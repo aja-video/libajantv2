@@ -110,8 +110,8 @@ class AJADPXFileIO : public DpxHdr
 		/**
 			@brief		Write a DPX file.
 			@param[in]	inBuffer		Specifies the DPX file image payload.
-			#param[in]	inBufferSize	Specifies the number of payload bytes in inBuffer.
-			#param[in]	inIndex			Specifies the index number to be appended to the file name.
+			@param[in]	inBufferSize	Specifies the number of payload bytes in inBuffer.
+			@param[in]	inIndex			Specifies the index number to be appended to the file name.
 		**/
 		AJA_EXPORT AJAStatus					Write (const uint8_t  &	inBuffer,
 											   const uint32_t	inBufferSize,

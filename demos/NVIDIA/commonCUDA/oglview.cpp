@@ -360,7 +360,7 @@ void COglView::render(GLuint renderedTexture,
 
 	// Draw timing statistics
 	char buf[100];
-	sprintf(buf, "Card->GPU: %6.3f msec  Draw: %6.3f msec  GPU->Card: %6.3f msec\n", durationCapture, durationDraw, durationPlayout);
+	snprintf(buf, sizeof(buf), "Card->GPU: %6.3f msec  Draw: %6.3f msec  GPU->Card: %6.3f msec\n", durationCapture, durationDraw, durationPlayout);
 	size_t len = strlen(buf);
 	glListBase(1000);
 	glColor3f(0.0f, 1.0f, 0.0f);

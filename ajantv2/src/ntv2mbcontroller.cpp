@@ -54,7 +54,7 @@ bool CNTV2MBController::SetMBNetworkConfiguration (eSFP port, string ipaddr, str
 	bool rv = AcquireMailbox();
 	if (!rv) return false;
 
-	sprintf((char*)txBuf,"cmd=%d,port=%d,ipaddr=%s,subnet=%s,gateway=%s",
+	snprintf((char*)txBuf,sizeof(txBuf),"cmd=%d,port=%d,ipaddr=%s,subnet=%s,gateway=%s",
 			(int)MB_CMD_SET_NET,(int)port,ipaddr.c_str(),netmask.c_str(),gateway.c_str());
 
 	rv = sendMsg(5000);
@@ -104,7 +104,7 @@ bool CNTV2MBController::DisableNetworkInterface(eSFP port)
 	bool rv = AcquireMailbox();
 	if (!rv) return false;
 
-	sprintf((char*)txBuf,"cmd=%d,port=%d",
+	snprintf((char*)txBuf,sizeof(txBuf),"cmd=%d,port=%d",
 			(int)MB_CMD_DISABLE_NET_IF,(int)port);
 
 	rv = sendMsg(5000);
@@ -151,7 +151,7 @@ bool CNTV2MBController::SetIGMPVersion(uint32_t version)
 	if (!(getFeatures() & SAREK_MB_PRESENT))
 		return true;
 
-	sprintf((char*)txBuf,"cmd=%d,version=%d",(int)MB_CMD_SET_IGMP_VERSION,version);
+	snprintf((char*)txBuf,sizeof(txBuf),"cmd=%d,version=%d",(int)MB_CMD_SET_IGMP_VERSION,version);
 	bool rv = sendMsg(500);
 	if (!rv)
 	{
@@ -227,7 +227,7 @@ eArpState CNTV2MBController::GetRemoteMACFromArpTable(std::string remote_IPAddre
 	if (!(getFeatures() & SAREK_MB_PRESENT))
 		return ARP_VALID;
 
-	sprintf(reinterpret_cast<char*>(txBuf), "cmd=%d,ipaddr=%s,port=%d,stream=%d",
+	snprintf(reinterpret_cast<char*>(txBuf),sizeof(txBuf), "cmd=%d,ipaddr=%s,port=%d,stream=%d",
 			int(MB_CMD_GET_MAC_FROM_ARP_TABLE),
 			remote_IPAddress.c_str(),
 			int(port),
@@ -284,7 +284,7 @@ bool CNTV2MBController::SendArpRequest(std::string remote_IPAddress, eSFP port)
 	if ( (getFeatures() & SAREK_MB_PRESENT) == 0)
 		return true;
 
-	sprintf((char*)txBuf,"cmd=%d,ipaddr=%s,port=%d",
+	snprintf((char*)txBuf,sizeof(txBuf),"cmd=%d,ipaddr=%s,port=%d",
 			(int)MB_CMD_SEND_ARP_REQ,
 			remote_IPAddress.c_str(),
 			int(port));
@@ -687,7 +687,7 @@ bool CNTV2MBController::PushSDP(string filename, stringstream & sdpstream)
 		return false;
 	}
 
-	sprintf((char*)txBuf,"cmd=%d,name=%s,sdp=%s",(int)MB_CMD_TAKE_SDP,filename.c_str(),sdp.c_str());
+	snprintf((char*)txBuf,sizeof(txBuf),"cmd=%d,name=%s,sdp=%s",(int)MB_CMD_TAKE_SDP,filename.c_str(),sdp.c_str());
 	bool rv = sendMsg(500);
 	if (!rv)
 	{
@@ -733,7 +733,7 @@ bool CNTV2MBController::PushSDP(string filename, stringstream & sdpstream)
 		return false;
 	 }
 
-	 sprintf((char*)txBuf,"cmd=%d,URL=%s",(int)MB_CMD_FETCH_SDP,url.c_str());
+	 snprintf((char*)txBuf,sizeof(txBuf),"cmd=%d,URL=%s",(int)MB_CMD_FETCH_SDP,url.c_str());
 	 bool rv = sendMsg(5000);
 	 if (!rv)
 	 {
@@ -787,7 +787,7 @@ bool CNTV2MBController::PushSDP(string filename, stringstream & sdpstream)
 	 if (!(getFeatures() & SAREK_MB_PRESENT))
 		 return true;
 
-	 sprintf((char*)txBuf,"cmd=%d,port=%d",(int)MB_CMD_FETCH_SFP_INFO,(int)port);
+	 snprintf((char*)txBuf,sizeof(txBuf),"cmd=%d,port=%d",(int)MB_CMD_FETCH_SFP_INFO,(int)port);
 	 bool rv = sendMsg(5000);
 	 if (!rv)
 	 {
@@ -851,7 +851,7 @@ bool CNTV2MBController::GetLLDPInfo(std::string &chassisId0, std::string &portId
 	if (!(getFeatures() & SAREK_MB_PRESENT))
 		return true;
 
-	sprintf((char*)txBuf,"cmd=%d",(int)MB_CMD_GET_LLDP_INFO);
+	snprintf((char*)txBuf,sizeof(txBuf),"cmd=%d",(int)MB_CMD_GET_LLDP_INFO);
 	bool rv = sendMsg(5000);
 	if (!rv)
 	{
@@ -918,7 +918,7 @@ bool CNTV2MBController::SetLLDPInfo(string sysName)
 	bool rv = AcquireMailbox();
 	if (!rv) return false;
 
-	sprintf((char*)txBuf,"cmd=%d,sysName=%s", (int)MB_CMD_SET_LLDP_INFO,
+	snprintf((char*)txBuf,sizeof(txBuf),"cmd=%d,sysName=%s", (int)MB_CMD_SET_LLDP_INFO,
 															sysName.c_str());
 
 	rv = sendMsg(5000);

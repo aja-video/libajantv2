@@ -244,6 +244,7 @@ typedef struct _dmaEngine_
 	bool					dmaEnable;				// transfer enable
 	NTV2DmaMethod			dmaMethod;				// dma method				
 	ULWord					dmaIndex;				// dma index
+    ULWord64                deviceDMAOffset;        // memory start offset on device
 	bool					dmaC2H;					// dma to host
     bool                    dmaStream;              // streaming engine
     ULWord                  strIndex;               // stream index

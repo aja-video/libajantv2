@@ -308,6 +308,18 @@ private:
 		DefineRegister (kRegSDIOut6Control,		"", mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel6, kRegClass_NULL);
 		DefineRegister (kRegSDIOut7Control,		"", mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel7, kRegClass_NULL);
 		DefineRegister (kRegSDIOut8Control,		"", mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel8, kRegClass_NULL);
+		DefineRegister (kRegSDIOut6Control,		"", mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel6, kRegClass_NULL);
+		DefineRegister (kRegSDIOut7Control,		"", mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel7, kRegClass_NULL);
+		DefineRegister (kRegSDIOut8Control,		"", mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel8, kRegClass_NULL);
+
+		DefineRegister (kRegOutputTimingControl,	"", mDecodeSDIOutTimingCtrl,READWRITE,	kRegClass_Output,	kRegClass_Channel1, kRegClass_NULL);
+		DefineRegister (kRegOutputTimingControlch2,	"", mDecodeSDIOutTimingCtrl,READWRITE,	kRegClass_Output,	kRegClass_Channel2, kRegClass_NULL);
+		DefineRegister (kRegOutputTimingControlch3,	"", mDecodeSDIOutTimingCtrl,READWRITE,	kRegClass_Output,	kRegClass_Channel3, kRegClass_NULL);
+		DefineRegister (kRegOutputTimingControlch4,	"", mDecodeSDIOutTimingCtrl,READWRITE,	kRegClass_Output,	kRegClass_Channel4, kRegClass_NULL);
+		DefineRegister (kRegOutputTimingControlch5,	"", mDecodeSDIOutTimingCtrl,READWRITE,	kRegClass_Output,	kRegClass_Channel5, kRegClass_NULL);
+		DefineRegister (kRegOutputTimingControlch6,	"", mDecodeSDIOutTimingCtrl,READWRITE,	kRegClass_Output,	kRegClass_Channel6, kRegClass_NULL);
+		DefineRegister (kRegOutputTimingControlch7,	"", mDecodeSDIOutTimingCtrl,READWRITE,	kRegClass_Output,	kRegClass_Channel7, kRegClass_NULL);
+
 		DefineRegister (kRegCh1ControlExtended, "", mDecodeChannelControlExt,	READWRITE,	kRegClass_NULL,		kRegClass_Channel1, kRegClass_NULL);
 		DefineRegister (kRegCh2ControlExtended, "", mDecodeChannelControlExt,	READWRITE,	kRegClass_NULL,		kRegClass_Channel2, kRegClass_NULL);
 		DefineRegister (kRegBoardID,			"", mDecodeBoardID,				READONLY,	kRegClass_Info,		kRegClass_NULL,		kRegClass_NULL);
@@ -1622,7 +1634,9 @@ private:
 		DEF_REG	(kVRegHdrMaxFALLCh1,					mDefaultRegDecoder, READWRITE, kRegClass_HDR,  kRegClass_NULL, kRegClass_NULL);
 		DEF_REG	(kVRegHDROverrideState,					mDefaultRegDecoder, READWRITE, kRegClass_HDR,  kRegClass_NULL, kRegClass_NULL);
 		DEF_REG	(kVRegPCIMaxReadRequestSize,			mDefaultRegDecoder, READWRITE, kRegClass_DMA,  kRegClass_NULL, kRegClass_NULL);
-		DEF_REG	(kVRegUserInColorimetry,				mDefaultRegDecoder, READWRITE, kRegClass_HDR,  kRegClass_Input,kRegClass_NULL);
+        DEF_REG	(kVRegPCILinkSpeed,                     mDefaultRegDecoder, READWRITE, kRegClass_DMA,  kRegClass_NULL, kRegClass_NULL);
+        DEF_REG	(kVRegPCILinkWidth,                     mDefaultRegDecoder, READWRITE, kRegClass_DMA,  kRegClass_NULL, kRegClass_NULL);
+        DEF_REG	(kVRegUserInColorimetry,				mDefaultRegDecoder, READWRITE, kRegClass_HDR,  kRegClass_Input,kRegClass_NULL);
 		DEF_REG	(kVRegUserInTransfer,					mDefaultRegDecoder, READWRITE, kRegClass_HDR,  kRegClass_Input,kRegClass_NULL);
 		DEF_REG	(kVRegUserInLuminance,					mDefaultRegDecoder, READWRITE, kRegClass_HDR,  kRegClass_Input,kRegClass_NULL);
 		DEF_REG	(kVRegHdrInColorimetryCh1,				mDefaultRegDecoder, READWRITE, kRegClass_HDR,  kRegClass_Input,kRegClass_NULL);
@@ -1931,7 +1945,7 @@ public:
 			result.insert(ULWord(kRegMRSupport));
 		}
 
-		if (inDeviceID == DEVICE_ID_KONAX  ||  inDeviceID == DEVICE_ID_KONAXM)
+		if (NTV2DeviceHasNTV4FrameStores(inDeviceID))
 		{
 			const NTV2RegNumSet ntv4FSRegs (GetRegistersForClass(kRegClass_NTV4FrameStore));
 			const UWord numFrameStores (::NTV2DeviceGetNumFrameStores(inDeviceID));
@@ -2273,9 +2287,19 @@ private:
 		{
 			(void) inRegNum;
 			(void) inDeviceID;
-			const UWord		rawDieTemp	((inRegValue & 0x0000FFFF) >> 6);
+			UWord	rawDieTemp	(0);
+			double	dieTempC	(0);
+			if (NTV2DeviceCanDoVersalSysMon(inDeviceID))
+			{
+				rawDieTemp = (inRegValue & 0x0000FFFF);
+				dieTempC = double(rawDieTemp) / 128.0;
+			}
+			else
+			{
+				rawDieTemp = ((inRegValue & 0x0000FFFF) >> 6);
+				dieTempC = ((double(rawDieTemp)) * 503.975 / 1024.0 - 273.15 );
+			}
 			const UWord		rawVoltage	((inRegValue >> 22) & 0x3FF);
-			const double	dieTempC	((double(rawDieTemp)) * 503.975 / 1024.0 - 273.15 );
 			const double	dieTempF	(dieTempC * 9.0 / 5.0  +  32.0);
 			const double	voltage		(double(rawVoltage)/ 1024.0 * 3.0);
 			ostringstream	oss;
@@ -3511,11 +3535,12 @@ private:
 			switch (NTV4FrameStoreRegs(ntv4RegNum))
 			{
 				case regNTV4FS_RasterControl:
-				{	const ULWord sync ((inRegValue & (BIT(20)|BIT(21))) >> 20);
+				{	const ULWord disabled (inRegValue & BIT(1));
+					const ULWord sync ((inRegValue & (BIT(20)|BIT(21))) >> 20);
 					const ULWord pixClkSel((inRegValue & (BIT(16)|BIT(17)|BIT(18))) >> 16);
 					const ULWord pixFmt((inRegValue & (BIT(8)|BIT(9)|BIT(10)|BIT(11)|BIT(12))) >> 8);
-					if (inRegValue & BIT(1))
-						oss	<< "Enabled: "		<< YesNo(inRegValue & BIT( 1))							<< endl
+					if (!disabled)
+						oss	<< "Enabled: "		<< YesNo(!disabled)										<< endl
 							<< "Mode: "			<< ((inRegValue & BIT( 0)) ? "Capture" : "Display")		<< endl
 							<< "DRT_DISP: "		<< OnOff(inRegValue & BIT( 2))							<< endl
 							<< "Fill Bit: "		<< DEC((inRegValue & BIT( 3)) ? 1 : 0)					<< endl
@@ -3526,7 +3551,7 @@ private:
 							<< "Pix Clk Sel: "	<< sPixClkSelects[pixClkSel] << " MHz"					<< endl
 							<< "Sync: "			<< sSyncs[sync];
 					else
-						oss	<< "Enabled: "		<< YesNo(inRegValue & BIT( 1));
+						oss	<< "Enabled: "		<< YesNo(!disabled);
 					break;
 				}
 				case regNTV4FS_Status:
@@ -3858,6 +3883,20 @@ private:
 		}
 	}	mDecodeSDIOutputControl;
 	
+	struct DecodeSDIOutTimingCtrl : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{	(void)inRegNum;  (void)inDeviceID;
+			ostringstream oss;
+			const uint32_t hMask(0x00001FFF), vMask(0x1FFF0000);
+			const uint32_t hOffset(inRegValue & hMask), vOffset((inRegValue & vMask) >> 16);
+			oss << "Horz Offset: "			<< xHEX0N(UWord(hOffset),4)	<< endl
+				<< "Vert Offset: "			<< xHEX0N(UWord(vOffset),4)	<< endl
+				<< "E-E Timing Override: "	<< EnabDisab(inRegValue & BIT(31));
+			return oss.str();
+		}
+	}	mDecodeSDIOutTimingCtrl;
+
 	struct DecodeDMAControl : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const

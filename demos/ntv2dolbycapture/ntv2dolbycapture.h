@@ -132,7 +132,7 @@ class NTV2DolbyCapture
 			@brief		Recover Dolby data from the given audio data.
 			@param[in]	inAudioBuffer	A valid buffer containing the captured audio data.
 			@param[in]	inAudioSize		Specifies the size of the given audio data buffer.
-			@param[out]	inAudioSize		Specifies the size of the given audio data buffer.
+			@param[out]	outDolbyBuffer	The buffer to receive recovered Dolby data.
 			@returns	The number of 16-bit words copied into outDolbyBuffer.
 		**/
 		virtual uint32_t		RecoverDolby (const NTV2Buffer & inAudioBuffer, const uint32_t inAudioSize, NTV2Buffer & outDolbyBuffer);

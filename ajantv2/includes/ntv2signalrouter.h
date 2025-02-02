@@ -41,6 +41,7 @@ typedef NTV2XptConnections::const_iterator				NTV2XptConnectionsConstIter, NTV2A
 typedef std::multimap <NTV2InputXptID, NTV2OutputXptID> NTV2PossibleConnections;	///< @brief A map of zero or more one-to-many possible ::NTV2InputXptID to ::NTV2OutputXptID connections.
 typedef NTV2PossibleConnections::const_iterator			NTV2PossibleConnectionsConstIter;
 
+AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2XptConnection & inObj);
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2XptConnections & inObj);
 
 /**
@@ -360,7 +361,7 @@ class AJAExport CNTV2SignalRouter
 		static bool					GetWidgetInputs (const NTV2WidgetID inWidgetID, NTV2InputXptIDSet & outInputs);
 
 		/**
-			@brief		Returns all known widget input crosspoints for the given device.
+			@brief		Returns all supported widget input crosspoints for the given device.
 			@param[in]	inDeviceID		Specifies the ::NTV2DeviceID of the device of interest.
 			@param[out] outInputs		Receives the ::NTV2InputXptIDSet (or empty upon failure).
 			@return		True if successful;	 otherwise false.
@@ -383,6 +384,14 @@ class AJAExport CNTV2SignalRouter
 			@return		True if successful;	 otherwise false.
 		**/
 		static bool					GetWidgetOutputs (const NTV2WidgetID inWidgetID, NTV2OutputXptIDSet & outOutputs);
+
+		/**
+			@brief		Returns all supported widget output crosspoints for the given device.
+			@param[in]	inDeviceID		Specifies the ::NTV2DeviceID of the device of interest.
+			@param[out] outOutputs		Receives the ::NTV2OutputXptIDSet (or empty upon failure).
+			@return		True if successful;	 otherwise false.
+		**/
+		static bool					GetAllWidgetOutputs (const NTV2DeviceID inDeviceID, NTV2OutputXptIDSet & outOutputs);	//	New in SDK 17.5
 
 		/**
 			@brief		Converts a set of crosspoint registers into a set of crosspoint connections.
@@ -570,7 +579,7 @@ class AJAExport CNTV2SignalRouter
 	@param[in]	inFrameStore	Specifies the FrameStore of interest, expressed as an ::NTV2Channel (a zero-based index value).
 	@param[in]	inIsBInput		Specify true to obtain the "B" input crosspoint (for dual-link). Defaults to false (the "A" input crosspoint).
 **/
-AJAExport NTV2InputXptID		GetFrameBufferInputXptFromChannel (const NTV2Channel inFrameStore, const bool inIsBInput = false);
+AJAExport NTV2InputXptID		GetFrameStoreInputXptFromChannel (const NTV2Channel inFrameStore, const bool inIsBInput = false);	//	Renamed in SDK 17.5
 
 /**
 	@return		The appropriate ::NTV2InputXptID for the given color space converter (CSC) widget, or ::NTV2_INPUT_CROSSPOINT_INVALID upon failure.
@@ -619,7 +628,7 @@ AJAExport NTV2OutputXptID		GetLUTOutputXptFromChannel (const NTV2Channel inLUT);
 	@param[in]	inIsRGB			Specify true to obtain the RGB output crosspoint. Defaults to false (the YUV output crosspoint).
 	@param[in]	inIs425			Specify true to obtain the 425 output crosspoint. Defaults to false (the normal non-425 output crosspoint).
 **/
-AJAExport NTV2OutputXptID		GetFrameBufferOutputXptFromChannel (const NTV2Channel inFrameStore, const bool inIsRGB = false, const bool inIs425 = false);
+AJAExport NTV2OutputXptID		GetFrameStoreOutputXptFromChannel (const NTV2Channel inFrameStore, const bool inIsRGB = false, const bool inIs425 = false);	//	Renamed in SDK 17.5
 
 /**
 	@return		The appropriate ::NTV2OutputCrosspointID for the given ::NTV2InputSource, or ::NTV2_OUTPUT_CROSSPOINT_INVALID upon failure.
@@ -634,7 +643,7 @@ AJAExport NTV2OutputXptID		GetFrameBufferOutputXptFromChannel (const NTV2Channel
 								Defaults to 0 (upperLeft). Ignored for non-HDMI input sources.
 **/
 AJAExport NTV2OutputXptID		GetInputSourceOutputXpt (const NTV2InputSource inInputSource,  const bool inIsSDI_DS2 = false,
-																const bool inIsHDMI_RGB = false,  const UWord inHDMI_Quadrant = 0);
+														const bool inIsHDMI_RGB = false,  const UWord inHDMI_Quadrant = 0);
 
 /**
 	@return		The appropriate SDI input's ::NTV2OutputCrosspointID for the given SDI Input, or ::NTV2_OUTPUT_CROSSPOINT_INVALID upon failure.
@@ -717,5 +726,10 @@ AJAExport NTV2OutputXptID		GetTSIMuxOutputXptFromChannel (const NTV2Channel inTS
 
 //	Stream operators
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const CNTV2SignalRouter & inObj);
+
+#if !defined(NTV2_DEPRECATE_17_5)
+	#define GetFrameBufferOutputXptFromChannel	GetFrameStoreOutputXptFromChannel
+	#define GetFrameBufferInputXptFromChannel	GetFrameStoreInputXptFromChannel
+#endif	//	!defined(NTV2_DEPRECATE_17_5)
 
 #endif	//	NTV2SIGNALROUTER_H

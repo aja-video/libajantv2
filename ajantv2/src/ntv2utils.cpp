@@ -2017,6 +2017,7 @@ NTV2VideoFormat GetQuarterSizedVideoFormat (const NTV2VideoFormat inVideoFormat)
 		case NTV2_FORMAT_4096x2160p_12000:
 		case NTV2_FORMAT_4096x2160psf_2997:
 		case NTV2_FORMAT_4096x2160psf_3000:
+		case NTV2_FORMAT_END_UHD_TSI_DEF_FORMAT:
 		case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
 		case NTV2_FORMAT_END_UHD2_DEF_FORMATS:
 		case NTV2_FORMAT_END_UHD2_FULL_DEF_FORMATS:
@@ -2163,6 +2164,7 @@ NTV2VideoFormat GetQuadSizedVideoFormat (const NTV2VideoFormat inVideoFormat, co
 		case NTV2_FORMAT_4x2048x1080p_4795:
 		case NTV2_FORMAT_4x2048x1080p_4800:
 		case NTV2_FORMAT_FIRST_UHD_TSI_DEF_FORMAT:
+		case NTV2_FORMAT_END_UHD_TSI_DEF_FORMAT:
 		case NTV2_FORMAT_3840x2160psf_2400:
 		case NTV2_FORMAT_3840x2160psf_2500:
 		case NTV2_FORMAT_3840x2160psf_2997:
@@ -2457,6 +2459,7 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 	case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
 	case NTV2_FORMAT_FIRST_4K_DEF_FORMAT2:
 	case NTV2_FORMAT_END_4K_DEF_FORMATS2:
+	case NTV2_FORMAT_END_UHD_TSI_DEF_FORMAT:
 	case NTV2_FORMAT_END_UHD2_DEF_FORMATS:
 	case NTV2_FORMAT_END_UHD2_FULL_DEF_FORMATS:
 	case NTV2_FORMAT_3840x2160p_5000_B:
@@ -2742,6 +2745,7 @@ NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(const NTV2VideoFormat inVi
 	case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
 	case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
 	case NTV2_FORMAT_END_4K_DEF_FORMATS2:
+	case NTV2_FORMAT_END_UHD_TSI_DEF_FORMAT:
 	case NTV2_FORMAT_END_UHD2_DEF_FORMATS:
 	case NTV2_FORMAT_END_UHD2_FULL_DEF_FORMATS:
 		break;	// Unsupported
@@ -3530,7 +3534,7 @@ NTV2FrameRate GetNTV2FrameRateFromNumeratorDenominator (const ULWord inNumerator
 NTV2FrameRate GetNTV2FrameRateFromVideoFormat (const NTV2VideoFormat videoFormat)
 {
 	NTV2FrameRate frameRate = NTV2_FRAMERATE_UNKNOWN;
-	switch ( videoFormat )
+	switch (videoFormat)
 	{
 	
 	case NTV2_FORMAT_2K_1498:
@@ -3738,6 +3742,7 @@ NTV2FrameRate GetNTV2FrameRateFromVideoFormat (const NTV2VideoFormat videoFormat
 	case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:
 	case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:
 	case NTV2_FORMAT_END_4K_DEF_FORMATS2:
+	case NTV2_FORMAT_END_UHD_TSI_DEF_FORMAT:
 	case NTV2_FORMAT_END_UHD2_DEF_FORMATS:
 	case NTV2_FORMAT_END_UHD2_FULL_DEF_FORMATS:
 		break;
@@ -4731,6 +4736,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONALHIDVI:				return inForRetailDisplay ? "KONA LHi DVI"				: "KonaLHiDVI";
 		case DEVICE_ID_KONAX:					return inForRetailDisplay ? "KONA X"					: "KonaX";
 		case DEVICE_ID_KONAXM:					return inForRetailDisplay ? "KONA XM"					: "KonaXM";
+		case DEVICE_ID_KONAIP_25G:				return "KonaIP 25G";
 		case DEVICE_ID_SOJI_3DLUT:				return "SOJI-3DLUT";
 		case DEVICE_ID_SOJI_DIAGS:				return "SOJI-DIAGS";
 		case DEVICE_ID_SOJI_OE1:				return "SOJI-OE1";
@@ -5098,7 +5104,7 @@ NTV2ReferenceSource NTV2InputSourceToReferenceSource (const NTV2InputSource inIn
 	if (NTV2_IS_VALID_INPUT_SOURCE (inInputSource)	&&	size_t (inInputSource) < sizeof (gInputSourceToReferenceSource) / sizeof (NTV2ReferenceSource))
 		return gInputSourceToReferenceSource [inInputSource];
 	else
-		return NTV2_NUM_REFERENCE_INPUTS;
+		return NTV2_REFERENCE_INVALID;
 
 }	//	NTV2InputSourceToReferenceSource
 
@@ -5223,10 +5229,24 @@ NTV2Channel NTV2OutputDestinationToChannel (const NTV2OutputDestination inOutput
 }
 
 
-NTV2OutputDestination NTV2ChannelToOutputDestination (const NTV2Channel inChannel)
+NTV2OutputDestination NTV2ChannelToOutputDestination (const NTV2Channel inChannel, const NTV2IOKinds inKinds)
 {
-	if (!NTV2_IS_VALID_CHANNEL (inChannel))
+	if (!NTV2_IS_VALID_CHANNEL(inChannel))
 		return NTV2_OUTPUTDESTINATION_INVALID;
+	if (!NTV2_IS_VALID_IOKINDS(inKinds))
+		return NTV2_OUTPUTDESTINATION_INVALID;
+	if ((inKinds & (NTV2_IOKINDS_SDI | NTV2_IOKINDS_HDMI)) == (NTV2_IOKINDS_SDI | NTV2_IOKINDS_HDMI))
+		return NTV2_OUTPUTDESTINATION_INVALID;	//	Ambiguous request
+	if ((inKinds & (NTV2_IOKINDS_SDI | NTV2_IOKINDS_ANALOG)) == (NTV2_IOKINDS_SDI | NTV2_IOKINDS_ANALOG))
+		return NTV2_OUTPUTDESTINATION_INVALID;	//	Ambiguous request
+	if ((inKinds & (NTV2_IOKINDS_HDMI | NTV2_IOKINDS_ANALOG)) == (NTV2_IOKINDS_HDMI | NTV2_IOKINDS_ANALOG))
+		return NTV2_OUTPUTDESTINATION_INVALID;	//	Ambiguous request
+	if ((inKinds & NTV2_IOKINDS_ALL) == NTV2_IOKINDS_ALL)
+		return NTV2_OUTPUTDESTINATION_INVALID;	//	Ambiguous request
+	if ((inKinds & NTV2_IOKINDS_HDMI) == NTV2_IOKINDS_HDMI)
+		return inChannel == NTV2_CHANNEL1 ? NTV2_OUTPUTDESTINATION_HDMI1 : NTV2_OUTPUTDESTINATION_INVALID;
+	if ((inKinds & NTV2_IOKINDS_ANALOG) == NTV2_IOKINDS_ANALOG)
+		return inChannel == NTV2_CHANNEL1 ? NTV2_OUTPUTDESTINATION_ANALOG1 : NTV2_OUTPUTDESTINATION_INVALID;
 
 	static const NTV2OutputDestination	gChannelToOutputDest [] =	{	NTV2_OUTPUTDESTINATION_SDI1,	NTV2_OUTPUTDESTINATION_SDI2,	NTV2_OUTPUTDESTINATION_SDI3,	NTV2_OUTPUTDESTINATION_SDI4,
 																		NTV2_OUTPUTDESTINATION_SDI5,	NTV2_OUTPUTDESTINATION_SDI6,	NTV2_OUTPUTDESTINATION_SDI7,	NTV2_OUTPUTDESTINATION_SDI8,
@@ -5321,7 +5341,7 @@ ULWord GetIndexForNTV2InputSource (const NTV2InputSource inValue)
 	static const ULWord sInputSourcesIndexes [] = { 0,							//	NTV2_INPUTSOURCE_ANALOG1,
 													0, 1, 2, 3,					//	NTV2_INPUTSOURCE_HDMI1 ... NTV2_INPUTSOURCE_HDMI4,
 													0, 1, 2, 3, 4, 5, 6, 7 };	//	NTV2_INPUTSOURCE_SDI1 ... NTV2_INPUTSOURCE_SDI8
-	if (static_cast <size_t> (inValue) < sizeof (sInputSourcesIndexes) / sizeof (ULWord))
+	if (size_t(inValue) < sizeof(sInputSourcesIndexes) / sizeof(ULWord))
 		return sInputSourcesIndexes [inValue];
 	else
 		return 0xFFFFFFFF;
@@ -6464,7 +6484,8 @@ string NTV2AudioChannelPairToString (const NTV2AudioChannelPair inValue, const b
 {
 	ostringstream	oss;
 	if (NTV2_IS_VALID_AUDIO_CHANNEL_PAIR(inValue))
-		oss << (inCompactDisplay ? "" : "NTV2_AudioChannel")  <<  DEC(inValue * 2 + 1)	<<	(inCompactDisplay ? "-" : "_")	<<	DEC(inValue * 2 + 2);
+		oss << (inCompactDisplay ? "" : "NTV2_AudioChannel")
+			<<  DEC(inValue * 2 + 1)	<<	(inCompactDisplay ? "-" : "_")	<<	DEC(inValue * 2 + 2);
 	else if (!inCompactDisplay)
 		oss << "NTV2_AUDIO_CHANNEL_PAIR_INVALID";
 	return oss.str();
@@ -6474,8 +6495,9 @@ string NTV2AudioChannelPairToString (const NTV2AudioChannelPair inValue, const b
 string NTV2AudioChannelQuadToString (const NTV2Audio4ChannelSelect inValue, const bool inCompactDisplay)
 {
 	ostringstream	oss;
-	if (NTV2_IS_VALID_AUDIO_CHANNEL_QUAD (inValue))
-		oss << (inCompactDisplay ? "" : "NTV2_AudioChannel")  <<  (inValue * 4 + 1)	 <<	 (inCompactDisplay ? "-" : "_")	 <<	 (inValue * 4 + 4);
+	if (NTV2_IS_VALID_AUDIO_CHANNEL_QUAD(inValue))
+		oss << (inCompactDisplay ? "" : "NTV2_AudioChannel")
+			<<  (inValue * 4 + 1)	 <<	 (inCompactDisplay ? "-" : "_")	 <<	 (inValue * 4 + 4);
 	else if (!inCompactDisplay)
 		oss << "NTV2_AUDIO_CHANNEL_QUAD_INVALID";
 	return oss.str ();
@@ -6485,8 +6507,9 @@ string NTV2AudioChannelQuadToString (const NTV2Audio4ChannelSelect inValue, cons
 string NTV2AudioChannelOctetToString (const NTV2Audio8ChannelSelect inValue, const bool inCompactDisplay)
 {
 	ostringstream	oss;
-	if (NTV2_IS_VALID_AUDIO_CHANNEL_OCTET (inValue))
-		oss << (inCompactDisplay ? "" : "NTV2_AudioChannel")  <<  (inValue * 8 + 1)	 <<	 (inCompactDisplay ? "-" : "_")	 <<	 (inValue * 8 + 8);
+	if (NTV2_IS_VALID_AUDIO_CHANNEL_OCTET(inValue))
+		oss << (inCompactDisplay ? "" : "NTV2_AudioChannel")
+			<<  (inValue * 8 + 1)	 <<	 (inCompactDisplay ? "-" : "_")	 <<	 (inValue * 8 + 8);
 	else if (!inCompactDisplay)
 		oss << "NTV2_AUDIO_CHANNEL_OCTET_INVALID";
 	return oss.str ();
@@ -6640,6 +6663,18 @@ string NTV2DownConvertModeToString (const NTV2DownConvertMode inValue, const boo
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "Anamorphic",						NTV2_DownConvertAnamorphic);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "Zoomed 14" "\xC3\x97" "9",		NTV2_DownConvert14x9);
 		case NTV2_MAX_NUM_DownConvertModes:			break;	//special case
+	}
+	return "";
+}
+
+string NTV2ScanMethodToString (const NTV2ScanMethod inValue, const bool inCompact)
+{
+	switch(inValue)
+	{
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "p",		NTV2Scan_Progressive);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "i",		NTV2Scan_Interlaced);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "psf",	NTV2Scan_PSF);
+		case NTV2_NUM_SCANMETHODS:	break;
 	}
 	return "";
 }
@@ -7252,8 +7287,8 @@ string NTV2OutputDestinationToString (const NTV2OutputDestination inValue, const
 {
 	switch (inValue)
 	{
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Analog", NTV2_OUTPUTDESTINATION_ANALOG);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "HDMI", NTV2_OUTPUTDESTINATION_HDMI);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Analog", NTV2_OUTPUTDESTINATION_ANALOG1);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "HDMI", NTV2_OUTPUTDESTINATION_HDMI1);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI1", NTV2_OUTPUTDESTINATION_SDI1);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI2", NTV2_OUTPUTDESTINATION_SDI2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI3", NTV2_OUTPUTDESTINATION_SDI3);
@@ -7518,21 +7553,23 @@ bool NTV2IsCompatibleBitfileName (const string & inBitfileName, const NTV2Device
 
 NTV2DeviceID NTV2GetDeviceIDFromBitfileName (const string & inBitfileName)
 {
-	typedef map <string, NTV2DeviceID>	BitfileName2DeviceID;
-	static BitfileName2DeviceID			sBitfileName2DeviceID;
-	if (sBitfileName2DeviceID.empty ())
+	typedef map<string, NTV2DeviceID>	BitfileName2DevID;
+	typedef BitfileName2DevID::const_iterator	BitfileName2DevCI;
+	static BitfileName2DevID	sBitfileName2DevID;
+	static AJALock	sBFN2DevIDMutex;
+	AJAAutoLock tmpLock(&sBFN2DevIDMutex);
+	if (sBitfileName2DevID.empty())
 	{
-		static	NTV2DeviceID	sDeviceIDs [] = {	DEVICE_ID_KONA3GQUAD,	DEVICE_ID_KONA3G,	DEVICE_ID_KONA4,		DEVICE_ID_KONA4UFC, DEVICE_ID_KONALHI,
-													DEVICE_ID_KONALHEPLUS,	DEVICE_ID_TTAP,		DEVICE_ID_CORVID1,		DEVICE_ID_CORVID22, DEVICE_ID_CORVID24,
-													DEVICE_ID_CORVID3G,		DEVICE_ID_IOXT,		DEVICE_ID_IOEXPRESS,	DEVICE_ID_IO4K,		DEVICE_ID_IO4KUFC,
-													DEVICE_ID_KONA1,		DEVICE_ID_KONAHDMI, DEVICE_ID_KONA5,		DEVICE_ID_KONA5_8KMK,DEVICE_ID_CORVID44_8KMK,
-													DEVICE_ID_KONA5_8K,		DEVICE_ID_CORVID44_8K,	DEVICE_ID_TTAP_PRO, DEVICE_ID_KONA5_2X4K,	DEVICE_ID_CORVID44_2X4K,
-													DEVICE_ID_CORVID44_PLNR,DEVICE_ID_IOX3,		DEVICE_ID_KONA5_8K_MV_TX, DEVICE_ID_KONAX, DEVICE_ID_KONAXM,
-													DEVICE_ID_NOTFOUND };
-		for (unsigned ndx (0);	ndx < sizeof (sDeviceIDs) / sizeof (NTV2DeviceID);	ndx++)
-			sBitfileName2DeviceID [::NTV2GetBitfileName (sDeviceIDs [ndx])] = sDeviceIDs [ndx];
+		const NTV2DeviceIDSet supportedDevices (::NTV2GetSupportedDevices());
+		for (NTV2DeviceIDSetConstIter it(supportedDevices.begin());	 it != supportedDevices.end();	++it)
+		{
+			const string bitFileName(::NTV2GetBitfileName(*it));
+			if (!bitFileName.empty())
+				sBitfileName2DevID[bitFileName] = *it;
+		}
 	}
-	return sBitfileName2DeviceID [inBitfileName];
+	BitfileName2DevCI it(sBitfileName2DevID.find(inBitfileName));
+	return it != sBitfileName2DevID.end() ? it->second : DEVICE_ID_INVALID;
 }
 
 
@@ -7612,11 +7649,13 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_KONAIP_2110,
 														DEVICE_ID_KONAIP_2TX_1SFP_J2K,
 														DEVICE_ID_KONAIP_4CH_2SFP,
+														DEVICE_ID_KONAIP_25G,
 														DEVICE_ID_KONALHEPLUS,
 														DEVICE_ID_KONALHI,
 														DEVICE_ID_KONALHIDVI,
 														DEVICE_ID_KONAX,
 														DEVICE_ID_KONAXM,
+														DEVICE_ID_SOFTWARE,
 														DEVICE_ID_SOJI_OE1,
 														DEVICE_ID_SOJI_OE2,
 														DEVICE_ID_SOJI_OE3,
@@ -7628,7 +7667,6 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_SOJI_DIAGS,
 														DEVICE_ID_TTAP,
 														DEVICE_ID_TTAP_PRO,
-														DEVICE_ID_SOFTWARE,
 														DEVICE_ID_NOTFOUND	};
 	if (inKinds == NTV2_DEVICEKIND_NONE)
 		return NTV2DeviceIDSet();
@@ -7777,6 +7815,7 @@ string NTV2BitfileTypeToString (const NTV2BitfileType inValue, const bool inComp
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaIP 1Rx 1Tx 1SFP J2K",	NTV2_BITFILE_KONAIP_1RX_1TX_1SFP_J2K);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaIP 2Tx 1SFP J2K",		NTV2_BITFILE_KONAIP_2TX_1SFP_J2K);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaIP 1Rx 1Tx 2110",		NTV2_BITFILE_KONAIP_1RX_1TX_2110);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaIP 25G",				NTV2_BITFILE_KONAIP_25G);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Io4K Plus",				NTV2_BITFILE_IO4KPLUS_MAIN);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"IoIP 2022",				NTV2_BITFILE_IOIP_2022);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"IoIP 2110",				NTV2_BITFILE_IOIP_2110);
@@ -8067,7 +8106,7 @@ string PercentDecode (const string & inStr)
 		switch (state)
 		{
 			case 0:
-				if (::isalnum(chr)	||	chr == '-'	||	chr == '_'	||	chr == '.'	||	chr == '~' || chr == '/')
+				if (::isalnum(chr)	||	chr == '-'	||	chr == '_'	||	chr == '.'	||	chr == '~')
 					oss << chr;
 				if (chr == '%')
 					{state++;  break;}

@@ -79,10 +79,10 @@ int main (int argc, const char ** argv)
 
 	//	VideoFormat
 	const string videoFormatStr (pVideoFormat  ?  pVideoFormat  :  "");
-	config.fVideoFormat = videoFormatStr.empty()	?	NTV2_FORMAT_4x1920x1080p_2398
-													:	CNTV2DemoCommon::GetVideoFormatFromString(videoFormatStr, VIDEO_FORMATS_4KUHD);
+	config.fVideoFormat = videoFormatStr.empty()	?	doLinkGrping ? NTV2_FORMAT_4096x2160p_2398 : NTV2_FORMAT_4x1920x1080p_2398
+													:	CNTV2DemoCommon::GetVideoFormatFromString(videoFormatStr, VIDEO_FORMATS_4KUHD, deviceSpec);
 	if (videoFormatStr == "?"  ||  videoFormatStr == "list")
-		{cout	<< CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_4KUHD, deviceSpec) << endl;  return 0;}
+		{cout	<< CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_4KUHD, pDeviceSpec ? deviceSpec : "") << endl;  return 0;}
 	else if (!videoFormatStr.empty()  &&  !NTV2_IS_4K_VIDEO_FORMAT(config.fVideoFormat))
 	{	cerr	<< "## ERROR:  Invalid '--videoFormat' value '" << videoFormatStr << "' -- expected values:" << endl
 				<< CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_4KUHD, deviceSpec) << endl;
@@ -93,7 +93,7 @@ int main (int argc, const char ** argv)
 	const string pixelFormatStr (pPixelFormat  ?  pPixelFormat  :  "");
 	config.fPixelFormat = pixelFormatStr.empty() ? NTV2_FBF_8BIT_YCBCR : CNTV2DemoCommon::GetPixelFormatFromString(pixelFormatStr);
 	if (pixelFormatStr == "?"  ||  pixelFormatStr == "list")
-		{cout << CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 0;}
+		{cout << CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, pDeviceSpec ? deviceSpec : "") << endl;  return 0;}
 	else if (!pixelFormatStr.empty()  &&  !NTV2_IS_VALID_FRAME_BUFFER_FORMAT(config.fPixelFormat))
 	{
 		cerr	<< "## ERROR:  Invalid '--pixelFormat' value '" << pixelFormatStr << "' -- expected values:" << endl

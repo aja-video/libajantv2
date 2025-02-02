@@ -48,11 +48,21 @@ void AJAPreviewWidget::paintEvent (QPaintEvent * /* event */)
 		}
 	}
 
+	//	Draw the status message using a dark gray outline and white interior, for better visibility...
 	QFont f ("Lucida");
-	f.setPointSize (18);
-	setFont (f);
-	painter.setPen (qRgba (255, 255, 255, 255));
-	painter.drawText (30, 40, _statusString);
+	f.setPointSize(32);
+	f.setStyleStrategy(QFont::PreferOutline);
+	f.setLetterSpacing(QFont::PercentageSpacing, 110.0);
+	f.setWeight(QFont::Bold);
+	const QBrush whiteBrush(Qt::white);
+	const QPen blackPen(QBrush(Qt::darkGray), 2.0);
+	QPainterPath pp;
+	pp.addText(QPointF(30.0, 40.0), f, _statusString);
+	painter.fillPath(pp, whiteBrush);
+	painter.strokePath(pp, blackPen);
+//	setFont(f);
+//	painter.setPen (qRgba (255, 255, 255, 255));
+//	painter.drawText (30, 40, _statusString);
 
 	#if defined (INCLUDE_AJACC)
 		QFont			captionFont ("Courier");

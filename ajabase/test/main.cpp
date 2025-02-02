@@ -1419,11 +1419,12 @@ TEST_SUITE("timebase/timecode" * doctest::description("functions in ajabase/comm
 		tc.QueryString(tmp, AJATimeBase(AJA_FrameRate_6000), false);
 		CHECK(tmp == "00:41:40:00");
 
-		// test the deprecated functionality
-		char ctmp[12];
-		tc.QueryString(ctmp, AJATimeBase(AJA_FrameRate_2400), false);
-		CHECK(strcmp(ctmp, "01:44:10:00")==0);
-
+		#if !defined(NTV2_DEPRECATE_17_5)
+			// test the deprecated functionality
+			char ctmp[12];
+			tc.QueryString(ctmp, AJATimeBase(AJA_FrameRate_2400), false);
+			CHECK(strcmp(ctmp, "01:44:10:00")==0);
+		#endif	//	NTV2_DEPRECATE_17_5
 		// tc string to frames
 		std::vector<AJATimeCode> tcs;
 		tcs.push_back(AJATimeCode("01:44:10:00", AJATimeBase(AJA_FrameRate_2398), false));
@@ -1915,6 +1916,10 @@ TEST_SUITE("info" * doctest::description("functions in ajabase/system/info.h")) 
 	{
 		// just create an instance to make sure everything works at runtime
 		AJASystemInfo i;
+		std::string cpuType;
+		CHECK(i.GetValue(AJA_SystemInfoTag_CPU_Type, cpuType) == AJA_STATUS_SUCCESS);
+		std::cout << "CPU Type: " << cpuType << std::endl;
+		CHECK(!cpuType.empty());
 	}
 
 } //info

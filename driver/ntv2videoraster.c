@@ -76,8 +76,8 @@ static const struct standard_data c_standard_data[] =
     { ntv2_video_standard_2048x1556,    2048,   1980,   195,    211,    988,    1185,   1201,   1978,   1,      991,    1,      7,      0,      ntv2_video_scan_top_first },
     { ntv2_video_standard_2048x1080p,   2048,   1125,   10,     42,     1121,   0,      0,      0,      0,      0,      1,      7,      0,      ntv2_video_scan_progressive },
     { ntv2_video_standard_2048x1080i,   2048,   1125,   10,     21,     560,    572,    584,    1123,   1,      564,    1,      7,      569,    ntv2_video_scan_top_first },
-    { ntv2_video_standard_3840x2160p,   3840,   2250,   0,      84,     2242,   0,      0,      0,      0,      0,      1,      7,      0,      ntv2_video_scan_progressive },
-    { ntv2_video_standard_4096x2160p,   4096,   2250,   0,      84,     2242,   0,      0,      0,      0,      0,      1,      7,      0,      ntv2_video_scan_progressive },
+    { ntv2_video_standard_3840x2160p,   3840,   2250,   10,     42,     2201,   0,      0,      0,      0,      0,      1,      7,      0,      ntv2_video_scan_progressive },
+    { ntv2_video_standard_4096x2160p,   4096,   2250,   10,     42,     2201,   0,      0,      0,      0,      0,      1,      7,      0,      ntv2_video_scan_progressive },
     { ntv2_video_standard_3840_hfr,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      ntv2_video_scan_progressive },
     { ntv2_video_standard_4096_hfr,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      ntv2_video_scan_progressive },
     { ntv2_video_standard_7680,         0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      ntv2_video_scan_progressive },
@@ -241,14 +241,14 @@ static const struct timing_offset_data c_offset_data[] =
     { ntv2_video_standard_625i,         1,      0,      1,      0,      0,      0 },
     { ntv2_video_standard_1080p,        1,      4,      1,      0,      0,      0 },
     { ntv2_video_standard_2048x1556,    1,      0,      1,      0,      0,      0 },
-    { ntv2_video_standard_2048x1080p,   1,      0,      1,      0,      0,      0 },
+    { ntv2_video_standard_2048x1080p,   1,      4,      1,      0,      0,      0 },
     { ntv2_video_standard_2048x1080i,   1,      0,      1,      0,      0,      0 },
-    { ntv2_video_standard_3840x2160p,   1,      0,      1,      0,      0,      0 },
-    { ntv2_video_standard_4096x2160p,   1,      0,      1,      0,      0,      0 },
-    { ntv2_video_standard_3840_hfr,     1,      0,      1,      0,      0,      0 },
-    { ntv2_video_standard_4096_hfr,     1,      0,      1,      0,      0,      0 },
-    { ntv2_video_standard_7680,         1,      0,      1,      0,      0,      0 },
-    { ntv2_video_standard_8192,         1,      0,      1,      0,      0,      0 },
+    { ntv2_video_standard_3840x2160p,   1,      4,      1,      0,      0,      0 },
+    { ntv2_video_standard_4096x2160p,   1,      4,      1,      0,      0,      0 },
+    { ntv2_video_standard_3840_hfr,     1,      4,      1,      0,      0,      0 },
+    { ntv2_video_standard_4096_hfr,     1,      4,      1,      0,      0,      0 },
+    { ntv2_video_standard_7680,         1,      4,      1,      0,      0,      0 },
+    { ntv2_video_standard_8192,         1,      4,      1,      0,      0,      0 },
     { ntv2_video_standard_3840i,        1,      0,      1,      0,      0,      0 },
     { ntv2_video_standard_4096i,        1,      0,      1,      0,      0,      0 },
     { ntv2_video_standard_none,         1,      0,      1,      0,      0,      0 }
@@ -288,7 +288,6 @@ struct ntv2_videoraster *ntv2_videoraster_open(Ntv2SystemContext* sys_con,
 	snprintf(ntv2_raster->name, NTV2_VIDEORASTER_STRING_SIZE, "%s%d", name, index);
 #endif
 	ntv2_raster->system_context = sys_con;
-
 	ntv2InterruptLockOpen(&ntv2_raster->state_lock, sys_con);
 
     s_standard_size = sizeof(c_standard_data) / sizeof(struct standard_data);
@@ -336,6 +335,9 @@ Ntv2Status ntv2_videoraster_configure(struct ntv2_videoraster *ntv2_raster,
     ntv2_raster->widget_base = widget_base;
     ntv2_raster->widget_size = widget_size;
     ntv2_raster->num_widgets = num_widgets;
+
+	ntv2_raster->version = ntv2_regnum_read(ntv2_raster->system_context, widget_base + ntv2_reg_videoraster_version);
+	ntv2_raster->useFullRasterValues = ntv2_raster->version == 3 ? true : false;
 
 	return NTV2_STATUS_SUCCESS;
 }
@@ -408,7 +410,7 @@ Ntv2Status ntv2_videoraster_update_channel(struct ntv2_videoraster *ntv2_raster,
 	if (index >= ntv2_raster->num_widgets)
 		return NTV2_STATUS_SUCCESS;
 
-	NTV2_MSG_VIDEORASTER_STATE("%s: video raster update channel\n", ntv2_raster->name);
+	NTV2_MSG_VIDEORASTER_STATE("%s: video raster update channel %d\n", ntv2_raster->name, index);
 
 	if (has_config_changed(ntv2_raster, index))
 	{
@@ -457,11 +459,28 @@ Ntv2Status ntv2_videoraster_update_frame(struct ntv2_videoraster *ntv2_raster, u
     standard = NTV2_FLD_GET(ntv2_fld_global_control_standard, global_control);
     if (standard >= s_standard_size) return false;
 	quad = NTV2_FLD_GET(ntv2_fld_global_control_quad_tsi_enable, global_control) != 0;
+
+	if (ntv2_raster->useFullRasterValues && quad)
+	{
+		switch (standard)
+		{
+		case ntv2_video_standard_1080p:
+			standard = ntv2_video_standard_3840x2160p;
+			break;
+		case ntv2_video_standard_2048x1080p:
+			standard = ntv2_video_standard_4096x2160p;
+			break;
+		default:
+			break;
+		}
+	}
+
     progressive = c_standard_data[standard].video_scan == ntv2_video_scan_progressive;
     top_first = c_standard_data[standard].video_scan == ntv2_video_scan_top_first;
     geometry = NTV2_FLD_GET(ntv2_fld_global_control_geometry, global_control);
     if (geometry >= s_geometry_size) return false;
 	height = c_geometry_data[geometry].frame_height;
+	height *= (ntv2_raster->useFullRasterValues && quad) ? 2 : 1;
     channel_control = ntv2_raster->channel_control[index];
     invert = (NTV2_FLD_GET(ntv2_fld_channel_control_frame_orientation, channel_control) != 0);
 
@@ -478,7 +497,12 @@ Ntv2Status ntv2_videoraster_update_frame(struct ntv2_videoraster *ntv2_raster, u
         /* handle upside down */
         if (progressive)
         {
-            if (quad)
+			if (quad && ntv2_raster->useFullRasterValues)
+			{
+				field1_address = frame_number * frame_size + pitch * (height - 1);
+                oddline_address = frame_number * frame_size + pitch * (height - 2);
+			}
+            else if (quad)
             {
                 field1_address = frame_number * frame_size + pitch * (height * 2 - 1);
                 oddline_address = frame_number * frame_size + pitch * (height * 2 - 2);
@@ -564,15 +588,9 @@ static bool has_config_changed(struct ntv2_videoraster *ntv2_raster, uint32_t in
     uint32_t input_frame_value = 0;
     bool ret = true;
 
-	global_control_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control, 0);
+	global_control_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control, index);
     global_control2_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control2, 0);
 	global_control3_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control3, 0);
-
-    /* find global control register value */
-    if (NTV2_FLD_GET(ntv2_fld_global_control_independent_mode, global_control2_value))
-    {
-        global_control_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control, index);
-    }
 
     channel_control_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_channel_control, index);
     
@@ -659,12 +677,29 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     bool top_first = false;
 	bool quad = false;
     char* channel_mode = "unknown";
+	uint64_t pixelScale = 0;
 
     standard = NTV2_FLD_GET(ntv2_fld_global_control_standard, global_control);
     if (standard >= s_standard_size) return false;
     geometry = NTV2_FLD_GET(ntv2_fld_global_control_geometry, global_control);
     if (geometry >= s_geometry_size) return false;
 	quad = NTV2_FLD_GET(ntv2_fld_global_control_quad_tsi_enable, global_control) != 0;
+
+	if (ntv2_raster->useFullRasterValues && quad)
+	{
+		switch (standard)
+		{
+		case ntv2_video_standard_1080p:
+			standard = ntv2_video_standard_3840x2160p;
+			break;
+		case ntv2_video_standard_2048x1080p:
+			standard = ntv2_video_standard_4096x2160p;
+			break;
+		default:
+			break;
+		}
+	}
+
     format = NTV2_FLD_GET(ntv2_fld_channel_control_pixel_format, channel_control);
 	format |= NTV2_FLD_GET(ntv2_fld_channel_control_pixel_format_high, channel_control) <<
 		NTV2_FLD_SIZE(ntv2_fld_channel_control_pixel_format);;
@@ -707,6 +742,11 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
 	/* frame width and height */
 	width = c_geometry_data[geometry].frame_width;
 	height = c_geometry_data[geometry].frame_height;
+	if (quad && ntv2_raster->useFullRasterValues)
+	{
+		width *= 2;
+		height *= 2;
+	}
 
     /* frame size and number */
     frame_size = get_frame_size(ntv2_raster, index);
@@ -723,7 +763,7 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
         c_format_data[format].pixels_cadence_width * c_format_data[format].bytes_cadence_width;
     pitch = (width + c_format_data[format].pixels_cadence_pitch - 1) /
         c_format_data[format].pixels_cadence_pitch * c_format_data[format].bytes_cadence_pitch;
-	if (quad)
+	if (quad && !ntv2_raster->useFullRasterValues)
 	{
 		length *= 2;
 		pitch *= 2;
@@ -741,7 +781,12 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
         /* handle upside down */
         if (progressive)
         {
-            if (quad)
+			if (quad && ntv2_raster->useFullRasterValues)
+			{
+				field1_address = frame_number * frame_size + pitch * (height - 1);
+                oddline_address = frame_number * frame_size + pitch * (height - 2);
+			}
+            else if (quad)
             {
                 field1_address = frame_number * frame_size + pitch * (height * 2 - 1);
                 oddline_address = frame_number * frame_size + pitch * (height * 2 - 2);
@@ -769,7 +814,12 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     {
         if (progressive)
         {
-            if (quad)
+			if (quad && ntv2_raster->useFullRasterValues)
+			{
+				field1_address = frame_number * frame_size;
+                oddline_address = frame_number * frame_size + pitch;
+			}
+            else if (quad)
             {
                 field1_address = frame_number * frame_size;
                 oddline_address = frame_number * frame_size + pitch;
@@ -861,8 +911,17 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     /* total lines */
     total_lines = c_standard_data[standard].line_total;
 
+	pixelScale = c_pixel_rate_data[pixel_rate].scale;
+	if (quad && ntv2_raster->useFullRasterValues)
+	{
+		pixelScale *= 4;
+	}
+
+	NTV2_MSG_VIDEORASTER_STATE("pix scale: %llu, frame duration: %d, pix duration%llu, frame scale: %d, total lines: %d\n",
+		pixelScale, c_frame_rate_data[frame_rate].duration, c_pixel_rate_data[pixel_rate].duration, c_frame_rate_data[frame_rate].scale, total_lines);
+
     /* calucate total width based on frame rate, pixel rate and total lines */
-    total_width = (uint32_t)((c_pixel_rate_data[pixel_rate].scale * c_frame_rate_data[frame_rate].duration) /
+    total_width = (uint32_t)((pixelScale * c_frame_rate_data[frame_rate].duration) /
         (c_pixel_rate_data[pixel_rate].duration * c_frame_rate_data[frame_rate].scale * total_lines));
 
     value = NTV2_FLD_SET(ntv2_fld_videoraster_videoh_active, width);

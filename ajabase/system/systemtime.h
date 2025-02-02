@@ -88,7 +88,7 @@
 
 		/**
 			@brief		Suspends execution of the current thread for a given number of nanoseconds.
-			@param		inMicroseconds		Time to sleep (nanoseconds).
+			@param		inNanoseconds		Time to sleep (nanoseconds).
 		**/
 		static void		SleepInNanoseconds (const uint64_t inNanoseconds);
 

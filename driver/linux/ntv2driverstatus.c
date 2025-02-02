@@ -87,6 +87,7 @@ void getDeviceVersionString(ULWord deviceNumber, char *deviceVersionString, ULWo
 	case DEVICE_ID_KONA5_8K: deviceStr = "KONA5_8K"; break;
 	case DEVICE_ID_KONA5_3DLUT: deviceStr = "KONA5_3DLUT"; break;
 	case DEVICE_ID_KONA5_8K_MV_TX: deviceStr = "KONA5_8K_MV_TX"; break;
+	case DEVICE_ID_KONA5_2X4K: deviceStr = "KONA5_2X4K"; break;
 	case DEVICE_ID_KONA5_OE1:
 	case DEVICE_ID_KONA5_OE2:
 	case DEVICE_ID_KONA5_OE3:
@@ -115,6 +116,7 @@ void getDeviceVersionString(ULWord deviceNumber, char *deviceVersionString, ULWo
     case DEVICE_ID_KONAXM: deviceStr = "KONAXM"; break;
 	case DEVICE_ID_IOX3: deviceStr = "IoX3"; break;
     case DEVICE_ID_TTAP_PRO: deviceStr = "TTAP_PRO"; break;
+    case DEVICE_ID_KONAIP_25G: deviceStr = "KonaIP_25G"; break;
 	
 	default:
 		deviceStr = "Unknown Device";

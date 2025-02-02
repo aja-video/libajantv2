@@ -72,19 +72,6 @@ class NTV2Player
 		**/
 		virtual uint32_t	AddTone (NTV2FrameData & inFrameData);
 
-		/**
-			@return		True if the given output destination's RP188 bypass is enabled; otherwise false.
-			@param[in]	inOutputDest	Specifies the NTV2OutputDestination of interest.
-		**/
-		virtual bool		OutputDestHasRP188BypassEnabled (const NTV2OutputDestination inOutputDest);
-
-		/**
-			@brief	Disables the given SDI output's RP188 bypass.
-			@param[in]	inOutputDest	Specifies the NTV2OutputDestination of interest.
-		**/
-		virtual void		DisableRP188Bypass (const NTV2OutputDestination inOutputDest);
-
-
 	//	Protected Class Methods
 	protected:
 		/**

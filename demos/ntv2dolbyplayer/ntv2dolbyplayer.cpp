@@ -413,16 +413,16 @@ bool NTV2DolbyPlayer::RouteOutputSignal (void)
 	mDevice.ClearRouting();		//	Start with clean slate
 
 	//	Connect HDMI video output...
-	return mDevice.Connect (::GetOutputDestInputXpt (NTV2_OUTPUTDESTINATION_HDMI),  fsVidOutXpt);
+	return mDevice.Connect (::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_HDMI1), fsVidOutXpt);
 
 }	//	RouteOutputSignal
 
 
-AJAStatus NTV2DolbyPlayer::Run ()
+AJAStatus NTV2DolbyPlayer::Run (void)
 {
 	//	Start my consumer and producer threads...
-	StartConsumerThread ();
-	StartProducerThread ();
+	StartConsumerThread();
+	StartProducerThread();
 	return AJA_STATUS_SUCCESS;
 
 }	//	Run

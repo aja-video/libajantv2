@@ -808,24 +808,119 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 
 }	//	construct from NTV2VideoFormat & NTV2VANCMode
 
+NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2FrameSize &	inFrameSize,
+											const NTV2PixelFormat	inPixelFormat,
+											const NTV2VANCMode		inVancMode)
+{
+	MakeInvalid();
+	if (!inFrameSize)
+		return;	//	bad frame size
+	if (!NTV2_IS_VALID_FRAME_BUFFER_FORMAT(inPixelFormat))
+		return;	//	bad FBF
+	if (!NTV2_IS_VALID_VANCMODE(inVancMode))
+		return;	//	bad Vanc mode
+
+	NTV2FrameSize frameSize(inFrameSize);
+	mFrameGeometry = frameSize;
+	if (NTV2_IS_TALL_VANC_GEOMETRY(mFrameGeometry))
+	{
+		if (inVancMode != NTV2_VANCMODE_TALL)
+			return;	//	vanc mode mismatched
+		NTV2FrameGeometry tmp(::GetNormalizedFrameGeometry(mFrameGeometry));
+		const NTV2FrameSize tall(mFrameGeometry), normal(tmp);
+		firstActiveLine = tall.height() - normal.height();	//	1st active line
+		mVancMode = inVancMode;
+	}
+	else if (NTV2_IS_TALLER_VANC_GEOMETRY(mFrameGeometry))
+	{
+		if (inVancMode != NTV2_VANCMODE_TALLER)
+			return;	//	vanc mode mismatched
+		NTV2FrameGeometry tmp(::GetNormalizedFrameGeometry(mFrameGeometry));
+		const NTV2FrameSize taller(mFrameGeometry), normal(tmp);
+		firstActiveLine = taller.height() - normal.height();	//	1st active line
+		mVancMode = inVancMode;
+	}
+	else if (NTV2_IS_VALID_NTV2FrameGeometry(mFrameGeometry))
+	{
+		NTV2FrameGeometry tallTaller(::GetVANCFrameGeometry(mFrameGeometry, inVancMode));
+		if (!NTV2_IS_VALID_NTV2FrameGeometry(tallTaller))
+			return;	//	bad geometry
+		if (tallTaller != mFrameGeometry)
+		{
+			mFrameGeometry = tallTaller;
+			frameSize = tallTaller;
+			firstActiveLine = frameSize.height() - inFrameSize.height();	//	1st active line
+		}
+	}
+	else if (NTV2_IS_VANCMODE_ON(inVancMode))
+		return;	//	vanc enabled but non-standard geometry
+	numLines = frameSize.height();
+	numPixels = frameSize.width();
+	//	mLinePitch[0]:	# bytes per line
+	//	linePitch:	# 32-bit words per line -- shadows mLinePitch[0] / sizeof(ULWord)
+	mPixelFormat = inPixelFormat;
+	switch (mPixelFormat)
+	{
+		case NTV2_FBF_8BIT_YCBCR:
+		case NTV2_FBF_8BIT_YCBCR_YUY2:			mLinePitch[0] = 2*numPixels;	linePitch = mLinePitch[0]/4;	break;
+
+		case NTV2_FBF_10BIT_YCBCR:
+		case NTV2_FBF_10BIT_YCBCR_DPX:			mLinePitch[0] = 16*numPixels/6;	linePitch = mLinePitch[0]/4;	break;
+
+		case NTV2_FBF_ARGB:
+		case NTV2_FBF_RGBA:
+		case NTV2_FBF_ABGR:
+		case NTV2_FBF_10BIT_RGB:
+		case NTV2_FBF_10BIT_DPX:
+		case NTV2_FBF_10BIT_DPX_LE:				mLinePitch[0] = 4*numPixels;	linePitch = mLinePitch[0]/4;	break;
+
+		case NTV2_FBF_24BIT_RGB:
+		case NTV2_FBF_24BIT_BGR:				mLinePitch[0] = 3*numPixels;	linePitch = mLinePitch[0]/4;	break;
+
+		case NTV2_FBF_48BIT_RGB:				mLinePitch[0] = 6*numPixels;	linePitch = mLinePitch[0]/4;	break;
+
+		case NTV2_FBF_12BIT_RGB_PACKED:			mLinePitch[0] = 36*numPixels/8;	linePitch = mLinePitch[0]/4;	break;
+
+		case NTV2_FBF_8BIT_YCBCR_420PL3:
+		case NTV2_FBF_8BIT_YCBCR_422PL3:		linePitch = numPixels/4;	break;
+
+		case NTV2_FBF_10BIT_YCBCR_420PL3_LE:
+		case NTV2_FBF_10BIT_YCBCR_422PL3_LE:	linePitch = numPixels/2;	break;
+
+		case NTV2_FBF_10BIT_YCBCR_420PL2:
+		case NTV2_FBF_10BIT_YCBCR_422PL2:		linePitch = 5*numPixels/16;	break;
+
+		default:	mLinePitch[0] = 0;	linePitch = 0;	break;	//	unsupported
+	}
+	mNumBitsLuma	= gBitsPerComponent[mPixelFormat][0];
+	mNumBitsChroma	= gBitsPerComponent[mPixelFormat][1];
+	mNumBitsAlpha	= gBitsPerComponent[mPixelFormat][2];
+	if (NTV2_IS_FBF_PLANAR(inPixelFormat))
+		FinalizePlanar();
+}	//	Construct from NTV2FrameSize & NTV2VANCMode
+
 
 NTV2FormatDescriptor::NTV2FormatDescriptor ()
 {
-	MakeInvalid ();
+	MakeInvalid();
 }
 
 
-NTV2FormatDescriptor::NTV2FormatDescriptor (const ULWord inNumLines, const ULWord inNumPixels, const ULWord inLinePitch, const ULWord inFirstActiveLine)
+NTV2FormatDescriptor::NTV2FormatDescriptor (const ULWord inNumLines, const ULWord inNumPixels, const ULWord inLinePitch, const ULWord in1stActiveLine,
+											const UByte inNumLumaBits, const UByte inNumChromaBits, const UByte inNumAlphaBits)
 	:	numLines		(inNumLines),
 		numPixels		(inNumPixels),
 		linePitch		(inLinePitch),
-		firstActiveLine	(inFirstActiveLine),
+		firstActiveLine	(in1stActiveLine),
 		mStandard		(NTV2_STANDARD_INVALID),
 		mVideoFormat	(NTV2_FORMAT_UNKNOWN),
 		mPixelFormat	(NTV2_FBF_INVALID),
 		mVancMode		(NTV2_VANCMODE_INVALID),
 		mNumPlanes		(1),
-		mFrameGeometry	(NTV2_FG_INVALID)
+		mFrameGeometry	(NTV2_FG_INVALID),
+		mNumBitsLuma	(inNumLumaBits),
+		mNumBitsChroma	(inNumChromaBits),
+		mNumBitsAlpha	(inNumAlphaBits)
 {
 	mLinePitch[0] = inLinePitch * 4;	//	mLinePitch is in bytes, inLinePitch is in 32-bit longwords
 	mLinePitch[1] = mLinePitch[2] = mLinePitch[3] = 0;

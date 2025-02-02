@@ -1916,7 +1916,7 @@ bool CNTV2Config2110::GenSDP(const bool enableSfp1, const bool enableSfp2,
 	GetPTPStatus(ptpStatus);
 
 	char gmInfo[32];
-	sprintf(gmInfo, "%02X-%02X-%02X-%02X-%02X-%02X-%02X-%02X:%d",
+	snprintf(gmInfo, sizeof(gmInfo), "%02X-%02X-%02X-%02X-%02X-%02X-%02X-%02X:%d",
 			ptpStatus.PTP_gmId[0], ptpStatus.PTP_gmId[1], ptpStatus.PTP_gmId[2], ptpStatus.PTP_gmId[3],
 			ptpStatus.PTP_gmId[4], ptpStatus.PTP_gmId[5], ptpStatus.PTP_gmId[6], ptpStatus.PTP_gmId[7], ptpStatus.PTP_domain);
 

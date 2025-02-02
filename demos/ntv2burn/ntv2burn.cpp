@@ -11,12 +11,18 @@
 #include "ajabase/common/types.h"
 #include "ajabase/system/process.h"
 #include "ajabase/system/systemtime.h"
+#include "ajaanc/includes/ancillarylist.h"
 #include <iostream>
 
 using namespace std;
 
 //#define NTV2_BUFFER_LOCKING		//	Define this to pre-lock video/audio buffers in kernel
-
+#define HasWidgetsAnyOf(_w1,_w2,_w3)	(mDevice.features().CanDoWidget(_w1) || mDevice.features().CanDoWidget(_w2) || mDevice.features().CanDoWidget(_w3))
+#if defined(_DEBUG)
+	static const bool sShowConfig(true);
+#else
+	static const bool sShowConfig(false);
+#endif
 static const uint32_t	kAppSignature	(NTV2_FOURCC('B','u','r','n'));
 
 
@@ -30,7 +36,6 @@ NTV2Burn::NTV2Burn (const BurnConfig & inConfig)
 		mDeviceID		(DEVICE_ID_NOTFOUND),
 		mVideoFormat	(NTV2_FORMAT_UNKNOWN),
 		mSavedTaskMode	(NTV2_DISABLE_TASKS),
-		mOutputDest		(NTV2_OUTPUTDESTINATION_INVALID),
 		mAudioSystem	(inConfig.WithAudio() ? ::NTV2InputSourceToAudioSystem(inConfig.fInputSource) : NTV2_AUDIOSYSTEM_INVALID),
 		mGlobalQuit		(false)
 {
@@ -139,12 +144,12 @@ AJAStatus NTV2Burn::Init (void)
 																		mFormatDesc.numPixels,
 																		mFormatDesc.numLines);
 	//	Ready to go...
-	#if defined(_DEBUG)
-		cerr << mConfig;
+	if (mConfig.IsVerbose() || sShowConfig)
+	{	cerr << mConfig;
 		if (mDevice.IsRemote())
 			cerr	<< "Device Description:  " << mDevice.GetDescription() << endl;
 		cerr << endl;
-	#endif	//	not _DEBUG
+	}
 	BURNINFO("Configuration: " << mConfig);
 	return AJA_STATUS_SUCCESS;
 
@@ -153,20 +158,116 @@ AJAStatus NTV2Burn::Init (void)
 
 AJAStatus NTV2Burn::SetupVideo (void)
 {
-	const UWord	numFrameStores	(mDevice.features().GetNumFrameStores());
+	//	If no input source specified, choose a default...
+	if (!NTV2_IS_VALID_INPUT_SOURCE(mConfig.fInputSource))
+	{
+		mConfig.fInputSource = ::NTV2ChannelToInputSource(NTV2_CHANNEL1, mDeviceID == DEVICE_ID_KONAHDMI ? NTV2_IOKINDS_HDMI : NTV2_IOKINDS_SDI);
+		if (mConfig.IsVerbose())
+			cout << "## NOTE:  Input source was not specified, will use " << mConfig.ISrcStr() << endl;
+	}
 
 	//	Does this device have the requested input source?
 	if (!mDevice.features().CanDoInputSource(mConfig.fInputSource))
-		{cerr << "## ERROR:  Device does not have the specified input source" << endl;  return AJA_STATUS_BAD_PARAM;}
+		{cerr << "## ERROR:  Device does not have input source " << mConfig.ISrcStr() << endl;  return AJA_STATUS_BAD_PARAM;}
 
-	//	Pick an input NTV2Channel from the input source, and enable its frame buffer...
-	mConfig.fInputChannel = NTV2_INPUT_SOURCE_IS_ANALOG(mConfig.fInputSource) ? NTV2_CHANNEL1 : ::NTV2InputSourceToChannel(mConfig.fInputSource);
-	mDevice.EnableChannel (mConfig.fInputChannel);		//	Enable the input frame buffer
+	//	The input channel should match the input source...
+	mConfig.fInputChannel = ::NTV2InputSourceToChannel(mConfig.fInputSource);
+	if (mConfig.IsVerbose())
+		cout << "## NOTE:  Input FrameStore chosen to be " << mConfig.IChStr() << endl;
 
-	//	Pick an appropriate output NTV2Channel, and enable its frame buffer...
+	//	Enable/subscribe interrupts...
+	mDevice.EnableInputInterrupt(mConfig.fInputChannel);
+	mDevice.SubscribeInputVerticalEvent(mConfig.fInputChannel);
+	mDevice.EnableOutputInterrupt(NTV2_CHANNEL1);
+	mDevice.SubscribeOutputVerticalEvent(NTV2_CHANNEL1);
+
+	//	Flip the input spigot to "receive" if necessary...
+	bool isXmit (false);
+	if (mDevice.features().HasBiDirectionalSDI()							//	If device has bidirectional SDI connectors...
+		&& mConfig.ISrcIsSDI()												//	...and desired input source is SDI...
+		&& mDevice.GetSDITransmitEnable (mConfig.fInputChannel, isXmit)		//	...and GetSDITransmitEnable succeeds...
+		&& isXmit)															//	...and input is set to "transmit"...
+		{
+			mDevice.SetSDITransmitEnable (mConfig.fInputChannel, false);		//	...then disable transmit mode...
+			mDevice.WaitForOutputVerticalInterrupt (NTV2_CHANNEL1, 10);			//	...and give device time to lock to input
+		}	//	if input SDI connector needs to switch from transmit mode
+
+	//	Is there an input signal?  What format is it?
+	mVideoFormat = mDevice.GetInputVideoFormat(mConfig.fInputSource);
+	if (mVideoFormat == NTV2_FORMAT_UNKNOWN)
+		{cerr << "## ERROR:  No signal at input " << mConfig.ISrcStr() << endl;  return AJA_STATUS_NOINPUT;}
+	if (mConfig.IsVerbose())
+		cout << "## NOTE:  Signal at input " << mConfig.ISrcStr() << " is " << ::NTV2VideoFormatToString(mVideoFormat, true) << endl;
+
+	//	Free-run the device clock, since E-to-E mode isn't used, nor is a mixer tied to the input...
+	mDevice.SetReference (NTV2_REFERENCE_FREERUN);
+
+	//	Check the timecode source...
+	if (NTV2_IS_SDI_TIMECODE_INDEX(mConfig.fTimecodeSource))
+	{
+		const NTV2Channel tcChannel (::NTV2TimecodeIndexToChannel(mConfig.fTimecodeSource));
+		const NTV2Channel endNum (NTV2Channel (mDevice.features().GetNumVideoChannels()));
+		if (tcChannel >= endNum)
+			{cerr << "## ERROR:  Timecode source '" << ::NTV2TCIndexToString(mConfig.fTimecodeSource, true) << "' illegal on this device" << endl;  return AJA_STATUS_BAD_PARAM;}
+		if (tcChannel == mConfig.fOutputChannel)
+			{cerr << "## ERROR:  Timecode source '" << ::NTV2TCIndexToString(mConfig.fTimecodeSource, true) << "' conflicts with output channel" << endl;  return AJA_STATUS_BAD_PARAM;}
+		if (mDevice.features().HasBiDirectionalSDI()				//	If device has bidirectional SDI connectors...
+			&& mDevice.GetSDITransmitEnable (tcChannel, isXmit)		//	...and GetSDITransmitEnable succeeds...
+			&& isXmit)												//	...and the SDI timecode source is set to "transmit"...
+			{
+				mDevice.SetSDITransmitEnable (tcChannel, false);		//	...then disable transmit mode...
+				mDevice.WaitForInputVerticalInterrupt(tcChannel, 12);	//	...and allow device to lock to input signal
+			}	//	if SDI must switch from transmit to receive
+
+		//	Configure for VITC capture
+		mDevice.SetRP188SourceFilter(tcChannel, 0x01);
+
+		const NTV2VideoFormat tcInputVideoFormat (mDevice.GetInputVideoFormat (::NTV2TimecodeIndexToInputSource(mConfig.fTimecodeSource)));
+		if (tcInputVideoFormat == NTV2_FORMAT_UNKNOWN)
+			cerr << "## WARNING:  Timecode source '" << ::NTV2TCIndexToString(mConfig.fTimecodeSource, true) << "' has no input signal" << endl;
+		if (!InputSignalHasTimecode())
+			cerr << "## WARNING:  Timecode source '" << ::NTV2TCIndexToString(mConfig.fTimecodeSource, true) << "' has no embedded timecode" << endl;
+	}
+	else if (NTV2_IS_ANALOG_TIMECODE_INDEX(mConfig.fTimecodeSource) && !AnalogLTCInputHasTimecode())
+		cerr << "## WARNING:  Timecode source '" << ::NTV2TCIndexToString(mConfig.fTimecodeSource, true) << "' has no embedded timecode" << endl;
+
+	if (NTV2_IS_ANALOG_TIMECODE_INDEX(mConfig.fTimecodeSource)  &&  mDevice.features().CanDoLTCInOnRefPort())
+		mDevice.SetLTCInputEnable(true);	//	Enable analog LTC input (some LTC inputs are shared with reference input)
+	mDevice.DisableRP188Bypass (::NTV2InputSourceToChannel(mConfig.fInputSource));	//	AutoCirculate will drive timecode output
+
+	//	Final pre-flight checks...
+	if (!mDevice.features().CanDoFrameBufferFormat(mConfig.fPixelFormat))
+		{cerr << "## ERROR: " << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat) << " unsupported" << endl;  return AJA_STATUS_UNSUPPORTED;}
+	if (mFormatDesc.IsPlanar())
+		{cerr << "## ERROR: This demo doesn't work with planar pixel formats" << endl;  return AJA_STATUS_UNSUPPORTED;}
+	if (mFormatDesc.IsSD()  &&  mConfig.WithTallVANC()  &&  mConfig.fPixelFormat == NTV2_FBF_8BIT_YCBCR)
+		{cerr << "## ERROR: NTV2_VANCDATA_8BITSHIFT_ENABLE unsupported in firmware for SD video" << endl;  return AJA_STATUS_UNSUPPORTED;}
+	if (mConfig.WithTallVANC()  &&  mConfig.fPixelFormat != NTV2_FBF_8BIT_YCBCR  &&  mConfig.fPixelFormat != NTV2_FBF_10BIT_YCBCR)
+		{cerr << "## ERROR: Tall-frame VANC requires NTV2_FBF_8BIT_YCBCR or NTV2_FBF_10BIT_YCBCR pixel format" << endl;  return AJA_STATUS_UNSUPPORTED;}
+	if (mConfig.WithTallVANC()  &&  (mFormatDesc.Is4K() || mFormatDesc.Is8K()))
+		{cerr << "## ERROR: Tall-frame VANC unsupported for 4K or 8K video" << endl;  return AJA_STATUS_UNSUPPORTED;}
+
+	//	If the device supports different per-channel video formats, configure it as requested...
+	if (mDevice.features().CanDoMultiFormat())
+		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
+
+	//	Get the raster description...
+	mFormatDesc = NTV2FormatDescriptor (mVideoFormat, mConfig.fPixelFormat,
+										mConfig.WithTallVANC() ? NTV2_VANCMODE_TALLER : NTV2_VANCMODE_OFF);
+
+	//	Configure the input FrameStore...
+	mDevice.EnableChannel (mConfig.fInputChannel);
+	mDevice.SetVideoFormat (mVideoFormat, false, false, mDevice.features().CanDoMultiFormat() ? mConfig.fInputChannel : NTV2_CHANNEL1);
+	mDevice.SetFrameBufferFormat (mConfig.fInputChannel, mConfig.fPixelFormat);
+	mDevice.SetVANCMode (mConfig.WithTallVANC() ? NTV2_VANCMODE_TALLER : NTV2_VANCMODE_OFF, mConfig.fInputChannel);
+	mDevice.SetVANCShiftMode (mConfig.fInputChannel, ::Is8BitFrameBufferFormat(mConfig.fPixelFormat) && mConfig.WithTallVANC()
+																				? NTV2_VANCDATA_8BITSHIFT_ENABLE : NTV2_VANCDATA_NORMAL);
+
+	//	Choose an output channel/FrameStore, and enable it...
+	const UWord	numFrameStores (mDevice.features().GetNumFrameStores());
 	switch (mConfig.fInputSource)
 	{
-		case NTV2_INPUTSOURCE_SDI1:		mConfig.fOutputChannel = numFrameStores == 2 || numFrameStores > 4 ? NTV2_CHANNEL2 : NTV2_CHANNEL3;
+		case NTV2_INPUTSOURCE_SDI1:		mConfig.fOutputChannel = numFrameStores > 4 ? NTV2_CHANNEL2 : (numFrameStores == 2 ? NTV2_CHANNEL2 : NTV2_CHANNEL3);
 										break;
 
 		case NTV2_INPUTSOURCE_HDMI2:
@@ -193,118 +294,47 @@ AJAStatus NTV2Burn::SetupVideo (void)
 		default:
 		case NTV2_INPUTSOURCE_INVALID:	cerr << "## ERROR:  Bad input source" << endl;  return AJA_STATUS_BAD_PARAM;
 	}
-	mDevice.EnableChannel(mConfig.fOutputChannel);	//	Enable the output frame buffer
-
-	//	Enable/subscribe interrupts...
-	mDevice.EnableInputInterrupt(mConfig.fInputChannel);
-	mDevice.SubscribeInputVerticalEvent(mConfig.fInputChannel);
-	mDevice.EnableOutputInterrupt(mConfig.fOutputChannel);
-	mDevice.SubscribeOutputVerticalEvent(mConfig.fOutputChannel);
-
-	//	Pick an appropriate output spigot based on the output channel...
-	mOutputDest	= ::NTV2ChannelToOutputDestination(mConfig.fOutputChannel);
-	if (!mDevice.features().CanDoWidget(NTV2_Wgt12GSDIOut2)
-		&& !mDevice.features().CanDoWidget(NTV2_Wgt3GSDIOut2)
-		&& !mDevice.features().CanDoWidget(NTV2_WgtSDIOut2))
-			mOutputDest = NTV2_OUTPUTDESTINATION_SDI1;						//	If device has only one SDI output
-	if (mDevice.features().HasBiDirectionalSDI()							//	If device has bidirectional SDI connectors...
-		&& NTV2_OUTPUT_DEST_IS_SDI(mOutputDest))							//	...and output destination is SDI...
-			mDevice.SetSDITransmitEnable (mConfig.fOutputChannel, true);	//	...then enable transmit mode
-
-	//	Flip the input spigot to "receive" if necessary...
-	bool isXmit (false);
-	if (mDevice.features().HasBiDirectionalSDI()							//	If device has bidirectional SDI connectors...
-		&& NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource)					//	...and desired input source is SDI...
-		&& mDevice.GetSDITransmitEnable (mConfig.fInputChannel, isXmit)		//	...and GetSDITransmitEnable succeeds...
-		&& isXmit)															//	...and input is set to "transmit"...
-		{
-			mDevice.SetSDITransmitEnable (mConfig.fInputChannel, false);			//	...then disable transmit mode...
-			mDevice.WaitForOutputVerticalInterrupt (mConfig.fOutputChannel, 10);	//	...and allow device to lock to input signal
-		}	//	if input SDI connector needs to switch from transmit mode
-
-	//	Is there an input signal?  What format is it?
-	mVideoFormat = mDevice.GetInputVideoFormat(mConfig.fInputSource);
-	if (mVideoFormat == NTV2_FORMAT_UNKNOWN)
-		{cerr << "## ERROR:  No input signal, or can't handle its format" << endl;  return AJA_STATUS_NOINPUT;}
-
-	//	Free-run the device clock, since E-to-E mode isn't used, nor is a mixer tied to the input...
-	mDevice.SetReference (NTV2_REFERENCE_FREERUN);
-
-	//	Check the timecode source...
-	if (NTV2_IS_SDI_TIMECODE_INDEX(mConfig.fTimecodeSource))
+	if (mConfig.IsVerbose())
+		cout << "## NOTE:  Output FrameStore chosen to be " << mConfig.OChStr() << endl;
+	if (NTV2_IS_VALID_OUTPUT_DEST(mConfig.fOutputDest))
 	{
-		const NTV2Channel	tcChannel	(::NTV2TimecodeIndexToChannel(mConfig.fTimecodeSource));
-		const NTV2Channel	endNum		(NTV2Channel (mDevice.features().GetNumVideoChannels()));
-		if (tcChannel >= endNum)
-			{cerr << "## ERROR:  Timecode source '" << ::NTV2TCIndexToString(mConfig.fTimecodeSource, true) << "' illegal on this device" << endl;  return AJA_STATUS_BAD_PARAM;}
-		if (tcChannel == mConfig.fOutputChannel)
-			{cerr << "## ERROR:  Timecode source '" << ::NTV2TCIndexToString(mConfig.fTimecodeSource, true) << "' conflicts with output channel" << endl;  return AJA_STATUS_BAD_PARAM;}
-		if (mDevice.features().HasBiDirectionalSDI()	//	If device has bidirectional SDI connectors...
-			&& mDevice.GetSDITransmitEnable (tcChannel, isXmit)			//	...and GetSDITransmitEnable succeeds...
-			&& isXmit)													//	...and the SDI timecode source is set to "transmit"...
-			{
-				mDevice.SetSDITransmitEnable (tcChannel, false);		//	...then disable transmit mode...
-				AJATime::Sleep (500);									//	...and give the device a dozen frames or so to lock to the input signal
-			}	//	if input SDI connector needs to switch from transmit mode
-
-		// configure for vitc capture (should the driver do this?)
-		mDevice.SetRP188SourceFilter(tcChannel, 0x01);
-
-		const NTV2VideoFormat tcInputVideoFormat (mDevice.GetInputVideoFormat (::NTV2TimecodeIndexToInputSource(mConfig.fTimecodeSource)));
-		if (tcInputVideoFormat == NTV2_FORMAT_UNKNOWN)
-			cerr << "## WARNING:  Timecode source '" << ::NTV2TCIndexToString(mConfig.fTimecodeSource, true) << "' has no input signal" << endl;
-		if (!InputSignalHasTimecode ())
-			cerr << "## WARNING:  Timecode source '" << ::NTV2TCIndexToString(mConfig.fTimecodeSource, true) << "' has no embedded timecode" << endl;
+		if (NTV2_OUTPUT_DEST_IS_SDI(mConfig.fOutputDest))
+			if (NTV2_IS_VALID_CHANNEL(mConfig.ODstCh()))
+				if (mConfig.ODstCh() != mConfig.fOutputChannel)
+					if (mConfig.WithAnc() && !mConfig.WithTallVANC())
+					{
+						const string oldChStr(mConfig.OChStr());
+						mConfig.fOutputChannel = mConfig.ODstCh();
+						if (mConfig.IsVerbose())
+							cout << "## NOTE:  Output " << mConfig.ODstStr() << " with Anc forced FrameStore change to "
+									<< mConfig.OChStr() << " from " << oldChStr << endl;
+					}
 	}
-	else if (NTV2_IS_ANALOG_TIMECODE_INDEX(mConfig.fTimecodeSource) && !AnalogLTCInputHasTimecode ())
-		cerr << "## WARNING:  Timecode source '" << ::NTV2TCIndexToString(mConfig.fTimecodeSource, true) << "' has no embedded timecode" << endl;
+	else	//	else output destination not specified
+	{	//	Pick an appropriate output spigot based on the output channel...
+		mConfig.fOutputDest	= ::NTV2ChannelToOutputDestination(mConfig.fOutputChannel);
+		if (!HasWidgetsAnyOf(NTV2_Wgt12GSDIOut2, NTV2_Wgt3GSDIOut2, NTV2_WgtSDIOut2))
+		{	//	If device has only one SDI output
+			mConfig.fOutputDest = NTV2_OUTPUTDESTINATION_SDI1;
+			if (mConfig.IsVerbose())
+				cout << "## NOTE:  Output destination was not specified, will use " << mConfig.ODstStr() << endl;
+		}
+	}
+	if (mDevice.features().HasBiDirectionalSDI()					//	If device has bidirectional SDI connectors...
+		&& mConfig.ODstIsSDI())										//	...and output destination is SDI...
+			mDevice.SetSDITransmitEnable (mConfig.ODstCh(), true);	//	...then enable transmit mode
+	if (mConfig.fInputChannel == mConfig.fOutputChannel)
+		{cerr << "## ERROR: Input " << mConfig.IChStr() << " & output " << mConfig.OChStr() << " conflict" << endl;  return AJA_STATUS_BAD_PARAM;}
+	if (mDevice.features().HasBiDirectionalSDI() && mConfig.ISrcIsSDI() && mConfig.ODstIsSDI() && mConfig.ISrcCh() == mConfig.ODstCh())
+		{cerr << "## ERROR: SDI conflict:  input " << mConfig.ISrcStr() << " & output " << mConfig.ODstStr() << " are same connector" << endl;  return AJA_STATUS_BAD_PARAM;}
 
-	//	If the device supports different per-channel video formats, configure it as requested...
-	if (mDevice.features().CanDoMultiFormat())
-		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
-
-	//	Set the input/output channel video formats to the video format that was detected earlier...
-	mDevice.SetVideoFormat (mVideoFormat, false, false, mDevice.features().CanDoMultiFormat() ? mConfig.fInputChannel : NTV2_CHANNEL1);
-	if (mDevice.features().CanDoMultiFormat())											//	If device supports multiple formats per-channel...
-		mDevice.SetVideoFormat (mVideoFormat, false, false, mConfig.fOutputChannel);	//	...then also set the output channel format to the detected input format
-
-	//	Can the device handle the requested frame buffer pixel format?
-	if (!mDevice.features().CanDoFrameBufferFormat(mConfig.fPixelFormat))
-		{cerr << "## ERROR: " << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat) << " unsupported" << endl;  return AJA_STATUS_UNSUPPORTED;}
-
-	//	Set both input and output frame buffers' pixel formats...
-	mDevice.SetFrameBufferFormat (mConfig.fInputChannel, mConfig.fPixelFormat);
+	//	Configure the output FrameStore...
+	mDevice.EnableChannel(mConfig.fOutputChannel);
+	mDevice.SetVideoFormat (mVideoFormat, false, false, mConfig.fOutputChannel);
 	mDevice.SetFrameBufferFormat (mConfig.fOutputChannel, mConfig.fPixelFormat);
-
-	//	Normally, timecode embedded in the output signal comes from whatever is written into the RP188
-	//	registers (30/31 for SDI out 1, 65/66 for SDIout2, etc.).
-	//	AutoCirculate automatically writes the timecode in the AUTOCIRCULATE_TRANSFER's acRP188 field
-	//	into these registers (if AutoCirculateInitForOutput was called with AUTOCIRCULATE_WITH_RP188 set).
-	//	Newer AJA devices can also bypass these RP188 registers, and simply copy whatever timecode appears
-	//	at any SDI input (called the "bypass source"). To ensure that AutoCirculate's playout timecode
-	//	will actually be seen in the output signal, "bypass mode" must be disabled...
-	bool	bypassIsEnabled	(false);
-	mDevice.IsRP188BypassEnabled (::NTV2InputSourceToChannel(mConfig.fInputSource), bypassIsEnabled);
-	if (bypassIsEnabled)
-		mDevice.DisableRP188Bypass (::NTV2InputSourceToChannel(mConfig.fInputSource));
-
-	//	Now that newer AJA devices can capture/play anc data from separate buffers,
-	//	there's no need to enable VANC frame geometries...
-	mDevice.SetVANCMode (NTV2_VANCMODE_OFF, mConfig.fInputChannel);
-	mDevice.SetVANCMode (NTV2_VANCMODE_OFF, mConfig.fOutputChannel);
-	if (::Is8BitFrameBufferFormat(mConfig.fPixelFormat))
-	{	//	8-bit FBFs:  since not using VANC geometries, disable bit shift...
-		mDevice.SetVANCShiftMode (mConfig.fInputChannel, NTV2_VANCDATA_NORMAL);
-		mDevice.SetVANCShiftMode (mConfig.fOutputChannel, NTV2_VANCDATA_NORMAL);
-	}
-
-	if (NTV2_IS_ANALOG_TIMECODE_INDEX(mConfig.fTimecodeSource))
-		mDevice.SetLTCInputEnable (true);	//	Enable analog LTC input (some LTC inputs are shared with reference input)
-
-	//	Now that the video is set up, get information about the current frame geometry...
-	mFormatDesc = NTV2FormatDescriptor (mVideoFormat, mConfig.fPixelFormat);
-	if (mFormatDesc.IsPlanar())
-		{cerr << "## ERROR: This demo doesn't work with planar pixel formats" << endl;  return AJA_STATUS_UNSUPPORTED;}
+	mDevice.SetVANCMode (mConfig.WithTallVANC() ? NTV2_VANCMODE_TALLER : NTV2_VANCMODE_OFF, mConfig.fOutputChannel);
+	mDevice.SetVANCShiftMode (mConfig.fOutputChannel, ::Is8BitFrameBufferFormat(mConfig.fPixelFormat) && mConfig.WithTallVANC()
+																				? NTV2_VANCDATA_8BITSHIFT_ENABLE : NTV2_VANCDATA_NORMAL);
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetupVideo
@@ -399,7 +429,7 @@ AJAStatus NTV2Burn::SetupHostBuffers (void)
 		if (frameData.AudioBuffer())
 			frameData.fAudioBuffer.Fill(ULWord(0));
 
-		if (mConfig.WithAnc())
+		if (mConfig.WithAnc() && !mConfig.WithTallVANC())
 		{	//	Allocate page-aligned anc buffers...
 			if (!frameData.fAncBuffer.Allocate (ancBuffSizeBytes, /*pageAligned*/true))
 			{
@@ -452,15 +482,15 @@ void NTV2Burn::RouteInputSignal (void)
 
 void NTV2Burn::RouteOutputSignal (void)
 {
-	const NTV2InputCrosspointID		outputInputXpt	(::GetOutputDestInputXpt(mOutputDest));
-	const NTV2OutputCrosspointID	fbOutputXpt		(::GetFrameBufferOutputXptFromChannel (mConfig.fOutputChannel, ::IsRGBFormat(mConfig.fPixelFormat)));
-	const bool						isRGB			(::IsRGBFormat(mConfig.fPixelFormat));
-	NTV2OutputCrosspointID			outputXpt		(fbOutputXpt);
+	const NTV2InputXptID outputInputXpt (::GetOutputDestInputXpt(mConfig.fOutputDest));
+	const NTV2OutputXptID fbOutputXpt (::GetFrameBufferOutputXptFromChannel(mConfig.fOutputChannel, ::IsRGBFormat(mConfig.fPixelFormat)));
+	const bool isRGB (::IsRGBFormat(mConfig.fPixelFormat));
+	NTV2OutputXptID outputXpt (fbOutputXpt);
 
 	if (isRGB)
 	{
-		const NTV2OutputCrosspointID	cscVidOutputXpt	(::GetCSCOutputXptFromChannel(mConfig.fOutputChannel));	//	Use CSC's YUV video output
-		const NTV2InputCrosspointID		cscVidInputXpt	(::GetCSCInputXptFromChannel(mConfig.fOutputChannel));
+		const NTV2OutputXptID cscVidOutputXpt (::GetCSCOutputXptFromChannel(mConfig.fOutputChannel));	//	Use CSC's YUV video output
+		const NTV2InputXptID cscVidInputXpt (::GetCSCInputXptFromChannel(mConfig.fOutputChannel));
 
 		mDevice.Connect (cscVidInputXpt, fbOutputXpt);		//	Connect the CSC's video input to the frame store's output
 		mDevice.Connect (outputInputXpt, cscVidOutputXpt);	//	Connect the SDI output's input to the CSC's video output
@@ -550,7 +580,8 @@ void NTV2Burn::PlayThreadStatic (AJAThread * pThread, void * pContext)		//	stati
 
 void NTV2Burn::PlayFrames (void)
 {
-	const ULWord			acOptions (AUTOCIRCULATE_WITH_RP188 | (mConfig.WithAnc() ? AUTOCIRCULATE_WITH_ANC : 0));
+	const ULWord			acOptions (AUTOCIRCULATE_WITH_RP188
+										| (mConfig.WithAnc() && !mConfig.WithTallVANC() ? AUTOCIRCULATE_WITH_ANC : 0));
 	ULWord					goodXfers(0), badXfers(0), starves(0), noRoomWaits(0);
 	AUTOCIRCULATE_TRANSFER	outputXferInfo;
 	AUTOCIRCULATE_STATUS	outputStatus;
@@ -595,7 +626,7 @@ void NTV2Burn::PlayFrames (void)
 			if (pFrameData->AudioBuffer())
 				outputXferInfo.SetAudioBuffer (pFrameData->AudioBuffer(), pFrameData->NumCapturedAudioBytes());
 			if (pFrameData->AncBuffer() || pFrameData->AncBuffer2())
-				outputXferInfo.SetAncBuffers (pFrameData->AncBuffer(), pFrameData->NumCapturedAncBytes(), pFrameData->AncBuffer2(), pFrameData->NumCapturedAnc2Bytes());
+				outputXferInfo.SetAncBuffers (pFrameData->AncBuffer(), pFrameData->AncBufferSize(), pFrameData->AncBuffer2(), pFrameData->AncBuffer2Size());
 
 			//	Tell AutoCirculate to embed this frame's timecode(s) into the SDI output(s)...
 			outputXferInfo.SetOutputTimeCodes(pFrameData->fTimecodes);
@@ -663,7 +694,8 @@ void NTV2Burn::CaptureThreadStatic (AJAThread * pThread, void * pContext)		//	st
 void NTV2Burn::CaptureFrames (void)
 {
 	AUTOCIRCULATE_TRANSFER	inputXferInfo;
-	const ULWord			acOptions ((mConfig.WithTimecode() ? AUTOCIRCULATE_WITH_RP188 : 0)  |  (mConfig.WithAnc() ? AUTOCIRCULATE_WITH_ANC : 0));
+	const ULWord			acOptions ((mConfig.WithTimecode() ? AUTOCIRCULATE_WITH_RP188 : 0)
+										|  (mConfig.WithAnc() && !mConfig.WithTallVANC() ? AUTOCIRCULATE_WITH_ANC : 0));
 	ULWord					goodXfers(0), badXfers(0), ringFulls(0), devWaits(0);
 	Bouncer<UWord>			yPercent	(85/*upperLimit*/, 1/*lowerLimit*/, 1/*startValue*/);	//	"Bounces" timecode up & down in raster
 	BURNNOTE("Thread started");
@@ -715,6 +747,23 @@ void NTV2Burn::CaptureFrames (void)
 			pFrameData->fNumAudioBytes	= pFrameData->AudioBuffer()	? inputXferInfo.GetCapturedAudioByteCount()			: 0;
 			pFrameData->fNumAncBytes	= pFrameData->AncBuffer()	? inputXferInfo.GetCapturedAncByteCount(false/*F1*/): 0;
 			pFrameData->fNumAnc2Bytes	= pFrameData->AncBuffer2()	? inputXferInfo.GetCapturedAncByteCount(true/*F2*/)	: 0;
+			if (pFrameData->AncBuffer())
+			{	//	Zero F1 anc buffer memory past last byte written by anc extractor
+				NTV2Buffer stale (pFrameData->fAncBuffer.GetHostAddress(pFrameData->fNumAncBytes),
+									pFrameData->fAncBuffer.GetByteCount() - pFrameData->fNumAncBytes);
+				stale.Fill(uint8_t(0));
+			}
+			if (pFrameData->AncBuffer2())
+			{	//	Zero F2 anc buffer memory past last byte written by anc extractor
+				NTV2Buffer stale (pFrameData->AncBuffer2().GetHostAddress(pFrameData->fNumAnc2Bytes),
+									pFrameData->AncBuffer2().GetByteCount() - pFrameData->fNumAnc2Bytes);
+				stale.Fill(uint8_t(0));
+			}
+
+			if (pFrameData->AncBuffer()  &&  !mConfig.WithHanc())
+				AJAAncList::StripNativeInserterGUMPPackets (pFrameData->AncBuffer(), pFrameData->AncBuffer());
+			if (pFrameData->AncBuffer2()  &&  !mConfig.WithHanc())
+				AJAAncList::StripNativeInserterGUMPPackets (pFrameData->AncBuffer2(), pFrameData->AncBuffer2());
 
 			//	Determine which timecode value should be burned in to the video frame
 			string timeCodeString;
@@ -760,7 +809,9 @@ void NTV2Burn::CaptureFrames (void)
 			}
 
 			//	While this NTV2FrameData's buffers are locked, "burn" timecode into the raster...
-			mTCBurner.BurnTimeCode (pFrameData->VideoBuffer(), timeCodeString.c_str(), yPercent.Next());
+			NTV2Buffer visibleRgn (mFormatDesc.GetTopVisibleRowAddress(pFrameData->VideoBuffer()),
+									mFormatDesc.GetVisibleRasterBytes());
+			mTCBurner.BurnTimeCode (visibleRgn, timeCodeString.c_str(), yPercent.Next());
 
 			//	Signal that we're done "producing" this frame, making it available for future "consumption"...
 			mFrameDataRing.EndProduceNextBuffer();

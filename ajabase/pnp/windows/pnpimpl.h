@@ -14,20 +14,20 @@
 class AJAPnpImpl
 {
 public:
-	AJAPnpImpl();
-	virtual ~AJAPnpImpl(void);
+							AJAPnpImpl();
+	virtual					~AJAPnpImpl();
 
-	AJAStatus Install(AJAPnpCallback callback, void* refCon, uint32_t devices);
-	AJAStatus Uninstall(void);
+	AJAStatus				Install (AJAPnpCallback callback, void* refCon, uint32_t devices);
+	AJAStatus				Uninstall (void);
 	
-	AJAPnpCallback GetCallback();
-	void* GetRefCon();
-	uint32_t GetPnpDevices();
-	void AddSignaled();
-	void RemoveSignaled();
+	inline AJAPnpCallback	GetCallback (void) const	{return mCallback;}
+	inline void *			GetRefCon (void) const		{return mRefCon;}
+	inline uint32_t			GetPnpDevices (void) const	{return mDevices;}
+
+	void					AddSignaled (void);
+	void					RemoveSignaled (void);
 
 private:
-	
 	void*				mRefCon;
 	AJAPnpCallback		mCallback;
 	uint32_t			mDevices;

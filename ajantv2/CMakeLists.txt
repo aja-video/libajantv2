@@ -50,6 +50,9 @@ if (AJANTV2_DISABLE_PLUGIN_LOAD)
     list(APPEND TARGET_COMPILE_DEFS
         -DNTV2_PREVENT_PLUGIN_LOAD)
 else()
+    if(NOT DEFINED AJANTV2_MBEDTLS_URL)
+        set(AJANTV2_MBEDTLS_URL https://github.com/aja-video/mbedtls.git)
+    endif()
     message(STATUS "NTV2 SDK will load signed 3rd-party plugins")
 
     set(MBEDTLS_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/mbedtls-install)
@@ -62,7 +65,6 @@ else()
         set(MBEDCRYPTO_LIBRARY ${MBEDTLS_LIBRARY_DIR}/mbedcrypto.lib)
         set(MBEDTLS_EXTRA_CONFIG_FLAGS
                 "-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=ON"
-                "-DMSVC_STATIC_RUNTIME=ON"
                 "-DCMAKE_MSVC_RUNTIME_LIBRARY=${CMAKE_MSVC_RUNTIME_LIBRARY}")
     elseif (CMAKE_SYSTEM_NAME MATCHES "^(Linux|Darwin)$")
         set(MBEDTLS_LIBRARY ${MBEDTLS_LIBRARY_DIR}/libmbedtls.a)
@@ -74,7 +76,7 @@ else()
     # BUILD_BYPRODUCTS informing CMake where the .a files are located is required to make Ninja build work
     ExternalProject_Add(
         mbedtls
-        GIT_REPOSITORY https://github.com/aja-video/mbedtls.git
+        GIT_REPOSITORY ${AJANTV2_MBEDTLS_URL}
         GIT_TAG fix-win-dll-cmake
         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${MBEDTLS_INSTALL_DIR}
                     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
@@ -85,6 +87,7 @@ else()
                     -DUSE_STATIC_MBEDTLS_LIBRARY=ON
                     -DUSE_SHARED_MBEDTLS_LIBRARY=OFF
                     ${MBEDTLS_EXTRA_CONFIG_FLAGS}
+		CMAKE_CACHE_ARGS "-DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}"
         BUILD_ALWAYS TRUE
         BUILD_BYPRODUCTS ${MBEDTLS_LIBRARY} ${MBEDX509_LIBRARY} ${MBEDCRYPTO_LIBRARY}
     )

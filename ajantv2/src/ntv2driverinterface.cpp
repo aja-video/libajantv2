@@ -308,7 +308,11 @@ bool CNTV2DriverInterface::OpenRemote (const NTV2DeviceSpecParser & inParser)
 	//	plugin in stages via its client interface.
 	if (!pClient->IsConnected())
 		if (!pClient->NTV2Connect())
-			{DIFAIL("Failed to connect/open '" << inParser.DeviceSpec() << "'");  delete pClient;}
+		{	DIFAIL("Failed to connect/open '" << inParser.DeviceSpec() << "'");
+			delete pClient;
+			CloseRemote();
+			return false;
+		}
 
 	//	NTV2 physical devices always have a hardware identity -- the NTV2DeviceID read from register 50.
 	//	This plugin device is considered "open" if ReadRegister is successful, and returns a non-zero
@@ -326,7 +330,7 @@ bool CNTV2DriverInterface::OpenRemote (const NTV2DeviceSpecParser & inParser)
 }	//	OpenRemote
 
 
-bool CNTV2DriverInterface::CloseRemote()
+bool CNTV2DriverInterface::CloseRemote (void)
 {
 	if (_pRPCAPI)
 	{
@@ -700,6 +704,8 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 		case DEVICE_ID_IOX3:						bitFileInfo.bitFileType = NTV2_BITFILE_IOX3_MAIN;					break;
 		case DEVICE_ID_KONAX:						bitFileInfo.bitFileType = NTV2_BITFILE_KONAX;						break;
 		case DEVICE_ID_KONAXM:						bitFileInfo.bitFileType = NTV2_BITFILE_KONAXM;						break;
+        case DEVICE_ID_KONAIP_25G:					bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_25G;					break;
+		case DEVICE_ID_SOFTWARE:
 		case DEVICE_ID_NOTFOUND:					bitFileInfo.bitFileType = NTV2_BITFILE_TYPE_INVALID;				break;
 	#if !defined (_DEBUG)
 		default:					break;
@@ -1309,14 +1315,22 @@ void CNTV2DriverInterface::BumpEventCount (const INTERRUPT_ENUMS eInterruptType)
 
 bool CNTV2DriverInterface::IsDeviceReady (const bool checkValid)
 {
-	if (!IsIPDevice())
+    if (!IsIPDevice() && !::NTV2DeviceCanDo25GIP(GetDeviceID()))
 		return true;	//	Non-IP devices always ready
-
-	if (!IsMBSystemReady())
-		return false;
-
-	if (checkValid && !IsMBSystemValid())
-		return false;
+    
+    if (IsIPDevice())
+    {
+        if (!IsMBSystemReady())
+            return false;
+    
+        if (checkValid && !IsMBSystemValid())
+            return false;
+    }
+    else
+    {
+        if (!IsLPSystemReady())
+            return false;
+    }
 
 	return true;	//	Ready!
 }
@@ -1345,6 +1359,19 @@ bool CNTV2DriverInterface::IsMBSystemReady (void)
 	// Not enough to read MB State, we need to make sure MB is running
 	ReadRegister(SAREK_REGS + kRegSarekMBUptime, val);
 	return (val < 2) ? false : true;
+}
+
+bool CNTV2DriverInterface::IsLPSystemReady (void)
+{
+    if (!::NTV2DeviceCanDo25GIP(GetDeviceID()))
+        return false;	//	No local proc
+    
+    uint32_t val;
+    ReadRegister(kRegReserved83, val);
+    if (val == 0x00)
+        return false;	//	MB not ready
+
+    return true;
 }
 
 #if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
@@ -1655,8 +1682,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceHasBiDirectionalSDI:			outValue = ::NTV2DeviceHasBiDirectionalSDI(devID);					break;
 		case kDeviceHasColorSpaceConverterOnChannel2:	outValue = ::NTV2DeviceCanDoWidget(devID, NTV2_WgtCSC2);		break;	//	Deprecate?
 		case kDeviceHasIDSwitch:					outValue = ::NTV2DeviceCanDoIDSwitch(devID);						break;
-		case kDeviceHasNTV4FrameStores:				outValue =		(devID == DEVICE_ID_KONAX)
-																||	(devID == DEVICE_ID_KONAXM) ? 1 : 0;				break;
+        case kDeviceHasNTV4FrameStores:				outValue = ::NTV2DeviceHasNTV4FrameStores(devID);                   break;
 		case kDeviceHasNWL:							outValue = ::NTV2DeviceHasNWL(devID);								break;
 		case kDeviceHasPCIeGen2:					outValue = ::NTV2DeviceHasPCIeGen2(devID);							break;
 		case kDeviceHasRetailSupport:				outValue = ::NTV2DeviceHasRetailSupport(devID);						break;
@@ -1669,6 +1695,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceIs64Bit:						outValue = ::NTV2DeviceIs64Bit(devID);								break;	//	Deprecate?
 		case kDeviceIsDirectAddressable:			outValue = ::NTV2DeviceIsDirectAddressable(devID);					break;	//	Deprecate?
 		case kDeviceIsExternalToHost:				outValue = ::NTV2DeviceIsExternalToHost(devID);						break;
+		case kDeviceIsLocalPhysical:				outValue = !IsRemote();												break;
 		case kDeviceIsSupported:					outValue = ::NTV2DeviceIsSupported(devID);							break;
 		case kDeviceNeedsRoutingSetup:				outValue = ::NTV2DeviceNeedsRoutingSetup(devID);					break;	//	Deprecate?
 		case kDeviceSoftwareCanChangeFrameBufferSize:	outValue = ::NTV2DeviceSoftwareCanChangeFrameBufferSize(devID);	break;
@@ -1710,7 +1737,9 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 																&& (GetDeviceID() != DEVICE_ID_KONAHDMI)				//	Not a KonaHDMI
 																&& (!IsSupported(kDeviceCanDoAudioMixer));				//	No audio mixer
 													break;
-
+		case kDeviceROMHasBankSelect:				outValue = GetNumSupported(kDeviceGetSPIFlashVersion) >= 3
+																&&  GetNumSupported(kDeviceGetSPIFlashVersion) <= 6;	break;
+		case kDeviceCanDoVersalSysMon:				outValue = ::NTV2DeviceCanDoVersalSysMon(devID);					break;
 		case kDeviceCanDoAudioMixer:
 		case kDeviceHasMicrophoneInput:
 		default:									return false;	//	Bad param

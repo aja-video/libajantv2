@@ -382,6 +382,9 @@ static const NTV2WidgetID	gSDIOutputs[]	= {	NTV2_WgtSDIOut1,	NTV2_WgtSDIOut2,	NT
 static const NTV2WidgetID	g3GSDIOutputs[]	= {	NTV2_Wgt3GSDIOut1,	NTV2_Wgt3GSDIOut2,	NTV2_Wgt3GSDIOut3,	NTV2_Wgt3GSDIOut4,
 												NTV2_Wgt3GSDIOut5,	NTV2_Wgt3GSDIOut6,	NTV2_Wgt3GSDIOut7,	NTV2_Wgt3GSDIOut8	};
 
+static const NTV2WidgetID	g12GSDIOutputs[]= {	NTV2_Wgt12GSDIOut1,	NTV2_Wgt12GSDIOut2,	NTV2_Wgt12GSDIOut3,	NTV2_Wgt12GSDIOut4,
+												NTV2_WIDGET_INVALID, NTV2_WIDGET_INVALID, NTV2_WIDGET_INVALID, NTV2_WIDGET_INVALID	};
+
 
 bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 {
@@ -1325,7 +1328,9 @@ bool NTV2CCGrabber::RouteOutputSignal (const NTV2VideoFormat inVideoFormat)
 		//	Multiformat --- route the one SDI output to the mixer's YUV output, and set its output standard...
 		if (mDevice.features().HasBiDirectionalSDI())
 			mDevice.SetSDITransmitEnable (mOutputChannel, true);
-		if (mDevice.features().CanDoWidget(g3GSDIOutputs[mOutputChannel]) || mDevice.features().CanDoWidget(gSDIOutputs[mOutputChannel]))
+		if (mDevice.features().CanDoWidget(g12GSDIOutputs[mOutputChannel])
+			|| mDevice.features().CanDoWidget(g3GSDIOutputs[mOutputChannel])
+			|| mDevice.features().CanDoWidget(gSDIOutputs[mOutputChannel]))
 		{
 			if (!mDevice.Connect (::GetSDIOutputInputXpt(mOutputChannel), mixerOutputYUV, canVerify)) connectFailures++;
 			mDevice.SetSDIOutputStandard (mOutputChannel, outputStandard);
@@ -1349,7 +1354,9 @@ bool NTV2CCGrabber::RouteOutputSignal (const NTV2VideoFormat inVideoFormat)
 					continue;	//	Skip the input
 				mDevice.SetSDITransmitEnable (chan, true);
 			}
-			if (mDevice.features().CanDoWidget(g3GSDIOutputs[chan]) || mDevice.features().CanDoWidget(gSDIOutputs[chan]))
+			if (mDevice.features().CanDoWidget(g12GSDIOutputs[chan])
+				|| mDevice.features().CanDoWidget(g3GSDIOutputs[chan])
+				|| mDevice.features().CanDoWidget(gSDIOutputs[chan]))
 			{
 				if (!mDevice.Connect (::GetSDIOutputInputXpt(chan), mixerOutputYUV, canVerify)) connectFailures++;
 				mDevice.SetSDIOutputStandard (chan, outputStandard);
@@ -1573,7 +1580,7 @@ AJALabelValuePairs CCGrabberConfig::Get (const bool inCompact) const
 	AJALabelValuePairs result (CaptureConfig::Get(inCompact));
 	AJASystemInfo::append(result, "Output Mode",		IS_VALID_OutputMode(fOutputMode) ? OutputModeToString(fOutputMode) : "(invalid)");
 	AJASystemInfo::append(result, "Caption Source",		IS_VALID_CaptionDataSrc(fCaptionSrc) ? CaptionDataSrcToString(fCaptionSrc) : "(invalid)");
-	AJASystemInfo::append(result, "Timecode Source",	::NTV2TCIndexToString(fTimecodeSrc, inCompact));
+	AJASystemInfo::append(result, "Timecode Source",	::NTV2TCIndexToString(fTimecodeSource, inCompact));
 	AJASystemInfo::append(result, "Caption Channel",	::NTV2Line21ChannelToStr(fCaptionChannel, inCompact));
 	AJASystemInfo::append(result, "Burn-In Captions",	fBurnCaptions ? "Y" : "N");
 	AJASystemInfo::append(result, "MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");

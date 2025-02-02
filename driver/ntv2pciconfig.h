@@ -18,5 +18,7 @@ int32_t		ntv2PciFindCapability(Ntv2SystemContext* pSysCon, uint32_t cap_id);
 int32_t		ntv2PciFindExtCapability(Ntv2SystemContext* pSysCon, uint32_t ext_id);
 uint32_t	ntv2ReadPciMaxReadRequestSize(Ntv2SystemContext* pSysCon);
 Ntv2Status	ntv2WritePciMaxReadRequestSize(Ntv2SystemContext* pSysCon, uint32_t reqSize);
+uint32_t	ntv2ReadPciLinkSpeed(Ntv2SystemContext* pSysCon);
+uint32_t	ntv2ReadPciLinkWidth(Ntv2SystemContext* pSysCon);
 
 #endif

@@ -39,17 +39,30 @@ AJAStatus
 AJAPnpImpl::Install(AJAPnpCallback callback, void* refCon, uint32_t devices)
 {
 	mCallback = callback;
-	mRefCon = refCon;
-	mDevices = devices;
+	mRefCon   = refCon;
+	mDevices  = devices;
 
-	
- 	mAddEventHandle = CreateEventW(NULL, FALSE, FALSE, L"Global\\AJAPNPAddEvent");
- 	RegisterWaitForSingleObject(&mAddWaitHandle, mAddEventHandle, (WAITORTIMERCALLBACK)&SignaledAddRoutine, this, INFINITE, NULL);
- 
- 	mRemoveEventHandle = CreateEventW(NULL, FALSE, FALSE, L"Global\\AJAPNPRemoveEvent");
- 	RegisterWaitForSingleObject(&mRemoveWaitHandle, mRemoveEventHandle, (WAITORTIMERCALLBACK)&SignaledRemoveRoutine, this, INFINITE, NULL);
-	
-	return AJA_STATUS_SUCCESS;
+	if (!mCallback)
+		return AJA_STATUS_NULL;	//	NULL callback
+
+	//	Windows only handles PCIe devices
+	if (mDevices & AJA_Pnp_PciVideoDevices)
+	{
+		mAddEventHandle = CreateEventW(NULL, FALSE, FALSE, L"Global\\AJAPNPAddEvent");
+		if (!mAddEventHandle)
+			return AJA_STATUS_FAIL;
+		if (!RegisterWaitForSingleObject(&mAddWaitHandle, mAddEventHandle, (WAITORTIMERCALLBACK)&SignaledAddRoutine, this, INFINITE, NULL))
+			return AJA_STATUS_FAIL;
+
+		mRemoveEventHandle = CreateEventW(NULL, FALSE, FALSE, L"Global\\AJAPNPRemoveEvent");
+		if (!mRemoveEventHandle)
+			return AJA_STATUS_FAIL;
+		if (!RegisterWaitForSingleObject(&mRemoveWaitHandle, mRemoveEventHandle, (WAITORTIMERCALLBACK)&SignaledRemoveRoutine, this, INFINITE, NULL))
+			return AJA_STATUS_FAIL;
+
+		return AJA_STATUS_SUCCESS;
+	}
+	return AJA_STATUS_FAIL;	//	Nothing installed
 }
 	
 AJAStatus 
@@ -71,24 +84,6 @@ AJAPnpImpl::Uninstall(void)
 	}
 	
 	return AJA_STATUS_SUCCESS;
-}
-
-AJAPnpCallback 
-AJAPnpImpl::GetCallback()
-{
-	return mCallback;
-}
-
-void* 
-AJAPnpImpl::GetRefCon()
-{
-	return mRefCon;
-}
-
-uint32_t
-AJAPnpImpl::GetPnpDevices()
-{
-	return mDevices;
 }
 
 void

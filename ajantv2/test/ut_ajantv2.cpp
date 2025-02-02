@@ -601,6 +601,15 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 	cerr << ::NTV2StandardToString(st) << " " << ::NTV2FrameBufferFormatToString(pf) << endl;
 #endif
 				//	Make black test pattern buffer for comparison later...
+				if (st == NTV2_STANDARD_720)
+					cout << "720" << endl;
+				else if (st == NTV2_STANDARD_2Kx1080p)
+					cout << "2K" << endl;
+				else if (st == NTV2_STANDARD_4096x2160p)
+					cout << "4K" << endl;
+				else if (st == NTV2_STANDARD_8192)
+					cout << "8K" << endl;
+
 				NTV2TestPatternGen gen;
 				NTV2Buffer tpBuffer(fd.GetTotalBytes());	//	Allocate test pattern buffer
 				if (!gen.DrawTestPattern (NTV2_TestPatt_Black, fd, tpBuffer))	//	Fill with black test pattern
@@ -630,13 +639,14 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 					//	but NTV2TestPatternGen stops writing after the "logical" end of line,
 					//	which causes mis-compares between the two buffers.
 					//	In these cases, the two buffers are compared logical-line-by-logical-line.
+					//  Line lengths (truncated) calculated by rasterWidth / 6 * 16.
 					ULWord logicalLineLength(0);
 					switch (st)
 					{
 						case NTV2_STANDARD_720:			logicalLineLength = 0xD55;	break;
-						case NTV2_STANDARD_2Kx1080p:	logicalLineLength = 0x1556;	break;
-						case NTV2_STANDARD_4096x2160p:	logicalLineLength = 0x2AAB;	break;
-						case NTV2_STANDARD_8192:		logicalLineLength = 0x5556;	break;
+						case NTV2_STANDARD_2Kx1080p:	logicalLineLength = 0x1555;	break;
+						case NTV2_STANDARD_4096x2160p:	logicalLineLength = 0x2AAA;	break;
+						case NTV2_STANDARD_8192:		logicalLineLength = 0x5555;	break;
 						default:						NTV2_ASSERT(false);  break;
 					}
 					NTV2Buffer rowBuff(fd.GetBytesPerRow()), tpRowBuff(fd.GetBytesPerRow());
@@ -646,6 +656,14 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 						CHECK(fd.GetRowBuffer(buff, rowBuff, rowNdx));
 						CHECK(rowBuff.IsContentEqual(tpRowBuff, /*byteOffset*/0, /*byteCount*/logicalLineLength));
 					}	//	for each row
+
+					// TODO: Check this test case on Big Endian machine
+					// Check last 10-bits of the buffers
+					uint8_t * rowBuffPtr = rowBuff;
+					uint8_t * patBuffPtr = tpRowBuff;
+					uint16_t rowBufEnd = (rowBuffPtr[logicalLineLength-1] << 2 | (rowBuffPtr[logicalLineLength] & 0x3));
+					uint16_t patBufEnd = (patBuffPtr[logicalLineLength-1] << 2 | (patBuffPtr[logicalLineLength] & 0x3));
+					CHECK_EQ(rowBufEnd, patBufEnd);
 				}	//	if 10-bit YUV and special-case geometry
 				else
 					CHECK(buff.IsContentEqual(tpBuffer));	//	Verify frame buffer content matches
@@ -937,19 +955,19 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 	{
 		SUBCASE("NTV2SegmentedXferInfo Basic Test")
 		{
-			const NTV2SegmentedXferInfo nfo;
-			CHECK(nfo.isValid() == false);
-			CHECK(nfo.getElementLength() == 1);
-			CHECK(nfo.getSegmentCount() == 0);
-			CHECK(nfo.getSegmentLength() == 0);
-			CHECK(nfo.getTotalElements() == 0);
-			CHECK(nfo.getTotalBytes() == 0);
-			CHECK(nfo.getSourceOffset() == 0);
-			CHECK(nfo.getDestOffset() == 0);
-			CHECK(nfo.isSourceTopDown() == true);
-			CHECK(nfo.isSourceBottomUp() == false);
-			CHECK(nfo.isDestTopDown() == true);
-			CHECK(nfo.isDestBottomUp() == false);
+			NTV2SegmentedXferInfo nfo;
+			CHECK_FALSE(nfo.isValid());
+			CHECK_EQ(nfo.getElementLength(), 1);
+			CHECK_EQ(nfo.getSegmentCount(), 0);
+			CHECK_EQ(nfo.getSegmentLength(), 0);
+			CHECK_EQ(nfo.getTotalElements(), 0);
+			CHECK_EQ(nfo.getTotalBytes(), 0);
+			CHECK_EQ(nfo.getSourceOffset(), 0);
+			CHECK_EQ(nfo.getDestOffset(), 0);
+			CHECK(nfo.isSourceTopDown());
+			CHECK_FALSE(nfo.isSourceBottomUp());
+			CHECK(nfo.isDestTopDown());
+			CHECK_FALSE(nfo.isDestBottomUp());
 		}
 
 		// TEST_CASE("NTV2SegmentedXfrInfo 1920x1080 YUV8")
@@ -966,8 +984,17 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 			nfo.setSegmentCount(64);
 			nfo.setSegmentLength(1024); // bytes
 			nfo.setSourcePitch(7680);	// 0x1E00 bytes
-			CHECK(nfo.isValid() == true);
-			CHECK(nfo.getTotalBytes() == 0x00010000);	//	64K
+			CHECK(nfo.isValid());
+			CHECK_EQ(nfo.getElementLength(), 1);
+			CHECK_EQ(nfo.getSegmentCount(), 64);
+			CHECK_EQ(nfo.getSegmentLength(), 1024);
+			CHECK_EQ(nfo.getSourcePitch(), 7680);
+			CHECK_EQ(nfo.getTotalBytes(), 0x00010000);	//	64K
+			CHECK(nfo.isSourceTopDown());
+			nfo.setSourceFlipped();
+			CHECK_EQ(nfo.getElementLength(), 1);
+			CHECK(nfo.isValid());
+			CHECK(nfo.isSourceBottomUp());
 		}
 		SUBCASE("1920x1080 ARGB8 src buffer, 256x64 selection at upper-left corner 0,0")
 		{	//	1920x1080 ARGB8 src buffer, 256x64 selection at upper-right corner 1664,0
@@ -976,8 +1003,8 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 			segInfo.setSegmentLength(1024); // bytes
 			segInfo.setSourceOffset(6656);	// 0x1A00 bytes
 			segInfo.setSourcePitch(7680);	// 0x1E00 bytes
-			CHECK(segInfo.isValid() == true);
-			CHECK(segInfo.getTotalBytes() == 0x00010000);	//	64K
+			CHECK(segInfo.isValid());
+			CHECK_EQ(segInfo.getTotalBytes(), 0x00010000);	//	64K
 		}
 		SUBCASE("1920x1080 ARGB8 src buffer, 256x64 selection at upper-right corner 1664,0	")
 		{
@@ -1009,7 +1036,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 			CHECK(segInfo.isValid() == true);
 			CHECK(segInfo.getTotalBytes() == 0x00010000);	//	64K
 		}
-	}
+	}	//	TEST_CASE("NTV2SegmentedXferInfo")
 
 	TEST_CASE("devicespecparser")
 	{
@@ -3380,3 +3407,286 @@ TEST_SUITE("AutoCirculate" * doctest::description("AutoCirculate tests"))
 		CHECK_FALSE(fRange.valid());
 	}	//	TEST_CASE("NTV2ACFrameRange")
 }	//	TEST_SUITE("AutoCirculate")
+
+
+TEST_SUITE("NTV2SegmentedXferInfo+NTV2Buffer+NTV2FormatDesc")
+{
+	//	Create two 8-bit YUV rasters:  one 48Hx96W, another 16x16...
+	static const NTV2FormatDesc fdYUV8_48x96(/*numLines*/48, /*numPixels*/96, /*ULWordsPerLine*/48, /*numLumaBits*/8, /*numChromaBits*/8);
+	static const NTV2FormatDesc fdYUV8_16x16(/*numLines*/16, /*numPixels*/16, /*ULWordsPerLine*/8, /*numLumaBits*/8, /*numChromaBits*/8);
+
+	static string drawRaster (const NTV2Buffer & b, const NTV2FormatDesc & d)
+	{	string s;
+		for (ULWord lineOffset(0);  lineOffset < d.GetRasterHeight();  lineOffset++)
+			s += b.GetString (d.GetBytesPerRow() * lineOffset, d.GetBytesPerRow()) + "\n";
+		return s;
+	}
+
+	TEST_CASE("CheckSegmentedXferBufferCopyFrom")
+	{
+		CHECK(fdYUV8_48x96.IsValid());
+		CHECK(fdYUV8_16x16.IsValid());
+
+		//	Create original background field raster...
+		NTV2Buffer origRaster (fdYUV8_48x96.GetTotalBytes());
+		CHECK(origRaster);
+		CHECK(origRaster.Fill(ULWord(0x2E2E2E2E)));
+		const string sOrigRaster(drawRaster(origRaster, fdYUV8_48x96));
+
+		//	Create original "logo" raster...
+		NTV2Buffer origLogo (fdYUV8_16x16.GetTotalBytes());
+		CHECK(origLogo);
+		for (ULWord logoRowOffset(0);  logoRowOffset < fdYUV8_16x16.GetRasterHeight();  logoRowOffset++)
+		{	NTV2Buffer logoRow;
+			origLogo.Segment(logoRow, logoRowOffset * fdYUV8_16x16.GetBytesPerRow(), fdYUV8_16x16.GetBytesPerRow());
+			const uint8_t val('A' + uint8_t(logoRowOffset));
+			for (int ndx(0);  ndx < int(fdYUV8_16x16.GetBytesPerRow());  ndx++)
+				logoRow.U8(ndx) = val;
+		}	//	for each logo line
+		const string sOrigLogo(drawRaster(origLogo, fdYUV8_16x16));
+		const string sCmpNormal ("................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA................................................................................................\n"
+		"................................................................BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB................................................................................................\n"
+		"................................................................CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC................................................................................................\n"
+		"................................................................DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD................................................................................................\n"
+		"................................................................EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE................................................................................................\n"
+		"................................................................FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF................................................................................................\n"
+		"................................................................GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG................................................................................................\n"
+		"................................................................HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH................................................................................................\n"
+		"................................................................IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII................................................................................................\n"
+		"................................................................JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ................................................................................................\n"
+		"................................................................KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK................................................................................................\n"
+		"................................................................LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL................................................................................................\n"
+		"................................................................MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM................................................................................................\n"
+		"................................................................NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN................................................................................................\n"
+		"................................................................OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO................................................................................................\n"
+		"................................................................PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n");
+		const string sCmpFlipped("................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP................................................................................................\n"
+		"................................................................OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO................................................................................................\n"
+		"................................................................NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN................................................................................................\n"
+		"................................................................MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM................................................................................................\n"
+		"................................................................LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL................................................................................................\n"
+		"................................................................KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK................................................................................................\n"
+		"................................................................JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ................................................................................................\n"
+		"................................................................IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII................................................................................................\n"
+		"................................................................HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH................................................................................................\n"
+		"................................................................GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG................................................................................................\n"
+		"................................................................FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF................................................................................................\n"
+		"................................................................EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE................................................................................................\n"
+		"................................................................DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD................................................................................................\n"
+		"................................................................CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC................................................................................................\n"
+		"................................................................BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB................................................................................................\n"
+		"................................................................AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n"
+		"................................................................................................................................................................................................\n");
+
+		SUBCASE("Normal Src, Normal Dst")
+		{
+			//	"Draw" the logo inside the raster at line offset 11 (from top) and pixel offset 32 (from left edge)...
+			NTV2Buffer logo(origLogo), raster(origRaster);
+			NTV2SegmentedXferInfo xferInfo;
+			ULWord dstLineOffset(11), dstPixOffset(32);
+			xferInfo.setSegmentInfo(/*numSegments*/fdYUV8_16x16.GetRasterHeight(), /*segmentLength*/fdYUV8_16x16.GetBytesPerRow());
+			xferInfo.setSourceDirection(xferInfo.Direction_Normal);
+			xferInfo.setSourceInfo(/*offset*/xferInfo.isSourceBottomUp()
+											?	fdYUV8_16x16.GetBytesPerRow() * (fdYUV8_16x16.GetRasterHeight() - 1)	//	start at last row
+											:	0,
+									/*bytesPerRow*/fdYUV8_16x16.GetBytesPerRow());
+			xferInfo.setDestDirection(xferInfo.Direction_Normal);
+			xferInfo.setDestPitch(/*bytesPerRow*/fdYUV8_48x96.GetBytesPerRow());
+			xferInfo.setDestOffset(/*offset*/dstLineOffset * fdYUV8_48x96.GetBytesPerRow() + dstPixOffset * 2);
+			if (xferInfo.isDestBottomUp())	//	if bottom-up, start at last row:
+				xferInfo.setDestOffset(xferInfo.getDestOffset() + (fdYUV8_16x16.GetRasterHeight() - 1) * fdYUV8_48x96.GetBytesPerRow());
+			CHECK(raster.CopyFrom (logo, xferInfo));
+			string s(drawRaster(raster, fdYUV8_48x96));
+			CHECK_EQ(sCmpNormal, s);
+//			cout << "Normal Src, Normal Dst:" << endl << s << flush;
+		}	//	SUBCASE("Normal Src, Normal Dst")
+
+		SUBCASE("Flipped Src, Normal Dst")
+		{
+			//	"Draw" the logo inside the raster at line offset 11 (from top) and pixel offset 32 (from left edge)...
+			NTV2Buffer logo(origLogo), raster(origRaster);
+			NTV2SegmentedXferInfo xferInfo;
+			ULWord dstLineOffset(11), dstPixOffset(32);
+			xferInfo.setSegmentInfo(/*numSegments*/fdYUV8_16x16.GetRasterHeight(), /*segmentLength*/fdYUV8_16x16.GetBytesPerRow());
+			xferInfo.setSourceDirection(xferInfo.Direction_BottomUp);
+			xferInfo.setSourceInfo(/*offset*/xferInfo.isSourceBottomUp()
+											?	fdYUV8_16x16.GetBytesPerRow() * (fdYUV8_16x16.GetRasterHeight() - 1)	//	start at last row
+											:	0,
+									/*bytesPerRow*/fdYUV8_16x16.GetBytesPerRow());
+			xferInfo.setDestDirection(xferInfo.Direction_Normal);
+			xferInfo.setDestPitch(/*bytesPerRow*/fdYUV8_48x96.GetBytesPerRow());
+			xferInfo.setDestOffset(/*offset*/dstLineOffset * fdYUV8_48x96.GetBytesPerRow() + dstPixOffset * 2);
+			if (xferInfo.isDestBottomUp())	//	if bottom-up, start at last row:
+				xferInfo.setDestOffset(xferInfo.getDestOffset() + (fdYUV8_16x16.GetRasterHeight() - 1) * fdYUV8_48x96.GetBytesPerRow());
+			CHECK(raster.CopyFrom (logo, xferInfo));
+			string s(drawRaster(raster, fdYUV8_48x96));
+			CHECK_EQ(sCmpFlipped, s);
+//			cout << "Flipped Src, Normal Dst:" << endl << s << flush;
+		}	//	SUBCASE("Flipped Src, Normal Dst")
+
+		SUBCASE("Normal Src, Flipped Dst")
+		{
+			//	"Draw" the logo inside the raster at line offset 11 (from top) and pixel offset 32 (from left edge)...
+			NTV2Buffer logo(origLogo), raster(origRaster);
+			NTV2SegmentedXferInfo xferInfo;
+			ULWord dstLineOffset(11), dstPixOffset(32);
+			xferInfo.setSegmentInfo(/*numSegments*/fdYUV8_16x16.GetRasterHeight(), /*segmentLength*/fdYUV8_16x16.GetBytesPerRow());
+			xferInfo.setSourceDirection(xferInfo.Direction_Normal);
+			xferInfo.setSourceInfo(/*offset*/xferInfo.isSourceBottomUp()
+											?	fdYUV8_16x16.GetBytesPerRow() * (fdYUV8_16x16.GetRasterHeight() - 1)	//	start at last row
+											:	0,
+									/*bytesPerRow*/fdYUV8_16x16.GetBytesPerRow());
+			xferInfo.setDestDirection(xferInfo.Direction_BottomUp);
+			xferInfo.setDestPitch(/*bytesPerRow*/fdYUV8_48x96.GetBytesPerRow());
+			xferInfo.setDestOffset(/*offset*/dstLineOffset * fdYUV8_48x96.GetBytesPerRow() + dstPixOffset * 2);
+			if (xferInfo.isDestBottomUp())	//	if bottom-up, start at last row:
+				xferInfo.setDestOffset(xferInfo.getDestOffset() + (fdYUV8_16x16.GetRasterHeight() - 1) * fdYUV8_48x96.GetBytesPerRow());
+			CHECK(raster.CopyFrom (logo, xferInfo));
+			string s(drawRaster(raster, fdYUV8_48x96));
+			CHECK_EQ(sCmpFlipped, s);
+//			cout << "Normal Src, Flipped Dst:" << endl << s << flush;
+		}	//	SUBCASE("Normal Src, Flipped Dst")
+
+		SUBCASE("Flipped Src, Flipped Dst")
+		{
+			//	"Draw" the logo inside the raster at line offset 11 (from top) and pixel offset 32 (from left edge)...
+			NTV2Buffer logo(origLogo), raster(origRaster);
+			NTV2SegmentedXferInfo xferInfo;
+			ULWord dstLineOffset(11), dstPixOffset(32);
+			xferInfo.setSegmentInfo(/*numSegments*/fdYUV8_16x16.GetRasterHeight(), /*segmentLength*/fdYUV8_16x16.GetBytesPerRow());
+			xferInfo.setSourceDirection(xferInfo.Direction_BottomUp);
+			xferInfo.setSourceInfo(/*offset*/xferInfo.isSourceBottomUp()
+											?	fdYUV8_16x16.GetBytesPerRow() * (fdYUV8_16x16.GetRasterHeight() - 1)	//	start at last row
+											:	0,
+									/*bytesPerRow*/fdYUV8_16x16.GetBytesPerRow());
+			xferInfo.setDestDirection(xferInfo.Direction_BottomUp);
+			xferInfo.setDestPitch(/*bytesPerRow*/fdYUV8_48x96.GetBytesPerRow());
+			xferInfo.setDestOffset(/*offset*/dstLineOffset * fdYUV8_48x96.GetBytesPerRow() + dstPixOffset * 2);
+			if (xferInfo.isDestBottomUp())	//	if bottom-up, start at last row:
+				xferInfo.setDestOffset(xferInfo.getDestOffset() + (fdYUV8_16x16.GetRasterHeight() - 1) * fdYUV8_48x96.GetBytesPerRow());
+			CHECK(raster.CopyFrom (logo, xferInfo));
+			string s(drawRaster(raster, fdYUV8_48x96));
+			CHECK_EQ(sCmpNormal, s);
+//			cout << "Flipped Src, Flipped Dst:" << endl << s << flush;
+		}	//	SUBCASE("Flipped Src, Flipped Dst")
+	}	//	TEST_CASE("CheckSegmentedXferBufferCopyFrom")
+}	//	TEST_SUITE("NTV2SegmentedXferInfo+NTV2Buffer+NTV2FormatDesc")
+
+
+TEST_SUITE("NTV2ScanMethod" * doctest::description("NTV2ScanMethod tests"))
+{
+	TEST_CASE("ScanMethodMacros")
+	{
+		CHECK(NTV2_IS_VALID_NTV2ScanMethod(NTV2Scan_Progressive));
+		CHECK(NTV2_IS_VALID_NTV2ScanMethod(NTV2Scan_NonInterlaced));
+		CHECK(NTV2_IS_VALID_NTV2ScanMethod(NTV2Scan_Interlaced));
+		CHECK(NTV2_IS_VALID_NTV2ScanMethod(NTV2Scan_PSF));
+		CHECK(NTV2_IS_VALID_NTV2ScanMethod(NTV2Scan_ProgressiveSegmentedFrame));
+		CHECK_FALSE(NTV2_IS_VALID_NTV2ScanMethod(NTV2_NUM_SCANMETHODS));
+		CHECK_FALSE(NTV2_IS_VALID_NTV2ScanMethod(NTV2Scan_Invalid));
+		CHECK_FALSE(NTV2_IS_VALID_NTV2ScanMethod(200));
+		CHECK_FALSE(NTV2_IS_VALID_NTV2ScanMethod(2000));
+		CHECK_FALSE(NTV2_IS_VALID_NTV2ScanMethod(20000));
+
+		CHECK(NTV2_IS_PROGRESSIVE_SCAN(NTV2Scan_Progressive));
+		CHECK(NTV2_IS_PROGRESSIVE_SCAN(NTV2Scan_NonInterlaced));
+		CHECK_FALSE(NTV2_IS_PROGRESSIVE_SCAN(NTV2Scan_Interlaced));
+		CHECK_FALSE(NTV2_IS_PROGRESSIVE_SCAN(NTV2Scan_PSF));
+		CHECK_FALSE(NTV2_IS_PROGRESSIVE_SCAN(NTV2Scan_ProgressiveSegmentedFrame));
+		CHECK_FALSE(NTV2_IS_PROGRESSIVE_SCAN(NTV2Scan_Invalid));
+
+		CHECK_FALSE(NTV2_IS_INTERLACED_SCAN(NTV2Scan_Progressive));
+		CHECK_FALSE(NTV2_IS_INTERLACED_SCAN(NTV2Scan_NonInterlaced));
+		CHECK(NTV2_IS_INTERLACED_SCAN(NTV2Scan_Interlaced));
+		CHECK_FALSE(NTV2_IS_INTERLACED_SCAN(NTV2Scan_PSF));
+		CHECK_FALSE(NTV2_IS_INTERLACED_SCAN(NTV2Scan_ProgressiveSegmentedFrame));
+		CHECK_FALSE(NTV2_IS_INTERLACED_SCAN(NTV2Scan_Invalid));
+
+		CHECK_FALSE(NTV2_IS_PSF_SCAN(NTV2Scan_Progressive));
+		CHECK_FALSE(NTV2_IS_PSF_SCAN(NTV2Scan_NonInterlaced));
+		CHECK_FALSE(NTV2_IS_PSF_SCAN(NTV2Scan_Interlaced));
+		CHECK(NTV2_IS_PSF_SCAN(NTV2Scan_PSF));
+		CHECK(NTV2_IS_PSF_SCAN(NTV2Scan_ProgressiveSegmentedFrame));
+		CHECK_FALSE(NTV2_IS_PSF_SCAN(NTV2Scan_Invalid));
+	}	//	TEST_CASE("ScanMethodMacros")
+
+	TEST_CASE("ScanMethodToString")
+	{
+		static const vector<NTV2ScanMethod> sSMs	= {NTV2Scan_Progressive,   NTV2Scan_NonInterlaced, NTV2Scan_Interlaced,   NTV2Scan_PSF,   NTV2Scan_ProgressiveSegmentedFrame, NTV2_NUM_SCANMETHODS, NTV2Scan_Invalid, NTV2ScanMethod(4096)};
+		static const NTV2StringList sCompact		= {"p",                    "p",                    "i",                   "psf",          "psf",                              "",                   "",               ""};
+		static const NTV2StringList sFull			= {"NTV2Scan_Progressive", "NTV2Scan_Progressive", "NTV2Scan_Interlaced", "NTV2Scan_PSF", "NTV2Scan_PSF",                     "",                   "",               ""};
+		CHECK_EQ(sSMs.size(), sCompact.size());
+		CHECK_EQ(sSMs.size(), sFull.size());
+		CHECK_EQ(sCompact.size(), sFull.size());
+		for (size_t ndx(0);  ndx < sSMs.size();  ndx++)
+		{	const NTV2ScanMethod sm(sSMs.at(ndx));
+			const string strSmall(::NTV2ScanMethodToString(sm, /*isCompact*/true)), strLarge(::NTV2ScanMethodToString(sm, /*isCompact*/false));
+			const string strSmallA(sCompact.at(ndx)), strLargeA(sFull.at(ndx));
+			CHECK_EQ(strSmall, strSmallA);
+			CHECK_EQ(strLarge, strLargeA);
+		}
+	}	//	TEST_CASE("ScanMethodMacros")
+}	//	TEST_SUITE("NTV2ScanMethod")

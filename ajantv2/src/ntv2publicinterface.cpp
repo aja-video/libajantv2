@@ -14,6 +14,7 @@
 #include "ntv2registerexpert.h"
 #include "ntv2nubtypes.h"
 #include "ntv2version.h"
+#include "ntv2debug.h"
 #include <iomanip>
 #include <locale>		//	For std::locale, std::numpunct, std::use_facet
 #include <string.h>		//	For memset, et al.
@@ -233,6 +234,73 @@ AUTOCIRCULATE_DATA::AUTOCIRCULATE_DATA (const AUTO_CIRC_COMMAND inCommand, const
 		pvVal3		(AJA_NULL),
 		pvVal4		(AJA_NULL)
 {
+}
+
+ostream & AUTOCIRCULATE_DATA::Print (ostream & oss) const
+{
+	static const string sCmds [] = {"ACInit","ACStart","ACStop","ACPause","GetAC","ACFrmStmp",
+									"ACFlush","ACPreRoll","ACXfer","ACAbort","ACStartAt",
+									"ACXfer1","ACXfer2","ACFrmStmp2","ACTask","ACSetActFrm"};
+	if (size_t(eCommand) < sizeof(sCmds))
+	{	oss << sCmds[eCommand];
+		switch (eCommand)
+		{
+			case eInitAutoCirc:
+				oss << " " << ::NTV2CrosspointToString(channelSpec);
+				oss	<< " frms " << DEC(lVal1) << "-" << DEC(lVal2);
+				if (lVal4 > 1)				oss << " +" << DEC(lVal4) << " chls";
+				if (lVal6 & AUTOCIRCULATE_WITH_FIELDS)		oss << " +FieldMode";
+				if (lVal6 & AUTOCIRCULATE_WITH_HDMIAUX)		oss << " +HDMIAux";
+				if (bVal2)									oss << " +RP188";
+				if (bVal3)									oss << " +FBFChg";
+				if (bVal4)									oss << " +FBOChg";
+				if (bVal5)									oss << " +ColCorr";
+				if (bVal6)									oss << " +VidProc";
+				if (bVal7)									oss << " +Anc";
+				if (bVal8)									oss << " +LTC";
+				oss	<< " " << ::NTV2AudioSystemToString(NTV2AudioSystem(lVal3 & 0xF), true);
+				if (!bVal1 && ((lVal3 & 0xF) == NTV2_MAX_NUM_AudioSystemEnums))	oss << " +AudCtrl";
+				if (lVal3 & NTV2_AUDIOSYSTEM_Plus1)			oss << " +MLAud1";
+				if (lVal3 & NTV2_AUDIOSYSTEM_Plus2)			oss << " +MLAud2";
+				if (lVal3 & NTV2_AUDIOSYSTEM_Plus3)			oss << " +MLAud3";
+				break;
+			case eStartAutoCirc:
+				break;
+			case eStartAutoCircAtTime:
+				if (lVal1 || lVal2)
+					oss << " at " << xHEX0N((uint64_t(lVal1) << 32) | uint64_t(lVal2),16);
+				break;
+			case eStopAutoCirc:
+				oss << " " << ::NTV2CrosspointToString(channelSpec);
+				break;
+			case eAbortAutoCirc:
+				oss << " " << ::NTV2CrosspointToString(channelSpec);
+				break;
+			case ePauseAutoCirc:
+				oss << " " << ::NTV2CrosspointToString(channelSpec);
+				if (!bVal1  &&  lVal6)	oss << " at frame " << DEC(lVal6);
+				if (bVal1)	oss << " +resume";
+				if (bVal1  &&  bVal2)	oss << " +clearDropCount";
+				break;
+			case eFlushAutoCirculate:
+				oss << " " << ::NTV2CrosspointToString(channelSpec);
+				if (bVal1)	oss << " +clearDropCount";
+				break;
+			case ePrerollAutoCirculate:
+				oss << " " << ::NTV2CrosspointToString(channelSpec) << " " << DEC(ULWord(lVal1)) << " frame(s)";
+				break;
+			case eGetAutoCirc:
+				oss << " " << ::NTV2CrosspointToString(channelSpec);
+				break;
+			case eSetActiveFrame:
+			case eGetFrameStamp:
+				oss << " " << ::NTV2CrosspointToString(channelSpec) << " frm " << DEC(ULWord(lVal1));
+				break;
+			default:
+				break;
+		}
+	}
+	return oss;
 }
 
 
@@ -1001,6 +1069,15 @@ ostream & operator << (ostream & inOutStream, const NTV2ColorCorrectionData & in
 }
 
 
+NTV2VideoFormatSet & operator += (NTV2VideoFormatSet & inOutSet, const NTV2VideoFormatSet inSet)
+{
+	for (NTV2VideoFormatSetConstIter iter(inSet.begin());  iter != inSet.end();  ++iter)
+		if (inOutSet.find(*iter) == inOutSet.end())
+			inOutSet.insert(*iter);
+	return inOutSet;
+}
+
+
 //	Implementation of NTV2VideoFormatSet's ostream writer...
 ostream & operator << (ostream & inOStream, const NTV2VideoFormatSet & inFormats)
 {
@@ -1292,7 +1369,7 @@ bool NTV2DeviceGetSupportedInputSources (const NTV2DeviceID inDeviceID, NTV2Inpu
 
 bool NTV2DeviceGetSupportedOutputDests (const NTV2DeviceID inDeviceID, NTV2OutputDestinations & outOutputDests, const NTV2IOKinds inKinds)
 {
-	static const NTV2OutputDest sDsts[] = {	NTV2_OUTPUTDESTINATION_ANALOG,	NTV2_OUTPUTDESTINATION_HDMI,
+	static const NTV2OutputDest sDsts[] = {	NTV2_OUTPUTDESTINATION_ANALOG1,	NTV2_OUTPUTDESTINATION_HDMI1,
 											NTV2_OUTPUTDESTINATION_SDI1,	NTV2_OUTPUTDESTINATION_SDI2,	NTV2_OUTPUTDESTINATION_SDI3,	NTV2_OUTPUTDESTINATION_SDI4,
 											NTV2_OUTPUTDESTINATION_SDI5,	NTV2_OUTPUTDESTINATION_SDI6,	NTV2_OUTPUTDESTINATION_SDI7,	NTV2_OUTPUTDESTINATION_SDI8};
 	outOutputDests.clear();
@@ -1368,6 +1445,64 @@ NTV2_TRAILER::NTV2_TRAILER ()
 	:	fTrailerVersion		(NTV2SDKVersionEncode(AJA_NTV2_SDK_VERSION_MAJOR, AJA_NTV2_SDK_VERSION_MINOR, AJA_NTV2_SDK_VERSION_POINT, AJA_NTV2_SDK_BUILD_NUMBER)),
 		fTrailerTag			(NTV2_TRAILER_TAG)
 {
+}
+
+
+NTV2FrameSize::operator NTV2FrameGeometry() const		//	Cast to NTV2FrameGeometry
+{
+	return isValid() ? ::GetGeometryFromFrameDimensions(*this) : NTV2_FG_INVALID;
+}
+
+ULWord NTV2FrameSize::FGWidth (const NTV2FrameGeometry fg)
+{	//	Requires C++11:
+	static const FGSizesMap sFGWdths = {	{NTV2_FG_720x486,	720},
+											{NTV2_FG_720x508,	720},
+											{NTV2_FG_720x514,	720},
+											{NTV2_FG_720x576,	720},
+											{NTV2_FG_720x598,	720},
+											{NTV2_FG_720x612,	720},
+											{NTV2_FG_1280x720,	1280},
+											{NTV2_FG_1280x740,	1280},
+											{NTV2_FG_1920x1080,	1920},
+											{NTV2_FG_1920x1114,	1920},
+											{NTV2_FG_1920x1112,	1920},
+											{NTV2_FG_2048x1080,	2048},
+											{NTV2_FG_2048x1112,	2048},
+											{NTV2_FG_2048x1114,	2048},
+											{NTV2_FG_2048x1556,	2048},
+											{NTV2_FG_2048x1588,	2048},
+											{NTV2_FG_3840x2160,	3840},
+											{NTV2_FG_4096x2160,	4096},
+											{NTV2_FG_7680x4320,	7680},
+											{NTV2_FG_8192x4320,	8192}	};
+	FGSizesMapCI it (sFGWdths.find(fg));
+	return it != sFGWdths.end() ? it->second : 0;
+}
+
+ULWord NTV2FrameSize::FGHeight (const NTV2FrameGeometry fg)
+{	//	Requires C++11:
+	static const FGSizesMap sFGHghts = {	{NTV2_FG_720x486,	486},
+											{NTV2_FG_720x508,	508},
+											{NTV2_FG_720x514,	514},
+											{NTV2_FG_720x576,	576},
+											{NTV2_FG_720x598,	598},
+											{NTV2_FG_720x612,	612},
+											{NTV2_FG_1280x720,	720},
+											{NTV2_FG_1280x740,	740},
+											{NTV2_FG_2048x1556,	1556},
+											{NTV2_FG_2048x1588,	1588},
+											{NTV2_FG_1920x1080,	1080},
+											{NTV2_FG_2048x1080,	1080},
+											{NTV2_FG_1920x1114,	1114},
+											{NTV2_FG_2048x1114,	1114},
+											{NTV2_FG_1920x1112,	1112},
+											{NTV2_FG_2048x1112,	1112},
+											{NTV2_FG_3840x2160,	2160},
+											{NTV2_FG_4096x2160,	2160},
+											{NTV2_FG_7680x4320,	4320},
+											{NTV2_FG_8192x4320,	4320}	};
+	FGSizesMapCI it (sFGHghts.find(fg));
+	return it != sFGHghts.end() ? it->second : 0;
 }
 
 
@@ -1488,6 +1623,8 @@ NTV2SegmentedXferInfo & NTV2SegmentedXferInfo::swapSourceAndDestination (void)
 {
 	std::swap(mSrcElementsPerRow, mDstElementsPerRow);
 	std::swap(mInitialSrcOffset, mInitialDstOffset);
+	const bool srcNormal(this->isSourceTopDown()), dstNormal(this->isDestTopDown());
+	setSourceDirection(dstNormal).setDestDirection(srcNormal);
 	return *this;
 }
 
@@ -1501,6 +1638,7 @@ NTV2Buffer::NTV2Buffer (const void * pInUserPointer, const size_t inByteCount)
 		fIOMemoryDesc		(0),
 		fIOMemoryMap		(0)
 	#else
+		//fKernelSpacePtr		(0),
 		fKernelHandle		(0)
 	#endif
 {
@@ -1516,12 +1654,12 @@ NTV2Buffer::NTV2Buffer (const size_t inByteCount)
 		fIOMemoryDesc		(0),
 		fIOMemoryMap		(0)
 	#else
+		//fKernelSpacePtr		(0),
 		fKernelHandle		(0)
 	#endif
 {
 	if (inByteCount)
-		if (Allocate(inByteCount))
-			Fill(UByte(0));
+		Allocate(inByteCount);
 }
 
 
@@ -1534,6 +1672,7 @@ NTV2Buffer::NTV2Buffer (const NTV2Buffer & inObj)
 		fIOMemoryDesc		(0),
 		fIOMemoryMap		(0)
 	#else
+		//fKernelSpacePtr		(0),
 		fKernelHandle		(0)
 	#endif
 {
@@ -1632,7 +1771,7 @@ bool NTV2Buffer::Allocate (const size_t inByteCount, const bool inPageAligned)
 	if (GetByteCount()	&&	fFlags & NTV2Buffer_ALLOCATED)	//	If already was Allocated
 		if (inByteCount == GetByteCount())					//	If same byte count
 		{
-			Fill(0);		//	Zero it...
+			Fill(UByte(0));		//	Zero it...
 			return true;	//	...and return true
 		}
 
@@ -1654,7 +1793,7 @@ bool NTV2Buffer::Allocate (const size_t inByteCount, const bool inPageAligned)
 			fFlags |= NTV2Buffer_ALLOCATED;
 			if (inPageAligned)
 				fFlags |= NTV2Buffer_PAGE_ALIGNED;	//	Set "page aligned" flag
-			Fill(0);	//	Zero it
+			Fill(UByte(0));	//	Zero it
 		}
 	}	//	if requested size is non-zero
 	return result;
@@ -1755,22 +1894,26 @@ bool NTV2Buffer::CopyFrom (const NTV2Buffer & inSrcBuffer, const NTV2SegmentedXf
 		return false;
 
 	//	Copy every segment...
-	ULWord			srcOffset	(inXferInfo.getSourceOffset() * inXferInfo.getElementLength());
-	ULWord			dstOffset	(inXferInfo.getDestOffset() * inXferInfo.getElementLength());
-	const ULWord	srcPitch	(inXferInfo.getSourcePitch() * inXferInfo.getElementLength());
-	const ULWord	dstPitch	(inXferInfo.getDestPitch() * inXferInfo.getElementLength());
-	const ULWord	bytesPerSeg (inXferInfo.getSegmentLength() * inXferInfo.getElementLength());
+	LWord	srcOffset	(LWord(inXferInfo.getSourceOffset() * inXferInfo.getElementLength()));
+	LWord	dstOffset	(LWord(inXferInfo.getDestOffset() * inXferInfo.getElementLength()));
+	LWord	srcPitch	(LWord(inXferInfo.getSourcePitch() * inXferInfo.getElementLength()));
+	LWord	dstPitch	(LWord(inXferInfo.getDestPitch() * inXferInfo.getElementLength()));
+	const LWord	bytesPerSeg (inXferInfo.getSegmentLength() * inXferInfo.getElementLength());
+	if (inXferInfo.isSourceBottomUp())
+		srcPitch = 0 - srcPitch;
+	if (inXferInfo.isDestBottomUp())
+		dstPitch = 0 - dstPitch;
 	for (ULWord segNdx(0);	segNdx < inXferInfo.getSegmentCount();	segNdx++)
 	{
 		const void *	pSrc (inSrcBuffer.GetHostAddress(srcOffset));
 		void *			pDst (GetHostAddress(dstOffset));
 		if (!pSrc)	return false;
 		if (!pDst)	return false;
-		if (srcOffset + bytesPerSeg > inSrcBuffer.GetByteCount())
+		if (srcOffset + bytesPerSeg > LWord(inSrcBuffer.GetByteCount()))
 			return false;	//	memcpy will read past end of srcBuffer
-		if (dstOffset + bytesPerSeg > GetByteCount())
+		if (dstOffset + bytesPerSeg > LWord(GetByteCount()))
 			return false;	//	memcpy will write past end of me
-		::memcpy (pDst,	 pSrc,	bytesPerSeg);
+		::memcpy (pDst,	 pSrc,	size_t(bytesPerSeg));
 		srcOffset += srcPitch;	//	Bump src offset
 		dstOffset += dstPitch;	//	Bump dst offset
 	}	//	for each segment

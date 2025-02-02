@@ -197,22 +197,18 @@ bool CNTV2SignalRouter::Compare (const CNTV2SignalRouter & inRHS, NTV2XptConnect
 }
 
 
-ostream & CNTV2SignalRouter::Print (ostream & inOutStream, const bool inForRetailDisplay) const
+ostream & CNTV2SignalRouter::Print (ostream & oss, const bool inForRetailDisplay) const
 {
 	if (inForRetailDisplay)
 	{
-		inOutStream << mConnections.size() << " routing entries:" << endl;
+		oss << mConnections.size() << " routing entries:" << endl;
 		for (NTV2XptConnectionsConstIter iter (mConnections.begin());  iter != mConnections.end();	++iter)
-			inOutStream << ::NTV2InputCrosspointIDToString(iter->first, inForRetailDisplay)
-						<< " <== " << ::NTV2OutputCrosspointIDToString(iter->second, inForRetailDisplay) << endl;
+			oss << ::NTV2InputCrosspointIDToString(iter->first, inForRetailDisplay)
+				<< " <== " << ::NTV2OutputCrosspointIDToString(iter->second, inForRetailDisplay) << endl;
 	}
 	else
-	{
-		for (NTV2XptConnectionsConstIter iter (mConnections.begin());  iter != mConnections.end();	++iter)
-			inOutStream << CNTV2SignalRouter::NTV2InputCrosspointIDToString(iter->first)
-						<< " <== " << CNTV2SignalRouter::NTV2OutputCrosspointIDToString(iter->second) << endl;
-	}
-	return inOutStream;
+		oss << mConnections;
+	return oss;
 }
 
 
@@ -462,9 +458,17 @@ bool CNTV2SignalRouter::GetAllWidgetInputs (const NTV2DeviceID inDeviceID, NTV2I
 
 	for (NTV2WidgetIDSetConstIter iter(widgetIDs.begin());	iter != widgetIDs.end ();  ++iter)
 	{
-		NTV2InputXptIDSet	inputs;
+		NTV2InputXptIDSet inputs;
 		CNTV2SignalRouter::GetWidgetInputs (*iter, inputs);
-		outInputs.insert(inputs.begin(), inputs.end());
+		for (NTV2InputXptIDSetConstIter it(inputs.begin());  it != inputs.end();  ++it)
+		{
+			if (WidgetIDToType(*iter) == NTV2WidgetType_FrameStore)
+				if (!::NTV2DeviceCanDo425Mux(inDeviceID))
+					if (!::NTV2DeviceCanDo8KVideo(inDeviceID))
+						if (::NTV2InputCrosspointIDToString(*it, false).find("DS2") != string::npos)	//	is DS2 input?
+							continue;	//	do not include FrameStore DS2 inputs for IP25G
+			outInputs.insert(*it);
+		}
 	}
 	return true;
 }
@@ -492,6 +496,30 @@ bool CNTV2SignalRouter::GetWidgetOutputs (const NTV2WidgetID inWidgetID, NTV2Out
 	outOutputs.clear();
 	RoutingExpertPtr	pExpert(RoutingExpert::GetInstance());
 	return pExpert ? pExpert->GetWidgetOutputs(inWidgetID, outOutputs) : false;
+}
+
+bool CNTV2SignalRouter::GetAllWidgetOutputs (const NTV2DeviceID inDeviceID, NTV2OutputXptIDSet & outOutputs)	//	STATIC
+{
+	outOutputs.clear();
+	NTV2WidgetIDSet widgetIDs;
+	if (!GetWidgetIDs (inDeviceID, widgetIDs))
+		return false;	//	Fail
+
+	for (NTV2WidgetIDSetConstIter iter(widgetIDs.begin());	iter != widgetIDs.end ();  ++iter)
+	{
+		NTV2OutputXptIDSet outputs;
+		CNTV2SignalRouter::GetWidgetOutputs (*iter, outputs);
+		for (NTV2OutputXptIDSetConstIter it(outputs.begin());  it != outputs.end();  ++it)
+		{
+			if (WidgetIDToType(*iter) == NTV2WidgetType_FrameStore)
+				if (!::NTV2DeviceCanDo425Mux(inDeviceID))
+					if (!::NTV2DeviceCanDo8KVideo(inDeviceID))
+						if (::NTV2OutputCrosspointIDToString(*it, false).find("DS2") != string::npos)	//	is DS2 output?
+							continue;	//	do not include FrameStore DS2 outputs for IP25G
+			outOutputs.insert(*it);
+		}
+	}
+	return true;
 }
 
 bool CNTV2SignalRouter::IsRGBOnlyInputXpt (const NTV2InputXptID inInputXpt)
@@ -759,7 +787,7 @@ bool CNTV2SignalRouter::CreateFromString (const string & inString, CNTV2SignalRo
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Crosspoint Utils Begin
 
-NTV2InputXptID GetFrameBufferInputXptFromChannel (const NTV2Channel inChannel, const bool inIsBInput)
+NTV2InputXptID GetFrameStoreInputXptFromChannel (const NTV2Channel inChannel, const bool inIsBInput)
 {
 	static const NTV2InputXptID gFrameBufferInputs []	=	{	NTV2_XptFrameBuffer1Input,	NTV2_XptFrameBuffer2Input,	NTV2_XptFrameBuffer3Input,	NTV2_XptFrameBuffer4Input,
 																NTV2_XptFrameBuffer5Input,	NTV2_XptFrameBuffer6Input,	NTV2_XptFrameBuffer7Input,	NTV2_XptFrameBuffer8Input};
@@ -842,7 +870,7 @@ NTV2OutputXptID GetLUTOutputXptFromChannel (const NTV2Channel inLUT)
 	return NTV2_IS_VALID_CHANNEL(inLUT) ? gLUTRGBOutputs[inLUT] : NTV2_OUTPUT_CROSSPOINT_INVALID;
 }
 
-NTV2OutputXptID GetFrameBufferOutputXptFromChannel (const NTV2Channel inChannel, const bool inIsRGB, const bool inIs425)
+NTV2OutputXptID GetFrameStoreOutputXptFromChannel (const NTV2Channel inChannel, const bool inIsRGB, const bool inIs425)
 {
 	static const NTV2OutputXptID gFrameBufferYUVOutputs[] = {		NTV2_XptFrameBuffer1YUV,		NTV2_XptFrameBuffer2YUV,		NTV2_XptFrameBuffer3YUV,		NTV2_XptFrameBuffer4YUV,
 																	NTV2_XptFrameBuffer5YUV,		NTV2_XptFrameBuffer6YUV,		NTV2_XptFrameBuffer7YUV,		NTV2_XptFrameBuffer8YUV};
@@ -1089,39 +1117,36 @@ bool CNTV2SignalRouter::MakeRouteROMRegisters (NTV2RegReads & outROMRegs)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Stream Operators Begin
 
-ostream & operator << (ostream & inOutStream, const CNTV2SignalRouter & inObj)
+ostream & operator << (ostream & oss, const CNTV2SignalRouter & inObj)
 {
-	inObj.Print (inOutStream);
-	return inOutStream;
+	return inObj.Print(oss);
 }
 
 
-ostream & operator << (ostream & inOutStream, const NTV2OutputXptIDSet & inObj)
+ostream & operator << (ostream & oss, const NTV2OutputXptIDSet & inObj)
 {
 	NTV2OutputXptIDSetConstIter iter(inObj.begin());
 	while (iter != inObj.end())
 	{
-		inOutStream << ::NTV2OutputCrosspointIDToString(*iter, false);
-		++iter;
-		if (iter == inObj.end())
+		oss << ::NTV2OutputCrosspointIDToString(*iter, false);
+		if (++iter == inObj.end())
 			break;
-		inOutStream << ", ";
+		oss << ", ";
 	}
-	return inOutStream;
+	return oss;
 }
 
-ostream & operator << (ostream & inOutStream, const NTV2InputXptIDSet & inObj)
+ostream & operator << (ostream & oss, const NTV2InputXptIDSet & inObj)
 {
 	NTV2InputXptIDSetConstIter	iter(inObj.begin());
 	while (iter != inObj.end())
 	{
-		inOutStream << ::NTV2InputCrosspointIDToString(*iter, false);
-		++iter;
-		if (iter == inObj.end())
+		oss << ::NTV2InputCrosspointIDToString(*iter, false);
+		if (++iter == inObj.end())
 			break;
-		inOutStream << ", ";
+		oss << ", ";
 	}
-	return inOutStream;
+	return oss;
 }
 
 NTV2RoutingEntry & NTV2RoutingEntry::operator = (const NTV2RegInfo & inRHS)
@@ -1144,15 +1169,21 @@ ostream & operator << (ostream & inOutStream, const NTV2WidgetIDSet & inObj)
 	return inOutStream;
 }
 
-ostream & operator << (ostream & inOutStream, const NTV2XptConnections & inObj)
+ostream & operator << (ostream & oss, const NTV2XptConnection & inObj)
+{
+	oss << ::NTV2InputCrosspointIDToString(inObj.first) << " <== " << ::NTV2OutputCrosspointIDToString(inObj.second);
+	return oss;
+}
+
+ostream & operator << (ostream & oss, const NTV2XptConnections & inObj)
 {
 	for (NTV2XptConnectionsConstIter it(inObj.begin());	 it != inObj.end();	 )
 	{
-		inOutStream << ::NTV2InputCrosspointIDToString(it->first) << "-" << ::NTV2OutputCrosspointIDToString(it->second);
+		oss << *it;
 		if (++it != inObj.end())
-			inOutStream << ", ";
+			oss << endl;
 	}
-	return inOutStream;
+	return oss;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Stream Operators End

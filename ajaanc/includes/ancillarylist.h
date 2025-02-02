@@ -184,6 +184,23 @@ public:	//	INSTANCE METHODS
 		@return		A non-const reference to myself.
 	**/
 	virtual AJAAncillaryList &				operator = (const AJAAncillaryList & inRHS);
+
+#if defined(AJA_USE_CPLUSPLUS11)
+	/**
+		@brief		Move-assignment constructor -- moves contents from the right-hand-side to my contents,
+					replacing my contents, and resets the right-hand-side.
+		@param[in]	inRHS	The list of packets to move into me.
+		@return		A non-const reference to myself.
+	**/
+											AJAAncillaryList (AJAAncillaryList && inRHS) noexcept;	//	(New in SDK 17.5)
+	/**
+		@brief		Move-assignment operator -- moves contents from the right-hand-side to my contents,
+					replacing my contents, and resets the right-hand-side.
+		@param[in]	inRHS	The list of packets to move into me.
+		@return		A non-const reference to myself.
+	**/
+	virtual AJAAncillaryList &				operator = (AJAAncillaryList && inRHS);	//	(New in SDK 17.5)
+#endif	//	AJA_USE_CPLUSPLUS11
 	///@}
 
 
@@ -504,8 +521,8 @@ public:	//	INSTANCE METHODS
 	/**
 		@brief		Parse "raw" HDMI auxillary data bytes received from hardware (ingest) into separate
 					AJAAncillaryData objects and appends them to me.
-		@param[in]	pInReceivedData		Specifies a valid, non-NULL address of the first byte of "raw" ancillary data received by an AncExtractor widget.
-		@param[in]	inByteCount			Specifies the number of bytes of data in the specified buffer to process.
+		@param[in]	inReceivedData		Specifies the buffer that contains "raw" auxiliary data received from an
+										HDMI Aux Extractor widget.
 		@param[in]	inFrameNum			If non-zero, replaces the frame identifier of new packets that have a zero frame ID.
 		@details	For each packet parsed from the received data, AJAAncillaryDataFactory::GuessAncillaryDataType
 					is called to ascertain the packet's AJAAncDataType, then AJAAncillaryDataFactory::Create
@@ -589,20 +606,22 @@ public:	//	INSTANCE METHODS
 
 	/**
 		@brief		Dumps a human-readable description of every packet in my list to the given output stream.
+		@param		oss				The output stream.
 		@param[in]	inDetailed		If true, include some of the packet data;  otherwise omit packet data.
 									Defaults to true.
 		@return		The specified output stream.
 	**/
-	virtual std::ostream &					Print (std::ostream & inOutStream, const bool inDetailed = true) const;
+	virtual std::ostream &		Print (std::ostream & oss, const bool inDetailed = true) const;
 	///@}
 
 	/**
-		@brief		Copies GUMP from inSrc to outDst buffers, but removes ATC, VPID & VITC packets.
+		@brief		Copies GUMP from inSrc to outDst buffers, but removes ATC, VPID, VITC, EDH & raw/analog packets.
 		@param[in]	inSrc		Specifies the source GUMP buffer.
 		@param		outDst		Specifies the destination buffer. It must be at least as large as inSrc.
+		@note		Both inSrc and outDst buffers can refer to the same buffer.
 		@return		True if successful; otherwise false.
 	**/
-	static bool					StripNativeInserterGUMPPackets (const NTV2Buffer & inSrc, NTV2Buffer outDst);
+	static bool					StripNativeInserterGUMPPackets (const NTV2Buffer & inSrc, NTV2Buffer & outDst);
 
 protected:
 	friend class CNTV2Card;	//	CNTV2Card's member functions can call AJAAncillaryList's private & protected member functions
