@@ -3247,19 +3247,27 @@ bool NTV2GetRegisters::GetRegisterValues (NTV2RegisterValueMap & outValues) cons
 	outValues.clear ();
 	if (!mOutGoodRegisters)
 		return false;		//	Empty/null 'mOutGoodRegisters' array!
-	//if (!mOutNumRegisters)
-	//	return false;		//	Driver says zero successfully read!
-	//if (mOutNumRegisters > mInNumRegisters)
-	//	return false;		//	Sanity check failed:  mOutNumRegisters must be less than or equal to mInNumRegisters!
-	//if (!mOutValues)
-	//	return false;		//	Empty/null 'mOutValues' array!
-	//if (mOutGoodRegisters.GetByteCount() != mOutValues.GetByteCount())
-	//	return false;		//	Sanity check failed:  These sizes should match
+	if (!mOutNumRegisters)
+		return false;		//	Driver says zero successfully read!
+	if (mOutNumRegisters > mInNumRegisters)
+		return false;		//	Sanity check failed:  mOutNumRegisters must be less than or equal to mInNumRegisters!
+	if (!mOutValues)
+		return false;		//	Empty/null 'mOutValues' array!
+	if (mOutGoodRegisters.GetByteCount() != mOutValues.GetByteCount())
+		return false;		//	Sanity check failed:  These sizes should match
 
 	const ULWord *	pRegArray	(mOutGoodRegisters);
 	const ULWord *	pValArray	(mOutValues);
 	for (ULWord ndx(0);  ndx < mOutNumRegisters;  ndx++)
+	{
 		outValues [pRegArray[ndx]] = pValArray[ndx];
+#if 0	//	Fake KONAIP25G from C4412G (see also CNTV2XXXXDriverInterface::ReadRegister):
+	if (pRegArray[ndx] == kRegBoardID  &&  pValArray[ndx] == DEVICE_ID_CORVID44_8K)
+		outValues [pRegArray[ndx]] = DEVICE_ID_KONAIP_25G;
+	else if (pRegArray[ndx] == kRegReserved83  ||  pRegArray[ndx] == kRegLPRJ45IP)
+		outValues [pRegArray[ndx]] = 0x0A03FAD9;	//	Local IPv4    10.3.250.217
+#endif	//	0
+	}
 	return true;
 }
 
@@ -3273,7 +3281,16 @@ bool NTV2GetRegisters::GetRegisterValues (NTV2RegisterReads & outValues) const
 	if (outValues.empty())
 	{
 		for (NTV2RegValueMapConstIter it(regValMap.begin());  it != regValMap.end();  ++it)
-			outValues.push_back(NTV2RegInfo(/*regNum*/it->first, /*regVal*/it->second));
+		{
+			NTV2RegInfo regInfo(/*regNum*/it->first, /*regVal*/it->second);
+#if 0		//	Fake KONAIP25G from C4412G (see also CNTV2XXXXDriverInterface::ReadRegister):
+			if (regInfo.regNum() == kRegBoardID  &&  regInfo.value() == DEVICE_ID_CORVID44_8K)
+				regInfo.setValue(DEVICE_ID_KONAIP_25G);
+			else if (regInfo.regNum() == kRegReserved83  ||  regInfo.regNum() == kRegLPRJ45IP)
+				regInfo.setValue(0x0A03FAD9);	//	Local IPv4    10.3.250.217
+#endif	//	0
+			outValues.push_back(regInfo);
+		}
 		return true;
 	}
 	else
@@ -3285,6 +3302,12 @@ bool NTV2GetRegisters::GetRegisterValues (NTV2RegisterReads & outValues) const
 			if (mapIter == regValMap.end())
 				missingTally++; //	Missing register
 			it->registerValue = mapIter->second;
+#if 0		//	Fake KONAIP25G from C4412G (see also CNTV2XXXXDriverInterface::ReadRegister):
+			if (it->registerNumber == kRegBoardID  &&  it->registerValue == DEVICE_ID_CORVID44_8K)
+				it->registerValue = DEVICE_ID_KONAIP_25G;
+			else if (it->registerNumber == kRegReserved83  ||  it->registerNumber == kRegLPRJ45IP)
+				it->registerValue = 0x0A03FAD9;	//	Local IPv4    10.3.250.217
+#endif	//	0
 		}
 		return !missingTally;
 	}

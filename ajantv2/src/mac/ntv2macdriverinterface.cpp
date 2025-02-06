@@ -412,12 +412,20 @@ bool CNTV2MacDriverInterface::ReadRegister (const ULWord inRegNum, ULWord & outV
 													&outputCount);			// pointer to the number of scalar output values.
 		AJADebug::StatTimerStop(AJA_DebugStat_ReadRegister);
 	}
+	if (kernResult != KERN_SUCCESS)
+	{
+		DIFAIL(KR(kernResult) << ": ndx=" << _boardNumber << ", con=" << HEX8(GetIOConnect())
+				<< " -- reg=" << DEC(inRegNum) << ", mask=" << HEX8(inMask) << ", shift=" << HEX8(inShift));
+		return false;
+	}
 	outValue = uint32_t(scalarO_64);
-	if (kernResult == KERN_SUCCESS)
-		return true;
-	DIFAIL(KR(kernResult) << ": ndx=" << _boardNumber << ", con=" << HEX8(GetIOConnect())
-			<< " -- reg=" << DEC(inRegNum) << ", mask=" << HEX8(inMask) << ", shift=" << HEX8(inShift));
-	return false;
+#if 0	//	Fake KONAIP25G from C4412G (see also NTV2GetRegisters::GetRegisterValues):
+	if (inRegNum == kRegBoardID  &&  outValue == DEVICE_ID_CORVID44_8K)
+		outValue = DEVICE_ID_KONAIP_25G;
+	else if (inRegNum == kRegReserved83  ||  inRegNum == kRegLPRJ45IP)
+		outValue = 0x0A03FAD9;	//	Local IPv4    10.3.250.217
+#endif	//	0
+	return true;
 }
 
 
