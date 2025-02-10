@@ -54,7 +54,7 @@ static const char CharMap [kMaxTCChars] [kDigitDotHeight] [kDigitDotWidth]	=
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	},
-	
+
 // '1'
 	{
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -425,7 +425,7 @@ void CRP188::Init()
 }
 
 
-bool CRP188::operator==( const CRP188& s)
+bool CRP188::operator==( const CRP188& s) const
 {
 	bool bResult = true;
 
@@ -2064,7 +2064,7 @@ string CRP188::GetTimeCodeString(bool bDisplay60_50fpsAs30_25)
 			}
 		}
 	}
-	
+
 	// if there is a "trailing character" (sometimes used for Field ID), do it now
 	if (trailingChar >= 0 && trailingChar < kMaxTCChars)
 	{
