@@ -6,6 +6,7 @@
 **/
 
 #include "ntv2rp188.h"
+#include <sstream>
 
 using namespace std;
 
