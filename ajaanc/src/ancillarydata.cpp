@@ -515,6 +515,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *			pInData,
 													uint32_t &				outPacketByteCount)
 {
 	AJAStatus status = AJA_STATUS_SUCCESS;
+	outPacketByteCount = 0;
 	Clear();
 
 	// If all is well, pInData points to the beginning of a "GUMP" packet:
@@ -549,7 +550,6 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *			pInData,
 	const uint32_t maxBytes(uint32_t(inMaxBytes+0));
 	if (pInData == AJA_NULL)
 	{
-		outPacketByteCount = 0;
 		LOGMYERROR("AJA_STATUS_NULL: NULL pointer");
 		return AJA_STATUS_NULL;
 	}
@@ -566,16 +566,15 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *			pInData,
 	if (pInData[0] != 0xFF)
 	{
 		//	Let the caller try to resynchronize...
-		outPacketByteCount = 0;
 		LOGMYDEBUG("No data:  First GUMP byte is " << xHEX0N(uint16_t(pInData[0]),2) << ", expected 0xFF");
 		return AJA_STATUS_SUCCESS;	//	Not necessarily an error (no data)
 	}
 
-	//	So we have at least enough bytes for a minimum packet, and the first byte is what we expect.
-	//	Let's see what size this packet actually reports...
+	//	There are sufficient bytes for a minimum packet, and the first byte is what we expect.
+	//	Check the Data Count in this packet...
 	const uint32_t	totalBytes	(pInData[5] + AJAAncillaryDataWrapperSize);
 
-	//	If the reported packet size extends beyond the end of the buffer, we're toast...
+	//	Does the reported Data Count extend past the end of the buffer?
 	if (totalBytes > maxBytes)
 	{
 		outPacketByteCount = maxBytes;
