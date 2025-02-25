@@ -686,10 +686,16 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const NTV2Buffer & inRecei
 			bMoreData = false;
 	}	// while (bMoreData)
 
-	if (AJA_SUCCESS(status)  &&  !rawPkts.empty())
-	{	//	Append accumulated analog/raw packets...
-		while (AJA_SUCCESS(status)  &&  !rawPkts.empty())
-		{
+	if (!rawPkts.empty())
+	{
+		if (AJA_FAILURE(status))
+			while (!rawPkts.empty())
+			{	//	Failed -- delete accumulated analog/raw packets
+				delete rawPkts.at(0);
+				rawPkts.erase(rawPkts.begin());
+			}
+		else while (AJA_SUCCESS(status)  &&  !rawPkts.empty())
+		{	//	Append accumulated analog/raw packets...
 			try {
 				m_ancList.push_back(rawPkts.back());
 			} catch(...) {status = AJA_STATUS_FAIL;}
@@ -697,7 +703,7 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const NTV2Buffer & inRecei
 		}
 		if (AJA_SUCCESS(status))
 			status = SortListByLocation();	//	Re-sort by location
-	}
+	}	//	if any accumulated raw pkts
 
 	return status;
 
