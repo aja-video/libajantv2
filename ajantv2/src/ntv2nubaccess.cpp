@@ -983,7 +983,7 @@ bool NTV2Plugin::LoadPlugin (const string & path, const string & folderPath, NTV
 			loadErr << "AddDllDirectory '" << path << "' failed: " << WinErrStr(::GetLastError());
 			return false;
 		}	//	AddDllDirectory failed
-		HMODULE h = ::LoadLibraryExA(LPCSTR(path.c_str()), AJA_NULL, LOAD_LIBRARY_SEARCH_USER_DIRS);
+		HMODULE h = ::LoadLibraryExA(LPCSTR(path.c_str()), AJA_NULL, LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
 		if (!h)
 			loadErr << "Unable to open '" << path << "': " << WinErrStr(::GetLastError());
 	#else	//	MacOS or Linux

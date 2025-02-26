@@ -3690,3 +3690,21 @@ TEST_SUITE("NTV2ScanMethod" * doctest::description("NTV2ScanMethod tests"))
 		}
 	}	//	TEST_CASE("ScanMethodMacros")
 }	//	TEST_SUITE("NTV2ScanMethod")
+
+
+TEST_SUITE("NTV2GetRegisters" * doctest::description("NTV2GetRegisters tests"))
+{
+	TEST_CASE("Basic")
+	{
+		NTV2GetRegisters a;
+		NTV2_HEADER * pMsg = reinterpret_cast<NTV2_HEADER*>(&a);
+		CHECK(pMsg->IsValid());
+		CHECK_EQ(pMsg->GetTag(), NTV2_HEADER_TAG);
+		CHECK_EQ(pMsg->GetType(), NTV2_TYPE_GETREGS);
+		CHECK_EQ(NTV2_HEADER::FourCCToString(pMsg->GetTag()), string("'NTV2'"));
+		CHECK_EQ(NTV2_HEADER::FourCCToString(pMsg->GetType()), string("'regR'"));
+//		NTV2RegNumSet regNums;
+//		CHECK(a.NTV2_IS_STRUCT_VALID());
+//		CHECK_FALSE(a.GetGoodRegisters(regNums));
+	}	//	TEST_CASE("Basic")
+}	//	TEST_SUITE("NTV2GetRegisters")
