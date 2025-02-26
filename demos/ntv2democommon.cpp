@@ -1770,7 +1770,6 @@ AJALabelValuePairs PlayerConfig::Get (const bool inCompact) const
 	AJASystemInfo::append (result,		"AutoCirc Frames",		fFrames.toString());
 	AJASystemInfo::append (result,		"MultiFormat Mode",		fDoMultiFormat ? "Y" : "N");
 	AJASystemInfo::append (result,		"VANC Mode",			::NTV2VANCModeToString(fVancMode));
-	AJASystemInfo::append (result,		"HDR Anc Type",			::AJAAncDataTypeToString(fTransmitHDRType));
 	AJASystemInfo::append (result,		"Output Channel",		::NTV2ChannelToString(fOutputChannel, inCompact));
 	AJASystemInfo::append (result,		"Output Connector",		::NTV2OutputDestinationToString(fOutputDest, inCompact));
 	AJASystemInfo::append (result,		"Anc Playback File",	fAncDataFilePath.empty() ? "---" : fAncDataFilePath);

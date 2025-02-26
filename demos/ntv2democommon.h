@@ -327,7 +327,6 @@ typedef struct PlayerConfig
 		NTV2PixelFormat		fPixelFormat;		///< @brief	The pixel format to use
 		NTV2VideoFormat		fVideoFormat;		///< @brief	The video format to use
 		NTV2VANCMode		fVancMode;			///< @brief	VANC mode to use
-		AJAAncDataType		fTransmitHDRType;	///< @brief	Specifies the HDR anc data packet to transmit, if any.
 		UWord				fNumAudioLinks;		///< @brief	The number of audio systems to control for multi-link audio (4K/8K)
 		bool				fDoMultiFormat;		///< @brief	If true, enable device-sharing;  otherwise take exclusive control of device
 		bool				fSuppressAudio;		///< @brief	If true, suppress audio;  otherwise generate & xfer audio tone
@@ -351,7 +350,6 @@ typedef struct PlayerConfig
 				fPixelFormat		(NTV2_FBF_8BIT_YCBCR),
 				fVideoFormat		(NTV2_FORMAT_1080i_5994),
 				fVancMode			(NTV2_VANCMODE_OFF),
-				fTransmitHDRType	(AJAAncDataType_Unknown),
 				fNumAudioLinks		(1),
 				fDoMultiFormat		(false),
 				fSuppressAudio		(false),
