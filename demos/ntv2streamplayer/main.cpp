@@ -35,7 +35,6 @@ int main (int argc, const char ** argv)
 	int				channelNumber	(1);			//	Channel/FrameStore to use
 	int				doMultiFormat	(0);			//	MultiFormat mode?
 	int				showVersion		(0);			//	Show version?
-	int				hdrType			(0);			//	Transmit HDR anc?
 	AJADebug::Open();
 
 	//	Command line option descriptions:
@@ -48,7 +47,6 @@ int main (int argc, const char ** argv)
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format to use",		"'?' or 'list' to list"		},
 		{"frames",		  0,	POPT_ARG_STRING,	&pFramesSpec,	0,	"frames to Stream",			"num[@min] or min-max"		},
 		{"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,	0,	"video format to produce",	"'?' or 'list' to list"		},
-		{"hdrType",		't',	POPT_ARG_INT,		&hdrType,		0,	"HDR pkt to send",			"0=none 1=SDR 2=HDR10 3=HLG"},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -106,15 +104,9 @@ int main (int argc, const char ** argv)
 	if (!config.fFrames.valid())
 		{cerr << "## ERROR:  Bad 'frames' spec '" << framesSpec << "'\n## Expected " << legalFramesSpec << endl;  return 1;}
 
-	//	Anc Playback & HDRType
+	//	Anc Playback
 	string ancFilePath (pAncFilePath ? pAncFilePath : "");
 	ancFilePath = aja::strip(ancFilePath);
-	config.fTransmitHDRType	= hdrType == 1	? AJAAncDataType_HDR_SDR
-											: (hdrType == 2	? AJAAncDataType_HDR_HDR10
-															: (hdrType == 3	? AJAAncDataType_HDR_HLG
-																			: AJAAncDataType_Unknown));
-	if (config.fTransmitHDRType != AJAAncDataType_Unknown  &&  !ancFilePath.empty())
-		{cerr	<< "## ERROR:  conflicting options '--hdrType' and '--anc'" << endl;  return 2;}
 
 	config.fAncDataFilePath		= ancFilePath;
 	config.fOutputDest			= ::NTV2ChannelToOutputDestination(config.fOutputChannel);
