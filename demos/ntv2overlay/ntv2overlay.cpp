@@ -15,12 +15,6 @@
 
 using namespace std;
 
-#define	OVRLFAIL	BURNFAIL
-#define	OVRLWARN	BURNWARN
-#define	OVRLDBG		BURNDBG
-#define	OVRLNOTE	BURNNOTE
-#define	OVRLINFO	BURNINFO
-
 static const uint32_t	kAppSignature	(NTV2_FOURCC('O','v','r','l'));
 
 //////////////////////	IMPLEMENTATION
@@ -125,7 +119,7 @@ AJAStatus NTV2Overlay::Init (void)
 		cerr	<< "Device Description:  " << mDevice.GetDescription() << endl;
 	cerr << endl;
 
-	OVRLINFO("Configuration: " << mConfig);
+	CAPINFO("Configuration: " << mConfig);  PLINFO("Configuration: " << mConfig);
 	return AJA_STATUS_SUCCESS;
 }	//	Init
 
@@ -164,18 +158,26 @@ AJAStatus NTV2Overlay::SetupVideo (void)
 
 void NTV2Overlay::RouteInputSignal (void)
 {
-	//	Connect SDIIn1 to FrameStore1 and Mixer1 background...
-	mDevice.Connect(NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1, false);
-	mDevice.Connect(NTV2_XptMixer1BGVidInput, NTV2_XptSDIIn1, false);
-	mDevice.Connect(NTV2_XptMixer1BGKeyInput, NTV2_XptSDIIn1, false);
+	//	Connect SDIIn1 to Mixer1 background...
+	mDevice.Connect(NTV2_XptMixer1BGVidInput, NTV2_XptSDIIn1, false);			//	SDIIn1 => Mix1BGVid
+	mDevice.Connect(NTV2_XptMixer1BGKeyInput, NTV2_XptSDIIn1, false);			//	SDIIn1 => Mix1BGKey
+
+	//	Connect SDIIn1 to FrameStore1...
+	if (NTV2_IS_FBF_RGB(mInputPixFormat))
+	{	//	Convert YUV to RGB...
+		mDevice.Connect(NTV2_XptCSC1VidInput, NTV2_XptSDIIn1, false);			//	SDIIn1 => CSC1
+		mDevice.Connect(NTV2_XptFrameBuffer1Input, NTV2_XptCSC1VidRGB, false);	//	CSC1RGB => FS1
+	}
+	else
+		mDevice.Connect(NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1, false);		//	SDIIn1 => FS1
 }	//	RouteInputSignal
 
 void NTV2Overlay::RouteOverlaySignal (void)
 {
 	//	Connect FrameStore2 RGB output through CSC2 to Mixer1 foreground...
-	mDevice.Connect(NTV2_XptCSC2VidInput, NTV2_XptFrameBuffer2RGB, false);
-	mDevice.Connect(NTV2_XptMixer1FGVidInput, NTV2_XptCSC2VidYUV, false);
-	mDevice.Connect(NTV2_XptMixer1FGKeyInput, NTV2_XptCSC2KeyYUV, false);
+	mDevice.Connect(NTV2_XptCSC2VidInput, NTV2_XptFrameBuffer2RGB, false);		//	FS2RGB => CSC2
+	mDevice.Connect(NTV2_XptMixer1FGVidInput, NTV2_XptCSC2VidYUV, false);		//	CSC2Vid => Mix1FGVid
+	mDevice.Connect(NTV2_XptMixer1FGKeyInput, NTV2_XptCSC2KeyYUV, false);		//	CSC2Key => Mix1FGKey
 }	//	RouteOverlaySignal
 
 
