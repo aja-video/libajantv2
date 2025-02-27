@@ -328,6 +328,12 @@ bool CNTV2WinDriverInterface::ReadRegister (const ULWord inRegNum,	ULWord & outV
 	if (ok)
 	{
 		outValue = propStruct.ulRegisterValue;
+#if 0	//	Fake KONAIP25G from C4412G (see also NTV2GetRegisters::GetRegisterValues):
+		if (inRegNum == kRegBoardID  &&  outValue == DEVICE_ID_CORVID44_8K)
+			outValue = DEVICE_ID_KONAIP_25G;
+		else if (inRegNum == kRegReserved83  ||  inRegNum == kRegLPRJ45IP)
+			outValue = 0x0A03FAD9;	//	Local IPv4    10.3.250.217
+#endif	//	0
 		return true;
 	}
 	WDIFAIL("reg=" << DEC(inRegNum) << " val=" << xHEX0N(outValue,8) << " msk=" << xHEX0N(inMask,8) << " shf=" << DEC(inShift) << " failed: " << ::GetKernErrStr(GetLastError()));

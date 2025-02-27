@@ -260,6 +260,25 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithName (const string & inNameSubString,
 
 }	//	GetFirstDeviceWithName
 
+bool CNTV2DeviceScanner::GetVirtualDeviceWithName (const string & inNameString, CNTV2Card & outDevice, const bool inRescan)
+{
+	outDevice.Close();
+	AJAAutoLock tmpLock(&sDevInfoListLock);
+	if (inRescan)
+		ScanHardware();
+	string	nameString(inNameString);  aja::lower(nameString);
+	for (size_t ndx(0);  ndx < sDevInfoList.size();  ndx++)
+	{
+		if (!sDevInfoList.at(ndx).isVirtualDevice)
+			continue;
+		string deviceName(sDevInfoList.at(ndx).vdevName);  aja::lower(deviceName);
+		if (deviceName == nameString)
+		{
+			return outDevice.Open(sDevInfoList.at(ndx).vdevUrl);
+		}
+	}
+	return false;	//	Not found
+}
 
 bool CNTV2DeviceScanner::GetFirstDeviceWithSerial (const string & inSerialStr, CNTV2Card & outDevice)
 {
@@ -806,16 +825,17 @@ void CNTV2DeviceScanner::SetAudioAttributes (NTV2DeviceInfo & info, CNTV2Card & 
 }	//	SetAudioAttributes
 
 
-bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevList)
+bool CNTV2DeviceScanner::GetVirtualDeviceList (NTV2DeviceInfoList& outVirtualDevList)
 {
 #if defined(NTV2_PREVENT_PLUGIN_LOAD)
-	return false;
+	return false;	//	Plugin loading disabled, therefore no virtual devices
 #endif
 
 	string vdevPath;
-	AJASystemInfo info;
-	if (info.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreUser, vdevPath) != AJA_STATUS_SUCCESS)
-		return false;
+	{	const AJASystemInfo pathInfo(AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_Path);
+		if (pathInfo.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreUser, vdevPath) != AJA_STATUS_SUCCESS)
+			return false;
+	}
 	vdevPath = vdevPath + "virtualdevices";
 	ULWord vdIndex = ULWord(outVirtualDevList.size());
 	std::vector<std::string> vdevFiles;

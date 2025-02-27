@@ -10,134 +10,8 @@
 #include "ajabase/common/timebase.h"
 
 /**
-	@brief		Identifies the timecode format used in AJATimeCode::QueryString.
-
-	@details	In SDK 17.5, AJA committed to resolving the High Frame-Rate (HFR) timecode display problem.
-				SMPTE ST 12-1 (formerly SMPTE 12M) timecode only allows enough bits to code for up to 30 frames
-				per second (with the standard officially supporting 24, 25, 30 drop-frame (DF) and 30 non-drop).
-				SMPTE ST 12-3 provides a way to encode rates above 30 fps by reusing DBB, field and color frame bits.
-				However, neither standard addresses how timecode is actually presented to a human being, particularly
-				for high frame rates, which has led to multiple <i>de facto</i> "standards" from multiple companies.
-				What follows below is a description of what is henceforth the AJA standard, which is based on HFR
-				presentation in various video tape machines (the binary representation of this is what eventually
-				became SMPTE ST 12-3) as well as software like the Autodesk Suite that requires users to know (and
-				enter) exact frame values.
-				
-				The AJATimeCode class supports 2 types of display conventions. Each is independent of the other,
-				and may be matched as needed.
-				-	<b>Frame-Count</b> convention
-				-	<b>Delimiter</b> convention
-
-				<b>Frame-Count</b> convention applies only to the frame field of a timecode. There are 2 types:
-				-	<b>LFR</b> (Standard or Default)
-					-	Frame values in the frame field are restricted by convention to be less than 30.
-						This supports timecode used in legacy video standards and common in legacy VTRs and hardware.
-						-	Frame number is unaltered when frame rate is less than or equal to 30 fps.
-						-	Frame number is divided by 2 when frame rate is greater than 30 fps.
-							Fractional frame values are truncated.
-						-	Frame number is divided by 4 when frame rate is greater than 60 fps.
-							Fractional frame values are truncated.
-					-	Example: Given a 60 fps non-drop frame rate, the frame roll for frames 0, 1, 2, 3, 4, ... 59, 60 are:
-						-	LFR ::AJA_TIMECODE_LEGACY:<br />
-							<tt>00:00:00:00</tt><br />
-							<tt>00:00:00:00</tt><br />
-							<tt>00:00:00:01</tt><br />
-							<tt>00:00:00:01</tt><br />
-							<tt>00:00:00:02</tt><br />
-							<tt>…</tt><br />
-							<tt>00:00:00:29</tt><br />
-							<tt>00:00:01:00</tt>
-						-	LFR ::AJA_TIMECODE_STANDARD:<br />
-							<tt>00:00:00:00</tt><br />
-							<tt>00:00:00.00</tt><br />
-							<tt>00:00:00:01</tt><br />
-							<tt>00:00:00.01</tt><br />
-							<tt>00:00:00:02</tt><br />
-							<tt>…</tt><br />
-							<tt>00:00:00.29</tt><br />
-							<tt>00:00:01:00</tt>
-				-	<b>HFR</b>
-					-	This uses the unaltered frame number in the frame field for both low and high frame rates. 
-					-	Example: Given a 60 fps non-drop frame rate, the frame roll for frames 0, 1, 2, 3, 4, … 59, 60 are:
-						-	HFR AJA_TIMECODE_LEGACY:<br />
-							<tt>00:00:00:00</tt><br />
-							<tt>00:00:00:01</tt><br />
-							<tt>00:00:00:02</tt><br />
-							<tt>00:00:00:03</tt><br />
-							<tt>00:00:00:04</tt><br />
-							<tt>…</tt><br />
-							<tt>00:00:00:59</tt><br />
-							<tt>00:00:01:00</tt>
-						-	HFR AJA_TIMECODE_STANDARD:<br />
-							<tt>00:00:00#00</tt><br />
-							<tt>00:00:00#01</tt><br />
-							<tt>00:00:00#02</tt><br />
-							<tt>00:00:00#03</tt><br />
-							<tt>00:00:00#04</tt><br />
-							<tt>…</tt><br />
-							<tt>00:00:00#59</tt><br />
-							<tt>00:00:01#00</tt>
-
-				<b>Delimiter</b> convention applies to the delimiter character-sets which separate fields in the timecode
-				presentation. There are 2 types:
-					-	::AJA_TIMECODE_LEGACY
-						-	This is the default timecode <b>Delimiter</b> convention and is widely used in legacy applications.
-							It is not preferred because its presentation is ambiguous when converting between frame values and
-							timecode for high frame rate video.
-						-	Non-Drop-frame video uses a colon (<tt>":"</tt>) as a delimiter between all fields
-							(<i>hours/minutes/seconds/frames</i>).<br />
-							Example: <tt>"01:02:03:04"</tt>
-						-	Drop-frame video also uses a colon (<tt>":"</tt>) as a delimiter between fields <i>hours/minutes/seconds</i>,
-							except between fields <i>seconds/frames</i>, which uses a semi-colon (<tt>";"</tt>).<br />
-							Example: <tt>"01:02:03;04"</tt>
-						-	This <b>Delimiter</b> convention is the same for both LFR and HFR <b>Frame-Count</b> conventions,
-							which can lead to misinterpretation.
-					-	::AJA_TIMECODE_STANDARD
-						-	<b>AJA Standard</b> presentation convention is updated and recommended for current and ongoing adoption.
-							- 	Timecode presentation is unambiguous when converting between frame values and timecode strings
-								for high frame rate video.
-							-	Does not break existing low frame rate (LFR) timecode use cases.
-							-	LFR and HFR <b>Frame-Count</b> presentations are distinct and unambiguous.
-						-	In both LFR and HFR presentations, the delimiter between <i>hours/minute/second</i> delimiters
-							are the same:
-							-	Colon (<tt>":"</tt>) for non-drop-frame timecode;
-							-	Semicolon (<tt>";"</tt>) for drop-frame timecode.
-						-	LFR <b>Frame-Count</b>
-							-	<b><i>seconds/frame</i> delimiter:</b>
-								-	identical to the other delimiters if the field flag is 0 (or unknown).
-								-	a period (<tt>"."</tt>) if the field flag is 1
-							-	Roll Sequence Examples:
-								-	Drop Frame:<br />
-									<tt>01;02;03;00</tt><br />
-									<tt>01;02;03.00</tt><br />
-									<tt>01;02;03;01</tt>
-								-	Non-Drop Frame:<br />
-									<tt>01:02:03:00</tt><br />
-									<tt>01:02:03.00</tt><br />
-									<tt>01:02:03:01</tt>
-						-	HFR <b>Frame-Count</b>
-							- 	<i>seconds/frame</i> delimiter is always a pound sign (<tt>"#"</tt>)
-							-	Roll Sequence Examples:
-								-	Drop Frame:<br />
-									<tt>01;02;03#58</tt><br />
-									<tt>01;02;03#59</tt><br />
-									<tt>01;02;04#00</tt>
-								-	Non-Drop Frame:<br />
-									<tt>01:02:03#58</tt><br />
-									<tt>01:02:03#59</tt><br />
-									<tt>01:02:04#00</tt>
-							-	For frame rates greater than 60, three padded zeros (<tt>"000"</tt>) is used for the frame count
-								instead of two (<tt>"00"</tt>).
-								-	Roll Sequence Examples for 120 fps drop frame:<br />
-									<tt>01;02;03#099</tt><br />
-									<tt>01;02;03#100</tt><br />
-									<tt>01;02;04#101</tt>
-
-	@note	Code that looks for a colon (<tt>":"</tt>) or semicolon (<tt>";"</tt>) in the <i>seconds/frame</i> delimiter
-			position to detect drop/non-drop will need to change, since it doesn’t work with ::AJA_TIMECODE_STANDARD.
-			AJA recommends using the AJATimeCode::QueryIsDropFrame method, since it supports all <b>Delimiter</b>
-			conventions presented here.
-	@note	For HFR, follow SMPTE ST 12-3 interpretation of the binary data; otherwise follow SMPTE ST 12-1 for LFR.
+	@brief	Identifies the timecode format used in AJATimeCode::QueryString.
+	@see	\ref anctimecodedisplay for details.
 **/
 typedef enum
 {
@@ -200,7 +74,8 @@ public:
 	 *	@param[in]	timeBase		frame rate from which to calculate string.
 	 *	@param[in]	bDropFrame		drop frame value for string.
 	 *	@param[in]	bStdTcForHfr	true to use standard (LFR) frame values (1/2 frame values for framerates above 30 fps, 1/4 for rates above 60)
-	 *	@param[in]  notation		sets target output notation for TC delimiters
+	 *	@param[in]  notation		specifies ::AJATimecodeNotation for timecode delimiters
+	 *	@see		\ref anctimecodedisplay
 	 */
 	void				QueryString(std::string &str, const AJATimeBase& timeBase, bool bDropFrame, bool bStdTcForHfr, AJATimecodeNotation notation = AJA_TIMECODE_LEGACY);
 
@@ -210,7 +85,8 @@ public:
 	 *	@param[out] str				string in which to place timecode.
 	 *	@param[in]	timeBase		frame rate from which to calculate string.
 	 *	@param[in]	bDropFrame		drop frame value for string.
-	 *	@param[in]  notation		sets target output notation for TC delimiters
+	 *	@param[in]  notation		specifies ::AJATimecodeNotation for timecode delimiters
+	 *	@see		\ref anctimecodedisplay
 	 */
 	void				QueryString(std::string &str, const AJATimeBase& timeBase, bool bDropFrame, AJATimecodeNotation notation = AJA_TIMECODE_LEGACY);
 

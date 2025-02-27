@@ -138,8 +138,8 @@ public:
 	/**
 	 *	Set the thread to be realtime.
 	 *
-	 *	@param[in]	AJAThreadRealTimePolicy Thread policy
-	 *				int						Realtime  priority
+	 *	@param[in]	policy					Thread realtime policy
+	 *	@param[in]	priority				Realtime priority
 	 *	@return		AJA_STATUS_SUCCESS		Thread priority set
 	 *				AJA_STATUS_RANGE		Unknown priority
 	 *				AJA_STATUS_FAIL			Priority not set

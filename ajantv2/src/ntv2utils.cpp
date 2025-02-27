@@ -5104,7 +5104,7 @@ NTV2ReferenceSource NTV2InputSourceToReferenceSource (const NTV2InputSource inIn
 	if (NTV2_IS_VALID_INPUT_SOURCE (inInputSource)	&&	size_t (inInputSource) < sizeof (gInputSourceToReferenceSource) / sizeof (NTV2ReferenceSource))
 		return gInputSourceToReferenceSource [inInputSource];
 	else
-		return NTV2_NUM_REFERENCE_INPUTS;
+		return NTV2_REFERENCE_INVALID;
 
 }	//	NTV2InputSourceToReferenceSource
 

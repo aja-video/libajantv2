@@ -1117,6 +1117,14 @@ int ReadReg(    ULWord deviceNumber,
 			*registerValue = ntv2ReadPciMaxReadRequestSize(&pNTV2Params->systemContext);
 			return 0;
 			
+		case kVRegPCILinkSpeed:
+			*registerValue = ntv2ReadPciLinkSpeed(&pNTV2Params->systemContext);
+			return 0;
+
+		case kVRegPCILinkWidth:
+			*registerValue = ntv2ReadPciLinkWidth(&pNTV2Params->systemContext);
+			return 0;
+
 		default:
 			// return virtual reg
 			*registerValue = pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START];

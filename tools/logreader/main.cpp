@@ -116,7 +116,7 @@ class DebugInfoSettings
 	public:
 		DebugInfoSettings()
 		{
-		    AJADebug::Open();
+			AJADebug::Open();
 			for (AJADebugSeverity sv(AJA_DebugSeverity_Emergency);  sv < AJA_DebugSeverity_Size;  sv = AJADebugSeverity(sv+1))
 			{	ostringstream	oss;	oss << DEC(sv);
 				string	sevStr (AJADebug::GetSeverityString(sv));
@@ -504,8 +504,8 @@ int main(int argc, const char *argv[])
 	optionsContext = ::poptFreeContext (optionsContext);
 
 	//	Configure the reader based on cmd line args...
-    string	severityStr (pSeverity ? pSeverity : "*");				aja::lower(severityStr);
-    string	sevThresholdStr (pSevThreshold ? pSevThreshold : "");	aja::lower(sevThresholdStr);
+	string	severityStr (pSeverity ? pSeverity : "*");				aja::lower(severityStr);
+	string	sevThresholdStr (pSevThreshold ? pSevThreshold : "");	aja::lower(sevThresholdStr);
 	string	debugUnitsStr (pUnits ? pUnits : "*");					aja::lower(debugUnitsStr);
 	const uint64_t	filterPID (static_cast<uint64_t>(pidFilter));
 	const uint64_t	filterTID (static_cast<uint64_t>(tidFilter));
@@ -601,52 +601,37 @@ int main(int argc, const char *argv[])
 		cerr << "## NOTE: Will increment reference count " << DEC(gRefCount) << endl;
 	AJADebug::SetClientReferenceCount(++gRefCount);
 
-    ::signal (SIGINT, SignalHandler);
-    #if defined (AJAMac)
-        ::signal (SIGHUP, SignalHandler);
-        ::signal (SIGQUIT, SignalHandler);
-    #endif
-	AJATimeBase	mTimeBase;
-	double		mLastTime(-1.0);
-	int64_t		mFirstTime(0);
-	uint64_t	mLastIndex(0);
-	uint64_t	mReadIndex(0);
-	AJADebug::GetSequenceNumber(&mReadIndex);
-	if (mReadIndex < 1)
-		mReadIndex = 1;
-	mTimeBase.SetTickRate(AJA_DEBUG_TICK_RATE);
+	::signal (SIGINT, SignalHandler);
+	#if defined (AJAMac)
+		::signal (SIGHUP, SignalHandler);
+		::signal (SIGQUIT, SignalHandler);
+	#endif
+
+	uint64_t lastIndex(0), readIndex(0);
+	AJADebug::GetSequenceNumber(readIndex);
 	do
 	{
-		uint64_t newIndex(0);
-	    uint64_t messageIndex(0);
-		while (AJA_SUCCESS(AJADebug::GetSequenceNumber(&newIndex))
-			 &&  newIndex > mLastIndex
-			 &&  AJA_SUCCESS(AJADebug::GetMessageSequenceNumber(mReadIndex, &messageIndex))
-			 &&  messageIndex > mLastIndex)
+		uint64_t newIndex(0), messageIndex(0);
+		while (AJA_SUCCESS(AJADebug::GetSequenceNumber(newIndex))
+			 &&  newIndex > lastIndex
+			 &&  AJA_SUCCESS(AJADebug::GetMessageSequenceNumber(readIndex, messageIndex))
+			 &&  messageIndex > lastIndex)
 		{
-	        uint32_t destination;
-	        mLastIndex = messageIndex;
-			if (AJA_SUCCESS(AJADebug::GetMessageDestination(mReadIndex, &destination))  &&  (destination != AJA_DEBUG_DESTINATION_NONE))
+			uint32_t destination(0);
+			lastIndex = messageIndex;
+			if (AJA_SUCCESS(AJADebug::GetMessageDestination(readIndex, destination))  &&  (destination != AJA_DEBUG_DESTINATION_NONE))
 			{
-		        int32_t groupIndex(0);
+				int32_t groupIndex(0), severity(0);
 				uint64_t time(0);
-		        int32_t severity(0);
-				const char* pMessage(AJA_NULL);
-				if (AJA_SUCCESS(AJADebug::GetMessageGroup(mReadIndex, &groupIndex))
-					&&  AJA_SUCCESS(AJADebug::GetMessageTime(mReadIndex, &time))
-					&&  AJA_SUCCESS(AJADebug::GetMessageSeverity(mReadIndex, &severity))
-					&&  AJA_SUCCESS(AJADebug::GetMessageText(mReadIndex, &pMessage)))
+				string	msg;
+				if (AJA_SUCCESS(AJADebug::GetMessageGroup(readIndex, groupIndex))
+					&&  AJA_SUCCESS(AJADebug::GetMessageTime(readIndex, time))
+					&&  AJA_SUCCESS(AJADebug::GetMessageSeverity(readIndex, severity))
+					&&  AJA_SUCCESS(AJADebug::GetMessageText(readIndex, msg)))
 				{
-					uint64_t pid(0);
-					uint64_t tid(0);
-					const string	msg(pMessage?pMessage:"");
-					if (!mFirstTime)
-						mFirstTime = int64_t(time);
-					const double currentTime (double(mTimeBase.MicrosecondsToSeconds(int64_t(time) - mFirstTime)));
-					if (mLastTime < 0)
-						mLastTime = currentTime;
-					AJADebug::GetProcessId(mReadIndex, &pid);
-					AJADebug::GetThreadId(mReadIndex,  &tid);
+					uint64_t pid(0), tid(0);
+					AJADebug::GetProcessId(readIndex, pid);
+					AJADebug::GetThreadId(readIndex,  tid);
 					if ((!filterPID || (pid == filterPID))
 						&&  (!filterTID || (tid == filterTID))
 						&&  dbgInfo.HasSeverity(AJADebugSeverity(severity))
@@ -654,16 +639,17 @@ int main(int argc, const char *argv[])
 					{
 						const string & severityStr (dbgInfo.SeverityToString(AJADebugSeverity(severity)));
 						int32_t lineNum(0);
-						AJADebug::GetMessageLineNumber(mReadIndex, &lineNum);
-						const char *	pFileName(AJA_NULL);
-						AJADebug::GetMessageFileName(mReadIndex, &pFileName);
-						const string	path(pFileName ? pFileName : "");
-						ostream &	outputStream (severity < sevThreshold ? cerr : cout);
+						AJADebug::GetMessageLineNumber(readIndex, lineNum);
+						string path;
+						AJADebug::GetMessageFileName(readIndex, path);
+						ostream & outputStream (severity < sevThreshold ? cerr : cout);
+						ostringstream timess;
+						timess << time;
 						if (formatStr.empty())
 							outputStream	<< DEC(messageIndex)
 											<< DLIM << DEC(pid)
 											<< DLIM << DEC(tid)
-											<< DLIM << currentTime
+											<< DLIM << timess.str()
 											<< DLIM << dbgInfo.DebugUnitToString(AJADebugUnit(groupIndex))
 											<< DLIM << severityStr
 											<< DLIM << path
@@ -672,24 +658,23 @@ int main(int argc, const char *argv[])
 											<< endl;
 						else
 						{	//	Custom formatting:
-							string	outputString (formatStr);
+							string outputString (formatStr);
 							aja::replace(outputString, kEscIndexNumber, NumToString(messageIndex));
 							aja::replace(outputString, kEscProcessID, NumToString(pid));
 							aja::replace(outputString, kEscThreadID, NumToString(tid));
-							aja::replace(outputString, kEscTimestamp, NumToString(currentTime));
+							aja::replace(outputString, kEscTimestamp, timess.str());
 							aja::replace(outputString, kEscDebugUnit, dbgInfo.DebugUnitToString(AJADebugUnit(groupIndex)));
 							aja::replace(outputString, kEscSeverity, severityStr);
 							aja::replace(outputString, kEscLineNumber, NumToString(lineNum));
 							aja::replace(outputString, kEscMessage, msg);
 							aja::replace(outputString, kEscPercent, "%");
 							FormatPaths(outputString, path);
-							outputStream	<< outputString;	//	User responsible for linebreaks!
+							outputStream << outputString;	//	User responsible for linebreaks!
 						}
 					}	//	if not filtered out
-					mLastTime = currentTime;
 				}	//	if  GetMessageGroup|GetMessageTime|GetMessageSeverity|GetMessageText OK
 			}	//	if MessageDestination != "none"
-			mReadIndex++;	//	On to the next message
+			readIndex++;	//	On to the next message
 		} // while GetSequenceNumber OK
 		if (samplesPerSec)
 			AJATime::SleepInMicroseconds(1000000 / uint32_t(samplesPerSec));

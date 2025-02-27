@@ -84,6 +84,7 @@
 #include "ntv2mcap.h"
 #include "ntv2stream.h"
 #include "../ntv2video.h"
+#include "../ntv2pciconfig.h"
 
 #if  !defined(x86_64) && !defined(aarch64)
 #error "*** AJA driver must be built 64 bit ***"
@@ -378,44 +379,14 @@ static struct pci_device_id pci_device_id_tab[] =
 	   0, 0,											// Class, class_mask
 	   0												// Opaque data
 	},
-	{  // KONAIP_CH1SFP
-	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_KONAIP_CH1SFP,	// Vendor and device IDs
-	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
-	   0, 0,											// Class, class_mask
-	   0												// Opaque data
-	},
-	{  // KONAIP_PHANTOM
-	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_KONAIP_PHANTOM,	// Vendor and device IDs
-	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
-	   0, 0,											// Class, class_mask
-	   0												// Opaque data
-	},
-	{  // KONAIP_CH2SFP
-	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_KONAIP_CH2SFP,	// Vendor and device IDs
-	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
-	   0, 0,											// Class, class_mask
-	   0												// Opaque data
-	},
 	{  // IO4KPLUS
 	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_IO4KPLUS,			// Vendor and device IDs
 	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
 	   0, 0,											// Class, class_mask
 	   0												// Opaque data
 	},
-    {  // IOIP
-        NTV2_VENDOR_ID, NTV2_DEVICE_ID_IOIP,			// Vendor and device IDs
-        PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
-        0, 0,											// Class, class_mask
-        0												// Opaque data
-    },
 	{  // KONA4PLUS
        NTV2_VENDOR_ID, NTV2_DEVICE_ID_KONA5,        	// Vendor and device IDs
-	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
-	   0, 0,											// Class, class_mask
-	   0												// Opaque data
-	},
-	{  // KONA4IP
-       NTV2_VENDOR_ID, NTV2_DEVICE_ID_KONA5IP,			// Vendor and device IDs
 	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
 	   0, 0,											// Class, class_mask
 	   0												// Opaque data
@@ -3307,7 +3278,6 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
 		(id->device == NTV2_DEVICE_ID_IO4K) ||
 		(id->device == NTV2_DEVICE_ID_IO4K_UFC) ||
 		(id->device == NTV2_DEVICE_ID_IO4KPLUS) ||
-		(id->device == NTV2_DEVICE_ID_IOIP) ||
 		(id->device == NTV2_DEVICE_ID_TTAPPRO) ||
 		(id->device == NTV2_DEVICE_ID_IOX3))
 	{
@@ -3529,7 +3499,10 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
         MSG("%s: serial number %s\n", ntv2pp->name, versionString);
         getPCIFPGAVersionString(deviceNumber, versionString, STRMAX);
         MSG("%s: firmware version %s\n", ntv2pp->name, versionString);
-        MSG("%s: hotplug %s\n", ntv2pp->name, ntv2pp->hotplug? "enabled":"disabled");
+        MSG("%s: pci speed %d  width %d  hotplug %s\n", ntv2pp->name,
+            ntv2ReadPciLinkSpeed(&ntv2pp->systemContext),
+            ntv2ReadPciLinkWidth(&ntv2pp->systemContext),
+            ntv2pp->hotplug? "enabled":"disabled");
 
         // initialize dma
         dmaInit(deviceNumber);

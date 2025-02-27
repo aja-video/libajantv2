@@ -9,13 +9,8 @@
 #define __NTV2_RP188_
 
 #include <string>
-#include <sstream>
-
-#include "ajaexport.h"
-#include "ajatypes.h"
-#include "ntv2enums.h"
+#include <ostream>
 #include "ntv2publicinterface.h"
-
 
 
 #if defined(AJALinux)

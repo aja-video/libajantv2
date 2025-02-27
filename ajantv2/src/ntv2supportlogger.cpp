@@ -491,6 +491,15 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 			AJASystemInfo::append(infoTable, "Installed Bitfile ByteCount", DECStr(numBytes));
 			AJASystemInfo::append(infoTable, "Installed Bitfile Build Date",	dateStr + " " + timeStr);
 		}
+		
+		if (::NTV2DeviceHasLPProductCode(mDevice.GetDeviceID()))
+		{
+			std::string urlString;
+			bool hasIP = mDevice.GetLPTunnelPortURLString(urlString);
+			AJASystemInfo::append(infoTable, ("Tunnel URL: " + (hasIP ? urlString : "No URL")));
+			hasIP = mDevice.GetLPExternalPortURLString(urlString);
+			AJASystemInfo::append(infoTable, ("External URL: " + (hasIP ? urlString : "No URL")));
+		}
 
 		if (mDevice.IsIPDevice())
 		{

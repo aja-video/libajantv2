@@ -1634,7 +1634,9 @@ private:
 		DEF_REG	(kVRegHdrMaxFALLCh1,					mDefaultRegDecoder, READWRITE, kRegClass_HDR,  kRegClass_NULL, kRegClass_NULL);
 		DEF_REG	(kVRegHDROverrideState,					mDefaultRegDecoder, READWRITE, kRegClass_HDR,  kRegClass_NULL, kRegClass_NULL);
 		DEF_REG	(kVRegPCIMaxReadRequestSize,			mDefaultRegDecoder, READWRITE, kRegClass_DMA,  kRegClass_NULL, kRegClass_NULL);
-		DEF_REG	(kVRegUserInColorimetry,				mDefaultRegDecoder, READWRITE, kRegClass_HDR,  kRegClass_Input,kRegClass_NULL);
+        DEF_REG	(kVRegPCILinkSpeed,                     mDefaultRegDecoder, READWRITE, kRegClass_DMA,  kRegClass_NULL, kRegClass_NULL);
+        DEF_REG	(kVRegPCILinkWidth,                     mDefaultRegDecoder, READWRITE, kRegClass_DMA,  kRegClass_NULL, kRegClass_NULL);
+        DEF_REG	(kVRegUserInColorimetry,				mDefaultRegDecoder, READWRITE, kRegClass_HDR,  kRegClass_Input,kRegClass_NULL);
 		DEF_REG	(kVRegUserInTransfer,					mDefaultRegDecoder, READWRITE, kRegClass_HDR,  kRegClass_Input,kRegClass_NULL);
 		DEF_REG	(kVRegUserInLuminance,					mDefaultRegDecoder, READWRITE, kRegClass_HDR,  kRegClass_Input,kRegClass_NULL);
 		DEF_REG	(kVRegHdrInColorimetryCh1,				mDefaultRegDecoder, READWRITE, kRegClass_HDR,  kRegClass_Input,kRegClass_NULL);
