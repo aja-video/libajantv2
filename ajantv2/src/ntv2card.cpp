@@ -490,6 +490,37 @@ bool CNTV2Card::GetLPTunnelPortURLString (string & outURLString)
 	return true;
 }
 
+int CNTV2Card::GetSFPURLs(std::vector<std::string> & OutSFPURLStrings)
+{
+	if (!NTV2DeviceHasLPProductCode(GetDeviceID()) || NTV2DeviceGetNum25GSFPs(GetDeviceID()) == 0)
+		return 0;
+	
+	UWord numSFPs = NTV2DeviceGetNum25GSFPs(GetDeviceID());
+	
+	for (int i = 0; i < numSFPs; i++)
+	{
+		uint32_t portIP(0);
+		int ipOctet(0);
+		ostringstream tempString;
+		ReadRegister(kRegLPSFP1IP+i, portIP);
+		if (portIP == 0)
+			return false;
+		
+		tempString << "http://";
+		ipOctet = (portIP & 0xFF000000) >> 24;
+		tempString << ipOctet << ".";
+		ipOctet = (portIP & 0x00FF0000) >> 16;
+		tempString << ipOctet << ".";
+		ipOctet = (portIP & 0x0000FF00) >> 8;
+		tempString << ipOctet << ".";
+		ipOctet = (portIP & 0x000000FF);
+		tempString << ipOctet;
+		
+		OutSFPURLStrings.push_back(tempString.str());
+	}
+	return OutSFPURLStrings.size();
+}
+
 #if !defined(NTV2_DEPRECATE_16_3)
 //////////	Device Features
 	bool CNTV2Card::DeviceCanDoFormat (NTV2FrameRate		inFrameRate,
