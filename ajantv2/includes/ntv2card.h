@@ -140,6 +140,7 @@ public:
 	**/
 	AJA_VIRTUAL bool GetLPExternalPortURLString (std::string & outURLString);
 	AJA_VIRTUAL bool GetLPTunnelPortURLString (std::string & outURLString);
+	AJA_VIRTUAL int GetSFPURLs(std::vector<std::string> & sfpURLStrings);
 
 	/**
 		@return A reference to my DeviceCapabilities API, for querying my capabilities.
