@@ -16,7 +16,6 @@ set(DEMO_APP_SOURCES
     main.cpp
     ntv2v4l2loopback.cpp
     ntv2v4l2loopback.h
-    error.h
 )
 
 set(DEMO_COMMON_SOURCES

@@ -38,7 +38,7 @@
 #if defined (AJALinux)
 #include "v4l2loopback.h"
 #endif
-#include "error.h"
+//#include "error.h"
 
 #define AUDIO_BYTESPERSAMPLE 4
 #if defined (AJALinux)
@@ -46,6 +46,56 @@
 #endif
 
 using namespace std;
+
+#define AJA_VW_SUCCESS									0
+#define AJA_VW_INVALIDARGS								1
+#define AJA_VW_INVALIDAJADEVICE							2
+#define AJA_VW_AJADEVICENOTREADY						3
+#define AJA_VW_AJADEVICENOCAPTURE						4
+#define AJA_VW_INVALIDPIXELFORMAT						5
+#define AJA_VW_AJADEVICENOPIXELFORMAT					6
+#define AJA_VW_NOTSISUPPORT								7
+#define AJA_VW_INVALIDINPUTCHANNEL						8
+#define AJA_VW_INVALIDINPUTSOURCE						9
+#define AJA_VW_ENABLECHANNELSFAILED						10
+#define AJA_VW_ENABLEINPUTINTERRUPTFAILED				11
+#define AJA_VW_SUBSCRIBEINPUTVERTICALEVENTFAILED		12
+#define AJA_VW_SUBSCRIBEOUTPUTVERTICALEVENTFAILED		13
+#define AJA_VW_SETSDITRANSITENABLEFAILED				14
+#define AJA_VW_WAITFOROUTPUTVERTICALINTERRUPTFAILED		14
+#define AJA_VW_INVALIDVIDEOFORMAT						15
+#define AJA_VW_SETCAPTUREMODEFAILED						16
+#define AJA_VW_SETFREERUNREFERENCEFAILED				17
+#define AJA_VW_SETVIDEOFORMATFAILED						18
+#define AJA_VW_SETVANCMODEOFFFAILED						19
+#define AJA_VW_SETTSIFRAMEENABLEFAILED					20
+#define AJA_VW_SET4KSQUARESENABLEFAILED					21
+#define AJA_VW_SETFRAMEBUFFERFORMATFAILED				22
+#define AJA_VW_INCORRECTMULTILINKAUDIOCHANNEL			23
+#define AJA_VW_APPLYSIGNALROUTEFAILED					24
+#define AJA_VW_ACINITFORINPUTFAILED						25
+#define AJA_VW_ACSTARTFAILED							26
+#define AJA_VW_ACSETVIDEOBUFFERFAILED					27
+#define AJA_VW_ACSETAUDIOBUFFERFAILED					28
+#define AJA_VW_ACSETANCBUFFERSFAILED					29
+#define AJA_VW_V4L2DRIVEROPENFAILED						30
+#define AJA_VW_V4L2DEVICECREATEFAILED					31
+#define AJA_VW_V4L2DEVICEOPENFAILED						32
+#define AJA_VW_ACTRANSFERFAILED							33
+#define AJA_VW_ACGETINPUTTIMECODESFAILED				34
+#define AJA_VW_ACSTOPFAILED								35
+#define AJA_VW_V4L2DEVICEREMOVEFAILED					36
+#define AJA_VW_ALSESETUPFAILED							37
+#define AJA_VW_CONFIGAUDIOSYSTEMFAILED					38
+#define AJA_VW_NOHDMISUPPORT							39
+#define AJA_VW_GETFRAMESERVICESFAILED					40
+#define AJA_VW_SETFRAMESERVICESFAILED					41
+#define AJA_VW_GETDEVICEOWNERFAILED						42
+#define AJA_VW_GETINPUTROUTEFAILED						43
+#define AJA_VW_SETACFRAMERANGEFAILED					44
+#define AJA_VW_MISSINGARGS								45
+#define AJA_VW_GETPOINTERFAILED							46
+#define AJA_VW_SAMPLEBUFFERSIZEMISMATCH					47
 
 #if defined (AJA_WINDOWS)
 #define VCAM_FILTER_NAME_W L"AJA Virtual Webcam"
@@ -275,79 +325,69 @@ public:
 #if defined (AJALinux)
 class NTV2V4L2Loopback
 {
-public:
-    ~NTV2V4L2Loopback();
+public:		//	PUBLIC INSTANCE METHODS
+	~NTV2V4L2Loopback();
 
-    bool Initialize(int argc, const char** argv);
-    bool Run(void);
+	bool Initialize (int argc, const char** argv);
+	bool Run (void);
 #endif
 
-private:
-    string ULWordToString(const ULWord inNum);
-    bool Get4KInputFormat(NTV2VideoFormat& inOutVideoFormat);
-    void SetupAudio();
-    bool GetInputRouting(NTV2XptConnections& conns, const bool isInputRGB);
-    bool GetInputRouting4K(NTV2XptConnections& conns, const bool isInputRGB);
+private:	//	PRIVATE INSTANCE METHODS
+    string	ULWordToString(const ULWord inNum);
+    bool	Get4KInputFormat(NTV2VideoFormat& inOutVideoFormat);
+    void	SetupAudio();
+    bool	GetInputRouting(NTV2XptConnections& conns, const bool isInputRGB);
+    bool	GetInputRouting4K(NTV2XptConnections& conns, const bool isInputRGB);
 #if defined (AJALinux)
-    int ExtractNumber(const char* str);
+	int		ExtractNumber(const char* str);
 #endif
-    int GetFps();
+	int		GetFps();
 
-    int mErrorCode = AJA_VW_SUCCESS;
+private:	//	PRIVATE INSTANCE DATA
+	int							mErrorCode			= AJA_VW_SUCCESS;
+	string						mAjaDevice;
+	string						mInputType;
+	string						mPixelFormatStr;
 #if defined (AJALinux)
-	char* mAjaDevice;
-	char* mInputType;
-	char* mPixelFormatStr;
+	string						mVideoDevice;
+	string						mAudioDevice;
+#endif
+	CNTV2Card					mDevice;
+	bool						mIsKonaHDMI			= false;
+	NTV2PixelFormat				mPixelFormat		= NTV2_FBF_8BIT_YCBCR;
+	bool						mDoMultiFormat		= false;
+	bool						mDoTSIRouting		= true;
+	NTV2Channel					mInputChannel		= NTV2_CHANNEL_INVALID;
+	NTV2InputSource				mInputSource		= NTV2_INPUTSOURCE_INVALID;
+	UWord						mNumSpigots			= 0;
+	NTV2ChannelSet				mActiveFrameStores;
+	NTV2ChannelSet				mActiveSDIs;
+	NTV2VideoFormat				mVideoFormat		= NTV2_FORMAT_UNKNOWN;
+	NTV2FormatDesc				mFormatDesc;
+	ULWord						mACOptions			= AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC;
+	NTV2IOKinds					mIOKinds			= NTV2_IOKINDS_SDI;
+	NTV2Buffer					mVideoBuffer;
+	NTV2TaskMode				mSavedTaskMode		= NTV2_TASK_MODE_INVALID;
+	NTV2Buffer					mAudioBuffer;
+	NTV2AudioSystem				mAudioSystem		= NTV2_AUDIOSYSTEM_INVALID;
+	UWord						mNumAudioLinks		= 1;
+	ULWord						mNumAudioChannels	= 1;
+	unsigned int				mSampleRate			= 48000;
+	ULWord						mBitsPerSample		= 32;
+	NTV2ACFrameRange			mFrames;
+	AUTOCIRCULATE_TRANSFER		mAcTransfer;
+#if defined (AJALinux)
+	snd_pcm_t *					mPcmHandle			= AJA_NULL;
+	snd_pcm_uframes_t			mAudioFrames		= 2;
+	int							mLbDevice			= -1;
+	int							mLbDeviceNR			= -1;
+	int							mLbDisplay			= -1;
 #endif
 #if defined (AJA_WINDOWS)
-	string mAjaDevice;
-    string mInputType;
-    string mPixelFormatStr;
-#endif
-#if defined (AJALinux)
-    char* mVideoDevice = AJA_NULL;
-#endif
-    CNTV2Card mDevice;
-    NTV2DeviceID mDeviceID = DEVICE_ID_NOTFOUND;
-    bool mIsKonaHDMI = false;
-    NTV2PixelFormat mPixelFormat = NTV2_FBF_8BIT_YCBCR;
-    bool mDoMultiFormat = false;
-    bool mDoTSIRouting = true;
-    NTV2Channel mInputChannel = NTV2_CHANNEL_INVALID;
-    NTV2Channel mInputChannelArg = NTV2_CHANNEL_INVALID;
-    NTV2InputSource mInputSource = NTV2_INPUTSOURCE_INVALID;
-    UWord mNumSpigots = 0;
-    NTV2ChannelSet mActiveFrameStores;
-    NTV2ChannelSet mActiveSDIs;
-    NTV2VideoFormat mVideoFormat = NTV2_FORMAT_UNKNOWN;
-    NTV2FormatDesc mFormatDesc;
-    ULWord mACOptions = AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC;
-    NTV2IOKinds mIOKinds = NTV2_IOKINDS_SDI;
-    NTV2Buffer mVideoBuffer = 0;
-    NTV2TaskMode mSavedTaskMode = NTV2_TASK_MODE_INVALID;
-#if defined (AJALinux)
-    char* mAudioDevice = AJA_NULL;
-#endif
-    NTV2Buffer mAudioBuffer = 0;
-    NTV2AudioSystem mAudioSystem = NTV2_AUDIOSYSTEM_INVALID;
-    UWord mNumAudioLinks = 1;
-    ULWord mNumAudioChannels = 1;
-    unsigned int mSampleRate = 48000;
-    ULWord mBitsPerSample = 32;
-    NTV2ACFrameRange mFrames;
-    AUTOCIRCULATE_TRANSFER mAcTransfer;
-#if defined (AJALinux)
-    snd_pcm_t* mPcmHandle = NULL;
-    snd_pcm_uframes_t mAudioFrames = 2;
-    int mLbDevice = -1;
-    int mLbDeviceNR = -1;
-    int mLbDisplay = -1;
-#endif
-#if defined (AJA_WINDOWS)
-	bool mInitialized = false;
-	bool mRunning = false;
-    CircularBuffer<NTV2Buffer> mVideos;
-    CircularBuffer<NTV2Buffer> mAudios;
+	bool						mInitialized		= false;
+	bool						mRunning			= false;
+	CircularBuffer<NTV2Buffer>	mVideos;
+	CircularBuffer<NTV2Buffer>	mAudios;
 #endif
 };
 

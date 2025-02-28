@@ -599,7 +599,7 @@ NTV2V4L2Loopback::NTV2V4L2Loopback(LPUNKNOWN pUnk, HRESULT* phr)
 	mInputChannelArg = NTV2Channel(1);
 	mPixelFormatStr = "uyvy";
 }
-#endif
+#endif	//	AJA_WINDOWS
 
 NTV2V4L2Loopback::~NTV2V4L2Loopback()
 {
@@ -624,7 +624,7 @@ NTV2V4L2Loopback::~NTV2V4L2Loopback()
 		snd_pcm_drain(mPcmHandle);
 		snd_pcm_close(mPcmHandle);
 	}
-#endif
+#endif	//	AJALinux
 
 	mDevice.AutoCirculateStop(mInputChannel);
 
@@ -636,41 +636,53 @@ NTV2V4L2Loopback::~NTV2V4L2Loopback()
 }
 
 #if defined (AJALinux)
-bool NTV2V4L2Loopback::Initialize(int argc, const char** argv)
+bool NTV2V4L2Loopback::Initialize (int argc, const char** argv)
 {
-	int showVersion = 0;
-	const CNTV2DemoCommon::PoptOpts optionsTable[] =
 	{
-		{"version", 'v', POPT_ARG_NONE, &showVersion, 0, "NTV2 version", AJA_NULL},
-		{"ajadevice", 'd', POPT_ARG_STRING, &mAjaDevice, 0, "AJA device", "index#, serial#, or model"},
-		{"inputtype", 'h', POPT_ARG_STRING, &mInputType, 0, "input type", "'sdi' or 'hdmi'"},
-		{"inputchannel", 'c', POPT_ARG_INT, &mInputChannelArg, 0, "input channel", "1-8"},
-		{"pixelformat", 'p', POPT_ARG_STRING, &mPixelFormatStr, 0, "pixel format", "FourCC string or 'list'"},
-		{"videodevice", 'i', POPT_ARG_STRING, &mVideoDevice, 0, "video device", "/dev/video1"},
-		{"audiodevice", 'u', POPT_ARG_STRING, &mAudioDevice, 0, "audio device", "hw:Loopback,1,1"},
-		{"audiolinks", 'a', POPT_ARG_INT, &mNumAudioLinks, 0, "multilink audio systems", "0 for silence or 1-4"},
-		POPT_AUTOHELP
-		POPT_TABLEEND
-	};
-	CNTV2DemoCommon::Popt popt(argc, argv, optionsTable);
-	if (!popt)
-	{
-		cerr << "## ERROR (" << errno << "): " << popt.errorStr() << endl;
-		mErrorCode = AJA_VW_INVALIDARGS;
-		return false;
+		int showVersion(0), useHDMI(0), inputChannel(0);
+		char * pAjaDevSpec = AJA_NULL;
+		char * pPixFormat = AJA_NULL;
+		char * pVideoDevice = AJA_NULL;
+		char * pAudioDevice = AJA_NULL;
+		const CNTV2DemoCommon::PoptOpts optionsTable[] =
+		{
+			{"version",		'v', POPT_ARG_NONE,		&showVersion,	0,	"NTV2 version",				AJA_NULL},
+			{"device",		'd', POPT_ARG_STRING,	&pAjaDevSpec,	0,	"AJA device",				"index#, serial#, or model"},
+			{"hdmi",		'h', POPT_ARG_NONE,		&useHDMI,		0,	"use HDMI input?",			AJA_NULL},
+			{"channel",		'c', POPT_ARG_INT,		&inputChannel,	0,	"input channel",			"1-8"},
+			{"pixelformat",	'p', POPT_ARG_STRING,	&pPixFormat,	0,	"pixel format",				"FourCC string or 'list'"},
+			{"vdev",		'i', POPT_ARG_STRING,	&pVideoDevice,	0,	"video device",				"/dev/video1"},
+			{"adev",		'u', POPT_ARG_STRING,	&pAudioDevice,	0,	"audio device",				"hw:Loopback,1,1"},
+			{"audiolinks",	'a', POPT_ARG_INT,		&mNumAudioLinks,0,	"multilink audio systems",	"0 for silence or 1-4"},
+			POPT_AUTOHELP
+			POPT_TABLEEND
+		};
+		CNTV2DemoCommon::Popt popt(argc, argv, optionsTable);
+		if (!popt)
+		{
+			cerr << "## ERROR (" << errno << "): " << popt.errorStr() << endl;
+			mErrorCode = AJA_VW_INVALIDARGS;
+			return false;
+		}
+		mAjaDevice = pAjaDevSpec ? pAjaDevSpec : "0";
+		mInputType = useHDMI ? "hdmi" : "sdi";
+		mPixelFormatStr = pPixFormat ? pPixFormat : "2vuy";
+		mVideoDevice = pVideoDevice ? pVideoDevice : "";
+		mAudioDevice = pAudioDevice ? pAudioDevice : "";
+		if (showVersion)
+		{
+			cout << argv[0] << ", NTV2 SDK " << NTV2Version() << endl;
+			return false;
+		}
+		mInputChannel = NTV2Channel(inputChannel ? inputChannel-1 : 0);
 	}
-	if (showVersion)
-	{
-		cout << argv[0] << ", NTV2 SDK " << NTV2Version() << endl;
-		return false;
-	}
-#endif
-#if defined (AJA_WINDOWS)
+#elif defined (AJA_WINDOWS)
 bool NTV2V4L2Loopback::Initialize()
 {
 	if (mInitialized)
 		return true;
 
+#endif	//	AJA_WINDOWS or AJALinux
 	if (mAjaDevice.empty())
 	{
 		cerr << "## ERROR (" << errno << "): Parameter 'AJA device' is required." << endl;
@@ -689,64 +701,33 @@ bool NTV2V4L2Loopback::Initialize()
 		mErrorCode = AJA_VW_MISSINGARGS;
 		return false;
 	}
-#endif
 #if defined (AJALinux)
-	if (mAjaDevice == NULL)
-	{
-		cerr << "## ERROR (" << errno << "): Parameter 'AJA device' is required." << endl;
-		mErrorCode = AJA_VW_MISSINGARGS;
-		return false;
-	}
-	if (mInputType == NULL)
-	{
-		cerr << "## ERROR (" << errno << "): Parameter 'input type' is required." << endl;
-		mErrorCode = AJA_VW_MISSINGARGS;
-		return false;
-	}
-	if (mPixelFormatStr == NULL)
-	{
-		cerr << "## ERROR (" << errno << "): Parameter 'pixel format' is required." << endl;
-		mErrorCode = AJA_VW_MISSINGARGS;
-		return false;
-	}
-	if (mVideoDevice == NULL)
+	if (mVideoDevice.empty())
 	{
 		cerr << "## ERROR (" << errno << "): Parameter 'video device' is required." << endl;
 		mErrorCode = AJA_VW_MISSINGARGS;
 		return false;
 	}
 #endif
-	if (!NTV2_IS_VALID_CHANNEL(mInputChannelArg))
-	{
-		cerr << "## ERROR (" << errno << "): Parameter 'input channel' is required." << endl;
-		mErrorCode = AJA_VW_MISSINGARGS;
-		return false;
-	}
-
-#if defined (AJA_WINDOWS)
-	if (strcmp(mPixelFormatStr.c_str(), "list") == 0)
-#endif
-#if defined (AJALinux)
-	if (strcmp(mPixelFormatStr, "list") == 0)
-#endif
+	if (mPixelFormatStr == "list")
 	{
 		cout << CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, mAjaDevice) << endl;
 		return false;
 	}
-#if defined (AJA_WINDOWS)
 	mPixelFormat = mPixelFormatStr.empty() ? NTV2_FBF_8BIT_YCBCR : CNTV2DemoCommon::GetPixelFormatFromString(mPixelFormatStr);
-#endif
-#if defined (AJALinux)
-	mPixelFormat = mPixelFormatStr == NULL ? NTV2_FBF_8BIT_YCBCR : CNTV2DemoCommon::GetPixelFormatFromString(mPixelFormatStr);
-#endif
-
-	if ((mInputChannelArg < 1) || (mInputChannelArg > 8))
+	if (!NTV2_IS_VALID_FRAME_BUFFER_FORMAT(mPixelFormat))
 	{
-		cerr << "## ERROR (" << errno << "): invalid channel '" << DEC(mInputChannelArg) << "'" << endl;
+		cerr << "## ERROR (" << errno << "): invalid pixel format" << endl;
+		mErrorCode = AJA_VW_INVALIDPIXELFORMAT;
+		return false;
+	}
+
+	if (!NTV2_IS_VALID_CHANNEL(mInputChannel))
+	{
+		cerr << "## ERROR (" << errno << "): invalid channel '" << DEC(mInputChannel+1) << "'" << endl;
 		mErrorCode = AJA_VW_INVALIDINPUTCHANNEL;
 		return false;
 	}
-	mInputChannel = NTV2Channel(mInputChannelArg - 1);
 
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument(mAjaDevice, mDevice))
 	{
@@ -762,23 +743,16 @@ bool NTV2V4L2Loopback::Initialize()
 		return false;
 	}
 
-	mDeviceID = mDevice.GetDeviceID();
-
-	if (!NTV2DeviceCanDoCapture(mDeviceID))
+	if (!mDevice.features().CanDoCapture())
 	{
 		cerr << "## ERROR (" << errno << "): AJA device does not support capture" << endl;
 		mErrorCode = AJA_VW_AJADEVICENOCAPTURE;
 		return false;
 	}
 
-#if defined (AJA_WINDOWS)
-	if (strcmp(mInputType.c_str(), "hdmi") == 0)
-#endif
-#if defined (AJALinux)
-	if (strcmp(mInputType, "hdmi") == 0)
-#endif
+	if (mInputType == "hdmi")
 	{
-		if (NTV2DeviceGetNumHDMIVideoInputs(mDeviceID) <= 0)
+		if (mDevice.features().GetNumHDMIVideoInputs() <= 0)
 		{
 			cerr << "## ERROR (" << errno << "): AJA device does not support HDMI" << endl;
 			mErrorCode = AJA_VW_NOHDMISUPPORT;
@@ -788,13 +762,7 @@ bool NTV2V4L2Loopback::Initialize()
 		mIOKinds = NTV2_IOKINDS_HDMI;
 	}
 
-	if (!NTV2_IS_VALID_FRAME_BUFFER_FORMAT(mPixelFormat))
-	{
-		cerr << "## ERROR (" << errno << "): invalid pixel format" << endl;
-		mErrorCode = AJA_VW_INVALIDPIXELFORMAT;
-		return false;
-	}
-	if (!NTV2DeviceCanDoFrameBufferFormat(mDeviceID, mPixelFormat))
+	if (!mDevice.features().CanDoFrameBufferFormat(mPixelFormat))
 	{
 		cerr << "## ERROR (" << errno << "): AJA device does not support pixel format" << endl;
 		mErrorCode = AJA_VW_AJADEVICENOPIXELFORMAT;
@@ -834,7 +802,7 @@ bool NTV2V4L2Loopback::Initialize()
 		}
 	}
 
-	if (NTV2DeviceCanDoMultiFormat(mDeviceID))
+	if (mDevice.features().CanDoMultiFormat())
 		mDevice.SetMultiFormatMode(mDoMultiFormat);
 
 	mVideoFormat = mDevice.GetInputVideoFormat(NTV2ChannelToInputSource(mInputChannel, mIOKinds));
@@ -857,7 +825,7 @@ bool NTV2V4L2Loopback::Initialize()
 		mInputSource = NTV2ChannelToInputSource(mInputChannel, mIOKinds);
 		if (mIsKonaHDMI && NTV2_INPUT_SOURCE_IS_SDI(mInputSource))
 			mInputSource = NTV2ChannelToInputSource(NTV2InputSourceToChannel(mInputSource), mIOKinds);
-		if (!NTV2DeviceCanDoInputSource(mDeviceID, mInputSource))
+		if (!mDevice.features().CanDoInputSource(mInputSource))
 		{
 			cerr << "## ERROR (" << errno << "): invalid input source" << endl;
 			mErrorCode = AJA_VW_INVALIDINPUTSOURCE;
@@ -883,10 +851,10 @@ bool NTV2V4L2Loopback::Initialize()
 				mInputChannel = NTV2_CHANNEL3;
 			mInputSource = mInputChannel ? NTV2_INPUTSOURCE_HDMI2 : NTV2_INPUTSOURCE_HDMI1;
 		}
-		else if (NTV2DeviceCanDo12gRouting(mDeviceID))
+		else if (mDevice.features().CanDo12gRouting())
 		{
 			mDoTSIRouting = false;
-			if (UWord(origCh) >= NTV2DeviceGetNumFrameStores(mDeviceID))
+			if (UWord(origCh) >= mDevice.features().GetNumFrameStores())
 			{
 				cerr << "## ERROR (" << errno << "): invalid channel '" << DEC(mInputChannel) << "'" << endl;
 				mErrorCode = AJA_VW_INVALIDINPUTCHANNEL;
@@ -929,7 +897,7 @@ bool NTV2V4L2Loopback::Initialize()
 		if (mInputChannel != origCh)
 			cerr << "## WARNING:  Specified channel Ch" << DEC(origCh + 1) << " corrected to use Ch" << DEC(mInputChannel + 1) << " to work for UHD/4K on '" << mDevice.GetDisplayName() << "'" << endl;
 
-		mNumSpigots = NTV2DeviceCanDo12gRouting(mDeviceID) ? 1 : (mDoTSIRouting ? 2 : 4);
+		mNumSpigots = mDevice.features().CanDo12gRouting() ? 1 : (mDoTSIRouting ? 2 : 4);
 		mActiveFrameStores = NTV2MakeChannelSet(mInputChannel, mNumSpigots);
 		mActiveSDIs = NTV2MakeChannelSet(mInputChannel, mNumSpigots);
 	}
@@ -962,7 +930,7 @@ bool NTV2V4L2Loopback::Initialize()
 		return false;
 	}
 
-	if (NTV2DeviceHasBiDirectionalSDI(mDeviceID) && NTV2_INPUT_SOURCE_IS_SDI(mInputSource))
+	if (mDevice.features().HasBiDirectionalSDI() && NTV2_INPUT_SOURCE_IS_SDI(mInputSource))
 	{
 		if (!mDevice.SetSDITransmitEnable(mActiveSDIs, false))
 		{
@@ -1011,7 +979,7 @@ bool NTV2V4L2Loopback::Initialize()
 
 	if (NTV2_IS_4K_VIDEO_FORMAT(mVideoFormat) || NTV2_IS_QUAD_QUAD_FORMAT(mVideoFormat))
 	{
-		if (NTV2DeviceCanDo12gRouting(mDeviceID) || mDoTSIRouting)
+		if (mDevice.features().CanDo12gRouting() || mDoTSIRouting)
 		{
 			if (NTV2_IS_QUAD_FRAME_FORMAT(mVideoFormat) || NTV2_IS_QUAD_QUAD_FORMAT(mVideoFormat))
 				if (!mDevice.SetTsiFrameEnable(true, mInputChannel))
@@ -1083,7 +1051,7 @@ bool NTV2V4L2Loopback::Initialize()
 	}
 	v4l2_loopback_config cfg;
 	memset(&cfg, 0, sizeof(v4l2_loopback_config));
-	cfg.output_nr = mLbDeviceNR = ExtractNumber(mVideoDevice);
+	cfg.output_nr = mLbDeviceNR = ExtractNumber(mVideoDevice.c_str());
 	string labelName = "AJA virtual webcam device " + to_string(mLbDeviceNR);
 	strcpy(cfg.card_label, labelName.c_str());
 	mLbDeviceNR = ioctl(mLbDevice, V4L2LOOPBACK_CTL_ADD, &cfg);
@@ -1093,7 +1061,7 @@ bool NTV2V4L2Loopback::Initialize()
 		mErrorCode = AJA_VW_V4L2DEVICECREATEFAILED;
 		return false;
 	}
-	mLbDisplay = open(mVideoDevice, O_RDWR);
+	mLbDisplay = open(mVideoDevice.c_str(), O_RDWR);
 	if (mLbDisplay == -1)
 	{
 		cerr << "## ERROR (" << errno << "): failed to open V4L2 output device" << endl;
@@ -1128,7 +1096,7 @@ bool NTV2V4L2Loopback::Initialize()
 	{
 		const UWord startFrame12g[] = { 0, 7, 64, 71 };
 		const UWord startFrame[] = { 0, 7, 14, 21 };
-		if (NTV2DeviceCanDo12gRouting(mDeviceID))
+		if (mDevice.features().CanDo12gRouting())
 			retVal = mFrames.setRangeWithCount(7, startFrame12g[mInputChannel]);
 		else
 			retVal = mFrames.setRangeWithCount(7, startFrame[mInputChannel / 2]);
@@ -1455,7 +1423,7 @@ bool NTV2V4L2Loopback::Get4KInputFormat(NTV2VideoFormat& inOutVideoFormat)
 void NTV2V4L2Loopback::SetupAudio()
 {
 #if defined (AJALinux)
-	if (mAudioDevice == AJA_NULL)
+	if (mAudioDevice.empty())
 		return;
 #endif
 
@@ -1463,10 +1431,10 @@ void NTV2V4L2Loopback::SetupAudio()
 	if (mIsKonaHDMI)
 		mAudioSystem = NTV2_AUDIOSYSTEM_2;
 
-	if (!NTV2DeviceCanDoMultiLinkAudio(mDeviceID))
+	if (!mDevice.features().CanDoMultiLinkAudio())
 		mNumAudioLinks = 1;
 
-	int fNumAudioSystems = NTV2DeviceGetNumAudioSystems(mDeviceID);
+	int fNumAudioSystems = mDevice.features().GetNumAudioSystems();
 	if (mDoMultiFormat && fNumAudioSystems > 1 && UWord(mInputChannel) < fNumAudioSystems)
 		mAudioSystem = NTV2ChannelToAudioSystem(mInputChannel);
 	NTV2AudioSystemSet multiLinkAudioSystems(NTV2MakeAudioSystemSet(mAudioSystem, 1));
@@ -1488,7 +1456,7 @@ void NTV2V4L2Loopback::SetupAudio()
 	}
 
 	UWord failures = 0;
-	mNumAudioChannels = NTV2DeviceGetMaxAudioChannels(mDeviceID);
+	mNumAudioChannels = mDevice.features().GetMaxAudioChannels();
 	for (NTV2AudioSystemSetConstIter it = multiLinkAudioSystems.begin(); it != multiLinkAudioSystems.end(); ++it)
 	{
 		const NTV2AudioSystem audSys(*it);
@@ -1510,7 +1478,7 @@ void NTV2V4L2Loopback::SetupAudio()
 		return;
 	}
 #if defined (AJALinux)
-	int pcmReturn = snd_pcm_open(&mPcmHandle, mAudioDevice, SND_PCM_STREAM_PLAYBACK, 0);
+	int pcmReturn = snd_pcm_open(&mPcmHandle, mAudioDevice.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
 	if (pcmReturn < 0)
 	{
 		cerr << "## ERROR (" << errno << "): snd_pcm_open failed" << endl;
@@ -1565,7 +1533,7 @@ bool NTV2V4L2Loopback::GetInputRouting4K(NTV2XptConnections& conns, const bool i
 	conns.clear();
 	if (NTV2_INPUT_SOURCE_IS_HDMI(mInputSource))
 	{	//	HDMI
-		if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+		if (mDevice.features().CanDo12gRouting())
 		{	//	FB <== SDIIn
 			in = ::GetFrameBufferInputXptFromChannel(mInputChannel);
 			out = ::GetInputSourceOutputXpt(mInputSource);
@@ -1633,7 +1601,7 @@ bool NTV2V4L2Loopback::GetInputRouting4K(NTV2XptConnections& conns, const bool i
 	}	//	HDMI
 	else
 	{	//	SDI
-		if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+		if (mDevice.features().CanDo12gRouting())
 		{	//	FB <== SDIIn
 			in = ::GetFrameBufferInputXptFromChannel(mInputChannel);
 			out = ::GetInputSourceOutputXpt(mInputSource);
