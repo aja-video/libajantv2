@@ -438,7 +438,7 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 	return result;
 }
 
-bool CNTV2Card::GetLPExternalPortURLString (string & outURLString)
+bool CNTV2Card::GetLPExternalConfigurationURLString (string & outURLString)
 {
 	if (!NTV2DeviceHasLPProductCode(GetDeviceID()))
 		return false;
@@ -464,7 +464,7 @@ bool CNTV2Card::GetLPExternalPortURLString (string & outURLString)
 	return true;
 }
 
-bool CNTV2Card::GetLPTunnelPortURLString (string & outURLString)
+bool CNTV2Card::GetLPTunnelConfigurationURLString (string & outURLString)
 {
 	if (!NTV2DeviceHasLPProductCode(GetDeviceID()))
 		return false;
@@ -490,7 +490,7 @@ bool CNTV2Card::GetLPTunnelPortURLString (string & outURLString)
 	return true;
 }
 
-int CNTV2Card::GetSFPURLs(std::vector<std::string> & OutSFPURLStrings)
+int CNTV2Card::GetSFPConfigurationURLStrings(std::vector<std::string> & OutSFPURLStrings)
 {
 	if (!NTV2DeviceHasLPProductCode(GetDeviceID()) || NTV2DeviceGetNum25GSFPs(GetDeviceID()) == 0)
 		return 0;
