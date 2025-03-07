@@ -428,7 +428,7 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 				break;
 			case DEVICE_ID_KONAX:
 				// Do we have a BOB?
-				if(IsBreakoutBoardConnected())
+				if (IsSupported(kDeviceHasBreakoutBoard))
 					result = NTV2_BreakoutBoard;
 				break;
 			default:

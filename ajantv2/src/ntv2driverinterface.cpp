@@ -1437,8 +1437,11 @@ ULWordSet CNTV2DriverInterface::GetSupportedItems (const NTV2EnumsID inEnumsID)
 	ULWordSet result;
 	if (!IsOpen())
 		return result;
+
+	//	Remote/virtual device gets first dibs on answering...
 	if (IsRemote()  &&  _pRPCAPI->NTV2GetSupportedRemote (inEnumsID, result))
 		return result;
+
 	const NTV2DeviceID devID(GetDeviceID());
 	switch (inEnumsID)
 	{
@@ -1578,22 +1581,24 @@ ULWordSet CNTV2DriverInterface::GetSupportedItems (const NTV2EnumsID inEnumsID)
 
 bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outValue)
 {
-	const NTV2BoolParamID paramID (NTV2BoolParamID(inParamID+0));
+	//	Remote/virtual device gets first dibs on answering...
+	if (IsRemote()  &&  _pRPCAPI->NTV2GetBoolParamRemote (inParamID, outValue))
+		return true;
 
 	//	Is there a register/bit that will answer this query?
-	{	NTV2RegInfo regInfo;
-		bool value (false);
-		if (GetRegInfoForBoolParam (paramID, regInfo))
+	const NTV2BoolParamID paramID (NTV2BoolParamID(inParamID+0));
+	{	NTV2RegInfo regInfo;   bool invertSense(false);
+		if (GetRegInfoForBoolParam (paramID, regInfo, invertSense))
 		{
-			if (!ReadRegister (regInfo.registerNumber, value, regInfo.registerMask, regInfo.registerShift))
+			if (!ReadRegister (regInfo.registerNumber, regInfo.registerValue, regInfo.registerMask, regInfo.registerShift))
 				return false;
-			outValue = value ? 1 : 0;
+			if (invertSense)
+				outValue = regInfo.registerValue ? 0 : 1;
+			else
+				outValue = regInfo.registerValue ? 1 : 0;
 			return true;
 		}
 	}
-	//	Ask the remote/virtual device?
-	if (IsRemote()  &&  _pRPCAPI->NTV2GetBoolParamRemote (inParamID, outValue))
-		return true;
 
 	//	Call classic device features function...
 	const NTV2DeviceID devID (GetDeviceID());
@@ -1751,17 +1756,18 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 
 bool CNTV2DriverInterface::GetNumericParam (const ULWord inParamID, ULWord & outVal)
 {
-	const NTV2NumericParamID paramID (NTV2NumericParamID(inParamID+0));
 	outVal = 0;
 
+	//	Remote/virtual device gets first dibs on answering...
+	if (IsRemote()  &&  _pRPCAPI->NTV2GetNumericParamRemote (inParamID, outVal))
+		return true;
+
 	//	Is there a register that will answer this query?
+	const NTV2NumericParamID paramID (NTV2NumericParamID(inParamID+0));
 	{	NTV2RegInfo regInfo;
 		if (GetRegInfoForNumericParam (paramID, regInfo))
 			return ReadRegister (regInfo.registerNumber, outVal, regInfo.registerMask, regInfo.registerShift);
 	}
-	//	Ask the remote/virtual device?
-	if (IsRemote()  &&  _pRPCAPI->NTV2GetNumericParamRemote (inParamID, outVal))
-		return true;
 
 	//	Call classic device features function...
 	const NTV2DeviceID devID (GetDeviceID());
@@ -1831,19 +1837,24 @@ bool CNTV2DriverInterface::GetNumericParam (const ULWord inParamID, ULWord & out
 }	//	GetNumericParam
 
 
-bool CNTV2DriverInterface::GetRegInfoForBoolParam (const NTV2BoolParamID inParamID, NTV2RegInfo & outRegInfo)
+bool CNTV2DriverInterface::GetRegInfoForBoolParam (const NTV2BoolParamID inParamID, NTV2RegInfo & outRegInfo, bool & outFlipSense)
 {
 	outRegInfo.MakeInvalid();
+	outFlipSense = false;
 	switch (inParamID)
 	{
 		case kDeviceCanDoAudioMixer:			outRegInfo.Set(kRegGlobalControl2, 0, kRegMaskAudioMixerPresent, kRegShiftAudioMixerPresent);		break;
 		case kDeviceHasMultiRasterWidget:		outRegInfo.Set(kRegMRSupport, 0, kRegMaskMRSupport, kRegShiftMRSupport);							break;
 		case kDeviceHasMicrophoneInput:			outRegInfo.Set(kRegGlobalControl2, 0, kRegMaskIsDNXIV, kRegShiftIsDNXIV);							break;
-		case kDeviceHasBreakoutBoard:			outRegInfo.Set(kRegBOBStatus, 0, kRegMaskBOBAbsent, kRegShiftBOBAbsent);							break;
 		case kDeviceAudioCanWaitForVBI:			outRegInfo.Set(kRegCanDoStatus, 0, kRegMaskCanDoAudioWaitForVBI, kRegShiftCanDoAudioWaitForVBI);	break;
 		case kDeviceHasXptConnectROM:			outRegInfo.Set(kRegCanDoStatus, 0, kRegMaskCanDoValidXptROM, kRegShiftCanDoValidXptROM);			break;
+
 //	BIT(2) IN kRegCanDoStatus NOT YET IN ALL KONA5, CORVID44/12G, KONAX FIRMWARE:
 //		case kDeviceCanDoCustomHancInsertion:	outRegInfo.Set(kRegCanDoStatus, 0, kRegMaskCanDoHancInsertion, kRegShiftCanDoHancInsertion);		break;
+
+		//	kDeviceHasBreakoutBoard's sense is opposite of "BOBAbsent", so set outFlipSense 'true':
+		case kDeviceHasBreakoutBoard:			outRegInfo.Set(kRegBOBStatus, 0, kRegMaskBOBAbsent, kRegShiftBOBAbsent);	outFlipSense = true;	break;
+
 		default:	break;
 	}
 	return outRegInfo.IsValid();

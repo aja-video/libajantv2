@@ -6580,7 +6580,9 @@ public:
 	AJA_VIRTUAL bool IsMultiRasterWidgetChannel (const NTV2Channel inChannel);	//	New in SDK 16.2
 	///@}
 
-	AJA_VIRTUAL bool	IsBreakoutBoardConnected (void);	//	New in SDK 17.0
+#if !defined(NTV2_DEPRECATE_17_5)
+	AJA_VIRTUAL inline bool NTV2_DEPRECATED_f(IsBreakoutBoardConnected (void)) {return IsSupported(kDeviceHasBreakoutBoard);}	///< @deprecated	Use features().HasBreakoutBoard() instead (new in SDK 17.0)
+#endif	//	NTV2_DEPRECATE_17_5
 
 #if !defined(NTV2_DEPRECATE_16_1)
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioOutputMonitorSource (const NTV2AudioMonitorSelect inChannelPair, const NTV2Channel inAudioSystem = NTV2_CHANNEL1))	{return SetAudioOutputMonitorSource(inChannelPair, NTV2AudioSystem(inAudioSystem));}	///< @deprecated	Use the function that uses NTV2AudioChannelPair and NTV2AudioSystem params.

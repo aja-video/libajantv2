@@ -4715,14 +4715,6 @@ bool CNTV2Card::IsMultiRasterWidgetChannel (const NTV2Channel inChannel)
 	return HasMultiRasterWidget() && inChannel == NTV2Channel(GetNumSupported(kDeviceGetNumVideoChannels));
 }
 
-bool CNTV2Card::IsBreakoutBoardConnected (void)
-{
-	bool BOBConnected(false);
-	return NTV2DeviceCanDoBreakoutBoard(_boardID)
-		   &&  CNTV2DriverInterface::ReadRegister(kRegBOBStatus, BOBConnected, kRegMaskBOBAbsent, kRegShiftBOBAbsent)
-		   &&  (BOBConnected == 0);
-}
-
 
 //////////////////////////////////////////////////////////////
 
