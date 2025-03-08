@@ -30,6 +30,8 @@ DRIVERSRCS = ntv2devicefeatures.c \
 			ntv2vpidfromspec.c \
 			registerio.c \
 			ntv2serial.c \
+			../ntv2anc.c \
+			../ntv2aux.c \
 			../ntv2commonreg.c \
 			../ntv2hdmiedid.c \
 			../ntv2hdmiin.c \
@@ -41,11 +43,12 @@ DRIVERSRCS = ntv2devicefeatures.c \
 			../ntv2mcap.c \
 			../ntv2pciconfig.c \
 			../ntv2system.c \
-			../ntv2anc.c \
 			../ntv2xpt.c \
 			../ntv2kona.c \
 			../ntv2vpid.c \
 			../ntv2rp188.c \
+			../ntv2video.c \
+			../ntv2videoraster.c \
 			ntv2driver.c \
 			ntv2dma.c
 

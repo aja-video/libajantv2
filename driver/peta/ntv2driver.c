@@ -96,7 +96,7 @@
 /*******************************/
 MODULE_AUTHOR("Bill Bowen and Shaun Case and Jeff Coffin");
 
-MODULE_LICENSE("GPL");
+MODULE_LICENSE("Dual MIT/GPL");
 
 // For boards that support a serial port
 // -1 = never make a serial port
@@ -483,31 +483,36 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 	case IOCTL_NTV2_WRITE_REGISTER:
 		{
 			REGISTER_ACCESS param;
+            int status = 0;
 			if(copy_from_user((void*)&param,(const void*) arg,sizeof(REGISTER_ACCESS)))
 				return -EFAULT;
 
-			WriteRegister(	deviceNumber,
-				  			param.RegisterNumber,
-							param.RegisterValue,
-							param.RegisterMask,
-							param.RegisterShift);
-
+			status = WriteReg(  deviceNumber,
+				  				param.RegisterNumber,
+								param.RegisterValue,
+								param.RegisterMask,
+								param.RegisterShift);
+            if (status != 0)
+                return status;
 		}
 		break;
 
 	case IOCTL_NTV2_READ_REGISTER:
 		{
 			REGISTER_ACCESS param;
+            int status = 0;
 			if(copy_from_user((void*)&param,(const void*) arg,sizeof(REGISTER_ACCESS)))
 				return -EFAULT;
 
-			param.RegisterValue = ReadRegister(	deviceNumber,
+			status = ReadReg(   deviceNumber,
 				  								param.RegisterNumber,
+                                &param.RegisterValue,
 												param.RegisterMask,
 												param.RegisterShift);
 			if(copy_to_user((void*)arg,(const void*) &param,sizeof(REGISTER_ACCESS)))
 				return -EFAULT;
-
+            if(status != 0)
+                return status;
 		}
 		break;
 
@@ -1495,7 +1500,7 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					}
 				}
 				break;
-
+#if 0
 			case NTV2_TYPE_AJABITSTREAM:
 				{
 					returnCode = DoMessageBitstream (deviceNumber, (NTV2Bitstream*)pMessage);
@@ -1511,7 +1516,7 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					}
 				}
 				break;
-
+#endif
 			case NTV2_TYPE_VIRTUAL_DATA_RW:
 				{
                     NTV2VirtualData *msg = (NTV2VirtualData *)pMessage;
@@ -1619,7 +1624,7 @@ int ntv2_mmap(struct file *file,struct vm_area_struct* vma)
 		return -ENODEV;
 
 	// Don't try to swap out physical pages
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,3,0))
+#if defined(KERNEL_6_3_0_VM_FLAGS)
     vm_flags_set(vma, VM_IO);
 #elif (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
 	vma->vm_flags |= VM_IO;
@@ -2436,13 +2441,12 @@ static struct platform_driver ntv2_platform_driver =
 //    .remove = platform_remove
 };
 
-static struct file_operations ntv2_proc_fops =
+static struct proc_ops ntv2_proc_ops =
 {
-	.owner		= THIS_MODULE,
-	.llseek		= seq_lseek,
-	.read		= seq_read,
-	.open		= aja_read_procmem_open,
-	.release	= seq_release
+	.proc_lseek		= seq_lseek,
+	.proc_read		= seq_read,
+	.proc_open		= aja_read_procmem_open,
+	.proc_release	= seq_release
 };
 #endif
 
@@ -2536,18 +2540,10 @@ static int __init aja_ntv2_module_init(void)
 //	for (i = 0; i < getNTV2ModuleParams()->numNTV2Devices; i++)
 //		AutoCirculateInitialize(i);
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
 	proc_create( "driver/aja",
 			0 /* default mode */,
 			NULL /* parent dir */,
-			&ntv2_proc_fops);
-#else
-	create_proc_read_entry( "driver/aja",
-			0 /* default mode */,
-			NULL /* parent dir */,
-			aja_read_procmem,
-			NULL /* client data */ );
-#endif
+			&ntv2_proc_ops);
 
 	// Ask to be notified before the system reboots
 	register_reboot_notifier(&reboot_notifier);
@@ -3121,46 +3117,49 @@ static void SetupBoard(ULWord deviceNumber)
 #endif
 	// Setup the LUTs
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 	if ( NTV2DeviceCanDoColorCorrection( getNTV2Params(deviceNumber)->_DeviceID ) )
 	{
 		switch( NTV2DeviceGetNumLUTs( getNTV2Params(deviceNumber)->_DeviceID ) )
 		{
 		case 8:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL8, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL8, 1);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL8, 0);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL8, 1);
 			// fall through
 		case 7:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL7, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL7, 1);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL7, 0);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL7, 1);
 			// fall through
 		case 6:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL6, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL6, 1);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL6, 0);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL6, 1);
 			// fall through
 		case 5:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL5, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL5, 1);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL5, 0);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL5, 1);
 			// fall through
 		case 4:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL4, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL4, 1);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL4, 0);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL4, 1);
 			// fall through
 		case 3:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL3, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL3, 1);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL3, 0);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL3, 1);
 			// fall through
 		case 2:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL2, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL2, 1);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL2, 0);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL2, 1);
 			// fall through
 		case 1:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL1, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL1, 1);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL1, 0);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL1, 1);
 			break;
 		default:
 			break;
 		}
 	}
+#pragma GCC diagnostic pop
 
 	switch( NTV2DeviceGetHDMIVersion(ntv2pp->_DeviceID) )
 	{
@@ -3200,6 +3199,8 @@ static void SetupBoard(ULWord deviceNumber)
 		SetRegisterWriteMode( deviceNumber, NTV2_CHANNEL1, NTV2_REGWRITE_SYNCTOFRAME );
 	}
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 	if( NTV2DeviceCanDoMultiFormat( ntv2pp->_DeviceID ) )
 	{
 		switch( NTV2DeviceGetNumVideoChannels( ntv2pp->_DeviceID ) )
@@ -3278,6 +3279,7 @@ static void SetupBoard(ULWord deviceNumber)
 			break;
 		}
 	}
+#pragma GCC diagnostic pop
 
 	//	Make an educated guess about the video formats of the channels
 	for( i = 0; i < NTV2DeviceGetNumVideoChannels( ntv2pp->_DeviceID ); i++)
@@ -3756,7 +3758,7 @@ static int platform_add_register(ULWord deviceNumber, struct device_node *node)
 				MSG("%s: %s request_mem_region failed\n", ntv2pp->name, node->full_name);
                 return -ENOMEM;
             }
-            mapped = ioremap_nocache(phyaddr, size);
+            mapped = ioremap(phyaddr, size);
             MSG("%s: video reg %p mapped\n", ntv2pp->name, mapped);
 
 			ntv2pp->_unmappedBAR0Address = phyaddr;

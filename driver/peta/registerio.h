@@ -52,7 +52,7 @@
 #include "ntv2driverautocirculate.h"
 #include "../ntv2hdmiin.h"
 #include "../ntv2hdmiin4.h"
-#include "../ntv2kona.h"
+//#include "../ntv2kona.h"
 
 // clean old stuff
 #define FGVCROSSPOINTMASK (BIT_0+BIT_1+BIT_2+BIT_3)
@@ -110,124 +110,6 @@ typedef enum
 	eIrqFpga = 0,
 	eNumNTV2IRQDevices
 } ntv2_irq_device_t;
-
-// Define interrupt control, dma, and flash register bits
-enum
-{
-	kIntOutputVBLEnable		= BIT (0),
-	kIntInput1VBLEnable		= BIT (1),
-	kIntInput2VBLEnable		= BIT (2),
-	kIntAudioWrapEnable		= BIT (3),
-	kIntAudioOutWrapEnable	= BIT (4),
-	kIntAudioInWrapEnable	= BIT (5),
-	kIntAuxVerticalEnable	= BIT (11),
-
-	// Status register
-	kIntOutput1VBLActive	= BIT (31),
-	kIntOutput1VBLClear		= BIT (31),
-
-	kIntInput1VBLActive		= BIT (30),
-	kintInput1VBLClear		= BIT (30),
-
-	kIntInput2VBLActive		= BIT (29),
-	kIntInput2VBLClear		= BIT (29),
-
-	kIntAudioWrapActive		= BIT (28),
-	kIntAudioWrapClear		= BIT (28),
-
-	kIntAudioOutWrapActive	= BIT (27),
-	kIntAudioOutWrapClear	= BIT (27),
-
-	kIntUartTx2Active		= BIT (26),
-	kIntUartTx2Clear		= BIT (26),
-
-	kIntOutput2VBLActive	= BIT (8),
-	kIntOutput2VBLClear		= BIT (23),
-
-	kIntOutput3VBLActive	= BIT (7),
-	kIntOutput3VBLClear		= BIT (22),
-
-	kIntOutput4VBLActive	= BIT (6),
-	kIntOutput4VBL			= BIT (21),
-
-	kIntAuxVerticalActive	= BIT (12),
-	kIntAuxVerticalClear	= BIT (12),
-
-	kIntI2C2Active			= BIT (13),
-	kIntI2C2Clear			= BIT (13),
-
-	kIntI2C1Active			= BIT (14),
-	kIntI2C1Clear			= BIT (14),
-
-	// Status register 2
-	kIntInput3VBLActive		= BIT (30),
-	kIntInput3VBLClear		= BIT (30),
-
-	kIntInput4VBLActive		= BIT (29),
-	kIntInput4VBLClear		= BIT (29),
-
-	kIntInput5VBLActive		= BIT (28),
-	kIntInput5VBLClear		= BIT (28),
-
-	kIntInput6VBLActive		= BIT (27),
-	kIntInput6VBLClear		= BIT (27),
-
-	kIntInput7VBLActive		= BIT (26),
-	kIntInput7VBLClear		= BIT (26),
-
-	kIntInput8VBLActive		= BIT (25),
-	kIntInput8VBLClear		= BIT (25),
-
-	kIntOutput5VBLActive	= BIT (31),
-	kIntOutput5VBLClear		= BIT (19),
-
-	kIntOutput6VBLActive	= BIT (24),
-	kIntOutput6VBLClear		= BIT (18),
-
-	kIntOutput7VBLActive	= BIT (23),
-	kIntOutput7VBLClear		= BIT (17),
-
-	kIntOutput8VBLActive	= BIT (22),
-	kIntOutput8VBLClear		= BIT (16),
-
-	kIntDma1Enable			= BIT (0),
-	kIntDma2Enable			= BIT (1),
-	kIntDma3Enable			= BIT (2),
-	kIntDma4Enable			= BIT (3),
-	kIntBusErrEnable		= BIT (4),
-	kIntDmaEnableMask		= BIT (0) + BIT (1) + BIT (2) + BIT (3) + BIT (4),
-
-	kIntValidation			= BIT (26),
-
-	kIntDMA1				= BIT (27),
-	kIntDMA2				= BIT (28),
-	kIntDMA3				= BIT (29),
-	kIntDMA4				= BIT (30),
-	kIntBusErr				= BIT (31),
-	kIntDmaMask				= BIT (27) + BIT (28) + BIT (29) + BIT (30) + BIT (31),
-
-	kIntPBChange 			= BIT (0),
-	kIntLowPower			= BIT (1),
-	kIntDisplayFifo			= BIT (2),
-	kIntSATAChange			= BIT (3),			// CF Presence Detect Change in Bones product ....
-	kIntTemp1High			= BIT (4),
-	kIntTemp2High			= BIT (5),
-	kIntPowerButtonChange	= BIT (6),
-	kIntCPLDMask			= BIT (0) + BIT (1) + BIT (2) + BIT (3) + BIT (4) + BIT(5) + BIT(6),
-
-	kDma1Go					= BIT (0),
-	kDma2Go					= BIT (1),
-	kDma3Go					= BIT (2),
-	kDma4Go					= BIT (3),
-
-	kRegDMAToHostBit		= BIT (31),
-	kRegDMAAudioModeBit		= BIT (30),
-
-	kRegFlashResetBit		= BIT (10),
-	kRegFlashDoneBit		= BIT (9),
-	kRegFlashPgmRdyBit		= BIT (8),
-	kRegFlashDataMask		= BIT (7) + BIT (6) + BIT (5) + BIT (4) + BIT (3) + BIT (2) + BIT (1) + BIT (0)
-};
 
 // The ntv2_irq_device_t enums must match up with the array of function
 // pointers below.
@@ -540,6 +422,8 @@ typedef struct ntv2_private
 
 	Ntv2SystemContext		systemContext;
 //    struct ntv2_genlock		*m_pGenlockMonitor;
+//    struct ntv2_genlock2	*m_pGenlock2Monitor;
+    struct ntv2_videoraster *m_pRasterMonitor;
 	struct ntv2_hdmiin		*m_pHDMIInputMonitor[NTV2_MAX_HDMI_MONITOR];
 	struct ntv2_hdmiin4		*m_pHDMIIn4Monitor[NTV2_MAX_HDMI_MONITOR];
 	struct ntv2_hdmiout4	*m_pHDMIOut4Monitor[NTV2_MAX_HDMI_MONITOR];
@@ -573,15 +457,15 @@ NTV2PrivateParams * getNTV2Params(unsigned int deviceNumber);
 
 // Billions and billions of prototypes for reading and writing registers
 //
-ULWord READ_REGISTER_ULWord( unsigned long address);
-ULWord READ_REGISTER_UWord( unsigned long address);
-ULWord READ_REGISTER_UByte( unsigned long address);
+ULWord READ_REGISTER_ULWord( ULWord deviceNumber, unsigned long address);
+ULWord READ_REGISTER_UWord( ULWord deviceNumber, unsigned long address);
+ULWord READ_REGISTER_UByte( ULWord deviceNumber, unsigned long address);
 
-void WRITE_REGISTER_ULWord( unsigned long address, ULWord regValue);
-void WRITE_REGISTER_UWord( unsigned long address, ULWord regValue);
-void WRITE_REGISTER_UByte( unsigned long address, ULWord regValue);
+void WRITE_REGISTER_ULWord( ULWord deviceNumber, unsigned long address, ULWord regValue);
+void WRITE_REGISTER_UWord( ULWord deviceNumber, unsigned long address, ULWord regValue);
+void WRITE_REGISTER_UByte( ULWord deviceNumber, unsigned long address, ULWord regValue);
 
-void GetActiveFrameBufferSize(ULWord deviceNumber,NTV2FrameDimensions * frameBufferSize);
+void GetActiveFrameBufferSize(ULWord deviceNumber, NTV2FrameDimensions * frameBufferSize);
 
 // Write a single register with mask and shift
 void WriteRegister(	ULWord deviceNumber,
@@ -589,6 +473,18 @@ void WriteRegister(	ULWord deviceNumber,
 					ULWord registerValue,
 					ULWord registerMask,
 					ULWord registerShift);
+
+int WriteReg(	ULWord deviceNumber,
+				ULWord registerNumber,
+				ULWord registerValue,
+				ULWord registerMask,
+				ULWord registerShift);
+
+int ReadReg(    ULWord deviceNumber,
+                ULWord registerNumber,
+                ULWord* registerValue,
+                ULWord registerMask,
+                ULWord registerShift);
 
 // Write a group of registers as a block
 void WriteRegisterBufferULWord(	ULWord deviceNumber,
@@ -598,6 +494,7 @@ void WriteRegisterBufferULWord(	ULWord deviceNumber,
 
 ULWord ReadRegister(ULWord deviceNumber,ULWord registerNumber, ULWord registerMask, ULWord registerShift);
 
+#if 0
 // old stuff
 void WriteVideoProcessingControl(ULWord deviceNumber,ULWord value);
 ULWord ReadVideoProcessingControl(ULWord deviceNumber);
@@ -608,6 +505,7 @@ void SetBackgroundKeyCrosspoint(ULWord deviceNumber, NTV2Crosspoint crosspoint);
 void SetBackgroundVideoCrosspoint(ULWord deviceNumber, NTV2Crosspoint crosspoint);
 void SetForegroundKeyCrosspoint(ULWord deviceNumber, NTV2Crosspoint crosspoint);
 void SetForegroundVideoCrosspoint(ULWord deviceNumber, NTV2Crosspoint crosspoint);
+#endif
 
 void WriteInterruptRegister(ULWord deviceNumber ,ULWord value);
 ULWord ReadInterruptRegister(ULWord deviceNumber);
@@ -813,6 +711,7 @@ ULWord ReadUARTControl2(ULWord deviceNumber);
 //////////////////////////////////////////////////////////////////
 // OEM Color Correction Methods
 //
+#if 0
 void SetColorCorrectionMode(ULWord deviceNumber, NTV2Channel channel, NTV2ColorCorrectionMode mode);
 ULWord GetColorCorrectionMode(ULWord deviceNumber, NTV2Channel channel);
 void SetColorCorrectionOutputBank (ULWord deviceNumber, NTV2Channel channel, ULWord bank);
@@ -821,7 +720,7 @@ void SetColorCorrectionHostAccessBank (ULWord deviceNumber, NTV2ColorCorrectionH
 NTV2ColorCorrectionHostAccessBank GetColorCorrectionHostAccessBank (ULWord deviceNumber, NTV2Channel channel);
 void SetColorCorrectionSaturation (ULWord deviceNumber, NTV2Channel channel, ULWord value);
 ULWord GetColorCorrectionSaturation (ULWord deviceNumber, NTV2Channel channel);
-
+#endif
 //////////////////////////////////////////////////////////////////
 // Utility methods
 //
@@ -884,10 +783,12 @@ void WriteFrameAperture(ULWord deviceNumber, ULWord offset, ULWord value);
 
 bool DeviceCanDoP2P(ULWord deviceNumber);
 
+#if 0
 void SetLUTEnable(ULWord deviceNumber, NTV2Channel channel, ULWord enable);
 void SetLUTV2HostAccessBank(ULWord deviceNumber, NTV2ColorCorrectionHostAccessBank value);
 void SetLUTV2OutputBank(ULWord deviceNumber, NTV2Channel channel, ULWord bank);
 ULWord GetLUTV2OutputBank(ULWord deviceNumber, NTV2Channel channel);
+#endif
 
 ULWord ntv2_getRoundedUpTimeoutJiffies(ULWord timeOutMs);
 

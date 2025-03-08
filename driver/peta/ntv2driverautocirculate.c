@@ -56,6 +56,8 @@
 /* Local defines and types */
 /***************************/
 
+void get100nsTime(LWord64 *time);
+
 //#define AUTO_REPORT
 void get100nsTime(LWord64 *time)
 {
@@ -196,7 +198,6 @@ static inline ULWord oemAudioSampleAlignIn (ULWord deviceNumber,
 static inline ULWord oemAudioSampleAlignOut (ULWord deviceNumber,
 											 NTV2AudioSystem audioSystem,
 											 ULWord ulReadSample);
-static LWord GetFramePeriod(ULWord deviceNumber, NTV2Channel channel);
 
 int oemAutoCirculateDmaAudioSetup(ULWord deviceNumber, INTERNAL_AUTOCIRCULATE_STRUCT* pAuto);
 
@@ -510,7 +511,14 @@ OemAutoCirculate(ULWord deviceNumber, NTV2Crosspoint channelSpec)
 
 				if (pAuto->circulateWithCustomAncData)
 				{
+					if (pAuto->circulateWithHDMIAux)
+					{
+						SetAuxExtWriteParams(&systemContext, acChannel, nextFrame);
+					}
+					else
+					{
 					SetAncExtWriteParams(&systemContext, acChannel, nextFrame);
+					}
 				}
 
 				if (MsgsEnabled(NTV2_DRIVER_AUTOCIRCULATE_DEBUG_MESSAGES))
@@ -727,7 +735,7 @@ OemAutoCirculate(ULWord deviceNumber, NTV2Crosspoint channelSpec)
 				timeDiff = (LWord64)pAuto->lastInterruptTime - (LWord64)pAuto->prevInterruptTime;
 
 				// get the current interrupt period
-				framePeriod = (LWord)GetFramePeriod(deviceNumber, channel);
+				framePeriod = (LWord)GetFramePeriod(&systemContext, channel);
 				if (GetSmpte372(&systemContext, channel) || fieldMode)
 				{
 					framePeriod /= 2;
@@ -899,16 +907,26 @@ OemAutoCirculate(ULWord deviceNumber, NTV2Crosspoint channelSpec)
 
 				if (pAuto->circulateWithCustomAncData)
 				{
-					pAuto->frameStamp[lastActiveFrame].ancTransferSize = GetAncExtField1Bytes(&systemContext, acChannel);
-					pAuto->frameStamp[lastActiveFrame].ancField2TransferSize = GetAncExtField2Bytes(&systemContext, acChannel);
-					SetAncExtWriteParams(&systemContext, acChannel, nextFrame);
+					if (pAuto->circulateWithHDMIAux)
+					{
+						pAuto->frameStamp[lastActiveFrame].ancTransferSize = GetAuxExtField1Bytes(&systemContext, acChannel);
+						pAuto->frameStamp[lastActiveFrame].ancField2TransferSize = GetAuxExtField2Bytes(&systemContext, acChannel);
+						SetAuxExtWriteParams(&systemContext, acChannel, nextFrame);
+					}
+					else
+					{
+						pAuto->frameStamp[lastActiveFrame].ancTransferSize = GetAncExtField1Bytes(&systemContext, acChannel);
+						pAuto->frameStamp[lastActiveFrame].ancField2TransferSize = GetAncExtField2Bytes(&systemContext, acChannel);
+						SetAncExtWriteParams(&systemContext, acChannel, nextFrame);
+					}
 				}
-
 				if ((pAuto->frameStamp[nextFrame].validCount == 0) && !dropFrame)
 				{
 					// Advance to next frame for capture.
-					WriteRegister(deviceNumber, pAuto->activeFrameRegister,nextFrame, NO_MASK, NO_SHIFT);
+					WriteRegister(deviceNumber, pAuto->activeFrameRegister, nextFrame, NO_MASK, NO_SHIFT);
+					pAuto->nextFrame = nextFrame;
 
+					// Increment frames processed
 					pAuto->framesProcessed++;
 				}
 				else
@@ -1012,6 +1030,7 @@ OemAutoCirculate(ULWord deviceNumber, NTV2Crosspoint channelSpec)
 
 						// Move to it
 						WriteRegister(deviceNumber, pAuto->activeFrameRegister, nextFrame, NO_MASK, NO_SHIFT);
+						pAuto->nextFrame = nextFrame;
 
 						pAuto->framesProcessed++; /// will go on air next vertical.
 
@@ -1057,7 +1076,7 @@ OemAutoCirculate(ULWord deviceNumber, NTV2Crosspoint channelSpec)
 							{
 								// calculate the error in the video interrupt period
 								ULWord64 time = 0;
-								LWord framePeriod = (LWord)GetFramePeriod(deviceNumber, syncChannel);
+								LWord framePeriod = (LWord)GetFramePeriod(&systemContext, syncChannel);
 								LWord discontinuityTime = 10000000;
 								if (GetSmpte372(&systemContext, syncChannel) || fieldMode)
 								{
@@ -1187,10 +1206,23 @@ OemAutoCirculate(ULWord deviceNumber, NTV2Crosspoint channelSpec)
 				if (pAuto->circulateWithAudio)
 				{
 	                StopAudioCapture(deviceNumber, pAuto->audioSystem);
+					while (pAuto->audioSystemCount)
+					{
+						ntv2WriteRegisterMS(&systemContext, GetAudioControlRegister(deviceNumber, (NTV2AudioSystem)(pAuto->audioSystemCount - 1)),
+											0, kRegMaskMultiLinkAudio, kRegShiftMultiLinkAudio);
+						pAuto->audioSystemCount--;
+					}
 				}
 				if (pAuto->circulateWithCustomAncData)
 				{
-					EnableAncExtractor(&systemContext, acChannel, false);
+					if (pAuto->circulateWithHDMIAux)
+					{
+						EnableAuxExtractor(&systemContext, acChannel, false);
+					}
+					else
+					{
+						EnableAncExtractor(&systemContext, acChannel, false);
+					}
 				}
             }
             else
@@ -1202,6 +1234,12 @@ OemAutoCirculate(ULWord deviceNumber, NTV2Crosspoint channelSpec)
 				if (pAuto->circulateWithAudio)
 				{
 	                StopAudioPlayback(deviceNumber, pAuto->audioSystem);
+					while (pAuto->audioSystemCount)
+					{
+						ntv2WriteRegisterMS(&systemContext, GetAudioControlRegister(deviceNumber, (NTV2AudioSystem)(pAuto->audioSystemCount - 1)),
+											0, kRegMaskMultiLinkAudio, kRegShiftMultiLinkAudio);
+						pAuto->audioSystemCount--;
+					}
 				}
 				if (pAuto->circulateWithCustomAncData)
 				{
@@ -1248,8 +1286,15 @@ OemAutoCirculate(ULWord deviceNumber, NTV2Crosspoint channelSpec)
     {
         if (pAuto->recording)
         {
-            SetAncExtField2WriteParams(&systemContext, acChannel, pAuto->nextFrame);
-        }
+			if (pAuto->circulateWithHDMIAux)
+			{
+				SetAuxExtField2WriteParams(&systemContext, acChannel, pAuto->nextFrame);
+			}
+			else
+			{
+            	SetAncExtField2WriteParams(&systemContext, acChannel, pAuto->nextFrame);
+        	}
+		}
         else
         {
             SetAncInsReadField2Params(&systemContext, acChannel, pAuto->nextFrame, pAuto->frameStamp[pAuto->nextFrame].ancField2TransferSize);
@@ -1279,7 +1324,7 @@ AutoCirculateControl(ULWord deviceNumber, AUTOCIRCULATE_DATA *pACData)
 									   pACData->channelSpec,
 									   pACData->lVal1,
 									   pACData->lVal2,
-									   (NTV2AudioSystem)pACData->lVal3,
+									   (NTV2AudioSystem)(pACData->lVal3 & NTV2AudioSystemRemoveValues),
 									   pACData->lVal4,
 									   pACData->bVal1,
 									   pACData->bVal2,
@@ -1290,7 +1335,10 @@ AutoCirculateControl(ULWord deviceNumber, AUTOCIRCULATE_DATA *pACData)
 									   pACData->bVal7,
 									   pACData->bVal8,
 									   ((pACData->lVal6 & AUTOCIRCULATE_WITH_FIELDS) != 0),
-									   ((pACData->lVal6 & AUTOCIRCULATE_WITH_HDMIAUX) != 0));
+									   ((pACData->lVal6 & AUTOCIRCULATE_WITH_HDMIAUX) != 0),
+									   ((pACData->lVal3 & NTV2_AUDIOSYSTEM_Plus1) != 0),
+									   ((pACData->lVal3 & NTV2_AUDIOSYSTEM_Plus2) != 0),
+									   ((pACData->lVal3 & NTV2_AUDIOSYSTEM_Plus3) != 0));
 		break;
 
 	case eStartAutoCirc:
@@ -1871,6 +1919,7 @@ AutoCirculateTransfer(ULWord deviceNumber, AUTOCIRCULATE_TRANSFER_COMBO_STRUCT *
 		dmaParams.toHost = pAuto->recording;
 		dmaParams.dmaEngine = eVideoDmaEngine;
 		dmaParams.videoChannel = channel;
+		dmaParams.audioSystemCount = pAuto->audioSystemCount;
 
 		if (((pTransferStruct->transferFlags & kTransferFlagP2PPrepare) == kTransferFlagP2PPrepare) ||
 			((pTransferStruct->transferFlags & kTransferFlagP2PTarget) == kTransferFlagP2PTarget))
@@ -2142,6 +2191,7 @@ AutoCirculateTransfer(ULWord deviceNumber, AUTOCIRCULATE_TRANSFER_COMBO_STRUCT *
 			dmaParams.audioSystem = pAuto->audioSystem;
 			dmaParams.audNumBytes = pTransferStruct->audioBufferSize;
 			dmaParams.audOffset = pAuto->audioTransferOffset;
+			dmaParams.audioSystemCount = pAuto->audioSystemCount;
 
 			status = dmaTransfer(&dmaParams);
 			if (status != 0)
@@ -2493,6 +2543,7 @@ AutoCirculateTransfer_Ex(ULWord deviceNumber, PDMA_PAGE_ROOT pPageRoot, AUTOCIRC
 					dmaParams.vidUserPitch = pTransferStruct->acInSegmentedDMAInfo.acSegmentHostPitch;
 					dmaParams.vidFramePitch = pTransferStruct->acInSegmentedDMAInfo.acSegmentDevicePitch;
 					dmaParams.numSegments = pTransferStruct->acInSegmentedDMAInfo.acNumSegments;
+					dmaParams.audioSystemCount = pAuto->audioSystemCount;
 
 					status = dmaTransfer(&dmaParams);
 					if (status != 0)
@@ -2565,6 +2616,7 @@ AutoCirculateTransfer_Ex(ULWord deviceNumber, PDMA_PAGE_ROOT pPageRoot, AUTOCIRC
 			dmaParams.vidUserPitch = pTransferStruct->acInSegmentedDMAInfo.acSegmentHostPitch;
 			dmaParams.vidFramePitch = pTransferStruct->acInSegmentedDMAInfo.acSegmentDevicePitch;
 			dmaParams.numSegments = pTransferStruct->acInSegmentedDMAInfo.acNumSegments;
+			dmaParams.audioSystemCount = pAuto->audioSystemCount;
 
 			if (pAuto->circulateWithAudio &&
 				(pTransferStruct->acAudioBuffer.fUserSpacePtr != 0) &&
@@ -2676,6 +2728,7 @@ AutoCirculateTransfer_Ex(ULWord deviceNumber, PDMA_PAGE_ROOT pPageRoot, AUTOCIRC
 			dmaParams.audioSystem = pAuto->audioSystem;
 			dmaParams.audNumBytes = pAuto->audioTransferSize;
 			dmaParams.audOffset = pAuto->audioTransferOffset;
+			dmaParams.audioSystemCount = pAuto->audioSystemCount;
 
 			status = dmaTransfer(&dmaParams);
 			if (status != 0)
@@ -2708,6 +2761,7 @@ AutoCirculateTransfer_Ex(ULWord deviceNumber, PDMA_PAGE_ROOT pPageRoot, AUTOCIRC
 			dmaParams.ancF2Frame = frameNumber;
 			dmaParams.ancF2NumBytes = pAuto->ancField2TransferSize;
 			dmaParams.ancF2Offset = pAuto->ancField2TransferOffset;
+			dmaParams.audioSystemCount = pAuto->audioSystemCount;
 
 			status = dmaTransfer(&dmaParams);
 			if (status != 0)
@@ -3080,7 +3134,10 @@ OemAutoCirculateInit (ULWord deviceNumber,
 					  bool bWithCustomAncData,
 					  bool bWithLTC,
 					  bool bWithFields,
-					  bool bWithHDMIAux)
+					  bool bWithHDMIAux,
+					  bool bWithASPlus1,
+					  bool bWithASPlus2,
+					  bool bWithASPlus3)
 {
 	Ntv2SystemContext systemContext;
 	NTV2PrivateParams* pNTV2Params;
@@ -3109,7 +3166,16 @@ OemAutoCirculateInit (ULWord deviceNumber,
 	    return -ECHRNG;
 	}
 
+	if (lStartFrameNum >= NTV2_MAX_FRAMEBUFFERS)
+		return -EINVAL;
+
+	if (lEndFrameNum >= NTV2_MAX_FRAMEBUFFERS)
+		return -EINVAL;
+
 	channelRange = lEndFrameNum - lStartFrameNum + 1;
+	if (channelRange >= NTV2_MAX_FRAMEBUFFERS)
+		return -EINVAL;
+    
 	csIndex = GetIndexForNTV2Crosspoint(channelSpec);
 	if (lChannelCount > 1)
 		pNTV2Params->_bMultiChannel = true;
@@ -3165,6 +3231,7 @@ OemAutoCirculateInit (ULWord deviceNumber,
 		pAuto->circulateWithFields			= bWithFields;
 		pAuto->circulateWithHDMIAux			= (loopCount == 0) ? bWithHDMIAux : false;
 		pAuto->audioSystem  = audioSystem;
+		pAuto->audioSystemCount = 0;
 		pAuto->channelCount = (loopCount == 0) ? lChannelCount : 0;
 		pAuto->VBIRDTSC = 0;
 		pAuto->VBILastRDTSC = 0;
@@ -3250,6 +3317,22 @@ OemAutoCirculateInit (ULWord deviceNumber,
 
 		if (pAuto->circulateWithAudio)
 		{
+			pAuto->audioSystemCount++;
+			if (bWithASPlus1)
+			{
+				ntv2WriteRegisterMS(&systemContext, GetAudioControlRegister(deviceNumber, (NTV2AudioSystem)(pAuto->audioSystem + 1)), 1, kRegMaskMultiLinkAudio, kRegShiftMultiLinkAudio);
+				pAuto->audioSystemCount++;
+				if (bWithASPlus2)
+				{
+					ntv2WriteRegisterMS(&systemContext, GetAudioControlRegister(deviceNumber, (NTV2AudioSystem)(pAuto->audioSystem + 2)), 1, kRegMaskMultiLinkAudio, kRegShiftMultiLinkAudio);
+					pAuto->audioSystemCount++;
+				}
+				if (bWithASPlus3)
+				{
+					ntv2WriteRegisterMS(&systemContext, GetAudioControlRegister(deviceNumber, (NTV2AudioSystem)(pAuto->audioSystem + 3)), 1, kRegMaskMultiLinkAudio, kRegShiftMultiLinkAudio);
+					pAuto->audioSystemCount++;
+				}
+			}
 			if (NTV2_IS_INPUT_CROSSPOINT(pAuto->channelSpec))
 			{
 				StopAudioCapture(deviceNumber, pAuto->audioSystem);
@@ -3273,10 +3356,27 @@ OemAutoCirculateInit (ULWord deviceNumber,
 		{
 			if (NTV2_IS_INPUT_CROSSPOINT(pAuto->channelSpec))
 			{
-				EnableAncInserter(&systemContext, ACChannel, false);
-				EnableAncExtractor(&systemContext, ACChannel, false);
-				SetupAncExtractor(&systemContext, ACChannel);
-				EnableAncExtractor(&systemContext, ACChannel, true);
+				if (pAuto->circulateWithHDMIAux)
+				{
+					if (NTV2DeviceCanDoCustomAux(pNTV2Params->_DeviceID))
+					{
+						EnableAuxExtractor(&systemContext, ACChannel, false);
+						SetupAuxExtractor(&systemContext, ACChannel);
+						EnableAuxExtractor(&systemContext, ACChannel, true);
+					}
+					else
+					{
+						pAuto->circulateWithHDMIAux = false;
+						pAuto->circulateWithCustomAncData = false;
+					}
+				}
+				else
+				{				
+					EnableAncInserter(&systemContext, ACChannel, false);
+					EnableAncExtractor(&systemContext, ACChannel, false);
+					SetupAncExtractor(&systemContext, ACChannel);
+					EnableAncExtractor(&systemContext, ACChannel, true);
+				}
 			}
 			else
 			{
@@ -3296,6 +3396,15 @@ OemAutoCirculateInit (ULWord deviceNumber,
 			//	Not using custom ANC, so turn off the firmware for the channel
 			EnableAncExtractor(&systemContext, ACChannel, false);
 			EnableAncInserter(&systemContext, ACChannel, false);
+		}
+
+		if (!pAuto->circulateWithHDMIAux)
+		{
+			if (NTV2_IS_INPUT_CROSSPOINT(pAuto->channelSpec) &&
+				NTV2DeviceCanDoCustomAux(pNTV2Params->_DeviceID))
+			{
+				EnableAuxExtractor(&systemContext, ACChannel, false);
+			}
 		}
 
 		if (pAuto->circulateWithRP188)
@@ -3424,7 +3533,14 @@ OemAutoCirculateStart(ULWord deviceNumber, NTV2Crosspoint channelSpec, ULWord64 
 
 			if (pAuto->circulateWithCustomAncData)
 			{
-				SetAncExtWriteParams(&systemContext, ACChannel, pAuto->startFrame);
+				if (pAuto->circulateWithHDMIAux)
+				{
+					SetAuxExtWriteParams(&systemContext, ACChannel, pAuto->startFrame);
+				}
+				else
+				{
+					SetAncExtWriteParams(&systemContext, ACChannel, pAuto->startFrame);
+				}
 			}
 		}
 		else // NTV2_IS_INPUT_CROSSPOINT(pautoChannelSpec)
@@ -3565,18 +3681,37 @@ OemAutoCirculateAbort (ULWord deviceNumber, NTV2Crosspoint channelSpec)
 				if (pAuto->circulateWithAudio)
 				{
 					StopAudioCapture(deviceNumber, pAuto->audioSystem);
+					while (pAuto->audioSystemCount)
+					{
+						ntv2WriteRegisterMS(&systemContext, GetAudioControlRegister(deviceNumber, (NTV2AudioSystem)(pAuto->audioSystemCount - 1)),
+											0, kRegMaskMultiLinkAudio, kRegShiftMultiLinkAudio);
+						pAuto->audioSystemCount--;
+					}
 				}
 
 				if (pAuto->circulateWithCustomAncData)
 				{
-					EnableAncExtractor(&systemContext, GetNTV2ChannelForNTV2Crosspoint(pAuto->channelSpec), false);
-				}
+					if (pAuto->circulateWithHDMIAux)
+					{
+						EnableAuxExtractor(&systemContext, GetNTV2ChannelForNTV2Crosspoint(pAuto->channelSpec), false);
+					}
+					else
+					{
+						EnableAncExtractor(&systemContext, GetNTV2ChannelForNTV2Crosspoint(pAuto->channelSpec), false);
+					}
+	        	}
 	        }
 	        else
 	        {
 				if (pAuto->circulateWithAudio)
 				{
 					StopAudioPlayback(deviceNumber, pAuto->audioSystem);
+					while (pAuto->audioSystemCount)
+					{
+						ntv2WriteRegisterMS(&systemContext, GetAudioControlRegister(deviceNumber, (NTV2AudioSystem)(pAuto->audioSystemCount - 1)),
+											0, kRegMaskMultiLinkAudio, kRegShiftMultiLinkAudio);
+						pAuto->audioSystemCount--;
+					}
 				}
 				else
 				{
@@ -4648,7 +4783,7 @@ GetAudioClock(ULWord deviceNumber)
 	ullRetVal=ullRetVal*10000;
 	if (NTV2DeviceCanDoAudio96K(pNTV2Params->_DeviceID))
 		// May need to change if a 2 channel 48/96 board exists in the future
-		do_div(ullRetVal, (ULWord64)(GetAudioSamplesPerSecond(deviceNumber, NTV2CROSSPOINT_CHANNEL1)/1000));
+		do_div(ullRetVal, (ULWord64)(GetAudioSamplesPerSecond(deviceNumber, NTV2_AUDIOSYSTEM_1)/1000));
 	else
 		do_div(ullRetVal, (ULWord64)(48));
 
@@ -4739,15 +4874,15 @@ StartAudioCapture(ULWord deviceNumber, NTV2AudioSystem audioSystem)
 	address = GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, &pSpinLock);
 
 	ntv2_spin_lock_irqsave(pSpinLock, flags);
-	value = READ_REGISTER_ULWord(address);
+	value = READ_REGISTER_ULWord(deviceNumber, address);
 	value |= BIT_8;
 	value &= ~BIT_0;
-	WRITE_REGISTER_ULWord(address, value);
+	WRITE_REGISTER_ULWord(deviceNumber, address, value);
 
-	value = READ_REGISTER_ULWord(address);
+	value = READ_REGISTER_ULWord(deviceNumber, address);
 	value |= BIT_0;
 	value &= ~BIT_8;
-	WRITE_REGISTER_ULWord(address, value);
+	WRITE_REGISTER_ULWord(deviceNumber, address, value);
 	ntv2_spin_unlock_irqrestore(pSpinLock, flags);
 }
 
@@ -4772,10 +4907,10 @@ StopAudioCapture(ULWord deviceNumber, NTV2AudioSystem audioSystem)
 	address = GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, &pSpinLock);
 
 	ntv2_spin_lock_irqsave(pSpinLock, flags);
-	value = READ_REGISTER_ULWord(address);
+	value = READ_REGISTER_ULWord(deviceNumber, address);
 	value |= BIT_8;
 	value &= ~BIT_0;
-	WRITE_REGISTER_ULWord(address, value);
+	WRITE_REGISTER_ULWord(deviceNumber, address, value);
 	ntv2_spin_unlock_irqrestore(pSpinLock, flags);
 }
 
@@ -4801,9 +4936,9 @@ StopAudioPlayback(ULWord deviceNumber, NTV2AudioSystem audioSystem)
 
     // Reset Audio Playback... basically stops it.
 	ntv2_spin_lock_irqsave(pSpinLock, flags);
-	value = READ_REGISTER_ULWord(address);
+	value = READ_REGISTER_ULWord(deviceNumber, address);
 	value |= BIT_9; //Set the Audio Output reset bit!
-	WRITE_REGISTER_ULWord(address, value);
+	WRITE_REGISTER_ULWord(deviceNumber, address, value);
 	ntv2_spin_unlock_irqrestore(pSpinLock, flags);
 	if (MsgsEnabled(NTV2_DRIVER_AUDIO_DEBUG_MESSAGES))
 	{
@@ -4834,10 +4969,10 @@ StartAudioPlayback(ULWord deviceNumber, NTV2AudioSystem audioSystem)
 	address = GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, &pSpinLock);
 
 	ntv2_spin_lock_irqsave(pSpinLock, flags);
-	value = READ_REGISTER_ULWord(address);
+	value = READ_REGISTER_ULWord(deviceNumber, address);
 
 	value &= (~BIT_9); //Clear the Audio Output reset bit!
-	WRITE_REGISTER_ULWord(address, value);
+	WRITE_REGISTER_ULWord(deviceNumber, address, value);
     udelay(30); //30us
 
 	ntv2_spin_unlock_irqrestore(pSpinLock, flags);
@@ -4868,7 +5003,7 @@ SetAudioPlaybackMode(ULWord deviceNumber, NTV2_GlobalAudioPlaybackMode mode)
 	{
 	case NTV2_AUDIOPLAYBACK_NOW:
 		// Hardwire channel to match windriver/vidfilter.cpp
-		StartAudioPlayback(deviceNumber, NTV2CROSSPOINT_CHANNEL1);
+		StartAudioPlayback(deviceNumber, NTV2_AUDIOSYSTEM_1);
 		break;
 	case NTV2_AUDIOPLAYBACK_NEXTFRAME:
 		pNTV2Params->_startAudioNextFrame = true;
@@ -5070,10 +5205,10 @@ PauseAudioPlayback(ULWord deviceNumber, NTV2AudioSystem audioSystem)
 	address = GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, & pSpinLock);
 
 	ntv2_spin_lock_irqsave(pSpinLock, flags);
-	value = READ_REGISTER_ULWord(address);
+	value = READ_REGISTER_ULWord(deviceNumber, address);
 
 	value |= BIT_11; 	// Set the pause bit
-	WRITE_REGISTER_ULWord(address, value);
+	WRITE_REGISTER_ULWord(deviceNumber, address, value);
 	ntv2_spin_unlock_irqrestore(pSpinLock, flags);
 }
 
@@ -5099,10 +5234,10 @@ UnPauseAudioPlayback(ULWord deviceNumber, NTV2AudioSystem audioSystem)
 	address = GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, &pSpinLock);
 
 	ntv2_spin_lock_irqsave(pSpinLock, flags);
-	value = READ_REGISTER_ULWord(address);
+	value = READ_REGISTER_ULWord(deviceNumber, address);
 
 	value &= ~ (BIT_11);  // Clear the pause bit
-	WRITE_REGISTER_ULWord(address, value);
+	WRITE_REGISTER_ULWord(deviceNumber, address, value);
 	ntv2_spin_unlock_irqrestore(pSpinLock, flags);
 }
 
@@ -5111,7 +5246,7 @@ IsAudioPlaybackPaused(ULWord deviceNumber, NTV2AudioSystem audioSystem)
 {
 	bool paused = 0;
 
-	if ((READ_REGISTER_ULWord(GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, NULL)) & BIT_11))
+	if ((READ_REGISTER_ULWord(deviceNumber, GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, NULL)) & BIT_11))
 	{
 		paused = 1;
 	}
@@ -5130,7 +5265,7 @@ static bool
 IsAudioPlaybackStopped(ULWord deviceNumber, NTV2AudioSystem audioSystem)
 {
 	// Audio is (supposed) to be playing if BIT_9 is cleared (not in reset)
-	if ((READ_REGISTER_ULWord(GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, NULL)) & BIT_9) != 0)
+	if ((READ_REGISTER_ULWord(deviceNumber, GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, NULL)) & BIT_9) != 0)
 		return 1;
 
 	return 0;
@@ -5140,7 +5275,7 @@ static ULWord
 IsAudioPlaying(ULWord deviceNumber, NTV2AudioSystem audioSystem)
 {
 	// Audio is (supposed) to be playing if BIT_9 is cleared (not in reset)
-	if ((READ_REGISTER_ULWord(GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, NULL)) & BIT_9) == 0)
+	if ((READ_REGISTER_ULWord(deviceNumber, GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, NULL)) & BIT_9) == 0)
 		return 1;
 
 	return 0;
@@ -5183,11 +5318,16 @@ oemAutoCirculateDmaAudioSetup(ULWord deviceNumber, INTERNAL_AUTOCIRCULATE_STRUCT
 
 		// save this for oemCompleteAutoCirculateTransfer
 		pAuto->audioTransferSize = ulPreWrapSize + ulPostWrapSize;
+        pAuto->audioTransferSize *= pAuto->audioSystemCount;
 		pAuto->audioStartSample = 0;
 	}
 	else
 	{
 		ULWord ulAudioBytes = pAuto->audioTransferSize;
+		if (pAuto->audioSystemCount > 1)
+		{
+			ulAudioBytes = ulAudioBytes/pAuto->audioSystemCount;
+		}
 
 		if(pAuto->audioDropsRequired > pAuto->audioDropsCompleted)
 		{
@@ -5229,110 +5369,113 @@ OemAutoCirculateSetupColorCorrector(ULWord deviceNumber,
 									NTV2Crosspoint channelSpec,
 									INTERNAL_ColorCorrectionInfo *ccInfo)
 {
-	if (!NTV2DeviceCanDoColorCorrection(getNTV2Params(deviceNumber)->_DeviceID))
+	NTV2PrivateParams* ntv2pp = getNTV2Params(deviceNumber);
+	Ntv2SystemContext* systemContext = &ntv2pp->systemContext;
+	
+	if (!NTV2DeviceCanDoColorCorrection(ntv2pp->_DeviceID))
 		return;
 
 	// Find current output bank and make host access bank the other bank.
 	switch (channelSpec)
 	{
 	case NTV2CROSSPOINT_CHANNEL1:
-		if (GetColorCorrectionOutputBank(deviceNumber, NTV2_CHANNEL1) == 1)
+		if (GetColorCorrectionOutputBank(systemContext, NTV2_CHANNEL1) == 1)
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH1BANK0);  // happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL1, 0)	;				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH1BANK0);  // happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL1, 0)	;				// happens next frame
 		}
 		else
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH1BANK1);  // happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL1, 1)	;				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH1BANK1);  // happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL1, 1)	;				// happens next frame
 		}
-		SetColorCorrectionSaturation (deviceNumber, NTV2_CHANNEL1, ccInfo->saturationValue);
-		SetColorCorrectionMode(deviceNumber, NTV2_CHANNEL1, ccInfo->mode);
+		SetColorCorrectionSaturation (systemContext, NTV2_CHANNEL1, ccInfo->saturationValue);
+		SetColorCorrectionMode(systemContext, NTV2_CHANNEL1, ccInfo->mode);
 		break;
 	case NTV2CROSSPOINT_CHANNEL2:
-		if (GetColorCorrectionOutputBank(deviceNumber, NTV2_CHANNEL2) == 1)
+		if (GetColorCorrectionOutputBank(systemContext, NTV2_CHANNEL2) == 1)
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH2BANK0);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL2, 0)	;				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH2BANK0);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL2, 0)	;				// happens next frame
 		}
 		else
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH2BANK1);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL2, 1);				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH2BANK1);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL2, 1);				// happens next frame
 		}
-		SetColorCorrectionSaturation (deviceNumber, NTV2_CHANNEL2, ccInfo->saturationValue);
-		SetColorCorrectionMode(deviceNumber, NTV2_CHANNEL2, ccInfo->mode);
+		SetColorCorrectionSaturation (systemContext, NTV2_CHANNEL2, ccInfo->saturationValue);
+		SetColorCorrectionMode(systemContext, NTV2_CHANNEL2, ccInfo->mode);
 		break;
 	case NTV2CROSSPOINT_CHANNEL3:
-		if (GetColorCorrectionOutputBank(deviceNumber, NTV2_CHANNEL3) == 1)
+		if (GetColorCorrectionOutputBank(systemContext, NTV2_CHANNEL3) == 1)
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH3BANK0);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL3, 0)	;				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH3BANK0);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL3, 0)	;				// happens next frame
 		}
 		else
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH3BANK1);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL3, 1);				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH3BANK1);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL3, 1);				// happens next frame
 		}
 		break;
 	case NTV2CROSSPOINT_CHANNEL4:
-		if (GetColorCorrectionOutputBank(deviceNumber, NTV2_CHANNEL4) == 1)
+		if (GetColorCorrectionOutputBank(systemContext, NTV2_CHANNEL4) == 1)
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH4BANK0);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL4, 0)	;				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH4BANK0);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL4, 0)	;				// happens next frame
 		}
 		else
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH4BANK1);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL4, 1);				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH4BANK1);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL4, 1);				// happens next frame
 		}
 		break;
 	case NTV2CROSSPOINT_CHANNEL5:
-		if (GetColorCorrectionOutputBank(deviceNumber, NTV2_CHANNEL5) == 1)
+		if (GetColorCorrectionOutputBank(systemContext, NTV2_CHANNEL5) == 1)
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH5BANK0);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL5, 0)	;				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH5BANK0);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL5, 0)	;				// happens next frame
 		}
 		else
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH5BANK1);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL5, 1);				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH5BANK1);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL5, 1);				// happens next frame
 		}
 		break;
 	case NTV2CROSSPOINT_CHANNEL6:
-		if (GetColorCorrectionOutputBank(deviceNumber, NTV2_CHANNEL6) == 1)
+		if (GetColorCorrectionOutputBank(systemContext, NTV2_CHANNEL6) == 1)
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH6BANK0);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL6, 0)	;				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH6BANK0);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL6, 0)	;				// happens next frame
 		}
 		else
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH6BANK1);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL6, 1);				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH6BANK1);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL6, 1);				// happens next frame
 		}
 		break;
 	case NTV2CROSSPOINT_CHANNEL7:
-		if (GetColorCorrectionOutputBank(deviceNumber, NTV2_CHANNEL7) == 1)
+		if (GetColorCorrectionOutputBank(systemContext, NTV2_CHANNEL7) == 1)
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH7BANK0);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL7, 0)	;				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH7BANK0);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL7, 0)	;				// happens next frame
 		}
 		else
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH7BANK1);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL7, 1);				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH7BANK1);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL7, 1);				// happens next frame
 		}
 		break;
 	case NTV2CROSSPOINT_CHANNEL8:
-		if (GetColorCorrectionOutputBank(deviceNumber, NTV2_CHANNEL8) == 1)
+		if (GetColorCorrectionOutputBank(systemContext, NTV2_CHANNEL8) == 1)
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH8BANK0);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL8, 0)	;				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH8BANK0);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL8, 0)	;				// happens next frame
 		}
 		else
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH8BANK1);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL8, 1);				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH8BANK1);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL8, 1);				// happens next frame
 		}
 		break;
 	default:
@@ -5375,84 +5518,6 @@ OemAutoCirculateTransferColorCorrectorInfo(ULWord deviceNumber,
 	} else {
 		return 0;
 	}
-}
-
-// this assumes we have one 1024-entry LUT that we're going to download to all three channels
-ULWord
-DownloadLinearLUTToHW (ULWord deviceNumber, NTV2Channel channel, int bank)
-{
-	ULWord bResult;
-	ULWord lutValue;
-	ULWord i;
-	unsigned long address;
-	NTV2ColorCorrectionHostAccessBank savedBank;
-
-	bResult = 1;
-	if (NTV2DeviceCanDoColorCorrection(getNTV2Params(deviceNumber)->_DeviceID))
-	{
-		savedBank = GetColorCorrectionHostAccessBank(deviceNumber, channel);
-
-		SetLUTEnable(deviceNumber, channel, true);
-		// setup Host Access
-		switch (channel)
-		{
-		case NTV2_CHANNEL1:
-			SetColorCorrectionHostAccessBank(
-				deviceNumber, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH1BANK0 + bank));
-			break;
-		case NTV2_CHANNEL2:
-			SetColorCorrectionHostAccessBank(
-				deviceNumber, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH2BANK0 + bank));
-			break;
-		case NTV2_CHANNEL3:
-			SetColorCorrectionHostAccessBank(
-				deviceNumber, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH3BANK0 + bank));
-			break;
-		case NTV2_CHANNEL4:
-			SetColorCorrectionHostAccessBank(
-				deviceNumber, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH4BANK0 + bank));
-			break;
-		case NTV2_CHANNEL5:
-			SetColorCorrectionHostAccessBank(
-				deviceNumber, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH5BANK0 + bank));
-			break;
-		case NTV2_CHANNEL6:
-			SetColorCorrectionHostAccessBank(
-				deviceNumber, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH6BANK0 + bank));
-			break;
-		case NTV2_CHANNEL7:
-			SetColorCorrectionHostAccessBank(
-				deviceNumber, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH7BANK0 + bank));
-			break;
-		case NTV2_CHANNEL8:
-			SetColorCorrectionHostAccessBank(
-				deviceNumber, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH8BANK0 + bank));
-			break;
-		default:
-			MSG("Download linear LUT bad channel %d\n", channel);
-			return 0;
-		}
-
-		for (i = 0; i < 1024;  i += 2)
-		{
-			// Tables are already converted to ints and endian swapped for the Mac
-			lutValue = ((i+1)<<22) + (i<<6);
-
-			address = (unsigned long)(getNTV2Params(deviceNumber)->_pGlobalControl + (kColorCorrectionLUTOffset_Red)   + (i*2));
-			WRITE_REGISTER_ULWord(address, lutValue);
-
-			address = (unsigned long)(getNTV2Params(deviceNumber)->_pGlobalControl + (kColorCorrectionLUTOffset_Green) + (i*2));
-			WRITE_REGISTER_ULWord(address, lutValue);
-
-			address = (unsigned long)(getNTV2Params(deviceNumber)->_pGlobalControl + (kColorCorrectionLUTOffset_Blue)  + (i*2));
-			WRITE_REGISTER_ULWord(address, lutValue);
-		}
-		SetLUTEnable(deviceNumber, channel, false);
-
-		SetColorCorrectionHostAccessBank(deviceNumber, savedBank);
-	}
-
-	return bResult;
 }
 
 static void
@@ -5550,13 +5615,16 @@ OemAutoCirculateSetupVidProc(ULWord deviceNumber,
 	ULWord softnessSlope;
 	ULWord regValue;
 
-	if (!NTV2DeviceCanDoVideoProcessing(getNTV2Params(deviceNumber)->_DeviceID))
+	NTV2PrivateParams* ntv2pp = getNTV2Params(deviceNumber);
+	Ntv2SystemContext* systemContext = &ntv2pp->systemContext;
+
+	if (!NTV2DeviceCanDoVideoProcessing(ntv2pp->_DeviceID))
 		return;
 
-	SetForegroundVideoCrosspoint(deviceNumber, vidProcInfo->foregroundVideoCrosspoint);
-	SetForegroundKeyCrosspoint(deviceNumber, vidProcInfo->foregroundKeyCrosspoint);
-	SetBackgroundVideoCrosspoint(deviceNumber, vidProcInfo->backgroundVideoCrosspoint);
-	SetBackgroundKeyCrosspoint(deviceNumber, vidProcInfo->backgroundKeyCrosspoint);
+	SetForegroundVideoCrosspoint(systemContext, vidProcInfo->foregroundVideoCrosspoint);
+	SetForegroundKeyCrosspoint(systemContext, vidProcInfo->foregroundKeyCrosspoint);
+	SetBackgroundVideoCrosspoint(systemContext, vidProcInfo->backgroundVideoCrosspoint);
+	SetBackgroundKeyCrosspoint(systemContext, vidProcInfo->backgroundKeyCrosspoint);
 
 	regValue = ReadRegister(deviceNumber, kRegVidProc1Control, NO_MASK, NO_SHIFT);
 	regValue &= ~(VIDPROCMUX1MASK + VIDPROCMUX2MASK + VIDPROCMUX3MASK);
@@ -5823,81 +5891,6 @@ GetNTV2VideoFormat(UByte status, UByte frameRateHiBit)
 	return videoFormat;
 }
 
-static LWord
-GetFramePeriod(ULWord deviceNumber, NTV2Channel channel)
-{
-	Ntv2SystemContext systemContext;
-	NTV2FrameRate frameRate;
-	LWord period;
-	systemContext.devNum = deviceNumber;
-	frameRate = GetFrameRate(&systemContext, channel);
-
-	switch (frameRate)
-	{
-	case NTV2_FRAMERATE_12000:
-		period = 10000000/120;
-		break;
-	case NTV2_FRAMERATE_11988:
-		period = 10010000/120;
-		break;
-	case NTV2_FRAMERATE_6000:
-		period = 10000000/60;
-		break;
-	case NTV2_FRAMERATE_5994:
-		period = 10010000/60;
-		break;
-	case NTV2_FRAMERATE_4800:
-		period = 10000000/48;
-		break;
-	case NTV2_FRAMERATE_4795:
-		period = 10010000/48;
-		break;
-	case NTV2_FRAMERATE_3000:
-		period = 10000000/30;
-		break;
-	case NTV2_FRAMERATE_2997:
-		period = 10010000/30;
-		break;
-	case NTV2_FRAMERATE_2500:
-		period = 10000000/25;
-		break;
-	case NTV2_FRAMERATE_2400:
-		period = 10000000/24;
-		break;
-	case NTV2_FRAMERATE_2398:
-		period = 10010000/24;
-		break;
-	case NTV2_FRAMERATE_5000:
-		period = 10000000/50;
-		break;
-#if !defined(NTV2_DEPRECATE_16_0)
-	case NTV2_FRAMERATE_1900:
-		period = 10000000/19;
-		break;
-	case NTV2_FRAMERATE_1898:
-		period = 10010000/19;
-		break;
-	case NTV2_FRAMERATE_1800:
-		period = 10000000/18;
-		break;
-	case NTV2_FRAMERATE_1798:
-		period = 10010000/18;
-		break;
-#endif	//	!defined(NTV2_DEPRECATE_16_0)
-	case NTV2_FRAMERATE_1500:
-		period = 10000000/15;
-		break;
-	case NTV2_FRAMERATE_1498:
-		period = 10010000/15;
-		break;
-	case NTV2_FRAMERATE_UNKNOWN:
-	default:
-		period = 10000000;
-	}
-
-	return period;
-}
-
 static ULWord
 GetNumAudioChannels(ULWord deviceNumber, NTV2AudioSystem audioSystem)
 {
@@ -5933,7 +5926,9 @@ GetAudioSamplesPerFrame(ULWord deviceNumber, NTV2AudioSystem audioSystem, ULWord
 	{
 		switch (audioSystem)
 		{
-		default:
+		case NTV2_AUDIOSYSTEM_Plus1:
+			case NTV2_AUDIOSYSTEM_Plus2:
+			case NTV2_AUDIOSYSTEM_Plus3:
 		case NTV2_NUM_AUDIOSYSTEMS:		// This is probably an error
 		case NTV2_AUDIOSYSTEM_1:
 			channel = NTV2_CHANNEL1;
