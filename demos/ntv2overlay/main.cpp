@@ -48,15 +48,10 @@ int main (int argc, const char ** argv)
 
 	//	Device
 	const string deviceSpec (pDeviceSpec ? pDeviceSpec : "0");
-	if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
-		return 1;
-
 	OverlayConfig config(deviceSpec);
-	config.fInputSource		= NTV2_INPUTSOURCE_SDI1;
-	config.fOutputDest		= NTV2_OUTPUTDESTINATION_SDI1;
-	config.fPixelFormat		= NTV2_FBF_10BIT_YCBCR;
+	config.fInputSource		= NTV2_INPUTSOURCE_SDI1;	//	Use NTV2_INPUTSOURCE_HDMI1 or NTV2_INPUTSOURCE_SDI1
+	config.fPixelFormat		= NTV2_FBF_ARGB;			//	Use NTV2_FBF_8BIT_YCBCR or NTV2_FBF_ARGB
 	config.fDoMultiFormat	= true;
-	config.fVerbose			= true;
 
 	//	Instantiate the NTV2Overlay object...
 	NTV2Overlay overlayer (config);
@@ -79,8 +74,7 @@ int main (int argc, const char ** argv)
 	ULWord counter(0);
 	do
 	{
-		cout	<< setw(9) << ++counter
-				<< "\r" << flush;
+		cout << setw(9) << ++counter << "\r" << flush;
 		AJATime::Sleep(2000);
 	} while (!gGlobalQuit);	//	loop until signaled
 

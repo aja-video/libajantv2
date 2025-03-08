@@ -37,6 +37,7 @@ class NTV2Overlay
 		void			ReleaseCaptureBuffers (void);	///< @brief	Frees capture buffers & ring
 		AJAStatus		SetupOverlayBug (void);			///< @brief	Sets up overlay "bug"
 		NTV2VideoFormat	WaitForStableInputSignal (void);///< @brief	Waits for stable input signal
+		bool			IsInputSignalRGB (void);		///< @returns	true if input signal is RGB
 		void			RouteInputSignal (void);		///< @brief	Performs input routing
 		void			RouteOverlaySignal (void);		///< @brief	Performs overlay routing
 		void			RouteOutputSignal (void);		///< @brief	Performs output routing
@@ -58,7 +59,6 @@ class NTV2Overlay
 		AJAThread				mCaptureThread;		///< @brief	My input thread object
 		CNTV2Card				mDevice;			///< @brief	My CNTV2Card instance
 		NTV2VideoFormat			mVideoFormat;		///< @brief	Input video format (for change detection)
-		NTV2LHIHDMIColorSpace	mHDMIColorSpace;	///< @brief	HDMI input colorspace (for change detection)
 		NTV2Buffer				mBug;				///< @brief	Overlay "bug" image buffer
 		NTV2RasterInfo			mBugRasterInfo;		///< @brief	Overlay "bug" raster info
 		NTV2TaskMode			mSavedTaskMode;		///< @brief	For restoring prior state
