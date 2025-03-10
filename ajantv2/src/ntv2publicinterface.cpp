@@ -409,6 +409,47 @@ string NTV2Buffer::AsString (UWord inDumpMaxBytes) const
 	return oss.str();
 }
 
+string NTV2Buffer::AsCode (const size_t inBytesPerWord, const std::string & inVarName, const bool inUseSTL, const bool inByteSwap) const
+{
+	ostringstream oss;
+	if (inBytesPerWord != 1 && inBytesPerWord != 2 && inBytesPerWord != 4 && inBytesPerWord != 8) return string();
+	NTV2Buffer tmp;
+	if (inBytesPerWord > 1)
+	{	//	Use a copy for U16s, U32s, or U64s...
+		tmp = *this;
+		if (!tmp)
+			return string();
+	}
+	const string cType (inBytesPerWord == 1 ? "uint8_t" : (inBytesPerWord == 2 ? "uint16_t" : (inBytesPerWord == 4 ? "uint32_t" : "uint64_t")));
+	const size_t numWords (GetByteCount() / inBytesPerWord);
+	const string vecType = "std::vector<" + cType + ">";
+	const string varName (inVarName.empty() ? (inUseSTL ? "tmpVector" : "tmpArray") : inVarName);
+	oss << "const " << (inUseSTL ? vecType : cType) << " " << varName << (inUseSTL ? "" : "[]") << " = {" << endl;
+	if (inByteSwap && inBytesPerWord > 1)
+		switch (inBytesPerWord)
+		{
+			case 2:	tmp.ByteSwap16();  break;
+			case 4:	tmp.ByteSwap32();  break;
+			case 8:	tmp.ByteSwap64();  break;
+		}
+	for (size_t ndx(0);  ndx < numWords;  )
+	{
+		switch (inBytesPerWord)
+		{
+			case 1:	oss << xHEX0N(UWord(U8(ndx)),2);	break;
+			case 2:	oss << xHEX0N(tmp.U16(ndx),4);		break;
+			case 4:	oss << xHEX0N(tmp.U32(ndx),8);		break;
+			case 8:	oss << xHEX0N(tmp.U64(ndx),16);		break;
+		}
+		if (++ndx < numWords)
+			oss << ",";
+		if (ndx % 128 == 0)
+			oss << endl;
+	}
+	oss << "};" << endl;
+	return oss.str();
+}
+
 bool NTV2Buffer::toHexString (std::string & outStr, const size_t inLineBreakInterval) const
 {
 	outStr.clear();

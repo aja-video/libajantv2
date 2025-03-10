@@ -6606,6 +6606,15 @@ typedef enum
 				std::string		AsString (UWord inDumpMaxBytes = 0) const;
 
 				/**
+					@param	inBytesPerWord	Word size, in bytes. Must be 1, 2, 4 or 8. Defaults to 4.
+					@param	inVarName		Optionally specifies the variable name to use.
+					@param	inUseSTL		Optionally specifies if std::vector should be used instead of a C-style array.
+					@param	inByteSwap		Optionally specifies if 2/4/8-byte words should be byte-swapped.
+					@return A string containing C/C++ code that will reproduce my contents.
+				**/
+				std::string		AsCode (const size_t inBytesPerWord = 4, const std::string & inVarName = "", const bool inUseSTL = false, const bool inByteSwap = false) const;
+
+				/**
 					@brief	Converts my contents into a hex-encoded string.
 					@param[out]	outStr				Receives the hexadecimal-encoded string representation of my contents.
 					@param[in]	inLineBreakInterval	Optionally inserts a newline into the resulting string at the specified
