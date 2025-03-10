@@ -1480,6 +1480,8 @@ bool SetVideoOutputStandard(Ntv2SystemContext* context, NTV2Channel channel)
 	}
 
 	//ntv2Message("xptSelect = %d\n", xptSelect);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 	switch(xptSelect)
 	{
 	case NTV2_XptConversionModule:
@@ -1521,6 +1523,7 @@ bool SetVideoOutputStandard(Ntv2SystemContext* context, NTV2Channel channel)
 			return false;
 		}
 	}
+#pragma GCC diagnostic pop
 
 	//ntv2Message("format = %d  standard = %d\n", videoFormat, standard);
 

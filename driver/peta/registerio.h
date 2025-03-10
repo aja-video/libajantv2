@@ -52,7 +52,10 @@
 #include "ntv2driverautocirculate.h"
 #include "../ntv2hdmiin.h"
 #include "../ntv2hdmiin4.h"
-//#include "../ntv2kona.h"
+#include "../ntv2kona.h"
+#include "../ntv2setup.h"
+#include "../ntv2genlock2.h"
+#include "../ntv2videoraster.h"
 
 // clean old stuff
 #define FGVCROSSPOINTMASK (BIT_0+BIT_1+BIT_2+BIT_3)
@@ -89,6 +92,14 @@
 
 #define NTV2_MAX_HDMI_MONITOR	4
 
+// module driver mode
+typedef enum _NTV2DriveMode
+{
+    eDriverModeAll = 0,     // support all driver functions
+    eDriverModeRegister,    // only support register access
+    eDriverModeGenlock      // register access with genlock initialization
+} NTV2DriverMode;
+
 // Singleton module params
 typedef struct ntv2_module_private
 {
@@ -97,6 +108,8 @@ typedef struct ntv2_module_private
 	char *	name;
 	char *	driverName;
 	ULWord	intrBitLut[eNumInterruptTypes];
+	struct class *class;
+    NTV2DriverMode driverMode;
 
 	// uart driver
 	struct uart_driver 			*uart_driver;
@@ -104,6 +117,11 @@ typedef struct ntv2_module_private
 	atomic_t					uart_index;
 
 } NTV2ModulePrivateParams;
+
+typedef struct _fileData
+{
+	DMA_PAGE_ROOT dmaRoot;
+} FILE_DATA, *PFILE_DATA;
 
 typedef enum
 {
@@ -422,13 +440,13 @@ typedef struct ntv2_private
 
 	Ntv2SystemContext		systemContext;
 //    struct ntv2_genlock		*m_pGenlockMonitor;
-//    struct ntv2_genlock2	*m_pGenlock2Monitor;
+    struct ntv2_genlock2	*m_pGenlock2Monitor;
     struct ntv2_videoraster *m_pRasterMonitor;
 	struct ntv2_hdmiin		*m_pHDMIInputMonitor[NTV2_MAX_HDMI_MONITOR];
 	struct ntv2_hdmiin4		*m_pHDMIIn4Monitor[NTV2_MAX_HDMI_MONITOR];
 	struct ntv2_hdmiout4	*m_pHDMIOut4Monitor[NTV2_MAX_HDMI_MONITOR];
 	struct ntv2_serial		*m_pSerialPort;
-	struct ntv2_mcap		*m_pBitstream;
+	struct ntv2_setup		*m_pSetupMonitor;
 
 	bool registerEnable;
 	bool serialActive;
