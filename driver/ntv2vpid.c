@@ -80,6 +80,8 @@ static const ULWord	gChannelToSDIOutVPIDLuminance[] = {	kVRegNTV2VPIDLuminance1,
 static const ULWord	gChannelToSDIOutVPIDRGBRange[] = {	kVRegNTV2VPIDRGBRange1, kVRegNTV2VPIDRGBRange2, kVRegNTV2VPIDRGBRange3, kVRegNTV2VPIDRGBRange4,
 														kVRegNTV2VPIDRGBRange5, kVRegNTV2VPIDRGBRange6, kVRegNTV2VPIDRGBRange7, kVRegNTV2VPIDRGBRange8, 0 };
 
+static const ULWord	gChannelToLPIPOutConfig[] = { kRegLPIPOut1Config, kRegLPIPOut2Config, kRegLPIPOut3Config, kRegLPIPOut4Config, 0 };
+
 /*********************************************/
 /* Prototypes for private utility functions. */
 /*********************************************/
@@ -230,6 +232,13 @@ bool SetSDIOutVPID(Ntv2SystemContext* context, NTV2Channel channel, ULWord value
 
 	return true;
 }	//	SetSDIOutVPID
+
+bool Set2110Key(Ntv2SystemContext* context, NTV2Channel channel, bool setKey)
+{
+	if (channel > NTV2_CHANNEL4)
+		return false;
+	return ntv2WriteRegisterMS(context, gChannelToLPIPOutConfig[channel], setKey ? 1 : 0, kRegMaskIPIsKey, kRegShiftIPIsKey);
+}
 
 bool AdjustFor4KDC(Ntv2SystemContext* context, VPIDControl * pControl)
 {
@@ -582,6 +591,8 @@ bool FindVPID(Ntv2SystemContext* context, NTV2OutputXptID startingXpt, VPIDContr
 		case NTV2_XptCSC6VidYUV:
 		case NTV2_XptCSC7VidYUV:
 		case NTV2_XptCSC8VidYUV:
+			pControl->flags = (VPIDFlags)(pControl->flags | CSCInPath);
+			break;
 		case NTV2_XptCSC1KeyYUV:
 		case NTV2_XptCSC2KeyYUV:
 		case NTV2_XptCSC3KeyYUV:
@@ -590,7 +601,14 @@ bool FindVPID(Ntv2SystemContext* context, NTV2OutputXptID startingXpt, VPIDContr
 		case NTV2_XptCSC6KeyYUV:
 		case NTV2_XptCSC7KeyYUV:
 		case NTV2_XptCSC8KeyYUV:
+			pControl->flags = (VPIDFlags)(pControl->flags | KeySignal);
 			pControl->flags = (VPIDFlags)(pControl->flags | CSCInPath);
+			break;
+		case NTV2_XptMixer1KeyYUV:
+		case NTV2_XptMixer2KeyYUV:
+		case NTV2_XptMixer3KeyYUV:
+		case NTV2_XptMixer4KeyYUV:
+			pControl->flags = (VPIDFlags)(pControl->flags | KeySignal);
 			break;
 		//	If a dual link widget DS 1
 		case NTV2_XptDuallinkOut1:
@@ -955,5 +973,7 @@ bool SetVPIDOutput(Ntv2SystemContext* context, NTV2Channel channel)
 			vpidControlDS2.value = vpidControlDS1.value | 0x40;
 	}
 
+	if (((vpidControlDS1.flags | KeySignal) == 1) && NTV2DeviceCanDo25GIP(deviceID))
+		Set2110Key(context, channel, vpidControlDS1.flags & KeySignal);
 	return SetSDIOutVPID(context, channel, vpidControlDS1.value, vpidControlDS2.value);
 }	//	SetVPIDOutput

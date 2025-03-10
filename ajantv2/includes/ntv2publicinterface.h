@@ -1115,7 +1115,9 @@ typedef enum
 	kRegMaskIPOut1Active	= BIT(24),
 	kRegMaskIPOut2Active	= BIT(25),
 	kRegMaskIPOut3Active	= BIT(26),
-	kRegMaskIPOut4Active	= BIT(27)
+	kRegMaskIPOut4Active	= BIT(27),
+
+	kRegMaskIPIsKey			= BIT(0)
 } NTV2LocalProcRegisterMask;
 
 typedef enum
@@ -1131,7 +1133,9 @@ typedef enum
 	kRegShiftIPOut1Active	= 24,
 	kRegShiftIPOut2Active	= 25,
 	kRegShiftIPOut3Active	= 26,
-	kRegShiftIPOut4Active	= 27
+	kRegShiftIPOut4Active	= 27,
+
+	kRegShiftIPIsKey		= 0
 } NTV2LocalProcRegisterShift;
 
 

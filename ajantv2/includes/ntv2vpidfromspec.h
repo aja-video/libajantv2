@@ -45,12 +45,13 @@ typedef struct
 
 typedef enum
 {
-	dualStreamFlag = 1,
-	output3GFlag = 2,
-	output3GbFlag = 4,
-	SMPTE425Flag = 8,
-	DC4KInPath = 16,
-	CSCInPath = 32
+	dualStreamFlag = BIT(0),
+	output3GFlag = BIT(1),
+	output3GbFlag = BIT(2),
+	SMPTE425Flag = BIT(3),
+	DC4KInPath = BIT(4),
+	CSCInPath = BIT(5),
+	KeySignal = BIT(6)
 } VPIDFlags;
 
 typedef struct
