@@ -2798,6 +2798,8 @@ void DisableAllInterrupts(ULWord deviceNumber)
 							 ? NTV2DeviceGetNumVideoChannels(boardID)
 							 : 1;
 
+    MSG("%s: disable all interrupts\n", pNTV2Params->name);
+    
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 	switch( outputChannelCount )
@@ -2869,35 +2871,6 @@ void DisableAllInterrupts(ULWord deviceNumber)
 	AvInterruptControl(deviceNumber, eUartRx,  0);
 	AvInterruptControl(deviceNumber, eUartTx,  0);
 	AvInterruptControl(deviceNumber, eUartTx2, 0);
-
-	if (pNTV2Params->_FrameApertureBaseAddress)
-	{
-		DisableMessageChannel1Interrupt(deviceNumber);
-		DisableMessageChannel2Interrupt(deviceNumber);
-		DisableMessageChannel3Interrupt(deviceNumber);
-		DisableMessageChannel4Interrupt(deviceNumber);
-	}
-
-	// Disable DMA interrupts
-	switch(pNTV2Params->_dmaMethod)
-	{
-	case DmaMethodAja:
-		MSG("%s: disable aja dma interrupts\n", pNTV2Params->name);
-		DisableDMAInterrupts(deviceNumber);
-		break;
-	case DmaMethodNwl:
-		MSG("%s: disable nwl user and dma interrupts\n", pNTV2Params->name);
-		DisableNwlUserInterrupt(deviceNumber);
-		DisableNwlDmaInterrupt(deviceNumber);
-		break;
-	case DmaMethodXlnx:
-		MSG("%s: disable xlnx user and dma interrupts\n", pNTV2Params->name);
-		DisableXlnxUserInterrupt(deviceNumber, 0);
-		DisableXlnxDmaInterrupts(deviceNumber);
-		break;
-	default:
-		break;
-	}
 }
 
 void StopAllDMAEngines(ULWord deviceNumber)

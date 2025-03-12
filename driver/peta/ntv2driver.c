@@ -78,7 +78,6 @@
 #include "ntv2hdmiout4.h"
 #include "ntv2genlock.h"
 #include "../ntv2kona.h"
-#include "ntv2mcap.h"
 
 #if  !defined(x86_64) && !defined(aarch64)
 #error "*** AJA driver must be built 64 bit ***"
@@ -2461,13 +2460,14 @@ static int reboot_handler(struct notifier_block *this, unsigned long code, void 
 	// Disable interrupts on all boards so we'll come up quietly
 	for ( i=0; i< getNTV2ModuleParams()->numNTV2Devices; i++ )
 	{
-		DisableAllInterrupts(i);
+        if (getNTV2Params(i) != NULL)
+            DisableAllInterrupts(i);
 	}
 
 	return NOTIFY_DONE;
 }
 
-static UWord deviceNumber;
+static UWord sDeviceNumber;
 
 static int __init aja_ntv2_module_init(void)
 {
@@ -2476,6 +2476,7 @@ static int __init aja_ntv2_module_init(void)
 	char versionString[STRMAX];
     char* driverModeString;
 
+    sDeviceNumber = 0;
 	for (i = 0; i < NTV2_MAXBOARDS; i++)
 	{
 		NTV2Params[i] = NULL;
@@ -2499,7 +2500,6 @@ static int __init aja_ntv2_module_init(void)
 #pragma GCC diagnostic ignored "-Wdate-time"        
     MSG("%s: driver date %s %s\n", getNTV2ModuleParams()->name, __DATE__, __TIME__);
 #pragma GCC diagnostic pop        
-
 
     // determine driver mode
     strncpy(versionString, DriverMode, STRMAX);
@@ -2532,10 +2532,6 @@ static int __init aja_ntv2_module_init(void)
 	ntv2_uart_driver.dev_name		= NTV2_TTY_NAME;
 	ntv2_uart_driver.nr				= NTV2_MAXBOARDS;
 
-	// register driver
-	MSG("%s: register driver %s\n",
-		getNTV2ModuleParams()->name, getNTV2ModuleParams()->driverName);
-
 #if 0
 	res = uart_register_driver(&ntv2_uart_driver);
 	if (res < 0) {
@@ -2547,6 +2543,10 @@ static int __init aja_ntv2_module_init(void)
 	getNTV2ModuleParams()->uart_max = NTV2_MAXBOARDS;
 	atomic_set(&getNTV2ModuleParams()->uart_index, 0);
 #endif
+
+	// register driver
+	MSG("%s: register driver %s\n",
+		getNTV2ModuleParams()->name, getNTV2ModuleParams()->driverName);
 
 	// register platform device (probe)
 	platform_driver_register(&ntv2_platform_driver);
@@ -2564,10 +2564,6 @@ static int __init aja_ntv2_module_init(void)
 	}
 	getNTV2ModuleParams()->NTV2Major = res;
 	MSG("%s: chrdev major %d\n", getNTV2ModuleParams()->name, getNTV2ModuleParams()->NTV2Major);
-
-	// Set all autocirculators to disabled
-//	for (i = 0; i < getNTV2ModuleParams()->numNTV2Devices; i++)
-//		AutoCirculateInitialize(i);
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,6,0))
@@ -2594,6 +2590,8 @@ static int __init aja_ntv2_module_init(void)
 
 	MSG("%s: module init end\n", getNTV2ModuleParams()->name);
 
+    platform_probe(NULL);
+
 	return 0;
 }
 
@@ -2611,16 +2609,21 @@ static void aja_ntv2_module_cleanup(void)
 	for (i = 0; i < getNTV2ModuleParams()->numNTV2Devices; i++)
 	{
 		NTV2PrivateParams *ntv2pp = getNTV2Params(i);
+        if (ntv2pp == NULL) continue;
 
-		MSG("%s: device release\n", ntv2pp->name);
+		MSG("%s: device %d release\n", ntv2pp->name, i);
 
-		// TODO: Shut down autocirculate if it is active.
+        if (getNTV2ModuleParams()->driverMode == eDriverModeAll)
+        {
+            // stop all dma engines
+            dmaRelease(i);
 
-		// stop all dma engines
-		dmaRelease(i);
+            // disable and unregister interrupts,
+            DisableAllInterrupts(i);
 
-		//Disable and unregister interrupts,
-		DisableAllInterrupts(i);
+            // disable autocirculate
+            AutoCirculateInitialize(i);
+        }
 
 		// disable hdmi monitor
 		for (j = 0; j < NTV2_MAX_HDMI_MONITOR; j++)
@@ -2680,14 +2683,18 @@ static void aja_ntv2_module_cleanup(void)
 			ntv2pp->m_pSerialPort = NULL;
 		}
 
-		for(irqIndex = 0; irqIndex < eNumNTV2IRQDevices; ++irqIndex)
-		{
-			MSG("%s: free irq 0x%x, dev_id %p\n",
-				ntv2pp->name, ntv2pp->_ntv2IRQ[irqIndex], (void *)ntv2pp);
+        if ((ntv2pp->platform_dev != NULL) &&
+            (getNTV2ModuleParams()->driverMode == eDriverModeAll))
+        {
+            for(irqIndex = 0; irqIndex < eNumNTV2IRQDevices; ++irqIndex)
+            {
+                MSG("%s: free irq 0x%x, dev_id %p\n",
+                    ntv2pp->name, ntv2pp->_ntv2IRQ[irqIndex], (void *)ntv2pp);
 
-			devm_free_irq(&ntv2pp->platform_dev->dev,
-						  ntv2pp->_ntv2IRQ[irqIndex],
-						  (void *)ntv2pp);
+                devm_free_irq(&ntv2pp->platform_dev->dev,
+                              ntv2pp->_ntv2IRQ[irqIndex],
+                              (void *)ntv2pp);
+            }
 		}
 
 		platform_resources_release(i);
@@ -2720,6 +2727,7 @@ static void aja_ntv2_module_cleanup(void)
 static int platform_probe(struct platform_device *pd)
 {
 	NTV2PrivateParams *ntv2pp = NULL;
+    ULWord deviceNumber;
 	char versionString[STRMAX];
 	Ntv2Status status;
 	int vpidIndex;
@@ -2729,45 +2737,42 @@ static int platform_probe(struct platform_device *pd)
 	int ret;
 
 	MSG("%s: probe check\n", getNTV2ModuleParams()->name);
-
+#if 0
     if(pd->dev.of_node == NULL)
 	{
         MSG("%s: device has no of_node\n", getNTV2ModuleParams()->name);
-        ret = -EINVAL;
-        goto fail;
+        return -EINVAL;
     }
 
-	if (deviceNumber >= NTV2_MAXBOARDS)
+	if (sDeviceNumber >= NTV2_MAXBOARDS)
 	{
 		MSG("%s: only %d boards supported\n", getNTV2ModuleParams()->name, NTV2_MAXBOARDS);
-		ret = -EPERM;
-		goto fail;
+		return -EPERM;
 	}
 
-	if (NTV2Params[deviceNumber])
+	if (NTV2Params[sDeviceNumber])
 	{
 		MSG("%s: attempt to probe previously allocated device %d\n",
 			getNTV2ModuleParams()->name, deviceNumber);
-		ret = -EPERM;
-		goto fail;
+		return -EPERM;
 	}
 
 	MSG("ntv2dev: probe device state size %d\n", (int)sizeof(NTV2PrivateParams));
-
+#endif
 	// Allocate space for keeping track of the device state
-	NTV2Params[deviceNumber] = vmalloc( sizeof(NTV2PrivateParams) );
-	if( NTV2Params[deviceNumber] == NULL)
+	NTV2Params[sDeviceNumber] = vmalloc( sizeof(NTV2PrivateParams) );
+	if( NTV2Params[sDeviceNumber] == NULL)
 	{
 		MSG("%s: allocation of device state failed for device %d\n",
-			getNTV2ModuleParams()->name, deviceNumber);
-		ret = -ENOMEM;
-		goto fail;
+			getNTV2ModuleParams()->name, sDeviceNumber);
+		return -ENOMEM;
 	}
+	getNTV2ModuleParams()->numNTV2Devices = sDeviceNumber + 1;
+    deviceNumber = sDeviceNumber;
 
 	ntv2pp = NTV2Params[deviceNumber];
 	memset(ntv2pp, 0, sizeof(NTV2PrivateParams));
 	ntv2pp->deviceNumber = deviceNumber;
-	getNTV2ModuleParams()->numNTV2Devices = deviceNumber + 1;
 	snprintf(ntv2pp->name, STRMAX, "ntv2dev%u", deviceNumber);
 
 	InitInterruptBitLUT();
@@ -2903,8 +2908,8 @@ static int platform_probe(struct platform_device *pd)
 	// about ranges, default values, etc.
 	memset(&ntv2pp->_virtualProcAmpRegisters, 0, sizeof(VirtualProcAmpRegisters));
 	memset(&ntv2pp->_hwProcAmpRegisterImage,  0, sizeof(HardwareProcAmpRegisterImage));
-
-    if (getNTV2ModuleParams()->driverMode == eDriverModeAll)
+    if ((ntv2pp->platform_dev != NULL) &&
+        (getNTV2ModuleParams()->driverMode == eDriverModeAll))
     {
 	    for(irqIndex = 0; irqIndex < eNumNTV2IRQDevices; ++irqIndex)
 	    {
@@ -2929,7 +2934,6 @@ static int platform_probe(struct platform_device *pd)
 			    }
 		    }   
 	    }
-
 	    SetupBoard(deviceNumber);
 
 	    getDeviceVersionString(deviceNumber, versionString, STRMAX);
@@ -2940,7 +2944,7 @@ static int platform_probe(struct platform_device *pd)
 	    MSG("%s: firmware version %s\n", ntv2pp->name, versionString);
 
 	    // initialize dma
-	    dmaInit(deviceNumber);
+//	    dmaInit(deviceNumber);
 
         // initialize autocirculate
         AutoCirculateInitialize(deviceNumber);
@@ -3043,10 +3047,10 @@ static int platform_probe(struct platform_device *pd)
 	    }
 
 	    // Enable interrupts
-	    EnableAllInterrupts(deviceNumber);
+//	    EnableAllInterrupts(deviceNumber);
 
 	    // Enable DMA
-	    dmaEnable(deviceNumber);
+//	    dmaEnable(deviceNumber);
     }
 
     if (getNTV2ModuleParams()->driverMode != eDriverModeRegister)
@@ -3081,9 +3085,8 @@ fail:
 	if (ntv2pp != NULL)
 	{
 		NTV2Params[deviceNumber] = NULL;
-		kfree(ntv2pp);
+		vfree(ntv2pp);
 	}
-    platform_set_drvdata(pd, NULL);
     return ret;
 }
 
@@ -3233,12 +3236,7 @@ static void SetupBoard(ULWord deviceNumber)
 	ClearSingleLED(deviceNumber, 2);
 	ClearSingleLED(deviceNumber, 1);
 
-#if 0	
-	// Clear the AutoCirculate state for the device
-	AutoCirculateInitialize(deviceNumber);
-#endif
 	// Setup the LUTs
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 	if ( NTV2DeviceCanDoColorCorrection( getNTV2Params(deviceNumber)->_DeviceID ) )
@@ -3672,7 +3670,7 @@ static int platform_resources_config(ULWord deviceNumber)
 	ntv2pp->_mappedBAR2Address = 0;
 	ntv2pp->_unmappedBAR2Address = 0;
 	ntv2pp->_BAR2MemorySize = 0;
-
+#if 0
     ret = of_property_read_u32(pd->dev.of_node, "deviceType", &val32);
     if(ret) {
         MSG("%s: failed to read deviceType property\n", ntv2pp->name);
@@ -3718,7 +3716,28 @@ static int platform_resources_config(ULWord deviceNumber)
             if(ret) goto fail;
         }
     }
+#else
+    {
+        unsigned long phyaddr = 0x00000000a8000000;
+        unsigned long size = 0x0000000000010000;
+        void *mapped = NULL;
+        struct resource *resource = NULL;
+        
+        resource = request_mem_region(phyaddr, size, ntv2pp->name);
+        if(resource == NULL)
+        {
+            MSG("%s: %s request_mem_region failed\n", ntv2pp->name, node->full_name);
+            if(ret) goto fail;
+        }
+        mapped = ioremap(phyaddr, size);
+        MSG("%s: video reg %p phyaddr\n", ntv2pp->name, (void*)phyaddr);
+        MSG("%s: video reg %p mapped\n", ntv2pp->name, mapped);
 
+        ntv2pp->_unmappedBAR0Address = phyaddr;
+        ntv2pp->_mappedBAR0Address = (unsigned long)mapped;
+        ntv2pp->_BAR0MemorySize = size;
+    }
+#endif    
     // FIXME: Grab these from device tree
     ntv2pp->_FrameMemoryAddress = 0x500000000;
     ntv2pp->_FrameMemorySize    = 0x40000000;
@@ -4019,8 +4038,11 @@ static int writeVirtualData(ULWord tag, UByte *buf, ULWord size)
 
 static void suspend(ULWord deviceNumber)
 {
-	NTV2PrivateParams *ntv2pp = getNTV2Params(deviceNumber);
+	NTV2PrivateParams *ntv2pp;
 	int j;
+
+    if ( !(ntv2pp = getNTV2Params(deviceNumber)) )
+		return;
 
 	MSG("%s: device suspend\n", ntv2pp->name);
 
@@ -4075,10 +4097,13 @@ static void suspend(ULWord deviceNumber)
 
 static void resume(ULWord deviceNumber)
 {
-	NTV2PrivateParams *ntv2pp = getNTV2Params(deviceNumber);
+	NTV2PrivateParams *ntv2pp;
 	int intrIndex;
 	char versionString[STRMAX];
 	int i;
+
+    if ( !(ntv2pp = getNTV2Params(deviceNumber)) )
+		return;
 
 	MSG("%s: device resume\n", ntv2pp->name);
 
