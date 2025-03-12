@@ -438,7 +438,7 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 	return result;
 }
 
-bool CNTV2Card::GetLPExternalPortURLString (string & outURLString)
+bool CNTV2Card::GetLPExternalConfigurationURLString (string & outURLString)
 {
 	if (!NTV2DeviceHasLPProductCode(GetDeviceID()))
 		return false;
@@ -464,7 +464,7 @@ bool CNTV2Card::GetLPExternalPortURLString (string & outURLString)
 	return true;
 }
 
-bool CNTV2Card::GetLPTunnelPortURLString (string & outURLString)
+bool CNTV2Card::GetLPTunnelConfigurationURLString (string & outURLString)
 {
 	if (!NTV2DeviceHasLPProductCode(GetDeviceID()))
 		return false;

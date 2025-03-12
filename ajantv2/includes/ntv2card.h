@@ -138,8 +138,8 @@ public:
 	/**
 		@return The Local Proc Managment port URL
 	**/
-	AJA_VIRTUAL bool GetLPExternalPortURLString (std::string & outURLString);
-	AJA_VIRTUAL bool GetLPTunnelPortURLString (std::string & outURLString);
+	AJA_VIRTUAL bool GetLPExternalConfigurationURLString (std::string & outURLString);
+	AJA_VIRTUAL bool GetLPTunnelConfigurationURLString (std::string & outURLString);
 	AJA_VIRTUAL int GetSFPURLs(std::vector<std::string> & sfpURLStrings);
 
 	/**
