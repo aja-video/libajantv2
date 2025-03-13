@@ -86,6 +86,8 @@
 //#define RHEL4
 //#undef RHEL4
 
+#define AJA_CREATE_DEVICE_NODES
+
 #define NTV2_MODULE_NAME "ntv2mod"
 #define NTV2_DRIVER_NAME "ajantv2"
 #define STR_AXI4LITE2HOSTBUS    "AXI4Lite2HostBus"
@@ -2467,6 +2469,18 @@ static int reboot_handler(struct notifier_block *this, unsigned long code, void 
 	return NOTIFY_DONE;
 }
 
+#if defined(AJA_CREATE_DEVICE_NODES)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,2,0))
+static int aja_ntv2_dev_uevent(const struct device *dev, struct kobj_uevent_env *env)
+#else
+static int aja_ntv2_dev_uevent(struct device *dev, struct kobj_uevent_env *env)
+#endif
+{
+	add_uevent_var(env, "DEVMODE=%#o", 0666);
+	return 0;
+}
+#endif
+
 static UWord sDeviceNumber;
 
 static int __init aja_ntv2_module_init(void)
@@ -2475,6 +2489,9 @@ static int __init aja_ntv2_module_init(void)
 	int i;
 	char versionString[STRMAX];
     char* driverModeString;
+#if defined(AJA_CREATE_DEVICE_NODES)
+	struct class *ntv2_class = NULL;
+#endif
 
     sDeviceNumber = 0;
 	for (i = 0; i < NTV2_MAXBOARDS; i++)
@@ -2544,12 +2561,29 @@ static int __init aja_ntv2_module_init(void)
 	atomic_set(&getNTV2ModuleParams()->uart_index, 0);
 #endif
 
+#if defined(AJA_CREATE_DEVICE_NODES)
+	// Create device class
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,4,0))
+	ntv2_class = class_create(getNTV2ModuleParams()->driverName);
+#else
+	ntv2_class = class_create(THIS_MODULE, getNTV2ModuleParams()->driverName);
+#endif
+	if (IS_ERR(ntv2_class))
+	{
+		res = PTR_ERR(ntv2_class);
+		MSG("%s: Failed to create device class; code %d\n",
+			getNTV2ModuleParams()->name, res);
+	}
+    else
+    {
+        ntv2_class->dev_uevent = aja_ntv2_dev_uevent;
+        getNTV2ModuleParams()->class = ntv2_class;
+    }
+#endif
+
 	// register driver
 	MSG("%s: register driver %s\n",
 		getNTV2ModuleParams()->name, getNTV2ModuleParams()->driverName);
-
-	// register platform device (probe)
-	platform_driver_register(&ntv2_platform_driver);
 
 	// register device with kernel
 	MSG("%s: register chrdev %s\n",	getNTV2ModuleParams()->name, getNTV2ModuleParams()->driverName);
@@ -2564,6 +2598,9 @@ static int __init aja_ntv2_module_init(void)
 	}
 	getNTV2ModuleParams()->NTV2Major = res;
 	MSG("%s: chrdev major %d\n", getNTV2ModuleParams()->name, getNTV2ModuleParams()->NTV2Major);
+
+	// register platform device (calls probe)
+	platform_driver_register(&ntv2_platform_driver);
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,6,0))
@@ -2599,6 +2636,9 @@ static void aja_ntv2_module_cleanup(void)
 	ULWord  i;
 	ULWord  j;
 	int irqIndex;
+#if defined(AJA_CREATE_DEVICE_NODES)
+    dev_t dev;
+#endif
 
 	MSG("%s: module exit begin\n", getNTV2ModuleParams()->name);
 	
@@ -2610,6 +2650,15 @@ static void aja_ntv2_module_cleanup(void)
         if (ntv2pp == NULL) continue;
 
 		MSG("%s: device %d release\n", ntv2pp->name, i);
+
+#if defined(AJA_CREATE_DEVICE_NODES)
+        if (getNTV2ModuleParams()->class != NULL)
+        {
+            dev = MKDEV(getNTV2ModuleParams()->NTV2Major, i);
+            device_destroy(getNTV2ModuleParams()->class, dev);
+            cdev_del(&ntv2pp->cdev);
+        }
+#endif
 
         if (getNTV2ModuleParams()->driverMode == eDriverModeAll)
         {
@@ -2704,6 +2753,13 @@ static void aja_ntv2_module_cleanup(void)
 	unregister_chrdev( getNTV2ModuleParams()->NTV2Major, getNTV2ModuleParams()->driverName);
 	remove_proc_entry("driver/aja", NULL /* parent dir */);
 
+#if defined(AJA_CREATE_DEVICE_NODES)
+    if (getNTV2ModuleParams()->class != NULL)
+    {
+        class_destroy(getNTV2ModuleParams()->class);
+    }
+#endif
+
 	for (i = 0; i < NTV2_MAXBOARDS; i++)
 	{
 		if (NTV2Params[i] != NULL)
@@ -2737,6 +2793,10 @@ static int platform_probe(struct platform_device *pd)
 	int ret;
     bool irqGood;
     bool irqFail;
+#if defined(AJA_CREATE_DEVICE_NODES)
+	dev_t dev;
+	struct device *device = NULL;
+#endif
 
 	MSG("%s: probe check\n", getNTV2ModuleParams()->name);
     if((pd == NULL) || (pd->dev.of_node == NULL))
@@ -3094,18 +3154,38 @@ static int platform_probe(struct platform_device *pd)
         }
     }
 
+#if defined(AJA_CREATE_DEVICE_NODES)
+    if (getNTV2ModuleParams()->class != NULL)
+    {
+        // Create the device node
+        dev = MKDEV(getNTV2ModuleParams()->NTV2Major, deviceNumber);
+        cdev_init(&NTV2Params[deviceNumber]->cdev, &ntv2_fops);
+        ret = cdev_add(&NTV2Params[deviceNumber]->cdev, dev, 1);
+        if (ret < 0)
+        {
+            MSG("%s: Failed to add cdev to subsystem\n", getNTV2ModuleParams()->name);
+        }
+        else
+        {
+            device = device_create(getNTV2ModuleParams()->class, NULL, dev,
+                                   NULL, "ajantv2%d", deviceNumber);
+            if (IS_ERR(device))
+            {
+                MSG("%s: Failed to create device node\n", getNTV2ModuleParams()->name);
+            }
+            else
+            {
+                MSG("%s: Created device node /dev/ajantv2%d\n",
+                    getNTV2ModuleParams()->name, deviceNumber);
+            }
+        }
+    }
+#endif
+
+fail:    
 	MSG("%s: probe end\n", ntv2pp->name);
 
 	return 0;
-
-fail:
-	if (ntv2pp != NULL)
-	{
-		NTV2Params[deviceNumber] = NULL;
-		vfree(ntv2pp);
-	}
-    getNTV2ModuleParams()->numNTV2Devices = deviceNumber;
-    return ret;
 }
 
 static void initializeRegisterNames(ULWord deviceNumber, unsigned long mappedAddress)

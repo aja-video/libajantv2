@@ -142,6 +142,7 @@ typedef struct ntv2_private
 	ULWord pci_device;
 	ULWord pci_vendor;
 	char name[16];
+	struct cdev cdev;
 
 	int deviceType;
 	bool legacyInterrupt;
