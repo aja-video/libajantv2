@@ -973,7 +973,7 @@ bool SetVPIDOutput(Ntv2SystemContext* context, NTV2Channel channel)
 			vpidControlDS2.value = vpidControlDS1.value | 0x40;
 	}
 
-	if (((vpidControlDS1.flags | KeySignal) == 1) && NTV2DeviceCanDo25GIP(deviceID))
+	if (((vpidControlDS1.flags & KeySignal) == 1) && NTV2DeviceCanDo25GIP(deviceID))
 		Set2110Key(context, channel, vpidControlDS1.flags & KeySignal);
 	return SetSDIOutVPID(context, channel, vpidControlDS1.value, vpidControlDS2.value);
 }	//	SetVPIDOutput
