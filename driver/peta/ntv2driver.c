@@ -2590,8 +2590,6 @@ static int __init aja_ntv2_module_init(void)
 
 	MSG("%s: module init end\n", getNTV2ModuleParams()->name);
 
-    platform_probe(NULL);
-
 	return 0;
 }
 
@@ -2688,12 +2686,15 @@ static void aja_ntv2_module_cleanup(void)
         {
             for(irqIndex = 0; irqIndex < eNumNTV2IRQDevices; ++irqIndex)
             {
-                MSG("%s: free irq 0x%x, dev_id %p\n",
-                    ntv2pp->name, ntv2pp->_ntv2IRQ[irqIndex], (void *)ntv2pp);
+                if (ntv2pp->_ntv2IRQ[irqIndex] != 0)
+                {
+                    MSG("%s: free irq 0x%x, dev_id %p\n",
+                        ntv2pp->name, ntv2pp->_ntv2IRQ[irqIndex], (void *)ntv2pp);
 
-                devm_free_irq(&ntv2pp->platform_dev->dev,
-                              ntv2pp->_ntv2IRQ[irqIndex],
-                              (void *)ntv2pp);
+                    devm_free_irq(&ntv2pp->platform_dev->dev,
+                                  ntv2pp->_ntv2IRQ[irqIndex],
+                                  (void *)ntv2pp);
+                }
             }
 		}
 
@@ -2731,14 +2732,14 @@ static int platform_probe(struct platform_device *pd)
 	char versionString[STRMAX];
 	Ntv2Status status;
 	int vpidIndex;
-	int irqIndex;
 	int intrIndex;
 	int i;
 	int ret;
+    bool irqGood;
+    bool irqFail;
 
 	MSG("%s: probe check\n", getNTV2ModuleParams()->name);
-#if 0
-    if(pd->dev.of_node == NULL)
+    if((pd == NULL) || (pd->dev.of_node == NULL))
 	{
         MSG("%s: device has no of_node\n", getNTV2ModuleParams()->name);
         return -EINVAL;
@@ -2753,12 +2754,12 @@ static int platform_probe(struct platform_device *pd)
 	if (NTV2Params[sDeviceNumber])
 	{
 		MSG("%s: attempt to probe previously allocated device %d\n",
-			getNTV2ModuleParams()->name, deviceNumber);
+			getNTV2ModuleParams()->name, sDeviceNumber);
 		return -EPERM;
 	}
 
 	MSG("ntv2dev: probe device state size %d\n", (int)sizeof(NTV2PrivateParams));
-#endif
+
 	// Allocate space for keeping track of the device state
 	NTV2Params[sDeviceNumber] = vmalloc( sizeof(NTV2PrivateParams) );
 	if( NTV2Params[sDeviceNumber] == NULL)
@@ -2769,6 +2770,7 @@ static int platform_probe(struct platform_device *pd)
 	}
 	getNTV2ModuleParams()->numNTV2Devices = sDeviceNumber + 1;
     deviceNumber = sDeviceNumber;
+	sDeviceNumber++;
 
 	ntv2pp = NTV2Params[deviceNumber];
 	memset(ntv2pp, 0, sizeof(NTV2PrivateParams));
@@ -2908,32 +2910,48 @@ static int platform_probe(struct platform_device *pd)
 	// about ranges, default values, etc.
 	memset(&ntv2pp->_virtualProcAmpRegisters, 0, sizeof(VirtualProcAmpRegisters));
 	memset(&ntv2pp->_hwProcAmpRegisterImage,  0, sizeof(HardwareProcAmpRegisterImage));
-    if ((ntv2pp->platform_dev != NULL) &&
-        (getNTV2ModuleParams()->driverMode == eDriverModeAll))
-    {
-	    for(irqIndex = 0; irqIndex < eNumNTV2IRQDevices; ++irqIndex)
-	    {
-            ret = devm_request_irq(&ntv2pp->platform_dev->dev,
-							   ntv2pp->_ntv2IRQ[irqIndex],
-							   ntv2_irq_arr[irqIndex].irq_func,
-							   ntv2_irq_arr[irqIndex].flags,
-							   ntv2pp->name,
-							   (void *)ntv2pp);
-            if(ret)
-		    {
-                MSG("%s: failed to register interrupt %d\n", ntv2pp->name, ntv2pp->_ntv2IRQ[irqIndex]);
-                goto fail;
-            }    
-            else
-		    {
-                MSG("%s: registered irq %d\n", ntv2pp->name, ntv2pp->_ntv2IRQ[irqIndex]);
- 	
-			    if (ntv2_irq_arr[irqIndex].irq_type != IRQ_TYPE_NONE)
-			    {
-				    irq_set_irq_type(ntv2pp->_ntv2IRQ[irqIndex], ntv2_irq_arr[irqIndex].irq_type);
-			    }
-		    }   
-	    }
+    
+    irqGood = false;
+    irqFail = false;
+    if (getNTV2ModuleParams()->driverMode == eDriverModeAll)
+    {        
+        if (ntv2pp->platform_dev != NULL)
+        {
+            for(intrIndex = 0; intrIndex < eNumNTV2IRQDevices; ++intrIndex)
+            {
+                if (ntv2pp->_ntv2IRQ[intrIndex] != 0)
+                {
+                    ret = devm_request_irq(&ntv2pp->platform_dev->dev,
+                                           ntv2pp->_ntv2IRQ[intrIndex],
+                                           ntv2_irq_arr[intrIndex].irq_func,
+                                           ntv2_irq_arr[intrIndex].flags,
+                                           ntv2pp->name,
+                                           (void *)ntv2pp);
+                    if(ret)
+                    {
+                        MSG("%s: failed to register interrupt %d\n", ntv2pp->name, ntv2pp->_ntv2IRQ[intrIndex]);
+                        irqFail = true;
+                    }    
+                    else
+                    {
+                        MSG("%s: registered irq %d\n", ntv2pp->name, ntv2pp->_ntv2IRQ[intrIndex]);
+                        
+                        if (ntv2_irq_arr[intrIndex].irq_type != IRQ_TYPE_NONE)
+                        {
+                            irq_set_irq_type(ntv2pp->_ntv2IRQ[intrIndex], ntv2_irq_arr[intrIndex].irq_type);
+                        }
+                        irqGood = true;
+                    }
+                }
+                else
+                {
+                    MSG("%s: no attempt to register interrupt %d\n", ntv2pp->name, ntv2pp->_ntv2IRQ[intrIndex]);
+                }
+            }
+        }
+        if (irqFail) irqGood = false;
+        ntv2pp->canDoInterrupt = irqGood;
+        
 	    SetupBoard(deviceNumber);
 
 	    getDeviceVersionString(deviceNumber, versionString, STRMAX);
@@ -3047,7 +3065,8 @@ static int platform_probe(struct platform_device *pd)
 	    }
 
 	    // Enable interrupts
-//	    EnableAllInterrupts(deviceNumber);
+        if (irqGood)
+            EnableAllInterrupts(deviceNumber);
 
 	    // Enable DMA
 //	    dmaEnable(deviceNumber);
@@ -3075,8 +3094,6 @@ static int platform_probe(struct platform_device *pd)
         }
     }
 
-	deviceNumber++;
-
 	MSG("%s: probe end\n", ntv2pp->name);
 
 	return 0;
@@ -3087,6 +3104,7 @@ fail:
 		NTV2Params[deviceNumber] = NULL;
 		vfree(ntv2pp);
 	}
+    getNTV2ModuleParams()->numNTV2Devices = deviceNumber;
     return ret;
 }
 
@@ -4193,10 +4211,11 @@ static void resume(ULWord deviceNumber)
         }
 
 	    // Enable interrupts
-	    EnableAllInterrupts(deviceNumber);
+        if (ntv2pp->canDoInterrupt)
+            EnableAllInterrupts(deviceNumber);
 
 	    // enable all dma engines
-	    dmaEnable(deviceNumber);
+//	    dmaEnable(deviceNumber);
     }
 }
 

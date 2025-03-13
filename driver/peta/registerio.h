@@ -145,6 +145,7 @@ typedef struct ntv2_private
 
 	int deviceType;
 	bool legacyInterrupt;
+    bool canDoInterrupt;
 
 	// Base Address Values
 	unsigned long _unmappedBAR0Address;

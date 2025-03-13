@@ -2733,60 +2733,11 @@ void EnableAllInterrupts(ULWord deviceNumber)
 	}
 #pragma GCC diagnostic pop
 
+//	MSG("%s: enable audio interrupts\n", pNTV2Params->name);
 //	AvInterruptControl(deviceNumber, eAudio, 1);
 //	AvInterruptControl(deviceNumber, eAudioInWrap, 1);
 //	AvInterruptControl(deviceNumber, eAudioOutWrap, 1);
 //	AvInterruptControl(deviceNumber, eWrapRate, 1);
-
-	// Don't enable Xena's 422 UART interrupts in case
-	// the user wants to poll
-	//
-	// AvInterruptControl(deviceNumber, eUartRx, 1);
-	// AvInterruptControl(deviceNumber, eUartTx, 1);
-	// AvInterruptControl(deviceNumber, eUartTx2, 1);
-
-	// Enable DMA interrupts
-	switch(pNTV2Params->_dmaMethod)
-	{
-	case DmaMethodAja:
-		MSG("%s: enable aja dma interrupts\n", pNTV2Params->name);
-		EnableDMAInterrupts(deviceNumber);
-		break;
-	case DmaMethodNwl:
-		MSG("%s: enable nwl dma interrupts\n", pNTV2Params->name);
-		EnableNwlUserInterrupt(deviceNumber);
-		EnableNwlDmaInterrupt(deviceNumber);
-		break;
-	case DmaMethodXlnx:
-		MSG("%s: enable xlnx user interrupt\n", pNTV2Params->name);
-		EnableXlnxUserInterrupt(deviceNumber, 0);
-		break;
-	default:
-		break;
-	}
-
-	// enable p2p message interrupts
-	if(DeviceCanDoP2P(deviceNumber) && (getNTV2Params(deviceNumber)->_FrameApertureBaseAddress != 0))
-	{
-		ULWord numChannels = NTV2DeviceGetNumVideoChannels(getNTV2Params(deviceNumber)->_DeviceID);
-
-		if(numChannels > 0)
-		{
-			EnableMessageChannel1Interrupt(deviceNumber);
-		}
-		if(numChannels > 1)
-		{
-			EnableMessageChannel2Interrupt(deviceNumber);
-		}
-		if(numChannels > 2)
-		{
-			EnableMessageChannel3Interrupt(deviceNumber);
-		}
-		if(numChannels > 3)
-		{
-			EnableMessageChannel4Interrupt(deviceNumber);
-		}
-	}
 }
 
 void DisableAllInterrupts(ULWord deviceNumber)
@@ -2868,9 +2819,6 @@ void DisableAllInterrupts(ULWord deviceNumber)
 	AvInterruptControl(deviceNumber, eAudioInWrap, 0);
 	AvInterruptControl(deviceNumber, eAudioOutWrap, 0);
 	AvInterruptControl(deviceNumber, eWrapRate, 0);
-	AvInterruptControl(deviceNumber, eUartRx,  0);
-	AvInterruptControl(deviceNumber, eUartTx,  0);
-	AvInterruptControl(deviceNumber, eUartTx2, 0);
 }
 
 void StopAllDMAEngines(ULWord deviceNumber)
