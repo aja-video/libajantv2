@@ -459,6 +459,15 @@ class AJAExport CNTV2DriverInterface
 												ULWord flags,
 												NTV2StreamBuffer& status);
 
+        // mail buffer operations
+        AJA_VIRTUAL bool    MailBufferOps (const NTV2Channel inChannel,
+                                           NTV2Buffer& inBuffer,
+                                           ULWord dataSize,
+                                           ULWord flags,
+                                           ULWord delay,
+                                           ULWord timeout,
+                                           NTV2MailBuffer& status);
+
 	/**
 		@name	Device Ownership
 	**/

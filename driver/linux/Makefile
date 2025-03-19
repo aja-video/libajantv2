@@ -148,6 +148,7 @@ DRIVERINCS = ../ntv2anc.h \
 			../ntv2hout4reg.h \
 			../ntv2infoframe.h \
 			../ntv2kona.h \
+			../ntv2mailbox.h \
 			../ntv2mcap.h \
 			../ntv2pciconfig.h \
 			../ntv2rp188.h \
@@ -173,6 +174,7 @@ DRIVERSRCS = ../ntv2anc.c \
 			../ntv2hdmiout4.c \
 			../ntv2infoframe.c \
 			../ntv2kona.c \
+			../ntv2mailbox.c \
 			../ntv2mcap.c \
 			../ntv2pciconfig.c \
 			../ntv2rp188.c \
