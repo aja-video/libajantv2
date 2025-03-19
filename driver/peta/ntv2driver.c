@@ -78,14 +78,15 @@
 #include "ntv2hdmiout4.h"
 #include "ntv2genlock.h"
 #include "../ntv2kona.h"
-#include "ntv2mcap.h"
 
-#if  !defined(x86_64)
+#if  !defined(x86_64) && !defined(aarch64)
 #error "*** AJA driver must be built 64 bit ***"
 #endif
 
 //#define RHEL4
 //#undef RHEL4
+
+#define AJA_CREATE_DEVICE_NODES
 
 #define NTV2_MODULE_NAME "ntv2mod"
 #define NTV2_DRIVER_NAME "ajantv2"
@@ -96,7 +97,7 @@
 /*******************************/
 MODULE_AUTHOR("Bill Bowen and Shaun Case and Jeff Coffin");
 
-MODULE_LICENSE("GPL");
+MODULE_LICENSE("Dual MIT/GPL");
 
 // For boards that support a serial port
 // -1 = never make a serial port
@@ -120,6 +121,13 @@ module_param(MapFrameBuffers, int, S_IRUGO);
 #else
 MODULE_PARM(MapFrameBuffers, "i");
 #endif
+
+// DriverMode - configure the driver initialization mode
+//   all         = support all driver functions (default)
+//   register    = only support register access
+//   genlock     = register access with genlock initialization
+static char* DriverMode = "all";
+module_param(DriverMode, charp, S_IRUGO);
 
 /***************************/
 /* Local defines and types */
@@ -179,11 +187,6 @@ struct VirtualDataNode
     ULWord          data;
 };
 
-typedef struct _fileData
-{
-	DMA_PAGE_ROOT dmaRoot;
-} FILE_DATA, *PFILE_DATA;
-
 /*********************************************/
 /* Prototypes for private utility functions. */
 /*********************************************/
@@ -196,7 +199,6 @@ static int DoMessageBankAndRegisterWrite(ULWord deviceNumber, NTV2RegInfo * pInR
 static int DoMessageBankAndRegisterRead(ULWord deviceNumber, NTV2RegInfo * pInReg, NTV2RegInfo * pInBank);
 static int DoMessageAutoCircFrame(ULWord deviceNumber, FRAME_STAMP * pInOutFrameStamp, NTV2_RP188 * pTimecodeArray);
 static int DoMessageBufferLock(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot, NTV2BufferLock* pBufferLock);
-static int DoMessageBitstream(ULWord deviceNumber, NTV2Bitstream* pBitstream);
 
 static int platform_probe(struct platform_device *pd);
 	
@@ -211,10 +213,13 @@ static void initializeRegisterNames(ULWord deviceNumber, unsigned long mappedAdd
 
 static int readVirtualData(ULWord tag, UByte *buf, ULWord size);
 static int writeVirtualData(ULWord tag, UByte *buf, ULWord size);
+void deleteVirtualDataNode(VirtualDataNode *node);
 static void deleteAllVirtualDataNodes(void);
 
 static void suspend(ULWord deviceNumber);
 static void resume(ULWord deviceNumber);
+
+void InitInterruptBitLUT(void);
 
 /********************/
 /* Static variables */
@@ -483,31 +488,36 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 	case IOCTL_NTV2_WRITE_REGISTER:
 		{
 			REGISTER_ACCESS param;
+            int status = 0;
 			if(copy_from_user((void*)&param,(const void*) arg,sizeof(REGISTER_ACCESS)))
 				return -EFAULT;
 
-			WriteRegister(	deviceNumber,
-				  			param.RegisterNumber,
-							param.RegisterValue,
-							param.RegisterMask,
-							param.RegisterShift);
-
+			status = WriteReg(  deviceNumber,
+				  				param.RegisterNumber,
+								param.RegisterValue,
+								param.RegisterMask,
+								param.RegisterShift);
+            if (status != 0)
+                return status;
 		}
 		break;
 
 	case IOCTL_NTV2_READ_REGISTER:
 		{
 			REGISTER_ACCESS param;
+            int status = 0;
 			if(copy_from_user((void*)&param,(const void*) arg,sizeof(REGISTER_ACCESS)))
 				return -EFAULT;
 
-			param.RegisterValue = ReadRegister(	deviceNumber,
+			status = ReadReg(   deviceNumber,
 				  								param.RegisterNumber,
+                                &param.RegisterValue,
 												param.RegisterMask,
 												param.RegisterShift);
 			if(copy_to_user((void*)arg,(const void*) &param,sizeof(REGISTER_ACCESS)))
 				return -EFAULT;
-
+            if(status != 0)
+                return status;
 		}
 		break;
 
@@ -1048,7 +1058,6 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 	//
 	// Autocirculate IOCTLs
 	//
-#if 0		
 	case IOCTL_NTV2_AUTOCIRCULATE_CONTROL:
 		{
 			AUTOCIRCULATE_DATA param;
@@ -1125,7 +1134,6 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 			return -ENOMEM;
 		}
 		break;
-#endif
 	case IOCTL_NTV2_CONTROL_DRIVER_DEBUG_MESSAGES:
 		{
 			NTV2_CONTROL_DRIVER_DEBUG_MESSAGES_STRUCT param;
@@ -1227,7 +1235,6 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 			// Determine what kind of message it is
 			switch(pMessage->fType)
 			{
-#if 0				
 			case NTV2_TYPE_ACSTATUS:
 				{
 					returnCode = AutoCirculateStatus_Ex(deviceNumber, (AUTOCIRCULATE_STATUS *) pMessage);
@@ -1392,7 +1399,6 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					((NTV2SetRegisters*)pMessage)->mOutNumFailures = 0;
 				}
 				break;
-#endif
 			case NTV2_TYPE_BANKGETSET:
 				{
 					ULWord  		mIsWriting		=  ((NTV2BankSelGetSetRegs*)pMessage)->mIsWriting;
@@ -1441,7 +1447,6 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					}
 				}
 				break;
-#if 0
 			case NTV2_TYPE_ACFRAMESTAMP:
 				{
 					NTV2Buffer *	pAcTimeCodes	= &((FRAME_STAMP*)pMessage)->acTimeCodes;
@@ -1474,7 +1479,6 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					}
 				}
 				break;
-#endif				
 			case NTV2_TYPE_AJABUFFERLOCK:
 				{
 					if (pFileData == NULL)
@@ -1495,23 +1499,6 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					}
 				}
 				break;
-
-			case NTV2_TYPE_AJABITSTREAM:
-				{
-					returnCode = DoMessageBitstream (deviceNumber, (NTV2Bitstream*)pMessage);
-					if (returnCode)
-					{
-						goto messageError;
-					}
-
-					if(copy_to_user((void*)arg, (const void*)pMessage, sizeof(NTV2Bitstream)))
-					{
-						returnCode = -EFAULT;
-						goto messageError;
-					}
-				}
-				break;
-
 			case NTV2_TYPE_VIRTUAL_DATA_RW:
 				{
                     NTV2VirtualData *msg = (NTV2VirtualData *)pMessage;
@@ -1619,7 +1606,7 @@ int ntv2_mmap(struct file *file,struct vm_area_struct* vma)
 		return -ENODEV;
 
 	// Don't try to swap out physical pages
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,3,0))
+#if defined(KERNEL_6_3_0_VM_FLAGS)
     vm_flags_set(vma, VM_IO);
 #elif (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
 	vma->vm_flags |= VM_IO;
@@ -1926,7 +1913,16 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
 		{
 			interruptHousekeeping(pNTV2Params,eAuxVerticalInterrupt);
 		}
-
+#if 0
+		if( statusRegister & kIntAudioInWrapActive )
+		{
+			// We don't do anything with audio in wrap
+		}
+		if( statusRegister & kIntAudioOutWrapActive )
+		{
+			// Nor do we do anything with audio out wrap
+		}
+#endif
 		if( statusRegister & kIntAudioWrapActive )
 		{
 			interruptHousekeeping(pNTV2Params, eAudio);
@@ -2404,6 +2400,7 @@ static int aja_read_procmem( char *buf, char **start, off_t offset,
 		itoa64(pNTV2Params->_interruptCount[eAuxVerticalInterrupt], tmpBuf);
 		P_PRE "Aux Vertical interrupts: %s\n", tmpBuf P_SUFF
 	}
+
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
 	return 0;
 #else
@@ -2436,6 +2433,15 @@ static struct platform_driver ntv2_platform_driver =
 //    .remove = platform_remove
 };
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,6,0))
+static struct proc_ops ntv2_proc_ops =
+{
+	.proc_lseek		= seq_lseek,
+	.proc_read		= seq_read,
+	.proc_open		= aja_read_procmem_open,
+	.proc_release	= seq_release
+};
+#else
 static struct file_operations ntv2_proc_fops =
 {
 	.owner		= THIS_MODULE,
@@ -2444,6 +2450,7 @@ static struct file_operations ntv2_proc_fops =
 	.open		= aja_read_procmem_open,
 	.release	= seq_release
 };
+#endif
 #endif
 
 static int reboot_handler(struct notifier_block *this, unsigned long code, void *x)
@@ -2455,20 +2462,38 @@ static int reboot_handler(struct notifier_block *this, unsigned long code, void 
 	// Disable interrupts on all boards so we'll come up quietly
 	for ( i=0; i< getNTV2ModuleParams()->numNTV2Devices; i++ )
 	{
-		DisableAllInterrupts(i);
+        if (getNTV2Params(i) != NULL)
+            DisableAllInterrupts(i);
 	}
 
 	return NOTIFY_DONE;
 }
 
-static UWord deviceNumber;
+#if defined(AJA_CREATE_DEVICE_NODES)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,2,0))
+static int aja_ntv2_dev_uevent(const struct device *dev, struct kobj_uevent_env *env)
+#else
+static int aja_ntv2_dev_uevent(struct device *dev, struct kobj_uevent_env *env)
+#endif
+{
+	add_uevent_var(env, "DEVMODE=%#o", 0666);
+	return 0;
+}
+#endif
+
+static UWord sDeviceNumber;
 
 static int __init aja_ntv2_module_init(void)
 {
 	int res;
 	int i;
 	char versionString[STRMAX];
+    char* driverModeString;
+#if defined(AJA_CREATE_DEVICE_NODES)
+	struct class *ntv2_class = NULL;
+#endif
 
+    sDeviceNumber = 0;
 	for (i = 0; i < NTV2_MAXBOARDS; i++)
 	{
 		NTV2Params[i] = NULL;
@@ -2493,15 +2518,36 @@ static int __init aja_ntv2_module_init(void)
     MSG("%s: driver date %s %s\n", getNTV2ModuleParams()->name, __DATE__, __TIME__);
 #pragma GCC diagnostic pop        
 
+    // determine driver mode
+    strncpy(versionString, DriverMode, STRMAX);
+    versionString[STRMAX - 1] = '\0';
+    driverModeString = strstrip(versionString);
+    if (strcmp(driverModeString, "all") == 0)
+    {
+        getNTV2ModuleParams()->driverMode = eDriverModeAll;
+        MSG("%s: driver mode: all functions\n", getNTV2ModuleParams()->name);;
+    }
+    else if (strcmp(driverModeString, "register") == 0)
+    {
+        getNTV2ModuleParams()->driverMode = eDriverModeRegister;
+        MSG("%s: driver mode: register access only\n", getNTV2ModuleParams()->name);;
+    }
+    else if (strcmp(driverModeString, "genlock") == 0)
+    {
+        getNTV2ModuleParams()->driverMode = eDriverModeGenlock;
+        MSG("%s: driver mode: register access with genlock\n", getNTV2ModuleParams()->name);;
+    }
+    else
+    {
+        getNTV2ModuleParams()->driverMode = eDriverModeAll;
+        MSG("%s: unknown driver mode: %s, default to all functions\n",
+            getNTV2ModuleParams()->name, driverModeString);
+    }
 
 	ntv2_uart_driver.owner			= THIS_MODULE;
 	ntv2_uart_driver.driver_name	= getNTV2ModuleParams()->driverName;
 	ntv2_uart_driver.dev_name		= NTV2_TTY_NAME;
 	ntv2_uart_driver.nr				= NTV2_MAXBOARDS;
-
-	// register driver
-	MSG("%s: register driver %s\n",
-		getNTV2ModuleParams()->name, getNTV2ModuleParams()->driverName);
 
 #if 0
 	res = uart_register_driver(&ntv2_uart_driver);
@@ -2515,8 +2561,29 @@ static int __init aja_ntv2_module_init(void)
 	atomic_set(&getNTV2ModuleParams()->uart_index, 0);
 #endif
 
-	// register platform device (probe)
-	platform_driver_register(&ntv2_platform_driver);
+#if defined(AJA_CREATE_DEVICE_NODES)
+	// Create device class
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,4,0))
+	ntv2_class = class_create(getNTV2ModuleParams()->driverName);
+#else
+	ntv2_class = class_create(THIS_MODULE, getNTV2ModuleParams()->driverName);
+#endif
+	if (IS_ERR(ntv2_class))
+	{
+		res = PTR_ERR(ntv2_class);
+		MSG("%s: Failed to create device class; code %d\n",
+			getNTV2ModuleParams()->name, res);
+	}
+    else
+    {
+        ntv2_class->dev_uevent = aja_ntv2_dev_uevent;
+        getNTV2ModuleParams()->class = ntv2_class;
+    }
+#endif
+
+	// register driver
+	MSG("%s: register driver %s\n",
+		getNTV2ModuleParams()->name, getNTV2ModuleParams()->driverName);
 
 	// register device with kernel
 	MSG("%s: register chrdev %s\n",	getNTV2ModuleParams()->name, getNTV2ModuleParams()->driverName);
@@ -2532,15 +2599,21 @@ static int __init aja_ntv2_module_init(void)
 	getNTV2ModuleParams()->NTV2Major = res;
 	MSG("%s: chrdev major %d\n", getNTV2ModuleParams()->name, getNTV2ModuleParams()->NTV2Major);
 
-	// Set all autocirculators to disabled
-//	for (i = 0; i < getNTV2ModuleParams()->numNTV2Devices; i++)
-//		AutoCirculateInitialize(i);
+	// register platform device (calls probe)
+	platform_driver_register(&ntv2_platform_driver);
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,6,0))
+	proc_create( "driver/aja",
+			0 /* default mode */,
+			NULL /* parent dir */,
+			&ntv2_proc_ops);
+#else	
 	proc_create( "driver/aja",
 			0 /* default mode */,
 			NULL /* parent dir */,
 			&ntv2_proc_fops);
+#endif	
 #else
 	create_proc_read_entry( "driver/aja",
 			0 /* default mode */,
@@ -2563,6 +2636,9 @@ static void aja_ntv2_module_cleanup(void)
 	ULWord  i;
 	ULWord  j;
 	int irqIndex;
+#if defined(AJA_CREATE_DEVICE_NODES)
+    dev_t dev;
+#endif
 
 	MSG("%s: module exit begin\n", getNTV2ModuleParams()->name);
 	
@@ -2571,16 +2647,30 @@ static void aja_ntv2_module_cleanup(void)
 	for (i = 0; i < getNTV2ModuleParams()->numNTV2Devices; i++)
 	{
 		NTV2PrivateParams *ntv2pp = getNTV2Params(i);
+        if (ntv2pp == NULL) continue;
 
-		MSG("%s: device release\n", ntv2pp->name);
+		MSG("%s: device %d release\n", ntv2pp->name, i);
 
-		// TODO: Shut down autocirculate if it is active.
+#if defined(AJA_CREATE_DEVICE_NODES)
+        if (getNTV2ModuleParams()->class != NULL)
+        {
+            dev = MKDEV(getNTV2ModuleParams()->NTV2Major, i);
+            device_destroy(getNTV2ModuleParams()->class, dev);
+            cdev_del(&ntv2pp->cdev);
+        }
+#endif
 
-		// stop all dma engines
-		dmaRelease(i);
+        if (getNTV2ModuleParams()->driverMode == eDriverModeAll)
+        {
+            // stop all dma engines
+            dmaRelease(i);
 
-		//Disable and unregister interrupts,
-		DisableAllInterrupts(i);
+            // disable and unregister interrupts,
+            DisableAllInterrupts(i);
+
+            // disable autocirculate
+            AutoCirculateInitialize(i);
+        }
 
 		// disable hdmi monitor
 		for (j = 0; j < NTV2_MAX_HDMI_MONITOR; j++)
@@ -2619,6 +2709,20 @@ static void aja_ntv2_module_cleanup(void)
             }
 		}
 
+	    if (ntv2pp->m_pSetupMonitor != NULL)
+	    {
+		    ntv2_setup_disable(ntv2pp->m_pSetupMonitor);
+		    ntv2_setup_close(ntv2pp->m_pSetupMonitor);
+		    ntv2pp->m_pSetupMonitor = NULL;
+	    }
+
+        if (ntv2pp->m_pGenlock2Monitor != NULL)
+        {
+            ntv2_genlock2_disable(ntv2pp->m_pGenlock2Monitor);
+            ntv2_genlock2_close(ntv2pp->m_pGenlock2Monitor);
+            ntv2pp->m_pGenlock2Monitor = NULL;
+        }
+
 		// close the serial port
 		if (ntv2pp->m_pSerialPort != NULL)
 		{
@@ -2626,20 +2730,21 @@ static void aja_ntv2_module_cleanup(void)
 			ntv2pp->m_pSerialPort = NULL;
 		}
 
-		if (ntv2pp->m_pBitstream != NULL)
-		{
-			ntv2_mcap_close(ntv2pp->m_pBitstream);
-			ntv2pp->m_pBitstream = NULL;
-		}
+        if ((ntv2pp->platform_dev != NULL) &&
+            (getNTV2ModuleParams()->driverMode == eDriverModeAll))
+        {
+            for(irqIndex = 0; irqIndex < eNumNTV2IRQDevices; ++irqIndex)
+            {
+                if (ntv2pp->_ntv2IRQ[irqIndex] != 0)
+                {
+                    MSG("%s: free irq 0x%x, dev_id %p\n",
+                        ntv2pp->name, ntv2pp->_ntv2IRQ[irqIndex], (void *)ntv2pp);
 
-		for(irqIndex = 0; irqIndex < eNumNTV2IRQDevices; ++irqIndex)
-		{
-			MSG("%s: free irq 0x%x, dev_id %p\n",
-				ntv2pp->name, ntv2pp->_ntv2IRQ[irqIndex], (void *)ntv2pp);
-
-			devm_free_irq(&ntv2pp->platform_dev->dev,
-						  ntv2pp->_ntv2IRQ[irqIndex],
-						  (void *)ntv2pp);
+                    devm_free_irq(&ntv2pp->platform_dev->dev,
+                                  ntv2pp->_ntv2IRQ[irqIndex],
+                                  (void *)ntv2pp);
+                }
+            }
 		}
 
 		platform_resources_release(i);
@@ -2647,6 +2752,13 @@ static void aja_ntv2_module_cleanup(void)
 	
 	unregister_chrdev( getNTV2ModuleParams()->NTV2Major, getNTV2ModuleParams()->driverName);
 	remove_proc_entry("driver/aja", NULL /* parent dir */);
+
+#if defined(AJA_CREATE_DEVICE_NODES)
+    if (getNTV2ModuleParams()->class != NULL)
+    {
+        class_destroy(getNTV2ModuleParams()->class);
+    }
+#endif
 
 	for (i = 0; i < NTV2_MAXBOARDS; i++)
 	{
@@ -2672,54 +2784,57 @@ static void aja_ntv2_module_cleanup(void)
 static int platform_probe(struct platform_device *pd)
 {
 	NTV2PrivateParams *ntv2pp = NULL;
+    ULWord deviceNumber;
 	char versionString[STRMAX];
 	Ntv2Status status;
 	int vpidIndex;
-	int irqIndex;
 	int intrIndex;
 	int i;
 	int ret;
+    bool irqGood;
+    bool irqFail;
+#if defined(AJA_CREATE_DEVICE_NODES)
+	dev_t dev;
+	struct device *device = NULL;
+#endif
 
 	MSG("%s: probe check\n", getNTV2ModuleParams()->name);
-
-    if(pd->dev.of_node == NULL)
+    if((pd == NULL) || (pd->dev.of_node == NULL))
 	{
         MSG("%s: device has no of_node\n", getNTV2ModuleParams()->name);
-        ret = -EINVAL;
-        goto fail;
+        return -EINVAL;
     }
 
-	if (deviceNumber >= NTV2_MAXBOARDS)
+	if (sDeviceNumber >= NTV2_MAXBOARDS)
 	{
 		MSG("%s: only %d boards supported\n", getNTV2ModuleParams()->name, NTV2_MAXBOARDS);
-		ret = -EPERM;
-		goto fail;
+		return -EPERM;
 	}
 
-	if (NTV2Params[deviceNumber])
+	if (NTV2Params[sDeviceNumber])
 	{
 		MSG("%s: attempt to probe previously allocated device %d\n",
-			getNTV2ModuleParams()->name, deviceNumber);
-		ret = -EPERM;
-		goto fail;
+			getNTV2ModuleParams()->name, sDeviceNumber);
+		return -EPERM;
 	}
 
 	MSG("ntv2dev: probe device state size %d\n", (int)sizeof(NTV2PrivateParams));
 
 	// Allocate space for keeping track of the device state
-	NTV2Params[deviceNumber] = vmalloc( sizeof(NTV2PrivateParams) );
-	if( NTV2Params[deviceNumber] == NULL)
+	NTV2Params[sDeviceNumber] = vmalloc( sizeof(NTV2PrivateParams) );
+	if( NTV2Params[sDeviceNumber] == NULL)
 	{
 		MSG("%s: allocation of device state failed for device %d\n",
-			getNTV2ModuleParams()->name, deviceNumber);
-		ret = -ENOMEM;
-		goto fail;
+			getNTV2ModuleParams()->name, sDeviceNumber);
+		return -ENOMEM;
 	}
+	getNTV2ModuleParams()->numNTV2Devices = sDeviceNumber + 1;
+    deviceNumber = sDeviceNumber;
+	sDeviceNumber++;
 
 	ntv2pp = NTV2Params[deviceNumber];
 	memset(ntv2pp, 0, sizeof(NTV2PrivateParams));
 	ntv2pp->deviceNumber = deviceNumber;
-	getNTV2ModuleParams()->numNTV2Devices = deviceNumber + 1;
 	snprintf(ntv2pp->name, STRMAX, "ntv2dev%u", deviceNumber);
 
 	InitInterruptBitLUT();
@@ -2773,7 +2888,7 @@ static int platform_probe(struct platform_device *pd)
 #endif	// SOFTWARE_UART_FIFO
 
 	// Initialize wait queues and interrupt bookkeeping
-	for (intrIndex = 0; intrIndex < eNumInterruptTypes; intrIndex++)
+	for ( intrIndex = 0; intrIndex < eNumInterruptTypes; intrIndex++)
 	{
 		ntv2pp->_interruptCount[intrIndex] = 0;
 		ntv2pp->_interruptHappened[intrIndex] = 0;
@@ -2841,37 +2956,6 @@ static int platform_probe(struct platform_device *pd)
 		WriteRegister(deviceNumber, gChannelToSDIOutVPIDLuminance[vpidIndex], 0x0, NO_MASK, NO_SHIFT);
 	}
 
-//	dma_registers_init(pdev, ntv2pp);		// init fpga-based dma registers
-
-	// Zero out procamp register images.  This does not write anything to the
-	// hardware registers.  These must be initialized by the SDK which knows
-	// about ranges, default values, etc.
-	memset(&ntv2pp->_virtualProcAmpRegisters, 0, sizeof(VirtualProcAmpRegisters));
-	memset(&ntv2pp->_hwProcAmpRegisterImage,  0, sizeof(HardwareProcAmpRegisterImage));
-
-	for(irqIndex = 0; irqIndex < eNumNTV2IRQDevices; ++irqIndex)
-	{
-        ret = devm_request_irq(&ntv2pp->platform_dev->dev,
-							   ntv2pp->_ntv2IRQ[irqIndex],
-							   ntv2_irq_arr[irqIndex].irq_func,
-							   ntv2_irq_arr[irqIndex].flags,
-							   ntv2pp->name,
-							   (void *)ntv2pp);
-        if(ret)
-		{
-            MSG("%s: failed to register interrupt %d\n", ntv2pp->name, ntv2pp->_ntv2IRQ[irqIndex]);
-            goto fail;
-        } else
-		{
-            MSG("%s: registered irq %d\n", ntv2pp->name, ntv2pp->_ntv2IRQ[irqIndex]);
- 	
-			if (ntv2_irq_arr[irqIndex].irq_type != IRQ_TYPE_NONE)
-			{
-				irq_set_irq_type(ntv2pp->_ntv2IRQ[irqIndex], ntv2_irq_arr[irqIndex].irq_type);
-			}
-		}
-	}
-
 	if (NTV2DeviceIsSupported(ntv2pp->_DeviceID))
 	{
 		MSG("%s: board id 0x%x\n", ntv2pp->name, (ULWord)ntv2pp->_DeviceID);
@@ -2881,92 +2965,227 @@ static int platform_probe(struct platform_device *pd)
 		MSG("%s: board id 0x%x not supported!\n", ntv2pp->name, (ULWord)ntv2pp->_DeviceID);
 	}
 
-	SetupBoard(deviceNumber);
-
-	getDeviceVersionString(deviceNumber, versionString, STRMAX);
-	MSG("%s: detected device %s\n", ntv2pp->name, versionString);
-	getDeviceSerialNumberString(deviceNumber, versionString, STRMAX);
-	MSG("%s: serial number %s\n", ntv2pp->name, versionString);
-	getPCIFPGAVersionString(deviceNumber, versionString, STRMAX);
-	MSG("%s: firmware version %s\n", ntv2pp->name, versionString);
-
-	// initialize dma
-	dmaInit(deviceNumber);
-
-	// configure hdmi input monitor
-	for (i = 0; i < NTV2_MAX_HDMI_MONITOR; i++)
-	{
-		ntv2pp->m_pHDMIInputMonitor[i] = NULL;
-		ntv2pp->m_pHDMIIn4Monitor[i] = NULL;
-		ntv2pp->m_pHDMIOut4Monitor[i] = NULL;
-	}
-
-    if (((ntv2pp->_DeviceID >= DEVICE_ID_KONA5_3DLUT) &&
-         (ntv2pp->_DeviceID <= DEVICE_ID_KONA5_OE12)) ||
-        ((ntv2pp->_DeviceID >= DEVICE_ID_SOJI_3DLUT) &&
-         (ntv2pp->_DeviceID <= DEVICE_ID_SOJI_DIAGS)))
-	{
-        ntv2pp->m_pHDMIOut4Monitor[0] = ntv2_hdmiout4_open(&ntv2pp->systemContext, "ntv2hdmiout4", 0);
-        if (ntv2pp->m_pHDMIOut4Monitor[0] != NULL)
+	// Zero out procamp register images.  This does not write anything to the
+	// hardware registers.  These must be initialized by the SDK which knows
+	// about ranges, default values, etc.
+	memset(&ntv2pp->_virtualProcAmpRegisters, 0, sizeof(VirtualProcAmpRegisters));
+	memset(&ntv2pp->_hwProcAmpRegisterImage,  0, sizeof(HardwareProcAmpRegisterImage));
+    
+    irqGood = false;
+    irqFail = false;
+    if (getNTV2ModuleParams()->driverMode == eDriverModeAll)
+    {        
+        if (ntv2pp->platform_dev != NULL)
         {
-            status = ntv2_hdmiout4_configure(ntv2pp->m_pHDMIOut4Monitor[0]);
-            if (status != NTV2_STATUS_SUCCESS)
+            for(intrIndex = 0; intrIndex < eNumNTV2IRQDevices; ++intrIndex)
             {
-                ntv2_hdmiout4_close(ntv2pp->m_pHDMIOut4Monitor[0]);
-                ntv2pp->m_pHDMIOut4Monitor[0] = NULL;
+                if (ntv2pp->_ntv2IRQ[intrIndex] != 0)
+                {
+                    ret = devm_request_irq(&ntv2pp->platform_dev->dev,
+                                           ntv2pp->_ntv2IRQ[intrIndex],
+                                           ntv2_irq_arr[intrIndex].irq_func,
+                                           ntv2_irq_arr[intrIndex].flags,
+                                           ntv2pp->name,
+                                           (void *)ntv2pp);
+                    if(ret)
+                    {
+                        MSG("%s: failed to register interrupt %d\n", ntv2pp->name, ntv2pp->_ntv2IRQ[intrIndex]);
+                        irqFail = true;
+                    }    
+                    else
+                    {
+                        MSG("%s: registered irq %d\n", ntv2pp->name, ntv2pp->_ntv2IRQ[intrIndex]);
+                        
+                        if (ntv2_irq_arr[intrIndex].irq_type != IRQ_TYPE_NONE)
+                        {
+                            irq_set_irq_type(ntv2pp->_ntv2IRQ[intrIndex], ntv2_irq_arr[intrIndex].irq_type);
+                        }
+                        irqGood = true;
+                    }
+                }
+                else
+                {
+                    MSG("%s: no attempt to register interrupt %d\n", ntv2pp->name, ntv2pp->_ntv2IRQ[intrIndex]);
+                }
             }
         }
-	}
+        if (irqFail) irqGood = false;
+        ntv2pp->canDoInterrupt = irqGood;
+        
+	    SetupBoard(deviceNumber);
+
+	    getDeviceVersionString(deviceNumber, versionString, STRMAX);
+	    MSG("%s: detected device %s\n", ntv2pp->name, versionString);
+	    getDeviceSerialNumberString(deviceNumber, versionString, STRMAX);
+	    MSG("%s: serial number %s\n", ntv2pp->name, versionString);
+	    getPCIFPGAVersionString(deviceNumber, versionString, STRMAX);
+	    MSG("%s: firmware version %s\n", ntv2pp->name, versionString);
+
+	    // initialize dma
+//	    dmaInit(deviceNumber);
+
+        // initialize autocirculate
+        AutoCirculateInitialize(deviceNumber);
+
+ 	    // configure hdmi input monitor
+	    for (i = 0; i < NTV2_MAX_HDMI_MONITOR; i++)
+	    {
+		    ntv2pp->m_pHDMIInputMonitor[i] = NULL;
+		    ntv2pp->m_pHDMIIn4Monitor[i] = NULL;
+		    ntv2pp->m_pHDMIOut4Monitor[i] = NULL;
+	    }
+        ntv2pp->m_pSetupMonitor = NULL;
+        ntv2pp->m_pGenlock2Monitor = NULL;
+
+        if (((ntv2pp->_DeviceID >= DEVICE_ID_KONA5_3DLUT) &&
+            (ntv2pp->_DeviceID <= DEVICE_ID_KONA5_OE12)) ||
+            ((ntv2pp->_DeviceID >= DEVICE_ID_SOJI_3DLUT) &&
+            (ntv2pp->_DeviceID <= DEVICE_ID_SOJI_DIAGS)))
+	    {
+            ntv2pp->m_pHDMIOut4Monitor[0] = ntv2_hdmiout4_open(&ntv2pp->systemContext, "ntv2hdmiout4", 0);
+            if (ntv2pp->m_pHDMIOut4Monitor[0] != NULL)
+            {
+                status = ntv2_hdmiout4_configure(ntv2pp->m_pHDMIOut4Monitor[0]);
+                if (status != NTV2_STATUS_SUCCESS)
+                {
+                    ntv2_hdmiout4_close(ntv2pp->m_pHDMIOut4Monitor[0]);
+                    ntv2pp->m_pHDMIOut4Monitor[0] = NULL;
+                }
+            }
+	    }
 	
-	for (i = 0; i < NTV2_MAX_HDMI_MONITOR; i++)
-	{
-		if (ntv2pp->m_pHDMIInputMonitor[i] != NULL)
-		{
-			ntv2_hdmiin_enable(ntv2pp->m_pHDMIInputMonitor[i]);
-		}
-		if (ntv2pp->m_pHDMIIn4Monitor[i] != NULL)
-		{
-			ntv2_hdmiin4_enable(ntv2pp->m_pHDMIIn4Monitor[i]);
-		}		
-		if (ntv2pp->m_pHDMIOut4Monitor[i] != NULL)
-		{
-			ntv2_hdmiout4_enable(ntv2pp->m_pHDMIOut4Monitor[i]);
+        if (ntv2pp->_DeviceID == DEVICE_ID_CORVID1)
+        {
+            ntv2pp->m_pRasterMonitor = ntv2_videoraster_open(&ntv2pp->systemContext, "ntv2videoraster", 0);
+            if (ntv2pp->m_pRasterMonitor != NULL)
+            {
+                status = ntv2_videoraster_configure(ntv2pp->m_pRasterMonitor, 0x3400, 64, 4);
+                if (status != NTV2_STATUS_SUCCESS)
+                {
+                    ntv2_videoraster_close(ntv2pp->m_pRasterMonitor);
+                    ntv2pp->m_pRasterMonitor = NULL;
+                }
+            }
         }
-	}
+	
+        if (ntv2pp->_DeviceID == DEVICE_ID_CORVID1)
+        {
+            ntv2pp->m_pSetupMonitor = ntv2_setup_open(&ntv2pp->systemContext, "ntv2setup");
+            if (ntv2pp->m_pSetupMonitor != NULL)
+            {
+                status = ntv2_setup_configure(ntv2pp->m_pSetupMonitor);
+                if (status != NTV2_STATUS_SUCCESS)
+                {
+                    ntv2_setup_close(ntv2pp->m_pSetupMonitor);
+                    ntv2pp->m_pSetupMonitor = NULL;
+                }
+            }
+        }
 
-	//Make sure the anc extractor is shut off
-	if (NTV2DeviceCanDoCustomAnc (ntv2pp->_DeviceID))
-	{
-		int numChannels = NTV2DeviceGetNumVideoChannels (ntv2pp->_DeviceID);
-		for(i = 0; i < numChannels; i++)
-		{
-			WriteRegister(deviceNumber, gChannelToAncExtOffset[i], 0, maskEnableHancY, shiftEnableHancY);
-			WriteRegister(deviceNumber, gChannelToAncExtOffset[i], 0, maskEnableHancC, shiftEnableHancC);
-			WriteRegister(deviceNumber, gChannelToAncExtOffset[i], 0, maskEnableVancY, shiftEnableVancY);
-			WriteRegister(deviceNumber, gChannelToAncExtOffset[i], 0, maskEnableVancC, shiftEnableVancC);
-		}
-	}
+	    for (i = 0; i < NTV2_MAX_HDMI_MONITOR; i++)
+	    {
+		    if (ntv2pp->m_pHDMIInputMonitor[i] != NULL)
+		    {
+			    ntv2_hdmiin_enable(ntv2pp->m_pHDMIInputMonitor[i]);
+		    }
+		    if (ntv2pp->m_pHDMIIn4Monitor[i] != NULL)
+		    {
+			    ntv2_hdmiin4_enable(ntv2pp->m_pHDMIIn4Monitor[i]);
+		    }		
+		    if (ntv2pp->m_pHDMIOut4Monitor[i] != NULL)
+		    {
+			    ntv2_hdmiout4_enable(ntv2pp->m_pHDMIOut4Monitor[i]);
+            }
+	    }
 
-	// Enable interrupts
-	EnableAllInterrupts(deviceNumber);
+        if (ntv2pp->m_pRasterMonitor != NULL)
+        {
+            ntv2_videoraster_enable(ntv2pp->m_pRasterMonitor);
+        }
+    
+        if (ntv2pp->m_pSetupMonitor != NULL)
+        {
+            ntv2_setup_enable(ntv2pp->m_pSetupMonitor);
+        }
+        
+        // configure tty uart
+        ntv2pp->m_pSerialPort = NULL;
 
-	// Enable DMA
-	dmaEnable(deviceNumber);
+	    //Make sure the anc extractor is shut off
+	    if (NTV2DeviceCanDoCustomAnc (ntv2pp->_DeviceID))
+	    {
+		    int numChannels = NTV2DeviceGetNumVideoChannels (ntv2pp->_DeviceID);
+		    for(i = 0; i < numChannels; i++)
+		    {
+			    WriteRegister(deviceNumber, gChannelToAncExtOffset[i], 0, maskEnableHancY, shiftEnableHancY);
+			    WriteRegister(deviceNumber, gChannelToAncExtOffset[i], 0, maskEnableHancC, shiftEnableHancC);
+			    WriteRegister(deviceNumber, gChannelToAncExtOffset[i], 0, maskEnableVancY, shiftEnableVancY);
+			    WriteRegister(deviceNumber, gChannelToAncExtOffset[i], 0, maskEnableVancC, shiftEnableVancC);
+		    }
+	    }
 
-	deviceNumber++;
+	    // Enable interrupts
+        if (irqGood)
+            EnableAllInterrupts(deviceNumber);
 
+	    // Enable DMA
+//	    dmaEnable(deviceNumber);
+    }
+
+    if (getNTV2ModuleParams()->driverMode != eDriverModeRegister)
+    {
+        if (ntv2pp->_DeviceID == DEVICE_ID_CORVID1)
+        {
+            ntv2pp->m_pGenlock2Monitor = ntv2_genlock2_open(&ntv2pp->systemContext, "ntv2genlock2", 0);
+            if (ntv2pp->m_pGenlock2Monitor != NULL)
+            {
+                status = ntv2_genlock2_configure(ntv2pp->m_pGenlock2Monitor);
+                if (status != NTV2_STATUS_SUCCESS)
+                {
+                    ntv2_genlock2_close(ntv2pp->m_pGenlock2Monitor);
+                    ntv2pp->m_pGenlock2Monitor = NULL;
+                }
+            }
+        }
+
+        if (ntv2pp->m_pGenlock2Monitor != NULL)
+        {
+            ntv2_genlock2_enable(ntv2pp->m_pGenlock2Monitor);
+        }
+    }
+
+#if defined(AJA_CREATE_DEVICE_NODES)
+    if (getNTV2ModuleParams()->class != NULL)
+    {
+        // Create the device node
+        dev = MKDEV(getNTV2ModuleParams()->NTV2Major, deviceNumber);
+        cdev_init(&NTV2Params[deviceNumber]->cdev, &ntv2_fops);
+        ret = cdev_add(&NTV2Params[deviceNumber]->cdev, dev, 1);
+        if (ret < 0)
+        {
+            MSG("%s: Failed to add cdev to subsystem\n", getNTV2ModuleParams()->name);
+        }
+        else
+        {
+            device = device_create(getNTV2ModuleParams()->class, NULL, dev,
+                                   NULL, "ajantv2%d", deviceNumber);
+            if (IS_ERR(device))
+            {
+                MSG("%s: Failed to create device node\n", getNTV2ModuleParams()->name);
+            }
+            else
+            {
+                MSG("%s: Created device node /dev/ajantv2%d\n",
+                    getNTV2ModuleParams()->name, deviceNumber);
+            }
+        }
+    }
+#endif
+
+fail:    
 	MSG("%s: probe end\n", ntv2pp->name);
 
 	return 0;
-
-fail:
-	if (ntv2pp != NULL)
-	{
-		NTV2Params[deviceNumber] = NULL;
-		kfree(ntv2pp);
-	}
-    platform_set_drvdata(pd, NULL);
-    return ret;
 }
 
 static void initializeRegisterNames(ULWord deviceNumber, unsigned long mappedAddress)
@@ -3115,52 +3334,50 @@ static void SetupBoard(ULWord deviceNumber)
 	ClearSingleLED(deviceNumber, 2);
 	ClearSingleLED(deviceNumber, 1);
 
-#if 0	
-	// Clear the AutoCirculate state for the device
-	AutoCirculateInitialize(deviceNumber);
-#endif
 	// Setup the LUTs
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 	if ( NTV2DeviceCanDoColorCorrection( getNTV2Params(deviceNumber)->_DeviceID ) )
 	{
 		switch( NTV2DeviceGetNumLUTs( getNTV2Params(deviceNumber)->_DeviceID ) )
 		{
 		case 8:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL8, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL8, 1);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL8, 0);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL8, 1);
 			// fall through
 		case 7:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL7, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL7, 1);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL7, 0);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL7, 1);
 			// fall through
 		case 6:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL6, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL6, 1);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL6, 0);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL6, 1);
 			// fall through
 		case 5:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL5, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL5, 1);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL5, 0);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL5, 1);
 			// fall through
 		case 4:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL4, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL4, 1);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL4, 0);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL4, 1);
 			// fall through
 		case 3:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL3, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL3, 1);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL3, 0);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL3, 1);
 			// fall through
 		case 2:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL2, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL2, 1);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL2, 0);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL2, 1);
 			// fall through
 		case 1:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL1, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL1, 1);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL1, 0);
+			DownloadLinearLUTToHW (&systemContext, NTV2_CHANNEL1, 1);
 			break;
 		default:
 			break;
 		}
 	}
+#pragma GCC diagnostic pop
 
 	switch( NTV2DeviceGetHDMIVersion(ntv2pp->_DeviceID) )
 	{
@@ -3200,6 +3417,8 @@ static void SetupBoard(ULWord deviceNumber)
 		SetRegisterWriteMode( deviceNumber, NTV2_CHANNEL1, NTV2_REGWRITE_SYNCTOFRAME );
 	}
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 	if( NTV2DeviceCanDoMultiFormat( ntv2pp->_DeviceID ) )
 	{
 		switch( NTV2DeviceGetNumVideoChannels( ntv2pp->_DeviceID ) )
@@ -3278,6 +3497,7 @@ static void SetupBoard(ULWord deviceNumber)
 			break;
 		}
 	}
+#pragma GCC diagnostic pop
 
 	//	Make an educated guess about the video formats of the channels
 	for( i = 0; i < NTV2DeviceGetNumVideoChannels( ntv2pp->_DeviceID ); i++)
@@ -3397,6 +3617,8 @@ int DoMessageSDIInStatictics(ULWord deviceNumber, NTV2Buffer * pInStatistics, vo
 	CopySDIStatusHardwareToFrameStampSDIStatusArray(&systemContext, &internalSDIStruct);
 	pSDIInputStatus = (NTV2SDIInputStatus *) pOutBuff;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 	switch(pInStatistics->fByteCount / sizeof(NTV2SDIInputStatus))
 	{
 	case 8:
@@ -3427,6 +3649,7 @@ int DoMessageSDIInStatictics(ULWord deviceNumber, NTV2Buffer * pInStatistics, vo
 		returnCode = -EINVAL;
 		break;
 	}
+#pragma GCC diagnostic pop
 
 	return returnCode;
 }
@@ -3520,92 +3743,6 @@ int DoMessageBufferLock(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot, NTV2BufferLoc
 }
 
 
-int DoMessageBitstream(ULWord deviceNumber, NTV2Bitstream* pBitstream)
-{
-	NTV2PrivateParams * pNTV2Params = getNTV2Params(deviceNumber);
-	
-	if (pBitstream == NULL)
-		return -EINVAL;
-
-	if ((pBitstream->mFlags & BITSTREAM_RESET_CONFIG) != 0)
-	{
-		if ((pBitstream->mFlags & BITSTREAM_RESET_MODULE) != 0)
-		{
-			pBitstream->mStatus = ntv2_mcap_full_reset(pNTV2Params->m_pBitstream);
-			if (pBitstream->mStatus != NTV2_STATUS_SUCCESS)
-				return -EINVAL;
-		}
-		else
-		{
-			pBitstream->mStatus = ntv2_mcap_config_reset(pNTV2Params->m_pBitstream);
-			if (pBitstream->mStatus != NTV2_STATUS_SUCCESS)
-				return -EINVAL;
-		}
-	}
-	else if ((pBitstream->mFlags & BITSTREAM_RESET_MODULE) != 0)
-	{
-		pBitstream->mStatus = ntv2_mcap_module_reset(pNTV2Params->m_pBitstream);
-		if (pBitstream->mStatus != NTV2_STATUS_SUCCESS)
-			return -EINVAL;
-	}
-	
-	if ((pBitstream->mFlags & BITSTREAM_WRITE) != 0)
-	{
-		void* pBuffer = NULL;
-		long ret;
-
-		if (pBitstream->mBuffer.fByteCount == 0)
-			return -EINVAL;
-		
-		// allocate bitstream buffer
-		pBuffer = vmalloc(pBitstream->mBuffer.fByteCount);
-		if (pBuffer == NULL)
-			return -ENOMEM;
-
-		// copy bitstream buffer from user
-		ret = copy_from_user(pBuffer,
-							 (void*)pBitstream->mBuffer.fUserSpacePtr,
-							 pBitstream->mBuffer.fByteCount);
-		if (ret < 0)
-		{
-			vfree(pBuffer);
-			return ret;
-		}
-		
-		// stop board activity
-		if (pNTV2Params->registerEnable)
-			suspend(deviceNumber);
-		
-		// resume board activity
-		if ((pBitstream->mFlags & BITSTREAM_FRAGMENT) == 0)
-			resume(deviceNumber);
-
-		// release buffer
-		vfree(pBuffer);
-
-		if (pBitstream->mStatus != NTV2_STATUS_SUCCESS)
-		{
-			return -EINVAL;
-		}
-	}
-
-	if ((pBitstream->mFlags & BITSTREAM_READ_REGISTERS) != 0)
-	{
-	}
-
-	if ((pBitstream->mFlags & BITSTREAM_SUSPEND) != 0)
-	{
-		suspend(deviceNumber);
-	}
-
-	if ((pBitstream->mFlags & BITSTREAM_RESUME) != 0)
-	{
-		resume(deviceNumber);
-	}
-
-	return 0;
-}
-
 static int platform_resources_config(ULWord deviceNumber)
 {
 	NTV2PrivateParams *ntv2pp = NULL;
@@ -3631,7 +3768,7 @@ static int platform_resources_config(ULWord deviceNumber)
 	ntv2pp->_mappedBAR2Address = 0;
 	ntv2pp->_unmappedBAR2Address = 0;
 	ntv2pp->_BAR2MemorySize = 0;
-
+#if 0
     ret = of_property_read_u32(pd->dev.of_node, "deviceType", &val32);
     if(ret) {
         MSG("%s: failed to read deviceType property\n", ntv2pp->name);
@@ -3677,7 +3814,28 @@ static int platform_resources_config(ULWord deviceNumber)
             if(ret) goto fail;
         }
     }
+#else
+    {
+        unsigned long phyaddr = 0x00000000a8000000;
+        unsigned long size = 0x0000000000010000;
+        void *mapped = NULL;
+        struct resource *resource = NULL;
+        
+        resource = request_mem_region(phyaddr, size, ntv2pp->name);
+        if(resource == NULL)
+        {
+            MSG("%s: %s request_mem_region failed\n", ntv2pp->name, node->full_name);
+            if(ret) goto fail;
+        }
+        mapped = ioremap(phyaddr, size);
+        MSG("%s: video reg %p phyaddr\n", ntv2pp->name, (void*)phyaddr);
+        MSG("%s: video reg %p mapped\n", ntv2pp->name, mapped);
 
+        ntv2pp->_unmappedBAR0Address = phyaddr;
+        ntv2pp->_mappedBAR0Address = (unsigned long)mapped;
+        ntv2pp->_BAR0MemorySize = size;
+    }
+#endif    
     // FIXME: Grab these from device tree
     ntv2pp->_FrameMemoryAddress = 0x500000000;
     ntv2pp->_FrameMemorySize    = 0x40000000;
@@ -3756,7 +3914,7 @@ static int platform_add_register(ULWord deviceNumber, struct device_node *node)
 				MSG("%s: %s request_mem_region failed\n", ntv2pp->name, node->full_name);
                 return -ENOMEM;
             }
-            mapped = ioremap_nocache(phyaddr, size);
+            mapped = ioremap(phyaddr, size);
             MSG("%s: video reg %p mapped\n", ntv2pp->name, mapped);
 
 			ntv2pp->_unmappedBAR0Address = phyaddr;
@@ -3978,8 +4136,11 @@ static int writeVirtualData(ULWord tag, UByte *buf, ULWord size)
 
 static void suspend(ULWord deviceNumber)
 {
-	NTV2PrivateParams *ntv2pp = getNTV2Params(deviceNumber);
+	NTV2PrivateParams *ntv2pp;
 	int j;
+
+    if ( !(ntv2pp = getNTV2Params(deviceNumber)) )
+		return;
 
 	MSG("%s: device suspend\n", ntv2pp->name);
 
@@ -3999,10 +4160,22 @@ static void suspend(ULWord deviceNumber)
 			ntv2_hdmiout4_disable(ntv2pp->m_pHDMIOut4Monitor[j]);
 		}	
 	}
-#if 0
-	// shut down autocirculate
-	AutoCirculateInitialize(deviceNumber);
-#endif
+
+	if (ntv2pp->m_pSetupMonitor != NULL)
+	{
+		ntv2_setup_disable(ntv2pp->m_pSetupMonitor);
+	}
+
+    if (ntv2pp->m_pRasterMonitor != NULL)
+    {
+        ntv2_videoraster_disable(ntv2pp->m_pRasterMonitor);
+    }
+	
+    if (ntv2pp->m_pGenlock2Monitor != NULL)
+    {
+        ntv2_genlock2_disable(ntv2pp->m_pGenlock2Monitor);
+    }
+
 	// disable the serial driver
 	if (ntv2pp->m_pSerialPort)
 	{
@@ -4022,10 +4195,13 @@ static void suspend(ULWord deviceNumber)
 
 static void resume(ULWord deviceNumber)
 {
-	NTV2PrivateParams *ntv2pp = getNTV2Params(deviceNumber);
+	NTV2PrivateParams *ntv2pp;
 	int intrIndex;
 	char versionString[STRMAX];
 	int i;
+
+    if ( !(ntv2pp = getNTV2Params(deviceNumber)) )
+		return;
 
 	MSG("%s: device resume\n", ntv2pp->name);
 
@@ -4051,57 +4227,76 @@ static void resume(ULWord deviceNumber)
 		MSG("%s: board id 0x%x not supported!\n", ntv2pp->name, (ULWord)ntv2pp->_DeviceID);
 	}
 
-	// configure board defaults
-	SetupBoard(deviceNumber);
+    if (getNTV2ModuleParams()->driverMode == eDriverModeAll)
+    {
+	    // configure board defaults
+	    SetupBoard(deviceNumber);
 
-	getDeviceVersionString(deviceNumber, versionString, STRMAX);
-	MSG("%s: detected device %s\n", ntv2pp->name, versionString);
-	getDeviceSerialNumberString(deviceNumber, versionString, STRMAX);
-	MSG("%s: serial number %s\n", ntv2pp->name, versionString);
-	getPCIFPGAVersionString(deviceNumber, versionString, STRMAX);
-	MSG("%s: firmware version %s\n", ntv2pp->name, versionString);
+	    getDeviceVersionString(deviceNumber, versionString, STRMAX);
+	    MSG("%s: detected device %s\n", ntv2pp->name, versionString);
+	    getDeviceSerialNumberString(deviceNumber, versionString, STRMAX);
+	    MSG("%s: serial number %s\n", ntv2pp->name, versionString);
+	    getPCIFPGAVersionString(deviceNumber, versionString, STRMAX);
+	    MSG("%s: firmware version %s\n", ntv2pp->name, versionString);
 
-	//Make sure the anc extractor is shut off
-	if (NTV2DeviceCanDoCustomAnc (ntv2pp->_DeviceID))
-	{
-		int numChannels = NTV2DeviceGetNumVideoChannels (ntv2pp->_DeviceID);
-		for(i = 0; i < numChannels; i++)
-		{
-			WriteRegister(deviceNumber, gChannelToAncExtOffset[i], 0, maskEnableHancY, shiftEnableHancY);
-			WriteRegister(deviceNumber, gChannelToAncExtOffset[i], 0, maskEnableHancC, shiftEnableHancC);
-			WriteRegister(deviceNumber, gChannelToAncExtOffset[i], 0, maskEnableVancY, shiftEnableVancY);
-			WriteRegister(deviceNumber, gChannelToAncExtOffset[i], 0, maskEnableVancC, shiftEnableVancC);
-		}
-	}
+	    //Make sure the anc extractor is shut off
+	    if (NTV2DeviceCanDoCustomAnc (ntv2pp->_DeviceID))
+	    {
+		    int numChannels = NTV2DeviceGetNumVideoChannels (ntv2pp->_DeviceID);
+		    for(i = 0; i < numChannels; i++)
+		    {
+			    WriteRegister(deviceNumber, gChannelToAncExtOffset[i], 0, maskEnableHancY, shiftEnableHancY);
+			    WriteRegister(deviceNumber, gChannelToAncExtOffset[i], 0, maskEnableHancC, shiftEnableHancC);
+			    WriteRegister(deviceNumber, gChannelToAncExtOffset[i], 0, maskEnableVancY, shiftEnableVancY);
+			    WriteRegister(deviceNumber, gChannelToAncExtOffset[i], 0, maskEnableVancC, shiftEnableVancC);
+		    }
+	    }
 
-	// enable the serial driver
-	if (ntv2pp->m_pSerialPort && ntv2pp->serialActive)
-	{
-		ntv2_serial_enable(ntv2pp->m_pSerialPort);
-	}
+	    // enable the serial driver
+	    if (ntv2pp->m_pSerialPort && ntv2pp->serialActive)
+	    {
+		    ntv2_serial_enable(ntv2pp->m_pSerialPort);
+	    }
 		
-	// enable hdmi monitor
-	for (i = 0; i < NTV2_MAX_HDMI_MONITOR; i++)
-	{
-		if (ntv2pp->m_pHDMIInputMonitor[i] != NULL)
-		{
-			ntv2_hdmiin_enable(ntv2pp->m_pHDMIInputMonitor[i]);
-		}
-		if (ntv2pp->m_pHDMIIn4Monitor[i] != NULL)
-		{
-			ntv2_hdmiin4_enable(ntv2pp->m_pHDMIIn4Monitor[i]);
-		}
-		if (ntv2pp->m_pHDMIOut4Monitor[i] != NULL)
-		{
-			ntv2_hdmiout4_enable(ntv2pp->m_pHDMIOut4Monitor[i]);
-		}	
-	}
+	    // enable hdmi monitor
+	    for (i = 0; i < NTV2_MAX_HDMI_MONITOR; i++)
+	    {
+		    if (ntv2pp->m_pHDMIInputMonitor[i] != NULL)
+		    {
+			    ntv2_hdmiin_enable(ntv2pp->m_pHDMIInputMonitor[i]);
+		    }
+		    if (ntv2pp->m_pHDMIIn4Monitor[i] != NULL)
+		    {
+			    ntv2_hdmiin4_enable(ntv2pp->m_pHDMIIn4Monitor[i]);
+		    }
+		    if (ntv2pp->m_pHDMIOut4Monitor[i] != NULL)
+		    {
+			    ntv2_hdmiout4_enable(ntv2pp->m_pHDMIOut4Monitor[i]);
+		    }	
+        }
+	
+        if (ntv2pp->m_pSetupMonitor != NULL)
+        {
+            ntv2_setup_enable(ntv2pp->m_pSetupMonitor);
+        }
 
-	// Enable interrupts
-	EnableAllInterrupts(deviceNumber);
+        if (ntv2pp->m_pRasterMonitor != NULL)
+        {
+            ntv2_videoraster_enable(ntv2pp->m_pRasterMonitor);
+        }
 
-	// enable all dma engines
-	dmaEnable(deviceNumber);
+        if (ntv2pp->m_pGenlock2Monitor != NULL)
+        {
+            ntv2_genlock2_enable(ntv2pp->m_pGenlock2Monitor);
+        }
+
+	    // Enable interrupts
+        if (ntv2pp->canDoInterrupt)
+            EnableAllInterrupts(deviceNumber);
+
+	    // enable all dma engines
+//	    dmaEnable(deviceNumber);
+    }
 }
 
 module_init(aja_ntv2_module_init);

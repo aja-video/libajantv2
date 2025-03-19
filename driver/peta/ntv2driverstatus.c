@@ -43,203 +43,80 @@ void getDeviceVersionString(ULWord deviceNumber, char *deviceVersionString, ULWo
 	deviceID = getDeviceID(deviceNumber);
 	
     switch(deviceID) {
-	case DEVICE_ID_CORVID1:
-		deviceStr = "CORVID";
-		break;
-	
-	case DEVICE_ID_KONALHI:
-		deviceStr = "KONALHI";
-		break;
-	
-	case DEVICE_ID_KONALHEPLUS:
-		deviceStr = "KONALHE+";
-		break;
-	
-	case DEVICE_ID_IOEXPRESS:
-		deviceStr = "IOEXPRESS";
-		break;
-
-	case DEVICE_ID_CORVID22:
-		deviceStr = "CORVID22";
-		break;
-
-	case DEVICE_ID_CORVID3G:
-		deviceStr = "CORVID3G";
-		break;
-
-	case DEVICE_ID_KONA3G:
-		deviceStr = "KONA3G";
-		break;
-	
-	case DEVICE_ID_KONA3GQUAD:
-		deviceStr = "KONA3GQUAD";
-		break;
-	
-	case DEVICE_ID_CORVID24:
-		deviceStr = "CORVID24";
-		break;
-	
-	case DEVICE_ID_IOXT:
-		deviceStr = "IOXT";
-		break;
-	
-	case DEVICE_ID_KONA4:
-		deviceStr = "KONA4";
-		break;
-	
-	case DEVICE_ID_KONA4UFC:
-		deviceStr = "KONA4UFC";
-		break;
-	
-	case DEVICE_ID_CORVID88:
-		deviceStr = "CORVID88";
-		break;
+	case DEVICE_ID_CORVID1: deviceStr = "CORVID"; break;	
+	case DEVICE_ID_KONALHI: deviceStr = "KONALHI"; break;
+	case DEVICE_ID_KONALHEPLUS: deviceStr = "KONALHE+"; break;	
+	case DEVICE_ID_IOEXPRESS: deviceStr = "IOEXPRESS"; break;
+	case DEVICE_ID_CORVID22: deviceStr = "CORVID22"; break;
+	case DEVICE_ID_CORVID3G: deviceStr = "CORVID3G"; break;
+	case DEVICE_ID_KONA3G: deviceStr = "KONA3G"; break;
+	case DEVICE_ID_KONA3GQUAD: deviceStr = "KONA3GQUAD"; break;
+	case DEVICE_ID_CORVID24: deviceStr = "CORVID24"; break;
+	case DEVICE_ID_IOXT: deviceStr = "IOXT"; break;
+	case DEVICE_ID_KONA4: deviceStr = "KONA4"; break;
+	case DEVICE_ID_KONA4UFC: deviceStr = "KONA4UFC"; break;
+	case DEVICE_ID_CORVID88: deviceStr = "CORVID88"; break;
 	
 	case DEVICE_ID_CORVID44:
 		//	Hack, until the 446 is supported by device features
 		{
-//            if( ReadRegister(deviceNumber, kVRegPCIDeviceID, NO_MASK, NO_SHIFT) == NTV2_DEVICE_ID_CORVID446 )
-//				deviceStr = "CORVID446";
-//			else
+            if( ReadRegister(deviceNumber, kVRegPCIDeviceID, NO_MASK, NO_SHIFT) == NTV2_DEVICE_ID_CORVID446 )
+				deviceStr = "CORVID446";
+			else
 				deviceStr = "CORVID44";
 		}
 		break;
 	
-	case DEVICE_ID_CORVIDHBR:
-		deviceStr = "CORVIDHBR";
-		break;
-	
-    case DEVICE_ID_KONAIP_2022:
-		deviceStr = "KONAIP_2022";
-		break;
-            
-    case DEVICE_ID_KONAIP_2110:
-        deviceStr = "KONAIP_2110";
-        break;
-
-	case DEVICE_ID_KONAIP_2110_RGB12:
-		deviceStr = "KONAIP_2110_RGB12";
-		break;
-
-    case DEVICE_ID_KONAIP_4CH_2SFP:
-        deviceStr = "KONAIP_4CH";
-		break;
-
-    case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
-        deviceStr = "KONAIP_1RX_1TX_J2K";
-        break;
-	
-	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
-		deviceStr = "KONAIP_2TX_J2K";
-		break;
-
-	case DEVICE_ID_KONAIP_1RX_1TX_2110:
-		deviceStr = "KONAIP_1RX_1TX_2110";
-		break;
-
-    case DEVICE_ID_CORVIDHEVC:
-        deviceStr = "CORVIDHEVC";
-        break;
-
-	case DEVICE_ID_IO4KPLUS:
-		deviceStr = "IO4KPLUS";
-		break;
-	
-	case DEVICE_ID_IOIP_2022:
-		deviceStr = "IOIP_2022";
-		break;
-	
-    case DEVICE_ID_IOIP_2110:
-        deviceStr = "IOIP_2110";
-        break;
-
-	case DEVICE_ID_KONA1:
-		deviceStr = "KONA1";
-		break;
-	
-	case DEVICE_ID_KONAHDMI:
-		deviceStr = "KONAHDMI";
-		break;
-
-    case DEVICE_ID_KONA5:
-        deviceStr = "KONA5";
-        break;
-
-    case DEVICE_ID_KONA5_3DLUT:
-        deviceStr = "KONA5_3DLUT";
-        break;
-
-    case DEVICE_ID_KONA5_4X12G:
-        deviceStr = "KONA5_4X12G";
-        break;
-
+	case DEVICE_ID_CORVID44_PLNR: deviceStr = "CORVID44_PLNR"; break;
+	case DEVICE_ID_CORVIDHBR: deviceStr = "CORVIDHBR"; break;
+    case DEVICE_ID_KONAIP_2022: deviceStr = "KONAIP_2022"; break;
+    case DEVICE_ID_KONAIP_2110: deviceStr = "KONAIP_2110"; break;
+	case DEVICE_ID_KONAIP_2110_RGB12: deviceStr = "KONAIP_2110_RGB12"; break;
+    case DEVICE_ID_KONAIP_4CH_2SFP: deviceStr = "KONAIP_4CH"; break;
+    case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K: deviceStr = "KONAIP_1RX_1TX_J2K"; break;
+	case DEVICE_ID_KONAIP_2TX_1SFP_J2K: deviceStr = "KONAIP_2TX_J2K"; break;
+	case DEVICE_ID_KONAIP_1RX_1TX_2110: deviceStr = "KONAIP_1RX_1TX_2110"; break;
+    case DEVICE_ID_CORVIDHEVC: deviceStr = "CORVIDHEVC"; break;
+	case DEVICE_ID_IO4KPLUS: deviceStr = "IO4KPLUS"; break;
+	case DEVICE_ID_IOIP_2022: deviceStr = "IOIP_2022"; break;
+    case DEVICE_ID_IOIP_2110: deviceStr = "IOIP_2110"; break;
+	case DEVICE_ID_KONA1: deviceStr = "KONA1"; break;
+	case DEVICE_ID_KONAHDMI: deviceStr = "KONAHDMI"; break;
+    case DEVICE_ID_KONA5: deviceStr = "KONA5"; break;
+	case DEVICE_ID_KONA5_8KMK: deviceStr = "KONA5_8KMK"; break;
+	case DEVICE_ID_KONA5_8K: deviceStr = "KONA5_8K"; break;
+	case DEVICE_ID_KONA5_3DLUT: deviceStr = "KONA5_3DLUT"; break;
+	case DEVICE_ID_KONA5_8K_MV_TX: deviceStr = "KONA5_8K_MV_TX"; break;
+	case DEVICE_ID_KONA5_2X4K: deviceStr = "KONA5_2X4K"; break;
 	case DEVICE_ID_KONA5_OE1:
-        deviceStr = "KONA5_OE1";
-        break;
-		
 	case DEVICE_ID_KONA5_OE2:
-        deviceStr = "KONA5_OE2";
-        break;
-		
 	case DEVICE_ID_KONA5_OE3:
-        deviceStr = "KONA5_OE3";
-        break;
-		
 	case DEVICE_ID_KONA5_OE4:
-        deviceStr = "KONA5_OE4";
-        break;
-		
 	case DEVICE_ID_KONA5_OE5:
-        deviceStr = "KONA5_OE5";
-        break;
-		
 	case DEVICE_ID_KONA5_OE6:
-        deviceStr = "KONA5_OE6";
-        break;
-		
 	case DEVICE_ID_KONA5_OE7:
-        deviceStr = "KONA5_OE7";
-        break;
-		
-    case DEVICE_ID_SOJI_3DLUT:
-        deviceStr = "SOJI_3DLUT";
-        break;
-
+	case DEVICE_ID_KONA5_OE8:
+	case DEVICE_ID_KONA5_OE9:
+	case DEVICE_ID_KONA5_OE10:
+	case DEVICE_ID_KONA5_OE11:
+	case DEVICE_ID_KONA5_OE12: deviceStr = "KONA5_OE"; break;
+	case DEVICE_ID_SOJI_3DLUT: deviceStr = "SOJI_3DLUT"; break;
 	case DEVICE_ID_SOJI_OE1:
-        deviceStr = "SOJI_OE1";
-        break;
-		
 	case DEVICE_ID_SOJI_OE2:
-        deviceStr = "SOJI_OE2";
-        break;
-		
 	case DEVICE_ID_SOJI_OE3:
-        deviceStr = "SOJI_OE3";
-        break;
-		
 	case DEVICE_ID_SOJI_OE4:
-        deviceStr = "SOJI_OE4";
-        break;
-		
 	case DEVICE_ID_SOJI_OE5:
-        deviceStr = "SOJI_OE5";
-        break;
-		
 	case DEVICE_ID_SOJI_OE6:
-        deviceStr = "SOJI_OE6";
-        break;
-		
-	case DEVICE_ID_SOJI_OE7:
-        deviceStr = "SOJI_OE7";
-        break;
-		
-    case DEVICE_ID_SOJI_DIAGS:
-        deviceStr = "SOJI_DIAGS";
-        break;
-
-	case DEVICE_ID_CORVID44_12G:
-        deviceStr = "CORVID44_12G";
-        break;
+	case DEVICE_ID_SOJI_OE7: deviceStr = "SOJI_OE"; break;
+	case DEVICE_ID_SOJI_DIAGS: deviceStr = "SOJI_DIAGS"; break;
+	case DEVICE_ID_CORVID44_8KMK: deviceStr = "CORVID44_8KMK"; break;
+	case DEVICE_ID_CORVID44_8K: deviceStr = "CORVID44_8K"; break;
+	case DEVICE_ID_CORVID44_2X4K: deviceStr = "CORVID44_2X4K"; break;
+    case DEVICE_ID_KONAX: deviceStr = "KONAX"; break;
+    case DEVICE_ID_KONAXM: deviceStr = "KONAXM"; break;
+	case DEVICE_ID_IOX3: deviceStr = "IoX3"; break;
+    case DEVICE_ID_TTAP_PRO: deviceStr = "TTAP_PRO"; break;
+    case DEVICE_ID_KONAIP_25G: deviceStr = "KonaIP_25G"; break;
 	
 	default:
 		deviceStr = "Unknown Device";

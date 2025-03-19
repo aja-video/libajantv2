@@ -22,15 +22,15 @@ typedef NTV2DeviceIDSerialPairs::iterator		NTV2DeviceIDSerialPairsIter;
 typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter;
 
 //	Supported NTV2ConnectParams:
-#define	kConnectParamScheme		"Scheme"		///< @brief	URL scheme
-#define	kConnectParamHost		"Host"			///< @brief	DNS name, IPv4 or sw device DLL name
-#define	kConnectParamPort		"Port"			///< @brief	Port number (optional)
-#define	kConnectParamDevIndex	"DeviceIndex"	///< @brief	Device having this index number
-#define	kConnectParamDevSerial	"DeviceSerial"	///< @brief	Device with this serial number
-#define	kConnectParamDevModel	"DeviceModel"	///< @brief	First device of this model (e.g. 'kona4')
-#define	kConnectParamDevID		"DeviceID"		///< @brief	First device having this ID (e.g. '0x10518400')
-#define	kConnectParamResource	"ResourcePath"	///< @brief	Resource path -- everything past URL [scheme://host[:port]/], excluding [?query]
-#define	kConnectParamQuery		"Query"			///< @brief	Query -- everything past '?' in URL
+#define	kConnectParamScheme		"scheme"		///< @brief	URL scheme
+#define	kConnectParamHost		"host"			///< @brief	DNS name, IPv4 or sw device DLL name
+#define	kConnectParamPort		"port"			///< @brief	Port number (optional)
+#define	kConnectParamDevIndex	"deviceindex"	///< @brief	Device having this index number
+#define	kConnectParamDevSerial	"deviceserial"	///< @brief	Device with this serial number
+#define	kConnectParamDevModel	"devicemodel"	///< @brief	First device of this model (e.g. 'kona4')
+#define	kConnectParamDevID		"deviceid"		///< @brief	First device having this ID (e.g. '0x10518400')
+#define	kConnectParamResource	"resourcePath"	///< @brief	Resource path -- everything past URL [scheme://host[:port]/], excluding [?query]
+#define	kConnectParamQuery		"query"			///< @brief	Query -- everything past '?' in URL
 
 //	AJA query params:
 #define	kQParamVerboseLogging	"verbose"		///< @brief	Query parameter option that enables verbose message logging

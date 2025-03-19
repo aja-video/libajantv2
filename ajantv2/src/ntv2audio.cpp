@@ -280,7 +280,7 @@ bool CNTV2Card::GetAudioBufferSize (NTV2AudioBufferSize & outSize, const NTV2Aud
 bool CNTV2Card::SetAudioAnalogLevel (const NTV2AudioLevel inLevel, const NTV2AudioSystem inAudioSystem)
 {
 	(void)inAudioSystem;
-	if (IsBreakoutBoardConnected())
+	if (IsSupported(kDeviceHasBreakoutBoard))
 		return WriteRegister (kRegBOBAudioControl, inLevel, kRegMaskBOBAnalogLevelControl, kRegShiftBOBAnalogLevelControl);
 	else
 		return WriteRegister (kRegAud1Control, inLevel, kFS1RegMaskAudioLevel, kFS1RegShiftAudioLevel);
@@ -290,7 +290,7 @@ bool CNTV2Card::SetAudioAnalogLevel (const NTV2AudioLevel inLevel, const NTV2Aud
 bool CNTV2Card::GetAudioAnalogLevel (NTV2AudioLevel & outLevel, const NTV2AudioSystem inAudioSystem)
 {
 	(void)inAudioSystem;
-	if (IsBreakoutBoardConnected())
+	if (IsSupported(kDeviceHasBreakoutBoard))
 		return CNTV2DriverInterface::ReadRegister (kRegBOBAudioControl, outLevel, kRegMaskBOBAnalogLevelControl, kRegShiftBOBAnalogLevelControl);
 	else
 		return CNTV2DriverInterface::ReadRegister (kRegAud1Control, outLevel, kFS1RegMaskAudioLevel, kK2RegShiftAudioLevel);
@@ -504,13 +504,8 @@ bool CNTV2Card::SetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, 
 			if (SetEmbeddedAudioInput (inEmbeddedSource, inAudioSystem))	//	Use the specified input for grabbing embedded audio
 				result = SetEmbeddedAudioClock (NTV2_EMBEDDED_AUDIO_CLOCK_VIDEO_INPUT, inAudioSystem);	//	Use video input clock (not reference)
 		
-		if (NTV2DeviceCanDoBreakoutBoard(_boardID))
-		{
-			if(IsBreakoutBoardConnected() && inAudioSource == NTV2_AUDIO_ANALOG)
-				result = EnableBOBAnalogAudioIn(true);
-			else
-				result = EnableBOBAnalogAudioIn(false);
-		}
+		if (IsSupported(kDeviceCanDoBreakoutBoard))
+			result = EnableBOBAnalogAudioIn(IsSupported(kDeviceHasBreakoutBoard) && inAudioSource == NTV2_AUDIO_ANALOG);
 	}
 	return result;
 
@@ -1720,9 +1715,8 @@ bool CNTV2Card::GetRawAudioTimer (ULWord & outValue, const NTV2AudioSystem inAud
 
 bool CNTV2Card::EnableBOBAnalogAudioIn(bool inEnable)
 {
-	if (!NTV2DeviceCanDoBreakoutBoard(_boardID))
-		return false;
-	return WriteRegister(kRegBOBAudioControl, inEnable ? 1 : 0, kRegMaskBOBAnalogInputSelect, kRegShiftBOBAnalogInputSelect);
+	return IsSupported(kDeviceCanDoBreakoutBoard)
+		&& WriteRegister(kRegBOBAudioControl, inEnable ? 1 : 0, kRegMaskBOBAnalogInputSelect, kRegShiftBOBAnalogInputSelect);
 }
 
 bool CNTV2Card::GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outAbsByteOffset,

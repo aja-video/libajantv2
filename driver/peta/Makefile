@@ -30,7 +30,10 @@ DRIVERSRCS = ntv2devicefeatures.c \
 			ntv2vpidfromspec.c \
 			registerio.c \
 			ntv2serial.c \
+			../ntv2anc.c \
+			../ntv2aux.c \
 			../ntv2commonreg.c \
+			../ntv2genlock2.c \
 			../ntv2hdmiedid.c \
 			../ntv2hdmiin.c \
 			../ntv2hdmiin4.c \
@@ -40,12 +43,14 @@ DRIVERSRCS = ntv2devicefeatures.c \
 			../ntv2genlock.c \
 			../ntv2mcap.c \
 			../ntv2pciconfig.c \
+			../ntv2setup.c \
 			../ntv2system.c \
-			../ntv2anc.c \
 			../ntv2xpt.c \
 			../ntv2kona.c \
 			../ntv2vpid.c \
 			../ntv2rp188.c \
+			../ntv2video.c \
+			../ntv2videoraster.c \
 			ntv2driver.c \
 			ntv2dma.c
 
@@ -70,6 +75,7 @@ DRIVERINCS = $(A_LIB_NTV2_INC)/ntv2audiodefines.h \
 			$(A_PETA_DRIVER_PATH)/registerio.h \
 			$(A_PETA_DRIVER_PATH)/ntv2serial.h \
 			$(A_DRIVER_PATH)/ntv2commonreg.h \
+			$(A_DRIVER_PATH)/ntv2genlock2.h \
 			$(A_DRIVER_PATH)/ntv2hdmiin.h \
 			$(A_DRIVER_PATH)/ntv2hinreg.h \
 			$(A_DRIVER_PATH)/ntv2hdmiin4.h \
@@ -82,10 +88,12 @@ DRIVERINCS = $(A_LIB_NTV2_INC)/ntv2audiodefines.h \
 			$(A_DRIVER_PATH)/ntv2kona.h \
 			$(A_DRIVER_PATH)/ntv2mcap.h \
 			$(A_DRIVER_PATH)/ntv2pciconfig.h \
+			$(A_DRIVER_PATH)/ntv2setup.h \
 			$(A_DRIVER_PATH)/ntv2system.h \
 			$(A_DRIVER_PATH)/ntv2vpid.h \
 			$(A_DRIVER_PATH)/ntv2xpt.h \
-			$(A_DRIVER_PATH)/ntv2anc.h
+			$(A_DRIVER_PATH)/ntv2anc.h \
+			$(A_DRIVER_PATH)/ntv2videoraster.h
 
 obj-m				:= $(DRIVERTARGET)
 $(NTV2TARGET)-objs 	:= $(DRIVEROBJS) $(HEVCOBJS)

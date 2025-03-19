@@ -494,11 +494,18 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 		
 		if (::NTV2DeviceHasLPProductCode(mDevice.GetDeviceID()))
 		{
+			AJASystemInfo::append(infoTable, "URL INFO", "");
 			std::string urlString;
-			bool hasIP = mDevice.GetLPTunnelPortURLString(urlString);
-			AJASystemInfo::append(infoTable, ("Tunnel URL: " + (hasIP ? urlString : "No URL")));
-			hasIP = mDevice.GetLPExternalPortURLString(urlString);
-			AJASystemInfo::append(infoTable, ("External URL: " + (hasIP ? urlString : "No URL")));
+			bool hasIP = mDevice.GetLPTunnelConfigurationURLString(urlString);
+			AJASystemInfo::append(infoTable, "Tunnel URL", hasIP ? urlString : "No URL");
+			hasIP = mDevice.GetLPExternalConfigurationURLString(urlString);
+			AJASystemInfo::append(infoTable, "External URL", hasIP ? urlString : "No URL");
+			std::vector<std::string> sfpURLStings;
+			int numSFPs = mDevice.GetSFPConfigurationURLStrings(sfpURLStings);
+			for (int i = 0; i < numSFPs; i++)
+			{
+				AJASystemInfo::append(infoTable, "SFP URL", sfpURLStings[i]);
+			}
 		}
 
 		if (mDevice.IsIPDevice())

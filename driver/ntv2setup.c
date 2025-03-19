@@ -155,6 +155,8 @@ void ntv2_setup_monitor_shared(void* data)
 	{
 		if (ntv2ReadVirtualRegister(systemContext, kVRegEveryFrameTaskFilter) != NTV2_DISABLE_TASKS)
 		{
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 			switch (NTV2DeviceGetNumVideoOutputs(deviceID))
 			{
 			case 8:
@@ -182,6 +184,7 @@ void ntv2_setup_monitor_shared(void* data)
 				SetVideoOutputStandard(systemContext, NTV2_CHANNEL1);
 				break;
 			}
+#pragma GCC diagnostic pop
 
 			if (NTV2DeviceHasRotaryEncoder(deviceID))
 			{

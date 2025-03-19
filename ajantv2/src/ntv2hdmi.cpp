@@ -289,7 +289,7 @@ bool CNTV2Card::GetHDMIInAudioChannel34Swap (bool & outIsSwapped, const NTV2Chan
 	if (inChannel >= ::NTV2DeviceGetNumHDMIVideoInputs(_boardID))
 		return false;	//	No such HDMI input
 	if (_boardID == DEVICE_ID_KONAHDMI)
-		return CNTV2DriverInterface::WriteRegister(gKonaHDMICtrlRegs[inChannel], outIsSwapped ? 1 : 0, kRegMaskHDMISwapInputAudCh34, kRegShiftHDMISwapInputAudCh34);	//	TBD
+		return CNTV2DriverInterface::ReadRegister(gKonaHDMICtrlRegs[inChannel], outIsSwapped, kRegMaskHDMISwapInputAudCh34, kRegShiftHDMISwapInputAudCh34);	//	TBD
 	return CNTV2DriverInterface::ReadRegister(kRegHDMIInputControl, outIsSwapped, kRegMaskHDMISwapInputAudCh34, kRegShiftHDMISwapInputAudCh34);
 }
 

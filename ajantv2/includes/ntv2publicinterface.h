@@ -1086,11 +1086,59 @@ typedef enum
 
 typedef enum
 {
-	kRegLPRJ45IP = 14080,
-	kRegLPTunnelIP = 14081,
-	//14082 - 14094 available - define as needed
-	kRegLPFrameTask = 14095
+	kRegLPRJ45IP		= 14080, // External IP Address
+	kRegLPTunnelIP		= 14081, // ajatun IP Address
+	kRegLPSFP1IP		= 14082, // SFP 1 IP Address
+	kRegLPSFP2IP		= 14083, // SFP 1 IP Address
+	kRegLPIPVidStatus	= 14084, // Video Enabled/Active Statuses : 0-7: Input enabled
+	kRegLPIPAudStatus	= 14085, // Audio Enabled/Active Statuses : 16-23: Output enabled
+	kRegLPIPAncStatus	= 14086, // Anc Enabled/Active Statuses	  : 24-31: Output Active	
+	kRegLPIPOut1Config	= 14087, // Stuff beyond VPID definition Out 1
+	kRegLPIPOut2Config	= 14088, // 		"	Out 2
+	kRegLPIPOut3Config	= 14089, // 		"	Out 3
+	kRegLPIPOut4Config	= 14090, // 		"	Out 4
+	//14086 - 14093 Available
+	kRegLPHeartBeat		= 14094, // Local Proc isAlive counter
+	kRegLPFrameTask		= 14095  // Used to report OEM/Retail configuration
 } NTV2LocalProcBlockRegisters;
+
+typedef enum
+{
+	kRegMaskIPIn1Enabled	= BIT(0),
+	kRegMaskIPIn2Enabled	= BIT(1),
+	kRegMaskIPIn3Enabled	= BIT(2),
+	kRegMaskIPIn4Enabled	= BIT(3),
+	kRegMaskIPOut1Enabled	= BIT(16),
+	kRegMaskIPOut2Enabled	= BIT(17),
+	kRegMaskIPOut3Enabled	= BIT(18),
+	kRegMaskIPOut4Enabled	= BIT(19),
+	kRegMaskIPOut1Active	= BIT(24),
+	kRegMaskIPOut2Active	= BIT(25),
+	kRegMaskIPOut3Active	= BIT(26),
+	kRegMaskIPOut4Active	= BIT(27),
+
+	kRegMaskIPIsKey			= BIT(0)
+} NTV2LocalProcRegisterMask;
+
+typedef enum
+{
+	kRegShiftIPIn1Enabled	= 0,
+	kRegShiftIPIn2Enabled	= 1,
+	kRegShiftIPIn3Enabled	= 2,
+	kRegShiftIPIn4Enabled	= 3,
+	kRegShiftIPOut1Enabled	= 16,
+	kRegShiftIPOut2Enabled	= 17,
+	kRegShiftIPOut3Enabled	= 18,
+	kRegShiftIPOut4Enabled	= 19,
+	kRegShiftIPOut1Active	= 24,
+	kRegShiftIPOut2Active	= 25,
+	kRegShiftIPOut3Active	= 26,
+	kRegShiftIPOut4Active	= 27,
+
+	kRegShiftIPIsKey		= 0
+} NTV2LocalProcRegisterShift;
+
+
 
 #define NTV2_HDMIAuxMaxFrames	8
 #define NTV2_HDMIAuxDataSize	32
@@ -6556,6 +6604,15 @@ typedef enum
 					@return A string containing a human-readable representation of me.
 				**/
 				std::string		AsString (UWord inDumpMaxBytes = 0) const;
+
+				/**
+					@param	inBytesPerWord	Word size, in bytes. Must be 1, 2, 4 or 8. Defaults to 4.
+					@param	inVarName		Optionally specifies the variable name to use.
+					@param	inUseSTL		Optionally specifies if std::vector should be used instead of a C-style array.
+					@param	inByteSwap		Optionally specifies if 2/4/8-byte words should be byte-swapped.
+					@return A string containing C/C++ code that will reproduce my contents.
+				**/
+				std::string		AsCode (const size_t inBytesPerWord = 4, const std::string & inVarName = "", const bool inUseSTL = false, const bool inByteSwap = false) const;
 
 				/**
 					@brief	Converts my contents into a hex-encoded string.

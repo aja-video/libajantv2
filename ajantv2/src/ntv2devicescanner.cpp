@@ -825,16 +825,17 @@ void CNTV2DeviceScanner::SetAudioAttributes (NTV2DeviceInfo & info, CNTV2Card & 
 }	//	SetAudioAttributes
 
 
-bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevList)
+bool CNTV2DeviceScanner::GetVirtualDeviceList (NTV2DeviceInfoList& outVirtualDevList)
 {
 #if defined(NTV2_PREVENT_PLUGIN_LOAD)
-	return false;
+	return false;	//	Plugin loading disabled, therefore no virtual devices
 #endif
 
 	string vdevPath;
-	AJASystemInfo info;
-	if (info.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreUser, vdevPath) != AJA_STATUS_SUCCESS)
-		return false;
+	{	const AJASystemInfo pathInfo(AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_Path);
+		if (pathInfo.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreUser, vdevPath) != AJA_STATUS_SUCCESS)
+			return false;
+	}
 	vdevPath = vdevPath + "virtualdevices";
 	ULWord vdIndex = ULWord(outVirtualDevList.size());
 	std::vector<std::string> vdevFiles;

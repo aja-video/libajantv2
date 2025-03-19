@@ -17,8 +17,8 @@
 #ifndef NTV2DRIVERAUTOCIRCULATE_H
 #define NTV2DRIVERAUTOCIRCULATE_H
 
-#include "ntv2dma.h"
 #include "../ntv2kona.h"
+#include "ntv2dma.h"
 
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -155,6 +155,7 @@ typedef struct
 	ULWord					VBIAudioOut;
 	bool					startAudioNextFrame;
 	bool					stopAudioNextFrame;
+	ULWord					audioSystemCount;
 } INTERNAL_AUTOCIRCULATE_STRUCT;
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -197,7 +198,10 @@ int OemAutoCirculateInit (	ULWord boardNumber,
 							bool bWithCustomAncData,
 							bool bWithLTC,
 							bool bWithFields,
-							bool bWithHDMIAux
+							bool bWithHDMIAux,
+							bool bWithASPlus1,
+							bool bWithASPlus2,
+							bool bWithASPlus3
 							);
 
 ULWord GetAudioFrameBufferNumber(ULWord boardNumber, ULWord boardID, NTV2AudioSystem audioSystem);
@@ -253,6 +257,8 @@ void SetAudioPlaybackMode(ULWord boardNumber, NTV2_GlobalAudioPlaybackMode mode)
 
 NTV2_GlobalAudioPlaybackMode GetAudioPlaybackMode(ULWord boardNumber);
 
+ULWord GetFPGARevision(ULWord deviceNumber);
+
 ULWord GetNumFrameBuffers(ULWord boardNumber, ULWord boardID);
 
 void OemAutoCirculateSetupNTV2Routing(ULWord boardNumber, NTV2RoutingTable* pNTV2RoutingTable);
@@ -260,8 +266,6 @@ void OemAutoCirculateSetupNTV2Routing(ULWord boardNumber, NTV2RoutingTable* pNTV
 void oemAutoCirculateWriteHDMIAux(ULWord deviceNumber, ULWord* pAuxData, ULWord auxDataSize);
 
 NTV2VideoFormat GetNTV2VideoFormat(UByte status, UByte frameRateHiBit);
-
-ULWord DownloadLinearLUTToHW (ULWord boardNumber, NTV2Channel channel, int bank);
 
 ULWord64 GetAudioClock(ULWord boardNumber);
 

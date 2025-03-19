@@ -86,6 +86,8 @@ bool CopyRP188HardwareToFrameStampTCArray(Ntv2SystemContext* context, INTERNAL_T
 
 	memset(tcStruct, 0xFF, sizeof(INTERNAL_TIMECODE_STRUCT));
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 	switch(NTV2DeviceGetNumVideoInputs(deviceID))
 	{
 	case 8:
@@ -123,6 +125,7 @@ bool CopyRP188HardwareToFrameStampTCArray(Ntv2SystemContext* context, INTERNAL_T
 	default:
 		break;
 	}
+#pragma GCC diagnostic pop
 
 	if (NTV2DeviceCanDoLTCInN(deviceID, NTV2_CHANNEL1))
 	{
@@ -547,6 +550,8 @@ bool CopySDIStatusHardwareToFrameStampSDIStatusArray(Ntv2SystemContext* context,
 		return false;
 	}
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 	switch (numSDIInputs)
 	{
 	case 8:
@@ -686,6 +691,7 @@ bool CopySDIStatusHardwareToFrameStampSDIStatusArray(Ntv2SystemContext* context,
 	default:
 		break;
 	}
+#pragma GCC diagnostic pop
 	return true;
 }
 

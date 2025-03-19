@@ -7865,6 +7865,15 @@ string NTV2BitfileTypeToString (const NTV2BitfileType inValue, const bool inComp
 	return "(bad bitfile type)";
 }
 
+string NTV2DieTempScaleToString (const NTV2DieTempScale inValue, const bool inUseUTF8)
+{
+	static const NTV2StringList sScalesUTF8	= {	"\xE2\x84\x83",	"\xE2\x84\x89",	"\xC2\xB0""K",	"\xC2\xB0""R"};
+	static const NTV2StringList sScales		= {	           "C",	           "F",	          "K",	          "R"};
+	if (size_t(inValue) < sScales.size())
+		return inUseUTF8 ? sScalesUTF8.at(inValue) : sScales.at(inValue);
+	return "";
+}
+
 bool convertHDRFloatToRegisterValues(const HDRFloatValues & inFloatValues, HDRRegValues & outRegisterValues)
 {
 	if ((inFloatValues.greenPrimaryX < 0 || inFloatValues.greenPrimaryX > float(1.0)) ||

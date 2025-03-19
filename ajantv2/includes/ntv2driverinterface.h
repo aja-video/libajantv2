@@ -645,9 +645,10 @@ class AJAExport CNTV2DriverInterface
 			@brief		Answers with the NTV2RegInfo of the register associated with the given boolean (i.e., "Can Do") device feature.
 			@param[in]	inParamID		Specifies the device features parameter of interest.
 			@param[out] outRegInfo		Receives the associated NTV2RegInfo.
+			@param[out] outFlipSense	Receives true only if the sense of the resulting boolean read from ReadRegister should be inverted.
 			@return		True if successful; otherwise false.
 		**/
-		AJA_VIRTUAL bool	GetRegInfoForBoolParam (const NTV2BoolParamID inParamID, NTV2RegInfo & outRegInfo);
+		AJA_VIRTUAL bool	GetRegInfoForBoolParam (const NTV2BoolParamID inParamID, NTV2RegInfo & outRegInfo, bool & outFlipSense);
 		/**
 			@brief		Answers with the NTV2RegInfo of the register associated with the given numeric (i.e., "Get Num") device feature.
 			@param[in]	inParamID		Specifies the device features parameter of interest.
