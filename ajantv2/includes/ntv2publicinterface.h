@@ -9050,7 +9050,7 @@ typedef enum
         NTV2_STRUCT_END (NTV2StreamBuffer)
 
 		// Mail buffer action flags
-		#define NTV2_MAIL_BUFFER_TRANSMIT   			BIT(0)			///< @brief Used in ::NTV2MailBuffer to transmit data
+		#define NTV2_MAIL_BUFFER_SEND          			BIT(0)			///< @brief Used in ::NTV2MailBuffer to send data
         #define NTV2_MAIL_BUFFER_RECEIVE    			BIT(1)			///< @brief Used in ::NTV2MailBuffer to receive data
 
 		// Mail buffer status flags
@@ -9058,6 +9058,12 @@ typedef enum
 		#define NTV2_MAIL_BUFFER_FAIL					BIT(1)			///< @brief Used in ::NTV2MailBuffer fail
 		#define NTV2_MAIL_BUFFER_OVERFLOW				BIT(2)			///< @brief Used in ::NTV2MailBuffer buffer overflow
 		#define NTV2_MAIL_BUFFER_TIMEOUT				BIT(3)			///< @brief Used in ::NTV2MailBuffer transfer timeout
+
+        // Mail buffer magic word
+        #define NTV2_MAIL_BUFFER_MAGIC                  0xE925A61C
+
+        // Mail buffer maximum size
+        #define NTV2_MAIL_BUFFER_MAX                    4096        
                 
         NTV2_STRUCT_BEGIN (NTV2MailBuffer)
 			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
