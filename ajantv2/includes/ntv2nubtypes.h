@@ -77,7 +77,7 @@ namespace ntv2nub
 
 	inline void POPU64 (uint64_t & outVal, const std::vector<uint8_t> & inArr, std::size_t & inOutNdx, const bool dontSwap = false)
 	{
-		uint32_t _u64(0);
+		uint64_t _u64(0);
 		UByte * _pU8(reinterpret_cast<UByte*>(&_u64));
 		_pU8[0] = inArr.at(inOutNdx++); _pU8[1] = inArr.at(inOutNdx++);
 		_pU8[2] = inArr.at(inOutNdx++); _pU8[3] = inArr.at(inOutNdx++);

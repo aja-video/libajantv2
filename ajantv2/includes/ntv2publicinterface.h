@@ -89,9 +89,11 @@
 	typedef	UByteSequence	NTV2_RPC_BLOB_TYPE;
 	#define	NTV2_RPC_ENCODE_DECL	bool RPCEncode (NTV2_RPC_BLOB_TYPE & outBlob);
 	#define	NTV2_RPC_DECODE_DECL	bool RPCDecode (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex);
+	#define	NTV2_RPC_DECODECLIENT_DECL	bool RPCDecodeClient (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex);
 
 	#define NTV2_RPC_CODEC_DECLS	NTV2_RPC_ENCODE_DECL	\
-									NTV2_RPC_DECODE_DECL
+									NTV2_RPC_DECODE_DECL	\
+									NTV2_RPC_DECODECLIENT_DECL
 #else
 	#define NTV2_RPC_CODEC_DECLS
 #endif	//	NTV2_BUILDING_DRIVER
