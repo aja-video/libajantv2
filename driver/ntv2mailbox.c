@@ -65,8 +65,6 @@
 static uint32_t ntv2_debug_mask = 0;
 static uint32_t ntv2_user_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
 
-static uint32_t ntv2_magic = NTV2_MAIL_BUFFER_MAGIC;
-
 struct ntv2_mailbox *ntv2_mailbox_open(Ntv2SystemContext* sys_con,
 									   const char *name, int index)
 {
@@ -239,9 +237,6 @@ Ntv2Status ntv2_packet_send(struct ntv2_mailbox *ntv2_mail,
     int64_t check = 0;
     uint32_t off = 0;
     Ntv2Status status = NTV2_STATUS_SUCCESS;
-    uint32_t head_off = 0;
-    bool head_magic = true;
-    bool head_size = true;
 
 	if ((ntv2_mail == NULL) || (buffer == NULL) || (offset == NULL))
 		return NTV2_STATUS_BAD_PARAMETER;
@@ -253,55 +248,20 @@ Ntv2Status ntv2_packet_send(struct ntv2_mailbox *ntv2_mail,
     NTV2_MSG_MAILBOX_SEND_STATE("%s: send packet data\n", ntv2_mail->name);
     while (off < size)
     {
-        if (!head_magic)
+        // write packet
+        status = ntv2_mailbox_send(ntv2_mail, buffer, size, &off);
+        if (status != NTV2_STATUS_SUCCESS)
         {
-            // write magic header number
-            head_off = 0;
-            status = ntv2_mailbox_send(ntv2_mail, (uint8_t*)&ntv2_magic, 4, &head_off);
-            if (status != NTV2_STATUS_SUCCESS)
-            {
-                NTV2_MSG_MAILBOX_ERROR("%s: send magic word %08x failed\n", ntv2_mail->name, ntv2_magic);
-                return status;
-            }
-            if (head_off >= 4)
-            {
-                NTV2_MSG_MAILBOX_SEND_STATE("%s: sent magic word %08x\n", ntv2_mail->name, ntv2_magic);
-                head_magic = true;
-            }
+            NTV2_MSG_MAILBOX_ERROR("%s: send packet data failed at offset %d\n",
+                                   ntv2_mail->name, (int)off);
+            *offset = off;
+            return status;
         }
-        else if (!head_size)
+        if (off >= size)
         {
-            // write packet size
-            head_off = 0;
-            status = ntv2_mailbox_send(ntv2_mail, (uint8_t*)&size, 4, &head_off);
-            if (status != NTV2_STATUS_SUCCESS)
-            {
-                NTV2_MSG_MAILBOX_ERROR("%s: send packet size %d failed\n", ntv2_mail->name, (int)size);
-                return status;
-            }
-            if (head_off >= 4)
-            {
-                NTV2_MSG_MAILBOX_SEND_STATE("%s: sent packet size %d\n", ntv2_mail->name, (int)size);
-                head_size = true;
-            }
-        }
-        else
-        {
-            // write packet
-            status = ntv2_mailbox_send(ntv2_mail, buffer, size, &off);
-            if (status != NTV2_STATUS_SUCCESS)
-            {
-                NTV2_MSG_MAILBOX_ERROR("%s: send packet data failed at offset %d\n",
-                                       ntv2_mail->name, (int)off);
-                *offset = off;
-                return status;
-            }
-            if (off >= size)
-            {
-                NTV2_MSG_MAILBOX_SEND_STATE("%s: sent packet data final offset %d\n",
-                                            ntv2_mail->name, (int)off);
-                break;
-            }
+            NTV2_MSG_MAILBOX_SEND_STATE("%s: sent packet data final offset %d\n",
+                                        ntv2_mail->name, (int)off);
+            break;
         }
 
         // check for timeout
@@ -329,10 +289,6 @@ Ntv2Status ntv2_packet_recv(struct ntv2_mailbox *ntv2_mail,
     int64_t check = 0;
     uint32_t off = 0;
     Ntv2Status status = NTV2_STATUS_SUCCESS;
-    uint32_t head_off = 0;
-    bool head_magic = true;
-    bool head_size = true;
-    uint32_t data_magic = 0;
     uint32_t data_size = 0;
 
 	if ((ntv2_mail == NULL) || (buffer == NULL) || (offset == NULL))
@@ -346,68 +302,21 @@ Ntv2Status ntv2_packet_recv(struct ntv2_mailbox *ntv2_mail,
     NTV2_MSG_MAILBOX_SEND_STATE("%s: receive packet data\n", ntv2_mail->name);
     while (off < size)
     {
-        if (!head_magic)
+        // read packet
+        status = ntv2_mailbox_recv(ntv2_mail, buffer, data_size, &off);
+        if (status != NTV2_STATUS_SUCCESS)
         {
-            // read magic header number
-            head_off = 0;
-            status = ntv2_mailbox_recv(ntv2_mail, (uint8_t*)&data_magic, 4, &head_off);
-            if (status != NTV2_STATUS_SUCCESS)
-            {
-                NTV2_MSG_MAILBOX_ERROR("%s: receive magic word failed\n", ntv2_mail->name);
-                return status;
-            }
-            if (head_off >= 4)
-            {
-                if (data_magic != ntv2_magic)
-                {
-                    NTV2_MSG_MAILBOX_ERROR("%s: receive magic word %08x not %08x\n",
-                                           ntv2_mail->name, data_magic, ntv2_magic);
-                    return NTV2_STATUS_FAIL;
-                }
-                NTV2_MSG_MAILBOX_RECV_STATE("%s: receive magic word %08x\n", ntv2_mail->name, data_magic);
-                head_magic = true;
-            }
+            NTV2_MSG_MAILBOX_ERROR("%s: receive packet data failed at offset %d\n",
+                                   ntv2_mail->name, (int)off);
+            *offset = off;
+            return status;
         }
-        else if (!head_size)
+        if (off >= data_size)
         {
-            // read packet size
-            head_off = 0;
-            status = ntv2_mailbox_recv(ntv2_mail, (uint8_t*)&data_size, 4, &head_off);
-            if (status != NTV2_STATUS_SUCCESS)
-            {
-                NTV2_MSG_MAILBOX_ERROR("%s: receive packet size failed\n", ntv2_mail->name);
-                return status;
-            }
-            if (head_off >= 4)
-            {
-                if ((data_size == 0) || (data_size > size))
-                {
-                    NTV2_MSG_MAILBOX_ERROR("%s: receive bad packet size %d  buffer size %d\n",
-                                           ntv2_mail->name, data_size, (int)size);
-                    return NTV2_STATUS_FAIL;
-                }
-                NTV2_MSG_MAILBOX_RECV_STATE("%s: receive packet size %d\n", ntv2_mail->name, (int)head_size);
-                head_size = true;
-            }
-        }
-        else
-        {
-            // read packet
-            status = ntv2_mailbox_recv(ntv2_mail, buffer, data_size, &off);
-            if (status != NTV2_STATUS_SUCCESS)
-            {
-                NTV2_MSG_MAILBOX_ERROR("%s: receive packet data failed at offset %d\n",
-                                       ntv2_mail->name, (int)off);
-                *offset = off;
-                return status;
-            }
-            if (off >= data_size)
-            {
-                NTV2_MSG_MAILBOX_RECV_STATE("%s: receive packet data final offset %d\n",
-                                            ntv2_mail->name, (int)off);
-                *offset = off;
-                break;
-            }
+            NTV2_MSG_MAILBOX_RECV_STATE("%s: receive packet data final offset %d\n",
+                                        ntv2_mail->name, (int)off);
+            *offset = off;
+            break;
         }
 
         // check for timeout

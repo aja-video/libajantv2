@@ -9059,9 +9059,6 @@ typedef enum
 		#define NTV2_MAIL_BUFFER_OVERFLOW				BIT(2)			///< @brief Used in ::NTV2MailBuffer buffer overflow
 		#define NTV2_MAIL_BUFFER_TIMEOUT				BIT(3)			///< @brief Used in ::NTV2MailBuffer transfer timeout
 
-        // Mail buffer magic word
-        #define NTV2_MAIL_BUFFER_MAGIC                  0xE925A61C
-
         // Mail buffer maximum size
         #define NTV2_MAIL_BUFFER_MAX                    4096        
                 
