@@ -97,7 +97,6 @@ struct ntv2_mailbox *ntv2_mailbox_open(Ntv2SystemContext* sys_con,
 	}
 	memset(ntv2_mail->data, 0, NTV2_MAIL_BUFFER_MAX);
     
-
 	NTV2_MSG_MAILBOX_INFO("%s: open ntv2_mailbox\n", ntv2_mail->name);
 
 	return ntv2_mail;
@@ -236,6 +235,7 @@ Ntv2Status ntv2_packet_send(struct ntv2_mailbox *ntv2_mail,
     int64_t start = ntv2TimeCounter();
     int64_t check = 0;
     uint32_t off = 0;
+    uint32_t busy_count = 0;
     Ntv2Status status = NTV2_STATUS_SUCCESS;
 
 	if ((ntv2_mail == NULL) || (buffer == NULL) || (offset == NULL))
@@ -259,10 +259,11 @@ Ntv2Status ntv2_packet_send(struct ntv2_mailbox *ntv2_mail,
         }
         if (off >= size)
         {
-            NTV2_MSG_MAILBOX_SEND_STATE("%s: sent packet data final offset %d\n",
-                                        ntv2_mail->name, (int)off);
+            NTV2_MSG_MAILBOX_SEND_STATE("%s: sent packet data final offset %d busy %d\n",
+                                        ntv2_mail->name, (int)off, (int)busy_count);
             break;
         }
+        busy_count++;
 
         // check for timeout
         check = (ntv2TimeCounter() - start) * 1000000 / ntv2TimeFrequency();
@@ -275,7 +276,8 @@ Ntv2Status ntv2_packet_send(struct ntv2_mailbox *ntv2_mail,
         }
 
         // sleep if not done
-        ntv2TimeSleep(delay);
+        if (delay > 0)
+            ntv2TimeSleep(delay);
     }
 
     return NTV2_STATUS_SUCCESS;
@@ -290,6 +292,7 @@ Ntv2Status ntv2_packet_recv(struct ntv2_mailbox *ntv2_mail,
     uint32_t off = 0;
     Ntv2Status status = NTV2_STATUS_SUCCESS;
     uint32_t data_size = 0;
+    uint32_t busy_count = 0;
 
 	if ((ntv2_mail == NULL) || (buffer == NULL) || (offset == NULL))
 		return NTV2_STATUS_BAD_PARAMETER;
@@ -313,11 +316,12 @@ Ntv2Status ntv2_packet_recv(struct ntv2_mailbox *ntv2_mail,
         }
         if (off >= data_size)
         {
-            NTV2_MSG_MAILBOX_RECV_STATE("%s: receive packet data final offset %d\n",
-                                        ntv2_mail->name, (int)off);
+            NTV2_MSG_MAILBOX_RECV_STATE("%s: receive packet data final offset %d busy %d\n",
+                                        ntv2_mail->name, (int)off, (int)busy_count);
             *offset = off;
             break;
         }
+        busy_count++;
 
         // check for timeout
         check = (ntv2TimeCounter() - start) * 1000000 / ntv2TimeFrequency();
@@ -330,7 +334,8 @@ Ntv2Status ntv2_packet_recv(struct ntv2_mailbox *ntv2_mail,
         }
 
         // sleep if not done
-        ntv2TimeSleep(delay);
+        if (delay > 0)
+            ntv2TimeSleep(delay);
     }
 
     return NTV2_STATUS_SUCCESS;
