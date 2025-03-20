@@ -3121,6 +3121,19 @@ ostream & NTV2StreamBuffer::Print (ostream & inOutStream) const
 	return inOutStream;
 }
 
+NTV2MailBuffer::NTV2MailBuffer()
+	:	mHeader (NTV2_TYPE_AJAMAILBUFFER, sizeof(NTV2MailBuffer))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+}
+
+ostream & NTV2MailBuffer::Print (ostream & inOutStream) const
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	inOutStream << mHeader << mChannel << " flags=" << xHEX0N(mFlags,8) << xHEX0N(mStatus, 8) << " " << mTrailer;
+	return inOutStream;
+}
+
 NTV2GetRegisters::NTV2GetRegisters (const NTV2RegNumSet & inRegisterNumbers)
 	:	mHeader				(NTV2_TYPE_GETREGS, sizeof(NTV2GetRegisters)),
 		mInNumRegisters		(ULWord (inRegisterNumbers.size ())),

@@ -910,9 +910,9 @@ bool CNTV2DriverInterface::StreamBufferOps (const NTV2Channel inChannel,
 bool CNTV2DriverInterface::MailBufferOps (const NTV2Channel inChannel,
 										  NTV2Buffer& inBuffer,
                                           ULWord dataSize,
+                                          ULWord flags,
                                           ULWord delay,
                                           ULWord timeout,
-                                          ULWord flags,
                                           NTV2MailBuffer& status)
 {
 	status.mChannel = inChannel;

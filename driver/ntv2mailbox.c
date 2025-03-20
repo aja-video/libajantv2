@@ -36,15 +36,15 @@
 #define FIFO_SIZE 8192 // 8192 bytes (2048 32-bit words) per RX/TX FIFO
 
 #define MB_WRDATA       0x00 // Wr data register
-#define MB_RDDATA       0x08 // Rd data register
-#define MB_STATUS       0x10 // Status register
-#define MB_ERROR        0x14 // Error register
-#define MB_SIT          0x18 // send interrupt threshold
-#define MB_RIT          0x1C // receive interrupt threshold
-#define MB_IS           0x20 // interrupt status register
-#define MB_IE           0x24 // interrupt enable register
-#define MB_IP           0x28 // interrupt pending register
-#define MB_CTRL         0x2C // Control register, write only.
+#define MB_RDDATA       0x02 // Rd data register
+#define MB_STATUS       0x04 // Status register
+#define MB_ERROR        0x05 // Error register
+#define MB_SIT          0x06 // send interrupt threshold
+#define MB_RIT          0x07 // receive interrupt threshold
+#define MB_IS           0x08 // interrupt status register
+#define MB_IE           0x09 // interrupt enable register
+#define MB_IP           0x0a // interrupt pending register
+#define MB_CTRL         0x0b // Control register, write only.
 
 #define MBS_RX_EMPTY    0x01 // FIFO status -- RX EMPTY
 #define MBS_TX_FULL     0x02 // FIFO status -- TX FULL
@@ -61,7 +61,8 @@
 #define FIFOCLEAR       0x03
 
 
-static uint32_t ntv2_debug_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR | NTV2_DEBUG_MAILBOX_SEND_STATE | NTV2_DEBUG_MAILBOX_RECV_STATE;
+//static uint32_t ntv2_debug_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR | NTV2_DEBUG_MAILBOX_SEND_STATE | NTV2_DEBUG_MAILBOX_RECV_STATE;
+static uint32_t ntv2_debug_mask = 0;
 static uint32_t ntv2_user_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
 
 static uint32_t ntv2_magic = NTV2_MAIL_BUFFER_MAGIC;
@@ -249,6 +250,7 @@ Ntv2Status ntv2_packet_send(struct ntv2_mailbox *ntv2_mail,
 
     off = *offset;
 
+    NTV2_MSG_MAILBOX_SEND_STATE("%s: send packet data\n", ntv2_mail->name);
     while (off < size)
     {
         if (!head_magic)
@@ -341,6 +343,7 @@ Ntv2Status ntv2_packet_recv(struct ntv2_mailbox *ntv2_mail,
     off = *offset;
     data_size = size;
 
+    NTV2_MSG_MAILBOX_SEND_STATE("%s: receive packet data\n", ntv2_mail->name);
     while (off < size)
     {
         if (!head_magic)
@@ -402,6 +405,7 @@ Ntv2Status ntv2_packet_recv(struct ntv2_mailbox *ntv2_mail,
             {
                 NTV2_MSG_MAILBOX_RECV_STATE("%s: receive packet data final offset %d\n",
                                             ntv2_mail->name, (int)off);
+                *offset = off;
                 break;
             }
         }

@@ -3750,7 +3750,7 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
             ntv2pp->m_pMailbox[0] = ntv2_mailbox_open(&ntv2pp->systemContext, "ntv2mailbox", 0);
             if (ntv2pp->m_pMailbox[0] != NULL)
             {
-                status = ntv2_mailbox_configure(ntv2pp->m_pMailbox[0], 0x3400);
+                status = ntv2_mailbox_configure(ntv2pp->m_pMailbox[0], 0x100000);
                 if (status != NTV2_STATUS_SUCCESS)
                 {
                     ntv2_mailbox_close(ntv2pp->m_pMailbox[0]);
