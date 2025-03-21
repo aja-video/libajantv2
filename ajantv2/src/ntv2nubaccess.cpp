@@ -558,7 +558,7 @@ bool NTV2DeviceSpecParser::ParseAlphaNumeric (size_t & pos, string & outToken, c
 			break;
 		++pos;  tokAlphaNum += ch;
 	}
-	if (tokAlphaNum.length() > 1)	//	At least 2 chars
+	if (tokAlphaNum.length() > 0)
 		outToken = tokAlphaNum;
 	return !outToken.empty();
 }
