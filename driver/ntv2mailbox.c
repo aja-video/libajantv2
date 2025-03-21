@@ -245,7 +245,7 @@ Ntv2Status ntv2_packet_send(struct ntv2_mailbox *ntv2_mail,
 
     off = *offset;
 
-    NTV2_MSG_MAILBOX_SEND_STATE("%s: send packet data\n", ntv2_mail->name);
+    NTV2_MSG_MAILBOX_SEND_STATE("%s: send packet data size %d\n", ntv2_mail->name, (int)size);
     while (off < size)
     {
         // write packet
@@ -302,7 +302,7 @@ Ntv2Status ntv2_packet_recv(struct ntv2_mailbox *ntv2_mail,
     off = *offset;
     data_size = size;
 
-    NTV2_MSG_MAILBOX_SEND_STATE("%s: receive packet data\n", ntv2_mail->name);
+    NTV2_MSG_MAILBOX_RECV_STATE("%s: receive packet data size %d\n", ntv2_mail->name, (int)size);
     while (off < size)
     {
         // read packet
