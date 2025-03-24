@@ -232,7 +232,7 @@ Ntv2Status ntv2_packet_send(struct ntv2_mailbox *ntv2_mail,
                             uint8_t* buffer, uint32_t size, uint32_t* offset,
                             uint32_t delay, uint32_t timeout)
 {
-    int64_t start = ntv2TimeCounter();
+    int64_t start = ntv2Time100ns();
     int64_t check = 0;
     uint32_t off = 0;
     uint32_t busy_count = 0;
@@ -266,7 +266,7 @@ Ntv2Status ntv2_packet_send(struct ntv2_mailbox *ntv2_mail,
         busy_count++;
 
         // check for timeout
-        check = (ntv2TimeCounter() - start) * 1000000 / ntv2TimeFrequency();
+        check = (ntv2Time100ns() - start) / 10;
         if (check > timeout)
         {
             NTV2_MSG_MAILBOX_ERROR("%s: send timeout at offset %d\n",
@@ -287,7 +287,7 @@ Ntv2Status ntv2_packet_recv(struct ntv2_mailbox *ntv2_mail,
                             uint8_t* buffer, uint32_t size, uint32_t* offset,
                             uint32_t delay, uint32_t timeout)
 {
-    int64_t start = ntv2TimeCounter();
+    int64_t start = ntv2Time100ns();
     int64_t check = 0;
     uint32_t off = 0;
     Ntv2Status status = NTV2_STATUS_SUCCESS;
@@ -324,7 +324,7 @@ Ntv2Status ntv2_packet_recv(struct ntv2_mailbox *ntv2_mail,
         busy_count++;
 
         // check for timeout
-        check = (ntv2TimeCounter() - start) * 1000000 / ntv2TimeFrequency();
+        check = (ntv2Time100ns() - start) / 10;
         if (check > timeout)
         {
             NTV2_MSG_MAILBOX_ERROR("%s: receive timeout at offset %d\n",
