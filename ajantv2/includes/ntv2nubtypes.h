@@ -11,8 +11,6 @@
 #include "ntv2endian.h"
 #include <vector>
 
-#define NTV2NUBPORT		7575	//	Default port we listen on
-
 #if !defined(NTV2_DEPRECATE_16_3)
 	//	In SDK 16.3 or later, client/server RPC implementations are plugins, each with their own protocols/versioning
 	typedef ULWord NTV2NubProtocolVersion;
