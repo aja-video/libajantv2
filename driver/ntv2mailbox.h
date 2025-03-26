@@ -22,7 +22,6 @@ struct ntv2_mailbox {
 	char					name[NTV2_MAILBOX_STRING_SIZE];
 	Ntv2SystemContext* 		system_context;
     uint32_t                reg_base;
-    uint8_t*                data;
     bool                    enable;
 };
 

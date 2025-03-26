@@ -89,14 +89,6 @@ struct ntv2_mailbox *ntv2_mailbox_open(Ntv2SystemContext* sys_con,
 #endif
 	ntv2_mail->system_context = sys_con;
 
-	ntv2_mail->data = (uint8_t *)ntv2MemoryAlloc(NTV2_MAIL_BUFFER_MAX);
-	if (ntv2_mail->data == NULL) {
-		NTV2_MSG_MAILBOX_ERROR("%s: ntv2_mailbox data memory size %d allocation failed\n",
-                               name, NTV2_MAIL_BUFFER_MAX);
-		return NULL;
-	}
-	memset(ntv2_mail->data, 0, NTV2_MAIL_BUFFER_MAX);
-    
 	NTV2_MSG_MAILBOX_INFO("%s: open ntv2_mailbox\n", ntv2_mail->name);
 
 	return ntv2_mail;
@@ -108,11 +100,6 @@ void ntv2_mailbox_close(struct ntv2_mailbox *ntv2_mail)
 		return;
 
 	NTV2_MSG_MAILBOX_INFO("%s: close ntv2_mailbox\n", ntv2_mail->name);
-
-    if (ntv2_mail->data != NULL)
-    {
-        ntv2MemoryFree(ntv2_mail->data, NTV2_MAIL_BUFFER_MAX);
-    }
 
 	memset(ntv2_mail, 0, sizeof(struct ntv2_mailbox));
 	ntv2MemoryFree(ntv2_mail, sizeof(struct ntv2_mailbox));

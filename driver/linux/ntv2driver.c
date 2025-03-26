@@ -4919,6 +4919,10 @@ int DoMessageStreamBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamBuffe
 	return 0;
 }
 
+
+static uint8_t mailBufferSend[NTV2_MAIL_BUFFER_MAX];
+static uint8_t mailBufferRecv[NTV2_MAIL_BUFFER_MAX];
+
 int DoMessageMailBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2MailBuffer* pBuffer)
 {
 	NTV2PrivateParams * pNTV2Params = getNTV2Params(deviceNumber);
@@ -4953,7 +4957,7 @@ int DoMessageMailBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2MailBuffer* p
         }
         
 		// copy data buffer from user
-		ret = copy_from_user(pMail->data,
+		ret = copy_from_user(mailBufferSend,
 							 (void*)pBuffer->mBuffer.fUserSpacePtr,
 							 pBuffer->mDataSize);
 		if (ret < 0)
@@ -4962,7 +4966,7 @@ int DoMessageMailBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2MailBuffer* p
 		}
 
         pBuffer->mStatus = ntv2_packet_send(pMail,
-                                            pMail->data,
+                                            mailBufferSend,
                                             pBuffer->mDataSize,
                                             &offset,
                                             pBuffer->mDelay,
@@ -4971,7 +4975,7 @@ int DoMessageMailBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2MailBuffer* p
 	if ((pBuffer->mFlags & NTV2_MAIL_BUFFER_RECEIVE) != 0)
 	{
         pBuffer->mStatus = ntv2_packet_recv(pMail,
-                                            pMail->data,
+                                            mailBufferRecv,
                                             pBuffer->mBuffer.fByteCount,
                                             &offset,
                                             pBuffer->mDelay,
@@ -4980,7 +4984,7 @@ int DoMessageMailBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2MailBuffer* p
         {
             pBuffer->mDataSize = offset;
             ret = copy_to_user((void*)pBuffer->mBuffer.fUserSpacePtr,
-                               pMail->data,
+                               mailBufferRecv,
                                pBuffer->mDataSize);
             if (ret < 0)
             {
