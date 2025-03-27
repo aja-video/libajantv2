@@ -101,6 +101,15 @@ void ntv2_mailbox_close(struct ntv2_mailbox *ntv2_mail)
 
 	NTV2_MSG_MAILBOX_INFO("%s: close ntv2_mailbox\n", ntv2_mail->name);
 
+    if (ntv2_mail->send_data != NULL)
+    {
+        ntv2MemoryFree(ntv2_mail->send_data, NTV2_MAIL_BUFFER_MAX);
+    }
+    if (ntv2_mail->recv_data != NULL)
+    {
+        ntv2MemoryFree(ntv2_mail->recv_data, NTV2_MAIL_BUFFER_MAX);
+    }
+
 	memset(ntv2_mail, 0, sizeof(struct ntv2_mailbox));
 	ntv2MemoryFree(ntv2_mail, sizeof(struct ntv2_mailbox));
 }
@@ -114,6 +123,22 @@ Ntv2Status ntv2_mailbox_configure(struct ntv2_mailbox* ntv2_mail,
 	NTV2_MSG_MAILBOX_INFO("%s: configure ntv2_mailbox\n", ntv2_mail->name);
 
     ntv2_mail->reg_base = reg_base;
+
+	ntv2_mail->send_data = (uint8_t *)ntv2MemoryAlloc(NTV2_MAIL_BUFFER_MAX);
+	if (ntv2_mail->send_data == NULL) {
+		NTV2_MSG_MAILBOX_ERROR("%s: ntv2_mailbox send data memory size %d allocation failed\n",
+                               ntv2_mail->name, NTV2_MAIL_BUFFER_MAX);
+		return NTV2_STATUS_NO_MEMORY;
+	}
+	memset(ntv2_mail->send_data, 0, NTV2_MAIL_BUFFER_MAX);
+    
+	ntv2_mail->recv_data = (uint8_t *)ntv2MemoryAlloc(NTV2_MAIL_BUFFER_MAX);
+	if (ntv2_mail->recv_data == NULL) {
+		NTV2_MSG_MAILBOX_ERROR("%s: ntv2_mailbox receive data memory size %d allocation failed\n",
+                               ntv2_mail->name, NTV2_MAIL_BUFFER_MAX);
+		return NTV2_STATUS_NO_MEMORY;
+	}
+	memset(ntv2_mail->recv_data, 0, NTV2_MAIL_BUFFER_MAX);
 
 	return NTV2_STATUS_SUCCESS;
 }
