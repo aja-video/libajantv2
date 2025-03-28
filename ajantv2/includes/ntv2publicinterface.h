@@ -87,15 +87,31 @@
 
 #if !defined (NTV2_BUILDING_DRIVER)
 	typedef	UByteSequence	NTV2_RPC_BLOB_TYPE;
-	#define	NTV2_RPC_ENCODE_DECL	bool RPCEncode (NTV2_RPC_BLOB_TYPE & outBlob);
-	#define	NTV2_RPC_DECODE_DECL	bool RPCDecode (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex);
+	#define	NTV2_RPC_ENCODE_DECL		bool RPCEncode (NTV2_RPC_BLOB_TYPE & outBlob);
+	#define	NTV2_RPC_DECODE_DECL		bool RPCDecode (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex);
 	#define	NTV2_RPC_DECODECLIENT_DECL	bool RPCDecodeClient (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex);
+	#define	NTV2_RPC_ENCODECLIENT_DECL	bool RPCEncodeClient (NTV2_RPC_BLOB_TYPE & inBlob);
+	#define	NTV2_RPC_DECODESERVER_DECL	bool RPCDecodeServer (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex);
+	#define	NTV2_RPC_ENCODESERVER_DECL	bool RPCEncodeServer (NTV2_RPC_BLOB_TYPE & inBlob);
 
 	#define NTV2_RPC_CODEC_DECLS	NTV2_RPC_ENCODE_DECL	\
 									NTV2_RPC_DECODE_DECL	\
-									NTV2_RPC_DECODECLIENT_DECL
+									NTV2_RPC_DECODECLIENT_DECL	\
+									NTV2_RPC_ENCODECLIENT_DECL	\
+									NTV2_RPC_DECODESERVER_DECL	\
+									NTV2_RPC_ENCODESERVER_DECL	
+
+	// NTV2Buffer has it's own RPC encode / decode methods
+	#define	NTV2_RPC_BUFFER_ENCODE_DECL		bool RPCEncode (NTV2_RPC_BLOB_TYPE & outBlob, bool fillBuffer=true);
+	#define	NTV2_RPC_BUFFER_DECODE_DECL		bool RPCDecode (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex, bool fillBuffer=true);
+	#define	NTV2_RPC_BUFFER_DECODE2_DECL	bool RPCDecodeNoAllocate (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex);
+	#define NTV2_RPC_BUFFER_CODEC_DECLS		NTV2_RPC_BUFFER_ENCODE_DECL		\
+											NTV2_RPC_BUFFER_DECODE_DECL		\
+											NTV2_RPC_BUFFER_DECODE2_DECL
+									
 #else
 	#define NTV2_RPC_CODEC_DECLS
+	#define NTV2_RPC_BUFFER_CODEC_DECLS
 #endif	//	NTV2_BUILDING_DRIVER
 
 
@@ -6962,7 +6978,7 @@ typedef enum
 				static size_t				HostPageSize (void);	//	New in SDK 16.3
 				///@}
 
-				NTV2_RPC_CODEC_DECLS
+				NTV2_RPC_BUFFER_CODEC_DECLS
 			#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2Buffer)
 
