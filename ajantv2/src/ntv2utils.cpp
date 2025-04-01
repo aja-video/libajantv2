@@ -7586,7 +7586,8 @@ string NTV2GetFirmwareFolderPath (void)
 			&& RegQueryValueExA (hKey, "firmwarePath", NULL, NULL, (LPBYTE) lpData, &bufferSize) == ERROR_SUCCESS)
 				return string (lpData);
 		RegCloseKey (hKey);
-		return "";
+		// Windows may not get a result if the ntv2 installer has not been executed (use case client side remote plugins)
+		return "C:\\ProgramData\\AJA\\ntv2\\Firmware";    
 	#elif defined (AJALinux)
 		return "/opt/aja/firmware";
 	#else
