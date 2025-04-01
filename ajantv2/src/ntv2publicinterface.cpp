@@ -3340,9 +3340,11 @@ bool NTV2GetRegisters::GetRegisterValues (NTV2RegisterReads & outValues) const
 		for (NTV2RegisterReadsIter it (outValues.begin());	it != outValues.end();	++it)
 		{
 			NTV2RegValueMapConstIter mapIter(regValMap.find(it->registerNumber));
-			if (mapIter == regValMap.end())
+			if (mapIter != regValMap.end())
+				it->registerValue = mapIter->second;
+			else
 				missingTally++; //	Missing register
-			it->registerValue = mapIter->second;
+				
 #if 0		//	Fake KONAIP25G from C4412G (see also CNTV2XXXXDriverInterface::ReadRegister):
 			if (it->registerNumber == kRegBoardID  &&  it->registerValue == DEVICE_ID_CORVID44_8K)
 				it->registerValue = DEVICE_ID_KONAIP_25G;
