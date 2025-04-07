@@ -3748,7 +3748,7 @@ static int platform_resources_config(ULWord deviceNumber)
 	NTV2PrivateParams *ntv2pp = NULL;
 	struct platform_device* pd = NULL;
     struct device_node *node = NULL;
-	uint32_t val32;
+//	uint32_t val32;
 	int ret = 0;
 
 	if ( !(ntv2pp = getNTV2Params(deviceNumber)) )
