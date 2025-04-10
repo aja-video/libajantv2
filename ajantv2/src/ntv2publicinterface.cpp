@@ -757,8 +757,8 @@ bool NTV2Buffer::AppendU8s (UByteSequence & outU8s) const
 	const size_t maxSize (GetByteCount());
 	try
 	{
-		for (size_t ndx(0);	 ndx < maxSize;	 ndx++)
-			outU8s.push_back(*pU8++);
+		outU8s.reserve(outU8s.size() + maxSize);
+		outU8s.insert(outU8s.end(),pU8, pU8 + maxSize);
 	}
 	catch (...)
 	{
@@ -3793,8 +3793,8 @@ using namespace ntv2nub;
 		{
 			if ((inOutIndex + byteCount) > inBlob.size())
 				return false;	//	past end of inBlob
-			for (ULWord cnt(0);  cnt < byteCount;  cnt++)
-				U8(int(cnt)) = inBlob.at(inOutIndex++);//	Caller is responsible for byte-swapping if needed
+			::memcpy(GetHostPointer(), inBlob.data() + inOutIndex, byteCount); //	Caller is responsible for byte-swapping if needed
+			inOutIndex += byteCount;
 		}	
 		return true;
 	}
@@ -3807,8 +3807,9 @@ using namespace ntv2nub;
 		POPU32(flags, inBlob, inOutIndex);						//	ULWord		fFlags
 		if ((inOutIndex + byteCount) > inBlob.size())
 			return false;	//	past end of inBlob
-		for (ULWord cnt(0);  cnt < byteCount;  cnt++)
-			U8(int(cnt)) = inBlob.at(inOutIndex++);	//	Caller is responsible for byte-swapping if needed
+
+		::memcpy(GetHostPointer(), inBlob.data() + inOutIndex, byteCount); //	Caller is responsible for byte-swapping if needed
+		inOutIndex += byteCount;
 		return true;
 	}
 
