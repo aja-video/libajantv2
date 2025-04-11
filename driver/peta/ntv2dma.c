@@ -745,6 +745,7 @@ int dmaTransfer(PDMA_PARAMS pDmaParams)
 	LWord64 softDoneTime = 0;
 	Ntv2SystemContext systemContext;
 	
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 
 	if (NTV2_DEBUG_ACTIVE(NTV2_DEBUG_STATISTICS))

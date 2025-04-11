@@ -509,11 +509,11 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 			if(copy_from_user((void*)&param,(const void*) arg,sizeof(REGISTER_ACCESS)))
 				return -EFAULT;
 
-			status = ReadReg(   deviceNumber,
-				  								param.RegisterNumber,
-                                &param.RegisterValue,
-												param.RegisterMask,
-												param.RegisterShift);
+			status = ReadReg(deviceNumber,
+                             param.RegisterNumber,
+                             &param.RegisterValue,
+                             param.RegisterMask,
+                             param.RegisterShift);
 			if(copy_to_user((void*)arg,(const void*) &param,sizeof(REGISTER_ACCESS)))
 				return -EFAULT;
             if(status != 0)
@@ -1228,6 +1228,7 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 			// Determine what kind of message it is
 			switch(pMessage->fType)
 			{
+#if 0                
 			case NTV2_TYPE_ACSTATUS:
 				{
 					returnCode = AutoCirculateStatus_Ex(deviceNumber, (AUTOCIRCULATE_STATUS *) pMessage);
@@ -1255,7 +1256,7 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					}
 				}
 				break;
-
+#endif
 			case NTV2_TYPE_SDISTATS:
 				{
 					NTV2Buffer * pInStatistics = &((NTV2SDIInStatistics*)pMessage)->mInStatistics;
@@ -1294,6 +1295,13 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					if((pInRegisters->fByteCount > (PAGE_SIZE * 1000)) ||
 					   (pOutGoodRegisters->fByteCount > (PAGE_SIZE * 1000)) ||
 					   (pOutValues->fByteCount > (PAGE_SIZE * 1000)))
+					{
+						returnCode = -ENOMEM;
+						goto messageError;
+					}
+					if((pInRegisters->fByteCount < (mInNumRegisters * 4)) ||
+					   (pOutGoodRegisters->fByteCount < (mInNumRegisters * 4)) ||
+					   (pOutValues->fByteCount < (mInNumRegisters * 4)))
 					{
 						returnCode = -ENOMEM;
 						goto messageError;
@@ -1465,6 +1473,7 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					}
 				}
 				break;
+#if 0                
 			case NTV2_TYPE_ACFRAMESTAMP:
 				{
 					NTV2Buffer *	pAcTimeCodes	= &((FRAME_STAMP*)pMessage)->acTimeCodes;
@@ -1497,6 +1506,7 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					}
 				}
 				break;
+#endif                
 			case NTV2_TYPE_AJABUFFERLOCK:
 				{
 					if (pFileData == NULL)
@@ -1788,14 +1798,14 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
 	NTV2PrivateParams* pNTV2Params = (NTV2PrivateParams*)dev_id;
 	ULWord deviceNumber = pNTV2Params->deviceNumber;
 //    ULWord statusRegister;
-//	ULWord status2Register;
+	ULWord status2Register;
     ULWord64 audioClock;
 	int handled = 0;
 
 	Ntv2SystemContext systemContext;
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 
-#if 0
 	if( NTV2DeviceGetNumVideoChannels(pNTV2Params->_DeviceID) > 2)
 	{
 		status2Register = ReadRegister(deviceNumber, kRegStatus2, NO_MASK, NO_SHIFT);
@@ -1805,6 +1815,7 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
 		status2Register = 0;
 	}
 
+#if 0
 	{
 		statusRegister = ReadStatusRegister(deviceNumber);
 
@@ -1991,7 +2002,6 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
 			interruptHousekeeping(pNTV2Params, eInput2);
 		}
 
-#if 0
 		if ( status2Register & kIntInput3VBLActive )
 		{
 			ClearInput3VerticalInterrupt(deviceNumber);
@@ -2000,16 +2010,17 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
             audioClock = GetAudioClock(deviceNumber);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput3VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput3VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
-
+#if 0
 			if(!autoCirculateLocked)
 			{
 				ntv2_spin_lock_irqsave(&pNTV2Params->_autoCirculateLock, flags);
 				autoCirculateLocked = true;
 			}
 			OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_INPUT3);
-			
+#endif			
 			interruptHousekeeping(pNTV2Params, eInput3);
 		}
+        
 		if ( status2Register & kIntInput4VBLActive )
 		{
 			ClearInput4VerticalInterrupt(deviceNumber);
@@ -2018,16 +2029,17 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
             audioClock = GetAudioClock(deviceNumber);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput4VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput4VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
-
+#if 0
 			if(!autoCirculateLocked)
 			{
 				ntv2_spin_lock_irqsave(&pNTV2Params->_autoCirculateLock, flags);
 				autoCirculateLocked = true;
 			}
 			OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_INPUT4);
-			
+#endif			
 			interruptHousekeeping(pNTV2Params, eInput4);
 		}
+        
 		if ( status2Register & kIntInput5VBLActive )
 		{
 			ClearInput5VerticalInterrupt(deviceNumber);
@@ -2036,14 +2048,14 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
             audioClock = GetAudioClock(deviceNumber);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput5VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput5VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
-
+#if 0
 			if(!autoCirculateLocked)
 			{
 				ntv2_spin_lock_irqsave(&pNTV2Params->_autoCirculateLock, flags);
 				autoCirculateLocked = true;
 			}
 			OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_INPUT5);
-			
+#endif			
 			interruptHousekeeping(pNTV2Params, eInput5);
 		}
 		if ( status2Register & kIntInput6VBLActive )
@@ -2054,14 +2066,14 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
             audioClock = GetAudioClock(deviceNumber);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput6VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput6VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
-
+#if 0
 			if(!autoCirculateLocked)
 			{
 				ntv2_spin_lock_irqsave(&pNTV2Params->_autoCirculateLock, flags);
 				autoCirculateLocked = true;
 			}
 			OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_INPUT6);
-			
+#endif			
 			interruptHousekeeping(pNTV2Params, eInput6);
 		}
 		if ( status2Register & kIntInput7VBLActive )
@@ -2072,14 +2084,14 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
             audioClock = GetAudioClock(deviceNumber);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput7VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput7VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
-
+#if 0
 			if(!autoCirculateLocked)
 			{
 				ntv2_spin_lock_irqsave(&pNTV2Params->_autoCirculateLock, flags);
 				autoCirculateLocked = true;
 			}
 			OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_INPUT7);
-			
+#endif			
 			interruptHousekeeping(pNTV2Params, eInput7);
 		}
 		if ( status2Register & kIntInput8VBLActive )
@@ -2090,17 +2102,16 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
             audioClock = GetAudioClock(deviceNumber);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput8VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput8VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
-
+#if 0
 			if(!autoCirculateLocked)
 			{
 				ntv2_spin_lock_irqsave(&pNTV2Params->_autoCirculateLock, flags);
 				autoCirculateLocked = true;
 			}
 			OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_INPUT8);
-			
+#endif			
 			interruptHousekeeping(pNTV2Params, eInput8);
 		}
-#endif
 		
 		if ( statusRegister & kIntOutput1VBLActive )
 		{
@@ -2188,7 +2199,6 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
 			interruptHousekeeping(pNTV2Params, eOutput4);
 		}
 
-#if 0		
 		if ( status2Register & kIntOutput5VBLActive )
 		{
 			ClearOutput5VerticalInterrupt(deviceNumber);
@@ -2197,14 +2207,14 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
             audioClock = GetAudioClock(deviceNumber);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput5VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput5VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
-
+#if 0		
 			if(!autoCirculateLocked)
 			{
 				ntv2_spin_lock_irqsave(&pNTV2Params->_autoCirculateLock, flags);
 				autoCirculateLocked = true;
 			}
 			OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_CHANNEL5);
-			
+#endif			
 			interruptHousekeeping(pNTV2Params, eOutput5);
 		}
 		if ( status2Register & kIntOutput6VBLActive )
@@ -2215,14 +2225,14 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
             audioClock = GetAudioClock(deviceNumber);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput6VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput6VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
-
+#if 0
 			if(!autoCirculateLocked)
 			{
 				ntv2_spin_lock_irqsave(&pNTV2Params->_autoCirculateLock, flags);
 				autoCirculateLocked = true;
 			}
 			OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_CHANNEL6);
-			
+#endif			
 			interruptHousekeeping(pNTV2Params, eOutput6);
 		}
 		if ( status2Register & kIntOutput7VBLActive )
@@ -2233,14 +2243,14 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
             audioClock = GetAudioClock(deviceNumber);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput7VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput7VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
-
+#if 0
 			if(!autoCirculateLocked)
 			{
 				ntv2_spin_lock_irqsave(&pNTV2Params->_autoCirculateLock, flags);
 				autoCirculateLocked = true;
 			}
 			OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_CHANNEL7);
-			
+#endif			
 			interruptHousekeeping(pNTV2Params, eOutput7);
 		}
 		if ( status2Register & kIntOutput8VBLActive )
@@ -2251,17 +2261,16 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
             audioClock = GetAudioClock(deviceNumber);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput8VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput8VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
-
+#if 0
 			if(!autoCirculateLocked)
 			{
 				ntv2_spin_lock_irqsave(&pNTV2Params->_autoCirculateLock, flags);
 				autoCirculateLocked = true;
 			}
 			OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_CHANNEL8);
-			
+#endif			
 			interruptHousekeeping(pNTV2Params, eOutput8);
 		}
-#endif
 
 		if(autoCirculateLocked)
 		{
@@ -3370,7 +3379,10 @@ static void SetupBoard(ULWord deviceNumber)
 	NTV2PrivateParams *ntv2pp = getNTV2Params(deviceNumber);
 	int i = 0;
 	Ntv2SystemContext systemContext;
+
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
+
 	// Disable Xena's machine control UART and flush the FIFOs
 	Init422Uart(deviceNumber);
 
@@ -3656,7 +3668,9 @@ int DoMessageSDIInStatictics(ULWord deviceNumber, NTV2Buffer * pInStatistics, vo
 	int returnCode = 0;
 	NTV2SDIInputStatus * pSDIInputStatus = NULL;
 	NTV2PrivateParams * pNTV2Params = getNTV2Params(deviceNumber);
-	systemContext.devNum = pNTV2Params->deviceNumber;
+
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
+    systemContext.devNum = pNTV2Params->deviceNumber;
 
 	CopySDIStatusHardwareToFrameStampSDIStatusArray(&systemContext, &internalSDIStruct);
 	pSDIInputStatus = (NTV2SDIInputStatus *) pOutBuff;
@@ -3861,7 +3875,7 @@ static int platform_resources_config(ULWord deviceNumber)
 #else
     {
         unsigned long phyaddr = 0x00000000a8000000;
-        unsigned long size = 0x0000000000010000;
+        unsigned long size = 0x0000000000040000;
         void *mapped = NULL;
         struct resource *resource = NULL;
         
