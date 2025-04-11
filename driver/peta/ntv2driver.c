@@ -3079,7 +3079,7 @@ static int platform_probe(struct platform_device *pd)
             }
 	    }
 	
-        if (ntv2pp->_DeviceID == DEVICE_ID_CORVID1)
+        if (ntv2pp->_DeviceID == DEVICE_ID_CORVID1)  // DEVICE_ID_ZEFRAM
         {
             ntv2pp->m_pRasterMonitor = ntv2_videoraster_open(&ntv2pp->systemContext, "ntv2videoraster", 0);
             if (ntv2pp->m_pRasterMonitor != NULL)
@@ -3091,10 +3091,7 @@ static int platform_probe(struct platform_device *pd)
                     ntv2pp->m_pRasterMonitor = NULL;
                 }
             }
-        }
-	
-        if (ntv2pp->_DeviceID == DEVICE_ID_CORVID1)
-        {
+
             ntv2pp->m_pSetupMonitor = ntv2_setup_open(&ntv2pp->systemContext, "ntv2setup");
             if (ntv2pp->m_pSetupMonitor != NULL)
             {
@@ -3103,6 +3100,28 @@ static int platform_probe(struct platform_device *pd)
                 {
                     ntv2_setup_close(ntv2pp->m_pSetupMonitor);
                     ntv2pp->m_pSetupMonitor = NULL;
+                }
+            }
+
+            ntv2pp->m_pHDMIOut4Monitor[0] = ntv2_hdmiout4_open(&ntv2pp->systemContext, "ntv2hdmiout4", 0);
+            if (ntv2pp->m_pHDMIOut4Monitor[0] != NULL)
+            {
+                status = ntv2_hdmiout4_configure(ntv2pp->m_pHDMIOut4Monitor[0]);
+                if (status != NTV2_STATUS_SUCCESS)
+                {
+                    ntv2_hdmiout4_close(ntv2pp->m_pHDMIOut4Monitor[0]);
+                    ntv2pp->m_pHDMIOut4Monitor[0] = NULL;
+                }
+            }
+
+            ntv2pp->m_pHDMIOut4Monitor[1] = ntv2_hdmiout4_open(&ntv2pp->systemContext, "ntv2hdmiout4", 1);
+            if (ntv2pp->m_pHDMIOut4Monitor[1] != NULL)
+            {
+                status = ntv2_hdmiout4_configure(ntv2pp->m_pHDMIOut4Monitor[1]);
+                if (status != NTV2_STATUS_SUCCESS)
+                {
+                    ntv2_hdmiout4_close(ntv2pp->m_pHDMIOut4Monitor[1]);
+                    ntv2pp->m_pHDMIOut4Monitor[1] = NULL;
                 }
             }
         }
@@ -3867,7 +3886,7 @@ static int platform_resources_config(ULWord deviceNumber)
     MSG("%s: frame buffer addr 0x%lx  size 0x%zx bytes\n",
 		ntv2pp->name, ntv2pp->_FrameMemoryAddress, ntv2pp->_FrameMemorySize);
 
-	ntv2pp->_dmaMethod = DmaMethodZynq;
+	ntv2pp->_dmaMethod = DmaMethodIllegal; //DmaMethodZynq;
 	ntv2pp->_dmaSerialize = true;
 
 	return ret;
