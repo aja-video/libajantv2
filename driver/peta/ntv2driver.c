@@ -91,6 +91,7 @@
 #define NTV2_MODULE_NAME "ntv2mod"
 #define NTV2_DRIVER_NAME "ajantv2"
 #define STR_AXI4LITE2HOSTBUS    "AXI4Lite2HostBus"
+#define STR_FRAME_MEMORY        "buffer"
 
 /*******************************/
 /* Module macros, params, etc. */
@@ -207,6 +208,8 @@ static int platform_resources_config(ULWord deviceNumber);
 static int platform_resources_release(ULWord deviceNumber);
 static int platform_add_register(ULWord deviceNumber, struct device_node *node);
 static int platform_remove_register(ULWord deviceNumber);
+static int platform_add_memory(ULWord deviceNumber, struct device_node *node);
+static int platform_remove_memory(ULWord deviceNumber);
 static int platform_add_interrupt(ULWord deviceNumber, struct device_node *node);
 
 static void initializeRegisterNames(ULWord deviceNumber, unsigned long mappedAddress);
@@ -2694,94 +2697,97 @@ static void aja_ntv2_module_cleanup(void)
         }
 #endif
 
-        if (getNTV2ModuleParams()->driverMode == eDriverModeAll)
+        if (ntv2pp->registerEnable)
         {
-            // stop all dma engines
-            dmaRelease(i);
-
-            // disable and unregister interrupts,
-            DisableAllInterrupts(i);
-
-            // disable autocirculate
-            AutoCirculateInitialize(i);
-        }
-
-		// disable hdmi monitor
-		for (j = 0; j < NTV2_MAX_HDMI_MONITOR; j++)
-		{
-			if (ntv2pp->m_pHDMIInputMonitor[j] != NULL)
-			{
-				ntv2_hdmiin_disable(ntv2pp->m_pHDMIInputMonitor[j]);
-			}
-			if (ntv2pp->m_pHDMIIn4Monitor[j] != NULL)
-			{
-				ntv2_hdmiin4_disable(ntv2pp->m_pHDMIIn4Monitor[j]);
-			}
-			if (ntv2pp->m_pHDMIOut4Monitor[j] != NULL)
-			{
-				ntv2_hdmiout4_disable(ntv2pp->m_pHDMIOut4Monitor[j]);
-			}	
-		}
-		
-		// close hdmi monitor
-		for (j = 0; j < NTV2_MAX_HDMI_MONITOR; j++)
-		{
-			if (ntv2pp->m_pHDMIInputMonitor[j] != NULL)
-			{
-				ntv2_hdmiin_close(ntv2pp->m_pHDMIInputMonitor[j]);
-				ntv2pp->m_pHDMIInputMonitor[j] = NULL;
-			}
-			if (ntv2pp->m_pHDMIIn4Monitor[j] != NULL)
-			{
-				ntv2_hdmiin4_close(ntv2pp->m_pHDMIIn4Monitor[j]);
-				ntv2pp->m_pHDMIIn4Monitor[j] = NULL;
-			}
-			if (ntv2pp->m_pHDMIOut4Monitor[j] != NULL)
-			{
-				ntv2_hdmiout4_close(ntv2pp->m_pHDMIOut4Monitor[j]);
-				ntv2pp->m_pHDMIOut4Monitor[j] = NULL;
-            }
-		}
-
-	    if (ntv2pp->m_pSetupMonitor != NULL)
-	    {
-		    ntv2_setup_disable(ntv2pp->m_pSetupMonitor);
-		    ntv2_setup_close(ntv2pp->m_pSetupMonitor);
-		    ntv2pp->m_pSetupMonitor = NULL;
-	    }
-
-        if (ntv2pp->m_pGenlock2Monitor != NULL)
-        {
-            ntv2_genlock2_disable(ntv2pp->m_pGenlock2Monitor);
-            ntv2_genlock2_close(ntv2pp->m_pGenlock2Monitor);
-            ntv2pp->m_pGenlock2Monitor = NULL;
-        }
-
-		// close the serial port
-		if (ntv2pp->m_pSerialPort != NULL)
-		{
-			ntv2_serial_close(ntv2pp->m_pSerialPort);
-			ntv2pp->m_pSerialPort = NULL;
-		}
-
-        if ((ntv2pp->platform_dev != NULL) &&
-            (getNTV2ModuleParams()->driverMode == eDriverModeAll))
-        {
-            for(irqIndex = 0; irqIndex < eNumNTV2IRQDevices; ++irqIndex)
+            if (getNTV2ModuleParams()->driverMode == eDriverModeAll)
             {
-                if (ntv2pp->_ntv2IRQ[irqIndex] != 0)
-                {
-                    MSG("%s: free irq 0x%x, dev_id %p\n",
-                        ntv2pp->name, ntv2pp->_ntv2IRQ[irqIndex], (void *)ntv2pp);
+                // stop all dma engines
+                dmaRelease(i);
 
-                    devm_free_irq(&ntv2pp->platform_dev->dev,
-                                  ntv2pp->_ntv2IRQ[irqIndex],
-                                  (void *)ntv2pp);
+                // disable and unregister interrupts,
+                DisableAllInterrupts(i);
+
+                // disable autocirculate
+                AutoCirculateInitialize(i);
+            }
+
+            // disable hdmi monitor
+            for (j = 0; j < NTV2_MAX_HDMI_MONITOR; j++)
+            {
+                if (ntv2pp->m_pHDMIInputMonitor[j] != NULL)
+                {
+                    ntv2_hdmiin_disable(ntv2pp->m_pHDMIInputMonitor[j]);
+                }
+                if (ntv2pp->m_pHDMIIn4Monitor[j] != NULL)
+                {
+                    ntv2_hdmiin4_disable(ntv2pp->m_pHDMIIn4Monitor[j]);
+                }
+                if (ntv2pp->m_pHDMIOut4Monitor[j] != NULL)
+                {
+                    ntv2_hdmiout4_disable(ntv2pp->m_pHDMIOut4Monitor[j]);
+                }	
+            }
+		
+            // close hdmi monitor
+            for (j = 0; j < NTV2_MAX_HDMI_MONITOR; j++)
+            {
+                if (ntv2pp->m_pHDMIInputMonitor[j] != NULL)
+                {
+                    ntv2_hdmiin_close(ntv2pp->m_pHDMIInputMonitor[j]);
+                    ntv2pp->m_pHDMIInputMonitor[j] = NULL;
+                }
+                if (ntv2pp->m_pHDMIIn4Monitor[j] != NULL)
+                {
+                    ntv2_hdmiin4_close(ntv2pp->m_pHDMIIn4Monitor[j]);
+                    ntv2pp->m_pHDMIIn4Monitor[j] = NULL;
+                }
+                if (ntv2pp->m_pHDMIOut4Monitor[j] != NULL)
+                {
+                    ntv2_hdmiout4_close(ntv2pp->m_pHDMIOut4Monitor[j]);
+                    ntv2pp->m_pHDMIOut4Monitor[j] = NULL;
                 }
             }
-		}
 
-		platform_resources_release(i);
+            if (ntv2pp->m_pSetupMonitor != NULL)
+            {
+                ntv2_setup_disable(ntv2pp->m_pSetupMonitor);
+                ntv2_setup_close(ntv2pp->m_pSetupMonitor);
+                ntv2pp->m_pSetupMonitor = NULL;
+            }
+
+            if (ntv2pp->m_pGenlock2Monitor != NULL)
+            {
+                ntv2_genlock2_disable(ntv2pp->m_pGenlock2Monitor);
+                ntv2_genlock2_close(ntv2pp->m_pGenlock2Monitor);
+                ntv2pp->m_pGenlock2Monitor = NULL;
+            }
+
+            // close the serial port
+            if (ntv2pp->m_pSerialPort != NULL)
+            {
+                ntv2_serial_close(ntv2pp->m_pSerialPort);
+                ntv2pp->m_pSerialPort = NULL;
+            }
+
+            if ((ntv2pp->platform_dev != NULL) &&
+                (getNTV2ModuleParams()->driverMode == eDriverModeAll))
+            {
+                for(irqIndex = 0; irqIndex < eNumNTV2IRQDevices; ++irqIndex)
+                {
+                    if (ntv2pp->_ntv2IRQ[irqIndex] != 0)
+                    {
+                        MSG("%s: free irq 0x%x, dev_id %p\n",
+                            ntv2pp->name, ntv2pp->_ntv2IRQ[irqIndex], (void *)ntv2pp);
+
+                        devm_free_irq(&ntv2pp->platform_dev->dev,
+                                      ntv2pp->_ntv2IRQ[irqIndex],
+                                      (void *)ntv2pp);
+                    }
+                }
+            }
+        }
+
+        platform_resources_release(i);
 	}
 	
 	unregister_chrdev( getNTV2ModuleParams()->NTV2Major, getNTV2ModuleParams()->driverName);
@@ -3806,7 +3812,7 @@ static int platform_resources_config(ULWord deviceNumber)
 	NTV2PrivateParams *ntv2pp = NULL;
 	struct platform_device* pd = NULL;
     struct device_node *node = NULL;
-//	uint32_t val32;
+	uint32_t val32;
 	int ret = 0;
 
 	if ( !(ntv2pp = getNTV2Params(deviceNumber)) )
@@ -3826,7 +3832,7 @@ static int platform_resources_config(ULWord deviceNumber)
 	ntv2pp->_mappedBAR2Address = 0;
 	ntv2pp->_unmappedBAR2Address = 0;
 	ntv2pp->_BAR2MemorySize = 0;
-#if 0
+    
     ret = of_property_read_u32(pd->dev.of_node, "deviceType", &val32);
     if(ret) {
         MSG("%s: failed to read deviceType property\n", ntv2pp->name);
@@ -3855,24 +3861,7 @@ static int platform_resources_config(ULWord deviceNumber)
     if(ntv2pp->legacyInterrupt)
 		MSG("%s: using legacy interrupt\n", ntv2pp->name);
 
-    // Walk through the children nodes and setup the device
-    for_each_child_of_node(pd->dev.of_node, node)
-	{
-        if(!strcmp("reg", node->name))
-		{
-			MSG("%s: found registers\n", ntv2pp->name);
-			ret = platform_add_register(deviceNumber, node);
-            if(ret)
-				goto fail;
-        }
-		else if(!strcmp("irq", node->name))
-		{
-			MSG("%s: found interrupt\n", ntv2pp->name);
-			ret = platform_add_interrupt(deviceNumber, node);
-            if(ret) goto fail;
-        }
-    }
-#else
+    // hack the registers
     {
         unsigned long phyaddr = 0x00000000a8000000;
         unsigned long size = 0x0000000000040000;
@@ -3892,13 +3881,42 @@ static int platform_resources_config(ULWord deviceNumber)
         ntv2pp->_unmappedBAR0Address = phyaddr;
         ntv2pp->_mappedBAR0Address = (unsigned long)mapped;
         ntv2pp->_BAR0MemorySize = size;
-    }
+#if 0
+        ntv2pp->_FrameMemoryAddress = 0x500000000;
+        ntv2pp->_FrameMemorySize    = 0x40000000;
+        MSG("%s: frame buffer addr 0x%lx  size 0x%zx bytes\n",
+            ntv2pp->name, ntv2pp->_FrameMemoryAddress, ntv2pp->_FrameMemorySize);
 #endif    
-    // FIXME: Grab these from device tree
-    ntv2pp->_FrameMemoryAddress = 0x500000000;
-    ntv2pp->_FrameMemorySize    = 0x40000000;
-    MSG("%s: frame buffer addr 0x%lx  size 0x%zx bytes\n",
-		ntv2pp->name, ntv2pp->_FrameMemoryAddress, ntv2pp->_FrameMemorySize);
+    }
+
+    // Walk through the children nodes and setup the device
+    for_each_child_of_node(pd->dev.of_node, node)
+	{
+#if 0        
+        if(!strcmp("reg", node->name))
+		{
+			MSG("%s: found registers\n", ntv2pp->name);
+			ret = platform_add_register(deviceNumber, node);
+            if(ret)
+				goto fail;
+        }
+#endif        
+        if(!strcmp("mem", node->name))
+		{
+			MSG("%s: found memory\n", ntv2pp->name);
+			ret = platform_add_memory(deviceNumber, node);
+            if(ret)
+				goto fail;
+        }
+#if 0        
+		if(!strcmp("irq", node->name))
+		{
+			MSG("%s: found interrupt\n", ntv2pp->name);
+			ret = platform_add_interrupt(deviceNumber, node);
+            if(ret) goto fail;
+        }
+#endif        
+    }
 
 	ntv2pp->_dmaMethod = DmaMethodIllegal; //DmaMethodZynq;
 	ntv2pp->_dmaSerialize = true;
@@ -3917,9 +3935,7 @@ static int platform_resources_release(ULWord deviceNumber)
 		return -ENODEV;
 
 	platform_remove_register(deviceNumber);
-
-    ntv2pp->_FrameMemoryAddress = 0;
-    ntv2pp->_FrameMemorySize    = 0;
+	platform_remove_memory(deviceNumber);
 
 	return 0;
 }
@@ -3981,6 +3997,8 @@ static int platform_add_register(ULWord deviceNumber, struct device_node *node)
 			
             return 0;
         }
+        
+        MSG("%s: found register node %s not %s\n", ntv2pp->name, handle->name, STR_AXI4LITE2HOSTBUS);
     }
 	
     MSG("%s: node %s does not define a register block\n", ntv2pp->name, node->full_name);
@@ -4004,6 +4022,90 @@ static int platform_remove_register(ULWord deviceNumber)
 	ntv2pp->_unmappedBAR0Address = 0;
 	ntv2pp->_mappedBAR0Address = 0;
 	ntv2pp->_BAR0MemorySize = 0;
+
+	return 0;
+}
+
+static int platform_add_memory(ULWord deviceNumber, struct device_node *node)
+{
+	NTV2PrivateParams *ntv2pp = NULL;
+    struct device_node *handle = of_parse_phandle(node, "node", 0);
+
+	if ( !(ntv2pp = getNTV2Params(deviceNumber)) )
+		return -ENODEV;
+
+    if (ntv2pp->_FrameMemorySize != 0)
+	{
+        MSG("%s: cannot add memory %s\n", ntv2pp->name, node->full_name);
+        return -ENOMEM;
+    }
+	
+    if (handle != NULL)
+	{
+        if (handle->name != NULL && !strcmp(handle->name, STR_FRAME_MEMORY))
+		{
+            uint32_t values[4];
+            int ret;
+            unsigned long phyaddr;
+			unsigned long size;
+
+            MSG("%s: %s is %s\n", ntv2pp->name, node->full_name, handle->name);
+            ret = of_property_read_u32_array(handle, "reg", values, 4);
+            if(ret)
+			{
+                MSG("%s: %s failed to read reg\n", ntv2pp->name, node->full_name);
+                return -EINVAL;
+            }
+            phyaddr = values[0];
+			phyaddr <<= 32;
+			phyaddr |= values[1];
+            size = values[2];
+			size <<= 32;
+			size |= values[3];
+
+            MSG("%s: frame memory (%s) addr 0x%08lx  size 0x%lx bytes\n",
+                     ntv2pp->name, node->full_name, phyaddr, size);
+#if 0
+            void *mapped = NULL;
+            struct resource *resource = NULL;
+            resource = request_mem_region(phyaddr, size, ntv2pp->name);
+            if(resource == NULL)
+			{
+				MSG("%s: %s request_mem_region failed\n", ntv2pp->name, node->full_name);
+                return -ENOMEM;
+            }
+            mapped = ioremap(phyaddr, size);
+            MSG("%s: video reg %p mapped\n", ntv2pp->name, mapped);
+#endif
+			ntv2pp->_FrameMemoryAddress = phyaddr;
+			ntv2pp->_FrameMemorySize = size;
+			
+            return 0;
+        }
+
+        MSG("%s: found memory node %s not %s\n", ntv2pp->name, handle->name, STR_FRAME_MEMORY);
+    }
+	
+    MSG("%s: node %s does not define a memory block\n", ntv2pp->name, node->full_name);
+    return -EINVAL;
+}
+
+static int platform_remove_memory(ULWord deviceNumber)
+{
+	NTV2PrivateParams *ntv2pp = NULL;
+
+	if ( !(ntv2pp = getNTV2Params(deviceNumber)) )
+		return -ENODEV;
+#if 0
+    if (ntv2pp->_FrameMemorySize != 0)
+	{
+		iounmap((void*)ntv2pp->_mappedBAR0Address);
+		release_mem_region(ntv2pp->_unmappedBAR0Address, ntv2pp->_BAR0MemorySize);
+		MSG("%s: reg %p unmapped\n", ntv2pp->name, (void*)ntv2pp->_mappedBAR0Address);
+    }
+#endif
+    ntv2pp->_FrameMemoryAddress = 0;
+    ntv2pp->_FrameMemorySize = 0;
 
 	return 0;
 }
