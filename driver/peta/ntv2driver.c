@@ -3062,7 +3062,7 @@ static int platform_probe(struct platform_device *pd)
 	    MSG("%s: firmware version %s\n", ntv2pp->name, versionString);
 
 	    // initialize dma
-//	    dmaInit(deviceNumber);
+	    dmaInit(deviceNumber);
 
         // initialize autocirculate
         AutoCirculateInitialize(deviceNumber);
@@ -3185,10 +3185,12 @@ static int platform_probe(struct platform_device *pd)
 
 	    // Enable interrupts
         if (irqGood)
+        {
             EnableAllInterrupts(deviceNumber);
+        }
 
 	    // Enable DMA
-//	    dmaEnable(deviceNumber);
+	    dmaEnable(deviceNumber);
     }
 
     if (getNTV2ModuleParams()->driverMode != eDriverModeRegister)
@@ -3918,7 +3920,7 @@ static int platform_resources_config(ULWord deviceNumber)
 #endif        
     }
 
-	ntv2pp->_dmaMethod = DmaMethodIllegal; //DmaMethodZynq;
+	ntv2pp->_dmaMethod = DmaMethodZynq;
 	ntv2pp->_dmaSerialize = true;
 
 	return ret;
@@ -4452,10 +4454,12 @@ static void resume(ULWord deviceNumber)
 
 	    // Enable interrupts
         if (ntv2pp->canDoInterrupt)
+        {
             EnableAllInterrupts(deviceNumber);
+        }
 
 	    // enable all dma engines
-//	    dmaEnable(deviceNumber);
+	    dmaEnable(deviceNumber);
     }
 }
 

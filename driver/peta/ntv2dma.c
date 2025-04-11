@@ -390,10 +390,13 @@ int dmaInit(ULWord deviceNumber)
 			pDmaEngine->engName = "zynq";
 			break;
 		default:
+			pDmaEngine->dmaIndex = 0;
+			pDmaEngine->dmaC2H = false; // not used
+			pDmaEngine->engName = "unknown";
 			NTV2_MSG_ERROR("%s%d:%s%d: dmaInit unsupported dma method %d\n",
 						   DMA_MSG_ENGINE, pDmaEngine->dmaMethod);
 			pDmaEngine->state = DmaStateDead;
-			break;
+			continue;
 		}
 		
 		// max resources
