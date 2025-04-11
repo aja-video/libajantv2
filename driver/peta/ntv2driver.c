@@ -1174,8 +1174,8 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 			NTV2_HEADER *	pMessage	= NULL;
 			void *			pInBuff		= NULL;
 			void *			pOutBuff	= NULL;
-			void *			pOutBuff2	= NULL;
 			int				returnCode	= 0;
+            void *          pVirtBuf[3] = { NULL, NULL, NULL };
 
 			// This limits the message size to one page, which should not be a problem, nor is sleeping on the alloc
 			pMessage = (NTV2_HEADER *) get_zeroed_page(GFP_KERNEL);
@@ -1220,13 +1220,6 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 			// Scratch areas for returned data
 			pOutBuff = (void *) get_zeroed_page(GFP_KERNEL);
 			if (!pOutBuff)
-			{
-				returnCode = -ENOMEM;
-				goto messageError;
-			}
-
-			pOutBuff2 = (void *) get_zeroed_page(GFP_KERNEL);
-			if (!pOutBuff2)
 			{
 				returnCode = -ENOMEM;
 				goto messageError;
@@ -1292,22 +1285,47 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					NTV2Buffer *	pInRegisters		= &((NTV2GetRegisters*)pMessage)->mInRegisters;
 					NTV2Buffer *	pOutGoodRegisters	= &((NTV2GetRegisters*)pMessage)->mOutGoodRegisters;
 					NTV2Buffer *	pOutValues			= &((NTV2GetRegisters*)pMessage)->mOutValues;
-					ULWord *		pInRegArray			= (ULWord*) pInBuff;
-					ULWord *		pOutRegArray		= (ULWord*) pOutBuff;
-					ULWord *		pOutValuesArray		= (ULWord*) pOutBuff2;
+					ULWord *		pInRegArray			= NULL;
+					ULWord *		pOutRegArray		= NULL;
+					ULWord *		pOutValuesArray		= NULL;
 					ULWord			i;
 
 					//	Check for buffer overrun
-					if((pInRegisters->fByteCount > PAGE_SIZE) ||
-					   (pOutGoodRegisters->fByteCount > PAGE_SIZE) ||
-					   (pOutValues->fByteCount > PAGE_SIZE))
+					if((pInRegisters->fByteCount > (PAGE_SIZE * 1000)) ||
+					   (pOutGoodRegisters->fByteCount > (PAGE_SIZE * 1000)) ||
+					   (pOutValues->fByteCount > (PAGE_SIZE * 1000)))
 					{
 						returnCode = -ENOMEM;
 						goto messageError;
 					}
 
+                    //  Allocate register buffers
+                    pVirtBuf[0] = vmalloc(pInRegisters->fByteCount);
+                    if (pVirtBuf[0] == NULL)
+					{
+						returnCode = -ENOMEM;
+						goto messageError;
+					}
+                    pInRegArray = (ULWord*)pVirtBuf[0];
+                    
+                    pVirtBuf[1] = vmalloc(pOutGoodRegisters->fByteCount);
+                    if (pVirtBuf[1] == NULL)
+					{
+						returnCode = -ENOMEM;
+						goto messageError;
+					}
+                    pOutRegArray = (ULWord*)pVirtBuf[1];
+                    
+                    pVirtBuf[2] = vmalloc(pOutValues->fByteCount);
+                    if (pVirtBuf[2] == NULL)
+					{
+						returnCode = -ENOMEM;
+						goto messageError;
+					}
+                    pOutValuesArray = (ULWord*)pVirtBuf[2];
+
 					//	List of registers to read
-					if(copy_from_user((void*) pInBuff,
+					if(copy_from_user((void*) pInRegArray,
 									  (const void*)(pInRegisters->fUserSpacePtr),
 									  pInRegisters->fByteCount))
 					{
@@ -1316,7 +1334,7 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					}
 
 					//	List of registers read to return
-					if(copy_from_user((void*) pOutBuff,
+					if(copy_from_user((void*) pOutRegArray,
 									  (const void*)(pOutGoodRegisters->fUserSpacePtr),
 									  pOutGoodRegisters->fByteCount))
 					{
@@ -1325,7 +1343,7 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					}
 
 					//	List of register values to return
-					if(copy_from_user((void*) pOutBuff2,
+					if(copy_from_user((void*) pOutValuesArray,
 									  (const void*)(pOutValues->fUserSpacePtr),
 									  pOutValues->fByteCount))
 					{
@@ -1343,14 +1361,14 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					}
 
 					//	Send back the list of registers read
-					if(copy_to_user((void*)(pOutGoodRegisters->fUserSpacePtr), (const void*)pOutBuff, pOutGoodRegisters->fByteCount))
+					if(copy_to_user((void*)(pOutGoodRegisters->fUserSpacePtr), (const void*)pOutRegArray, pOutGoodRegisters->fByteCount))
 					{
 						returnCode = -EFAULT;
 						goto messageError;
 					}
 
 					//	Send back the list of values read
-					if(copy_to_user((void*)(pOutValues->fUserSpacePtr), (const void*)pOutBuff2, pOutValues->fByteCount))
+					if(copy_to_user((void*)(pOutValues->fUserSpacePtr), (const void*)pOutValuesArray, pOutValues->fByteCount))
 					{
 						returnCode = -EFAULT;
 						goto messageError;
@@ -1566,10 +1584,17 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 
 messageError:
 
-			free_page((unsigned long) pOutBuff2);
-			free_page((unsigned long) pOutBuff);
-			free_page((unsigned long) pInBuff);
-			free_page((unsigned long) pMessage);
+            {
+                int i;
+                for (i = 0; i < 3; i++)
+                {
+                    if (pVirtBuf[i] != NULL)
+                        vfree(pVirtBuf[i]);
+                }
+                free_page((unsigned long) pOutBuff);
+                free_page((unsigned long) pInBuff);
+                free_page((unsigned long) pMessage);
+            }
 
 			return returnCode;
 		}
@@ -3054,7 +3079,7 @@ static int platform_probe(struct platform_device *pd)
             }
 	    }
 	
-        if (ntv2pp->_DeviceID == DEVICE_ID_CORVID1)
+        if (ntv2pp->_DeviceID == DEVICE_ID_CORVID1)  // DEVICE_ID_ZEFRAM
         {
             ntv2pp->m_pRasterMonitor = ntv2_videoraster_open(&ntv2pp->systemContext, "ntv2videoraster", 0);
             if (ntv2pp->m_pRasterMonitor != NULL)
@@ -3066,10 +3091,7 @@ static int platform_probe(struct platform_device *pd)
                     ntv2pp->m_pRasterMonitor = NULL;
                 }
             }
-        }
-	
-        if (ntv2pp->_DeviceID == DEVICE_ID_CORVID1)
-        {
+
             ntv2pp->m_pSetupMonitor = ntv2_setup_open(&ntv2pp->systemContext, "ntv2setup");
             if (ntv2pp->m_pSetupMonitor != NULL)
             {
@@ -3078,6 +3100,28 @@ static int platform_probe(struct platform_device *pd)
                 {
                     ntv2_setup_close(ntv2pp->m_pSetupMonitor);
                     ntv2pp->m_pSetupMonitor = NULL;
+                }
+            }
+
+            ntv2pp->m_pHDMIOut4Monitor[0] = ntv2_hdmiout4_open(&ntv2pp->systemContext, "ntv2hdmiout4", 0);
+            if (ntv2pp->m_pHDMIOut4Monitor[0] != NULL)
+            {
+                status = ntv2_hdmiout4_configure(ntv2pp->m_pHDMIOut4Monitor[0]);
+                if (status != NTV2_STATUS_SUCCESS)
+                {
+                    ntv2_hdmiout4_close(ntv2pp->m_pHDMIOut4Monitor[0]);
+                    ntv2pp->m_pHDMIOut4Monitor[0] = NULL;
+                }
+            }
+
+            ntv2pp->m_pHDMIOut4Monitor[1] = ntv2_hdmiout4_open(&ntv2pp->systemContext, "ntv2hdmiout4", 1);
+            if (ntv2pp->m_pHDMIOut4Monitor[1] != NULL)
+            {
+                status = ntv2_hdmiout4_configure(ntv2pp->m_pHDMIOut4Monitor[1]);
+                if (status != NTV2_STATUS_SUCCESS)
+                {
+                    ntv2_hdmiout4_close(ntv2pp->m_pHDMIOut4Monitor[1]);
+                    ntv2pp->m_pHDMIOut4Monitor[1] = NULL;
                 }
             }
         }
@@ -3748,7 +3792,7 @@ static int platform_resources_config(ULWord deviceNumber)
 	NTV2PrivateParams *ntv2pp = NULL;
 	struct platform_device* pd = NULL;
     struct device_node *node = NULL;
-	uint32_t val32;
+//	uint32_t val32;
 	int ret = 0;
 
 	if ( !(ntv2pp = getNTV2Params(deviceNumber)) )
@@ -3842,7 +3886,7 @@ static int platform_resources_config(ULWord deviceNumber)
     MSG("%s: frame buffer addr 0x%lx  size 0x%zx bytes\n",
 		ntv2pp->name, ntv2pp->_FrameMemoryAddress, ntv2pp->_FrameMemorySize);
 
-	ntv2pp->_dmaMethod = DmaMethodZynq;
+	ntv2pp->_dmaMethod = DmaMethodIllegal; //DmaMethodZynq;
 	ntv2pp->_dmaSerialize = true;
 
 	return ret;

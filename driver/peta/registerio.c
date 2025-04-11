@@ -847,10 +847,19 @@ int ReadReg(    ULWord deviceNumber,
 		!((registerNumber >= VIRTUALREG_START) && (registerNumber <= kVRegLast)))
 	{
 		if (registerNumber == kRegBoardID)
-			return pNTV2Params->_DeviceID;
+        {
+            *registerValue = pNTV2Params->_DeviceID;
+			return 0;
+        }
 		*registerValue = 0;
         return -EACCES;
 	}
+
+	if (registerNumber == kRegBoardID)
+    {
+        *registerValue = pNTV2Params->_DeviceID;
+        return 0;
+    }
 
 	address = GetRegisterAddress( deviceNumber, registerNumber);
 
@@ -1559,7 +1568,8 @@ ULWord ReadDeviceIDRegister(ULWord deviceNumber)
 	if (getNTV2Params(deviceNumber)->pci_device == NTV2_DEVICE_ID_IO4KPLUS)
 		return DEVICE_ID_IO4KPLUS;
 
-	return  READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pDeviceID);
+//	return  READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pDeviceID);
+    return DEVICE_ID_KONAIP_25G;
 }
 
 // NTV2 DMA functions
