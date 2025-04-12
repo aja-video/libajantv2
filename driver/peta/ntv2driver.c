@@ -90,8 +90,6 @@
 
 #define NTV2_MODULE_NAME "ntv2mod"
 #define NTV2_DRIVER_NAME "ajantv2"
-#define STR_AXI4LITE2HOSTBUS    "AXI4LiteFake"
-#define STR_FRAME_MEMORY        "buffer"
 
 /*******************************/
 /* Module macros, params, etc. */
@@ -3956,7 +3954,7 @@ static int platform_add_register(ULWord deviceNumber, struct device_node *node)
 	
     if (handle != NULL)
 	{
-        if (handle->name != NULL && !strcmp(handle->name, STR_AXI4LITE2HOSTBUS))
+        if (handle->name != NULL)
 		{
             uint32_t values[4];
             int ret;
@@ -3998,7 +3996,7 @@ static int platform_add_register(ULWord deviceNumber, struct device_node *node)
             return 0;
         }
         
-        MSG("%s: found register node %s not %s\n", ntv2pp->name, handle->name, STR_AXI4LITE2HOSTBUS);
+        MSG("%s: found register node no name\n", ntv2pp->name);
     }
 	
     MSG("%s: node %s does not define a register block\n", ntv2pp->name, node->full_name);
@@ -4042,7 +4040,7 @@ static int platform_add_memory(ULWord deviceNumber, struct device_node *node)
 	
     if (handle != NULL)
 	{
-        if (handle->name != NULL && !strcmp(handle->name, STR_FRAME_MEMORY))
+        if (handle->name != NULL)
 		{
             uint32_t values[4];
             int ret;
@@ -4083,7 +4081,7 @@ static int platform_add_memory(ULWord deviceNumber, struct device_node *node)
             return 0;
         }
 
-        MSG("%s: found memory node %s not %s\n", ntv2pp->name, handle->name, STR_FRAME_MEMORY);
+        MSG("%s: found memory node no name\n", ntv2pp->name);
     }
 	
     MSG("%s: node %s does not define a memory block\n", ntv2pp->name, node->full_name);
@@ -4131,7 +4129,7 @@ static int platform_add_interrupt(ULWord deviceNumber, struct device_node *node)
 	
     if(handle != NULL)
 	{
-        if(handle->name != NULL && !strcmp(handle->name, STR_AXI4LITE2HOSTBUS))
+        if(handle->name != NULL)
 		{
             int ret;
             struct device *dev;
@@ -4163,6 +4161,7 @@ static int platform_add_interrupt(ULWord deviceNumber, struct device_node *node)
 				ntv2pp->name, ntv2pp->_ntv2IRQ[eIrqFpga], node->full_name, handle->name);
             return 0;
         }
+        MSG("%s: found interrupt node no name\n", ntv2pp->name);
     }
 	
     MSG("%s: node %s does not define an interrupt\n", ntv2pp->name, node->full_name);
