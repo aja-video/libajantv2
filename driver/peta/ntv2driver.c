@@ -90,7 +90,7 @@
 
 #define NTV2_MODULE_NAME "ntv2mod"
 #define NTV2_DRIVER_NAME "ajantv2"
-#define STR_AXI4LITE2HOSTBUS    "AXI4Lite2HostBus"
+#define STR_AXI4LITE2HOSTBUS    "AXI4LiteFake"
 #define STR_FRAME_MEMORY        "buffer"
 
 /*******************************/
@@ -3864,6 +3864,7 @@ static int platform_resources_config(ULWord deviceNumber)
 		MSG("%s: using legacy interrupt\n", ntv2pp->name);
 
     // hack the registers
+#if 0
     {
         unsigned long phyaddr = 0x00000000a8000000;
         unsigned long size = 0x0000000000040000;
@@ -3883,18 +3884,17 @@ static int platform_resources_config(ULWord deviceNumber)
         ntv2pp->_unmappedBAR0Address = phyaddr;
         ntv2pp->_mappedBAR0Address = (unsigned long)mapped;
         ntv2pp->_BAR0MemorySize = size;
-#if 0
+
         ntv2pp->_FrameMemoryAddress = 0x500000000;
         ntv2pp->_FrameMemorySize    = 0x40000000;
         MSG("%s: frame buffer addr 0x%lx  size 0x%zx bytes\n",
             ntv2pp->name, ntv2pp->_FrameMemoryAddress, ntv2pp->_FrameMemorySize);
-#endif    
     }
+#endif    
 
     // Walk through the children nodes and setup the device
     for_each_child_of_node(pd->dev.of_node, node)
 	{
-#if 0        
         if(!strcmp("reg", node->name))
 		{
 			MSG("%s: found registers\n", ntv2pp->name);
@@ -3902,7 +3902,6 @@ static int platform_resources_config(ULWord deviceNumber)
             if(ret)
 				goto fail;
         }
-#endif        
         if(!strcmp("mem", node->name))
 		{
 			MSG("%s: found memory\n", ntv2pp->name);
@@ -3910,14 +3909,13 @@ static int platform_resources_config(ULWord deviceNumber)
             if(ret)
 				goto fail;
         }
-#if 0        
 		if(!strcmp("irq", node->name))
 		{
 			MSG("%s: found interrupt\n", ntv2pp->name);
 			ret = platform_add_interrupt(deviceNumber, node);
-            if(ret) goto fail;
+            if(ret)
+                goto fail;
         }
-#endif        
     }
 
 	ntv2pp->_dmaMethod = DmaMethodZynq;
