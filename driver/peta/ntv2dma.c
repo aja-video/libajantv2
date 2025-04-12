@@ -2572,7 +2572,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 	ULWord 		deviceNumber = pDmaContext->deviceNumber;
 	PDMA_ENGINE	pDmaEngine = getDmaEngine(deviceNumber, pDmaContext->engIndex);
 	NTV2PrivateParams *pNTV2Params = getNTV2Params(deviceNumber);
-//	unsigned long dmaFlags = DMA_CTRL_ACK | DMA_PREP_INTERRUPT;
+	unsigned long dmaFlags = DMA_CTRL_ACK | DMA_PREP_INTERRUPT;
 	struct dma_async_tx_descriptor*	pDmaDesc;
 	struct scatterlist sg[2];
 	int sgCount;
@@ -2612,7 +2612,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 		
 		// iniatlize dma descriptor
 		pDmaDesc = NULL;
-#if 0        
+#if 1        
 		if (pDmaContext->dmaC2H)
 		{
 			pDmaDesc = zynqmp_dma_prep_sg(pDmaEngine->dmaChannel,
@@ -2678,7 +2678,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 
 		// iniatlize dma descriptor
 		pDmaDesc = NULL;
-#if 0        
+#if 1        
 		if (pDmaContext->dmaC2H)
 		{
 			pDmaDesc = zynqmp_dma_prep_sg(pDmaEngine->dmaChannel,
@@ -2731,7 +2731,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 
 		// iniatlize dma descriptor
 		pDmaDesc = NULL;
-#if 0        
+#if 1        
 		if (pDmaContext->dmaC2H)
 		{
 			pDmaDesc = zynqmp_dma_prep_sg(pDmaEngine->dmaChannel,
@@ -2784,7 +2784,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 
 		// iniatlize dma descriptor
 		pDmaDesc = NULL;
-#if 0        
+#if 1        
 		if (pDmaContext->dmaC2H)
 		{
 			pDmaDesc = zynqmp_dma_prep_sg(pDmaEngine->dmaChannel,
