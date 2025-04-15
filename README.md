@@ -142,7 +142,6 @@ Please follow the instructions below to build `libajantv2` on the supported plat
      $ cmake -S . -B bld-x86 -G Xcode -DCMAKE_OSX_ARCHITECTURES=x86_64
      $ cmake -S . -B bld-fat -G Xcode -DCMAKE_OSX_ARCHITECTURES=arm64;x86_64
      ```
-
  1. Build the `libajantv2` static library from the **Terminal**, via the generated XCode Project:
      ```
      $ cmake --build build

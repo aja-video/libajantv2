@@ -1762,7 +1762,7 @@ bool AJAAncillaryList::StripNativeInserterGUMPPackets (const NTV2Buffer & inSrc,
 		::memcpy(tgtPtr, srcPtr, uncopied);	//	Copy last uncopied bytes
 	//	cout << DEC(numStripped) << " pkts removed, " << DEC(bytesRemoved) << " bytes removed" << endl;
 	return true;
-}	//	StripNativeInserterPackets
+}	//	StripNativeInserterGUMPPackets
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////

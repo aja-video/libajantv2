@@ -1800,6 +1800,11 @@ bool NTV2PluginLoader::validate (void)
 				<< "Issuer serial: " << fingerprint << "|AJA serial: " << ajaFingerprint);
 		return fail();	//	fail
 	}
+	if (fingerprint != ajaFingerprint)
+	{	P_FAIL(pluginPath() << " not authorized/signed by AJA: Issuer serial mismatch: " << fingerprint
+				<< " vs " << ajaFingerprint);
+		return false;	//	fail
+	}
 
 	//	Green light
 	mValidated = true;
