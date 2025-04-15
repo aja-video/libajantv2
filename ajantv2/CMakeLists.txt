@@ -281,7 +281,7 @@ if (NOT AJANTV2_BUILD_OPENSOURCE)
     endif()
 endif()
 
-if(NOT AJANTV2_DISABLE_CONFIGURE_VERSION_FILE AND EXISTS includes/ntv2version.h)
+if(NOT AJANTV2_DISABLE_CONFIGURE_VERSION_FILE OR NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/includes/ntv2version.h)
     configure_file(includes/ntv2version.h.in includes/ntv2version.h @ONLY)
     configure_file(includes/ntv2version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/includes/ntv2version.h @ONLY)
 endif()

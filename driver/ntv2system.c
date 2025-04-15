@@ -2184,7 +2184,7 @@ Ntv2Status ntv2ReadPciConfig(Ntv2SystemContext* pSysCon, void* pData, int32_t of
 {
 	int status;
 	
-	if ((pSysCon == NULL) || (pData == NULL))
+	if ((pSysCon == NULL) || (pData == NULL) || (pSysCon->pDevice == NULL))
 		return NTV2_STATUS_BAD_PARAMETER;
 
 	if (size == 4)
@@ -2206,7 +2206,7 @@ Ntv2Status ntv2WritePciConfig(Ntv2SystemContext* pSysCon, void* pData, int32_t o
 {
 	int status;
 	
-	if ((pSysCon == NULL)  || (pData == NULL))
+	if ((pSysCon == NULL)  || (pData == NULL) || (pSysCon->pDevice == NULL))
 		return NTV2_STATUS_BAD_PARAMETER;
 	
 	if (size == 4)

@@ -390,10 +390,13 @@ int dmaInit(ULWord deviceNumber)
 			pDmaEngine->engName = "zynq";
 			break;
 		default:
+			pDmaEngine->dmaIndex = 0;
+			pDmaEngine->dmaC2H = false; // not used
+			pDmaEngine->engName = "unknown";
 			NTV2_MSG_ERROR("%s%d:%s%d: dmaInit unsupported dma method %d\n",
 						   DMA_MSG_ENGINE, pDmaEngine->dmaMethod);
 			pDmaEngine->state = DmaStateDead;
-			break;
+			continue;
 		}
 		
 		// max resources
@@ -745,6 +748,7 @@ int dmaTransfer(PDMA_PARAMS pDmaParams)
 	LWord64 softDoneTime = 0;
 	Ntv2SystemContext systemContext;
 	
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 
 	if (NTV2_DEBUG_ACTIVE(NTV2_DEBUG_STATISTICS))
@@ -2568,7 +2572,9 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 	ULWord 		deviceNumber = pDmaContext->deviceNumber;
 	PDMA_ENGINE	pDmaEngine = getDmaEngine(deviceNumber, pDmaContext->engIndex);
 	NTV2PrivateParams *pNTV2Params = getNTV2Params(deviceNumber);
-//	unsigned long dmaFlags = DMA_CTRL_ACK | DMA_PREP_INTERRUPT;
+#ifdef ZEFRAM
+	unsigned long dmaFlags = DMA_CTRL_ACK | DMA_PREP_INTERRUPT;
+#endif
 	struct dma_async_tx_descriptor*	pDmaDesc;
 	struct scatterlist sg[2];
 	int sgCount;
@@ -2608,7 +2614,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 		
 		// iniatlize dma descriptor
 		pDmaDesc = NULL;
-#if 0        
+#ifdef ZEFRAM
 		if (pDmaContext->dmaC2H)
 		{
 			pDmaDesc = zynqmp_dma_prep_sg(pDmaEngine->dmaChannel,
@@ -2674,7 +2680,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 
 		// iniatlize dma descriptor
 		pDmaDesc = NULL;
-#if 0        
+#ifdef ZEFRAM
 		if (pDmaContext->dmaC2H)
 		{
 			pDmaDesc = zynqmp_dma_prep_sg(pDmaEngine->dmaChannel,
@@ -2727,7 +2733,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 
 		// iniatlize dma descriptor
 		pDmaDesc = NULL;
-#if 0        
+#ifdef ZEFRAM
 		if (pDmaContext->dmaC2H)
 		{
 			pDmaDesc = zynqmp_dma_prep_sg(pDmaEngine->dmaChannel,
@@ -2780,7 +2786,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 
 		// iniatlize dma descriptor
 		pDmaDesc = NULL;
-#if 0        
+#ifdef ZEFRAM
 		if (pDmaContext->dmaC2H)
 		{
 			pDmaDesc = zynqmp_dma_prep_sg(pDmaEngine->dmaChannel,

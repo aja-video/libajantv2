@@ -89,6 +89,7 @@ typedef enum
 	DEVICE_ID_SOJI_OE7					= 0x10922407,
 	DEVICE_ID_TTAP						= 0x10416000,	///< @brief See \ref ttap
 	DEVICE_ID_TTAP_PRO					= 0x10879000,	///< @brief See \ref ttappro
+	DEVICE_ID_ZEFRAM					= 0x11033300,
 	DEVICE_ID_NOTFOUND					= 0xFFFFFFFF,	///< @brief Invalid or "not found"
 	DEVICE_ID_INVALID					= DEVICE_ID_NOTFOUND
 
@@ -144,7 +145,8 @@ typedef enum
 													||	(__d__) == DEVICE_ID_KONAIP_1RX_1TX_2110	\
 													||	(__d__) == DEVICE_ID_IOIP_2110				\
 													||	(__d__) == DEVICE_ID_IOIP_2110_RGB12		\
-													||	(__d__) == DEVICE_ID_KONAIP_25G)
+													||	(__d__) == DEVICE_ID_KONAIP_25G				\
+													||	(__d__) == DEVICE_ID_ZEFRAM	)
 
 #define NTV2_DEVICE_SUPPORTS_SMPTE2022(__d__)	(		(__d__) == DEVICE_ID_KONAIP_2022			\
 													||	(__d__) == DEVICE_ID_IOIP_2022	)
