@@ -79,6 +79,8 @@ bool GetConverterOutFormat(ULWord boardNumber, NTV2VideoFormat* format)
 	bool isQuadQuadMode = false;
 	HDRDriverValues hdrRegValues;
 	Ntv2SystemContext systemContext;
+    
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = boardNumber;
 
 	if(!FindCrosspointSource(&systemContext, &xptSelect, NTV2_XptConversionModule))
@@ -287,7 +289,10 @@ NTV2VideoFormat GetDeviceVideoFormat(ULWord boardNumber, NTV2Channel channel)
 	NTV2FrameRate frameRate;
 	NTV2VideoFormat videoFormat = NTV2_FORMAT_UNKNOWN;
 	ULWord smpte372Enabled;
+    
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = boardNumber;
+    
 	standard = GetStandard(&systemContext, channel);
 	frameRate = GetFrameRate(&systemContext, channel);
 	smpte372Enabled = GetSmpte372(&systemContext, channel)?1:0;

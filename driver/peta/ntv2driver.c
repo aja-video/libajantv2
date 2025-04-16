@@ -90,7 +90,6 @@
 
 #define NTV2_MODULE_NAME "ntv2mod"
 #define NTV2_DRIVER_NAME "ajantv2"
-#define STR_AXI4LITE2HOSTBUS    "AXI4Lite2HostBus"
 
 /*******************************/
 /* Module macros, params, etc. */
@@ -207,6 +206,8 @@ static int platform_resources_config(ULWord deviceNumber);
 static int platform_resources_release(ULWord deviceNumber);
 static int platform_add_register(ULWord deviceNumber, struct device_node *node);
 static int platform_remove_register(ULWord deviceNumber);
+static int platform_add_memory(ULWord deviceNumber, struct device_node *node);
+static int platform_remove_memory(ULWord deviceNumber);
 static int platform_add_interrupt(ULWord deviceNumber, struct device_node *node);
 
 static void initializeRegisterNames(ULWord deviceNumber, unsigned long mappedAddress);
@@ -509,11 +510,11 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 			if(copy_from_user((void*)&param,(const void*) arg,sizeof(REGISTER_ACCESS)))
 				return -EFAULT;
 
-			status = ReadReg(   deviceNumber,
-				  								param.RegisterNumber,
-                                &param.RegisterValue,
-												param.RegisterMask,
-												param.RegisterShift);
+			status = ReadReg(deviceNumber,
+                             param.RegisterNumber,
+                             &param.RegisterValue,
+                             param.RegisterMask,
+                             param.RegisterShift);
 			if(copy_to_user((void*)arg,(const void*) &param,sizeof(REGISTER_ACCESS)))
 				return -EFAULT;
             if(status != 0)
@@ -1228,6 +1229,7 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 			// Determine what kind of message it is
 			switch(pMessage->fType)
 			{
+#if 0                
 			case NTV2_TYPE_ACSTATUS:
 				{
 					returnCode = AutoCirculateStatus_Ex(deviceNumber, (AUTOCIRCULATE_STATUS *) pMessage);
@@ -1255,7 +1257,7 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					}
 				}
 				break;
-
+#endif
 			case NTV2_TYPE_SDISTATS:
 				{
 					NTV2Buffer * pInStatistics = &((NTV2SDIInStatistics*)pMessage)->mInStatistics;
@@ -1294,6 +1296,13 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					if((pInRegisters->fByteCount > (PAGE_SIZE * 1000)) ||
 					   (pOutGoodRegisters->fByteCount > (PAGE_SIZE * 1000)) ||
 					   (pOutValues->fByteCount > (PAGE_SIZE * 1000)))
+					{
+						returnCode = -ENOMEM;
+						goto messageError;
+					}
+					if((pInRegisters->fByteCount < (mInNumRegisters * 4)) ||
+					   (pOutGoodRegisters->fByteCount < (mInNumRegisters * 4)) ||
+					   (pOutValues->fByteCount < (mInNumRegisters * 4)))
 					{
 						returnCode = -ENOMEM;
 						goto messageError;
@@ -1465,6 +1474,7 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					}
 				}
 				break;
+#if 0                
 			case NTV2_TYPE_ACFRAMESTAMP:
 				{
 					NTV2Buffer *	pAcTimeCodes	= &((FRAME_STAMP*)pMessage)->acTimeCodes;
@@ -1497,6 +1507,7 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					}
 				}
 				break;
+#endif                
 			case NTV2_TYPE_AJABUFFERLOCK:
 				{
 					if (pFileData == NULL)
@@ -1788,14 +1799,14 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
 	NTV2PrivateParams* pNTV2Params = (NTV2PrivateParams*)dev_id;
 	ULWord deviceNumber = pNTV2Params->deviceNumber;
 //    ULWord statusRegister;
-//	ULWord status2Register;
+	ULWord status2Register;
     ULWord64 audioClock;
 	int handled = 0;
 
 	Ntv2SystemContext systemContext;
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 
-#if 0
 	if( NTV2DeviceGetNumVideoChannels(pNTV2Params->_DeviceID) > 2)
 	{
 		status2Register = ReadRegister(deviceNumber, kRegStatus2, NO_MASK, NO_SHIFT);
@@ -1805,6 +1816,7 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
 		status2Register = 0;
 	}
 
+#if 0
 	{
 		statusRegister = ReadStatusRegister(deviceNumber);
 
@@ -1991,7 +2003,6 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
 			interruptHousekeeping(pNTV2Params, eInput2);
 		}
 
-#if 0
 		if ( status2Register & kIntInput3VBLActive )
 		{
 			ClearInput3VerticalInterrupt(deviceNumber);
@@ -2000,16 +2011,17 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
             audioClock = GetAudioClock(deviceNumber);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput3VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput3VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
-
+#if 0
 			if(!autoCirculateLocked)
 			{
 				ntv2_spin_lock_irqsave(&pNTV2Params->_autoCirculateLock, flags);
 				autoCirculateLocked = true;
 			}
 			OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_INPUT3);
-			
+#endif			
 			interruptHousekeeping(pNTV2Params, eInput3);
 		}
+        
 		if ( status2Register & kIntInput4VBLActive )
 		{
 			ClearInput4VerticalInterrupt(deviceNumber);
@@ -2018,16 +2030,17 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
             audioClock = GetAudioClock(deviceNumber);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput4VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput4VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
-
+#if 0
 			if(!autoCirculateLocked)
 			{
 				ntv2_spin_lock_irqsave(&pNTV2Params->_autoCirculateLock, flags);
 				autoCirculateLocked = true;
 			}
 			OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_INPUT4);
-			
+#endif			
 			interruptHousekeeping(pNTV2Params, eInput4);
 		}
+        
 		if ( status2Register & kIntInput5VBLActive )
 		{
 			ClearInput5VerticalInterrupt(deviceNumber);
@@ -2036,14 +2049,14 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
             audioClock = GetAudioClock(deviceNumber);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput5VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput5VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
-
+#if 0
 			if(!autoCirculateLocked)
 			{
 				ntv2_spin_lock_irqsave(&pNTV2Params->_autoCirculateLock, flags);
 				autoCirculateLocked = true;
 			}
 			OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_INPUT5);
-			
+#endif			
 			interruptHousekeeping(pNTV2Params, eInput5);
 		}
 		if ( status2Register & kIntInput6VBLActive )
@@ -2054,14 +2067,14 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
             audioClock = GetAudioClock(deviceNumber);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput6VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput6VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
-
+#if 0
 			if(!autoCirculateLocked)
 			{
 				ntv2_spin_lock_irqsave(&pNTV2Params->_autoCirculateLock, flags);
 				autoCirculateLocked = true;
 			}
 			OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_INPUT6);
-			
+#endif			
 			interruptHousekeeping(pNTV2Params, eInput6);
 		}
 		if ( status2Register & kIntInput7VBLActive )
@@ -2072,14 +2085,14 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
             audioClock = GetAudioClock(deviceNumber);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput7VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput7VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
-
+#if 0
 			if(!autoCirculateLocked)
 			{
 				ntv2_spin_lock_irqsave(&pNTV2Params->_autoCirculateLock, flags);
 				autoCirculateLocked = true;
 			}
 			OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_INPUT7);
-			
+#endif			
 			interruptHousekeeping(pNTV2Params, eInput7);
 		}
 		if ( status2Register & kIntInput8VBLActive )
@@ -2090,17 +2103,16 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
             audioClock = GetAudioClock(deviceNumber);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput8VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput8VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
-
+#if 0
 			if(!autoCirculateLocked)
 			{
 				ntv2_spin_lock_irqsave(&pNTV2Params->_autoCirculateLock, flags);
 				autoCirculateLocked = true;
 			}
 			OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_INPUT8);
-			
+#endif			
 			interruptHousekeeping(pNTV2Params, eInput8);
 		}
-#endif
 		
 		if ( statusRegister & kIntOutput1VBLActive )
 		{
@@ -2188,7 +2200,6 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
 			interruptHousekeeping(pNTV2Params, eOutput4);
 		}
 
-#if 0		
 		if ( status2Register & kIntOutput5VBLActive )
 		{
 			ClearOutput5VerticalInterrupt(deviceNumber);
@@ -2197,14 +2208,14 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
             audioClock = GetAudioClock(deviceNumber);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput5VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput5VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
-
+#if 0		
 			if(!autoCirculateLocked)
 			{
 				ntv2_spin_lock_irqsave(&pNTV2Params->_autoCirculateLock, flags);
 				autoCirculateLocked = true;
 			}
 			OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_CHANNEL5);
-			
+#endif			
 			interruptHousekeeping(pNTV2Params, eOutput5);
 		}
 		if ( status2Register & kIntOutput6VBLActive )
@@ -2215,14 +2226,14 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
             audioClock = GetAudioClock(deviceNumber);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput6VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput6VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
-
+#if 0
 			if(!autoCirculateLocked)
 			{
 				ntv2_spin_lock_irqsave(&pNTV2Params->_autoCirculateLock, flags);
 				autoCirculateLocked = true;
 			}
 			OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_CHANNEL6);
-			
+#endif			
 			interruptHousekeeping(pNTV2Params, eOutput6);
 		}
 		if ( status2Register & kIntOutput7VBLActive )
@@ -2233,14 +2244,14 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
             audioClock = GetAudioClock(deviceNumber);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput7VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput7VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
-
+#if 0
 			if(!autoCirculateLocked)
 			{
 				ntv2_spin_lock_irqsave(&pNTV2Params->_autoCirculateLock, flags);
 				autoCirculateLocked = true;
 			}
 			OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_CHANNEL7);
-			
+#endif			
 			interruptHousekeeping(pNTV2Params, eOutput7);
 		}
 		if ( status2Register & kIntOutput8VBLActive )
@@ -2251,17 +2262,16 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
             audioClock = GetAudioClock(deviceNumber);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput8VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput8VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
-
+#if 0
 			if(!autoCirculateLocked)
 			{
 				ntv2_spin_lock_irqsave(&pNTV2Params->_autoCirculateLock, flags);
 				autoCirculateLocked = true;
 			}
 			OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_CHANNEL8);
-			
+#endif			
 			interruptHousekeeping(pNTV2Params, eOutput8);
 		}
-#endif
 
 		if(autoCirculateLocked)
 		{
@@ -2685,94 +2695,97 @@ static void aja_ntv2_module_cleanup(void)
         }
 #endif
 
-        if (getNTV2ModuleParams()->driverMode == eDriverModeAll)
+        if (ntv2pp->registerEnable)
         {
-            // stop all dma engines
-            dmaRelease(i);
-
-            // disable and unregister interrupts,
-            DisableAllInterrupts(i);
-
-            // disable autocirculate
-            AutoCirculateInitialize(i);
-        }
-
-		// disable hdmi monitor
-		for (j = 0; j < NTV2_MAX_HDMI_MONITOR; j++)
-		{
-			if (ntv2pp->m_pHDMIInputMonitor[j] != NULL)
-			{
-				ntv2_hdmiin_disable(ntv2pp->m_pHDMIInputMonitor[j]);
-			}
-			if (ntv2pp->m_pHDMIIn4Monitor[j] != NULL)
-			{
-				ntv2_hdmiin4_disable(ntv2pp->m_pHDMIIn4Monitor[j]);
-			}
-			if (ntv2pp->m_pHDMIOut4Monitor[j] != NULL)
-			{
-				ntv2_hdmiout4_disable(ntv2pp->m_pHDMIOut4Monitor[j]);
-			}	
-		}
-		
-		// close hdmi monitor
-		for (j = 0; j < NTV2_MAX_HDMI_MONITOR; j++)
-		{
-			if (ntv2pp->m_pHDMIInputMonitor[j] != NULL)
-			{
-				ntv2_hdmiin_close(ntv2pp->m_pHDMIInputMonitor[j]);
-				ntv2pp->m_pHDMIInputMonitor[j] = NULL;
-			}
-			if (ntv2pp->m_pHDMIIn4Monitor[j] != NULL)
-			{
-				ntv2_hdmiin4_close(ntv2pp->m_pHDMIIn4Monitor[j]);
-				ntv2pp->m_pHDMIIn4Monitor[j] = NULL;
-			}
-			if (ntv2pp->m_pHDMIOut4Monitor[j] != NULL)
-			{
-				ntv2_hdmiout4_close(ntv2pp->m_pHDMIOut4Monitor[j]);
-				ntv2pp->m_pHDMIOut4Monitor[j] = NULL;
-            }
-		}
-
-	    if (ntv2pp->m_pSetupMonitor != NULL)
-	    {
-		    ntv2_setup_disable(ntv2pp->m_pSetupMonitor);
-		    ntv2_setup_close(ntv2pp->m_pSetupMonitor);
-		    ntv2pp->m_pSetupMonitor = NULL;
-	    }
-
-        if (ntv2pp->m_pGenlock2Monitor != NULL)
-        {
-            ntv2_genlock2_disable(ntv2pp->m_pGenlock2Monitor);
-            ntv2_genlock2_close(ntv2pp->m_pGenlock2Monitor);
-            ntv2pp->m_pGenlock2Monitor = NULL;
-        }
-
-		// close the serial port
-		if (ntv2pp->m_pSerialPort != NULL)
-		{
-			ntv2_serial_close(ntv2pp->m_pSerialPort);
-			ntv2pp->m_pSerialPort = NULL;
-		}
-
-        if ((ntv2pp->platform_dev != NULL) &&
-            (getNTV2ModuleParams()->driverMode == eDriverModeAll))
-        {
-            for(irqIndex = 0; irqIndex < eNumNTV2IRQDevices; ++irqIndex)
+            if (getNTV2ModuleParams()->driverMode == eDriverModeAll)
             {
-                if (ntv2pp->_ntv2IRQ[irqIndex] != 0)
-                {
-                    MSG("%s: free irq 0x%x, dev_id %p\n",
-                        ntv2pp->name, ntv2pp->_ntv2IRQ[irqIndex], (void *)ntv2pp);
+                // stop all dma engines
+                dmaRelease(i);
 
-                    devm_free_irq(&ntv2pp->platform_dev->dev,
-                                  ntv2pp->_ntv2IRQ[irqIndex],
-                                  (void *)ntv2pp);
+                // disable and unregister interrupts,
+                DisableAllInterrupts(i);
+
+                // disable autocirculate
+                AutoCirculateInitialize(i);
+            }
+
+            // disable hdmi monitor
+            for (j = 0; j < NTV2_MAX_HDMI_MONITOR; j++)
+            {
+                if (ntv2pp->m_pHDMIInputMonitor[j] != NULL)
+                {
+                    ntv2_hdmiin_disable(ntv2pp->m_pHDMIInputMonitor[j]);
+                }
+                if (ntv2pp->m_pHDMIIn4Monitor[j] != NULL)
+                {
+                    ntv2_hdmiin4_disable(ntv2pp->m_pHDMIIn4Monitor[j]);
+                }
+                if (ntv2pp->m_pHDMIOut4Monitor[j] != NULL)
+                {
+                    ntv2_hdmiout4_disable(ntv2pp->m_pHDMIOut4Monitor[j]);
+                }	
+            }
+		
+            // close hdmi monitor
+            for (j = 0; j < NTV2_MAX_HDMI_MONITOR; j++)
+            {
+                if (ntv2pp->m_pHDMIInputMonitor[j] != NULL)
+                {
+                    ntv2_hdmiin_close(ntv2pp->m_pHDMIInputMonitor[j]);
+                    ntv2pp->m_pHDMIInputMonitor[j] = NULL;
+                }
+                if (ntv2pp->m_pHDMIIn4Monitor[j] != NULL)
+                {
+                    ntv2_hdmiin4_close(ntv2pp->m_pHDMIIn4Monitor[j]);
+                    ntv2pp->m_pHDMIIn4Monitor[j] = NULL;
+                }
+                if (ntv2pp->m_pHDMIOut4Monitor[j] != NULL)
+                {
+                    ntv2_hdmiout4_close(ntv2pp->m_pHDMIOut4Monitor[j]);
+                    ntv2pp->m_pHDMIOut4Monitor[j] = NULL;
                 }
             }
-		}
 
-		platform_resources_release(i);
+            if (ntv2pp->m_pSetupMonitor != NULL)
+            {
+                ntv2_setup_disable(ntv2pp->m_pSetupMonitor);
+                ntv2_setup_close(ntv2pp->m_pSetupMonitor);
+                ntv2pp->m_pSetupMonitor = NULL;
+            }
+
+            if (ntv2pp->m_pGenlock2Monitor != NULL)
+            {
+                ntv2_genlock2_disable(ntv2pp->m_pGenlock2Monitor);
+                ntv2_genlock2_close(ntv2pp->m_pGenlock2Monitor);
+                ntv2pp->m_pGenlock2Monitor = NULL;
+            }
+
+            // close the serial port
+            if (ntv2pp->m_pSerialPort != NULL)
+            {
+                ntv2_serial_close(ntv2pp->m_pSerialPort);
+                ntv2pp->m_pSerialPort = NULL;
+            }
+
+            if ((ntv2pp->platform_dev != NULL) &&
+                (getNTV2ModuleParams()->driverMode == eDriverModeAll))
+            {
+                for(irqIndex = 0; irqIndex < eNumNTV2IRQDevices; ++irqIndex)
+                {
+                    if (ntv2pp->_ntv2IRQ[irqIndex] != 0)
+                    {
+                        MSG("%s: free irq 0x%x, dev_id %p\n",
+                            ntv2pp->name, ntv2pp->_ntv2IRQ[irqIndex], (void *)ntv2pp);
+
+                        devm_free_irq(&ntv2pp->platform_dev->dev,
+                                      ntv2pp->_ntv2IRQ[irqIndex],
+                                      (void *)ntv2pp);
+                    }
+                }
+            }
+        }
+
+        platform_resources_release(i);
 	}
 	
 	unregister_chrdev( getNTV2ModuleParams()->NTV2Major, getNTV2ModuleParams()->driverName);
@@ -3047,7 +3060,7 @@ static int platform_probe(struct platform_device *pd)
 	    MSG("%s: firmware version %s\n", ntv2pp->name, versionString);
 
 	    // initialize dma
-//	    dmaInit(deviceNumber);
+	    dmaInit(deviceNumber);
 
         // initialize autocirculate
         AutoCirculateInitialize(deviceNumber);
@@ -3079,7 +3092,7 @@ static int platform_probe(struct platform_device *pd)
             }
 	    }
 	
-        if (ntv2pp->_DeviceID == DEVICE_ID_CORVID1)
+        if (ntv2pp->_DeviceID == DEVICE_ID_CORVID1)  // DEVICE_ID_ZEFRAM
         {
             ntv2pp->m_pRasterMonitor = ntv2_videoraster_open(&ntv2pp->systemContext, "ntv2videoraster", 0);
             if (ntv2pp->m_pRasterMonitor != NULL)
@@ -3091,10 +3104,7 @@ static int platform_probe(struct platform_device *pd)
                     ntv2pp->m_pRasterMonitor = NULL;
                 }
             }
-        }
-	
-        if (ntv2pp->_DeviceID == DEVICE_ID_CORVID1)
-        {
+
             ntv2pp->m_pSetupMonitor = ntv2_setup_open(&ntv2pp->systemContext, "ntv2setup");
             if (ntv2pp->m_pSetupMonitor != NULL)
             {
@@ -3103,6 +3113,28 @@ static int platform_probe(struct platform_device *pd)
                 {
                     ntv2_setup_close(ntv2pp->m_pSetupMonitor);
                     ntv2pp->m_pSetupMonitor = NULL;
+                }
+            }
+
+            ntv2pp->m_pHDMIOut4Monitor[0] = ntv2_hdmiout4_open(&ntv2pp->systemContext, "ntv2hdmiout4", 0);
+            if (ntv2pp->m_pHDMIOut4Monitor[0] != NULL)
+            {
+                status = ntv2_hdmiout4_configure(ntv2pp->m_pHDMIOut4Monitor[0]);
+                if (status != NTV2_STATUS_SUCCESS)
+                {
+                    ntv2_hdmiout4_close(ntv2pp->m_pHDMIOut4Monitor[0]);
+                    ntv2pp->m_pHDMIOut4Monitor[0] = NULL;
+                }
+            }
+
+            ntv2pp->m_pHDMIOut4Monitor[1] = ntv2_hdmiout4_open(&ntv2pp->systemContext, "ntv2hdmiout4", 1);
+            if (ntv2pp->m_pHDMIOut4Monitor[1] != NULL)
+            {
+                status = ntv2_hdmiout4_configure(ntv2pp->m_pHDMIOut4Monitor[1]);
+                if (status != NTV2_STATUS_SUCCESS)
+                {
+                    ntv2_hdmiout4_close(ntv2pp->m_pHDMIOut4Monitor[1]);
+                    ntv2pp->m_pHDMIOut4Monitor[1] = NULL;
                 }
             }
         }
@@ -3151,10 +3183,12 @@ static int platform_probe(struct platform_device *pd)
 
 	    // Enable interrupts
         if (irqGood)
+        {
             EnableAllInterrupts(deviceNumber);
+        }
 
 	    // Enable DMA
-//	    dmaEnable(deviceNumber);
+	    dmaEnable(deviceNumber);
     }
 
     if (getNTV2ModuleParams()->driverMode != eDriverModeRegister)
@@ -3351,7 +3385,10 @@ static void SetupBoard(ULWord deviceNumber)
 	NTV2PrivateParams *ntv2pp = getNTV2Params(deviceNumber);
 	int i = 0;
 	Ntv2SystemContext systemContext;
+
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
+
 	// Disable Xena's machine control UART and flush the FIFOs
 	Init422Uart(deviceNumber);
 
@@ -3637,7 +3674,9 @@ int DoMessageSDIInStatictics(ULWord deviceNumber, NTV2Buffer * pInStatistics, vo
 	int returnCode = 0;
 	NTV2SDIInputStatus * pSDIInputStatus = NULL;
 	NTV2PrivateParams * pNTV2Params = getNTV2Params(deviceNumber);
-	systemContext.devNum = pNTV2Params->deviceNumber;
+
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
+    systemContext.devNum = pNTV2Params->deviceNumber;
 
 	CopySDIStatusHardwareToFrameStampSDIStatusArray(&systemContext, &internalSDIStruct);
 	pSDIInputStatus = (NTV2SDIInputStatus *) pOutBuff;
@@ -3773,7 +3812,7 @@ static int platform_resources_config(ULWord deviceNumber)
 	NTV2PrivateParams *ntv2pp = NULL;
 	struct platform_device* pd = NULL;
     struct device_node *node = NULL;
-//	uint32_t val32;
+	uint32_t val32;
 	int ret = 0;
 
 	if ( !(ntv2pp = getNTV2Params(deviceNumber)) )
@@ -3793,7 +3832,7 @@ static int platform_resources_config(ULWord deviceNumber)
 	ntv2pp->_mappedBAR2Address = 0;
 	ntv2pp->_unmappedBAR2Address = 0;
 	ntv2pp->_BAR2MemorySize = 0;
-#if 0
+    
     ret = of_property_read_u32(pd->dev.of_node, "deviceType", &val32);
     if(ret) {
         MSG("%s: failed to read deviceType property\n", ntv2pp->name);
@@ -3822,27 +3861,11 @@ static int platform_resources_config(ULWord deviceNumber)
     if(ntv2pp->legacyInterrupt)
 		MSG("%s: using legacy interrupt\n", ntv2pp->name);
 
-    // Walk through the children nodes and setup the device
-    for_each_child_of_node(pd->dev.of_node, node)
-	{
-        if(!strcmp("reg", node->name))
-		{
-			MSG("%s: found registers\n", ntv2pp->name);
-			ret = platform_add_register(deviceNumber, node);
-            if(ret)
-				goto fail;
-        }
-		else if(!strcmp("irq", node->name))
-		{
-			MSG("%s: found interrupt\n", ntv2pp->name);
-			ret = platform_add_interrupt(deviceNumber, node);
-            if(ret) goto fail;
-        }
-    }
-#else
+    // hack the registers
+#if 0
     {
         unsigned long phyaddr = 0x00000000a8000000;
-        unsigned long size = 0x0000000000010000;
+        unsigned long size = 0x0000000000040000;
         void *mapped = NULL;
         struct resource *resource = NULL;
         
@@ -3859,13 +3882,39 @@ static int platform_resources_config(ULWord deviceNumber)
         ntv2pp->_unmappedBAR0Address = phyaddr;
         ntv2pp->_mappedBAR0Address = (unsigned long)mapped;
         ntv2pp->_BAR0MemorySize = size;
+
+        ntv2pp->_FrameMemoryAddress = 0x500000000;
+        ntv2pp->_FrameMemorySize    = 0x40000000;
+        MSG("%s: frame buffer addr 0x%lx  size 0x%zx bytes\n",
+            ntv2pp->name, ntv2pp->_FrameMemoryAddress, ntv2pp->_FrameMemorySize);
     }
 #endif    
-    // FIXME: Grab these from device tree
-    ntv2pp->_FrameMemoryAddress = 0x500000000;
-    ntv2pp->_FrameMemorySize    = 0x40000000;
-    MSG("%s: frame buffer addr 0x%lx  size 0x%zx bytes\n",
-		ntv2pp->name, ntv2pp->_FrameMemoryAddress, ntv2pp->_FrameMemorySize);
+
+    // Walk through the children nodes and setup the device
+    for_each_child_of_node(pd->dev.of_node, node)
+	{
+        if(!strcmp("reg", node->name))
+		{
+			MSG("%s: found registers\n", ntv2pp->name);
+			ret = platform_add_register(deviceNumber, node);
+            if(ret)
+				goto fail;
+        }
+        if(!strcmp("mem", node->name))
+		{
+			MSG("%s: found memory\n", ntv2pp->name);
+			ret = platform_add_memory(deviceNumber, node);
+            if(ret)
+				goto fail;
+        }
+		if(!strcmp("irq", node->name))
+		{
+			MSG("%s: found interrupt\n", ntv2pp->name);
+			ret = platform_add_interrupt(deviceNumber, node);
+            if(ret)
+                goto fail;
+        }
+    }
 
 	ntv2pp->_dmaMethod = DmaMethodZynq;
 	ntv2pp->_dmaSerialize = true;
@@ -3884,9 +3933,7 @@ static int platform_resources_release(ULWord deviceNumber)
 		return -ENODEV;
 
 	platform_remove_register(deviceNumber);
-
-    ntv2pp->_FrameMemoryAddress = 0;
-    ntv2pp->_FrameMemorySize    = 0;
+	platform_remove_memory(deviceNumber);
 
 	return 0;
 }
@@ -3907,7 +3954,7 @@ static int platform_add_register(ULWord deviceNumber, struct device_node *node)
 	
     if (handle != NULL)
 	{
-        if (handle->name != NULL && !strcmp(handle->name, STR_AXI4LITE2HOSTBUS))
+        if (handle->name != NULL)
 		{
             uint32_t values[4];
             int ret;
@@ -3948,6 +3995,8 @@ static int platform_add_register(ULWord deviceNumber, struct device_node *node)
 			
             return 0;
         }
+        
+        MSG("%s: found register node no name\n", ntv2pp->name);
     }
 	
     MSG("%s: node %s does not define a register block\n", ntv2pp->name, node->full_name);
@@ -3975,6 +4024,90 @@ static int platform_remove_register(ULWord deviceNumber)
 	return 0;
 }
 
+static int platform_add_memory(ULWord deviceNumber, struct device_node *node)
+{
+	NTV2PrivateParams *ntv2pp = NULL;
+    struct device_node *handle = of_parse_phandle(node, "node", 0);
+
+	if ( !(ntv2pp = getNTV2Params(deviceNumber)) )
+		return -ENODEV;
+
+    if (ntv2pp->_FrameMemorySize != 0)
+	{
+        MSG("%s: cannot add memory %s\n", ntv2pp->name, node->full_name);
+        return -ENOMEM;
+    }
+	
+    if (handle != NULL)
+	{
+        if (handle->name != NULL)
+		{
+            uint32_t values[4];
+            int ret;
+            unsigned long phyaddr;
+			unsigned long size;
+
+            MSG("%s: %s is %s\n", ntv2pp->name, node->full_name, handle->name);
+            ret = of_property_read_u32_array(handle, "reg", values, 4);
+            if(ret)
+			{
+                MSG("%s: %s failed to read reg\n", ntv2pp->name, node->full_name);
+                return -EINVAL;
+            }
+            phyaddr = values[0];
+			phyaddr <<= 32;
+			phyaddr |= values[1];
+            size = values[2];
+			size <<= 32;
+			size |= values[3];
+
+            MSG("%s: frame memory (%s) addr 0x%08lx  size 0x%lx bytes\n",
+                     ntv2pp->name, node->full_name, phyaddr, size);
+#if 0
+            void *mapped = NULL;
+            struct resource *resource = NULL;
+            resource = request_mem_region(phyaddr, size, ntv2pp->name);
+            if(resource == NULL)
+			{
+				MSG("%s: %s request_mem_region failed\n", ntv2pp->name, node->full_name);
+                return -ENOMEM;
+            }
+            mapped = ioremap(phyaddr, size);
+            MSG("%s: video reg %p mapped\n", ntv2pp->name, mapped);
+#endif
+			ntv2pp->_FrameMemoryAddress = phyaddr;
+			ntv2pp->_FrameMemorySize = size;
+			
+            return 0;
+        }
+
+        MSG("%s: found memory node no name\n", ntv2pp->name);
+    }
+	
+    MSG("%s: node %s does not define a memory block\n", ntv2pp->name, node->full_name);
+    return -EINVAL;
+}
+
+static int platform_remove_memory(ULWord deviceNumber)
+{
+	NTV2PrivateParams *ntv2pp = NULL;
+
+	if ( !(ntv2pp = getNTV2Params(deviceNumber)) )
+		return -ENODEV;
+#if 0
+    if (ntv2pp->_FrameMemorySize != 0)
+	{
+		iounmap((void*)ntv2pp->_mappedBAR0Address);
+		release_mem_region(ntv2pp->_unmappedBAR0Address, ntv2pp->_BAR0MemorySize);
+		MSG("%s: reg %p unmapped\n", ntv2pp->name, (void*)ntv2pp->_mappedBAR0Address);
+    }
+#endif
+    ntv2pp->_FrameMemoryAddress = 0;
+    ntv2pp->_FrameMemorySize = 0;
+
+	return 0;
+}
+
 static int dev_node_match(struct device *dev, const void *data)
 {
     return dev->of_node == data;
@@ -3996,7 +4129,7 @@ static int platform_add_interrupt(ULWord deviceNumber, struct device_node *node)
 	
     if(handle != NULL)
 	{
-        if(handle->name != NULL && !strcmp(handle->name, STR_AXI4LITE2HOSTBUS))
+        if(handle->name != NULL)
 		{
             int ret;
             struct device *dev;
@@ -4028,6 +4161,7 @@ static int platform_add_interrupt(ULWord deviceNumber, struct device_node *node)
 				ntv2pp->name, ntv2pp->_ntv2IRQ[eIrqFpga], node->full_name, handle->name);
             return 0;
         }
+        MSG("%s: found interrupt node no name\n", ntv2pp->name);
     }
 	
     MSG("%s: node %s does not define an interrupt\n", ntv2pp->name, node->full_name);
@@ -4317,10 +4451,12 @@ static void resume(ULWord deviceNumber)
 
 	    // Enable interrupts
         if (ntv2pp->canDoInterrupt)
+        {
             EnableAllInterrupts(deviceNumber);
+        }
 
 	    // enable all dma engines
-//	    dmaEnable(deviceNumber);
+	    dmaEnable(deviceNumber);
     }
 }
 

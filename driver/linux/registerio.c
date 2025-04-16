@@ -830,7 +830,10 @@ int ReadReg(    ULWord deviceNumber,
 		!((registerNumber >= VIRTUALREG_START) && (registerNumber <= kVRegLast)))
 	{
 		if (registerNumber == kRegBoardID)
-			return pNTV2Params->_DeviceID;
+        {
+            *registerValue = pNTV2Params->_DeviceID;
+            return 0;
+        }
 		*registerValue = 0;
         return -EACCES;
 	}
