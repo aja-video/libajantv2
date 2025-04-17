@@ -3092,7 +3092,7 @@ static int platform_probe(struct platform_device *pd)
             }
 	    }
 	
-        if (ntv2pp->_DeviceID == DEVICE_ID_CORVID1)  // DEVICE_ID_ZEFRAM
+        if (ntv2pp->_DeviceID == DEVICE_ID_ZEFRAM)
         {
             ntv2pp->m_pRasterMonitor = ntv2_videoraster_open(&ntv2pp->systemContext, "ntv2videoraster", 0);
             if (ntv2pp->m_pRasterMonitor != NULL)
@@ -3126,7 +3126,7 @@ static int platform_probe(struct platform_device *pd)
                     ntv2pp->m_pHDMIOut4Monitor[0] = NULL;
                 }
             }
-
+#if 0
             ntv2pp->m_pHDMIOut4Monitor[1] = ntv2_hdmiout4_open(&ntv2pp->systemContext, "ntv2hdmiout4", 1);
             if (ntv2pp->m_pHDMIOut4Monitor[1] != NULL)
             {
@@ -3137,6 +3137,7 @@ static int platform_probe(struct platform_device *pd)
                     ntv2pp->m_pHDMIOut4Monitor[1] = NULL;
                 }
             }
+#endif            
         }
 
 	    for (i = 0; i < NTV2_MAX_HDMI_MONITOR; i++)
@@ -3193,7 +3194,8 @@ static int platform_probe(struct platform_device *pd)
 
     if (getNTV2ModuleParams()->driverMode != eDriverModeRegister)
     {
-        if (ntv2pp->_DeviceID == DEVICE_ID_CORVID1)
+#if 0        
+        if (ntv2pp->_DeviceID == DEVICE_ID_ZEFRAM)
         {
             ntv2pp->m_pGenlock2Monitor = ntv2_genlock2_open(&ntv2pp->systemContext, "ntv2genlock2", 0);
             if (ntv2pp->m_pGenlock2Monitor != NULL)
@@ -3206,13 +3208,14 @@ static int platform_probe(struct platform_device *pd)
                 }
             }
         }
-
-        if (ntv2pp->m_pGenlock2Monitor != NULL)
-        {
-            ntv2_genlock2_enable(ntv2pp->m_pGenlock2Monitor);
-        }
+#endif        
     }
 
+    if (ntv2pp->m_pGenlock2Monitor != NULL)
+    {
+        ntv2_genlock2_enable(ntv2pp->m_pGenlock2Monitor);
+    }
+    
 #if defined(AJA_CREATE_DEVICE_NODES)
     if (getNTV2ModuleParams()->class != NULL)
     {
