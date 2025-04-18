@@ -3629,10 +3629,10 @@ int ValidateAjaNTV2Message(NTV2_HEADER * pHeaderIn)
 #endif
 		return -EINVAL;
 	}
-	if (pHeaderIn->fOperation || pHeaderIn->fResultStatus)
+	if (pHeaderIn->fResultStatus)
 	{
 #ifdef LOG_VALIDATE_ERRORS
-		MSG("fOperation or fResultStatus non-zero\n");
+		MSG("fResultStatus non-zero\n");
 #endif
 		return -EINVAL;
 	}
