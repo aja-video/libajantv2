@@ -807,7 +807,7 @@ if (AJA_INSTALL_MISC)
 endif()
 
 install(TARGETS ${PROJECT_NAME}
-    EXPORT          ajantv2-targets
+    EXPORT          ${PROJECT_NAME}
     ARCHIVE         DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY         DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME         DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -815,21 +815,10 @@ install(TARGETS ${PROJECT_NAME}
     PUBLIC_HEADER   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 set(AJANTV2_INSTALL_CMAKECONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/ajantv2)
-install(EXPORT ajantv2-targets
+install(EXPORT ${PROJECT_NAME}
+    FILE ${PROJECT_NAME}Config.cmake
     NAMESPACE AJA::
     DESTINATION ${AJANTV2_INSTALL_CMAKECONFIGDIR})
-configure_package_config_file(ajantv2Config.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/cmake/ajantv2Config.cmake
-    INSTALL_DESTINATION ${AJANTV2_INSTALL_CMAKECONFIGDIR})
-write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/cmake/ajantv2ConfigVersion.cmake
-    VERSION ${AJA_NTV2_VER_SHORT_STR}
-    COMPATIBILITY SameMajorVersion)
-install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/cmake/ajantv2Config.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/cmake/ajantv2ConfigVersion.cmake
-    DESTINATION ${AJANTV2_INSTALL_CMAKECONFIGDIR})
-
 if (NOT AJANTV2_DISABLE_TESTS)
     add_subdirectory(test)
 endif()
