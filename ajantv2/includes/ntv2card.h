@@ -4638,41 +4638,41 @@ public:
 
 	AJA_VIRTUAL bool		SetHDMIV2TxBypass (const bool inBypass);
 
-	AJA_VIRTUAL bool		SetHDMIOutVideoStandard (const NTV2Standard inNewValue);
-	AJA_VIRTUAL bool		GetHDMIOutVideoStandard (NTV2Standard & outValue);
+	AJA_VIRTUAL bool		SetHDMIOutVideoStandard (const NTV2Standard inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		GetHDMIOutVideoStandard (NTV2Standard & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool		SetHDMIOutSampleStructure (const NTV2HDMISampleStructure inNewValue);
-	AJA_VIRTUAL bool		GetHDMIOutSampleStructure (NTV2HDMISampleStructure & outValue);
+	AJA_VIRTUAL bool		SetHDMIOutSampleStructure (const NTV2HDMISampleStructure inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		GetHDMIOutSampleStructure (NTV2HDMISampleStructure & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool		SetHDMIOutVideoFPS (const NTV2FrameRate inNewValue);
-	AJA_VIRTUAL bool		GetHDMIOutVideoFPS (NTV2FrameRate & outValue);
+	AJA_VIRTUAL bool		SetHDMIOutVideoFPS (const NTV2FrameRate inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		GetHDMIOutVideoFPS (NTV2FrameRate & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool		SetHDMIOutRange (const NTV2HDMIRange inNewValue);
-	AJA_VIRTUAL bool		GetHDMIOutRange (NTV2HDMIRange & outValue);
+	AJA_VIRTUAL bool		SetHDMIOutRange (const NTV2HDMIRange inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		GetHDMIOutRange (NTV2HDMIRange & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool		SetHDMIOutAudioChannels (const NTV2HDMIAudioChannels inNewValue);
-	AJA_VIRTUAL bool		GetHDMIOutAudioChannels (NTV2HDMIAudioChannels & outValue);
+	AJA_VIRTUAL bool		SetHDMIOutAudioChannels (const NTV2HDMIAudioChannels inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		GetHDMIOutAudioChannels (NTV2HDMIAudioChannels & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool		SetHDMIOutColorSpace (const NTV2HDMIColorSpace inNewValue);
-	AJA_VIRTUAL bool		GetHDMIOutColorSpace (NTV2HDMIColorSpace & outValue);
-	AJA_VIRTUAL bool		SetLHIHDMIOutColorSpace (const NTV2LHIHDMIColorSpace inNewValue);
-	AJA_VIRTUAL bool		GetLHIHDMIOutColorSpace (NTV2LHIHDMIColorSpace & outValue);
+	AJA_VIRTUAL bool		SetHDMIOutColorSpace (const NTV2HDMIColorSpace inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		GetHDMIOutColorSpace (NTV2HDMIColorSpace & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		SetLHIHDMIOutColorSpace (const NTV2LHIHDMIColorSpace inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		GetLHIHDMIOutColorSpace (NTV2LHIHDMIColorSpace & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool		SetHDMIOutBitDepth (const NTV2HDMIBitDepth inNewValue);
-	AJA_VIRTUAL bool		GetHDMIOutBitDepth (NTV2HDMIBitDepth & outValue);
+	AJA_VIRTUAL bool		SetHDMIOutBitDepth (const NTV2HDMIBitDepth inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		GetHDMIOutBitDepth (NTV2HDMIBitDepth & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool		SetHDMIOutProtocol (const NTV2HDMIProtocol inNewValue);
-	AJA_VIRTUAL bool		GetHDMIOutProtocol (NTV2HDMIProtocol & outValue);
+	AJA_VIRTUAL bool		SetHDMIOutProtocol (const NTV2HDMIProtocol inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		GetHDMIOutProtocol (NTV2HDMIProtocol & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool		SetHDMIOutForceConfig (const bool inNewValue);
-	AJA_VIRTUAL bool		GetHDMIOutForceConfig (bool & outValue);
+	AJA_VIRTUAL bool		SetHDMIOutForceConfig (const bool inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		GetHDMIOutForceConfig (bool & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool		SetHDMIOutPrefer420 (const bool inNewValue);
-	AJA_VIRTUAL bool		GetHDMIOutPrefer420 (bool & outValue);
+	AJA_VIRTUAL bool		SetHDMIOutPrefer420 (const bool inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		GetHDMIOutPrefer420 (bool & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool		GetHDMIOutDownstreamBitDepth (NTV2HDMIBitDepth & outValue);
+	AJA_VIRTUAL bool		GetHDMIOutDownstreamBitDepth (NTV2HDMIBitDepth & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool		GetHDMIOutDownstreamColorSpace (NTV2LHIHDMIColorSpace & outValue);
+	AJA_VIRTUAL bool		GetHDMIOutDownstreamColorSpace (NTV2LHIHDMIColorSpace & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
 	/**
 		@brief						Sets the HDMI output's 2-channel audio source.
@@ -4680,7 +4680,9 @@ public:
 		@param[in]	inAudioSystem	Specifies the Audio System that will supply audio samples to the HDMI output. Defaults to NTV2_AUDIOSYSTEM_1.
 		@return						True if successful;	 otherwise false.
 	**/
-	AJA_VIRTUAL bool	SetHDMIOutAudioSource2Channel (const NTV2AudioChannelPair inNewValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+	AJA_VIRTUAL bool	SetHDMIOutAudioSource2Channel (const NTV2AudioChannelPair inNewValue,
+                                                       const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1,
+                                                       const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
 	/**
 		@brief						Answers with the HDMI output's current 2-channel audio source.
@@ -4688,7 +4690,9 @@ public:
 		@param[out] outAudioSystem	Receives the Audio System that is currently supplying audio samples to the HDMI output.
 		@return						True if successful;	 otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetHDMIOutAudioSource2Channel (NTV2AudioChannelPair & outValue, NTV2AudioSystem & outAudioSystem);
+	AJA_VIRTUAL bool	GetHDMIOutAudioSource2Channel (NTV2AudioChannelPair & outValue,
+                                                       NTV2AudioSystem & outAudioSystem,
+                                                       const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
 	/**
 		@brief						Changes the HDMI output's 8-channel audio source.
@@ -4696,7 +4700,9 @@ public:
 		@param[in]	inAudioSystem	Specifies the Audio System that will supply audio samples to the HDMI output. Defaults to NTV2_AUDIOSYSTEM_1.
 		@return						True if successful;	 otherwise false.
 	**/
-	AJA_VIRTUAL bool	SetHDMIOutAudioSource8Channel (const NTV2Audio8ChannelSelect inNewValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+	AJA_VIRTUAL bool	SetHDMIOutAudioSource8Channel (const NTV2Audio8ChannelSelect inNewValue,
+                                                       const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1,
+                                                       const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
 	/**
 		@brief						Answers with the HDMI output's current 8-channel audio source.
@@ -4704,7 +4710,9 @@ public:
 		@param[out] outAudioSystem	Receives the Audio System that is currently supplying audio samples to the HDMI output.
 		@return						True if successful;	 otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValue, NTV2AudioSystem & outAudioSystem);
+	AJA_VIRTUAL bool	GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValue,
+                                                       NTV2AudioSystem & outAudioSystem,
+                                                       const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
 	/**
 		@brief						Answers with the HDMI output's current audio channel 3/4 swap setting.
@@ -4731,56 +4739,56 @@ public:
 		@param[in]	inNewValue		Specifies the audio rate
 		@return						True if successful;	 otherwise false.
 	**/
-	AJA_VIRTUAL bool	SetHDMIOutAudioRate (const NTV2AudioRate inNewValue);
+	AJA_VIRTUAL bool	SetHDMIOutAudioRate (const NTV2AudioRate inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
 	/**
 		@brief						Answers with the HDMI output's current audio rate.
 		@param[out] outValue		Receives the HDMI output's current audio rate.
 		@return						True if successful;	 otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetHDMIOutAudioRate (NTV2AudioRate & outValue);
+	AJA_VIRTUAL bool	GetHDMIOutAudioRate (NTV2AudioRate & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
 	/**
 		@brief						Sets the HDMI output's audio format
 		@param[in]	inNewValue		Specifies the audio format
 		@return						True if successful;	 otherwise false.
 	**/
-	AJA_VIRTUAL bool	SetHDMIOutAudioFormat (const NTV2AudioFormat inNewValue);
+	AJA_VIRTUAL bool	SetHDMIOutAudioFormat (const NTV2AudioFormat inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
 	/**
 		@brief						Answers with the HDMI output's current audio format.
 		@param[out] outValue		Receives the HDMI output's current audio format.
 		@return						True if successful;	 otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetHDMIOutAudioFormat (NTV2AudioFormat & outValue);
+	AJA_VIRTUAL bool	GetHDMIOutAudioFormat (NTV2AudioFormat & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
 	/**
 		@brief						Enables or disables override of HDMI parameters.
 		@param[in]	inEnable		Specify true to enable HDMI user-override;	otherwise false to disable it.
 		@return						True if successful;	 otherwise false.
 	**/
-	AJA_VIRTUAL bool	EnableHDMIOutUserOverride (const bool inEnable);
+	AJA_VIRTUAL bool	EnableHDMIOutUserOverride (const bool inEnable, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
 	/**
 		@brief						Answers if override of HDMI parameters is enabled or not.
 		@param[out] outIsEnabled	Receives true if enabled;  otherwise false.
 		@return						True if successful;	 otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetEnableHDMIOutUserOverride (bool & outIsEnabled);
+	AJA_VIRTUAL bool	GetEnableHDMIOutUserOverride (bool & outIsEnabled, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
 	/**
 		@brief						Controls the 4k/2k -> UHD/HD HDMI center cropping feature.
 		@param[in]	inEnable		Specify true to enable center cropping;	 otherwise false to disable it.
 		@return						True if successful;	 otherwise false.
 	**/
-	AJA_VIRTUAL bool	EnableHDMIOutCenterCrop (const bool inEnable);
+	AJA_VIRTUAL bool	EnableHDMIOutCenterCrop (const bool inEnable, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
 	/**
 		@brief						Answers if the HDMI 4k/2k -> UHD/HD center cropping is enabled or not.
 		@param[out] outIsEnabled	Receives true if center cropping is enabled;  otherwise false.
 		@return						True if successful;	 otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetEnableHDMIOutCenterCrop (bool & outIsEnabled);
+	AJA_VIRTUAL bool	GetEnableHDMIOutCenterCrop (bool & outIsEnabled, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
 	/**
 		@brief		Enables or disables decimate mode on the device's HDMI rasterizer, which halves the
@@ -4835,7 +4843,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[out] outStatus	Receives the current status of the HDMI output.
 	**/
-	AJA_VIRTUAL bool		GetHDMIOutStatus (NTV2HDMIOutputStatus & outStatus);	//	New in SDK 16.1
+	AJA_VIRTUAL bool		GetHDMIOutStatus (NTV2HDMIOutputStatus & outStatus, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 16.1
 
 	//protected:	SHOULD BE PROTECTED/PRIVATE:
 		AJA_VIRTUAL bool	GetHDMIInputStatus (ULWord & outValue,	const NTV2Channel inChannel = NTV2_CHANNEL1, const bool in12BitDetection = false);	///< @brief Answers with the contents of the HDMI Input status register for the given HDMI input.
@@ -6367,8 +6375,8 @@ public:
 		@param[in]	inEnableHDMIHDR		If true, sets the device to output HDMI HDR Metadata; otherwise sets the device to not output HDMI HDR Metadata.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool EnableHDMIHDR (const bool inEnableHDMIHDR);	//	New in SDK 12.5
-	AJA_VIRTUAL bool GetHDMIHDREnabled (void);	///< @return	True if HDMI HDR metadata output is enabled for the device;	 otherwise false.
+	AJA_VIRTUAL bool EnableHDMIHDR (const bool inEnableHDMIHDR, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDMIHDREnabled (const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	///< @return	True if HDMI HDR metadata output is enabled for the device;	 otherwise false.
 
 	/**
 		@brief		Enables or disables HDMI HDR Dolby Vision.
@@ -6378,8 +6386,8 @@ public:
 		@see		CNTV2Card::GetHDMIHDRDolbyVisionEnabled
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool EnableHDMIHDRDolbyVision (const bool inEnable);	//	New in SDK 13.0
-	AJA_VIRTUAL bool GetHDMIHDRDolbyVisionEnabled (void);	///< @return	True if HDMI HDR Dolby Vision output is enabled for the device;	 otherwise false.
+	AJA_VIRTUAL bool EnableHDMIHDRDolbyVision (const bool inEnable, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 13.0
+	AJA_VIRTUAL bool GetHDMIHDRDolbyVisionEnabled (const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	///< @return	True if HDMI HDR Dolby Vision output is enabled for the device;	 otherwise false.
 
 
 	/**
@@ -6387,177 +6395,177 @@ public:
 		@param[in]	inEnableConstantLuminance	If true, sets the device to BT.2020 Y'cC'bcC'rc; otherwise sets the device to BT.2020 Y'C'bC'r or R'G'B'.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRConstantLuminance (const bool inEnableConstantLuminance);	//	New in SDK 12.5
-	AJA_VIRTUAL bool GetHDMIHDRConstantLuminance (void);		///< @return	True if BT.2020 Y'cC'bcC'rc is enabled; otherwise false for BT.2020 Y'C'bC'r or R'G'B'.
+	AJA_VIRTUAL bool SetHDMIHDRConstantLuminance (const bool inEnableConstantLuminance, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDMIHDRConstantLuminance (const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);		///< @return	True if BT.2020 Y'cC'bcC'rc is enabled; otherwise false for BT.2020 Y'C'bC'r or R'G'B'.
 
 	/**
 		@brief		Sets the Display Mastering data for Green Primary X as defined in SMPTE ST 2086. This is Byte 3 and 4 of SMDT Type 1.
 		@param[in]	inGreenPrimaryX		Specifies the Green Primary X value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRGreenPrimaryX (const uint16_t inGreenPrimaryX);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDMIHDRGreenPrimaryX (const uint16_t inGreenPrimaryX, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for Green Primary X as defined in SMPTE ST 2086. This is Byte 3 and 4 of SMDT Type 1.
 		@param[out] outGreenPrimaryX		Receives the Green Primary X value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRGreenPrimaryX (uint16_t & outGreenPrimaryX);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDMIHDRGreenPrimaryX (uint16_t & outGreenPrimaryX, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for Green Primary Y as defined in SMPTE ST 2086. This is Byte 5 and 6 of SMDT Type 1.
 		@param[in]	inGreenPrimaryY		Specifies the Green Primary Y value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRGreenPrimaryY (const uint16_t inGreenPrimaryY);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDMIHDRGreenPrimaryY (const uint16_t inGreenPrimaryY, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for Green Primary Y as defined in SMPTE ST 2086. This is Byte 5 and 6 of SMDT Type 1.
 		@param[out] outGreenPrimaryY		Receives the Green Primary Y value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRGreenPrimaryY (uint16_t & outGreenPrimaryY);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDMIHDRGreenPrimaryY (uint16_t & outGreenPrimaryY, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for Blue Primary X as defined in SMPTE ST 2086. This is Byte 7 and 8 of SMDT Type 1.
 		@param[in]	inBluePrimaryX		Specifies the Blue Primary X value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRBluePrimaryX (const uint16_t inBluePrimaryX);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDMIHDRBluePrimaryX (const uint16_t inBluePrimaryX, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for Blue Primary X as defined in SMPTE ST 2086. This is Byte 7 and 8 of SMDT Type 1.
 		@param[out] outBluePrimaryX		Receives the Blue Primary X value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRBluePrimaryX (uint16_t & outBluePrimaryX);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDMIHDRBluePrimaryX (uint16_t & outBluePrimaryX, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for Blue Primary Y as defined in SMPTE ST 2086. This is Byte 9 and 10 of SMDT Type 1.
 		@param[in]	inBluePrimaryY		Specifies the Blue Primary Y value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRBluePrimaryY (const uint16_t inBluePrimaryY);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDMIHDRBluePrimaryY (const uint16_t inBluePrimaryY, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for Blue Primary Y as defined in SMPTE ST 2086. This is Byte 9 and 10 of SMDT Type 1.
 		@param[out] outBluePrimaryY		Receives the Blue Primary Y value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRBluePrimaryY (uint16_t & outBluePrimaryY);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDMIHDRBluePrimaryY (uint16_t & outBluePrimaryY, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for Red Primary X as defined in SMPTE ST 2086. This is Byte 11 and 12 of SMDT Type 1.
 		@param[in]	inRedPrimaryX		Specifies the Red Primary X value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRRedPrimaryX (const uint16_t inRedPrimaryX);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDMIHDRRedPrimaryX (const uint16_t inRedPrimaryX, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for Red Primary X as defined in SMPTE ST 2086. This is Byte 11 and 12 of SMDT Type 1.
 		@param[out] outRedPrimaryX		Receives the Red Primary X value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRRedPrimaryX (uint16_t & outRedPrimaryX);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDMIHDRRedPrimaryX (uint16_t & outRedPrimaryX, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for Red Primary Y as defined in SMPTE ST 2086. This is Byte 13 and 14 of SMDT Type 1.
 		@param[in]	inRedPrimaryY		Specifies the Red Primary Y value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRRedPrimaryY (const uint16_t inRedPrimaryY);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDMIHDRRedPrimaryY (const uint16_t inRedPrimaryY, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for Red Primary Y as defined in SMPTE ST 2086. This is Byte 13 and 14 of SMDT Type 1.
 		@param[out] outRedPrimaryY		Receives the Red Primary Y value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRRedPrimaryY (uint16_t & outRedPrimaryY);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDMIHDRRedPrimaryY (uint16_t & outRedPrimaryY, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for White Point X as defined in SMPTE ST 2086. This is Byte 15 and 16 of SMDT Type 1.
 		@param[in]	inWhitePointX		Specifies the White Point X value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRWhitePointX (const uint16_t inWhitePointX);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDMIHDRWhitePointX (const uint16_t inWhitePointX, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for White Point X as defined in SMPTE ST 2086. This is Byte 15 and 16 of SMDT Type 1.
 		@param[out] outWhitePointX		Receives the White Point X value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRWhitePointX (uint16_t & outWhitePointX);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDMIHDRWhitePointX (uint16_t & outWhitePointX, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for White Point Y as defined in SMPTE ST 2086. This is Byte 17 and 18 of SMDT Type 1.
 		@param[in]	inWhitePointY		Specifies the White Point Y value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRWhitePointY (const uint16_t inWhitePointY);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDMIHDRWhitePointY (const uint16_t inWhitePointY, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for White Point Y as defined in SMPTE ST 2086. This is Byte 17 and 18 of SMDT Type 1.
 		@param[out] outWhitePointY		Receives the White Point Y value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRWhitePointY (uint16_t & outWhitePointY);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDMIHDRWhitePointY (uint16_t & outWhitePointY, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for the Max Mastering Luminance value as defined in SMPTE ST 2086. This is Byte 19 and 20 of SMDT Type 1.
 		@param[in]	inMaxMasteringLuminance		Specifies the Max Mastering Luminance value.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRMaxMasteringLuminance (const uint16_t inMaxMasteringLuminance);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDMIHDRMaxMasteringLuminance (const uint16_t inMaxMasteringLuminance, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for the Max Mastering Luminance value as defined in SMPTE ST 2086. This is Byte 19 and 20 of SMDT Type 1.
 		@param[out] outMaxMasteringLuminance		Receives the Max Mastering Luminance value.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRMaxMasteringLuminance (uint16_t & outMaxMasteringLuminance);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDMIHDRMaxMasteringLuminance (uint16_t & outMaxMasteringLuminance, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for the Min Mastering Luminance value as defined in SMPTE ST 2086. This is Byte 21 and 22 of SMDT Type 1.
 		@param[in]	inMinMasteringLuminance		Specifies the Min Mastering Luminance value.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRMinMasteringLuminance (const uint16_t inMinMasteringLuminance);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDMIHDRMinMasteringLuminance (const uint16_t inMinMasteringLuminance, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for the Min Mastering Luminance value as defined in SMPTE ST 2086. This is Byte 21 and 22 of SMDT Type 1.
 		@param[out] outMinMasteringLuminance		Receives the Min Mastering Luminance value.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRMinMasteringLuminance (uint16_t & outMinMasteringLuminance);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDMIHDRMinMasteringLuminance (uint16_t & outMinMasteringLuminance, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for the Max Content Light Level(Max CLL) value. This is Byte 23 and 24 of SMDT Type 1.
 		@param[in]	inMaxContentLightLevel		Specifies the Max Content Light Level value.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRMaxContentLightLevel (const uint16_t inMaxContentLightLevel);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDMIHDRMaxContentLightLevel (const uint16_t inMaxContentLightLevel, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for the Max Content Light Level(Max CLL) value. This is Byte 23 and 24 of SMDT Type 1.
 		@param[out] outMaxContentLightLevel		Receives the Max Content Light Level value.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRMaxContentLightLevel (uint16_t & outMaxContentLightLevel);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDMIHDRMaxContentLightLevel (uint16_t & outMaxContentLightLevel, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for the Max Frame Average Light Level(Max FALL) value. This is Byte 25 and 26 of SMDT Type 1.
 		@param[in]	inMaxFrameAverageLightLevel		Specifies the Max Frame Average Light Level value.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRMaxFrameAverageLightLevel (const uint16_t inMaxFrameAverageLightLevel);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDMIHDRMaxFrameAverageLightLevel (const uint16_t inMaxFrameAverageLightLevel, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for the Max Frame Average Light Level(Max FALL) value. This is Byte 25 and 26 of SMDT Type 1.
 		@param[out] outMaxFrameAverageLightLevel		Receives the Max Frame Average Light Level value.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRMaxFrameAverageLightLevel (uint16_t & outMaxFrameAverageLightLevel);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDMIHDRMaxFrameAverageLightLevel (uint16_t & outMaxFrameAverageLightLevel, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 
 
-	AJA_VIRTUAL bool SetHDMIHDRElectroOpticalTransferFunction (const uint8_t inEOTFByte);	//	New in SDK 12.5
-	AJA_VIRTUAL bool GetHDMIHDRElectroOpticalTransferFunction (uint8_t & outEOTFByte);	//	New in SDK 12.5
-	AJA_VIRTUAL bool SetHDMIHDRStaticMetadataDescriptorID (const uint8_t inSMDId);	//	New in SDK 12.5
-	AJA_VIRTUAL bool GetHDMIHDRStaticMetadataDescriptorID (uint8_t & outSMDId);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDMIHDRElectroOpticalTransferFunction (const uint8_t inEOTFByte, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDMIHDRElectroOpticalTransferFunction (uint8_t & outEOTFByte, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDMIHDRStaticMetadataDescriptorID (const uint8_t inSMDId, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDMIHDRStaticMetadataDescriptorID (uint8_t & outSMDId, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 
-	AJA_VIRTUAL bool SetHDRData (const HDRFloatValues & inFloatValues);	//	New in SDK 12.5
-	AJA_VIRTUAL bool SetHDRData (const HDRRegValues & inRegisterValues);	//	New in SDK 12.5
-	AJA_VIRTUAL bool GetHDRData (HDRFloatValues & outFloatValues);	//	New in SDK 12.5
-	AJA_VIRTUAL bool GetHDRData (HDRRegValues & outRegisterValues);	//	New in SDK 12.5
-	AJA_VIRTUAL bool SetHDMIHDRBT2020 (void);	//	New in SDK 12.5
-	AJA_VIRTUAL bool SetHDMIHDRDCIP3 (void);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDRData (const HDRFloatValues & inFloatValues, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDRData (const HDRRegValues & inRegisterValues, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDRData (HDRFloatValues & outFloatValues, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDRData (HDRRegValues & outRegisterValues, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDMIHDRBT2020 (const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDMIHDRDCIP3 (const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 12.5
 	
 	AJA_VIRTUAL bool SetVPIDTransferCharacteristics (const NTV2VPIDTransferCharacteristics inValue, const NTV2Channel inChannel);	//	New in SDK 15.2
 	AJA_VIRTUAL bool GetVPIDTransferCharacteristics (NTV2VPIDTransferCharacteristics & outValue, const NTV2Channel inChannel);	//	New in SDK 15.2

@@ -843,19 +843,19 @@ bool CNTV2Card::SetAudioMixerLevelsSampleCount (const ULWord inSampleCount)
 
 
 
-bool CNTV2Card::SetHDMIOutAudioChannels (const NTV2HDMIAudioChannels value)
+bool CNTV2Card::SetHDMIOutAudioChannels (const NTV2HDMIAudioChannels value, const NTV2Channel inWhichHDMIOut)
 {
 	return WriteRegister (kRegHDMIOutControl, ULWord(value), kRegMaskHDMIOutAudioCh, kRegShiftHDMIOutAudioCh);
 }
 
 
-bool CNTV2Card::GetHDMIOutAudioChannels (NTV2HDMIAudioChannels & outValue)
+bool CNTV2Card::GetHDMIOutAudioChannels (NTV2HDMIAudioChannels & outValue, const NTV2Channel inWhichHDMIOut)
 {
 	return CNTV2DriverInterface::ReadRegister (kRegHDMIOutControl, outValue, kRegMaskHDMIOutAudioCh, kRegShiftHDMIOutAudioCh);
 }
 
 
-bool CNTV2Card::SetHDMIOutAudioSource2Channel (const NTV2AudioChannelPair inValue, const NTV2AudioSystem inAudioSystem)
+bool CNTV2Card::SetHDMIOutAudioSource2Channel (const NTV2AudioChannelPair inValue, const NTV2AudioSystem inAudioSystem, const NTV2Channel inWhichHDMIOut)
 {
 	if (!NTV2_IS_VALID_AUDIO_CHANNEL_PAIR (inValue))
 		return false;
@@ -877,7 +877,7 @@ bool CNTV2Card::SetHDMIOutAudioSource2Channel (const NTV2AudioChannelPair inValu
 }
 
 
-bool CNTV2Card::GetHDMIOutAudioSource2Channel (NTV2AudioChannelPair & outValue, NTV2AudioSystem & outAudioSystem)
+bool CNTV2Card::GetHDMIOutAudioSource2Channel (NTV2AudioChannelPair & outValue, NTV2AudioSystem & outAudioSystem, const NTV2Channel inWhichHDMIOut)
 {
 	bool	result = false;
 	if(NTV2DeviceGetHDMIVersion(GetDeviceID()) > 3)
@@ -906,7 +906,7 @@ bool CNTV2Card::GetHDMIOutAudioSource2Channel (NTV2AudioChannelPair & outValue, 
 }
 
 
-bool CNTV2Card::SetHDMIOutAudioSource8Channel (const NTV2Audio8ChannelSelect inValue, const NTV2AudioSystem inAudioSystem)
+bool CNTV2Card::SetHDMIOutAudioSource8Channel (const NTV2Audio8ChannelSelect inValue, const NTV2AudioSystem inAudioSystem, const NTV2Channel inWhichHDMIOut)
 {
 	if (!NTV2_IS_VALID_AUDIO_CHANNEL_OCTET (inValue))
 		return false;
@@ -932,7 +932,7 @@ bool CNTV2Card::SetHDMIOutAudioSource8Channel (const NTV2Audio8ChannelSelect inV
 }
 
 
-bool CNTV2Card::GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValue, NTV2AudioSystem & outAudioSystem)
+bool CNTV2Card::GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValue, NTV2AudioSystem & outAudioSystem, const NTV2Channel inWhichHDMIOut)
 {
 	bool result = false;
 	if(NTV2DeviceGetHDMIVersion(GetDeviceID()) > 3)
@@ -964,25 +964,25 @@ bool CNTV2Card::GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValu
 }
 
 
-bool CNTV2Card::SetHDMIOutAudioRate (const NTV2AudioRate inNewValue)
+bool CNTV2Card::SetHDMIOutAudioRate (const NTV2AudioRate inNewValue, const NTV2Channel inWhichHDMIOut)
 {
 	return WriteRegister (kRegHDMIInputControl, static_cast <ULWord> (inNewValue), kRegMaskHDMIOutAudioRate, kRegShiftHDMIOutAudioRate);
 }
 
 
-bool CNTV2Card::GetHDMIOutAudioRate (NTV2AudioRate & outValue)
+bool CNTV2Card::GetHDMIOutAudioRate (NTV2AudioRate & outValue, const NTV2Channel inWhichHDMIOut)
 {
 	return CNTV2DriverInterface::ReadRegister (kRegHDMIInputControl, outValue, kRegMaskHDMIOutAudioRate, kRegShiftHDMIOutAudioRate);
 }
 
 
-bool CNTV2Card::SetHDMIOutAudioFormat (const NTV2AudioFormat inNewValue)
+bool CNTV2Card::SetHDMIOutAudioFormat (const NTV2AudioFormat inNewValue, const NTV2Channel inWhichHDMIOut)
 {
 	return WriteRegister (kRegHDMIOutControl, static_cast <ULWord> (inNewValue), kRegMaskHDMIOutAudioFormat, kRegShiftHDMIOutAudioFormat);
 }
 
 
-bool CNTV2Card::GetHDMIOutAudioFormat (NTV2AudioFormat & outValue)
+bool CNTV2Card::GetHDMIOutAudioFormat (NTV2AudioFormat & outValue, const NTV2Channel inWhichHDMIOut)
 {
 	return CNTV2DriverInterface::ReadRegister (kRegHDMIOutControl, outValue, kRegMaskHDMIOutAudioFormat, kRegShiftHDMIOutAudioFormat);
 }
