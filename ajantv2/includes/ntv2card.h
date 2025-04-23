@@ -6607,6 +6607,18 @@ protected:
 	AJA_VIRTUAL bool			IS_HDMI_INPUT_SPIGOT_INVALID (const UWord inInputHDMIPort);
 	AJA_VIRTUAL bool			SetWarmBootFirmwareReload(bool enable);
 
+    AJA_VIRTUAL bool            GetHDMIOutControlReg(ULWord& reg, const NTV2Channel inWhichHDMIOut);
+    AJA_VIRTUAL bool            GetHDMIInputStatusReg(ULWord& reg, const NTV2Channel inWhichHDMIOut);
+    AJA_VIRTUAL bool            GetHDMIInputControlReg(ULWord& reg, const NTV2Channel inWhichHDMIOut);
+    AJA_VIRTUAL bool            GetHDMIOutStatusReg(ULWord& reg, const NTV2Channel inWhichHDMIOut);
+    AJA_VIRTUAL bool            GetHDMIOutHDRGreenPrimaryReg(ULWord& reg, const NTV2Channel inWhichHDMIOut);
+    AJA_VIRTUAL bool            GetHDMIOutHDRBluePrimaryReg(ULWord& reg, const NTV2Channel inWhichHDMIOut);
+    AJA_VIRTUAL bool            GetHDMIOutHDRRedPrimaryReg(ULWord& reg, const NTV2Channel inWhichHDMIOut);
+    AJA_VIRTUAL bool            GetHDMIOutHDRWhitePointReg(ULWord& reg, const NTV2Channel inWhichHDMIOut);
+    AJA_VIRTUAL bool            GetHDMIOutHDRMasterLuminanceReg(ULWord& reg, const NTV2Channel inWhichHDMIOut);
+    AJA_VIRTUAL bool            GetHDMIOutHDRLightLevelReg(ULWord& reg, const NTV2Channel inWhichHDMIOut);
+    AJA_VIRTUAL bool            GetHDMIOutHDRControlReg(ULWord& reg, const NTV2Channel inWhichHDMIOut);
+
 	//	Seamless Anc Playout & Capture
 	//		For AutoCirculate Playout
 	AJA_VIRTUAL bool			S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCIRCULATE_TRANSFER & inOutXferInfo);
