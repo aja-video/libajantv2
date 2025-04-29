@@ -757,8 +757,8 @@ bool NTV2Buffer::AppendU8s (UByteSequence & outU8s) const
 	const size_t maxSize (GetByteCount());
 	try
 	{
-		for (size_t ndx(0);	 ndx < maxSize;	 ndx++)
-			outU8s.push_back(*pU8++);
+		outU8s.reserve(outU8s.size() + maxSize);
+		outU8s.insert(outU8s.end(),pU8, pU8 + maxSize);
 	}
 	catch (...)
 	{
@@ -3793,8 +3793,8 @@ using namespace ntv2nub;
 		{
 			if ((inOutIndex + byteCount) > inBlob.size())
 				return false;	//	past end of inBlob
-			for (ULWord cnt(0);  cnt < byteCount;  cnt++)
-				U8(int(cnt)) = inBlob.at(inOutIndex++);//	Caller is responsible for byte-swapping if needed
+			::memcpy(GetHostPointer(), inBlob.data() + inOutIndex, byteCount); //	Caller is responsible for byte-swapping if needed
+			inOutIndex += byteCount;
 		}	
 		return true;
 	}
@@ -3807,8 +3807,9 @@ using namespace ntv2nub;
 		POPU32(flags, inBlob, inOutIndex);						//	ULWord		fFlags
 		if ((inOutIndex + byteCount) > inBlob.size())
 			return false;	//	past end of inBlob
-		for (ULWord cnt(0);  cnt < byteCount;  cnt++)
-			U8(int(cnt)) = inBlob.at(inOutIndex++);	//	Caller is responsible for byte-swapping if needed
+
+		::memcpy(GetHostPointer(), inBlob.data() + inOutIndex, byteCount); //	Caller is responsible for byte-swapping if needed
+		inOutIndex += byteCount;
 		return true;
 	}
 
@@ -3839,7 +3840,6 @@ using namespace ntv2nub;
 	bool NTV2GetRegisters::RPCDecodeServer (const UByteSequence & inBlob, size_t & inOutIndex)
 	{
 		bool ok = mHeader.RPCDecode(inBlob, inOutIndex);								//	NTV2_HEADER		mHeader
-		mHeader.SetConnectionID(0);		//  WorkAround... Setting a nonzero value seems to cause a driver error with NTV2Message (Corvid88 & Kona5, linux)
 		if (!ok) return false;
 		POPU32(mInNumRegisters, inBlob, inOutIndex);									//		ULWord			mInNumRegisters
 		ok &= mInRegisters.RPCDecode(inBlob, inOutIndex, /*fillbuffer=*/true);			//		NTV2Buffer		mInRegisters
@@ -3883,7 +3883,6 @@ using namespace ntv2nub;
 	bool NTV2GetRegisters::RPCDecodeClient (const UByteSequence & inBlob, size_t & inOutIndex)
 	{
 		bool ok = mHeader.RPCDecode(inBlob, inOutIndex);							//	NTV2_HEADER		mHeader
-		mHeader.SetConnectionID(0);		//  WorkAround... Setting a nonzero value seems to cause a driver error with NTV2Message (Corvid88 & Kona5, linux)
 		if (!ok) return false;
 		POPU32(mInNumRegisters, inBlob, inOutIndex);								//		ULWord			mInNumRegisters
 		ok &= mInRegisters.RPCDecode(inBlob, inOutIndex, /*fillbuffer=*/false);		//		NTV2Buffer		mInRegisters
@@ -3927,7 +3926,6 @@ using namespace ntv2nub;
 	bool NTV2SetRegisters::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
 	{
 		bool ok = mHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER		mHeader
-		mHeader.SetConnectionID(0);		//  WorkAround... Setting a nonzero value seems to cause a driver error with NTV2Message (Corvid88 & Kona5, linux)
 		POPU32(mInNumRegisters, inBlob, inOutIndex);			//		ULWord			mInNumRegisters
 		ok &= mInRegInfos.RPCDecode(inBlob, inOutIndex);		//		NTV2Buffer		mInRegInfos
 		POPU32(mOutNumFailures, inBlob, inOutIndex);			//		ULWord			mOutNumFailures
@@ -3968,7 +3966,6 @@ using namespace ntv2nub;
 	bool NTV2BankSelGetSetRegs::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
 	{
 		bool ok = mHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER		mHeader
-		mHeader.SetConnectionID(0);		//  WorkAround... Setting a nonzero value seems to cause a driver error with NTV2Message (Corvid88 & Kona5, linux)
 		POPU32(mIsWriting, inBlob, inOutIndex);					//		ULWord			mIsWriting
 		ok &= mInBankInfos.RPCDecode(inBlob, inOutIndex);		//		NTV2Buffer		mInBankInfos
 		ok &= mInRegInfos.RPCDecode(inBlob, inOutIndex);		//		NTV2Buffer		mInRegInfos
@@ -4008,7 +4005,6 @@ using namespace ntv2nub;
 	bool AUTOCIRCULATE_STATUS::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
 	{	uint16_t v16(0);  uint32_t v32(0);
 		bool ok = acHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER				acHeader
-		acHeader.SetConnectionID(0);	//  WorkAround... Setting a nonzero value seems to cause a driver error with NTV2Message (Corvid88 & Kona5, linux)
 		POPU16(v16, inBlob, inOutIndex);						//		NTV2Crosspoint			acCrosspoint
 		acCrosspoint = NTV2Crosspoint(v16);
 		POPU16(v16, inBlob, inOutIndex);						//		NTV2AutoCirculateState	acState
@@ -4072,7 +4068,6 @@ using namespace ntv2nub;
 	bool FRAME_STAMP::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
 	{	uint64_t v64(0);
 		bool ok = acHeader.RPCDecode(inBlob, inOutIndex);			//	NTV2_HEADER				acHeader
-		acHeader.SetConnectionID(0);		//  WorkAround... Setting a nonzero value seems to cause a driver error with NTV2Message (Corvid88 & Kona5, linux)
 		POPU64(v64, inBlob, inOutIndex);							//		LWord64					acFrameTime
 		acFrameTime = LWord64(v64);
 		POPU32(acRequestedFrame, inBlob, inOutIndex);				//		ULWord					acRequestedFrame
@@ -4129,7 +4124,6 @@ using namespace ntv2nub;
 	bool AUTOCIRCULATE_TRANSFER_STATUS::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
 	{	uint16_t v16(0);  uint32_t v32(0);
 		bool ok = acHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER				acHeader
-		acHeader.SetConnectionID(0);		//  WorkAround... Setting a nonzero value seems to cause a driver error with NTV2Message (Corvid88 & Kona5, linux)
 		POPU16(v16, inBlob, inOutIndex);						//		NTV2AutoCirculateState	acState
 		acState = NTV2AutoCirculateState(v16);
 		POPU32(v32, inBlob, inOutIndex);						//		LWord					acTransferFrame
@@ -4264,7 +4258,6 @@ using namespace ntv2nub;
 	{	uint16_t v16(0);  uint32_t v32(0);
 		AJADebug::StatTimerStart(AJA_DebugStat_ACXferRPCDecode);
 		bool ok = acHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER						acHeader
-		acHeader.SetConnectionID(0);		//  WorkAround... Setting a nonzero value seems to cause a driver error with NTV2Message (Corvid88 & Kona5, linux)
 		ok &= acVideoBuffer.RPCDecode(inBlob, inOutIndex);		//		NTV2Buffer						acVideoBuffer
 		ok &= acAudioBuffer.RPCDecode(inBlob, inOutIndex);		//		NTV2Buffer						acAudioBuffer
 		ok &= acANCBuffer.RPCDecode(inBlob, inOutIndex);		//		NTV2Buffer						acANCBuffer
@@ -4415,7 +4408,6 @@ using namespace ntv2nub;
 	bool NTV2Bitstream::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
 	{
 		bool ok = mHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER				acHeader
-		mHeader.SetConnectionID(0);		//  WorkAround... Setting a nonzero value seems to cause a driver error with NTV2Message (Corvid88 & Kona5, linux)
 		ok &= mBuffer.RPCDecode(inBlob, inOutIndex);			//		NTV2Buffer				mBuffer
 		POPU32(mFlags, inBlob, inOutIndex);						//		ULWord					mFlags
 		POPU32(mStatus, inBlob, inOutIndex);					//		ULWord					mStatus
