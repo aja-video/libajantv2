@@ -9,7 +9,6 @@
 //==========================================================================
 
 #include "ntv2kona.h"
-#include <linux/printk.h>
 
 static const uint32_t	gChannelToGlobalControlRegNum []	= {	kRegGlobalControl, kRegGlobalControlCh2, kRegGlobalControlCh3, kRegGlobalControlCh4,
 																kRegGlobalControlCh5, kRegGlobalControlCh6, kRegGlobalControlCh7, kRegGlobalControlCh8, 0};
@@ -1907,14 +1906,14 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context, NTV2Channel channel)
 	NTV2OutputXptID tempXptSelect;
 	HDRDriverValues hdrRegValues;
 	NTV2DeviceID deviceID;
-	ULWord hdmiVersion;
-	NTV2Standard currentStandard;
-	NTV2FrameRate currentFrameRate;
-	ULWord currentSampling;
-	ULWord currentLevelBMode;
-	ULWord currentDecimateMode;
-	ULWord currentSourceRGB;
-	ULWord levelBMode;
+	ULWord hdmiVersion = 0;
+	NTV2Standard currentStandard = NTV2_STANDARD_1080;
+	NTV2FrameRate currentFrameRate = NTV2_FRAMERATE_UNKNOWN;
+	ULWord currentSampling = 0;
+	ULWord currentLevelBMode = 0;
+	ULWord currentDecimateMode = 0;
+	ULWord currentSourceRGB = 0;
+	ULWord levelBMode = 0;
 	NTV2Standard standard = NTV2_NUM_STANDARDS;
 	NTV2VideoFormat videoFormat = NTV2_FORMAT_UNKNOWN;
 	NTV2FrameRate videoRate = NTV2_FRAMERATE_UNKNOWN;
@@ -2277,9 +2276,6 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context, NTV2Channel channel)
                                 kLHIRegMaskHDMIOutFPS, kLHIRegShiftHDMIOutFPS);
             ntv2WriteRegisterMS(context, gHDMIChannelToOutControlVRegNum[channel], sampling,
                                 kRegMaskHDMISampling, kRegShiftHDMISampling);
-            printk(KERN_INFO "SetHDMIOutputStandard channel %d  version %d  standard %d  hdmiv2std %d  rate %d\n",
-                   (int)channel, (int)hdmiVersion, (int)standard, (int)hdmiv2std, (int)videoRate);
-    
         }
 	}
 
