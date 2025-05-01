@@ -653,6 +653,17 @@ static void ntv2_hdmiout4_monitor(void* data)
 		// check genlock
 		genlocked_last = genlocked;
 		genlocked = is_genlocked(ntv2_hout);
+        if (genlocked != genlocked_last)
+        {
+            if (genlocked)
+            {
+                NTV2_MSG_HDMIOUT4_CONFIG("%s: genlock locked\n", ntv2_hout->name);
+            }
+            else
+            {
+                NTV2_MSG_HDMIOUT4_CONFIG("%s: waiting for genlock\n", ntv2_hout->name);
+            }
+        }
 		if (!genlocked_last && genlocked)
 		{
 			ntv2_hout->video_standard = ntv2_video_standard_none;
@@ -698,7 +709,7 @@ static Ntv2Status ntv2_hdmiout4_initialize(struct ntv2_hdmiout4 *ntv2_hout)
 	ntv2_displayid_config(&ntv2_hout->edid, ntv2_hdmiout4_edid_read, ntv2_hout);
 	
 	ntv2_hout->hdmi_config = 0;
-	ntv2_hout->hdmi_source = 0;
+	ntv2_hout->hdmi_rgb = 0;
 	ntv2_hout->hdmi_control = 0;
 	ntv2_hout->hdmi_hdr = 0;
 
@@ -770,8 +781,7 @@ static bool configure_hardware(struct ntv2_hdmiout4 *ntv2_hout)
 	uint32_t vobd = NTV2_FLD_GET(ntv2_fld_hdmiout_vobd, ntv2_hout->hdmi_config);
 
 	// get crosspoint hints
-	uint32_t color_space = (NTV2_FLD_GET(ntv2_fld_hdmiout_hdmi_rgb, ntv2_hout->hdmi_source) != 0)?
-		ntv2_color_space_rgb444 : ntv2_color_space_yuv422;
+	uint32_t color_space = (ntv2_hout->hdmi_rgb != 0)? ntv2_color_space_rgb444 : ntv2_color_space_yuv422;
 
 	// get control hints
 	uint32_t color_depth = (NTV2_FLD_GET(ntv2_fld_hdmiout_deep_12bit, ntv2_hout->hdmi_control) != 0)?
@@ -2149,7 +2159,7 @@ static bool is_genlocked(struct ntv2_hdmiout4 *ntv2_hout)
 	uint32_t value;
 	uint32_t lock;
 
-	value = ntv2_reg_read(ntv2_hout->system_context, ntv2_reg_control_status, ntv2_hout->index);
+	value = ntv2_reg_read(ntv2_hout->system_context, ntv2_reg_control_status, 0);
 	lock = NTV2_FLD_GET(ntv2_fld_control_genlock_locked, value);
 
 	return (lock != 0);
@@ -2158,7 +2168,7 @@ static bool is_genlocked(struct ntv2_hdmiout4 *ntv2_hout)
 static bool has_config_changed(struct ntv2_hdmiout4 *ntv2_hout)
 {
 	uint32_t value_config;
-	uint32_t value_source;
+	uint32_t value_rgb;
 	uint32_t value_control;
 
 	uint32_t mask_config = NTV2_FLD_MASK(ntv2_fld_hdmiout_video_standard) |
@@ -2170,7 +2180,6 @@ static bool has_config_changed(struct ntv2_hdmiout4 *ntv2_hout)
 		NTV2_FLD_MASK(ntv2_fld_hdmiout_full_range) |
 		NTV2_FLD_MASK(ntv2_fld_hdmiout_audio_8ch) |
 		NTV2_FLD_MASK(ntv2_fld_hdmiout_dvi);
-	uint32_t mask_source = NTV2_FLD_MASK(ntv2_fld_hdmiout_hdmi_rgb);
 	uint32_t mask_control = 
 		NTV2_FLD_MASK(ntv2_fld_hdmiout_deep_12bit) |
 		NTV2_FLD_MASK(ntv2_fld_hdmiout_force_hpd) |
@@ -2187,8 +2196,31 @@ static bool has_config_changed(struct ntv2_hdmiout4 *ntv2_hout)
 	value_config &= mask_config;
 
 	// read hdmi source rgb vs yuv crosspoint
-	value_source = ntv2_reg_read(ntv2_hout->system_context, ntv2_reg_hdmiout_cross_group6, ntv2_hout->index);
-	value_source &= mask_source;
+    switch (ntv2_hout->index)
+    {
+#if 0        
+    case 1:
+        value_rgb = ntv2_reg_read(ntv2_hout->system_context, ntv2_reg_hdmiout_cross_group20, 0);
+        value_rgb = NTV2_FLD_GET(ntv2_fld_hdmiout_hdmi_rgb1, value_rgb);
+        break;
+#endif        
+    case 2:
+        value_rgb = ntv2_reg_read(ntv2_hout->system_context, ntv2_reg_hdmiout_cross_group20, 0);
+        value_rgb = NTV2_FLD_GET(ntv2_fld_hdmiout_hdmi_rgb2, value_rgb);
+        break;
+    case 3:
+        value_rgb = ntv2_reg_read(ntv2_hout->system_context, ntv2_reg_hdmiout_cross_group20, 0);
+        value_rgb = NTV2_FLD_GET(ntv2_fld_hdmiout_hdmi_rgb3, value_rgb);
+        break;
+    case 4:
+        value_rgb = ntv2_reg_read(ntv2_hout->system_context, ntv2_reg_hdmiout_cross_group20, 0);
+        value_rgb = NTV2_FLD_GET(ntv2_fld_hdmiout_hdmi_rgb4, value_rgb);
+        break;
+    default:
+        value_rgb = ntv2_reg_read(ntv2_hout->system_context, ntv2_reg_hdmiout_cross_group6, 0);
+        value_rgb = NTV2_FLD_GET(ntv2_fld_hdmiout_hdmi_rgb, value_rgb);
+        break;
+    }
 
 	// read audio configuration
 	value_control = ntv2_reg_read(ntv2_hout->system_context, ntv2_reg_hdmi_control, ntv2_hout->index);
@@ -2196,12 +2228,12 @@ static bool has_config_changed(struct ntv2_hdmiout4 *ntv2_hout)
 
 	// look for changes
 	if ((value_config == ntv2_hout->hdmi_config) &&
-		(value_source == ntv2_hout->hdmi_source) &&
+		(value_rgb == ntv2_hout->hdmi_rgb) &&
 		(value_control == ntv2_hout->hdmi_control)) return false;
 
 	// update state
 	ntv2_hout->hdmi_config = value_config;
-	ntv2_hout->hdmi_source = value_source;
+	ntv2_hout->hdmi_rgb = value_rgb;
 	ntv2_hout->hdmi_control = value_control;
 
 	return true;

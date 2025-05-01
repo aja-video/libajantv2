@@ -116,6 +116,16 @@ NTV2_REG(ntv2_reg_hdmiout_cross_group6,						141);			/* crosspoint group 6 */
 	NTV2_FLD(ntv2_fld_hdmiout_hdmi_source,						7,	16);		/* hdmi source */
 	NTV2_FLD(ntv2_fld_hdmiout_hdmi_rgb,							1,	23);		/* rgb color space (not yuv) */
 
+NTV2_REG(ntv2_reg_hdmiout_cross_group20,					357);			/* crosspoint group 6 */
+	NTV2_FLD(ntv2_fld_hdmiout_hdmi_source1,						7,	0); 		/* hdmi source 1*/
+	NTV2_FLD(ntv2_fld_hdmiout_hdmi_rgb1,						1,	7);		    /* rgb color space 1 (not yuv) */
+	NTV2_FLD(ntv2_fld_hdmiout_hdmi_source2,						7,	8);	    	/* hdmi source 2 */
+	NTV2_FLD(ntv2_fld_hdmiout_hdmi_rgb2,						1,	15);		/* rgb color space 2 (not yuv) */
+	NTV2_FLD(ntv2_fld_hdmiout_hdmi_source3,						7,	16);		/* hdmi source 3 */
+	NTV2_FLD(ntv2_fld_hdmiout_hdmi_rgb3,						1,	23);		/* rgb color space 3 (not yuv) */
+	NTV2_FLD(ntv2_fld_hdmiout_hdmi_source4,						7,	24);		/* hdmi source 4 */
+	NTV2_FLD(ntv2_fld_hdmiout_hdmi_rgb4,						1,	31);		/* rgb color space 4 (not yuv) */
+
 // hdr parameters
 NTV2_REG(ntv2_reg_hdr_green_primary,						330,
                                                             kVRegHDMIOutHDRGreenPrimary1,

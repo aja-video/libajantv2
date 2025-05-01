@@ -3008,6 +3008,10 @@ typedef enum
 	,NTV2_WgtHDMIIn4v4
 	,NTV2_WgtHDMIOut1v4
 	,NTV2_WgtHDMIOut1v5
+	,NTV2_WgtHDMIOut1v6
+	,NTV2_WgtHDMIOut2v6
+	,NTV2_WgtHDMIOut3v6
+	,NTV2_WgtHDMIOut4v6
 	,NTV2_WgtMultiLinkOut1
 	,NTV2_Wgt3DLUT1
 	,NTV2_WgtMultiLinkOut2
@@ -3056,6 +3060,7 @@ typedef enum {
 	,NTV2WidgetType_HDMIOutV3
 	,NTV2WidgetType_HDMIOutV4
 	,NTV2WidgetType_HDMIOutV5
+	,NTV2WidgetType_HDMIOutV6
 	,NTV2WidgetType_SMPTE425Mux
 	,NTV2WidgetType_SDIIn12G
 	,NTV2WidgetType_SDIOut12G

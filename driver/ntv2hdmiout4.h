@@ -31,7 +31,7 @@ struct ntv2_hdmiout4 {
 
 	uint32_t			hot_plug_count;
 	uint32_t			hdmi_config;
-	uint32_t			hdmi_source;
+	uint32_t			hdmi_rgb;
 	uint32_t			hdmi_control;
 	uint32_t			hdmi_hdr;
 

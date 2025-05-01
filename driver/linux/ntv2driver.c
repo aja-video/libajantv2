@@ -3730,7 +3730,7 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
                     ntv2pp->m_pHDMIIn4Monitor[0] = NULL;
                 }
             }
-            ntv2pp->m_pHDMIOut4Monitor[0] = ntv2_hdmiout4_open(&ntv2pp->systemContext, "ntv2hdmiout4", 0);
+            ntv2pp->m_pHDMIOut4Monitor[0] = ntv2_hdmiout4_open(&ntv2pp->systemContext, "ntv2hdmiout4", 1);
             if (ntv2pp->m_pHDMIOut4Monitor[0] != NULL)
             {
                 status = ntv2_hdmiout4_configure(ntv2pp->m_pHDMIOut4Monitor[0]);
