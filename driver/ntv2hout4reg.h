@@ -24,7 +24,7 @@ NTV2_REG(ntv2_reg_control_status,							48);			/* control status */
 	NTV2_FLD(ntv2_fld_control_genlock_locked,					1,	31);		/* genlock locked */
 
 /* hdmi output configuration register */
-NTV2_REG(ntv2_reg_hdmiout_output_config,					125);			/* hdmi output config */
+NTV2_REG(ntv2_reg_hdmiout_output_config,					125, 0x1d14, 0x2514);			/* hdmi output config */
 	NTV2_FLD(ntv2_fld_hdmiout_video_standard,					4,	0);			/* video standard */
 	NTV2_FLD(ntv2_fld_hdmiout_audio_group_select,				1,	5);			/* audio upper group select */
 	NTV2_FLD(ntv2_fld_hdmiout_tx_bypass,						1,	7);			/* v2 tx bypass? */
@@ -45,7 +45,7 @@ NTV2_REG(ntv2_reg_hdmiout_output_config,					125);			/* hdmi output config */
 	NTV2_FLD(ntv2_fld_hdmiout_dvi,								1,	30);		/* dvi mode (vs hdmi) */
 
 /* hdmi input status */
-NTV2_REG(ntv2_reg_hdmiin_input_status,						126);			/* hdmi input status register */
+NTV2_REG(ntv2_reg_hdmiin_input_status,						126, 0x1d15, 0x2515);			/* hdmi input status register */
 	NTV2_FLD(ntv2_fld_hdmiin_locked,							1,	0);		
 	NTV2_FLD(ntv2_fld_hdmiin_stable,							1,	1);		
 	NTV2_FLD(ntv2_fld_hdmiin_rgb,								1,	2);		
@@ -64,7 +64,7 @@ NTV2_REG(ntv2_reg_hdmiin_input_status,						126);			/* hdmi input status registe
 	NTV2_FLD(ntv2_fld_hdmiin_video_rate,						4,	28);		/* ntv2 video rate */
 
 /* hdmi control */
-NTV2_REG(ntv2_reg_hdmi_control,								127);			/* hdmi audio status register */
+NTV2_REG(ntv2_reg_hdmi_control,								127, 0x1d16, 0x2516);			/* hdmi audio status register */
 	NTV2_FLD(ntv2_fld_hdmiout_force_config,						1,	1);			/* force output config (ignore edid) */	
 	NTV2_FLD(ntv2_fld_hdmiin_audio_pair,						2,	2);			/* hdmi input audio pair select */	
 	NTV2_FLD(ntv2_fld_hdmiin_rate_convert_enable,				1,	4);			/* hdmi input audio sample rate converter enable */	

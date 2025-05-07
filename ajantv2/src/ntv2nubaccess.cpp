@@ -558,7 +558,7 @@ bool NTV2DeviceSpecParser::ParseAlphaNumeric (size_t & pos, string & outToken, c
 			break;
 		++pos;  tokAlphaNum += ch;
 	}
-	if (tokAlphaNum.length() > 1)	//	At least 2 chars
+	if (tokAlphaNum.length() > 0)
 		outToken = tokAlphaNum;
 	return !outToken.empty();
 }
@@ -646,7 +646,7 @@ bool NTV2DeviceSpecParser::ParseModelName (size_t & pos, string & outToken)
 {
 	outToken.clear();
 	string tokName;
-	if (!ParseAlphaNumeric(pos, tokName))
+	if (!ParseAlphaNumeric(pos, tokName, " "))
 		return false;
 	aja::lower(tokName);	//	Fold to lower case
 
@@ -745,7 +745,7 @@ bool NTV2DeviceSpecParser::ParseResourcePath (size_t & pos, string & outRsrc)
 	{
 		++rsrcPos;
 		rsrc += '/';
-		if (!ParseAlphaNumeric(rsrcPos, name))
+		if (!ParseAlphaNumeric(rsrcPos, name, " "))
 			break;
 		rsrc += name;
 		ch = CharAt(rsrcPos);

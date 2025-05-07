@@ -4748,6 +4748,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_SOJI_OE7:				return "SOJI-OE7";
 		case DEVICE_ID_TTAP:					return inForRetailDisplay ? "T-TAP"						: "TTap";
 		case DEVICE_ID_TTAP_PRO:				return inForRetailDisplay ? "T-TAP Pro"					: "TTapPro";
+		case DEVICE_ID_ZEFRAM:					return "Zefram";
 		case DEVICE_ID_SOFTWARE:				return inForRetailDisplay ? "Software"					: "Software";
 		case DEVICE_ID_NOTFOUND:				return inForRetailDisplay ? "AJA Device"				: "(Not Found)";
 #if defined(_DEBUG)
@@ -7586,7 +7587,8 @@ string NTV2GetFirmwareFolderPath (void)
 			&& RegQueryValueExA (hKey, "firmwarePath", NULL, NULL, (LPBYTE) lpData, &bufferSize) == ERROR_SUCCESS)
 				return string (lpData);
 		RegCloseKey (hKey);
-		return "";
+		// Windows may not get a result if the ntv2 installer has not been executed (use case client side remote plugins)
+		return "C:\\ProgramData\\AJA\\ntv2\\Firmware";    
 	#elif defined (AJALinux)
 		return "/opt/aja/firmware";
 	#else
@@ -7667,6 +7669,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_SOJI_DIAGS,
 														DEVICE_ID_TTAP,
 														DEVICE_ID_TTAP_PRO,
+														DEVICE_ID_ZEFRAM,
 														DEVICE_ID_NOTFOUND	};
 	if (inKinds == NTV2_DEVICEKIND_NONE)
 		return NTV2DeviceIDSet();

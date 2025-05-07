@@ -75,6 +75,7 @@ Command-line tools are normally built by default.
 The test programs are normally built by default.
 - `AJANTV2_DISABLE_PLUGIN_LOAD` — If `ON`, prevents the NTV2 library from loading plugins (and also eliminates the dependency on the third-party `mbedtls` library).\
 The default is `OFF`, which includes the `mbedtls` library depdendency and the ability to load AJA-signed plugins.
+- `AJANTV2_DISABLE_CONFIGURE_VERSION_FILE` - If `ON`, prevents recreating the `ntv2version.h` file if it's already been created. This may be useful for some developers who don't wish to rebuild their project upon each configure of `libajantv2`. 
 
 Please follow the instructions below to build `libajantv2` on the supported platform and development environment of your preference.
 

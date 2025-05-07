@@ -36,6 +36,7 @@ option(AJANTV2_DISABLE_TESTS       "Disable building libajantv2 tests?"         
 option(AJANTV2_DISABLE_TOOLS       "Disable building libajantv2 tools?"               OFF)
 option(AJANTV2_DISABLE_PLUGIN_LOAD "Disable NTV2 3rd party plugin loading?"           OFF)
 option(AJANTV2_DISABLE_RDMA        "Disable building with Nvidia RDMA?"               OFF)
+option(AJANTV2_DISABLE_CONFIGURE_VERSION_FILE "Disable Configuring ntv2version.h"     OFF)
 
 if (NOT DEFINED LIBAJANTV2_DIR)
     set(LIBAJANTV2_DIR ${CMAKE_CURRENT_SOURCE_DIR})
