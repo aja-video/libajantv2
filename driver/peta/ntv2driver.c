@@ -3116,7 +3116,7 @@ static int platform_probe(struct platform_device *pd)
                 }
             }
 
-            ntv2pp->m_pHDMIOut4Monitor[0] = ntv2_hdmiout4_open(&ntv2pp->systemContext, "ntv2hdmiout4", 0);
+            ntv2pp->m_pHDMIOut4Monitor[0] = ntv2_hdmiout4_open(&ntv2pp->systemContext, "ntv2hdmiout4", 1);
             if (ntv2pp->m_pHDMIOut4Monitor[0] != NULL)
             {
                 status = ntv2_hdmiout4_configure(ntv2pp->m_pHDMIOut4Monitor[0]);
@@ -3127,7 +3127,7 @@ static int platform_probe(struct platform_device *pd)
                 }
             }
 #if 0
-            ntv2pp->m_pHDMIOut4Monitor[1] = ntv2_hdmiout4_open(&ntv2pp->systemContext, "ntv2hdmiout4", 1);
+            ntv2pp->m_pHDMIOut4Monitor[1] = ntv2_hdmiout4_open(&ntv2pp->systemContext, "ntv2hdmiout4", 2);
             if (ntv2pp->m_pHDMIOut4Monitor[1] != NULL)
             {
                 status = ntv2_hdmiout4_configure(ntv2pp->m_pHDMIOut4Monitor[1]);

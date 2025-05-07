@@ -756,6 +756,13 @@ int WriteReg(	ULWord deviceNumber,
 
 		default:
 			// store virtual reg
+            if (registerMask != NO_MASK)
+            {
+                oldValue = pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START];
+                oldValue &= ~registerMask;
+                registerValue <<= registerShift;
+                registerValue |= oldValue;
+            }
 			pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START] = registerValue;
 			break;
 
@@ -1161,7 +1168,13 @@ int ReadReg(    ULWord deviceNumber,
 
 		default:
 			// return virtual reg
-			*registerValue = pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START];
+			value = pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START];
+            if (registerMask != NO_MASK)
+            {
+                value &= registerMask;
+                value >>= registerShift;
+            }
+            *registerValue = value;
 			return 0;
 		} // switch
 	}
@@ -1585,7 +1598,6 @@ ULWord ReadDeviceIDRegister(ULWord deviceNumber)
 		return DEVICE_ID_IO4KPLUS;
 
 	return  READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pDeviceID);
-//    return DEVICE_ID_KONAIP_25G;
 }
 
 // NTV2 DMA functions
