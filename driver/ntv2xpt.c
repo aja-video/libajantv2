@@ -399,22 +399,7 @@ bool FindHDMIOutputSource(Ntv2SystemContext* context, NTV2OutputXptID* source, N
 {
 	NTV2OutputXptID xptSelect = NTV2_XptBlack;
 
-	switch (channel)
-	{
-	default:
-	case NTV2_CHANNEL1:
-		GetXptHDMIOutInputSelect(context, &xptSelect);
-		break;
-	case NTV2_CHANNEL2:
-		GetXptHDMIOutQ2InputSelect(context, &xptSelect);
-		break;
-	case NTV2_CHANNEL3:
-		GetXptHDMIOutQ3InputSelect(context, &xptSelect);
-		break;
-	case NTV2_CHANNEL4:
-		GetXptHDMIOutQ4InputSelect(context, &xptSelect);
-		break;
-	}
+	GetXptHDMIOutInputSelect(context, channel, &xptSelect);
 
 	if(xptSelect != NTV2_XptConversionModule)
 	{
@@ -598,9 +583,24 @@ bool GetXptFrameBuffer2InputSelect(Ntv2SystemContext* context, NTV2OutputXptID* 
 	return ntv2ReadRegisterMS(context, kRegXptSelectGroup5, (ULWord*)value, kK2RegMaskFrameBuffer2InputSelect, kK2RegShiftFrameBuffer2InputSelect);
 }
 
-bool GetXptHDMIOutInputSelect(Ntv2SystemContext* context, NTV2OutputXptID* value)
+bool GetXptHDMIOutInputSelect(Ntv2SystemContext* context, NTV2Channel channel, NTV2OutputXptID* value)
 {
-	return ntv2ReadRegisterMS(context, kRegXptSelectGroup6, (ULWord*)value, kK2RegMaskHDMIOutInputSelect, kK2RegShiftHDMIOutInputSelect);
+    switch (channel)
+    {
+    case NTV2_CHANNEL2:
+        return ntv2ReadRegisterMS(context, kRegXptSelectGroup20, (ULWord*)value,
+                                  kK2RegMaskHDMIOutV2Q2InputSelect, kK2RegShiftHDMIOutV2Q2InputSelect);
+    case NTV2_CHANNEL3:
+        return ntv2ReadRegisterMS(context, kRegXptSelectGroup20, (ULWord*)value,
+                                  kK2RegMaskHDMIOutV2Q3InputSelect, kK2RegShiftHDMIOutV2Q3InputSelect);
+    case NTV2_CHANNEL4:
+        return ntv2ReadRegisterMS(context, kRegXptSelectGroup20, (ULWord*)value,
+                                  (ULWord)kK2RegMaskHDMIOutV2Q4InputSelect, (ULWord)kK2RegShiftHDMIOutV2Q4InputSelect);
+    default:
+        break;
+    }
+
+    return ntv2ReadRegisterMS(context, kRegXptSelectGroup6, (ULWord*)value, kK2RegMaskHDMIOutInputSelect, kK2RegShiftHDMIOutInputSelect);
 }
 
 bool GetXptHDMIOutQ2InputSelect(Ntv2SystemContext* context, NTV2OutputXptID* value)

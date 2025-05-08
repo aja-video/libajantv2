@@ -180,7 +180,7 @@ NTV2_REG(ntv2_reg_hdr_control,								336,
 	NTV2_FLD(ntv2_fld_hdr_metadata_id,							8,	24);		/* metadata descriptor id */	
 
 /* hdmi output control registers */
-NTV2_REG(ntv2_reg_hdmiout4_videocontrol,					0x1d40, 0x1d40, 0x1d40, 0x1d40);	/* hdmi control/status */
+NTV2_REG(ntv2_reg_hdmiout4_videocontrol,					0x1d40, 0x1d40, 0x1d80, 0x1d40, 0x1d40);	/* hdmi control/status */
 	NTV2_FLD(ntv2_fld_hdmiout4_videocontrol_scrambleMode,		1,	 1);	/* scdc 2.0 scramble mode */
 		NTV2_CON(ntv2_con_hdmiout4_scramblemode_disable,			0x0);		/* scramble disable */
 		NTV2_CON(ntv2_con_hdmiout4_scramblemode_enable,				0x1);		/* scramble enable */
@@ -226,7 +226,7 @@ NTV2_REG(ntv2_reg_hdmiout4_videocontrol,					0x1d40, 0x1d40, 0x1d40, 0x1d40);	/*
 	NTV2_FLD(ntv2_fld_hdmiout4_videocontrol_resetdone,			1,	 30);	/* rx reset done */
 	NTV2_FLD(ntv2_fld_hdmiout4_videocontrol_reset,	   			1,	 31);	/* rx reset */
 
-NTV2_REG(ntv2_reg_hdmiout4_videosetup0,						0x1d41, 0x1d41, 0x1d41, 0x1d41);	/* video setup 0 register */
+NTV2_REG(ntv2_reg_hdmiout4_videosetup0,						0x1d41, 0x1d41, 0x1d81, 0x1d41, 0x1d41);	/* video setup 0 register */
 	NTV2_FLD(ntv2_fld_hdmiout4_videosetup0_colordepth,			2,	 0);	/* color depth */
    	NTV2_FLD(ntv2_fld_hdmiout4_videosetup0_colorspace,			2,	 2);	/* color space */
 	NTV2_FLD(ntv2_fld_hdmiout4_videosetup0_scanmode,			1,	 4);	/* video scan mode */
@@ -239,40 +239,40 @@ NTV2_REG(ntv2_reg_hdmiout4_videosetup0,						0x1d41, 0x1d41, 0x1d41, 0x1d41);	/*
 		NTV2_CON(ntv2_con_hdmiout4_syncpolarity_activelow,			0x0);		/* active low */
 		NTV2_CON(ntv2_con_hdmiout4_syncpolarity_activehigh,			0x1);		/* active high */
 
-NTV2_REG(ntv2_reg_hdmiout4_videosetup1,						0x1d42, 0x1d42, 0x1d42, 0x142);	/* video setup 1 register */
+NTV2_REG(ntv2_reg_hdmiout4_videosetup1,						0x1d42, 0x1d42, 0x1d82, 0x142, 0x1d42);	/* video setup 1 register */
 	NTV2_FLD(ntv2_fld_hdmiout4_videosetup1_hsyncstart,			16,	 0);	/* horizontal sync start */
 	NTV2_FLD(ntv2_fld_hdmiout4_videosetup1_hsyncend,			16,	 16);	/* horizontal sync end */
 
-NTV2_REG(ntv2_reg_hdmiout4_videosetup2,						0x1d43, 0x1d43, 0x1d43, 0x1d43);	/* video setup 2 register */
+NTV2_REG(ntv2_reg_hdmiout4_videosetup2,						0x1d43, 0x1d43, 0x1d83, 0x1d43, 0x1d43);	/* video setup 2 register */
 	NTV2_FLD(ntv2_fld_hdmiout4_videosetup2_hdestart,			16,	 0);	/* horizontal de start */
 	NTV2_FLD(ntv2_fld_hdmiout4_videosetup2_htotal,				16,	 16);	/* horizontal total */
 
-NTV2_REG(ntv2_reg_hdmiout4_videosetup3,						0x1d44, 0x1d44, 0x1d44, 0x1d44);	/* video setup 3 register */
+NTV2_REG(ntv2_reg_hdmiout4_videosetup3,						0x1d44, 0x1d44, 0x1d84, 0x1d44, 0x1d44);	/* video setup 3 register */
 	NTV2_FLD(ntv2_fld_hdmiout4_videosetup3_vtransf1,			16,	 0);	/* vertical transistion field 1 */
 	NTV2_FLD(ntv2_fld_hdmiout4_videosetup3_vtransf2,			16,	 16);	/* vertical transistion field 2 */
 
-NTV2_REG(ntv2_reg_hdmiout4_videosetup4,						0x1d45, 0x1d45, 0x1d45, 0x1d45);	/* video setup 4 register */
+NTV2_REG(ntv2_reg_hdmiout4_videosetup4,						0x1d45, 0x1d45, 0x1d85, 0x1d45, 0x1d45);	/* video setup 4 register */
 	NTV2_FLD(ntv2_fld_hdmiout4_videosetup4_vsyncstartf1,		16,	 0);	/* vertical sync start field 1 */
 	NTV2_FLD(ntv2_fld_hdmiout4_videosetup4_vsyncendf1,			16,	 16);	/* virtical sync end field 1 */
 
-NTV2_REG(ntv2_reg_hdmiout4_videosetup5,						0x1d46, 0x1d46, 0x1d46, 0x1d46);	/* video setup 5 register */
+NTV2_REG(ntv2_reg_hdmiout4_videosetup5,						0x1d46, 0x1d46, 0x1d86, 0x1d46, 0x1d46);	/* video setup 5 register */
 	NTV2_FLD(ntv2_fld_hdmiout4_videosetup5_vdestartf1,			16,	 0);	/* vertical de start field 1 */
 	NTV2_FLD(ntv2_fld_hdmiout4_videosetup5_vdestartf2,			16,	 16);	/* vertical de start field 2 */
 
-NTV2_REG(ntv2_reg_hdmiout4_videosetup6,						0x1d47, 0x1d47, 0x1d47, 0x1d47);	/* video setup 6 register */
+NTV2_REG(ntv2_reg_hdmiout4_videosetup6,						0x1d47, 0x1d47, 0x1d87, 0x1d47, 0x1d47);	/* video setup 6 register */
 	NTV2_FLD(ntv2_fld_hdmiout4_videosetup6_vsyncstartf2,		16,	 0);	/* vertical sync start field 2 */
 	NTV2_FLD(ntv2_fld_hdmiout4_videosetup6_vsyncendf2,			16,	 16);	/* virtical sync end field 2 */
 
-NTV2_REG(ntv2_reg_hdmiout4_videosetup7,						0x1d48, 0x1d48, 0x1d48, 0x1d48);	/* video setup 7 register */
+NTV2_REG(ntv2_reg_hdmiout4_videosetup7,						0x1d48, 0x1d48, 0x1d88, 0x1d48, 0x1d48);	/* video setup 7 register */
 	NTV2_FLD(ntv2_fld_hdmiout4_videosetup7_vtotalf1,			16,	 0);	/* vertical total field 1 */
 	NTV2_FLD(ntv2_fld_hdmiout4_videosetup7_vtotalf2,			16,	 16);	/* vertical total field 2 */
 
-NTV2_REG(ntv2_reg_hdmiout4_auxcontrol,						0x1d49, 0x1d49, 0x1d49, 0x1d49);	/* aux data control */
+NTV2_REG(ntv2_reg_hdmiout4_auxcontrol,						0x1d49, 0x1d49, 0x1d89, 0x1d49, 0x1d49);	/* aux data control */
 	NTV2_FLD(ntv2_fld_hdmiout4_auxcontrol_auxdata,				8,	 0);	/* aux data */
 	NTV2_FLD(ntv2_fld_hdmiout4_auxcontrol_auxaddress,			11,	 8);	/* aux address */
 	NTV2_FLD(ntv2_fld_hdmiout4_auxcontrol_auxwrite,				1,	 20);	/* aux write */
 
-NTV2_REG(ntv2_reg_hdmiout4_audiocontrol,					0x1d4b, 0x1d4b, 0x1d4b, 0x1d4b);	/* audio data control */
+NTV2_REG(ntv2_reg_hdmiout4_audiocontrol,					0x1d4b, 0x1d4b, 0x1d8b, 0x1d4b, 0x1d4b);	/* audio data control */
 	NTV2_FLD(ntv2_fld_hdmiout4_audiocontrol_source,				4,	 0);	/* source */
 	NTV2_FLD(ntv2_fld_hdmiout4_audiocontrol_group_select,		1,	 4);	/* upper/lower 8 source channels */
 		NTV2_CON(ntv2_con_hdmiout4_group_select_lower,				0x0);		/* lower 8 channels */
@@ -293,7 +293,7 @@ NTV2_REG(ntv2_reg_hdmiout4_audiocontrol,					0x1d4b, 0x1d4b, 0x1d4b, 0x1d4b);	/*
 		NTV2_CON(ntv2_con_hdmiout4_audio_rate_192,					0x2);		/* 192 khz */
 
 
-NTV2_REG(ntv2_reg_hdmiout4_redrivercontrol,					0x1d4f, 0x1d4f, 0x1d4f, 0x1d4f);	/* hdmi redriver control */
+NTV2_REG(ntv2_reg_hdmiout4_redrivercontrol,					0x1d4f, 0x1d4f, 0x1d8f, 0x1d4f, 0x1d4f);	/* hdmi redriver control */
 	NTV2_FLD(ntv2_fld_hdmiout4_redrivercontrol_power,			1,	 0);	/* power */
 		NTV2_CON(ntv2_con_hdmiout4_power_disable,					0x0);		/* power disable */
 		NTV2_CON(ntv2_con_hdmiout4_power_enable,					0x1);		/* power enable */
@@ -331,22 +331,22 @@ NTV2_REG(ntv2_reg_hdmiout4_redrivercontrol,					0x1d4f, 0x1d4f, 0x1d4f, 0x1d4f);
 		NTV2_CON(ntv2_con_hdmiout4_boost_20d50db,					0xe);		/* 20.5 db */
 		NTV2_CON(ntv2_con_hdmiout4_boost_22d20db,					0xf);		/* 22.2 db */
 
-NTV2_REG(ntv2_reg_hdmiout4_refclockfrequency,				0x1d50, 0x1d50, 0x1d50, 0x1d50);	/* reference clock frequency */
-NTV2_REG(ntv2_reg_hdmiout4_tmdsclockfrequency,				0x1d51, 0x1d51, 0x1d51, 0x1d51);	/* tmds clock frequency */
-NTV2_REG(ntv2_reg_hdmiout4_txclockfrequency,				0x1d52, 0x1d52, 0x1d52, 0x1d52);	/* tx clock frequency */
-NTV2_REG(ntv2_reg_hdmiout4_fpllclockfrequency,				0x1d53, 0x1d53, 0x1d53, 0x1d53);	/* fpll clock frequency */
+NTV2_REG(ntv2_reg_hdmiout4_refclockfrequency,				0x1d50, 0x1d50, 0x1d90, 0x1d50, 0x1d50);	/* reference clock frequency */
+NTV2_REG(ntv2_reg_hdmiout4_tmdsclockfrequency,				0x1d51, 0x1d51, 0x1d91, 0x1d51, 0x1d51);	/* tmds clock frequency */
+NTV2_REG(ntv2_reg_hdmiout4_txclockfrequency,				0x1d52, 0x1d52, 0x1d92, 0x1d52, 0x1d52);	/* tx clock frequency */
+NTV2_REG(ntv2_reg_hdmiout4_fpllclockfrequency,				0x1d53, 0x1d53, 0x1d93, 0x1d53, 0x1d53);	/* fpll clock frequency */
 
-NTV2_REG(ntv2_reg_hdmiout4_audio_cts1,						0x1d54, 0x1d54, 0x1d54, 0x1d54);	/* audio clock cts 1 */
-NTV2_REG(ntv2_reg_hdmiout4_audio_cts2,						0x1d55, 0x1d55, 0x1d55, 0x1d55);	/* audio clock cts 2 */
-NTV2_REG(ntv2_reg_hdmiout4_audio_cts3,						0x1d56, 0x1d56, 0x1d56, 0x1d56);	/* audio clock cts 3 */
-NTV2_REG(ntv2_reg_hdmiout4_audio_cts4,						0x1d57, 0x1d57, 0x1d57, 0x1d57);	/* audio clock cts 4 */
-NTV2_REG(ntv2_reg_hdmiout4_audio_n,							0x1d58, 0x1d58, 0x1d58, 0x1d58);	/* audio clock n */
+NTV2_REG(ntv2_reg_hdmiout4_audio_cts1,						0x1d54, 0x1d54, 0x1d94, 0x1d54, 0x1d54);	/* audio clock cts 1 */
+NTV2_REG(ntv2_reg_hdmiout4_audio_cts2,						0x1d55, 0x1d55, 0x1d95, 0x1d55, 0x1d55);	/* audio clock cts 2 */
+NTV2_REG(ntv2_reg_hdmiout4_audio_cts3,						0x1d56, 0x1d56, 0x1d96, 0x1d56, 0x1d56);	/* audio clock cts 3 */
+NTV2_REG(ntv2_reg_hdmiout4_audio_cts4,						0x1d57, 0x1d57, 0x1d97, 0x1d57, 0x1d57);	/* audio clock cts 4 */
+NTV2_REG(ntv2_reg_hdmiout4_audio_n,							0x1d58, 0x1d58, 0x1d98, 0x1d58, 0x1d58);	/* audio clock n */
 
-NTV2_REG(ntv2_reg_hdmiout4_croplocation,					0x1d5e, 0x1d5e, 0x1d5e, 0x1d5e);	/* crop location */
+NTV2_REG(ntv2_reg_hdmiout4_croplocation,					0x1d5e, 0x1d5e, 0x1d9e, 0x1d5e, 0x1d5e);	/* crop location */
 	NTV2_FLD(ntv2_fld_hdmiout4_croplocation_start,				16,	 0);	/* crop start location */
 	NTV2_FLD(ntv2_fld_hdmiout4_croplocation_end,				16,	 16);	/* crop end location */
 
-NTV2_REG(ntv2_reg_hdmiout4_pixelcontrol,					0x1d5f, 0x1d5f, 0x1d5f, 0x1d5f);	/* pixel control */
+NTV2_REG(ntv2_reg_hdmiout4_pixelcontrol,					0x1d5f, 0x1d5f, 0x1d9f, 0x1d5f, 0x1d5e);	/* pixel control */
 	NTV2_FLD(ntv2_fld_hdmiout4_pixelcontrol_lineinterleave,		1,	0);		/* line interleave */
 		NTV2_CON(ntv2_con_hdmiout4_lineinterleave_disable,			0x0);		/* disable */
 		NTV2_CON(ntv2_con_hdmiout4_lineinterleave_enable,			0x1);		/* enable */
@@ -360,14 +360,14 @@ NTV2_REG(ntv2_reg_hdmiout4_pixelcontrol,					0x1d5f, 0x1d5f, 0x1d5f, 0x1d5f);	/*
 		NTV2_CON(ntv2_con_hdmiout4_cropmode_disable,				0x0);		/* disable */
 		NTV2_CON(ntv2_con_hdmiout4_cropmode_enable,					0x1);		/* enable */
 
-NTV2_REG(ntv2_reg_hdmiout4_i2ccontrol,						0x1d60, 0x1d60, 0x1d60, 0x1d60);	/* i2c control */
+NTV2_REG(ntv2_reg_hdmiout4_i2ccontrol,						0x1d60, 0x1d60, 0x1da0, 0x1d60, 0x1d60);	/* i2c control */
 	NTV2_FLD(ntv2_fld_hdmiout4_i2ccontrol_writedata,			8,	 0);	/* write data */
 	NTV2_FLD(ntv2_fld_hdmiout4_i2ccontrol_subaddress,			8,	 8);	/* i2c sub-address */
 	NTV2_FLD(ntv2_fld_hdmiout4_i2ccontrol_devaddress,			7,	 16);	/* i2c device address */
 	NTV2_FLD(ntv2_fld_hdmiout4_i2ccontrol_read,					1,	 23);	/* read (not write) */
 	NTV2_FLD(ntv2_fld_hdmiout4_i2ccontrol_readdata,				8,	 24);	/* read data */
 
-NTV2_REG(ntv2_reg_hdmiout4_i2cedid,							0x1d61, 0x1d61, 0x1d61, 0x1d61);	/* edid read control */
+NTV2_REG(ntv2_reg_hdmiout4_i2cedid,							0x1d61, 0x1d61, 0x1da1, 0x1d61, 0x1d61);	/* edid read control */
 	NTV2_FLD(ntv2_fld_hdmiout4_i2cedid_subaddress,				8,	 0);	/* edid sub-address */
 	NTV2_FLD(ntv2_fld_hdmiout4_i2cedid_readdata,				8,	 8);	/* read data */
 	NTV2_FLD(ntv2_fld_hdmiout4_i2cedid_update,					1,	 16);	/* trigger edid update */

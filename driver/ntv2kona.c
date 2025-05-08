@@ -1963,7 +1963,7 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context, NTV2Channel channel)
 		{
 			if (NTV2DeviceCanDo12gRouting(deviceID))
 			{
-				bFormatIsTSI = Get425FrameEnable(context, NTV2_CHANNEL1);
+				bFormatIsTSI = Get425FrameEnable(context, channel);
 			}
 		}
 		else
@@ -1980,7 +1980,7 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context, NTV2Channel channel)
 
 	is4k = false;
 	isLevelB = false;
-	GetXptHDMIOutInputSelect(context, &tempXptSelect);
+	GetXptHDMIOutInputSelect(context, channel, &tempXptSelect);
 	isSourceRGB = (tempXptSelect & 0x80) != 0 ? true : false;
 	useHDMI420Mode = false;
 	if (hdmiVersion == 2 || hdmiVersion == 4 || hdmiVersion == 5)

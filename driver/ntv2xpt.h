@@ -32,7 +32,7 @@ bool GetXptDuallinkInInputSelect(Ntv2SystemContext* context, NTV2Channel channel
 bool GetXptAnalogOutInputSelect(Ntv2SystemContext* context, NTV2OutputXptID* value);
 bool GetXptFrameBuffer1InputSelect(Ntv2SystemContext* context, NTV2OutputXptID* value);
 bool GetXptFrameBuffer2InputSelect(Ntv2SystemContext* context, NTV2OutputXptID* value);
-bool GetXptHDMIOutInputSelect(Ntv2SystemContext* context, NTV2OutputXptID* value);
+bool GetXptHDMIOutInputSelect(Ntv2SystemContext* context, NTV2Channel channel, NTV2OutputXptID* value);
 bool GetXptHDMIOutQ2InputSelect(Ntv2SystemContext* context, NTV2OutputXptID* value);
 bool GetXptHDMIOutQ3InputSelect(Ntv2SystemContext* context, NTV2OutputXptID* value);
 bool GetXptHDMIOutQ4InputSelect(Ntv2SystemContext* context, NTV2OutputXptID* value);
