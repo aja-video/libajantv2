@@ -731,7 +731,9 @@ int WriteReg(	ULWord deviceNumber,
 		case kVRegEveryFrameTaskFilter:
 			if (NTV2DeviceHasLPProductCode(pNTV2Params->_DeviceID))
 				ntv2WriteRegister (&pNTV2Params->systemContext, kRegLPFrameTask, registerValue);
-			// fallthrough
+			pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START] = registerValue;
+			break;
+
 		default:
 			// store virtual reg
             if (registerMask != NO_MASK)
