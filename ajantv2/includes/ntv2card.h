@@ -4638,46 +4638,188 @@ public:
 
 	AJA_VIRTUAL bool		SetHDMIV2TxBypass (const bool inBypass);
 
+	/**
+		@brief						Sets the video standard to use for the given HDMI output.
+		@param[in]	inNewValue		Specifies the new video standard to use.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
 	AJA_VIRTUAL bool		SetHDMIOutVideoStandard (const NTV2Standard inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	/**
+		@brief						Answers with the video standard being used for the given HDMI output.
+		@param[out]	outValue		Receives the video standard being used.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
 	AJA_VIRTUAL bool		GetHDMIOutVideoStandard (NTV2Standard & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
+	/**
+		@brief						Sets the video pixel sample structure to use for the given HDMI output.
+		@param[in]	inNewValue		Specifies the new video pixel sample structure to use.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
 	AJA_VIRTUAL bool		SetHDMIOutSampleStructure (const NTV2HDMISampleStructure inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	/**
+		@brief						Answers with the video pixel sample structure being used for the given HDMI output.
+		@param[out]	outValue		Receives the video pixel sample structure being used.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
 	AJA_VIRTUAL bool		GetHDMIOutSampleStructure (NTV2HDMISampleStructure & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
+	/**
+		@brief						Sets the video frame rate to use for the given HDMI output.
+		@param[in]	inNewValue		Specifies the new video frame rate to use.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
 	AJA_VIRTUAL bool		SetHDMIOutVideoFPS (const NTV2FrameRate inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	/**
+		@brief						Answers with the video frame rate being used for the given HDMI output.
+		@param[out]	outValue		Receives the video frame rate being used.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
 	AJA_VIRTUAL bool		GetHDMIOutVideoFPS (NTV2FrameRate & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
+	/**
+		@brief						Sets the video pixel value range limiting, if any, to use for the given HDMI output.
+		@param[in]	inNewValue		Specifies the new video pixel value range limiting to use.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
 	AJA_VIRTUAL bool		SetHDMIOutRange (const NTV2HDMIRange inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	/**
+		@brief						Answers with the video pixel value range limiting, if any, for the given HDMI output (SMPTE or none).
+		@param[out]	outValue		Receives the video pixel value range limiting being used.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
 	AJA_VIRTUAL bool		GetHDMIOutRange (NTV2HDMIRange & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
+	/**
+		@brief						Sets the audio channel count to use for the given HDMI output.
+		@param[in]	inNewValue		Specifies the new audio channel count to use.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
 	AJA_VIRTUAL bool		SetHDMIOutAudioChannels (const NTV2HDMIAudioChannels inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	/**
+		@brief						Answers with the audio channel count for the given HDMI output (2 or 8).
+		@param[out]	outValue		Receives the audio channel count being used.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
 	AJA_VIRTUAL bool		GetHDMIOutAudioChannels (NTV2HDMIAudioChannels & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
 	AJA_VIRTUAL bool		SetHDMIOutColorSpace (const NTV2HDMIColorSpace inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 	AJA_VIRTUAL bool		GetHDMIOutColorSpace (NTV2HDMIColorSpace & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	/**
+		@brief						Sets the color space to use for the given HDMI output.
+		@param[in]	inNewValue		Specifies the new color space to use.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
 	AJA_VIRTUAL bool		SetLHIHDMIOutColorSpace (const NTV2LHIHDMIColorSpace inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	/**
+		@brief						Answers with the color space of the given HDMI output (YCbCr or RGB).
+		@param[out]	outValue		Receives the color space being used.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
 	AJA_VIRTUAL bool		GetLHIHDMIOutColorSpace (NTV2LHIHDMIColorSpace & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
+	/**
+		@brief						Sets the bit depth to use for the given HDMI output.
+		@param[in]	inNewValue		Specifies the new bit depth to use.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
 	AJA_VIRTUAL bool		SetHDMIOutBitDepth (const NTV2HDMIBitDepth inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	/**
+		@brief						Answers with the bit depth of the given HDMI output (8, 10 or 12 bits).
+		@param[out]	outValue		Receives the bit depth being used.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
 	AJA_VIRTUAL bool		GetHDMIOutBitDepth (NTV2HDMIBitDepth & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
+	/**
+		@brief						Sets the protocol to use for the given HDMI output.
+		@param[in]	inNewValue		Specifies the new protocol to use.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
 	AJA_VIRTUAL bool		SetHDMIOutProtocol (const NTV2HDMIProtocol inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	/**
+		@brief						Answers with the protocol being used for the given HDMI output (DVI or HDMI).
+		@param[out]	outValue		Receives the protocol being used.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
 	AJA_VIRTUAL bool		GetHDMIOutProtocol (NTV2HDMIProtocol & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
 	AJA_VIRTUAL bool		SetHDMIOutForceConfig (const bool inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 	AJA_VIRTUAL bool		GetHDMIOutForceConfig (bool & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
+	/**
+		@brief						Sets if the given HDMI output should prefer 4:2:0 or not.
+		@param[in]	inNewValue		Specify true to prefer 4:2:0;  otherwise specify false.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
 	AJA_VIRTUAL bool		SetHDMIOutPrefer420 (const bool inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	/**
+		@brief						Answers if the given HDMI output prefers 4:2:0 video (rather than, say, 4:2:2 or higher).
+		@param[out]	outValue		Receives true if HDMI output prefers 4:2:0 video;  otherwise false.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
 	AJA_VIRTUAL bool		GetHDMIOutPrefer420 (bool & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
+	/**
+		@brief						Answers with the bit depth of the downstream device connected to the given HDMI output.
+		@param[out]	outValue		Receives the bit depth of the downstream HDMI device.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
 	AJA_VIRTUAL bool		GetHDMIOutDownstreamBitDepth (NTV2HDMIBitDepth & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
+	/**
+		@brief						Answers with the color space of the downstream device connected to the given HDMI output.
+		@param[out]	outValue		Receives the color space of the downstream HDMI device.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
 	AJA_VIRTUAL bool		GetHDMIOutDownstreamColorSpace (NTV2LHIHDMIColorSpace & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
 	/**
 		@brief						Sets the HDMI output's 2-channel audio source.
 		@param[in]	inNewValue		Specifies the audio channels from the given Audio System to be used.
 		@param[in]	inAudioSystem	Specifies the Audio System that will supply audio samples to the HDMI output. Defaults to NTV2_AUDIOSYSTEM_1.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
 		@return						True if successful;	 otherwise false.
 	**/
 	AJA_VIRTUAL bool	SetHDMIOutAudioSource2Channel (const NTV2AudioChannelPair inNewValue,
@@ -4688,6 +4830,8 @@ public:
 		@brief						Answers with the HDMI output's current 2-channel audio source.
 		@param[out] outValue		Receives the audio channels that are currently being used.
 		@param[out] outAudioSystem	Receives the Audio System that is currently supplying audio samples to the HDMI output.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
 		@return						True if successful;	 otherwise false.
 	**/
 	AJA_VIRTUAL bool	GetHDMIOutAudioSource2Channel (NTV2AudioChannelPair & outValue,
@@ -4698,6 +4842,8 @@ public:
 		@brief						Changes the HDMI output's 8-channel audio source.
 		@param[in]	inNewValue		Specifies the audio channels from the given Audio System to be used.
 		@param[in]	inAudioSystem	Specifies the Audio System that will supply audio samples to the HDMI output. Defaults to NTV2_AUDIOSYSTEM_1.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
 		@return						True if successful;	 otherwise false.
 	**/
 	AJA_VIRTUAL bool	SetHDMIOutAudioSource8Channel (const NTV2Audio8ChannelSelect inNewValue,
@@ -4708,6 +4854,8 @@ public:
 		@brief						Answers with the HDMI output's current 8-channel audio source.
 		@param[out] outValue		Receives the audio channels that are currently being used.
 		@param[out] outAudioSystem	Receives the Audio System that is currently supplying audio samples to the HDMI output.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
 		@return						True if successful;	 otherwise false.
 	**/
 	AJA_VIRTUAL bool	GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValue,
@@ -4717,8 +4865,8 @@ public:
 	/**
 		@brief						Answers with the HDMI output's current audio channel 3/4 swap setting.
 		@param[out] outIsSwapped	Receives true if channels 3 & 4 are currently being swapped;  otherwise false.
-		@param[in]	inWhichHDMIOut	Optionally specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
-									Defaults to the first HDMI output.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
 		@return						True if successful;	 otherwise false.
 		@see						CNTV2Card::SetHDMIOutAudioChannel34Swap
 	**/
@@ -4727,8 +4875,8 @@ public:
 	/**
 		@brief						Sets the HDMI output's audio channel 3/4 swap state.
 		@param[in]	inIsSwapped		Specify true to swap channels 3 & 4;  otherwise false.
-		@param[in]	inWhichHDMIOut	Optionally specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
-									Defaults to the first HDMI output.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
 		@return						True if successful;	 otherwise false.
 		@see						CNTV2Card::GetHDMIOutAudioChannel34Swap
 	**/
@@ -4737,6 +4885,8 @@ public:
 	/**
 		@brief						Sets the HDMI output's audio rate
 		@param[in]	inNewValue		Specifies the audio rate
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
 		@return						True if successful;	 otherwise false.
 	**/
 	AJA_VIRTUAL bool	SetHDMIOutAudioRate (const NTV2AudioRate inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
@@ -4744,6 +4894,8 @@ public:
 	/**
 		@brief						Answers with the HDMI output's current audio rate.
 		@param[out] outValue		Receives the HDMI output's current audio rate.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
 		@return						True if successful;	 otherwise false.
 	**/
 	AJA_VIRTUAL bool	GetHDMIOutAudioRate (NTV2AudioRate & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
@@ -4751,6 +4903,8 @@ public:
 	/**
 		@brief						Sets the HDMI output's audio format
 		@param[in]	inNewValue		Specifies the audio format
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
 		@return						True if successful;	 otherwise false.
 	**/
 	AJA_VIRTUAL bool	SetHDMIOutAudioFormat (const NTV2AudioFormat inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
@@ -4758,6 +4912,8 @@ public:
 	/**
 		@brief						Answers with the HDMI output's current audio format.
 		@param[out] outValue		Receives the HDMI output's current audio format.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
 		@return						True if successful;	 otherwise false.
 	**/
 	AJA_VIRTUAL bool	GetHDMIOutAudioFormat (NTV2AudioFormat & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
@@ -4765,6 +4921,8 @@ public:
 	/**
 		@brief						Enables or disables override of HDMI parameters.
 		@param[in]	inEnable		Specify true to enable HDMI user-override;	otherwise false to disable it.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
 		@return						True if successful;	 otherwise false.
 	**/
 	AJA_VIRTUAL bool	EnableHDMIOutUserOverride (const bool inEnable, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
@@ -4772,6 +4930,8 @@ public:
 	/**
 		@brief						Answers if override of HDMI parameters is enabled or not.
 		@param[out] outIsEnabled	Receives true if enabled;  otherwise false.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
 		@return						True if successful;	 otherwise false.
 	**/
 	AJA_VIRTUAL bool	GetEnableHDMIOutUserOverride (bool & outIsEnabled, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
@@ -4779,6 +4939,8 @@ public:
 	/**
 		@brief						Controls the 4k/2k -> UHD/HD HDMI center cropping feature.
 		@param[in]	inEnable		Specify true to enable center cropping;	 otherwise false to disable it.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
 		@return						True if successful;	 otherwise false.
 	**/
 	AJA_VIRTUAL bool	EnableHDMIOutCenterCrop (const bool inEnable, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
@@ -4786,6 +4948,8 @@ public:
 	/**
 		@brief						Answers if the HDMI 4k/2k -> UHD/HD center cropping is enabled or not.
 		@param[out] outIsEnabled	Receives true if center cropping is enabled;  otherwise false.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
 		@return						True if successful;	 otherwise false.
 	**/
 	AJA_VIRTUAL bool	GetEnableHDMIOutCenterCrop (bool & outIsEnabled, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
@@ -4841,7 +5005,9 @@ public:
 	/**
 		@brief		Answers with the current HDMI output status.
 		@return		True if successful; otherwise false.
-		@param[out] outStatus	Receives the current status of the HDMI output.
+		@param[out] outStatus		Receives the current status of the HDMI output.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
 	**/
 	AJA_VIRTUAL bool		GetHDMIOutStatus (NTV2HDMIOutputStatus & outStatus, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 16.1
 
