@@ -311,6 +311,8 @@ OemAutoCirculate(ULWord deviceNumber, NTV2Crosspoint channelSpec)
 	bool syncProgressive = false;
 	bool fieldMode = false;
 	bool syncField0 = false;
+
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 
     if (ILLEGAL_CHANNELSPEC(channelSpec))
@@ -1764,6 +1766,7 @@ AutoCirculateTransfer(ULWord deviceNumber, AUTOCIRCULATE_TRANSFER_COMBO_STRUCT *
 	bool transferPending = false;
 	unsigned long flags = 0;
 	
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 
 	if (!(pNTV2Params = getNTV2Params(deviceNumber)))
@@ -2279,6 +2282,7 @@ AutoCirculateTransfer_Ex(ULWord deviceNumber, PDMA_PAGE_ROOT pPageRoot, AUTOCIRC
 	bool transferPending = false;
 	unsigned long flags = 0;
 
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 	
 #ifdef AUTO_REPORT
@@ -2947,6 +2951,8 @@ oemAutoCirculateTransferFields(ULWord deviceNumber,
 	NTV2FrameGeometry fbGeometry = NTV2_FG_720x486;
 	NTV2FrameBufferFormat fbFormat = NTV2_FBF_10BIT_YCBCR;
 	Ntv2SystemContext systemContext;
+
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 
 	if ((pDmaParams->frameOffset != 0) || 
@@ -3146,6 +3152,8 @@ OemAutoCirculateInit (ULWord deviceNumber,
 	LWord loopCount = 0;
 	NTV2Channel ACChannel = NTV2_CHANNEL1;
 	INTERNAL_AUTOCIRCULATE_STRUCT* pAuto;
+    
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 
 	if (!(pNTV2Params = getNTV2Params(deviceNumber)))
@@ -3467,6 +3475,8 @@ OemAutoCirculateStart(ULWord deviceNumber, NTV2Crosspoint channelSpec, ULWord64 
 	NTV2Channel channel = NTV2_CHANNEL1;
 	NTV2Channel ACChannel = NTV2_CHANNEL1;
 	NTV2Crosspoint pautoChannelSpec;
+    
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 
 	if (!(pNTV2Params = getNTV2Params(deviceNumber)))
@@ -3657,6 +3667,8 @@ OemAutoCirculateAbort (ULWord deviceNumber, NTV2Crosspoint channelSpec)
 	INTERNAL_AUTOCIRCULATE_STRUCT *pAutoPrimary;
 	Ntv2SystemContext systemContext;
 	LWord loopCount = 0;
+
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 
 	if (!(pNTV2Params = getNTV2Params(deviceNumber)))
@@ -3750,6 +3762,8 @@ OemAutoCirculatePause (ULWord deviceNumber, NTV2Crosspoint channelSpec, bool bPl
 	ULWord csIndex = 0;
 	LWord loopCount = 0;
 	Ntv2SystemContext systemContext;
+
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 
 	if (!(pNTV2Params = getNTV2Params(deviceNumber)))
@@ -4179,6 +4193,8 @@ OemBeginAutoCirculateTransfer_Ex (ULWord deviceNumber,
 								  INTERNAL_AUTOCIRCULATE_STRUCT *pAuto)
 {
 	Ntv2SystemContext systemContext;
+
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 
 	pAuto->transferFrame = frameNumber;
@@ -4549,6 +4565,8 @@ IsField0(ULWord deviceNumber, NTV2Crosspoint channelSpec)
 	ULWord statusRegister = ReadStatusRegister(deviceNumber);
 	ULWord status2Register = ReadStatus2Register(deviceNumber);
 	Ntv2SystemContext systemContext;
+    
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 
     switch (channelSpec)
@@ -5051,6 +5069,8 @@ GetNumFrameBuffers(ULWord deviceNumber, ULWord boardID)
 	ULWord channel2Compressed;
 	
 	Ntv2SystemContext systemContext;
+
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 	
 	frameGeometry = GetFrameGeometry(&systemContext, NTV2_CHANNEL1);
@@ -5920,6 +5940,7 @@ GetAudioSamplesPerFrame(ULWord deviceNumber, NTV2AudioSystem audioSystem, ULWord
 
 	NTV2Channel channel = NTV2_CHANNEL1;
 	
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 	
 	if (IsMultiFormatActive(&systemContext))
@@ -6731,6 +6752,8 @@ oemAutoCirculateCanDoFieldMode(ULWord deviceNumber, NTV2Crosspoint channelSpec)
 	NTV2Channel syncChannel = NTV2_CHANNEL1;
 	bool fieldMode = false;
 	NTV2VideoFormat vidFormat = NTV2_FORMAT_525_5994;
+
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 
 	if(IsMultiFormatActive(&systemContext))

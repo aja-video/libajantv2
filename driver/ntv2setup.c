@@ -205,10 +205,36 @@ void ntv2_setup_monitor_shared(void* data)
 				SetLHiAnalogOutputStandard(systemContext);
 			}
 
-			if (NTV2DeviceGetNumHDMIVideoOutputs(deviceID) > 0)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+			switch (NTV2DeviceGetNumHDMIVideoOutputs(deviceID))
 			{
-				SetHDMIOutputStandard(systemContext);
+			case 8:
+				SetHDMIOutputStandard(systemContext, NTV2_CHANNEL8);
+				// fallthrough
+			case 7:
+				SetHDMIOutputStandard(systemContext, NTV2_CHANNEL7);
+				// fallthrough
+			case 6:
+				SetHDMIOutputStandard(systemContext, NTV2_CHANNEL6);
+				// fallthrough
+			case 5:
+				SetHDMIOutputStandard(systemContext, NTV2_CHANNEL5);
+				// fallthrough
+			case 4:
+				SetHDMIOutputStandard(systemContext, NTV2_CHANNEL4);
+				// fallthrough
+			case 3:
+				SetHDMIOutputStandard(systemContext, NTV2_CHANNEL3);
+				// fallthrough
+			case 2:
+				SetHDMIOutputStandard(systemContext, NTV2_CHANNEL2);
+				// fallthrough
+			default:
+				SetHDMIOutputStandard(systemContext, NTV2_CHANNEL1);
+				break;
 			}
+#pragma GCC diagnostic pop
 
 			for (i = 0; i < NTV2DeviceGetNumVideoChannels(deviceID); i++)
 			{

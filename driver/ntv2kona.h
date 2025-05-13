@@ -347,7 +347,7 @@ bool GetSDIIn12GEnable(Ntv2SystemContext* context, NTV2Channel channel);
 ///////////////////////
 //hdmi routines
 bool SetLHiHDMIOutputStandard(Ntv2SystemContext* context);
-bool SetHDMIOutputStandard(Ntv2SystemContext* context);
+bool SetHDMIOutputStandard(Ntv2SystemContext* context, NTV2Channel channel);
 bool SetHDMIV2LevelBEnable(Ntv2SystemContext* context, bool enable);
 bool SetMultiRasterInputStandard(Ntv2SystemContext* context, NTV2Standard mrStandard, NTV2Channel mrChannel);
 bool SetMultiRasterOutputStandard(Ntv2SystemContext* context, NTV2Standard mrStandard);
@@ -357,10 +357,10 @@ bool IsMultiRasterEnabled(Ntv2SystemContext* context);
 
 ///////////////////////
 //hdr routines
-bool EnableHDMIHDR(Ntv2SystemContext* context, bool inEnableHDMIHDR);
-bool GetEnableHDMIHDR(Ntv2SystemContext* context);
-bool SetHDRData(Ntv2SystemContext* context, HDRDriverValues inRegisterValues);
-bool GetHDRData(Ntv2SystemContext* context, HDRDriverValues* inRegisterValues);
+bool EnableHDMIHDR(Ntv2SystemContext* context, bool inEnableHDMIHDR, NTV2Channel channel);
+bool GetEnableHDMIHDR(Ntv2SystemContext* context, NTV2Channel channel);
+bool SetHDRData(Ntv2SystemContext* context, HDRDriverValues inRegisterValues, NTV2Channel channel);
+bool GetHDRData(Ntv2SystemContext* context, HDRDriverValues* inRegisterValues, NTV2Channel channel);
 
 ///////////////////////
 //analog routines

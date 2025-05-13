@@ -59,7 +59,7 @@ public:
 						CRP188 (ULWord frames, const TimecodeFormat tcFormat = kTCFormat30fps);
 	virtual				~CRP188();
 	void				Init ();
-	bool				operator==( const CRP188& s);
+	bool				operator == (const CRP188& s) const;
 
 	// Setters
 	void				SetRP188 (ULWord ulFrms, ULWord ulSecs, ULWord ulMins, ULWord ulHrs,
@@ -137,7 +137,7 @@ public:
 	bool				BurnTC (char *pBaseVideoAddress, int rowBytes, TimecodeBurnMode burnMode, int64_t frameCount = kDefaultFrameCount, bool bDisplay60_50fpsAs30_25 = false);
 	void				CopyDigit (char *pDigit, int digitWidth, int digitHeight, char *pFrameBuff, int fbRowBytes);
 	std::string			GetTimeCodeString(bool bDisplay60_50fpsAs30_25 = false);
-	
+
 private:
 	void				ConvertTcStrToVal (void);	// converts _sHMSF to _ulVal
 	void				ConvertTcStrToReg (void);	// converts _sHMSF to _rp188

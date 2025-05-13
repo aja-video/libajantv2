@@ -240,7 +240,10 @@ void GetActiveFrameBufferSize(ULWord deviceNumber, NTV2FrameDimensions * frameBu
 {
 	Ntv2SystemContext systemContext;
 	NTV2Standard  standard;
+    
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
+
 	standard = GetStandard(&systemContext, NTV2_CHANNEL1);
 
 	switch ( standard )
@@ -753,6 +756,13 @@ int WriteReg(	ULWord deviceNumber,
 
 		default:
 			// store virtual reg
+            if (registerMask != NO_MASK)
+            {
+                oldValue = pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START];
+                oldValue &= ~registerMask;
+                registerValue <<= registerShift;
+                registerValue |= oldValue;
+            }
 			pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START] = registerValue;
 			break;
 
@@ -763,8 +773,13 @@ int WriteReg(	ULWord deviceNumber,
 		return status;
 	}
 
-	MSG("%s: BUG BUG %s: Attempt to write register %u with value 0x%x was not handled\n",
-		pNTV2Params->name, __FUNCTION__, registerNumber, registerValue);
+    if ((registerNumber != kRegPWMFanControl) &&
+        (registerNumber != kRegPWMFanStatus))
+    {
+        MSG("%s: BUG BUG %s: Attempt to write register %u with value 0x%x was not handled\n",
+            pNTV2Params->name, __FUNCTION__, registerNumber, registerValue);
+    }
+    
     return -EINVAL;
 }
 
@@ -854,13 +869,13 @@ int ReadReg(    ULWord deviceNumber,
 		*registerValue = 0;
         return -EACCES;
 	}
-
+#if 0
 	if (registerNumber == kRegBoardID)
     {
         *registerValue = pNTV2Params->_DeviceID;
         return 0;
     }
-
+#endif
 	address = GetRegisterAddress( deviceNumber, registerNumber);
 
 
@@ -1150,16 +1165,26 @@ int ReadReg(    ULWord deviceNumber,
 		case kVRegPCILinkWidth:
 			*registerValue = ntv2ReadPciLinkWidth(&pNTV2Params->systemContext);
 			return 0;
-			
+
 		default:
 			// return virtual reg
-			*registerValue = pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START];
+			value = pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START];
+            if (registerMask != NO_MASK)
+            {
+                value &= registerMask;
+                value >>= registerShift;
+            }
+            *registerValue = value;
 			return 0;
 		} // switch
 	}
 
-	MSG("%s: BUG BUG: Attempt to read register %u was not handled\n",
-		pNTV2Params->name, registerNumber );
+    if ((registerNumber != kRegPWMFanControl) &&
+        (registerNumber != kRegPWMFanStatus))
+    {
+        MSG("%s: BUG BUG: Attempt to read register %u was not handled\n",
+            pNTV2Params->name, registerNumber );
+    }
 
 	*registerValue = 0xFFFFFFFF;
     return -EINVAL;
@@ -1219,6 +1244,8 @@ void SetRegisterWriteMode(ULWord deviceNumber, NTV2Channel channel, NTV2Register
 {
 	Ntv2SystemContext systemContext;
 	ULWord regNum = 0;
+    
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 	
 	if (!IsMultiFormatActive(&systemContext))
@@ -1236,6 +1263,8 @@ NTV2RegisterWriteMode GetRegisterWriteMode(ULWord deviceNumber, NTV2Channel chan
 {
 	Ntv2SystemContext systemContext;
 	ULWord regNum = 0;
+    
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 	
 	if (!IsMultiFormatActive(&systemContext))
@@ -1568,8 +1597,7 @@ ULWord ReadDeviceIDRegister(ULWord deviceNumber)
 	if (getNTV2Params(deviceNumber)->pci_device == NTV2_DEVICE_ID_IO4KPLUS)
 		return DEVICE_ID_IO4KPLUS;
 
-//	return  READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pDeviceID);
-    return DEVICE_ID_KONAIP_25G;
+	return  READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pDeviceID);
 }
 
 // NTV2 DMA functions

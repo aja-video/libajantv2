@@ -4079,11 +4079,11 @@ NTV2_STRUCT_BEGIN(NTV2RegInfo)
 									{registerNumber = registerValue = registerMask	= registerShift = 0xFFFFFFFF;}
 
 		/**
-			@return True if I'm considered "valid", or false if my register number, value,
-					mask and shift values are all 0xFFFFFFFF.
+			@return True if I'm considered "valid" -- i.e. non-zero mask and < 32 bits of shift;
+					or false if all my values are 0xFFFFFFFF, or if my mask is zero, or my shift > 31.
 		**/
-		inline bool		IsValid (void) const	{return regNum() != 0xFFFFFFFF || value() != 0xFFFFFFFF
-														|| mask() != 0xFFFFFFFF || shift() != 0xFFFFFFFF;}
+		inline bool		IsValid (void) const	{return !(regNum() == 0xFFFFFFFF && value() == 0xFFFFFFFF && mask() == 0xFFFFFFFF && shift() == 0xFFFFFFFF)
+														&& mask() && shift() < 32;}
 
 		/**
 			@return		True if I'm identical to the right-hand-side NTV2RegInfo.

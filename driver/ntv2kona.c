@@ -90,6 +90,19 @@ static const ULWord    gChannelToVPIDColorimetry[]			= {	kVRegNTV2VPIDColorimetr
 static const ULWord    gChannelToVPIDLuminance[]			= {	kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance,
 																kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance, 0 };
 
+// hdmi version 6 mulitple output virtual registers
+static const ULWord gHDMIChannelToOutControlVRegNum [] =	{ kVRegHDMIOutControl1, kVRegHDMIOutControl2, kVRegHDMIOutControl3, kVRegHDMIOutControl4, kVRegHDMIOutControl1, kVRegHDMIOutControl1, kVRegHDMIOutControl1, kVRegHDMIOutControl1 };
+static const ULWord gHDMIChannelToInputStatusVRegNum [] =	{ kVRegHDMIInputStatus1, kVRegHDMIInputStatus2, kVRegHDMIInputStatus3, kVRegHDMIInputStatus4, kVRegHDMIInputStatus1, kVRegHDMIInputStatus1, kVRegHDMIInputStatus1, kVRegHDMIInputStatus1 };
+static const ULWord gHDMIChannelToInputControlVRegNum [] =	{ kVRegHDMIInputControl1, kVRegHDMIInputControl2, kVRegHDMIInputControl3, kVRegHDMIInputControl4, kVRegHDMIInputControl1, kVRegHDMIInputControl1, kVRegHDMIInputControl1, kVRegHDMIInputControl1 };
+static const ULWord gHDMIChannelToOutStatusVRegNum [] =	{ kVRegHDMIOutStatus1, kVRegHDMIOutStatus2, kVRegHDMIOutStatus3, kVRegHDMIOutStatus4, kVRegHDMIOutStatus1, kVRegHDMIOutStatus1, kVRegHDMIOutStatus1, kVRegHDMIOutStatus1 };
+static const ULWord gHDMIChannelToOutHDRGreenPrimaryVRegNum [] =	{ kVRegHDMIOutHDRGreenPrimary1, kVRegHDMIOutHDRGreenPrimary2, kVRegHDMIOutHDRGreenPrimary3, kVRegHDMIOutHDRGreenPrimary4, kVRegHDMIOutHDRGreenPrimary1, kVRegHDMIOutHDRGreenPrimary1, kVRegHDMIOutHDRGreenPrimary1, kVRegHDMIOutHDRGreenPrimary1 };
+static const ULWord gHDMIChannelToOutHDRRedPrimaryVRegNum [] =	{ kVRegHDMIOutHDRRedPrimary1, kVRegHDMIOutHDRRedPrimary2, kVRegHDMIOutHDRRedPrimary3, kVRegHDMIOutHDRRedPrimary4, kVRegHDMIOutHDRRedPrimary1, kVRegHDMIOutHDRRedPrimary1, kVRegHDMIOutHDRRedPrimary1, kVRegHDMIOutHDRRedPrimary1 };
+static const ULWord gHDMIChannelToOutHDRBluePrimaryVRegNum [] =	{ kVRegHDMIOutHDRBluePrimary1, kVRegHDMIOutHDRBluePrimary2, kVRegHDMIOutHDRBluePrimary3, kVRegHDMIOutHDRBluePrimary4, kVRegHDMIOutHDRBluePrimary1, kVRegHDMIOutHDRBluePrimary1, kVRegHDMIOutHDRBluePrimary1, kVRegHDMIOutHDRBluePrimary1 };
+static const ULWord gHDMIChannelToOutHDRWhitePointVRegNum [] =	{ kVRegHDMIOutHDRWhitePoint1, kVRegHDMIOutHDRWhitePoint2, kVRegHDMIOutHDRWhitePoint3, kVRegHDMIOutHDRWhitePoint4, kVRegHDMIOutHDRWhitePoint1, kVRegHDMIOutHDRWhitePoint1, kVRegHDMIOutHDRWhitePoint1, kVRegHDMIOutHDRWhitePoint1 };
+static const ULWord gHDMIChannelToOutHDRMasterLuminanceVRegNum [] =	{ kVRegHDMIOutHDRMasterLuminance1, kVRegHDMIOutHDRMasterLuminance2, kVRegHDMIOutHDRMasterLuminance3, kVRegHDMIOutHDRMasterLuminance4, kVRegHDMIOutHDRMasterLuminance1, kVRegHDMIOutHDRMasterLuminance1, kVRegHDMIOutHDRMasterLuminance1, kVRegHDMIOutHDRMasterLuminance1 };
+static const ULWord gHDMIChannelToOutHDRLightLevelVRegNum [] =	{ kVRegHDMIOutHDRLightLevel1, kVRegHDMIOutHDRLightLevel2, kVRegHDMIOutHDRLightLevel3, kVRegHDMIOutHDRLightLevel4, kVRegHDMIOutHDRLightLevel1, kVRegHDMIOutHDRLightLevel1, kVRegHDMIOutHDRLightLevel1, kVRegHDMIOutHDRLightLevel1 };
+static const ULWord gHDMIChannelToOutHDRControlVRegNum [] =	{ kVRegHDMIOutHDRControl1, kVRegHDMIOutHDRControl2, kVRegHDMIOutHDRControl3, kVRegHDMIOutHDRControl4, kVRegHDMIOutHDRControl1, kVRegHDMIOutHDRControl1, kVRegHDMIOutHDRControl1, kVRegHDMIOutHDRControl1 };
+
 bool IsKonaIPDevice(Ntv2SystemContext* inSystemContext);
 
 #if defined(AJAMacDext)
@@ -1887,20 +1900,20 @@ bool SetLHiHDMIOutputStandard(Ntv2SystemContext* context)
 	return true;
 }
 
-bool SetHDMIOutputStandard(Ntv2SystemContext* context)
+bool SetHDMIOutputStandard(Ntv2SystemContext* context, NTV2Channel channel)
 {
 	NTV2OutputXptID xptSelect;
 	NTV2OutputXptID tempXptSelect;
 	HDRDriverValues hdrRegValues;
 	NTV2DeviceID deviceID;
-	ULWord hdmiVersion;
-	NTV2Standard currentStandard;
-	NTV2FrameRate currentFrameRate;
-	ULWord currentSampling;
-	ULWord currentLevelBMode;
-	ULWord currentDecimateMode;
-	ULWord currentSourceRGB;
-	ULWord levelBMode;
+	ULWord hdmiVersion = 0;
+	NTV2Standard currentStandard = NTV2_STANDARD_1080;
+	NTV2FrameRate currentFrameRate = NTV2_FRAMERATE_UNKNOWN;
+	ULWord currentSampling = 0;
+	ULWord currentLevelBMode = 0;
+	ULWord currentDecimateMode = 0;
+	ULWord currentSourceRGB = 0;
+	ULWord levelBMode = 0;
 	NTV2Standard standard = NTV2_NUM_STANDARDS;
 	NTV2VideoFormat videoFormat = NTV2_FORMAT_UNKNOWN;
 	NTV2FrameRate videoRate = NTV2_FRAMERATE_UNKNOWN;
@@ -1917,14 +1930,19 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context)
 	deviceID = (NTV2DeviceID)ntv2ReadRegister(context, kRegBoardID);
 	hdmiVersion = NTV2DeviceGetHDMIVersion(deviceID);
 	
-	if (hdmiVersion == 0)
+    if (hdmiVersion == 0)
 		return false;
 	if (hdmiVersion == 1)
 		return SetLHiHDMIOutputStandard(context);
+    if (hdmiVersion < 6)
+        channel = NTV2_CHANNEL1;
+
+    if (channel >= NTV2DeviceGetNumHDMIVideoOutputs(deviceID)) {
+        return false; }
 
 	memset(&hdrRegValues, 0, sizeof(HDRDriverValues));
 
-	if (!FindHDMIOutputSource(context, &xptSelect, NTV2_CHANNEL1))
+	if (!FindHDMIOutputSource(context, &xptSelect, channel))
 	{
 		return false;
 	}
@@ -1945,7 +1963,7 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context)
 		{
 			if (NTV2DeviceCanDo12gRouting(deviceID))
 			{
-				bFormatIsTSI = Get425FrameEnable(context, NTV2_CHANNEL1);
+				bFormatIsTSI = Get425FrameEnable(context, channel);
 			}
 		}
 		else
@@ -1962,7 +1980,7 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context)
 
 	is4k = false;
 	isLevelB = false;
-	GetXptHDMIOutInputSelect(context, &tempXptSelect);
+	GetXptHDMIOutInputSelect(context, channel, &tempXptSelect);
 	isSourceRGB = (tempXptSelect & 0x80) != 0 ? true : false;
 	useHDMI420Mode = false;
 	if (hdmiVersion == 2 || hdmiVersion == 4 || hdmiVersion == 5)
@@ -2033,10 +2051,16 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context)
 			}
 		}
 	}
+    else if (hdmiVersion == 6)
+    {
+		if (NTV2DeviceCanDo12gRouting(deviceID) && bFormatIsTSI)
+			is4k = true;
+    }
 
 	standard = NTV2_IS_PSF_VIDEO_FORMAT(videoFormat) ? NTV2_STANDARD_1080p : GetNTV2StandardFromVideoFormat(videoFormat);
 	hdmiv2std = NTV2_STANDARD_INVALID;
 	sampling = NTV2_HDMI_422;
+
 	switch(standard)
 	{
 	case NTV2_STANDARD_1080:
@@ -2063,7 +2087,7 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context)
 		hdmiv2std = NTV2_STANDARD_625;
 		break;
 	case NTV2_STANDARD_1080p:
-		hdmiv2fg = GetFrameGeometry(context, NTV2_CHANNEL1);
+		hdmiv2fg = GetFrameGeometry(context, channel);
 		if (is4k)
 		{
 			if (hdmiVersion >= 4)
@@ -2169,12 +2193,26 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context)
 
 	levelBMode = isLevelB ? 1 : 0;
 
-	ntv2ReadRegisterMS(context, kRegHDMIOutControl, (ULWord*)&currentStandard, kRegMaskHDMIOutV2VideoStd, kRegShiftHDMIOutVideoStd);
-	ntv2ReadRegisterMS(context, kRegHDMIOutControl, (ULWord*)&currentFrameRate, kLHIRegMaskHDMIOutFPS, kLHIRegShiftHDMIOutFPS);
-	ntv2ReadRegisterMS(context, kRegHDMIOutControl, (ULWord*)&currentSampling, kRegMaskHDMISampling, kRegShiftHDMISampling);
-	ntv2ReadRegisterMS(context, kRegHDMIOutControl, (ULWord*)&currentSourceRGB, kRegMaskSourceIsRGB, kRegShiftSourceIsRGB);
-	ntv2ReadRegisterMS(context, kRegRasterizerControl, (ULWord*)&currentLevelBMode, kRegMaskRasterLevelB, kRegShiftRasterLevelB);
-	ntv2ReadRegisterMS(context, kRegRasterizerControl, (ULWord*)&currentDecimateMode, kRegMaskRasterDecimate, kRegShiftRasterDecimate);
+	if (hdmiVersion < 6)
+    {    
+        ntv2ReadRegisterMS(context, kRegHDMIOutControl, (ULWord*)&currentStandard, kRegMaskHDMIOutV2VideoStd, kRegShiftHDMIOutVideoStd);
+        ntv2ReadRegisterMS(context, kRegHDMIOutControl, (ULWord*)&currentFrameRate, kLHIRegMaskHDMIOutFPS, kLHIRegShiftHDMIOutFPS);
+        ntv2ReadRegisterMS(context, kRegHDMIOutControl, (ULWord*)&currentSampling, kRegMaskHDMISampling, kRegShiftHDMISampling);
+        ntv2ReadRegisterMS(context, kRegHDMIOutControl, (ULWord*)&currentSourceRGB, kRegMaskSourceIsRGB, kRegShiftSourceIsRGB);
+        ntv2ReadRegisterMS(context, kRegRasterizerControl, (ULWord*)&currentLevelBMode, kRegMaskRasterLevelB, kRegShiftRasterLevelB);
+        ntv2ReadRegisterMS(context, kRegRasterizerControl, (ULWord*)&currentDecimateMode, kRegMaskRasterDecimate, kRegShiftRasterDecimate);
+    }
+    else
+    {
+        ntv2ReadRegisterMS(context, gHDMIChannelToOutControlVRegNum[channel], (ULWord*)&currentStandard,
+                           kRegMaskHDMIOutV2VideoStd, kRegShiftHDMIOutVideoStd);
+        ntv2ReadRegisterMS(context, gHDMIChannelToOutControlVRegNum[channel], (ULWord*)&currentFrameRate,
+                           kLHIRegMaskHDMIOutFPS, kLHIRegShiftHDMIOutFPS);
+        ntv2ReadRegisterMS(context, gHDMIChannelToOutControlVRegNum[channel], (ULWord*)&currentSampling,
+                           kRegMaskHDMISampling, kRegShiftHDMISampling);
+        ntv2ReadRegisterMS(context, gHDMIChannelToOutControlVRegNum[channel], (ULWord*)&currentSourceRGB,
+                           kRegMaskSourceIsRGB, kRegShiftSourceIsRGB);
+    }
 
 	if(currentDecimateMode != 0)
 	{
@@ -2223,19 +2261,49 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context)
 		(currentLevelBMode != levelBMode) ||
 		(currentSampling != sampling))
 	{
-		ntv2WriteRegisterMS(context, kRegHDMIOutControl, (ULWord)hdmiv2std, kRegMaskHDMIOutV2VideoStd, kRegShiftHDMIOutVideoStd);
-		ntv2WriteRegisterMS(context, kRegHDMIOutControl, videoRate, kLHIRegMaskHDMIOutFPS, kLHIRegShiftHDMIOutFPS);
-		ntv2WriteRegisterMS(context, kRegHDMIOutControl, sampling, kRegMaskHDMISampling, kRegShiftHDMISampling);
-
-		SetHDMIV2LevelBEnable(context, levelBMode ? true : false);
+        if (hdmiVersion < 6)
+        {
+            ntv2WriteRegisterMS(context, kRegHDMIOutControl, (ULWord)hdmiv2std, kRegMaskHDMIOutV2VideoStd, kRegShiftHDMIOutVideoStd);
+            ntv2WriteRegisterMS(context, kRegHDMIOutControl, videoRate, kLHIRegMaskHDMIOutFPS, kLHIRegShiftHDMIOutFPS);
+            ntv2WriteRegisterMS(context, kRegHDMIOutControl, sampling, kRegMaskHDMISampling, kRegShiftHDMISampling);
+            SetHDMIV2LevelBEnable(context, levelBMode ? true : false);
+        }
+        else
+        {
+            ntv2WriteRegisterMS(context, gHDMIChannelToOutControlVRegNum[channel], (ULWord)hdmiv2std,
+                                kRegMaskHDMIOutV2VideoStd, kRegShiftHDMIOutVideoStd);
+            ntv2WriteRegisterMS(context, gHDMIChannelToOutControlVRegNum[channel], videoRate,
+                                kLHIRegMaskHDMIOutFPS, kLHIRegShiftHDMIOutFPS);
+            ntv2WriteRegisterMS(context, gHDMIChannelToOutControlVRegNum[channel], sampling,
+                                kRegMaskHDMISampling, kRegShiftHDMISampling);
+        }
 	}
 
-	if (sampling == NTV2_HDMI_420)
-		ntv2WriteRegisterMS(context, kRegHDMIOutControl, 0, kLHIRegMaskHDMIOutColorSpace, kLHIRegShiftHDMIOutColorSpace);
-	else
-	{
-		if (hdmiVersion >= 4)
-			ntv2WriteRegisterMS(context, kRegHDMIOutControl, (isSourceRGB? 1 : 0), kLHIRegMaskHDMIOutColorSpace, kLHIRegShiftHDMIOutColorSpace);
+    if (hdmiVersion < 6)
+    {
+        if (sampling == NTV2_HDMI_420)
+        {
+            ntv2WriteRegisterMS(context, kRegHDMIOutControl, 0, kLHIRegMaskHDMIOutColorSpace, kLHIRegShiftHDMIOutColorSpace);
+        }
+        else
+        {
+            if (hdmiVersion >= 4)
+                ntv2WriteRegisterMS(context, kRegHDMIOutControl, (isSourceRGB? 1 : 0),
+                                    kLHIRegMaskHDMIOutColorSpace, kLHIRegShiftHDMIOutColorSpace);
+        }
+    }
+    else
+    {
+        if (sampling == NTV2_HDMI_420)
+        {
+            ntv2WriteRegisterMS(context, gHDMIChannelToOutControlVRegNum[channel], 0,
+                                kLHIRegMaskHDMIOutColorSpace, kLHIRegShiftHDMIOutColorSpace);
+        }
+        else
+        {
+			ntv2WriteRegisterMS(context, gHDMIChannelToOutControlVRegNum[channel], (isSourceRGB? 1 : 0),
+                                kLHIRegMaskHDMIOutColorSpace, kLHIRegShiftHDMIOutColorSpace);
+        }
 	}
 
 	if(NTV2DeviceCanDoHDMIHDROut(deviceID))
@@ -2249,8 +2317,8 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context)
 				hdrRegValues.luminance > 1)
 			{
 				memset(&hdrRegValues, 0, sizeof(HDRDriverValues));
-				SetHDRData(context, hdrRegValues);
-				EnableHDMIHDR(context, false);
+				SetHDRData(context, hdrRegValues, channel);
+				EnableHDMIHDR(context, false, channel);
 				return true;
 			}
 			switch(hdrRegValues.electroOpticalTransferFunction)
@@ -2264,24 +2332,24 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context)
 			if(hdmiVersion == 2 || hdmiVersion == 3)
 			{
 				HDRDriverValues currentValues;
-				GetHDRData(context, &currentValues);
+				GetHDRData(context, &currentValues, channel);
 				if(HDRIsChanging(currentValues, hdrRegValues))
 				{
-					if(GetEnableHDMIHDR(context))
+					if(GetEnableHDMIHDR(context, channel))
 					{
-						EnableHDMIHDR(context, false);
+						EnableHDMIHDR(context, false, channel);
 						return true;
 					}
 				}
 			}
-			SetHDRData(context, hdrRegValues);
-			EnableHDMIHDR(context, true);
+			SetHDRData(context, hdrRegValues, channel);
+			EnableHDMIHDR(context, true, channel);
 		}
 		else
 		{
 			memset(&hdrRegValues, 0, sizeof(HDRDriverValues));
-			SetHDRData(context, hdrRegValues);
-			EnableHDMIHDR(context, false);
+			SetHDRData(context, hdrRegValues, channel);
+			EnableHDMIHDR(context, false, channel);
 		}
 	}
 
@@ -2329,79 +2397,224 @@ bool IsMultiRasterEnabled(Ntv2SystemContext* context)
 
 ///////////////////////
 //hdr routines
-bool EnableHDMIHDR(Ntv2SystemContext* context, bool inEnableHDMIHDR)
+bool EnableHDMIHDR(Ntv2SystemContext* context, bool inEnableHDMIHDR, NTV2Channel channel)
 {
 	bool status = true;
 	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(context, kRegBoardID);
+	ULWord hdmiVersion = NTV2DeviceGetHDMIVersion(deviceID);
+
 	if (!NTV2DeviceCanDoHDMIHDROut(deviceID))
 		return false;
-	status = ntv2WriteRegisterMS(context, kRegHDMIHDRControl, (inEnableHDMIHDR ? 1 : 0), kRegMaskHDMIHDREnable, kRegShiftHDMIHDREnable);
+
+	if (hdmiVersion < 6)
+    {    
+        status = ntv2WriteRegisterMS(context, kRegHDMIHDRControl, (inEnableHDMIHDR ? 1 : 0), kRegMaskHDMIHDREnable, kRegShiftHDMIHDREnable);
+    }
+    else
+    {
+        status = ntv2WriteRegisterMS(context, gHDMIChannelToOutHDRControlVRegNum[channel], (inEnableHDMIHDR ? 1 : 0),
+                                     kRegMaskHDMIHDREnable, kRegShiftHDMIHDREnable);
+    }
 	return status;
 }
 
-bool GetEnableHDMIHDR(Ntv2SystemContext* context)
+bool GetEnableHDMIHDR(Ntv2SystemContext* context, NTV2Channel channel)
 {
 	ULWord HDREnabled = 0;
 	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(context, kRegBoardID);
+	ULWord hdmiVersion = NTV2DeviceGetHDMIVersion(deviceID);
+
 	if (!NTV2DeviceCanDoHDMIHDROut(deviceID))
 		return false;
-	ntv2ReadRegisterMS(context, kRegHDMIHDRControl, &HDREnabled, kRegMaskHDMIHDREnable, kRegShiftHDMIHDREnable);
+
+	if (hdmiVersion < 6)
+    {    
+        ntv2ReadRegisterMS(context, kRegHDMIHDRControl, &HDREnabled, kRegMaskHDMIHDREnable, kRegShiftHDMIHDREnable);
+    }
+    else
+    {
+        ntv2ReadRegisterMS(context, gHDMIChannelToOutHDRControlVRegNum[channel], &HDREnabled,
+                           kRegMaskHDMIHDREnable, kRegShiftHDMIHDREnable);
+    }
 	return HDREnabled == 1 ? true : false;
 }
 
-bool SetHDRData(Ntv2SystemContext* context, HDRDriverValues inRegisterValues)
+bool SetHDRData(Ntv2SystemContext* context, HDRDriverValues inRegisterValues, NTV2Channel channel)
 {
-	ntv2WriteRegisterMS(context, kRegHDMIHDRGreenPrimary, (ULWord)inRegisterValues.greenPrimaryX, kRegMaskHDMIHDRGreenPrimaryX, kRegShiftHDMIHDRGreenPrimaryX);
-	ntv2WriteRegisterMS(context, kRegHDMIHDRGreenPrimary, (ULWord)inRegisterValues.greenPrimaryY, (ULWord)kRegMaskHDMIHDRGreenPrimaryY, kRegShiftHDMIHDRGreenPrimaryY);
-	ntv2WriteRegisterMS(context, kRegHDMIHDRBluePrimary, (ULWord)inRegisterValues.bluePrimaryX, kRegMaskHDMIHDRBluePrimaryX, kRegShiftHDMIHDRBluePrimaryX);
-	ntv2WriteRegisterMS(context, kRegHDMIHDRBluePrimary, (ULWord)inRegisterValues.bluePrimaryY, (ULWord)kRegMaskHDMIHDRBluePrimaryY, kRegShiftHDMIHDRBluePrimaryY);
-	ntv2WriteRegisterMS(context, kRegHDMIHDRRedPrimary, (ULWord)inRegisterValues.redPrimaryX, kRegMaskHDMIHDRRedPrimaryX, kRegShiftHDMIHDRRedPrimaryX);
-	ntv2WriteRegisterMS(context, kRegHDMIHDRRedPrimary, (ULWord)inRegisterValues.redPrimaryY, (ULWord)kRegMaskHDMIHDRRedPrimaryY, kRegShiftHDMIHDRRedPrimaryY);
-	ntv2WriteRegisterMS(context, kRegHDMIHDRWhitePoint, (ULWord)inRegisterValues.whitePointX, kRegMaskHDMIHDRWhitePointX, kRegShiftHDMIHDRWhitePointX);
-	ntv2WriteRegisterMS(context, kRegHDMIHDRWhitePoint, (ULWord)inRegisterValues.whitePointY, (ULWord)kRegMaskHDMIHDRWhitePointY, kRegShiftHDMIHDRWhitePointY);
-	ntv2WriteRegisterMS(context, kRegHDMIHDRMasteringLuminence, (ULWord)inRegisterValues.maxMasteringLuminance, kRegMaskHDMIHDRMaxMasteringLuminance, kRegShiftHDMIHDRMaxMasteringLuminance);
-	ntv2WriteRegisterMS(context, kRegHDMIHDRMasteringLuminence, (ULWord)inRegisterValues.minMasteringLuminance, (ULWord)kRegMaskHDMIHDRMinMasteringLuminance, kRegShiftHDMIHDRMinMasteringLuminance);
-	ntv2WriteRegisterMS(context, kRegHDMIHDRLightLevel, (ULWord)inRegisterValues.maxContentLightLevel, kRegMaskHDMIHDRMaxContentLightLevel, kRegShiftHDMIHDRMaxContentLightLevel);
-	ntv2WriteRegisterMS(context, kRegHDMIHDRLightLevel, (ULWord)inRegisterValues.maxFrameAverageLightLevel, (ULWord)kRegMaskHDMIHDRMaxFrameAverageLightLevel, kRegShiftHDMIHDRMaxFrameAverageLightLevel);
-	ntv2WriteRegisterMS(context, kRegHDMIHDRControl, (ULWord)inRegisterValues.electroOpticalTransferFunction, kRegMaskElectroOpticalTransferFunction, kRegShiftElectroOpticalTransferFunction);
-	ntv2WriteRegisterMS(context, kRegHDMIHDRControl, (ULWord)inRegisterValues.staticMetadataDescriptorID, (ULWord)kRegMaskHDRStaticMetadataDescriptorID, kRegShiftHDRStaticMetadataDescriptorID);
-	ntv2WriteRegisterMS(context, kRegHDMIHDRControl, (ULWord)inRegisterValues.luminance, kRegMaskHDMIHDRNonContantLuminance, kRegShiftHDMIHDRNonContantLuminance);
+	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(context, kRegBoardID);
+	ULWord hdmiVersion = NTV2DeviceGetHDMIVersion(deviceID);
+
+	if (hdmiVersion < 6)
+    {    
+        ntv2WriteRegisterMS(context, kRegHDMIHDRGreenPrimary, (ULWord)inRegisterValues.greenPrimaryX,
+                            kRegMaskHDMIHDRGreenPrimaryX, kRegShiftHDMIHDRGreenPrimaryX);
+        ntv2WriteRegisterMS(context, kRegHDMIHDRGreenPrimary, (ULWord)inRegisterValues.greenPrimaryY,
+                            (ULWord)kRegMaskHDMIHDRGreenPrimaryY, kRegShiftHDMIHDRGreenPrimaryY);
+        ntv2WriteRegisterMS(context, kRegHDMIHDRBluePrimary, (ULWord)inRegisterValues.bluePrimaryX,
+                            kRegMaskHDMIHDRBluePrimaryX, kRegShiftHDMIHDRBluePrimaryX);
+        ntv2WriteRegisterMS(context, kRegHDMIHDRBluePrimary, (ULWord)inRegisterValues.bluePrimaryY,
+                            (ULWord)kRegMaskHDMIHDRBluePrimaryY, kRegShiftHDMIHDRBluePrimaryY);
+        ntv2WriteRegisterMS(context, kRegHDMIHDRRedPrimary, (ULWord)inRegisterValues.redPrimaryX,
+                            kRegMaskHDMIHDRRedPrimaryX, kRegShiftHDMIHDRRedPrimaryX);
+        ntv2WriteRegisterMS(context, kRegHDMIHDRRedPrimary, (ULWord)inRegisterValues.redPrimaryY,
+                            (ULWord)kRegMaskHDMIHDRRedPrimaryY, kRegShiftHDMIHDRRedPrimaryY);
+        ntv2WriteRegisterMS(context, kRegHDMIHDRWhitePoint, (ULWord)inRegisterValues.whitePointX,
+                            kRegMaskHDMIHDRWhitePointX, kRegShiftHDMIHDRWhitePointX);
+        ntv2WriteRegisterMS(context, kRegHDMIHDRWhitePoint, (ULWord)inRegisterValues.whitePointY,
+                            (ULWord)kRegMaskHDMIHDRWhitePointY, kRegShiftHDMIHDRWhitePointY);
+        ntv2WriteRegisterMS(context, kRegHDMIHDRMasteringLuminence, (ULWord)inRegisterValues.maxMasteringLuminance,
+                            kRegMaskHDMIHDRMaxMasteringLuminance, kRegShiftHDMIHDRMaxMasteringLuminance);
+        ntv2WriteRegisterMS(context, kRegHDMIHDRMasteringLuminence, (ULWord)inRegisterValues.minMasteringLuminance,
+                            (ULWord)kRegMaskHDMIHDRMinMasteringLuminance, kRegShiftHDMIHDRMinMasteringLuminance);
+        ntv2WriteRegisterMS(context, kRegHDMIHDRLightLevel, (ULWord)inRegisterValues.maxContentLightLevel,
+                            kRegMaskHDMIHDRMaxContentLightLevel, kRegShiftHDMIHDRMaxContentLightLevel);
+        ntv2WriteRegisterMS(context, kRegHDMIHDRLightLevel, (ULWord)inRegisterValues.maxFrameAverageLightLevel,
+                            (ULWord)kRegMaskHDMIHDRMaxFrameAverageLightLevel, kRegShiftHDMIHDRMaxFrameAverageLightLevel);
+        ntv2WriteRegisterMS(context, kRegHDMIHDRControl, (ULWord)inRegisterValues.electroOpticalTransferFunction,
+                            kRegMaskElectroOpticalTransferFunction, kRegShiftElectroOpticalTransferFunction);
+        ntv2WriteRegisterMS(context, kRegHDMIHDRControl, (ULWord)inRegisterValues.staticMetadataDescriptorID,
+                            (ULWord)kRegMaskHDRStaticMetadataDescriptorID, kRegShiftHDRStaticMetadataDescriptorID);
+        ntv2WriteRegisterMS(context, kRegHDMIHDRControl, (ULWord)inRegisterValues.luminance,
+                            kRegMaskHDMIHDRNonContantLuminance, kRegShiftHDMIHDRNonContantLuminance);
+    }
+    else
+    {
+        ntv2WriteRegisterMS(context, gHDMIChannelToOutHDRGreenPrimaryVRegNum[channel], (ULWord)inRegisterValues.greenPrimaryX,
+                            kRegMaskHDMIHDRGreenPrimaryX, kRegShiftHDMIHDRGreenPrimaryX);
+        ntv2WriteRegisterMS(context, gHDMIChannelToOutHDRGreenPrimaryVRegNum[channel], (ULWord)inRegisterValues.greenPrimaryY,
+                            (ULWord)kRegMaskHDMIHDRGreenPrimaryY, kRegShiftHDMIHDRGreenPrimaryY);
+        ntv2WriteRegisterMS(context, gHDMIChannelToOutHDRBluePrimaryVRegNum[channel], (ULWord)inRegisterValues.bluePrimaryX,
+                            kRegMaskHDMIHDRBluePrimaryX, kRegShiftHDMIHDRBluePrimaryX);
+        ntv2WriteRegisterMS(context, gHDMIChannelToOutHDRBluePrimaryVRegNum[channel], (ULWord)inRegisterValues.bluePrimaryY,
+                            (ULWord)kRegMaskHDMIHDRBluePrimaryY, kRegShiftHDMIHDRBluePrimaryY);
+        ntv2WriteRegisterMS(context, gHDMIChannelToOutHDRRedPrimaryVRegNum[channel], (ULWord)inRegisterValues.redPrimaryX,
+                            kRegMaskHDMIHDRRedPrimaryX, kRegShiftHDMIHDRRedPrimaryX);
+        ntv2WriteRegisterMS(context, gHDMIChannelToOutHDRRedPrimaryVRegNum[channel], (ULWord)inRegisterValues.redPrimaryY,
+                            (ULWord)kRegMaskHDMIHDRRedPrimaryY, kRegShiftHDMIHDRRedPrimaryY);
+        ntv2WriteRegisterMS(context, gHDMIChannelToOutHDRWhitePointVRegNum[channel], (ULWord)inRegisterValues.whitePointX,
+                            kRegMaskHDMIHDRWhitePointX, kRegShiftHDMIHDRWhitePointX);
+        ntv2WriteRegisterMS(context, gHDMIChannelToOutHDRWhitePointVRegNum[channel], (ULWord)inRegisterValues.whitePointY,
+                            (ULWord)kRegMaskHDMIHDRWhitePointY, kRegShiftHDMIHDRWhitePointY);
+        ntv2WriteRegisterMS(context, gHDMIChannelToOutHDRMasterLuminanceVRegNum[channel], (ULWord)inRegisterValues.maxMasteringLuminance,
+                            kRegMaskHDMIHDRMaxMasteringLuminance, kRegShiftHDMIHDRMaxMasteringLuminance);
+        ntv2WriteRegisterMS(context, gHDMIChannelToOutHDRMasterLuminanceVRegNum[channel], (ULWord)inRegisterValues.minMasteringLuminance,
+                            (ULWord)kRegMaskHDMIHDRMinMasteringLuminance, kRegShiftHDMIHDRMinMasteringLuminance);
+        ntv2WriteRegisterMS(context, gHDMIChannelToOutHDRLightLevelVRegNum[channel], (ULWord)inRegisterValues.maxContentLightLevel,
+                            kRegMaskHDMIHDRMaxContentLightLevel, kRegShiftHDMIHDRMaxContentLightLevel);
+        ntv2WriteRegisterMS(context, gHDMIChannelToOutHDRLightLevelVRegNum[channel], (ULWord)inRegisterValues.maxFrameAverageLightLevel,
+                            (ULWord)kRegMaskHDMIHDRMaxFrameAverageLightLevel, kRegShiftHDMIHDRMaxFrameAverageLightLevel);
+        ntv2WriteRegisterMS(context, gHDMIChannelToOutHDRControlVRegNum[channel], (ULWord)inRegisterValues.electroOpticalTransferFunction,
+                            kRegMaskElectroOpticalTransferFunction, kRegShiftElectroOpticalTransferFunction);
+        ntv2WriteRegisterMS(context, gHDMIChannelToOutHDRControlVRegNum[channel], (ULWord)inRegisterValues.staticMetadataDescriptorID,
+                            (ULWord)kRegMaskHDRStaticMetadataDescriptorID, kRegShiftHDRStaticMetadataDescriptorID);
+        ntv2WriteRegisterMS(context, gHDMIChannelToOutHDRControlVRegNum[channel], (ULWord)inRegisterValues.luminance,
+                            kRegMaskHDMIHDRNonContantLuminance, kRegShiftHDMIHDRNonContantLuminance);
+    }
 	return true;
 }
 
-bool GetHDRData(Ntv2SystemContext* context, HDRDriverValues* inRegisterValues)
+bool GetHDRData(Ntv2SystemContext* context, HDRDriverValues* inRegisterValues, NTV2Channel channel)
 {
+	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(context, kRegBoardID);
+	ULWord hdmiVersion = NTV2DeviceGetHDMIVersion(deviceID);
 	ULWord temp = 0;
-	ntv2ReadRegisterMS(context, kRegHDMIHDRGreenPrimary, &temp, kRegMaskHDMIHDRGreenPrimaryX, kRegShiftHDMIHDRGreenPrimaryX);
-	inRegisterValues->greenPrimaryX = (uint16_t)temp;
-	ntv2ReadRegisterMS(context, kRegHDMIHDRGreenPrimary, &temp, (ULWord)kRegMaskHDMIHDRGreenPrimaryY, kRegShiftHDMIHDRGreenPrimaryY);
-	inRegisterValues->greenPrimaryY = (uint16_t)temp;
-	ntv2ReadRegisterMS(context, kRegHDMIHDRBluePrimary, &temp, kRegMaskHDMIHDRBluePrimaryX, kRegShiftHDMIHDRBluePrimaryX);
-	inRegisterValues->bluePrimaryX = (uint16_t)temp;
-	ntv2ReadRegisterMS(context, kRegHDMIHDRBluePrimary, &temp, (ULWord)kRegMaskHDMIHDRBluePrimaryY, kRegShiftHDMIHDRBluePrimaryY);
-	inRegisterValues->bluePrimaryY = (uint16_t)temp;
-	ntv2ReadRegisterMS(context, kRegHDMIHDRRedPrimary, &temp, kRegMaskHDMIHDRRedPrimaryX, kRegShiftHDMIHDRRedPrimaryX);
-	inRegisterValues->redPrimaryX = (uint16_t)temp;
-	ntv2ReadRegisterMS(context, kRegHDMIHDRRedPrimary, &temp, (ULWord)kRegMaskHDMIHDRRedPrimaryY, kRegShiftHDMIHDRRedPrimaryY);
-	inRegisterValues->redPrimaryY = (uint16_t)temp;
-	ntv2ReadRegisterMS(context, kRegHDMIHDRWhitePoint, &temp, kRegMaskHDMIHDRWhitePointX, kRegShiftHDMIHDRWhitePointX);
-	inRegisterValues->whitePointX = (uint16_t)temp;
-	ntv2ReadRegisterMS(context, kRegHDMIHDRWhitePoint, &temp, (ULWord)kRegMaskHDMIHDRWhitePointY, kRegShiftHDMIHDRWhitePointY);
-	inRegisterValues->whitePointY = (uint16_t)temp;
-	ntv2ReadRegisterMS(context, kRegHDMIHDRMasteringLuminence, &temp, kRegMaskHDMIHDRMaxMasteringLuminance, kRegShiftHDMIHDRMaxMasteringLuminance);
-	inRegisterValues->maxMasteringLuminance = (uint16_t)temp;
-	ntv2ReadRegisterMS(context, kRegHDMIHDRMasteringLuminence, &temp, (ULWord)kRegMaskHDMIHDRMinMasteringLuminance, kRegShiftHDMIHDRMinMasteringLuminance);
-	inRegisterValues->minMasteringLuminance = (uint16_t)temp;
-	ntv2ReadRegisterMS(context, kRegHDMIHDRLightLevel, &temp, kRegMaskHDMIHDRMaxContentLightLevel, kRegShiftHDMIHDRMaxContentLightLevel);
-	inRegisterValues->maxContentLightLevel = (uint16_t)temp;
-	ntv2ReadRegisterMS(context, kRegHDMIHDRLightLevel, &temp, (ULWord)kRegMaskHDMIHDRMaxFrameAverageLightLevel, kRegShiftHDMIHDRMaxFrameAverageLightLevel);
-	inRegisterValues->maxFrameAverageLightLevel = (uint16_t)temp;
-	ntv2ReadRegisterMS(context, kRegHDMIHDRControl, &temp, kRegMaskElectroOpticalTransferFunction, kRegShiftElectroOpticalTransferFunction);
-	inRegisterValues->electroOpticalTransferFunction = (uint8_t)temp;
-	ntv2ReadRegisterMS(context, kRegHDMIHDRControl, &temp, (ULWord)kRegMaskHDRStaticMetadataDescriptorID, kRegShiftHDRStaticMetadataDescriptorID);
-	inRegisterValues->staticMetadataDescriptorID = (uint8_t)temp;
-	ntv2ReadRegisterMS(context, kRegHDMIHDRControl, &temp, kRegMaskHDMIHDRNonContantLuminance, kRegShiftHDMIHDRNonContantLuminance);
-	inRegisterValues->luminance = (uint8_t)temp;
+
+	if (hdmiVersion < 6)
+    {    
+        ntv2ReadRegisterMS(context, kRegHDMIHDRGreenPrimary, &temp,
+                           kRegMaskHDMIHDRGreenPrimaryX, kRegShiftHDMIHDRGreenPrimaryX);
+        inRegisterValues->greenPrimaryX = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, kRegHDMIHDRGreenPrimary, &temp,
+                           (ULWord)kRegMaskHDMIHDRGreenPrimaryY, kRegShiftHDMIHDRGreenPrimaryY);
+        inRegisterValues->greenPrimaryY = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, kRegHDMIHDRBluePrimary, &temp,
+                           kRegMaskHDMIHDRBluePrimaryX, kRegShiftHDMIHDRBluePrimaryX);
+        inRegisterValues->bluePrimaryX = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, kRegHDMIHDRBluePrimary, &temp,
+                           (ULWord)kRegMaskHDMIHDRBluePrimaryY, kRegShiftHDMIHDRBluePrimaryY);
+        inRegisterValues->bluePrimaryY = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, kRegHDMIHDRRedPrimary, &temp,
+                           kRegMaskHDMIHDRRedPrimaryX, kRegShiftHDMIHDRRedPrimaryX);
+        inRegisterValues->redPrimaryX = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, kRegHDMIHDRRedPrimary, &temp,
+                           (ULWord)kRegMaskHDMIHDRRedPrimaryY, kRegShiftHDMIHDRRedPrimaryY);
+        inRegisterValues->redPrimaryY = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, kRegHDMIHDRWhitePoint, &temp,
+                           kRegMaskHDMIHDRWhitePointX, kRegShiftHDMIHDRWhitePointX);
+        inRegisterValues->whitePointX = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, kRegHDMIHDRWhitePoint, &temp,
+                           (ULWord)kRegMaskHDMIHDRWhitePointY, kRegShiftHDMIHDRWhitePointY);
+        inRegisterValues->whitePointY = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, kRegHDMIHDRMasteringLuminence, &temp,
+                           kRegMaskHDMIHDRMaxMasteringLuminance, kRegShiftHDMIHDRMaxMasteringLuminance);
+        inRegisterValues->maxMasteringLuminance = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, kRegHDMIHDRMasteringLuminence, &temp,
+                           (ULWord)kRegMaskHDMIHDRMinMasteringLuminance, kRegShiftHDMIHDRMinMasteringLuminance);
+        inRegisterValues->minMasteringLuminance = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, kRegHDMIHDRLightLevel, &temp,
+                           kRegMaskHDMIHDRMaxContentLightLevel, kRegShiftHDMIHDRMaxContentLightLevel);
+        inRegisterValues->maxContentLightLevel = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, kRegHDMIHDRLightLevel, &temp,
+                           (ULWord)kRegMaskHDMIHDRMaxFrameAverageLightLevel, kRegShiftHDMIHDRMaxFrameAverageLightLevel);
+        inRegisterValues->maxFrameAverageLightLevel = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, kRegHDMIHDRControl, &temp,
+                           kRegMaskElectroOpticalTransferFunction, kRegShiftElectroOpticalTransferFunction);
+        inRegisterValues->electroOpticalTransferFunction = (uint8_t)temp;
+        ntv2ReadRegisterMS(context, kRegHDMIHDRControl, &temp,
+                           (ULWord)kRegMaskHDRStaticMetadataDescriptorID, kRegShiftHDRStaticMetadataDescriptorID);
+        inRegisterValues->staticMetadataDescriptorID = (uint8_t)temp;
+        ntv2ReadRegisterMS(context, kRegHDMIHDRControl, &temp,
+                           kRegMaskHDMIHDRNonContantLuminance, kRegShiftHDMIHDRNonContantLuminance);
+        inRegisterValues->luminance = (uint8_t)temp;
+    }
+    else
+    {
+        ntv2ReadRegisterMS(context, gHDMIChannelToOutHDRGreenPrimaryVRegNum[channel], &temp,
+                           kRegMaskHDMIHDRGreenPrimaryX, kRegShiftHDMIHDRGreenPrimaryX);
+        inRegisterValues->greenPrimaryX = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, gHDMIChannelToOutHDRGreenPrimaryVRegNum[channel], &temp,
+                           (ULWord)kRegMaskHDMIHDRGreenPrimaryY, kRegShiftHDMIHDRGreenPrimaryY);
+        inRegisterValues->greenPrimaryY = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, gHDMIChannelToOutHDRBluePrimaryVRegNum[channel], &temp,
+                           kRegMaskHDMIHDRBluePrimaryX, kRegShiftHDMIHDRBluePrimaryX);
+        inRegisterValues->bluePrimaryX = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, gHDMIChannelToOutHDRBluePrimaryVRegNum[channel], &temp,
+                           (ULWord)kRegMaskHDMIHDRBluePrimaryY, kRegShiftHDMIHDRBluePrimaryY);
+        inRegisterValues->bluePrimaryY = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, gHDMIChannelToOutHDRRedPrimaryVRegNum[channel], &temp,
+                           kRegMaskHDMIHDRRedPrimaryX, kRegShiftHDMIHDRRedPrimaryX);
+        inRegisterValues->redPrimaryX = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, gHDMIChannelToOutHDRRedPrimaryVRegNum[channel], &temp,
+                           (ULWord)kRegMaskHDMIHDRRedPrimaryY, kRegShiftHDMIHDRRedPrimaryY);
+        inRegisterValues->redPrimaryY = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, gHDMIChannelToOutHDRWhitePointVRegNum[channel], &temp,
+                           kRegMaskHDMIHDRWhitePointX, kRegShiftHDMIHDRWhitePointX);
+        inRegisterValues->whitePointX = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, gHDMIChannelToOutHDRWhitePointVRegNum[channel], &temp,
+                           (ULWord)kRegMaskHDMIHDRWhitePointY, kRegShiftHDMIHDRWhitePointY);
+        inRegisterValues->whitePointY = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, gHDMIChannelToOutHDRMasterLuminanceVRegNum[channel], &temp,
+                           kRegMaskHDMIHDRMaxMasteringLuminance, kRegShiftHDMIHDRMaxMasteringLuminance);
+        inRegisterValues->maxMasteringLuminance = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, gHDMIChannelToOutHDRMasterLuminanceVRegNum[channel], &temp,
+                           (ULWord)kRegMaskHDMIHDRMinMasteringLuminance, kRegShiftHDMIHDRMinMasteringLuminance);
+        inRegisterValues->minMasteringLuminance = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, gHDMIChannelToOutHDRLightLevelVRegNum[channel], &temp,
+                           kRegMaskHDMIHDRMaxContentLightLevel, kRegShiftHDMIHDRMaxContentLightLevel);
+        inRegisterValues->maxContentLightLevel = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, gHDMIChannelToOutHDRLightLevelVRegNum[channel], &temp,
+                           (ULWord)kRegMaskHDMIHDRMaxFrameAverageLightLevel, kRegShiftHDMIHDRMaxFrameAverageLightLevel);
+        inRegisterValues->maxFrameAverageLightLevel = (uint16_t)temp;
+        ntv2ReadRegisterMS(context, gHDMIChannelToOutHDRControlVRegNum[channel], &temp,
+                           kRegMaskElectroOpticalTransferFunction, kRegShiftElectroOpticalTransferFunction);
+        inRegisterValues->electroOpticalTransferFunction = (uint8_t)temp;
+        ntv2ReadRegisterMS(context, gHDMIChannelToOutHDRControlVRegNum[channel], &temp,
+                           (ULWord)kRegMaskHDRStaticMetadataDescriptorID, kRegShiftHDRStaticMetadataDescriptorID);
+        inRegisterValues->staticMetadataDescriptorID = (uint8_t)temp;
+        ntv2ReadRegisterMS(context, gHDMIChannelToOutHDRControlVRegNum[channel], &temp,
+                           kRegMaskHDMIHDRNonContantLuminance, kRegShiftHDMIHDRNonContantLuminance);
+        inRegisterValues->luminance = (uint8_t)temp;
+    }
 	return true;
 }
 
