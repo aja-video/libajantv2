@@ -522,6 +522,7 @@ static void ntv2_hdmiout4_monitor(void* data)
 	uint32_t absent_wait = 0;
 	uint32_t lock_retry = 0;
 	uint32_t edid_retry = 0;
+	uint32_t val = 0;
 	uint32_t i;
 
 	if (ntv2_hout == NULL)
@@ -533,6 +534,12 @@ static void ntv2_hdmiout4_monitor(void* data)
 
 	while (!ntv2ThreadShouldStop(&ntv2_hout->monitor_task) && ntv2_hout->monitor_enable) 
 	{
+		val = ntv2_reg_read(ntv2_hout->system_context, ntv2_reg_hdmi_control, 0);
+		if ((val & NTV2_FLD_MASK(ntv2_fld_hdmi_disable_update)) != 0)
+		{
+			goto wait;
+		}
+
 		update_debug_flags(ntv2_hout);
 
 		sink_present = check_sink_present(ntv2_hout);
