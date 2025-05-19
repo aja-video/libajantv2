@@ -10,6 +10,7 @@
 
 #include "ntv2hdmiout4.h"
 #include "ntv2hout4reg.h"
+#include "ntv2devicefeatures.h"
 
 /* debug messages */
 #define NTV2_DEBUG_INFO					0x00000001
@@ -713,6 +714,9 @@ wait:
 
 static Ntv2Status ntv2_hdmiout4_initialize(struct ntv2_hdmiout4 *ntv2_hout)
 {
+    ntv2_hout->device_id = ntv2_reg_read(ntv2_hout->system_context, ntv2_reg_device_id, 0);
+    ntv2_hout->hdmi_version = NTV2DeviceGetHDMIVersion(ntv2_hout->device_id);
+    
 	ntv2_displayid_config(&ntv2_hout->edid, ntv2_hdmiout4_edid_read, ntv2_hout);
 	
 	ntv2_hout->hdmi_config = 0;
@@ -1298,6 +1302,15 @@ static bool configure_hdmi_video(struct ntv2_hdmiout4 *ntv2_hout)
 		sync_pol = ntv2_con_hdmiout4_syncpolarity_activelow;
 	}
 
+    if ((ntv2_hout->hdmi_version >= 6) &&
+        ((clock_data->line_rate == ntv2_con_hdmiout4_linerate_742mhz) ||
+         (clock_data->line_rate == ntv2_con_hdmiout4_linerate_928mhz) ||
+         (clock_data->line_rate == ntv2_con_hdmiout4_linerate_1113mhz)))
+    {
+        pix_rep = ntv2_con_hdmiout4_pixelreplicate_enable;
+        rep_fac = 1;
+    }
+
 	pix_clock = 1;
 	lin_int = ntv2_con_hdmiout4_lineinterleave_disable;
 	pix_int = ntv2_con_hdmiout4_pixelinterleave_disable;
@@ -1310,9 +1323,18 @@ static bool configure_hdmi_video(struct ntv2_hdmiout4 *ntv2_hout)
 		(clock_data->clock_type == ntv2_clock_type_h2d) ||
 		(clock_data->clock_type == ntv2_clock_type_h2n)) 
 	{
-		pix_clock = 4;
-		lin_int = ntv2_con_hdmiout4_lineinterleave_enable;
-		pix_int = ntv2_con_hdmiout4_pixelinterleave_enable;
+        if (ntv2_hout->hdmi_version >= 6)
+        {
+            pix_clock = 2;
+            lin_int = ntv2_con_hdmiout4_lineinterleave_enable;
+            pix_int = ntv2_con_hdmiout4_pixelinterleave_disable;
+        }
+        else
+        {
+            pix_clock = 4;
+            lin_int = ntv2_con_hdmiout4_lineinterleave_enable;
+            pix_int = ntv2_con_hdmiout4_pixelinterleave_enable;
+        }
 	}
 
 	scram_mode = ntv2_con_hdmiout4_scramblemode_disable;
