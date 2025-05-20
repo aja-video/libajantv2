@@ -1951,9 +1951,9 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 				_mkdir(tempDir.c_str());
 				_getcwd(cwdBuf, AJA_MAX_PATH);
 	#else
-				if (mkdir(tempDir.c_str(), ACCESSPERMS) == 0)
+				if (mkdir(tempDir.c_str(), 0777) == 0)
 				{
-					chmod(tempDir.c_str(), ACCESSPERMS);
+					chmod(tempDir.c_str(), 0777);
 				}
 				char* result = getcwd(cwdBuf, AJA_MAX_PATH);
 				AJA_UNUSED(result);
