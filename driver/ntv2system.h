@@ -292,6 +292,8 @@
 		#endif
 	#endif
 
+    #define NUM_CHAN 8                  // max number of 'channels'
+
 	// Mac return codes
 	typedef IOReturn					Ntv2Status;
 	#define NTV2_STATUS_SUCCESS			(kIOReturnSuccess)
@@ -316,7 +318,7 @@
 	typedef struct ntv2_system_context
 	{
 		ntv2_mac_driver_ref		macDriverRef;
-		void*					pIOUserClient;
+		void*					pIOUserClient[NUM_CHAN];
 	} Ntv2SystemContext;
 
 	// Mac register abstraction
