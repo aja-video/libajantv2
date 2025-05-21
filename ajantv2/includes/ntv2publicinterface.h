@@ -10160,6 +10160,7 @@ typedef struct HDRRegValues
 	uint8_t		electroOpticalTransferFunction;
 	uint8_t		staticMetadataDescriptorID;
 
+	#if !defined(NTV2_BUILDING_DRIVER)
 	inline HDRRegValues &	zero(void)	 {	greenPrimaryX	= greenPrimaryY = bluePrimaryX = bluePrimaryY = redPrimaryX = redPrimaryY = whitePointX = whitePointY
 															= maxMasteringLuminance = minMasteringLuminance = maxContentLightLevel = maxFrameAverageLightLevel = 0;
 											electroOpticalTransferFunction = staticMetadataDescriptorID = 0;	return *this;}
@@ -10176,6 +10177,7 @@ typedef struct HDRRegValues
 													maxMasteringLuminance = 0x02E8;	minMasteringLuminance = 0x0032;
 													maxContentLightLevel = 0;		maxFrameAverageLightLevel = 0;
 													electroOpticalTransferFunction = 0x02;	staticMetadataDescriptorID = 0x00;	return *this; }
+	#endif	//	!defined(NTV2_BUILDING_DRIVER)
 } HDRRegValues;
 
 typedef struct HDRFloatValues
@@ -10195,6 +10197,7 @@ typedef struct HDRFloatValues
 	uint8_t		electroOpticalTransferFunction;
 	uint8_t		staticMetadataDescriptorID;
 
+	#if !defined(NTV2_BUILDING_DRIVER)
 	inline HDRFloatValues & zero(void)	{	greenPrimaryX = greenPrimaryY = bluePrimaryX = bluePrimaryY = redPrimaryX = redPrimaryY = whitePointX = whitePointY = minMasteringLuminance = 0.0;
 											maxMasteringLuminance = maxContentLightLevel = maxFrameAverageLightLevel = 0;
 											electroOpticalTransferFunction = staticMetadataDescriptorID = 0;	return *this;}
@@ -10245,6 +10248,7 @@ typedef struct HDRFloatValues
 																			outVals.electroOpticalTransferFunction	= electroOpticalTransferFunction;
 																			outVals.staticMetadataDescriptorID		= staticMetadataDescriptorID;
 																			return true;	}
+	#endif	//	!defined(NTV2_BUILDING_DRIVER)
 } HDRFloatValues;
 
 typedef struct HDRDriverValues{
