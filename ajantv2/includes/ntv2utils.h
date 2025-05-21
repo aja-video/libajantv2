@@ -1117,6 +1117,8 @@ AJAExport std::string NTV2VANCModeToString				(const NTV2VANCMode				inValue,	co
 AJAExport std::string NTV2MixerKeyerModeToString		(const NTV2MixerKeyerMode		inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
 AJAExport std::string NTV2MixerInputControlToString		(const NTV2MixerKeyerInputControl inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
 AJAExport std::string NTV2VideoLimitingToString			(const NTV2VideoLimiting		inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2EmbeddedAudioInputToString	(const NTV2EmbeddedAudioInput	inValue,	const bool inCompactDisplay = false);	//	New in SDK 13.0
+AJAExport std::string NTV2AudioSourceToString			(const NTV2AudioSource			inValue,	const bool inCompactDisplay = false);	//	New in SDK 13.0
 AJAExport std::string NTV2BreakoutTypeToString			(const NTV2BreakoutType			inValue,	const bool inCompactDisplay = false);	//	New in SDK 15.5
 AJAExport std::string NTV2AncDataRgnToStr				(const NTV2AncDataRgn			inValue,	const bool inCompactDisplay = false);	//	New in SDK 15.5
 AJAExport std::string NTV2UpConvertModeToString			(const NTV2UpConvertMode		inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
@@ -1133,10 +1135,12 @@ AJAExport std::string NTV2AudioFormatToString			(const NTV2AudioFormat			inValue
 
 AJAExport std::string NTV2BitfileTypeToString			(const NTV2BitfileType			inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.2
 AJAExport std::string NTV2DieTempScaleToString			(const NTV2DieTempScale			inValue,	const bool inUseUTF8 = false);			//	New in SDK 17.6
-AJAExport bool	convertHDRFloatToRegisterValues			(const HDRFloatValues & inFloatValues,		HDRRegValues & outRegisterValues);
-AJAExport bool	convertHDRRegisterToFloatValues			(const HDRRegValues & inRegisterValues,		HDRFloatValues & outFloatValues);
-AJAExport void	setHDRDefaultsForBT2020					(HDRRegValues & outRegisterValues);
-AJAExport void	setHDRDefaultsForDCIP3					(HDRRegValues & outRegisterValues);
+#if !defined(NTV2_DEPRECATE_17_6)
+	AJAExport NTV2_DEPRECATED_f(bool convertHDRFloatToRegisterValues (const HDRFloatValues & inFVals, HDRRegValues & outRegVals));	///< @deprecated	Use HDRFloatValues::toRegValues instead
+	AJAExport NTV2_DEPRECATED_f(bool convertHDRRegisterToFloatValues (const HDRRegValues & inRegVals, HDRFloatValues & outFloatVals));	///< @deprecated	Use HDRFloatValues::setFromRegValues instead
+	AJAExport NTV2_DEPRECATED_f(void setHDRDefaultsForBT2020 (HDRRegValues & outRegVals));	///< @deprecated	Use HDRRegValues::setBT2020 instead
+	AJAExport NTV2_DEPRECATED_f(void setHDRDefaultsForDCIP3 (HDRRegValues & outRegVals));	///< @deprecated	Use HDRRegValues::setDCIP3 instead
+#endif	//	!defined(NTV2_DEPRECATE_17_6)
 #if !defined(NTV2_DEPRECATE_16_1)
 	inline std::string NTV2AudioMonitorSelectToString (const NTV2AudioMonitorSelect inValue, const bool inForRetailDisplay = false) {return NTV2AudioChannelPairToString(inValue, inForRetailDisplay);} ///< @deprecated	Use ::NTV2AudioChannelPairToString instead.
 #endif	//	!defined(NTV2_DEPRECATE_16_1)
@@ -1147,12 +1151,8 @@ typedef NTV2StringList::const_iterator	NTV2StringListConstIter;//	New in SDK 12.
 typedef std::set <std::string>			NTV2StringSet;			//	New in SDK 12.5
 typedef NTV2StringSet::const_iterator	NTV2StringSetConstIter; //	New in SDK 12.5
 
-AJAExport std::string NTV2EmbeddedAudioInputToString	(const NTV2EmbeddedAudioInput	inValue,	const bool inCompactDisplay = false);	//	New in SDK 13.0
-AJAExport std::string NTV2AudioSourceToString			(const NTV2AudioSource			inValue,	const bool inCompactDisplay = false);	//	New in SDK 13.0
-
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2StringList & inData);	//	New in SDK 15.5
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2StringSet & inData);
-
 
 AJAExport NTV2RegisterReads FromRegNumSet	(const NTV2RegNumSet &		inRegNumSet);
 AJAExport NTV2RegNumSet		ToRegNumSet		(const NTV2RegisterReads &	inRegReads);

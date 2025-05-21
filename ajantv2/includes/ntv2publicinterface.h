@@ -10143,7 +10143,8 @@ typedef struct HevcMessageDebug
 	HevcDeviceDebug			data;
 } HevcMessageDebug;
 
-typedef struct HDRRegValues{
+typedef struct HDRRegValues
+{
 	uint16_t	greenPrimaryX;
 	uint16_t	greenPrimaryY;
 	uint16_t	bluePrimaryX;
@@ -10158,9 +10159,27 @@ typedef struct HDRRegValues{
 	uint16_t	maxFrameAverageLightLevel;
 	uint8_t		electroOpticalTransferFunction;
 	uint8_t		staticMetadataDescriptorID;
-}HDRRegValues;
 
-typedef struct HDRFloatValues{
+	inline HDRRegValues &	zero(void)	 {	greenPrimaryX	= greenPrimaryY = bluePrimaryX = bluePrimaryY = redPrimaryX = redPrimaryY = whitePointX = whitePointY
+															= maxMasteringLuminance = minMasteringLuminance = maxContentLightLevel = maxFrameAverageLightLevel = 0;
+											electroOpticalTransferFunction = staticMetadataDescriptorID = 0;	return *this;}
+	inline bool				validPrimariesAndWhitePoint (void) const	{	const uint16_t kMax(0xC350);
+																			return	greenPrimaryX <= kMax || greenPrimaryY <= kMax || bluePrimaryX <= kMax || bluePrimaryY <= kMax ||
+																					redPrimaryX <= kMax || redPrimaryY <= kMax || whitePointX <= kMax || whitePointY <= kMax; }
+	inline HDRRegValues &	setBT2020 (void)	{	greenPrimaryX = 0x2134;	greenPrimaryY = 0x9BAA;		bluePrimaryX = 0x1996;	bluePrimaryY = 0x08FC;
+													redPrimaryX = 0x8A48;	redPrimaryY = 0x3908;		whitePointX = 0x3D13;	whitePointY = 0x4042;
+													maxMasteringLuminance = 0x2710;	minMasteringLuminance = 0x0032;
+													maxContentLightLevel = 0;		maxFrameAverageLightLevel = 0;
+													electroOpticalTransferFunction = 0x02;	staticMetadataDescriptorID = 0x00;	return *this; }
+	inline HDRRegValues &	setDCIP3 (void)		{	greenPrimaryX = 0x33C2;	greenPrimaryY = 0x86C4;		bluePrimaryX = 0x1D4C;	bluePrimaryY = 0x0BB8;
+													redPrimaryX = 0x84D0;	redPrimaryY = 0x3E80;		whitePointX = 0x3D13;	whitePointY = 0x4042;
+													maxMasteringLuminance = 0x02E8;	minMasteringLuminance = 0x0032;
+													maxContentLightLevel = 0;		maxFrameAverageLightLevel = 0;
+													electroOpticalTransferFunction = 0x02;	staticMetadataDescriptorID = 0x00;	return *this; }
+} HDRRegValues;
+
+typedef struct HDRFloatValues
+{
 	float		greenPrimaryX;
 	float		greenPrimaryY;
 	float		bluePrimaryX;
@@ -10175,7 +10194,58 @@ typedef struct HDRFloatValues{
 	uint16_t	maxFrameAverageLightLevel;
 	uint8_t		electroOpticalTransferFunction;
 	uint8_t		staticMetadataDescriptorID;
-}HDRFloatValues;
+
+	inline HDRFloatValues & zero(void)	{	greenPrimaryX = greenPrimaryY = bluePrimaryX = bluePrimaryY = redPrimaryX = redPrimaryY = whitePointX = whitePointY = minMasteringLuminance = 0.0;
+											maxMasteringLuminance = maxContentLightLevel = maxFrameAverageLightLevel = 0;
+											electroOpticalTransferFunction = staticMetadataDescriptorID = 0;	return *this;}
+
+	inline bool	validPrimariesAndWhitePoint (void) const	{	return	greenPrimaryX >= 0.0 || greenPrimaryX <= float(1.0) ||
+																		greenPrimaryY >= 0.0 || greenPrimaryY <= float(1.0) ||
+																		bluePrimaryX  >= 0.0 || bluePrimaryX  <= float(1.0) ||
+																		bluePrimaryY  >= 0.0 || bluePrimaryY  <= float(1.0) ||
+																		redPrimaryX   >= 0.0 || redPrimaryX   <= float(1.0) ||
+																		redPrimaryY   >= 0.0 || redPrimaryY   <= float(1.0) ||
+																		whitePointX   >= 0.0 || whitePointX   <= float(1.0) ||
+																		whitePointY   >= 0.0 || whitePointY   <= float(1.0) ||
+																		minMasteringLuminance >= 0 || minMasteringLuminance <= float(6.5535);	}
+
+	inline bool setFromRegValues (const HDRRegValues & inRegValues)		{	if (!inRegValues.validPrimariesAndWhitePoint())
+																				return false;
+																			const float kMult(0.00002), kMultLum(0.0001);
+																			greenPrimaryX					= float(inRegValues.greenPrimaryX * kMult);
+																			greenPrimaryY					= float(inRegValues.greenPrimaryY * kMult);
+																			bluePrimaryX					= float(inRegValues.bluePrimaryX * kMult);
+																			bluePrimaryY					= float(inRegValues.bluePrimaryY * kMult);
+																			redPrimaryX						= float(inRegValues.redPrimaryX * kMult);
+																			redPrimaryY						= float(inRegValues.redPrimaryY * kMult);
+																			whitePointX						= float(inRegValues.whitePointX * kMult);
+																			whitePointY						= float(inRegValues.whitePointY * kMult);
+																			minMasteringLuminance			= float(inRegValues.minMasteringLuminance * kMultLum);
+																			maxMasteringLuminance			= inRegValues.maxMasteringLuminance;
+																			maxContentLightLevel			= inRegValues.maxContentLightLevel;
+																			maxFrameAverageLightLevel		= inRegValues.maxFrameAverageLightLevel;
+																			electroOpticalTransferFunction	= inRegValues.electroOpticalTransferFunction;
+																			staticMetadataDescriptorID		= inRegValues.staticMetadataDescriptorID;
+																			return true;	}
+
+	inline bool toRegValues (HDRRegValues & outVals) const				{	if (!validPrimariesAndWhitePoint())
+																				return false;
+																			outVals.greenPrimaryX					= uint16_t(greenPrimaryX / float(0.00002));
+																			outVals.greenPrimaryY					= uint16_t(greenPrimaryY / float(0.00002));
+																			outVals.bluePrimaryX					= uint16_t(bluePrimaryX / float(0.00002));
+																			outVals.bluePrimaryY					= uint16_t(bluePrimaryY / float(0.00002));
+																			outVals.redPrimaryX						= uint16_t(redPrimaryX / float(0.00002));
+																			outVals.redPrimaryY						= uint16_t(redPrimaryY / float(0.00002));
+																			outVals.whitePointX						= uint16_t(whitePointX / float(0.00002));
+																			outVals.whitePointY						= uint16_t(whitePointY / float(0.00002));
+																			outVals.minMasteringLuminance			= uint16_t(minMasteringLuminance / float(0.0001));
+																			outVals.maxMasteringLuminance			= maxMasteringLuminance;
+																			outVals.maxContentLightLevel			= maxContentLightLevel;
+																			outVals.maxFrameAverageLightLevel		= maxFrameAverageLightLevel;
+																			outVals.electroOpticalTransferFunction	= electroOpticalTransferFunction;
+																			outVals.staticMetadataDescriptorID		= staticMetadataDescriptorID;
+																			return true;	}
+} HDRFloatValues;
 
 typedef struct HDRDriverValues{
 	uint16_t	greenPrimaryX;

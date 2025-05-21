@@ -697,15 +697,15 @@ bool CNTV2Card::GetAudioMixerOutputLevels (const NTV2AudioChannelPairs & inChann
 bool CNTV2Card::GetHeadphoneOutputGain (ULWord & outGainValue)
 {
 	outGainValue = 0;
-	if (!NTV2DeviceHasRotaryEncoder(GetDeviceID()))
-		return false;	//	No Audio Mixer -- shouldn't be calling this function
+	if (!IsSupported(kDeviceHasRotaryEncoder))
+		return false;	//	No Rotary Encoder control
 	return ReadRegister (kRegRotaryEncoder, outGainValue, kRegMaskRotaryEncoderGain, kRegShiftRotaryEncoderGain);
 }
 
 bool CNTV2Card::SetHeadphoneOutputGain (const ULWord inGainValue)
 {
-	if (!NTV2DeviceHasRotaryEncoder(GetDeviceID()))
-		return false;	//	No Audio Mixer -- shouldn't be calling this function
+	if (!IsSupported(kDeviceHasRotaryEncoder))
+		return false;	//	No Rotary Encoder control
 	return WriteRegister(kRegRotaryEncoder, inGainValue, kRegMaskRotaryEncoderGain, kRegShiftRotaryEncoderGain);
 }
 
@@ -873,9 +873,9 @@ bool CNTV2Card::SetHDMIOutAudioSource2Channel (const NTV2AudioChannelPair inValu
 	if (!NTV2_IS_VALID_AUDIO_CHANNEL_PAIR (inValue))
 		return false;
 
-	if(NTV2DeviceGetHDMIVersion(GetDeviceID()) > 3)
+	if (GetNumSupported(kDeviceGetHDMIVersion) > 3)
 	{
-        if (!GetHDMIInputControlReg(regIC, inWhichHDMIOut))
+        if (!GetHDMIOutInputControlRegNum(regIC, inWhichHDMIOut))
             return false;
         if (!GetHDMIOutControlReg(regOC, inWhichHDMIOut))
             return false;
@@ -901,9 +901,9 @@ bool CNTV2Card::GetHDMIOutAudioSource2Channel (NTV2AudioChannelPair & outValue, 
     ULWord regOC(kRegHDMIOutControl);
 	bool	result = false;
 
-    if(NTV2DeviceGetHDMIVersion(GetDeviceID()) > 3)
+    if (GetNumSupported(kDeviceGetHDMIVersion) > 3)
 	{
-        if (!GetHDMIInputControlReg(regIC, inWhichHDMIOut))
+        if (!GetHDMIOutInputControlRegNum(regIC, inWhichHDMIOut))
             return false;
         if (!GetHDMIOutControlReg(regOC, inWhichHDMIOut))
             return false;
@@ -940,9 +940,9 @@ bool CNTV2Card::SetHDMIOutAudioSource8Channel (const NTV2Audio8ChannelSelect inV
 	if (!NTV2_IS_VALID_AUDIO_CHANNEL_OCTET (inValue))
 		return false;
 
-	if(NTV2DeviceGetHDMIVersion(GetDeviceID()) > 3)
+	if (GetNumSupported(kDeviceGetHDMIVersion) > 3)
 	{
-        if (!GetHDMIInputControlReg(regIC, inWhichHDMIOut))
+        if (!GetHDMIOutInputControlRegNum(regIC, inWhichHDMIOut))
             return false;
         if (!GetHDMIOutControlReg(regOC, inWhichHDMIOut))
             return false;
@@ -972,9 +972,9 @@ bool CNTV2Card::GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValu
     ULWord regOC(kRegHDMIOutControl);
 	bool result = false;
 
-	if(NTV2DeviceGetHDMIVersion(GetDeviceID()) > 3)
+	if (GetNumSupported(kDeviceGetHDMIVersion) > 3)
 	{
-        if (!GetHDMIInputControlReg(regIC, inWhichHDMIOut))
+        if (!GetHDMIOutInputControlRegNum(regIC, inWhichHDMIOut))
             return false;
         if (!GetHDMIOutControlReg(regOC, inWhichHDMIOut))
             return false;
@@ -1010,7 +1010,7 @@ bool CNTV2Card::SetHDMIOutAudioRate (const NTV2AudioRate inNewValue, const NTV2C
 {
     ULWord reg(kRegHDMIInputControl);
 
-    if (!GetHDMIInputControlReg(reg, inWhichHDMIOut))
+    if (!GetHDMIOutInputControlRegNum(reg, inWhichHDMIOut))
         return false;
     
     return WriteRegister (reg, static_cast <ULWord> (inNewValue), kRegMaskHDMIOutAudioRate, kRegShiftHDMIOutAudioRate);
@@ -1021,7 +1021,7 @@ bool CNTV2Card::GetHDMIOutAudioRate (NTV2AudioRate & outValue, const NTV2Channel
 {
     ULWord reg(kRegHDMIInputControl);
 
-    if (!GetHDMIInputControlReg(reg, inWhichHDMIOut))
+    if (!GetHDMIOutInputControlRegNum(reg, inWhichHDMIOut))
         return false;
     
     return CNTV2DriverInterface::ReadRegister (reg, outValue, kRegMaskHDMIOutAudioRate, kRegShiftHDMIOutAudioRate);
@@ -1677,7 +1677,7 @@ bool CNTV2Card::SetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, co
 bool CNTV2Card::SetAnalogAudioTransmitEnable (const NTV2Audio4ChannelSelect inChannelQuad, const bool inXmitEnable)
 {
 	//	Reg 108 (kRegGlobalControl3) has two bits for controlling XLR direction:  BIT(0) for XLRs 1-4,	BIT(1) for XLRs 5-8
-	if (!NTV2DeviceHasBiDirectionalAnalogAudio(_boardID))
+	if (!IsSupported(kDeviceHasBiDirectionalAnalogAudio))
 		return false;	//	unsupported
 	if (inChannelQuad > NTV2_AudioChannel5_8)
 		return false;	//	NTV2_AudioChannel1_4 & NTV2_AudioChannel5_8 only
@@ -1690,7 +1690,7 @@ bool CNTV2Card::GetAnalogAudioTransmitEnable (const NTV2Audio4ChannelSelect inCh
 {
 	outXmitEnabled = false;
 	//	Reg 108 (kRegGlobalControl3) has two bits for controlling XLR direction:  BIT(0) for XLRs 1-4,	BIT(1) for XLRs 5-8
-	if (!NTV2DeviceHasBiDirectionalAnalogAudio(_boardID))
+	if (!IsSupported(kDeviceHasBiDirectionalAnalogAudio))
 		return false;	//	unsupported
 	if (inChannelQuad > NTV2_AudioChannel5_8)
 		return false;	//	NTV2_AudioChannel1_4 & NTV2_AudioChannel5_8 only
@@ -1704,16 +1704,15 @@ bool CNTV2Card::GetAnalogAudioTransmitEnable (const NTV2Audio4ChannelSelect inCh
 
 bool CNTV2Card::SetMultiLinkAudioMode (const NTV2AudioSystem inAudioSystem, const bool inEnable)
 {
-	if (!NTV2DeviceCanDoMultiLinkAudio(_boardID))
+	if (!IsSupported(kDeviceCanDoMultiLinkAudio))
 		return false;
-	
 	return WriteRegister(gAudioSystemToAudioControlRegNum[inAudioSystem], inEnable ? 1 : 0, kRegMaskMultiLinkAudio, kRegShiftMultiLinkAudio);
 }
 
 bool CNTV2Card::GetMultiLinkAudioMode (const NTV2AudioSystem inAudioSystem, bool & outEnabled)
 {
 	outEnabled = false;
-	if (!NTV2DeviceCanDoMultiLinkAudio(_boardID))
+	if (!IsSupported(kDeviceCanDoMultiLinkAudio))
 		return false;
 	return CNTV2DriverInterface::ReadRegister(gAudioSystemToAudioControlRegNum[inAudioSystem], outEnabled, kRegMaskMultiLinkAudio, kRegShiftMultiLinkAudio);
 }
