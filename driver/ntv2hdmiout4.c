@@ -1325,7 +1325,7 @@ static bool configure_hdmi_video(struct ntv2_hdmiout4 *ntv2_hout)
 	{
         if (ntv2_hout->hdmi_version >= 6)
         {
-            pix_clock = 2;
+            pix_clock = 4;
             lin_int = ntv2_con_hdmiout4_lineinterleave_enable;
             pix_int = ntv2_con_hdmiout4_pixelinterleave_disable;
         }
