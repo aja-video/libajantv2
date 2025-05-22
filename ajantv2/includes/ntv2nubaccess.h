@@ -323,9 +323,10 @@ class AJAExport NTV2RPCClientAPI : public NTV2RPCBase
 										-	serial:		device serial number as 16-digit hex string, or its character string equivalent;
 										-	index:		16-bit unsigned index number (optional;  only specified for real, connected hardware)
 										Subclasses must re-implement to return whateever is appropriate.
+			@param[out]	outErrMsg		An error message if NTV2QueryDevices is unsuccessful.
 			@return		True if successful;  otherwise false.
 		**/
-		virtual bool	NTV2QueryDevices (NTV2StringList & outDeviceInfos)	{outDeviceInfos.clear(); return true;}
+		virtual bool	NTV2QueryDevices (NTV2StringList & outDeviceInfos, std::string & outErrMsg)	{outDeviceInfos.clear(); return true;}
 
 		#if !defined(NTV2_DEPRECATE_16_3)	//	These functions are going away
 		virtual bool	NTV2DriverGetBitFileInformationRemote	(BITFILE_INFO_STRUCT & bitFileInfo, const NTV2BitFileType bitFileType);
