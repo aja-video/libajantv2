@@ -1307,11 +1307,16 @@ static bool configure_hdmi_video(struct ntv2_hdmiout4 *ntv2_hout)
          (clock_data->line_rate == ntv2_con_hdmiout4_linerate_928mhz) ||
          (clock_data->line_rate == ntv2_con_hdmiout4_linerate_1113mhz)))
     {
-        pix_rep = ntv2_con_hdmiout4_pixelreplicate_enable;
         rep_fac = 1;
     }
 
 	pix_clock = 1;
+
+    if (ntv2_hout->hdmi_version >= 6)
+    {
+        pix_clock = 2;
+    }
+    
 	lin_int = ntv2_con_hdmiout4_lineinterleave_disable;
 	pix_int = ntv2_con_hdmiout4_pixelinterleave_disable;
 	if ((clock_data->clock_type == ntv2_clock_type_4kd) ||
