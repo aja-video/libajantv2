@@ -10,7 +10,6 @@
 
 #include "ntv2utils.h"					//	NTV2StringList
 #include "ajabase/system/lock.h"		//	AJALock
-#include "ajabase/common/ajarefptr.h"	//	AJARefPtr
 #include <string>
 #include <vector>
 #include <map>

@@ -8,6 +8,7 @@
 #include "ntv2overlay.h"
 #include "ntv2devicescanner.h"
 #include "ajabase/common/types.h"
+#include "ajabase/system/atomic.h"
 #include "ajabase/system/process.h"
 #include "ajabase/system/systemtime.h"
 #include "ajaanc/includes/ancillarylist.h"
