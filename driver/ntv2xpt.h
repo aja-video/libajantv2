@@ -38,4 +38,6 @@ bool GetXptHDMIOutQ3InputSelect(Ntv2SystemContext* context, NTV2OutputXptID* val
 bool GetXptHDMIOutQ4InputSelect(Ntv2SystemContext* context, NTV2OutputXptID* value);
 bool GetXptMultiLinkOutInputSelect(Ntv2SystemContext* context, NTV2Channel channel, NTV2OutputXptID* value);
 
+bool IsXptFrameStore(NTV2OutputXptID source);
+
 #endif
