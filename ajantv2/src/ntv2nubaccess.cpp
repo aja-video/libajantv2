@@ -12,9 +12,11 @@
 #include "ajabase/system/debug.h"
 #include "ajabase/common/common.h"
 #include "ajabase/system/systemtime.h"
-#include "ajabase/system/thread.h"
+#include "ajabase/system/atomic.h"
 #include <iomanip>
 #if !defined(NTV2_PREVENT_PLUGIN_LOAD)
+	#include "ajabase/common/ajarefptr.h"
+	#include "ajabase/system/thread.h"
 	#include <fstream>
 	#include "mbedtls/x509.h"
 	#include "mbedtls/error.h"

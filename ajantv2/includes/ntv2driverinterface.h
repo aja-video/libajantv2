@@ -571,6 +571,7 @@ class AJAExport CNTV2DriverInterface
 		AJA_VIRTUAL bool				ReadRP188Registers (const NTV2Channel inChannel, RP188_STRUCT * pRP188Data);
 		AJA_VIRTUAL inline std::string	GetHostName (void) const	{return IsRemote() ? _pRPCAPI->Name() : "";}	///< @return	String containing the remote device host name (if any).
 		AJA_VIRTUAL inline bool			IsRemote (void) const		{return _pRPCAPI ? true : false;}	///< @return	True if I'm connected to a non-local or non-physical device;  otherwise false.
+		AJA_VIRTUAL inline bool			IsRemoteConnected (void) const	{return IsRemote() ? _pRPCAPI->IsConnected() : false;}	///< @return	True if I'm connected to a non-local or non-physical device;  otherwise false.
 		/**
 			@return		String containing remote device description.
 		**/

@@ -7882,99 +7882,27 @@ string NTV2DieTempScaleToString (const NTV2DieTempScale inValue, const bool inUs
 	return "";
 }
 
-bool convertHDRFloatToRegisterValues(const HDRFloatValues & inFloatValues, HDRRegValues & outRegisterValues)
-{
-	if ((inFloatValues.greenPrimaryX < 0 || inFloatValues.greenPrimaryX > float(1.0)) ||
-		(inFloatValues.greenPrimaryY < 0 || inFloatValues.greenPrimaryY > float(1.0)) ||
-		(inFloatValues.bluePrimaryX < 0 || inFloatValues.bluePrimaryX > float(1.0)) ||
-		(inFloatValues.bluePrimaryY < 0 || inFloatValues.bluePrimaryY > float(1.0)) ||
-		(inFloatValues.redPrimaryX < 0 || inFloatValues.redPrimaryX > float(1.0)) ||
-		(inFloatValues.redPrimaryY < 0 || inFloatValues.redPrimaryY > float(1.0)) ||
-		(inFloatValues.whitePointX < 0 || inFloatValues.whitePointX > float(1.0)) ||
-		(inFloatValues.whitePointY < 0 || inFloatValues.whitePointY > float(1.0)) ||
-		(inFloatValues.minMasteringLuminance < 0 || inFloatValues.minMasteringLuminance > float(6.5535)))
-		return false;
+#if !defined(NTV2_DEPRECATE_17_6)
+	bool convertHDRFloatToRegisterValues (const HDRFloatValues & inFloatValues, HDRRegValues & outRegisterValues)
+	{
+		return inFloatValues.toRegValues(outRegisterValues);
+	}
 
-	outRegisterValues.greenPrimaryX = static_cast<uint16_t>(inFloatValues.greenPrimaryX / float(0.00002));
-	outRegisterValues.greenPrimaryY = static_cast<uint16_t>(inFloatValues.greenPrimaryY / float(0.00002));
-	outRegisterValues.bluePrimaryX = static_cast<uint16_t>(inFloatValues.bluePrimaryX / float(0.00002));
-	outRegisterValues.bluePrimaryY = static_cast<uint16_t>(inFloatValues.bluePrimaryY / float(0.00002));
-	outRegisterValues.redPrimaryX = static_cast<uint16_t>(inFloatValues.redPrimaryX / float(0.00002));
-	outRegisterValues.redPrimaryY = static_cast<uint16_t>(inFloatValues.redPrimaryY / float(0.00002));
-	outRegisterValues.whitePointX = static_cast<uint16_t>(inFloatValues.whitePointX / float(0.00002));
-	outRegisterValues.whitePointY = static_cast<uint16_t>(inFloatValues.whitePointY / float(0.00002));
-	outRegisterValues.minMasteringLuminance = static_cast<uint16_t>(inFloatValues.minMasteringLuminance / float(0.0001));
-	outRegisterValues.maxMasteringLuminance = inFloatValues.maxMasteringLuminance;
-	outRegisterValues.maxContentLightLevel = inFloatValues.maxContentLightLevel;
-	outRegisterValues.maxFrameAverageLightLevel = inFloatValues.maxFrameAverageLightLevel;
-	outRegisterValues.electroOpticalTransferFunction = inFloatValues.electroOpticalTransferFunction;
-	outRegisterValues.staticMetadataDescriptorID = inFloatValues.staticMetadataDescriptorID;
-	return true;
-}
+	bool convertHDRRegisterToFloatValues (const HDRRegValues & inRegisterValues, HDRFloatValues & outFloatValues)
+	{
+		return outFloatValues.setFromRegValues(inRegisterValues);
+	}
 
-bool convertHDRRegisterToFloatValues(const HDRRegValues & inRegisterValues, HDRFloatValues & outFloatValues)
-{
-	if ((inRegisterValues.greenPrimaryX > 0xC350) ||
-		(inRegisterValues.greenPrimaryY > 0xC350) ||
-		(inRegisterValues.bluePrimaryX > 0xC350) ||
-		(inRegisterValues.bluePrimaryY > 0xC350) ||
-		(inRegisterValues.redPrimaryX > 0xC350) ||
-		(inRegisterValues.redPrimaryY > 0xC350) ||
-		(inRegisterValues.whitePointX > 0xC350) ||
-		(inRegisterValues.whitePointY > 0xC350))
-		return false;
-	outFloatValues.greenPrimaryX = static_cast<float>(inRegisterValues.greenPrimaryX * 0.00002);
-	outFloatValues.greenPrimaryY = static_cast<float>(inRegisterValues.greenPrimaryY * 0.00002);
-	outFloatValues.bluePrimaryX = static_cast<float>(inRegisterValues.bluePrimaryX * 0.00002);
-	outFloatValues.bluePrimaryY = static_cast<float>(inRegisterValues.bluePrimaryY * 0.00002);
-	outFloatValues.redPrimaryX = static_cast<float>(inRegisterValues.redPrimaryX * 0.00002);
-	outFloatValues.redPrimaryY = static_cast<float>(inRegisterValues.redPrimaryY * 0.00002);
-	outFloatValues.whitePointX = static_cast<float>(inRegisterValues.whitePointX * 0.00002);
-	outFloatValues.whitePointY = static_cast<float>(inRegisterValues.whitePointY * 0.00002);
-	outFloatValues.minMasteringLuminance = static_cast<float>(inRegisterValues.minMasteringLuminance * 0.0001);
-	outFloatValues.maxMasteringLuminance = inRegisterValues.maxMasteringLuminance;
-	outFloatValues.maxContentLightLevel = inRegisterValues.maxContentLightLevel;
-	outFloatValues.maxFrameAverageLightLevel = inRegisterValues.maxFrameAverageLightLevel;
-	outFloatValues.electroOpticalTransferFunction = inRegisterValues.electroOpticalTransferFunction;
-	outFloatValues.staticMetadataDescriptorID = inRegisterValues.staticMetadataDescriptorID;
-	return true;
-}
+	void setHDRDefaultsForBT2020 (HDRRegValues & outRegisterValues)
+	{
+		outRegisterValues.setBT2020();
+	}
 
-void setHDRDefaultsForBT2020(HDRRegValues & outRegisterValues)
-{
-	outRegisterValues.greenPrimaryX = 0x2134;
-	outRegisterValues.greenPrimaryY = 0x9BAA;
-	outRegisterValues.bluePrimaryX = 0x1996;
-	outRegisterValues.bluePrimaryY = 0x08FC;
-	outRegisterValues.redPrimaryX = 0x8A48;
-	outRegisterValues.redPrimaryY = 0x3908;
-	outRegisterValues.whitePointX = 0x3D13;
-	outRegisterValues.whitePointY = 0x4042;
-	outRegisterValues.maxMasteringLuminance = 0x2710;
-	outRegisterValues.minMasteringLuminance = 0x0032;
-	outRegisterValues.maxContentLightLevel = 0;
-	outRegisterValues.maxFrameAverageLightLevel = 0;
-	outRegisterValues.electroOpticalTransferFunction = 0x02;
-	outRegisterValues.staticMetadataDescriptorID = 0x00;
-}
-
-void setHDRDefaultsForDCIP3(HDRRegValues & outRegisterValues)
-{
-	outRegisterValues.greenPrimaryX = 0x33C2;
-	outRegisterValues.greenPrimaryY = 0x86C4;
-	outRegisterValues.bluePrimaryX = 0x1D4C;
-	outRegisterValues.bluePrimaryY = 0x0BB8;
-	outRegisterValues.redPrimaryX = 0x84D0;
-	outRegisterValues.redPrimaryY = 0x3E80;
-	outRegisterValues.whitePointX = 0x3D13;
-	outRegisterValues.whitePointY = 0x4042;
-	outRegisterValues.maxMasteringLuminance = 0x02E8;
-	outRegisterValues.minMasteringLuminance = 0x0032;
-	outRegisterValues.maxContentLightLevel = 0;
-	outRegisterValues.maxFrameAverageLightLevel = 0;
-	outRegisterValues.electroOpticalTransferFunction = 0x02;
-	outRegisterValues.staticMetadataDescriptorID = 0x00;
-}
+	void setHDRDefaultsForDCIP3(HDRRegValues & outRegisterValues)
+	{
+		outRegisterValues.setDCIP3();
+	}
+#endif	//	!defined(NTV2_DEPRECATE_17_6)
 
 
 ostream & operator << (ostream & inOutStr, const NTV2OutputCrosspointIDs & inList)

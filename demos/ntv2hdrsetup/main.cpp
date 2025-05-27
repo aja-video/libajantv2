@@ -10,18 +10,10 @@
 // Includes
 #include "ajatypes.h"
 #include "ajabase/common/options_popt.h"
-#include "ajabase/common/types.h"
 #include "ajabase/system/process.h"
-#include "ajabase/system/systemtime.h"
 #include "ntv2card.h"
-#include "ntv2devicefeatures.h"
 #include "ntv2devicescanner.h"
-#include "ntv2utils.h"
-
 #include "ntv2democommon.h"
-#include <signal.h>
-#include <iostream>
-#include <iomanip>
 
 using namespace std;
 
@@ -105,14 +97,13 @@ int main (int argc, const char ** argv)
 	}
 
 	//	Load up the digital primitives with some reasonable values...
-	HDRRegValues registerValues;
-	::setHDRDefaultsForBT2020(registerValues);
-	registerValues.electroOpticalTransferFunction = uint8_t(eotf);
-	device.SetHDRData(registerValues);
+	HDRRegValues regValues;
+	regValues.setBT2020().electroOpticalTransferFunction = uint8_t(eotf);
+	device.SetHDRData(regValues);
 
 	//	Setup HDR values based on passed args...
 	device.SetHDMIHDRConstantLuminance(bool(constLuminance));
-	device.SetHDMIHDRElectroOpticalTransferFunction(uint8_t(eotf));
+	device.SetHDMIHDRElectroOpticalTransferFunction(uint8_t(eotf));	//	This call is redundant (was set in SetHDRData above)
 
 	//	Enabling this will allow dolby vision containing frames to properly display out of HDMI
 	device.EnableHDMIHDRDolbyVision(bool(dolbyVision));

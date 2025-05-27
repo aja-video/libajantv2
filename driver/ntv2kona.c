@@ -1961,7 +1961,7 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context, NTV2Channel channel)
 	{
 		if (GetSourceVideoFormat(context, &videoFormat, xptSelect, &isQuadMode, &isQuadQuadMode, &hdrRegValues))
 		{
-			if (NTV2DeviceCanDo12gRouting(deviceID))
+			if (NTV2DeviceCanDo12gRouting(deviceID) && IsXptFrameStore(xptSelect))
 			{
 				bFormatIsTSI = Get425FrameEnable(context, channel);
 			}
@@ -2053,7 +2053,7 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context, NTV2Channel channel)
 	}
     else if (hdmiVersion == 6)
     {
-		if (NTV2DeviceCanDo12gRouting(deviceID) && bFormatIsTSI)
+		if (bFormatIsTSI || isQuadMode)
 			is4k = true;
     }
 

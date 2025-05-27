@@ -23,6 +23,8 @@ NTV2_REG(ntv2_reg_control_status,							48);			/* control status */
 	NTV2_FLD(ntv2_fld_control_reference_present,				1,	30);		/* reference source present */
 	NTV2_FLD(ntv2_fld_control_genlock_locked,					1,	31);		/* genlock locked */
 
+NTV2_REG(ntv2_reg_device_id,    							50);			/* device id */
+
 /* hdmi output configuration register */
 NTV2_REG(ntv2_reg_hdmiout_output_config,					125,
                                                             kVRegHDMIOutControl1,
