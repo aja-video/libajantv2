@@ -1091,24 +1091,6 @@ bool CNTV2BareMetalDriverInterface::NTV2Message (NTV2_HEADER * pInMessage)
 	return true;
 }
 
-bool CNTV2BareMetalDriverInterface::HevcSendMessage (HevcMessageHeader* pMessage)
-{
-#if 0
-	if (!pMessage)
-		return false;	//	NULL message pointer
-	if (_hDevice == INVALID_HANDLE_VALUE)
-		return false;
-	if (_hDevice == 0)
-		return false;
-	AJADebug::StatTimerStart(AJA_DebugStat_HEVCSendMessage);
-	const int result = ioctl(int(_hDevice), IOCTL_HEVC_MESSAGE, pMessage);
-	AJADebug::StatTimerStop(AJA_DebugStat_HEVCSendMessage);
-	if (result)
-		{LDIFAIL("IOCTL_AJANTV2_MESSAGE failed");	return false;}
-#endif
-	return true;
-}
-
 
 #if !defined(NTV2_DEPRECATE_16_0)
 	bool CNTV2BareMetalDriverInterface::GetDMADriverBufferPhysicalAddress (ULWord* physAddr)

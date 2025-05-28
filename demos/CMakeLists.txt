@@ -20,8 +20,8 @@ if(NOT AJA_DISABLE_QT)
     add_subdirectory(ntv2qtpreview)
     add_subdirectory(ntv2streampreview)
     add_subdirectory(ntv2qtmultiinput)
-    add_subdirectory(ntv2konaipj2ksetup)
-    add_subdirectory(ntv2konaipjsonsetup)
+#   add_subdirectory(ntv2konaipj2ksetup) # removed in SDK 17.6
+#   add_subdirectory(ntv2konaipjsonsetup) # removed in SDK 17.6
 endif()
 
 add_subdirectory(ntv2llburn)

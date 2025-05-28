@@ -73,7 +73,9 @@ class CNTV2LinuxDriverInterface : public CNTV2DriverInterface
 	AJA_VIRTUAL bool NTV2Message (NTV2_HEADER * pInOutMessage);
 	AJA_VIRTUAL bool ControlDriverDebugMessages(NTV2_DriverDebugMessageSet msgSet,
 									bool enable);
-	AJA_VIRTUAL bool HevcSendMessage(HevcMessageHeader* pMessage);
+#if !defined(NTV2_DEPRECATE_17_6)
+	AJA_VIRTUAL inline bool	NTV2_DEPRECATED_f(HevcSendMessage(HevcMessageHeader* pMsg))	{(void)pMsg; return false;}	///< @deprecated	Corvid HEVC support dropped in SDK 17.6
+#endif//!defined(NTV2_DEPRECATE_17_6)
 
 	AJA_VIRTUAL bool SetupBoard(void);
 

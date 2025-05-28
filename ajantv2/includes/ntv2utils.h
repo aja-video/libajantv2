@@ -1077,7 +1077,6 @@ AJAExport std::string NTV2DeviceIDToString				(const NTV2DeviceID				inValue,	co
 AJAExport std::string NTV2VideoFormatToString			(const NTV2VideoFormat			inValue,	const bool inUseFrameRate = false);		//	New in SDK 12.0
 AJAExport std::string NTV2StandardToString				(const NTV2Standard				inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
 AJAExport std::string NTV2FrameBufferFormatToString		(const NTV2FrameBufferFormat	inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
-AJAExport std::string NTV2M31VideoPresetToString		(const M31VideoPreset			inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
 AJAExport std::string NTV2FrameGeometryToString			(const NTV2FrameGeometry		inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
 AJAExport std::string NTV2FrameRateToString				(const NTV2FrameRate			inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
 AJAExport std::string NTV2InputSourceToString			(const NTV2InputSource			inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
@@ -1136,7 +1135,8 @@ AJAExport std::string NTV2AudioFormatToString			(const NTV2AudioFormat			inValue
 AJAExport std::string NTV2BitfileTypeToString			(const NTV2BitfileType			inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.2
 AJAExport std::string NTV2DieTempScaleToString			(const NTV2DieTempScale			inValue,	const bool inUseUTF8 = false);			//	New in SDK 17.6
 #if !defined(NTV2_DEPRECATE_17_6)
-	AJAExport NTV2_DEPRECATED_f(bool convertHDRFloatToRegisterValues (const HDRFloatValues & inFVals, HDRRegValues & outRegVals));	///< @deprecated	Use HDRFloatValues::toRegValues instead
+	AJAExport NTV2_DEPRECATED_f(std::string NTV2M31VideoPresetToString (const M31VideoPreset val, const bool retailDisplay = false));	///< @deprecated	New in SDK 12.0, removed in SDK 17.6
+	AJAExport NTV2_DEPRECATED_f(bool convertHDRFloatToRegisterValues (const HDRFloatValues & inFVals, HDRRegValues & outRegVals));		///< @deprecated	Use HDRFloatValues::toRegValues instead
 	AJAExport NTV2_DEPRECATED_f(bool convertHDRRegisterToFloatValues (const HDRRegValues & inRegVals, HDRFloatValues & outFloatVals));	///< @deprecated	Use HDRFloatValues::setFromRegValues instead
 	AJAExport NTV2_DEPRECATED_f(void setHDRDefaultsForBT2020 (HDRRegValues & outRegVals));	///< @deprecated	Use HDRRegValues::setBT2020 instead
 	AJAExport NTV2_DEPRECATED_f(void setHDRDefaultsForDCIP3 (HDRRegValues & outRegVals));	///< @deprecated	Use HDRRegValues::setDCIP3 instead

@@ -9557,591 +9557,594 @@ typedef enum
 		#endif	//	defined (AJAMac)
 //////////////////////////////////////////////////////////////////////////////////////////////	END NEW AUTOCIRCULATE API
 
+#if !defined(NTV2_DEPRECATE_17_6)
+	//// NOTE: HEVC support removed in SDK 17.6
 
-// maximum number of hevc streams
-#define HEVC_STREAM_MAX						4
+	// maximum number of hevc streams
+	#define HEVC_STREAM_MAX						4
 
-// maximum number of gpio ports
-#define HEVC_GPIO_MAX						64
+	// maximum number of gpio ports
+	#define HEVC_GPIO_MAX						64
 
-// version string maximum size (bytes)
-#define HEVC_VERSION_STRING_SIZE			64
+	// version string maximum size (bytes)
+	#define HEVC_VERSION_STRING_SIZE			64
 
-// picture and encoded information additional data size (bytes)
-#define HEVC_ADDITIONAL_DATA_SIZE			((4 + 4 + 256) * 16)
+	// picture and encoded information additional data size (bytes)
+	#define HEVC_ADDITIONAL_DATA_SIZE			((4 + 4 + 256) * 16)
 
-// codec state flags 
-#define HEVC_STATE_FLAG_VIDEO_STARTED		0x00000001U			// codec video input capture started
+	// codec state flags 
+	#define HEVC_STATE_FLAG_VIDEO_STARTED		0x00000001U			// codec video input capture started
 
-// transfer flags 
-#define HEVC_TRANSFER_FLAG_IS_LAST_FRAME	0x00000001U			// last stream frame
+	// transfer flags 
+	#define HEVC_TRANSFER_FLAG_IS_LAST_FRAME	0x00000001U			// last stream frame
 
-// driver io status codes
-#define HEVC_STATUS_SUCCESS					0x00000001U
+	// driver io status codes
+	#define HEVC_STATUS_SUCCESS					0x00000001U
 
-// fatal error registers
-#define HEVC_FATAL_ERROR_INFO_REG			0x08000100U			// codec error register base
-#define HEVC_FATAL_ERROR_INFO_COUNT			64					// number of codec error registers
+	// fatal error registers
+	#define HEVC_FATAL_ERROR_INFO_REG			0x08000100U			// codec error register base
+	#define HEVC_FATAL_ERROR_INFO_COUNT			64					// number of codec error registers
 
-// driver debug register output enable bits
-#define HEVC_DEBUG_DRIVER_REGISTER			0x080000FCU			// register address of debug bits
-#define HEVC_DEBUG_MASK_INFO				0x00000001			// general probe and cleanup
-#define HEVC_DEBUG_MASK_WARNING				0x00000002			// general warinings
-#define HEVC_DEBUG_MASK_ERROR				0x00000004			// general erros
-#define HEVC_DEBUG_MASK_INT_PRIMARY			0x00000008			// primary interrupt info
-#define HEVC_DEBUG_MASK_INT_COMMAND			0x00000010			// command tasklet info
-#define HEVC_DEBUG_MASK_INT_VEI				0x00000020			// raw stream tasklet info
-#define HEVC_DEBUG_MASK_INT_SEO				0x00000040			// encoded stream tasklet info
-#define HEVC_DEBUG_MASK_INT_ERROR			0x00000080			// interrupt errors
-#define HEVC_DEBUG_MASK_REGISTER_INFO		0x00000100			// register read/write info
-#define HEVC_DEBUG_MASK_REGISTER_STATE		0x00000200			// detailed register access info
-#define HEVC_DEBUG_MASK_REGISTER_ERROR		0x00000400			// register access errors
-#define HEVC_DEBUG_MASK_COMMAND_INFO		0x00000800			// command queue info
-#define HEVC_DEBUG_MASK_COMMAND_STATE		0x00001000			// detailed command processing info
-#define HEVC_DEBUG_MASK_COMMAND_ERROR		0x00002000			// command queue errors
-#define HEVC_DEBUG_MASK_STREAM_INFO			0x00004000			// stream (dma) queue info
-#define HEVC_DEBUG_MASK_STREAM_STATE		0x00008000			// detailed stream processing info
-#define HEVC_DEBUG_MASK_STREAM_COPY			0x00010000			// stream data copy info
-#define HEVC_DEBUG_MASK_STREAM_SEGMENT		0x00020000			// stream data segment info
-#define HEVC_DEBUG_MASK_STREAM_FRAME		0x00040000			// stream vif frame info
-#define HEVC_DEBUG_MASK_STREAM_ERROR		0x00080000			// stream queue errors
-#define HEVC_DEBUG_MASK_MEMORY_ALLOC		0x00100000			// buffer memory allocation info
-#define HEVC_DEBUG_MASK_MEMORY_ERROR		0x00200000			// buffer memory allocation errors
-#define HEVC_DEBUG_MASK_DMA_INFO			0x00400000			// dma send info
-#define HEVC_DEBUG_MASK_DMA_DESCRIPTOR		0x00800000			// dma descriptor dump
-#define HEVC_DEBUG_MASK_DMA_ERROR			0x01000000			// dma errors
-#define HEVC_DEBUG_MASK_STATUS_INFO			0x02000000			// status info requests
-#define HEVC_DEBUG_MASK_RESERVED_0			0x04000000
-#define HEVC_DEBUG_MASK_RESERVED_1			0x08000000
-#define HEVC_DEBUG_MASK_RESERVED_2			0x10000000
-#define HEVC_DEBUG_MASK_RESERVED_3			0x20000000
-#define HEVC_DEBUG_MASK_RESERVED_4			0x40000000
-#define HEVC_DEBUG_MASK_RESERVED_5			0x80000000
+	// driver debug register output enable bits
+	#define HEVC_DEBUG_DRIVER_REGISTER			0x080000FCU			// register address of debug bits
+	#define HEVC_DEBUG_MASK_INFO				0x00000001			// general probe and cleanup
+	#define HEVC_DEBUG_MASK_WARNING				0x00000002			// general warinings
+	#define HEVC_DEBUG_MASK_ERROR				0x00000004			// general erros
+	#define HEVC_DEBUG_MASK_INT_PRIMARY			0x00000008			// primary interrupt info
+	#define HEVC_DEBUG_MASK_INT_COMMAND			0x00000010			// command tasklet info
+	#define HEVC_DEBUG_MASK_INT_VEI				0x00000020			// raw stream tasklet info
+	#define HEVC_DEBUG_MASK_INT_SEO				0x00000040			// encoded stream tasklet info
+	#define HEVC_DEBUG_MASK_INT_ERROR			0x00000080			// interrupt errors
+	#define HEVC_DEBUG_MASK_REGISTER_INFO		0x00000100			// register read/write info
+	#define HEVC_DEBUG_MASK_REGISTER_STATE		0x00000200			// detailed register access info
+	#define HEVC_DEBUG_MASK_REGISTER_ERROR		0x00000400			// register access errors
+	#define HEVC_DEBUG_MASK_COMMAND_INFO		0x00000800			// command queue info
+	#define HEVC_DEBUG_MASK_COMMAND_STATE		0x00001000			// detailed command processing info
+	#define HEVC_DEBUG_MASK_COMMAND_ERROR		0x00002000			// command queue errors
+	#define HEVC_DEBUG_MASK_STREAM_INFO			0x00004000			// stream (dma) queue info
+	#define HEVC_DEBUG_MASK_STREAM_STATE		0x00008000			// detailed stream processing info
+	#define HEVC_DEBUG_MASK_STREAM_COPY			0x00010000			// stream data copy info
+	#define HEVC_DEBUG_MASK_STREAM_SEGMENT		0x00020000			// stream data segment info
+	#define HEVC_DEBUG_MASK_STREAM_FRAME		0x00040000			// stream vif frame info
+	#define HEVC_DEBUG_MASK_STREAM_ERROR		0x00080000			// stream queue errors
+	#define HEVC_DEBUG_MASK_MEMORY_ALLOC		0x00100000			// buffer memory allocation info
+	#define HEVC_DEBUG_MASK_MEMORY_ERROR		0x00200000			// buffer memory allocation errors
+	#define HEVC_DEBUG_MASK_DMA_INFO			0x00400000			// dma send info
+	#define HEVC_DEBUG_MASK_DMA_DESCRIPTOR		0x00800000			// dma descriptor dump
+	#define HEVC_DEBUG_MASK_DMA_ERROR			0x01000000			// dma errors
+	#define HEVC_DEBUG_MASK_STATUS_INFO			0x02000000			// status info requests
+	#define HEVC_DEBUG_MASK_RESERVED_0			0x04000000
+	#define HEVC_DEBUG_MASK_RESERVED_1			0x08000000
+	#define HEVC_DEBUG_MASK_RESERVED_2			0x10000000
+	#define HEVC_DEBUG_MASK_RESERVED_3			0x20000000
+	#define HEVC_DEBUG_MASK_RESERVED_4			0x40000000
+	#define HEVC_DEBUG_MASK_RESERVED_5			0x80000000
 
-// ntv2 gpio input registers
-#define HEVC_NTV2_GPIO_REGISTER_LOW			510
-#define HEVC_NTV2_GPIO_REGISTER_HIGH		511
+	// ntv2 gpio input registers
+	#define HEVC_NTV2_GPIO_REGISTER_LOW			510
+	#define HEVC_NTV2_GPIO_REGISTER_HIGH		511
 
 
-// hevc version information
-typedef struct HevcVersion
-{
-	ULWord					major;
-	ULWord					minor;
-	ULWord					point;
-	ULWord					build;
-} HevcVersion;
+	// hevc version information
+	typedef struct HevcVersion
+	{
+		ULWord					major;
+		ULWord					minor;
+		ULWord					point;
+		ULWord					build;
+	} HevcVersion;
 
-// pci id information
-typedef struct HevcPciId
-{
-	ULWord					vendor;
-	ULWord					device;
-	ULWord					subVendor;
-	ULWord					subDevice;
-} HevcPciId;
+	// pci id information
+	typedef struct HevcPciId
+	{
+		ULWord					vendor;
+		ULWord					device;
+		ULWord					subVendor;
+		ULWord					subDevice;
+	} HevcPciId;
 
-// hevc device mode
-typedef enum HevcDeviceMode
-{
-	Hevc_DeviceMode_Unknown,
-	Hevc_DeviceMode_Codec,							// codec mode
-	Hevc_DeviceMode_Maintenance,					// maintenance mode
-	Hevc_DeviceMode_Size
-} HevcDeviceMode;
+	// hevc device mode
+	typedef enum HevcDeviceMode
+	{
+		Hevc_DeviceMode_Unknown,
+		Hevc_DeviceMode_Codec,							// codec mode
+		Hevc_DeviceMode_Maintenance,					// maintenance mode
+		Hevc_DeviceMode_Size
+	} HevcDeviceMode;
 
-// hevc device information message
-typedef struct HevcDeviceInfo
-{
-	HevcVersion				driverVersion;			// driver version
-	HevcVersion				mcpuVersion;			// firmware versions
-	char					systemFirmware[HEVC_VERSION_STRING_SIZE];
-	char					standardFirmwareSingle[HEVC_VERSION_STRING_SIZE];
-	char					standardFirmwareMultiple[HEVC_VERSION_STRING_SIZE];
-	char					userFirmwareSingle[HEVC_VERSION_STRING_SIZE];
-	char					userFirmwareMultiple[HEVC_VERSION_STRING_SIZE];
-	HevcPciId				pciId;					// pci ids
-	HevcDeviceMode			deviceMode;				// hardware device mode
-	bool					mcpuVersionCheck;		// mcpu version supported 
-	bool					systemVersionCheck;		// system version supported
-	bool					standardSingleCheck;	// standard firmware single version supported
-	bool					standardMultipleCheck;	// standard fimwrare multiple version supported
-	bool					pciIdCheck;				// pci id supported
-} HevcDeviceInfo;
+	// hevc device information message
+	typedef struct HevcDeviceInfo
+	{
+		HevcVersion				driverVersion;			// driver version
+		HevcVersion				mcpuVersion;			// firmware versions
+		char					systemFirmware[HEVC_VERSION_STRING_SIZE];
+		char					standardFirmwareSingle[HEVC_VERSION_STRING_SIZE];
+		char					standardFirmwareMultiple[HEVC_VERSION_STRING_SIZE];
+		char					userFirmwareSingle[HEVC_VERSION_STRING_SIZE];
+		char					userFirmwareMultiple[HEVC_VERSION_STRING_SIZE];
+		HevcPciId				pciId;					// pci ids
+		HevcDeviceMode			deviceMode;				// hardware device mode
+		bool					mcpuVersionCheck;		// mcpu version supported 
+		bool					systemVersionCheck;		// system version supported
+		bool					standardSingleCheck;	// standard firmware single version supported
+		bool					standardMultipleCheck;	// standard fimwrare multiple version supported
+		bool					pciIdCheck;				// pci id supported
+	} HevcDeviceInfo;
 
-// hevc register
-typedef struct HevcDeviceRegister
-{
-	ULWord					address;				// register address
-	ULWord					writeValue;				// register write value
-	ULWord					readValue;				// register read value
-	ULWord					mask;					// register value mask
-	ULWord					shift;					// register value shift
-	bool					write;					// write flag
-	bool					read;					// read flag
-	bool					forceBar4;				// force bar4 access
-} HevcDeviceRegister;
+	// hevc register
+	typedef struct HevcDeviceRegister
+	{
+		ULWord					address;				// register address
+		ULWord					writeValue;				// register write value
+		ULWord					readValue;				// register read value
+		ULWord					mask;					// register value mask
+		ULWord					shift;					// register value shift
+		bool					write;					// write flag
+		bool					read;					// read flag
+		bool					forceBar4;				// force bar4 access
+	} HevcDeviceRegister;
 
-// hevc main state
-typedef enum HevcMainState
-{
-	Hevc_MainState_Unknown,
-	Hevc_MainState_Boot,							// codec has booted
-	Hevc_MainState_Init,							// initialize codec
-	Hevc_MainState_Encode,							// configure encoding (load firmware?)
-	Hevc_MainState_Error,							// codec must be reset
-	Hevc_MainState_Size
-} HevcMainState;
+	// hevc main state
+	typedef enum HevcMainState
+	{
+		Hevc_MainState_Unknown,
+		Hevc_MainState_Boot,							// codec has booted
+		Hevc_MainState_Init,							// initialize codec
+		Hevc_MainState_Encode,							// configure encoding (load firmware?)
+		Hevc_MainState_Error,							// codec must be reset
+		Hevc_MainState_Size
+	} HevcMainState;
 
-// encoder mode
-typedef enum HevcEncodeMode
-{
-	Hevc_EncodeMode_Unknown,
-	Hevc_EncodeMode_Single,							// encode a sigle stream
-	Hevc_EncodeMode_Multiple,						// encode multiple streams
-	Hevc_EncodeMode_Size
-} HevcEncodeMode;
+	// encoder mode
+	typedef enum HevcEncodeMode
+	{
+		Hevc_EncodeMode_Unknown,
+		Hevc_EncodeMode_Single,							// encode a sigle stream
+		Hevc_EncodeMode_Multiple,						// encode multiple streams
+		Hevc_EncodeMode_Size
+	} HevcEncodeMode;
 
-// encoder firmware type
-typedef enum HevcFirmwareType
-{
-	Hevc_FirmwareType_Unknown,
-	Hevc_FirmwareType_Standard,						// encode firmware standard
-	Hevc_FirmwareType_User,							// encode firmware user
-	Hevc_FirmwareType_Size
-} HevcFirmwareType;
+	// encoder firmware type
+	typedef enum HevcFirmwareType
+	{
+		Hevc_FirmwareType_Unknown,
+		Hevc_FirmwareType_Standard,						// encode firmware standard
+		Hevc_FirmwareType_User,							// encode firmware user
+		Hevc_FirmwareType_Size
+	} HevcFirmwareType;
 
-// hevc video interface state
-typedef enum HevcVifState
-{
-	Hevc_VifState_Unknown,
-	Hevc_VifState_Stop,								// video interface stop
-	Hevc_VifState_Start,							// video interface start
-	Hevc_VifState_Size
-} HevcVifState;
+	// hevc video interface state
+	typedef enum HevcVifState
+	{
+		Hevc_VifState_Unknown,
+		Hevc_VifState_Stop,								// video interface stop
+		Hevc_VifState_Start,							// video interface start
+		Hevc_VifState_Size
+	} HevcVifState;
 
-// hevc video input state
-typedef enum HevcVinState
-{
-	Hevc_VinState_Unknown,
-	Hevc_VinState_Stop,								// video input stop
-	Hevc_VinState_Start,							// video input start
-	Hevc_VinState_Size
-} HevcVinState;
+	// hevc video input state
+	typedef enum HevcVinState
+	{
+		Hevc_VinState_Unknown,
+		Hevc_VinState_Stop,								// video input stop
+		Hevc_VinState_Start,							// video input start
+		Hevc_VinState_Size
+	} HevcVinState;
 
-// hevc encoder state
-typedef enum HevcEhState
-{
-	Hevc_EhState_Unknown,
-	Hevc_EhState_Stop,								// encoder stop
-	Hevc_EhState_Start,								// encoder start
-	Hevc_EhState_ReadyToStop,						// encoder ready to stop
-	Hevc_EhState_Size
-} HevcEhState;
+	// hevc encoder state
+	typedef enum HevcEhState
+	{
+		Hevc_EhState_Unknown,
+		Hevc_EhState_Stop,								// encoder stop
+		Hevc_EhState_Start,								// encoder start
+		Hevc_EhState_ReadyToStop,						// encoder ready to stop
+		Hevc_EhState_Size
+	} HevcEhState;
 
-// hevc gpio control
-typedef enum HevcGpioControl
-{
-	Hevc_GpioControl_Unknown,
-	Hevc_GpioControl_Function,						// configure gpio port function
-	Hevc_GpioControl_Direction,						// configure gpio port direction
-	Hevc_GpioControl_Set,							// set gpio port value
-	Hevc_GpioControl_Get,							// get pgio port value
-	Hevc_GpioControl_Size
-} HevcGpioControl;
+	// hevc gpio control
+	typedef enum HevcGpioControl
+	{
+		Hevc_GpioControl_Unknown,
+		Hevc_GpioControl_Function,						// configure gpio port function
+		Hevc_GpioControl_Direction,						// configure gpio port direction
+		Hevc_GpioControl_Set,							// set gpio port value
+		Hevc_GpioControl_Get,							// get pgio port value
+		Hevc_GpioControl_Size
+	} HevcGpioControl;
 
-// hevc gpio function
-typedef enum HevcGpioFunction
-{
-	Hevc_GpioFunction_Unknown,
-	Hevc_GpioFunction_Gpio,							// gpio function is gpio
-	Hevc_GpioFunction_Peripheral,					// gpio function is peripheral
-	Hevc_GpioFunction_Size
-} HevcGpioFunction;
+	// hevc gpio function
+	typedef enum HevcGpioFunction
+	{
+		Hevc_GpioFunction_Unknown,
+		Hevc_GpioFunction_Gpio,							// gpio function is gpio
+		Hevc_GpioFunction_Peripheral,					// gpio function is peripheral
+		Hevc_GpioFunction_Size
+	} HevcGpioFunction;
 
-// hevc gpio direction
-typedef enum HevcGpioDirection
-{
-	Hevc_GpioDirection_Unknown,
-	Hevc_GpioDirection_Input,						// gpio direction is input
-	Hevc_GpioDirection_Output,						// gpio direction is output
-	Hevc_GpioDirection_Size
-} HevcGpioDirection;
+	// hevc gpio direction
+	typedef enum HevcGpioDirection
+	{
+		Hevc_GpioDirection_Unknown,
+		Hevc_GpioDirection_Input,						// gpio direction is input
+		Hevc_GpioDirection_Output,						// gpio direction is output
+		Hevc_GpioDirection_Size
+	} HevcGpioDirection;
 
-// hevc gpio value
-typedef enum HevcGpioValue
-{
-	Hevc_GpioValue_Unknown,
-	Hevc_GpioValue_Low,								// gpio direction is input
-	Hevc_GpioValue_High,							// gpio direction is output
-	Hevc_GpioValue_Size
-} HevcGpioValue;
+	// hevc gpio value
+	typedef enum HevcGpioValue
+	{
+		Hevc_GpioValue_Unknown,
+		Hevc_GpioValue_Low,								// gpio direction is input
+		Hevc_GpioValue_High,							// gpio direction is output
+		Hevc_GpioValue_Size
+	} HevcGpioValue;
 
-typedef enum HevcChangeSequence
-{
-	Hevc_ChangeSequence_Unknown,
-	Hevc_ChangeSequence_Enabled,
-	Hevc_ChangeSequence_Disabled,
-	Hevc_ChangeSequence_Size
-} HevcChangeSequence;
+	typedef enum HevcChangeSequence
+	{
+		Hevc_ChangeSequence_Unknown,
+		Hevc_ChangeSequence_Enabled,
+		Hevc_ChangeSequence_Disabled,
+		Hevc_ChangeSequence_Size
+	} HevcChangeSequence;
 
-// hevc change param target
-#define Hevc_ParamTarget_None			0x00000000
-#define Hevc_ParamTarget_Vbr			0x00000001	// change variable bitrate
-#define Hevc_ParamTarget_Cbr			0x00000002	// change constant bitrate
-#define Hevc_ParamTarget_Resolution		0x00000004	// change size, crop, pan, etc.
-#define Hevc_ParamTarget_Frame_Rate		0x00000008	// change frame rate
-#define Hevc_ParamTarget_All			0x0000000f
+	// hevc change param target
+	#define Hevc_ParamTarget_None			0x00000000
+	#define Hevc_ParamTarget_Vbr			0x00000001	// change variable bitrate
+	#define Hevc_ParamTarget_Cbr			0x00000002	// change constant bitrate
+	#define Hevc_ParamTarget_Resolution		0x00000004	// change size, crop, pan, etc.
+	#define Hevc_ParamTarget_Frame_Rate		0x00000008	// change frame rate
+	#define Hevc_ParamTarget_All			0x0000000f
 
-// hevc commands
-typedef enum HevcCommand
-{
-	Hevc_Command_Unknown,
-	Hevc_Command_MainState,							// set main state
-	Hevc_Command_VinState,							// set video input state
-	Hevc_Command_EhState,							// set encoder state
-	Hevc_Command_Gpio,								// control gpio
-	Hevc_Command_Reset,								// reset codec
-	Hevc_Command_ChangeParam,						// change dynamic params during encode
-	Hevc_Command_ChangePicture,						// change picture type
-	Hevc_Command_Size
-} HevcCommand;
+	// hevc commands
+	typedef enum HevcCommand
+	{
+		Hevc_Command_Unknown,
+		Hevc_Command_MainState,							// set main state
+		Hevc_Command_VinState,							// set video input state
+		Hevc_Command_EhState,							// set encoder state
+		Hevc_Command_Gpio,								// control gpio
+		Hevc_Command_Reset,								// reset codec
+		Hevc_Command_ChangeParam,						// change dynamic params during encode
+		Hevc_Command_ChangePicture,						// change picture type
+		Hevc_Command_Size
+	} HevcCommand;
 
-// hevc command information
-typedef struct HevcDeviceCommand
-{
-	HevcCommand				command;				// command type
-	// main state command info
-	HevcMainState			mainState;				// set main state
-	HevcEncodeMode			encodeMode;				// set encoder mode
-	HevcFirmwareType		firmwareType;			// set encode firmware type
-	// vin/eh state command info
-	HevcVinState			vinState;				// set video input state
-	HevcEhState				ehState;				// set encoder state
-	ULWord					streamBits;				// command applies to each stream bit
-	// gpio command info
-	HevcGpioControl			gpioControl;			// gpio control type
-	ULWord					gpioNumber;				// gpio port number (function, direction, set, get)
-	HevcGpioFunction		gpioFunction;			// gpio port function (function)
-	HevcGpioDirection		gpioDirection;			// gpio port direction (direction)
-	HevcGpioValue			gpioValue;				// gpio port value (set, get)
-	// change encode params
-	ULWord					paramTarget;			// parameters to change
-	ULWord					paramStreamId;			// stream id
-	HevcChangeSequence		changeSequence;			// start new sequence (vbr)
-	ULWord					maxBitRate;				// maximum bitrate (vbr)
-	ULWord					aveBitRate;				// average bitrate (vbr and cbr)
-	ULWord					minBitRate;				// minimum bitrate (vbr)
-	ULWord					seqEndPicNumber;		// last picture number of sequence (resolution and frame rate)
-	ULWord					hSizeEh;				// resolution parameters
-	ULWord					vSizeEh;
-	ULWord					cropLeft;
-	ULWord					cropRight;
-	ULWord					cropTop;
-	ULWord					cropBottom;
-	ULWord					panScanRectLeft;
-	ULWord					panScanRectRight;
-	ULWord					panScanRectTop;
-	ULWord					panScanRectBottom;
-	ULWord					videoSignalType;
-	ULWord					videoFormat;
-	ULWord					videoFullRangeFlag;
-	ULWord					colourDescriptionPresentFlag;
-	ULWord					colourPrimaries;
-	ULWord					transferCharacteristics;
-	ULWord					matrixCoeffs;
-	ULWord					aspectRatioIdc;
-	ULWord					sarWidth;
-	ULWord					sarHeight;
-	ULWord					frameRateCode;			// frame rate parameter
-	// change picture type
-	ULWord					picType;				// picture type
-	ULWord					picStreamId;			// stream id
-	ULWord					gopEndPicNumber;		// last picture number of gop
-	// general command flags
-	ULWord					flags;					// command flags
-} HevcDeviceCommand;
+	// hevc command information
+	typedef struct HevcDeviceCommand
+	{
+		HevcCommand				command;				// command type
+		// main state command info
+		HevcMainState			mainState;				// set main state
+		HevcEncodeMode			encodeMode;				// set encoder mode
+		HevcFirmwareType		firmwareType;			// set encode firmware type
+		// vin/eh state command info
+		HevcVinState			vinState;				// set video input state
+		HevcEhState				ehState;				// set encoder state
+		ULWord					streamBits;				// command applies to each stream bit
+		// gpio command info
+		HevcGpioControl			gpioControl;			// gpio control type
+		ULWord					gpioNumber;				// gpio port number (function, direction, set, get)
+		HevcGpioFunction		gpioFunction;			// gpio port function (function)
+		HevcGpioDirection		gpioDirection;			// gpio port direction (direction)
+		HevcGpioValue			gpioValue;				// gpio port value (set, get)
+		// change encode params
+		ULWord					paramTarget;			// parameters to change
+		ULWord					paramStreamId;			// stream id
+		HevcChangeSequence		changeSequence;			// start new sequence (vbr)
+		ULWord					maxBitRate;				// maximum bitrate (vbr)
+		ULWord					aveBitRate;				// average bitrate (vbr and cbr)
+		ULWord					minBitRate;				// minimum bitrate (vbr)
+		ULWord					seqEndPicNumber;		// last picture number of sequence (resolution and frame rate)
+		ULWord					hSizeEh;				// resolution parameters
+		ULWord					vSizeEh;
+		ULWord					cropLeft;
+		ULWord					cropRight;
+		ULWord					cropTop;
+		ULWord					cropBottom;
+		ULWord					panScanRectLeft;
+		ULWord					panScanRectRight;
+		ULWord					panScanRectTop;
+		ULWord					panScanRectBottom;
+		ULWord					videoSignalType;
+		ULWord					videoFormat;
+		ULWord					videoFullRangeFlag;
+		ULWord					colourDescriptionPresentFlag;
+		ULWord					colourPrimaries;
+		ULWord					transferCharacteristics;
+		ULWord					matrixCoeffs;
+		ULWord					aspectRatioIdc;
+		ULWord					sarWidth;
+		ULWord					sarHeight;
+		ULWord					frameRateCode;			// frame rate parameter
+		// change picture type
+		ULWord					picType;				// picture type
+		ULWord					picStreamId;			// stream id
+		ULWord					gopEndPicNumber;		// last picture number of gop
+		// general command flags
+		ULWord					flags;					// command flags
+	} HevcDeviceCommand;
 
-// hevc stream types
-typedef enum HevcStream
-{
-	Hevc_Stream_Unknown,
-	Hevc_Stream_VideoRaw,							// raw data stream
-	Hevc_Stream_VideoEnc,							// encoded data stream
-	Hevc_Stream_Size
-} HevcStream;
+	// hevc stream types
+	typedef enum HevcStream
+	{
+		Hevc_Stream_Unknown,
+		Hevc_Stream_VideoRaw,							// raw data stream
+		Hevc_Stream_VideoEnc,							// encoded data stream
+		Hevc_Stream_Size
+	} HevcStream;
 
-// hevc picture data (raw streams)
-typedef struct HevcPictureData
-{
-	ULWord					serialNumber;			// serial number (application data)
-	ULWord					ptsValueLow;			// presentation time stamp (90kHz)
-	ULWord					ptsValueHigh;			// pts high bit only (33 bit roll over)
-	ULWord					pictureNumber;			// start with 1 and increment for each picture
-	ULWord					numAdditionalData;		// number of additional data entries
-} HevcPictureData;
+	// hevc picture data (raw streams)
+	typedef struct HevcPictureData
+	{
+		ULWord					serialNumber;			// serial number (application data)
+		ULWord					ptsValueLow;			// presentation time stamp (90kHz)
+		ULWord					ptsValueHigh;			// pts high bit only (33 bit roll over)
+		ULWord					pictureNumber;			// start with 1 and increment for each picture
+		ULWord					numAdditionalData;		// number of additional data entries
+	} HevcPictureData;
 
-// hevc picture information (raw streams)
-typedef struct HevcPictureInfo
-{
-	HevcPictureData			pictureData;			// raw stream picture data
-//
-//	additional data format
-//	u32 additional_data_type
-//	u32 additional_data_size (256 bytes max)
-//	u8... additional_data_payload
-//	... more additional data
-//
-//	additional data types
-//	1 = sei data
-//	2 = passthrough data (to encoded additional data of encoded frame)
-//	4 = cancel sei on every gop (set additional size to 0)
-//
-//	sei data format
-//	u8 user_sei_location
-//	u8 user_sei_type
-//	u8 user_sei_length
-//	u8... user_sei_payload
-//
-//	user sei location
-//	2 = every gop head picture
-//	3 = this picture only
-//
-//	passthrough data format
-//	u8... passthrough_data_payload
-//
-	UByte					additionalData[HEVC_ADDITIONAL_DATA_SIZE];
-} HevcPictureInfo;
+	// hevc picture information (raw streams)
+	typedef struct HevcPictureInfo
+	{
+		HevcPictureData			pictureData;			// raw stream picture data
+	//
+	//	additional data format
+	//	u32 additional_data_type
+	//	u32 additional_data_size (256 bytes max)
+	//	u8... additional_data_payload
+	//	... more additional data
+	//
+	//	additional data types
+	//	1 = sei data
+	//	2 = passthrough data (to encoded additional data of encoded frame)
+	//	4 = cancel sei on every gop (set additional size to 0)
+	//
+	//	sei data format
+	//	u8 user_sei_location
+	//	u8 user_sei_type
+	//	u8 user_sei_length
+	//	u8... user_sei_payload
+	//
+	//	user sei location
+	//	2 = every gop head picture
+	//	3 = this picture only
+	//
+	//	passthrough data format
+	//	u8... passthrough_data_payload
+	//
+		UByte					additionalData[HEVC_ADDITIONAL_DATA_SIZE];
+	} HevcPictureInfo;
 
-// hevc encoded stream data (encoded streams)
-typedef struct HevcEncodedData
-{
-	ULWord					serialNumber;			// serial number (from picture information)
-	ULWord					esOffsetLow;			// encoded stream frame location (?)
-	ULWord					esOffsetHigh;			// es frame location high 32 bits
-	ULWord					esSize;					// encoded stream frame size (?)
-	ULWord					ptsValueLow;			// presentation time stamp (picture information)
-	ULWord					ptsValueHigh;			// pts high bit (33 bit roll over)
-	ULWord					dtsValueLow;			// decoding time stamp (90 kHz)
-	ULWord					dtsValueHigh;			// dts high bit (33 bit roll over)
-	ULWord					itcValueLow;			// internal time clock (90 kHz)
-	ULWord					itcValueHigh;			// itc high bit (33 bit roll over)
-	ULWord					itcExtension;			// internal time extension (27 MHz)
-	ULWord					temporalId;				// temporal ID
-	ULWord					esIdrType;				// 0 = not IDR, 1 = IDR, 3 = IDR command
-	ULWord					pictureType;			// 0 = I-frame, 1 = P-frame, 2 = B-frame
-	ULWord					nalOffset;				// offset to the nal top of the idr/i picture
-	ULWord					cpbValue;				// codec picture buffer occupancy value
-	ULWord					esHSize;				// horizontal resolution
-	ULWord					esVSize;				// vertical resolution
-	ULWord					esUnitsInTick;			// frame duration (2x eh param value for half rate)
-	ULWord					esBitRate;				// bit rate (Kbps)
-	ULWord					esEndFlag;				// 0 = not end of sequence, 1 = end of sequence
-	ULWord					esLastFrame;			// 0xffffffff = last frame
-	ULWord					reserved0;
-	ULWord					reserved1;
-	ULWord					reserved2;
-	ULWord					reserved3;
-	ULWord					reserved4;
-	ULWord					reserved5;
-	ULWord					reserved6;
-	ULWord					reserved7;
-	ULWord					numAdditionalData;		// number of additional data entries
-} HevcEncodedData;
+	// hevc encoded stream data (encoded streams)
+	typedef struct HevcEncodedData
+	{
+		ULWord					serialNumber;			// serial number (from picture information)
+		ULWord					esOffsetLow;			// encoded stream frame location (?)
+		ULWord					esOffsetHigh;			// es frame location high 32 bits
+		ULWord					esSize;					// encoded stream frame size (?)
+		ULWord					ptsValueLow;			// presentation time stamp (picture information)
+		ULWord					ptsValueHigh;			// pts high bit (33 bit roll over)
+		ULWord					dtsValueLow;			// decoding time stamp (90 kHz)
+		ULWord					dtsValueHigh;			// dts high bit (33 bit roll over)
+		ULWord					itcValueLow;			// internal time clock (90 kHz)
+		ULWord					itcValueHigh;			// itc high bit (33 bit roll over)
+		ULWord					itcExtension;			// internal time extension (27 MHz)
+		ULWord					temporalId;				// temporal ID
+		ULWord					esIdrType;				// 0 = not IDR, 1 = IDR, 3 = IDR command
+		ULWord					pictureType;			// 0 = I-frame, 1 = P-frame, 2 = B-frame
+		ULWord					nalOffset;				// offset to the nal top of the idr/i picture
+		ULWord					cpbValue;				// codec picture buffer occupancy value
+		ULWord					esHSize;				// horizontal resolution
+		ULWord					esVSize;				// vertical resolution
+		ULWord					esUnitsInTick;			// frame duration (2x eh param value for half rate)
+		ULWord					esBitRate;				// bit rate (Kbps)
+		ULWord					esEndFlag;				// 0 = not end of sequence, 1 = end of sequence
+		ULWord					esLastFrame;			// 0xffffffff = last frame
+		ULWord					reserved0;
+		ULWord					reserved1;
+		ULWord					reserved2;
+		ULWord					reserved3;
+		ULWord					reserved4;
+		ULWord					reserved5;
+		ULWord					reserved6;
+		ULWord					reserved7;
+		ULWord					numAdditionalData;		// number of additional data entries
+	} HevcEncodedData;
 
-// hevc encode stream information (encoded streams)
-typedef struct HevcEncodedInfo
-{
-	HevcEncodedData			encodedData;			// encoded stream data
-	UByte					additionalData[HEVC_ADDITIONAL_DATA_SIZE];
-} HevcEncodedInfo;
+	// hevc encode stream information (encoded streams)
+	typedef struct HevcEncodedInfo
+	{
+		HevcEncodedData			encodedData;			// encoded stream data
+		UByte					additionalData[HEVC_ADDITIONAL_DATA_SIZE];
+	} HevcEncodedInfo;
 
-// hevc stream transfer information
-typedef struct HevcDeviceTransfer
-{
-	HevcStream				streamType;				// transfer stream type
-	ULWord					streamId;				// transfer stream id
+	// hevc stream transfer information
+	typedef struct HevcDeviceTransfer
+	{
+		HevcStream				streamType;				// transfer stream type
+		ULWord					streamId;				// transfer stream id
 
-	UByte*					pVideoBuffer;			// video buffer
-	ULWord					videoBufferSize;		// total video buffer size
-	ULWord					videoDataSize;			// video data size in buffer
+		UByte*					pVideoBuffer;			// video buffer
+		ULWord					videoBufferSize;		// total video buffer size
+		ULWord					videoDataSize;			// video data size in buffer
 
-	ULWord					segVideoPitch;			// video segment pitch
-	ULWord					segCodecPitch;			// codec segment pitch
-	ULWord					segSize;				// segment size
-	ULWord					segCount;				// number of segments
+		ULWord					segVideoPitch;			// video segment pitch
+		ULWord					segCodecPitch;			// codec segment pitch
+		ULWord					segSize;				// segment size
+		ULWord					segCount;				// number of segments
 
-	UByte*					pInfoBuffer;			// information buffer (picture or encoded)
-	ULWord					infoBufferSize;			// total information buffer size
-	ULWord					infoDataSize;			// information size in buffer
+		UByte*					pInfoBuffer;			// information buffer (picture or encoded)
+		ULWord					infoBufferSize;			// total information buffer size
+		ULWord					infoDataSize;			// information size in buffer
 
-	LWord64					encodeTime;				// frame encode time (100ns host system clock)
-	ULWord					flags;					// transfer flags (see above for last frame flag)
-} HevcDeviceTransfer;
+		LWord64					encodeTime;				// frame encode time (100ns host system clock)
+		ULWord					flags;					// transfer flags (see above for last frame flag)
+	} HevcDeviceTransfer;
 
-// hevc gpio port status
-typedef struct hevc_gpio_state
-{
-	HevcGpioFunction		function;				// gpio last set port function
-	HevcGpioDirection		direction;				// gpio last set port direction
-	HevcGpioValue			setValue;				// gpio last set value
-	HevcGpioValue			getValue;				// gpio last get value
-} HevcGpioState;	
+	// hevc gpio port status
+	typedef struct hevc_gpio_state
+	{
+		HevcGpioFunction		function;				// gpio last set port function
+		HevcGpioDirection		direction;				// gpio last set port direction
+		HevcGpioValue			setValue;				// gpio last set value
+		HevcGpioValue			getValue;				// gpio last get value
+	} HevcGpioState;	
 
-// hevc stream statistics (nsec, bytes)
-typedef struct hevc_stream_statistics
-{
-	LWord64				transferCount;				// number of transfers queued
-	LWord64				minTransferTime;			// minimum time between transfers
-	LWord64				avrTransferTime;			// average time between transfers
-	LWord64				maxTransferTime;			// maximum time between transfers
-	LWord64				minTransferSize;			// minimum transfer size
-	LWord64				maxTransferSize;			// maximum transfer size
-	LWord64				avrTransferSize;			// average transfer size
-	LWord64				minCopyDuration;			// time for io thread to copy frames 
-	LWord64				maxCopyDuration;			//	 to/from bounce buffer
-	LWord64				avrCopyDuration;
-	LWord64				minEnqueueDuration;			// time from io thread enqueue
-	LWord64				maxEnqueueDuration;			//	 to send to codec
-	LWord64				avrEnqueueDuration;
-	LWord64				minSendDuration;			// time from send to codec
-	LWord64				maxSendDuration;			//	 to codec acknowledge
-	LWord64				avrSendDuration;
-	LWord64				minDmaDuration;				// time from codec acknowledge
-	LWord64				maxDmaDuration;				//	 to codec dma completion
-	LWord64				avrDmaDuration;
-	LWord64				minDequeueDuration;			// time from io thread enqueue
-	LWord64				maxDequeueDuration;			//	 to io thread dequeue
-	LWord64				avrDequeueDuration;
-} HevcStreamStatistics;
+	// hevc stream statistics (nsec, bytes)
+	typedef struct hevc_stream_statistics
+	{
+		LWord64				transferCount;				// number of transfers queued
+		LWord64				minTransferTime;			// minimum time between transfers
+		LWord64				avrTransferTime;			// average time between transfers
+		LWord64				maxTransferTime;			// maximum time between transfers
+		LWord64				minTransferSize;			// minimum transfer size
+		LWord64				maxTransferSize;			// maximum transfer size
+		LWord64				avrTransferSize;			// average transfer size
+		LWord64				minCopyDuration;			// time for io thread to copy frames 
+		LWord64				maxCopyDuration;			//	 to/from bounce buffer
+		LWord64				avrCopyDuration;
+		LWord64				minEnqueueDuration;			// time from io thread enqueue
+		LWord64				maxEnqueueDuration;			//	 to send to codec
+		LWord64				avrEnqueueDuration;
+		LWord64				minSendDuration;			// time from send to codec
+		LWord64				maxSendDuration;			//	 to codec acknowledge
+		LWord64				avrSendDuration;
+		LWord64				minDmaDuration;				// time from codec acknowledge
+		LWord64				maxDmaDuration;				//	 to codec dma completion
+		LWord64				avrDmaDuration;
+		LWord64				minDequeueDuration;			// time from io thread enqueue
+		LWord64				maxDequeueDuration;			//	 to io thread dequeue
+		LWord64				avrDequeueDuration;
+	} HevcStreamStatistics;
 
-// hevc status information
-typedef struct HevcDeviceStatus
-{
-	HevcMainState			mainState;				// codec main state
-	HevcEncodeMode			encodeMode;				// codec encode mode
-	HevcFirmwareType		firmwareType;			// codec firmware type
+	// hevc status information
+	typedef struct HevcDeviceStatus
+	{
+		HevcMainState			mainState;				// codec main state
+		HevcEncodeMode			encodeMode;				// codec encode mode
+		HevcFirmwareType		firmwareType;			// codec firmware type
 
-	HevcVifState			vifState[HEVC_STREAM_MAX];	// video interface state
-	HevcVinState			vinState[HEVC_STREAM_MAX];	// video input state
-	HevcEhState				ehState[HEVC_STREAM_MAX];	// encoder state
-	HevcGpioState			gpioState[HEVC_GPIO_MAX];	// gpio state
+		HevcVifState			vifState[HEVC_STREAM_MAX];	// video interface state
+		HevcVinState			vinState[HEVC_STREAM_MAX];	// video input state
+		HevcEhState				ehState[HEVC_STREAM_MAX];	// encoder state
+		HevcGpioState			gpioState[HEVC_GPIO_MAX];	// gpio state
 
-	LWord64					commandCount;			// number of commands processed
-	LWord64					rawTransferCount;		// number of raw transfers processed
-	LWord64					encTransferCount;		// number of encoded transfers processed
+		LWord64					commandCount;			// number of commands processed
+		LWord64					rawTransferCount;		// number of raw transfers processed
+		LWord64					encTransferCount;		// number of encoded transfers processed
 
-	ULWord					commandQueueLevel;		// number of commands in command queue
-	ULWord					rawTransferQueueLevel;	// number of transfers in raw transfer queue
-	ULWord					encTransferQueueLevel;	// number of transfers in encoded transfer queue
-} HevcDeviceStatus;
+		ULWord					commandQueueLevel;		// number of commands in command queue
+		ULWord					rawTransferQueueLevel;	// number of transfers in raw transfer queue
+		ULWord					encTransferQueueLevel;	// number of transfers in encoded transfer queue
+	} HevcDeviceStatus;
 
-// hevc debug information
-typedef struct HevcDeviceDebug
-{
-	HevcDeviceStatus		deviceStatus;			// device status structure
+	// hevc debug information
+	typedef struct HevcDeviceDebug
+	{
+		HevcDeviceStatus		deviceStatus;			// device status structure
 
-	HevcStreamStatistics	rawStats[HEVC_STREAM_MAX];		// raw stream statistics
-	HevcStreamStatistics	encStats[HEVC_STREAM_MAX];		// encoded stream statistics
-	ULWord					queueLevel[HEVC_STREAM_MAX];	// stream queue level
-	ULWord					clearRawStatsBits;		// stream bits to clear raw stream statistics
-	ULWord					clearEncStatsBits;		// stream bits to clear encodec stream statistics
+		HevcStreamStatistics	rawStats[HEVC_STREAM_MAX];		// raw stream statistics
+		HevcStreamStatistics	encStats[HEVC_STREAM_MAX];		// encoded stream statistics
+		ULWord					queueLevel[HEVC_STREAM_MAX];	// stream queue level
+		ULWord					clearRawStatsBits;		// stream bits to clear raw stream statistics
+		ULWord					clearEncStatsBits;		// stream bits to clear encodec stream statistics
 
-	ULWord					cmdContCount;			// codec command continuity count
-	ULWord					cmdAckContCount;		// codec command acknowledge count
-	ULWord					cmdMsgContCount;		// codec command message count
-	ULWord					rawContCount;			// raw dma continuity count 
-	ULWord					rawAckContCount;		// raw dma acknowledge count
-	ULWord					rawMsgContCount;		// raw dma message count
-	ULWord					encContCount;			// encoded dma continuity count
-	ULWord					encAckContCount;		// encoded dma acnowledge count
-	ULWord					encMsgContCount;		// encoded dma message count
-} HevcDeviceDebug;
+		ULWord					cmdContCount;			// codec command continuity count
+		ULWord					cmdAckContCount;		// codec command acknowledge count
+		ULWord					cmdMsgContCount;		// codec command message count
+		ULWord					rawContCount;			// raw dma continuity count 
+		ULWord					rawAckContCount;		// raw dma acknowledge count
+		ULWord					rawMsgContCount;		// raw dma message count
+		ULWord					encContCount;			// encoded dma continuity count
+		ULWord					encAckContCount;		// encoded dma acnowledge count
+		ULWord					encMsgContCount;		// encoded dma message count
+	} HevcDeviceDebug;
 
-// hevc driver ioctl message types
-typedef enum HevcMessageId
-{
-	Hevc_MessageId_Unknown,
-	Hevc_MessageId_Info,							// get device information
-	Hevc_MessageId_Register,						// write/read codec register
-	Hevc_MessageId_Command,							// send a codec command
-	Hevc_MessageId_Transfer,						// transfer codec stream data
-	Hevc_MessageId_Status,							// get codec status
-	Hevc_MessageId_Debug,							// get debug information
-	Hevc_MessageId_Size
-} HevcMessageId;
+	// hevc driver ioctl message types
+	typedef enum HevcMessageId
+	{
+		Hevc_MessageId_Unknown,
+		Hevc_MessageId_Info,							// get device information
+		Hevc_MessageId_Register,						// write/read codec register
+		Hevc_MessageId_Command,							// send a codec command
+		Hevc_MessageId_Transfer,						// transfer codec stream data
+		Hevc_MessageId_Status,							// get codec status
+		Hevc_MessageId_Debug,							// get debug information
+		Hevc_MessageId_Size
+	} HevcMessageId;
 
-// hevc common driver ioctl message header
-typedef struct hevcMessageHeader
-{
-	HevcMessageId			type;
-	ULWord					size;
-	ULWord					status;
-	ULWord					reverved0;
-	ULWord					reverved1;
-	ULWord					reverved2;
-} HevcMessageHeader;
+	// hevc common driver ioctl message header
+	typedef struct hevcMessageHeader
+	{
+		HevcMessageId			type;
+		ULWord					size;
+		ULWord					status;
+		ULWord					reverved0;
+		ULWord					reverved1;
+		ULWord					reverved2;
+	} HevcMessageHeader;
 
-// hevc stream transfer data
-typedef struct HevcTransferData
-{
-	HevcStream				streamType;
-	ULWord					streamId;
-	ULWord64				videoBuffer;
-	ULWord					videoBufferSize;
-	ULWord					videoDataSize;
-	ULWord					segVideoPitch;
-	ULWord					segCodecPitch;
-	ULWord					segSize;
-	ULWord					segCount;
-	ULWord64				infoBuffer;
-	ULWord					infoBufferSize;
-	ULWord					infoDataSize;
-	LWord64					encodeTime;
-	ULWord					flags;
-} HevcTransferData;
+	// hevc stream transfer data
+	typedef struct HevcTransferData
+	{
+		HevcStream				streamType;
+		ULWord					streamId;
+		ULWord64				videoBuffer;
+		ULWord					videoBufferSize;
+		ULWord					videoDataSize;
+		ULWord					segVideoPitch;
+		ULWord					segCodecPitch;
+		ULWord					segSize;
+		ULWord					segCount;
+		ULWord64				infoBuffer;
+		ULWord					infoBufferSize;
+		ULWord					infoDataSize;
+		LWord64					encodeTime;
+		ULWord					flags;
+	} HevcTransferData;
 
-// hevc driver device information message
-typedef struct HevcMessageInfo
-{
-	HevcMessageHeader		header;
-	HevcDeviceInfo			data;
-} HevcMessageInfo;
+	// hevc driver device information message
+	typedef struct HevcMessageInfo
+	{
+		HevcMessageHeader		header;
+		HevcDeviceInfo			data;
+	} HevcMessageInfo;
 
-// hevc driver register message
-typedef struct HevcMessageRegister
-{
-	HevcMessageHeader		header;
-	HevcDeviceRegister		data;
-} HevcMessageRegister;
+	// hevc driver register message
+	typedef struct HevcMessageRegister
+	{
+		HevcMessageHeader		header;
+		HevcDeviceRegister		data;
+	} HevcMessageRegister;
 
-// hevc driver command message
-typedef struct HevcMessageCommand
-{
-	HevcMessageHeader		header;
-	HevcDeviceCommand		data;
-} HevcMessageCommand;
+	// hevc driver command message
+	typedef struct HevcMessageCommand
+	{
+		HevcMessageHeader		header;
+		HevcDeviceCommand		data;
+	} HevcMessageCommand;
 
-// hevc driver transfer message
-typedef struct HevcMessageTransfer
-{
-	HevcMessageHeader		header;
-	HevcTransferData		data;
-} HevcMessageTransfer;
+	// hevc driver transfer message
+	typedef struct HevcMessageTransfer
+	{
+		HevcMessageHeader		header;
+		HevcTransferData		data;
+	} HevcMessageTransfer;
 
-// hevc driver status message
-typedef struct HevcMessageStatus
-{
-	HevcMessageHeader		header;
-	HevcDeviceStatus		data;
-} HevcMessageStatus;
+	// hevc driver status message
+	typedef struct HevcMessageStatus
+	{
+		HevcMessageHeader		header;
+		HevcDeviceStatus		data;
+	} HevcMessageStatus;
 
-// hevc driver debug message
-typedef struct HevcMessageDebug
-{
-	HevcMessageHeader		header;
-	HevcDeviceDebug			data;
-} HevcMessageDebug;
+	// hevc driver debug message
+	typedef struct HevcMessageDebug
+	{
+		HevcMessageHeader		header;
+		HevcDeviceDebug			data;
+	} HevcMessageDebug;
+#endif//!defined(NTV2_DEPRECATE_17_6)
 
 typedef struct HDRRegValues
 {
@@ -10165,8 +10168,10 @@ typedef struct HDRRegValues
 															= maxMasteringLuminance = minMasteringLuminance = maxContentLightLevel = maxFrameAverageLightLevel = 0;
 											electroOpticalTransferFunction = staticMetadataDescriptorID = 0;	return *this;}
 	inline bool				validPrimariesAndWhitePoint (void) const	{	const uint16_t kMax(0xC350);
-																			return	greenPrimaryX <= kMax || greenPrimaryY <= kMax || bluePrimaryX <= kMax || bluePrimaryY <= kMax ||
-																					redPrimaryX <= kMax || redPrimaryY <= kMax || whitePointX <= kMax || whitePointY <= kMax; }
+																			return	greenPrimaryX <= kMax || greenPrimaryY <= kMax ||
+																					bluePrimaryX <= kMax  || bluePrimaryY <= kMax  ||
+																					redPrimaryX <= kMax   || redPrimaryY <= kMax   ||
+																					whitePointX <= kMax   || whitePointY <= kMax;  }
 	inline HDRRegValues &	setBT2020 (void)	{	greenPrimaryX = 0x2134;	greenPrimaryY = 0x9BAA;		bluePrimaryX = 0x1996;	bluePrimaryY = 0x08FC;
 													redPrimaryX = 0x8A48;	redPrimaryY = 0x3908;		whitePointX = 0x3D13;	whitePointY = 0x4042;
 													maxMasteringLuminance = 0x2710;	minMasteringLuminance = 0x0032;

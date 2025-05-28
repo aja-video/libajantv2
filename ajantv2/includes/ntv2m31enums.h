@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2m31enums.h
-	@brief		Enumerations for controlling NTV2 devices with m31 HEVC encoders.
+	@deprecated	Corvid HEVC support removed in SDK 17.6.
 	@copyright	(C) 2015-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
@@ -9,6 +9,7 @@
 #ifndef NTV2M31ENUMS_H
 #define NTV2M31ENUMS_H
 
+#if !defined(NTV2_DEPRECATE_17_6)	//	Corvid HEVC support removed in SDK 17.6
 typedef enum
 {
 	// File presets
@@ -367,5 +368,5 @@ typedef enum
 	M31_FrameRate60		= 8
 } M31FrameRate;
 
+#endif//!defined(NTV2_DEPRECATE_17_6)
 #endif //NTV2M31ENUMS_H
-
