@@ -624,3 +624,49 @@ bool GetXptMultiLinkOutInputSelect(Ntv2SystemContext* context, NTV2Channel chann
 	return ntv2ReadRegisterMS(context, source.registerNumber, (ULWord*)value, (ULWord)source.registerMask, (ULWord)source.registerShift);
 }
 
+bool IsXptFrameStore(NTV2OutputXptID source)
+{
+    bool fs = false;
+    
+    switch(source)
+    {
+    case NTV2_XptFrameBuffer1YUV:
+    case NTV2_XptFrameBuffer1RGB:
+    case NTV2_XptFrameBuffer2YUV:
+    case NTV2_XptFrameBuffer2RGB:
+    case NTV2_XptFrameBuffer3YUV:
+    case NTV2_XptFrameBuffer3RGB:
+    case NTV2_XptFrameBuffer4YUV:
+    case NTV2_XptFrameBuffer4RGB:
+    case NTV2_XptFrameBuffer5YUV:
+    case NTV2_XptFrameBuffer5RGB:
+    case NTV2_XptFrameBuffer6YUV:
+    case NTV2_XptFrameBuffer6RGB:
+    case NTV2_XptFrameBuffer7YUV:
+    case NTV2_XptFrameBuffer7RGB:
+    case NTV2_XptFrameBuffer8YUV:
+    case NTV2_XptFrameBuffer8RGB:
+    case NTV2_XptFrameBuffer1_DS2YUV:
+    case NTV2_XptFrameBuffer1_DS2RGB:
+    case NTV2_XptFrameBuffer2_DS2YUV:
+    case NTV2_XptFrameBuffer2_DS2RGB:
+    case NTV2_XptFrameBuffer3_DS2YUV:
+    case NTV2_XptFrameBuffer3_DS2RGB:
+    case NTV2_XptFrameBuffer4_DS2YUV:
+    case NTV2_XptFrameBuffer4_DS2RGB:
+    case NTV2_XptFrameBuffer5_DS2YUV:
+    case NTV2_XptFrameBuffer5_DS2RGB:
+    case NTV2_XptFrameBuffer6_DS2YUV:
+    case NTV2_XptFrameBuffer6_DS2RGB:
+    case NTV2_XptFrameBuffer7_DS2YUV:
+    case NTV2_XptFrameBuffer7_DS2RGB:
+    case NTV2_XptFrameBuffer8_DS2YUV:
+    case NTV2_XptFrameBuffer8_DS2RGB:
+        fs = true;
+        break;
+    default:
+        break;
+    }
+
+    return fs;
+}
