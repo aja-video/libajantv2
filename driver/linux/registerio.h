@@ -91,6 +91,7 @@
 
 #define NTV2_MAX_HDMI_MONITOR	4
 #define NTV2_MAX_DMA_STREAMS    8
+#define NTV2_MAX_MAILBOX    	4
 
 // module driver mode
 typedef enum _NTV2DriveMode
@@ -446,6 +447,7 @@ typedef struct ntv2_private
 	struct ntv2_mcap		*m_pBitstream;
 	struct ntv2_setup		*m_pSetupMonitor;
     struct ntv2_stream  	*m_pDmaStream[NTV2_MAX_DMA_STREAMS];
+    struct ntv2_mailbox  	*m_pMailbox[NTV2_MAX_MAILBOX];
 
     DMA_ENGINE              *m_pMapEngine[DMA_NUM_ENGINES];
     DMA_ENGINE              *m_pMapStream[DMA_NUM_ENGINES];

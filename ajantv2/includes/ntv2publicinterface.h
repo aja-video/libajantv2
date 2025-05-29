@@ -5648,6 +5648,7 @@ typedef enum
 		#define NTV2_TYPE_AJABITSTREAM			NTV2_FOURCC ('b', 't', 's', 't')	///< @brief Identifies NTV2Bitstream struct
 		#define NTV2_TYPE_AJASTREAMCHANNEL		NTV2_FOURCC ('s', 't', 'c', 'h')	///< @brief Identifies NTV2StreamChannel struct
 		#define NTV2_TYPE_AJASTREAMBUFFER		NTV2_FOURCC ('s', 't', 'b', 'u')	///< @brief Identifies NTV2StreamBuffer struct
+		#define NTV2_TYPE_AJAMAILBUFFER    		NTV2_FOURCC ('m', 'a', 'i', 'l')	///< @brief Identifies NTV2MailBuffer struct
 		#if defined(NTV2_DEPRECATE_16_3)
 			#define AUTOCIRCULATE_TYPE_STATUS		NTV2_TYPE_ACSTATUS
 			#define AUTOCIRCULATE_TYPE_XFER			NTV2_TYPE_ACXFER
@@ -5673,7 +5674,8 @@ typedef enum
 													(_x_) == NTV2_TYPE_AJABUFFERLOCK	||	\
 													(_x_) == NTV2_TYPE_AJABITSTREAM		||	\
 													(_x_) == NTV2_TYPE_AJASTREAMCHANNEL	||	\
-													(_x_) == NTV2_TYPE_AJASTREAMBUFFER)
+													(_x_) == NTV2_TYPE_AJASTREAMBUFFER  ||  \
+                                                    (_x_) == NTV2_TYPE_AJAMAILBUFFER)
 
 		//	NTV2Buffer FLAGS
 		#define NTV2Buffer_ALLOCATED				BIT(0)		///< @brief Allocated using Allocate function?
@@ -9078,6 +9080,49 @@ typedef enum
 
         NTV2_STRUCT_END (NTV2StreamBuffer)
 
+		// Mail buffer action flags
+		#define NTV2_MAIL_BUFFER_SEND          			BIT(0)			///< @brief Used in ::NTV2MailBuffer to send data
+        #define NTV2_MAIL_BUFFER_RECEIVE    			BIT(1)			///< @brief Used in ::NTV2MailBuffer to receive data
+
+		// Mail buffer status flags
+		#define NTV2_MAIL_BUFFER_SUCCESS				BIT(0)			///< @brief Used in ::NTV2MailBuffer success
+		#define NTV2_MAIL_BUFFER_FAIL					BIT(1)			///< @brief Used in ::NTV2MailBuffer fail
+		#define NTV2_MAIL_BUFFER_OVERFLOW				BIT(2)			///< @brief Used in ::NTV2MailBuffer buffer overflow
+		#define NTV2_MAIL_BUFFER_TIMEOUT				BIT(3)			///< @brief Used in ::NTV2MailBuffer transfer timeout
+
+        // Mail buffer maximum size
+        #define NTV2_MAIL_BUFFER_MAX                    4096        
+                
+        NTV2_STRUCT_BEGIN (NTV2MailBuffer)
+			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
+				NTV2Channel		mChannel;			///< @brief Mail buffer channel
+				NTV2Buffer		mBuffer;			///< @brief Virtual address of a mail buffer and its length.
+				ULWord  		mDataSize;			///< @brief Size of data in the buffer
+				ULWord			mFlags;				///< @brief Action flags
+				ULWord			mDelay;				///< @brief Trial delay (us)
+				ULWord			mTimeout;			///< @brief Timeout (us)
+				ULWord			mStatus;			///< @brief Action status
+				ULWord			mReserved[32];		///< @brief Reserved for future expansion.
+			NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
+
+			#if !defined (NTV2_BUILDING_DRIVER)
+				/**
+					@name	Construction & Destruction
+				**/
+				///@{
+				explicit	NTV2MailBuffer ();		///< @brief Constructs a default NTV2MailBuffer struct.
+				inline		~NTV2MailBuffer ()	{}	///< @brief My default destructor, which frees all allocatable fields that I own.
+				///@}
+
+				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 16.3
+
+				std::ostream &	Print (std::ostream & inOutStream) const;
+
+				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)
+
+			#endif	//	!defined (NTV2_BUILDING_DRIVER)
+
+        NTV2_STRUCT_END (NTV2MailBuffer)
 
 		#if !defined (NTV2_BUILDING_DRIVER)
 			typedef std::set <NTV2VideoFormat>					NTV2VideoFormatSet;					///< @brief A set of distinct NTV2VideoFormat values.
