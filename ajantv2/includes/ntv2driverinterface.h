@@ -372,13 +372,6 @@ class AJAExport CNTV2DriverInterface
 		**/
 		AJA_VIRTUAL bool		NTV2Message (NTV2_HEADER * pInMessage);
 
-		/**
-			@brief	Sends an HEVC message to the NTV2 driver.
-			@param	pMessage	Points to the HevcMessageHeader that contains the HEVC message.
-			@return	False. This must be implemented by the platform-specific subclass.
-		**/
-		AJA_VIRTUAL inline bool	HevcSendMessage (HevcMessageHeader * pMessage)		{(void) pMessage; return false;}
-
 		AJA_VIRTUAL bool	ControlDriverDebugMessages (NTV2_DriverDebugMessageSet msgSet,  bool enable);
 	///@}
 
@@ -610,6 +603,9 @@ class AJAExport CNTV2DriverInterface
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetDefaultDeviceForPID(const int32_t procID)) {(void)procID; return false;}	///< @deprecated	Obsolete, first deprecated in SDK 14.3 when classic Apple QuickTime support was dropped.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool IsDefaultDeviceForPID(const int32_t procID))  {(void)procID; return false;}	///< @deprecated	Obsolete, first deprecated in SDK 14.3 when classic Apple QuickTime support was dropped.
 #endif	//	!defined(NTV2_DEPRECATE_16_3)
+#if !defined(NTV2_DEPRECATE_17_6)
+	AJA_VIRTUAL inline bool	NTV2_DEPRECATED_f(HevcSendMessage(HevcMessageHeader* pMsg))	{(void)pMsg; return false;}	///< @deprecated	Corvid HEVC support dropped in SDK 17.6
+#endif//!defined(NTV2_DEPRECATE_17_6)
 
 #if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
 		/**

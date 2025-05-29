@@ -6468,67 +6468,15 @@ protected:
 	static NTV2Buffer NULL_POINTER;	///< @brief Used for default empty NTV2Buffer parameters -- do not modify.
 
 public:
-	/**
-		@name	HEVC-Specific Functions
-	**/
-	///@{
-	/**
-		@brief		Returns the driver version and time/date stamp of the hevc device's currently-installed firmware.
-		@param[out] pInfo			HevcDeviceInfo structure to receive the information.
-		@return		True if successful;	 otherwise false.
-	**/ 
-	AJA_VIRTUAL bool HevcGetDeviceInfo (HevcDeviceInfo* pInfo);
-
-	/**
-		@brief		Write an hevc register.
-		@param[in]	address			Hevc register byte address
-		@param[in]	value			Hevc register data
-		@param[in]	mask			Read bit mask
-		@param[in]	shift			Read bit shift
-		@return		True if successful;	 otherwise false.
-	**/ 
-	AJA_VIRTUAL bool HevcWriteRegister (ULWord address, ULWord value, ULWord mask = 0xffffffff, ULWord shift = 0);
-
-	/**
-		@brief		Read an hevc register.
-		@param[in]	address			Hevc register byte address
-		@param[out] pValue			Hevc register data
-		@param[in]	mask			Read bit mask
-		@param[in]	shift			Read bit shift
-		@return		True if successful;	 otherwise false.
-	**/ 
-	AJA_VIRTUAL bool HevcReadRegister (ULWord address, ULWord* pValue, ULWord mask = 0xffffffff, ULWord shift = 0);
-
-	/**
-		@brief		Send a command to the hevc device.	See the hevc codec documentation for details on commands.
-		@param[in]	pCommand		HevcDeviceCommand structure with the command parameters.
-		@return		True if successful;	 otherwise false.
-	**/ 
-	AJA_VIRTUAL bool HevcSendCommand (HevcDeviceCommand* pCommand);
-
-	/**
-		@brief		Transfer video to/from the hevc device.
-		@param[in]	pTransfer		HevcDeviceTransfer structure with the transfer parameters.
-		@return		True if successful;	 otherwise false.
-	**/ 
-	AJA_VIRTUAL bool HevcVideoTransfer (HevcDeviceTransfer* pTransfer);
-
-	/**
-		@brief		Get the status of the hevc device.
-		@param[in]	pStatus			HevcDeviceDebug structure to receive the information.
-		@return		True if successful;	 otherwise false.
-	**/ 
-	AJA_VIRTUAL bool HevcGetStatus (HevcDeviceStatus* pStatus);
-
-	/**
-		@brief		Get debug data from the hevc device.
-		@param[in]	pDebug			HevcDeviceStatus structure to receive the information.	This is an expanded version
-									of the device status that contains performance information.	 This structure may change
-									more often.
-		@return		True if successful;	 otherwise false.
-	**/ 
-	AJA_VIRTUAL bool HevcDebugInfo (HevcDeviceDebug* pDebug);
-	///@}
+#if !defined(NTV2_DEPRECATE_17_6)
+	AJA_VIRTUAL bool NTV2_DEPRECATED_f(HevcGetDeviceInfo (HevcDeviceInfo* pInfo))	{(void)pInfo; return false;}		///< @deprecated	Corvid HEVC support dropped in SDK 17.6
+	AJA_VIRTUAL bool NTV2_DEPRECATED_f(HevcWriteRegister (ULWord addr, ULWord val, ULWord mask = 0xffffffff, ULWord shift = 0))	{(void)addr; (void)val; (void)mask; (void)shift; return false;}		///< @deprecated	Corvid HEVC support dropped in SDK 17.6
+	AJA_VIRTUAL bool NTV2_DEPRECATED_f(HevcReadRegister (ULWord addr, ULWord* pVal, ULWord mask = 0xffffffff, ULWord shift = 0))	{(void)addr; (void)pVal; (void)mask; (void)shift; return false;}///< @deprecated	Corvid HEVC support dropped in SDK 17.6
+	AJA_VIRTUAL bool NTV2_DEPRECATED_f(HevcSendCommand (HevcDeviceCommand* pCmd))	{(void)pCmd; return false;}			///< @deprecated	Corvid HEVC support dropped in SDK 17.6
+	AJA_VIRTUAL bool NTV2_DEPRECATED_f(HevcVideoTransfer (HevcDeviceTransfer* pXfer))	{(void)pXfer; return false;}	///< @deprecated	Corvid HEVC support dropped in SDK 17.6
+	AJA_VIRTUAL bool NTV2_DEPRECATED_f(HevcGetStatus (HevcDeviceStatus* pStat))	{(void)pStat; return false;}			///< @deprecated	Corvid HEVC support dropped in SDK 17.6
+	AJA_VIRTUAL bool NTV2_DEPRECATED_f(HevcDebugInfo (HevcDeviceDebug* pDbg))	{(void)pDbg; return false;}				///< @deprecated	Corvid HEVC support dropped in SDK 17.6
+#endif//defined(AJA_RETAIN_HEVC)
 
 	/**
 		@name	HDMI HDR Support
