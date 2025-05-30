@@ -436,10 +436,10 @@ string NTV2Buffer::AsCode (const size_t inBytesPerWord, const std::string & inVa
 	{
 		switch (inBytesPerWord)
 		{
-			case 1:	oss << xHEX0N(UWord(U8(ndx)),2);	break;
-			case 2:	oss << xHEX0N(tmp.U16(ndx),4);		break;
-			case 4:	oss << xHEX0N(tmp.U32(ndx),8);		break;
-			case 8:	oss << xHEX0N(tmp.U64(ndx),16);		break;
+			case 1:	oss << xHEX0N(UWord(U8(int(ndx))),2);	break;
+			case 2:	oss << xHEX0N(tmp.U16(int(ndx)),4);		break;
+			case 4:	oss << xHEX0N(tmp.U32(int(ndx)),8);		break;
+			case 8:	oss << xHEX0N(tmp.U64(int(ndx)),16);		break;
 		}
 		if (++ndx < numWords)
 			oss << ",";
