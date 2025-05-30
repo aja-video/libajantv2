@@ -714,7 +714,7 @@ wait:
 
 static Ntv2Status ntv2_hdmiout4_initialize(struct ntv2_hdmiout4 *ntv2_hout)
 {
-    ntv2_hout->device_id = ntv2_reg_read(ntv2_hout->system_context, ntv2_reg_device_id, 0);
+    ntv2_hout->device_id = (NTV2DeviceID)ntv2_reg_read(ntv2_hout->system_context, ntv2_reg_device_id, 0);
     ntv2_hout->hdmi_version = NTV2DeviceGetHDMIVersion(ntv2_hout->device_id);
     
 	ntv2_displayid_config(&ntv2_hout->edid, ntv2_hdmiout4_edid_read, ntv2_hout);

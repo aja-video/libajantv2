@@ -383,14 +383,15 @@ bool KonaNotifier::Install (CFMutableDictionaryRef matchingDictionary)
 	
 
 	// walk through each of our devices
-	static const std::string driverName ("com_aja_iokit_ntv2");
+    static const std::string kextName ("com_aja_kext_ntv2");
+    static const std::string dextName ("AJANTV2");
 	io_iterator_t notifyIterator_matched, notifyIterator_terminated;
 		
 	// Device Added
 	ioReturn = ::IOServiceAddMatchingNotification ( m_notificationPort,
 													kIOMatchedNotification,
-													IOServiceMatching(driverName.c_str ()),
-													reinterpret_cast<IOServiceMatchingCallback>(DeviceAddedCallback), 
+                                                    IOServiceMatching(kextName.c_str ()),
+                                                    reinterpret_cast<IOServiceMatchingCallback>(DeviceAddedCallback),
 													this, 
 													&notifyIterator_matched);
 
@@ -400,11 +401,24 @@ bool KonaNotifier::Install (CFMutableDictionaryRef matchingDictionary)
 		return false;
 	}
 
+    ioReturn = ::IOServiceAddMatchingNotification ( m_notificationPort,
+                                                  kIOMatchedNotification,
+                                                  IOServiceNameMatching(dextName.c_str ()),
+                                                  reinterpret_cast<IOServiceMatchingCallback>(DeviceAddedCallback),
+                                                  this,
+                                                  &notifyIterator_matched);
+
+    if (ioReturn != kIOReturnSuccess)
+    {
+        DNFAIL(KR(ioReturn) << " -- IOServiceAddMatchingNotification for 'kIOMatchedNotification' failed");
+        return false;
+    }
+
 	// Device Terminated
 	ioReturn = ::IOServiceAddMatchingNotification ( m_notificationPort,
 													kIOTerminatedNotification,
-													IOServiceMatching(driverName.c_str ()),
-													reinterpret_cast<IOServiceMatchingCallback>(DeviceRemovedCallback), 
+                                                    IOServiceMatching(kextName.c_str ()),
+                                                    reinterpret_cast<IOServiceMatchingCallback>(DeviceRemovedCallback),
 													this, 
 													&notifyIterator_terminated);
 	if (ioReturn != kIOReturnSuccess)
@@ -412,6 +426,18 @@ bool KonaNotifier::Install (CFMutableDictionaryRef matchingDictionary)
 		DNFAIL(KR(ioReturn) << " -- IOServiceAddMatchingNotification for 'kIOTerminatedNotification' failed");
 		return false;
 	}
+
+    ioReturn = ::IOServiceAddMatchingNotification ( m_notificationPort,
+                                                  kIOTerminatedNotification,
+                                                  IOServiceNameMatching(dextName.c_str ()),
+                                                  reinterpret_cast<IOServiceMatchingCallback>(DeviceRemovedCallback),
+                                                  this,
+                                                  &notifyIterator_terminated);
+    if (ioReturn != kIOReturnSuccess)
+    {
+        DNFAIL(KR(ioReturn) << " -- IOServiceAddMatchingNotification for 'kIOTerminatedNotification' failed");
+        return false;
+    }
 
 	DeviceAddedCallback (this, notifyIterator_matched);
 	m_deviceMatchList.push_back (notifyIterator_matched);

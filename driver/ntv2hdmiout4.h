@@ -14,6 +14,7 @@
 
 #include "ntv2system.h"
 #include "ntv2displayid.h"
+#include "ntv2enums.h"
 
 #define NTV2_HDMIOUT4_STRING_SIZE	80
 
@@ -22,7 +23,7 @@ struct ntv2_hdmiout4 {
 	char				name[NTV2_HDMIOUT4_STRING_SIZE];
 	Ntv2SystemContext* 	system_context;
 	Ntv2SpinLock		state_lock;
-    uint32_t            device_id;
+    NTV2DeviceID        device_id;
     uint32_t            hdmi_version;
 
 	Ntv2Thread 			monitor_task;
