@@ -1097,7 +1097,7 @@ bool CNTV2SupportLogger::LoadFromLog (const string & inLogFilePath, const bool b
 	return true;
 }
 
-string CNTV2SupportLogger::InventLogFilePathAndName (CNTV2Card & inDevice, const string inPrefix, const string inExtension)
+string CNTV2SupportLogger::InventLogFilePathAndName (CNTV2Card & inDevice, const string inPrefix, const string inExtension)	//	STATIC
 {
 	string homePath;
 	AJASystemInfo info;
@@ -1112,7 +1112,7 @@ string CNTV2SupportLogger::InventLogFilePathAndName (CNTV2Card & inDevice, const
 	return oss.str();
 }
 
-bool CNTV2SupportLogger::DumpDeviceSDRAM (CNTV2Card & inDevice, const string & inFilePath, ostream & msgStrm)
+bool CNTV2SupportLogger::DumpDeviceSDRAM (CNTV2Card & inDevice, const string & inFilePath, ostream & msgStrm)	//	STATIC
 {
 	if (!inDevice.IsOpen())
 		return false;
