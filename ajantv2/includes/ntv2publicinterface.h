@@ -10252,19 +10252,19 @@ typedef struct HDRFloatValues
 											maxMasteringLuminance = maxContentLightLevel = maxFrameAverageLightLevel = 0;
 											electroOpticalTransferFunction = staticMetadataDescriptorID = 0;	return *this;}
 
-	inline bool	validPrimariesAndWhitePoint (void) const	{	return	greenPrimaryX >= 0.0 || greenPrimaryX <= float(1.0) ||
-																		greenPrimaryY >= 0.0 || greenPrimaryY <= float(1.0) ||
-																		bluePrimaryX  >= 0.0 || bluePrimaryX  <= float(1.0) ||
-																		bluePrimaryY  >= 0.0 || bluePrimaryY  <= float(1.0) ||
-																		redPrimaryX   >= 0.0 || redPrimaryX   <= float(1.0) ||
-																		redPrimaryY   >= 0.0 || redPrimaryY   <= float(1.0) ||
-																		whitePointX   >= 0.0 || whitePointX   <= float(1.0) ||
-																		whitePointY   >= 0.0 || whitePointY   <= float(1.0) ||
-																		minMasteringLuminance >= 0 || minMasteringLuminance <= float(6.5535);	}
+	inline bool	validPrimariesAndWhitePoint (void) const	{	return	greenPrimaryX >= 0.0f || greenPrimaryX <= float(1.0f) ||
+																		greenPrimaryY >= 0.0f || greenPrimaryY <= float(1.0f) ||
+																		bluePrimaryX  >= 0.0f || bluePrimaryX  <= float(1.0f) ||
+																		bluePrimaryY  >= 0.0f || bluePrimaryY  <= float(1.0f) ||
+																		redPrimaryX   >= 0.0f || redPrimaryX   <= float(1.0f) ||
+																		redPrimaryY   >= 0.0f || redPrimaryY   <= float(1.0f) ||
+																		whitePointX   >= 0.0f || whitePointX   <= float(1.0f) ||
+																		whitePointY   >= 0.0f || whitePointY   <= float(1.0f) ||
+																		minMasteringLuminance >= 0 || minMasteringLuminance <= float(6.5535f);	}
 
 	inline bool setFromRegValues (const HDRRegValues & inRegValues)		{	if (!inRegValues.validPrimariesAndWhitePoint())
 																				return false;
-																			const float kMult(0.00002), kMultLum(0.0001);
+																			const float kMult(0.00002f), kMultLum(0.0001f);
 																			greenPrimaryX					= float(inRegValues.greenPrimaryX * kMult);
 																			greenPrimaryY					= float(inRegValues.greenPrimaryY * kMult);
 																			bluePrimaryX					= float(inRegValues.bluePrimaryX * kMult);
@@ -10283,15 +10283,15 @@ typedef struct HDRFloatValues
 
 	inline bool toRegValues (HDRRegValues & outVals) const				{	if (!validPrimariesAndWhitePoint())
 																				return false;
-																			outVals.greenPrimaryX					= uint16_t(greenPrimaryX / float(0.00002));
-																			outVals.greenPrimaryY					= uint16_t(greenPrimaryY / float(0.00002));
-																			outVals.bluePrimaryX					= uint16_t(bluePrimaryX / float(0.00002));
-																			outVals.bluePrimaryY					= uint16_t(bluePrimaryY / float(0.00002));
-																			outVals.redPrimaryX						= uint16_t(redPrimaryX / float(0.00002));
-																			outVals.redPrimaryY						= uint16_t(redPrimaryY / float(0.00002));
-																			outVals.whitePointX						= uint16_t(whitePointX / float(0.00002));
-																			outVals.whitePointY						= uint16_t(whitePointY / float(0.00002));
-																			outVals.minMasteringLuminance			= uint16_t(minMasteringLuminance / float(0.0001));
+																			outVals.greenPrimaryX					= uint16_t(greenPrimaryX / float(0.00002f));
+																			outVals.greenPrimaryY					= uint16_t(greenPrimaryY / float(0.00002f));
+																			outVals.bluePrimaryX					= uint16_t(bluePrimaryX / float(0.00002f));
+																			outVals.bluePrimaryY					= uint16_t(bluePrimaryY / float(0.00002f));
+																			outVals.redPrimaryX						= uint16_t(redPrimaryX / float(0.00002f));
+																			outVals.redPrimaryY						= uint16_t(redPrimaryY / float(0.00002f));
+																			outVals.whitePointX						= uint16_t(whitePointX / float(0.00002f));
+																			outVals.whitePointY						= uint16_t(whitePointY / float(0.00002f));
+																			outVals.minMasteringLuminance			= uint16_t(minMasteringLuminance / float(0.0001f));
 																			outVals.maxMasteringLuminance			= maxMasteringLuminance;
 																			outVals.maxContentLightLevel			= maxContentLightLevel;
 																			outVals.maxFrameAverageLightLevel		= maxFrameAverageLightLevel;
