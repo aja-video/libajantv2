@@ -398,7 +398,7 @@ bool StartDriverProcesses(Ntv2DriverProcessContext* inProcessContext)
 	
 	#ifdef AJA_HDMI_OUT
 		// configure hdmi output version 4 monitor
-		if ((NTV2DeviceGetHDMIVersion(deviceID) == 4) &&
+		if ((NTV2DeviceGetHDMIVersion(deviceID) >= 4) &&
 			(NTV2DeviceGetNumHDMIVideoOutputs(deviceID) > 0))
 		{
 			ntv2Message("Starting HDMI Out 1 v4\n");
