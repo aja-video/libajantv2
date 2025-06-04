@@ -1197,6 +1197,7 @@ static bool configure_hdmi_video(struct ntv2_hdmiout4 *ntv2_hout)
 	uint32_t tran_mode;
 	uint32_t crop_mode;
 	uint32_t aud_mult;
+    uint32_t clock_select;
 
 	int i;
 
@@ -1410,6 +1411,20 @@ static bool configure_hdmi_video(struct ntv2_hdmiout4 *ntv2_hout)
 		}
 	}
 
+    clock_select = ntv2_con_hdmiout4_clockselect_integer;
+    switch (frame_rate)
+    {
+    case ntv2_frame_rate_2398:
+    case ntv2_frame_rate_2997:
+    case ntv2_frame_rate_4795:
+    case ntv2_frame_rate_5994:
+        if (video_standard != ntv2_video_standard_525i)
+            clock_select = ntv2_con_hdmiout4_clockselect_fractional;
+        break;
+    default:
+        break;
+    }
+
 	value = NTV2_FLD_SET(ntv2_fld_hdmiout4_videocontrol_scrambleMode, scram_mode);
 	value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_videocontrol_tranceivermode, tran_mode);
 	value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_videocontrol_420mode, vid_420);
@@ -1417,6 +1432,7 @@ static bool configure_hdmi_video(struct ntv2_hdmiout4 *ntv2_hout)
 	value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_videocontrol_pixelreplicate, pix_rep);
 	value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_videocontrol_replicatefactor, rep_fac);
 	value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_videocontrol_linerate, clock_data->line_rate);
+	value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_videocontrol_clock_select, clock_select);
 	value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_videocontrol_audiomode, ntv2_con_hdmiout4_audiomode_disable);
 	value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_videocontrol_txconfigmode, ntv2_con_hdmiout4_txconfigmode_active);
 	ntv2_reg_write(ntv2_hout->system_context, ntv2_reg_hdmiout4_videocontrol, ntv2_hout->index, value);

@@ -215,6 +215,9 @@ NTV2_REG(ntv2_reg_hdmiout4_videocontrol,					0x1d40, 0x1d40, 0x1d80, 0x1d40, 0x1
 		NTV2_CON(ntv2_con_hdmiout4_linerate_556mhz,					0xe);		/*  556 mhz */
 		NTV2_CON(ntv2_con_hdmiout4_linerate_540mhz,					0xf);		/*  540 mhz */
 		NTV2_CON(ntv2_con_hdmiout4_linerate_250mhz,					0x10);		/*  250 mhz */
+	NTV2_FLD(ntv2_fld_hdmiout4_videocontrol_clock_select,		1,	 25);	/* select fractional or interger clock */
+		NTV2_CON(ntv2_con_hdmiout4_clockselect_fractional,			0x0);		/* fractional clock */
+		NTV2_CON(ntv2_con_hdmiout4_clockselect_integer,				0x1);		/* integer clock */
 	NTV2_FLD(ntv2_fld_hdmiout4_videocontrol_audiomode,			1,	 26);	/* audio mode */
 		NTV2_CON(ntv2_con_hdmiout4_audiomode_disable,				0x0);		/* audio disable */
 		NTV2_CON(ntv2_con_hdmiout4_audiomode_enable,				0x1);		/* audio enable */
