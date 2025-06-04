@@ -4973,6 +4973,8 @@ int DoMessageMailBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2MailBuffer* p
 	{
         if (pBuffer->mBuffer.fByteCount > NTV2_MAIL_BUFFER_MAX)
         {
+			// MSG("%s: DoMessageMailBuffer: Send buffer too large (%u > %u)\n",
+			// 	pMail->name, pBuffer->mBuffer.fByteCount, NTV2_MAIL_BUFFER_MAX);
             pBuffer->mStatus = NTV2_MAIL_BUFFER_FAIL;
             return -EINVAL;
         }
@@ -4995,6 +4997,14 @@ int DoMessageMailBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2MailBuffer* p
     }    
 	if ((pBuffer->mFlags & NTV2_MAIL_BUFFER_RECEIVE) != 0)
 	{
+        if (pBuffer->mBuffer.fByteCount > NTV2_MAIL_BUFFER_MAX)
+        {
+			// MSG("%s: DoMessageMailBuffer: Receive buffer too large (%u > %u)\n",
+			// 	pMail->name, pBuffer->mBuffer.fByteCount, NTV2_MAIL_BUFFER_MAX);
+            pBuffer->mStatus = NTV2_MAIL_BUFFER_FAIL;
+            return -EINVAL;
+        }
+
         pBuffer->mStatus = ntv2_packet_recv(pMail,
                                             pMail->recv_data,
                                             pBuffer->mBuffer.fByteCount,
