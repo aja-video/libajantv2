@@ -3676,7 +3676,7 @@ void AutoCircWriteHDMIAux(NTV2AutoCirc* pAutoCirc, uint32_t* pAuxData, uint32_t 
 			for (iData = 0; iData < numData/4; iData++, auxReg++)
 				ntv2WriteRegister(pSysCon, auxReg, pAux[iData]);
 		}
-		if (NTV2DeviceGetHDMIVersion(deviceID) == 4)
+		if (NTV2DeviceGetHDMIVersion(deviceID) >= 4)
 		{
 //			ntv2_hdmiout4_write_info_frame(m_pHDMIOut4Monitor[channel],
 //										   numData, ((uint8_t*)pAux) + (iAux * numData));
