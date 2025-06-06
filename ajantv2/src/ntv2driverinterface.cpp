@@ -908,6 +908,24 @@ bool CNTV2DriverInterface::StreamBufferOps (const NTV2Channel inChannel,
 	return NTV2Message(status);
 }
 
+bool CNTV2DriverInterface::MailBufferOps (const NTV2Channel inChannel,
+										  NTV2Buffer& inBuffer,
+                                          ULWord dataSize,
+                                          ULWord flags,
+                                          ULWord delay,
+                                          ULWord timeout,
+                                          NTV2MailBuffer& status)
+{
+	status.mChannel = inChannel;
+	status.mBuffer.Set (inBuffer.GetHostPointer(), inBuffer.GetByteCount());
+	status.mDataSize = dataSize;
+	status.mDelay = delay;
+	status.mTimeout = timeout;
+	status.mFlags = flags;
+
+	return NTV2Message(status);
+}
+
 // FinishOpen
 // NOTE _boardID must be set before calling this routine.
 void CNTV2DriverInterface::FinishOpen (void)

@@ -85,6 +85,7 @@
 #include "ntv2stream.h"
 #include "../ntv2video.h"
 #include "../ntv2pciconfig.h"
+#include "../ntv2mailbox.h"
 
 #if  !defined(x86_64) && !defined(aarch64)
 #error "*** AJA driver must be built 64 bit ***"
@@ -217,6 +218,7 @@ static int DoMessageBufferLock(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot, NTV2Bu
 static int DoMessageBitstream(ULWord deviceNumber, NTV2Bitstream* pBitstream);
 static int DoMessageStreamChannel(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamChannel* pStreamChannel);
 static int DoMessageStreamBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamBuffer* pStreamBuffer);
+static int DoMessageMailBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2MailBuffer* pMailBuffer);
 
 /* PCI Device Module functions */
 static int probe(struct pci_dev *pdev, const struct pci_device_id *id);	/* New device inserted */
@@ -1913,6 +1915,22 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					}
 
 					if(copy_to_user((void*)arg, (const void*)pMessage, sizeof(NTV2StreamBuffer)))
+					{
+						returnCode = -EFAULT;
+						goto messageError;
+					}
+				}
+				break;
+
+            case NTV2_TYPE_AJAMAILBUFFER:
+				{
+					returnCode = DoMessageMailBuffer (deviceNumber, pFileData, (NTV2MailBuffer*)pMessage);
+					if (returnCode)
+					{
+						goto messageError;
+					}
+
+					if(copy_to_user((void*)arg, (const void*)pMessage, sizeof(NTV2MailBuffer)))
 					{
 						returnCode = -EFAULT;
 						goto messageError;
@@ -3754,6 +3772,16 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
                     ntv2pp->m_pRasterMonitor = NULL;
                 }
             }
+            ntv2pp->m_pMailbox[0] = ntv2_mailbox_open(&ntv2pp->systemContext, "ntv2mailbox", 0);
+            if (ntv2pp->m_pMailbox[0] != NULL)
+            {
+                status = ntv2_mailbox_configure(ntv2pp->m_pMailbox[0], 0x100000);
+                if (status != NTV2_STATUS_SUCCESS)
+                {
+                    ntv2_mailbox_close(ntv2pp->m_pMailbox[0]);
+                    ntv2pp->m_pMailbox[0] = NULL;
+                }
+            }
         }
 	
         ntv2pp->m_pSetupMonitor = ntv2_setup_open(&ntv2pp->systemContext, "ntv2setup");
@@ -3787,6 +3815,14 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
         if (ntv2pp->m_pRasterMonitor != NULL)
         {
             ntv2_videoraster_enable(ntv2pp->m_pRasterMonitor);
+        }
+
+        for (i = 0; i < NTV2_MAX_MAILBOX; i++)
+        {
+            if (ntv2pp->m_pMailbox[i] != NULL)
+            {
+                ntv2_mailbox_enable(ntv2pp->m_pMailbox[i]);
+            }
         }
     
         // configure tty uart
@@ -4034,6 +4070,23 @@ static void remove(struct pci_dev *pdev)
     {
         ntv2_videoraster_close(ntv2pp->m_pRasterMonitor);
         ntv2pp->m_pRasterMonitor = NULL;
+    }
+
+    for (i = 0; i < NTV2_MAX_MAILBOX; i++)
+    {
+        if (ntv2pp->m_pMailbox[i] != NULL)
+        {
+            ntv2_mailbox_disable(ntv2pp->m_pMailbox[i]);
+        }
+    }
+    
+    for (i = 0; i < NTV2_MAX_MAILBOX; i++)
+    {
+        if (ntv2pp->m_pMailbox[i] != NULL)
+        {
+            ntv2_mailbox_close(ntv2pp->m_pMailbox[i]);
+            ntv2pp->m_pMailbox[i] = NULL;
+        }
     }
 
 	// close the serial port
@@ -4891,6 +4944,93 @@ int DoMessageStreamBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamBuffe
 	return 0;
 }
 
+int DoMessageMailBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2MailBuffer* pBuffer)
+{
+	NTV2PrivateParams * pNTV2Params = getNTV2Params(deviceNumber);
+    int chn = 0;
+    struct ntv2_mailbox* pMail = NULL;
+    uint32_t offset = 0;
+    int ret = 0;
+    
+	if (pBuffer == NULL)
+		return -EINVAL;
+
+    chn = (int)pBuffer->mChannel;
+    if (chn >= NTV2_MAX_MAILBOX)
+    {
+        pBuffer->mStatus = NTV2_MAIL_BUFFER_FAIL;
+        return -EINVAL;
+    }
+
+    pMail = pNTV2Params->m_pMailbox[chn];
+    if (pMail == NULL)
+    {
+        pBuffer->mStatus = NTV2_MAIL_BUFFER_FAIL;
+        return -EINVAL;
+    }
+
+	if ((pBuffer->mFlags & NTV2_MAIL_BUFFER_SEND) != 0)
+	{
+        if (pBuffer->mBuffer.fByteCount > NTV2_MAIL_BUFFER_MAX)
+        {
+			// MSG("%s: DoMessageMailBuffer: Send buffer too large (%u > %u)\n",
+			// 	pMail->name, pBuffer->mBuffer.fByteCount, NTV2_MAIL_BUFFER_MAX);
+            pBuffer->mStatus = NTV2_MAIL_BUFFER_FAIL;
+            return -EINVAL;
+        }
+        
+		// copy data buffer from user
+		ret = copy_from_user(pMail->send_data,
+							 (void*)pBuffer->mBuffer.fUserSpacePtr,
+							 pBuffer->mDataSize);
+		if (ret < 0)
+		{
+			return ret;
+		}
+
+        pBuffer->mStatus = ntv2_packet_send(pMail,
+                                            pMail->send_data,
+                                            pBuffer->mDataSize,
+                                            &offset,
+                                            pBuffer->mDelay,
+                                            pBuffer->mTimeout);
+    }    
+	if ((pBuffer->mFlags & NTV2_MAIL_BUFFER_RECEIVE) != 0)
+	{
+        if (pBuffer->mBuffer.fByteCount > NTV2_MAIL_BUFFER_MAX)
+        {
+			// MSG("%s: DoMessageMailBuffer: Receive buffer too large (%u > %u)\n",
+			// 	pMail->name, pBuffer->mBuffer.fByteCount, NTV2_MAIL_BUFFER_MAX);
+            pBuffer->mStatus = NTV2_MAIL_BUFFER_FAIL;
+            return -EINVAL;
+        }
+
+        pBuffer->mStatus = ntv2_packet_recv(pMail,
+                                            pMail->recv_data,
+                                            pBuffer->mBuffer.fByteCount,
+                                            &offset,
+                                            pBuffer->mDelay,
+                                            pBuffer->mTimeout);
+        if (pBuffer->mStatus == NTV2_STATUS_SUCCESS)
+        {
+            pBuffer->mDataSize = offset;
+            ret = copy_to_user((void*)pBuffer->mBuffer.fUserSpacePtr,
+                               pMail->recv_data,
+                               pBuffer->mDataSize);
+            if (ret < 0)
+            {
+                return ret;
+            }
+        }
+        else
+        {
+            return -EPERM;
+        }
+    }
+    
+	return 0;
+}
+
 //-----------------------------------------------------------------------------
 //
 // function : pci_resources_config - driver init configure of pci resources
@@ -5531,6 +5671,14 @@ static int suspend(struct pci_dev *pdev, pm_message_t state)
 		ntv2_genlock2_disable(ntv2pp->m_pGenlock2Monitor);
 	}
 
+    for (j = 0; j < NTV2_MAX_MAILBOX; j++)
+    {
+        if (ntv2pp->m_pMailbox[j] != NULL)
+        {
+            ntv2_mailbox_disable(ntv2pp->m_pMailbox[j]);
+        }
+    }
+
 	// disable the serial driver
 	if (ntv2pp->m_pSerialPort)
 	{
@@ -5663,6 +5811,14 @@ static int resume(struct pci_dev *pdev)
             ntv2_genlock2_enable(ntv2pp->m_pGenlock2Monitor);
         }
 
+        for (i = 0; i < NTV2_MAX_MAILBOX; i++)
+        {
+            if (ntv2pp->m_pMailbox[i] != NULL)
+            {
+                ntv2_mailbox_enable(ntv2pp->m_pMailbox[i]);
+            }
+        }
+        
         // Enable interrupts
         EnableAllInterrupts(deviceNumber);
 
