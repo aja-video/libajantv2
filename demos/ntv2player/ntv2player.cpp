@@ -266,7 +266,7 @@ AJAStatus NTV2Player::SetUpAudio (void)
 
 	//	If there are 2048 pixels on a line instead of 1920, reduce the number of audio channels
 	//	This is because HANC is narrower, and has space for only 8 channels
-	if (NTV2_IS_2K_1080_VIDEO_FORMAT(mConfig.fVideoFormat)  &&  numAudioChannels > 8)
+    if ((NTV2_IS_2K_1080_VIDEO_FORMAT(mConfig.fVideoFormat)  &&  numAudioChannels > 8) || !NTV2DeviceCanDo25GIP(mDevice.GetDeviceID()))
 		numAudioChannels = 8;
 
 	mAudioSystem = NTV2_AUDIOSYSTEM_1;										//	Use NTV2_AUDIOSYSTEM_1...
