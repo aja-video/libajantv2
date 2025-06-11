@@ -394,6 +394,7 @@ ULWord GetIndexForNTV2Crosspoint(NTV2Crosspoint channel);
 NTV2Channel GetNTV2ChannelForNTV2Crosspoint(NTV2Crosspoint crosspoint);
 NTV2VideoFormat GetVideoFormatFromState(NTV2Standard standard, NTV2FrameRate frameRate, ULWord is2Kx1080, ULWord smpte372Enabled);
 NTV2Standard GetNTV2StandardFromVideoFormat(NTV2VideoFormat videoFormat);
+NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(NTV2VideoFormat videoFormat);
 NTV2FrameRate GetNTV2FrameRateFromVideoFormat(NTV2VideoFormat videoFormat);
 NTV2Channel GetOutXptChannel(NTV2OutputCrosspointID inXpt, bool multiFormatActive);
 NTV2Standard GetStandardFromScanGeometry(NTV2ScanGeometry scanGeometry, ULWord progressive);
