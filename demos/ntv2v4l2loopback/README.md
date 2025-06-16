@@ -19,6 +19,9 @@ cmake -S . -B build
 cmake --build build
 ```
 
+### Linux
+The V4L2 loopback interface namely /dev/v4l2loopback that is used to create loopback devices on-the-fly is not available on kernel version 5.15. If you need to run this demo app on that version of the kernel, then you need to uncomment the line that defines AJA_BUILD_FOR_LINUX_KERNEL_5_15 in ntv2loopback.h.
+
 ## Setup
 
 ### Linux
@@ -78,6 +81,11 @@ regsvr32 virtual-webcam.dll
    sudo chmod 666 /dev/videoN
    ffplay -f v4l2 -i /dev/videoN
    ffplay -f alsa -channels 2 -sample_rate 44100 -i plughw:CARD=Loopback,DEV=1
+   ```
+
+##### If you need to run this demo app on kernel 5.15 then you will need to use this command to load the V4L2 loopback module instead:
+   ```bash
+   sudo modprobe v4l2loopback devices=2 video_nr=0,1 card_label="","AJA virtual webcam device 1"
    ```
 
 ### Windows

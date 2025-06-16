@@ -609,15 +609,19 @@ NTV2V4L2Loopback::~NTV2V4L2Loopback()
 	if (mLbDisplay > 0)
 	{
 		close(mLbDisplay);
+#if not defined (AJA_BUILD_FOR_LINUX_KERNEL_5_15)
 		if (ioctl(mLbDevice, V4L2LOOPBACK_CTL_REMOVE, mLbDeviceNR) == -1)
 		{
 			cerr << "## ERROR (" << errno << "): failed to remove V4L2 device for output" << endl;
 			mErrorCode = AJA_VW_V4L2DEVICEREMOVEFAILED;
 			return;
 		}
+#endif
 	}
+#if not defined (AJA_BUILD_FOR_LINUX_KERNEL_5_15)
 	if (mLbDevice > 0)
 		close(mLbDevice);
+#endif
 
 	if (mPcmHandle)
 	{
@@ -1042,6 +1046,7 @@ bool NTV2V4L2Loopback::Initialize()
 	}
 
 #if defined (AJALinux)
+#if not defined (AJA_BUILD_FOR_LINUX_KERNEL_5_15)
 	mLbDevice = open(V4L2_DRIVER_NAME, O_RDONLY);
 	if (mLbDevice == -1)
 	{
@@ -1061,6 +1066,7 @@ bool NTV2V4L2Loopback::Initialize()
 		mErrorCode = AJA_VW_V4L2DEVICECREATEFAILED;
 		return false;
 	}
+#endif
 	mLbDisplay = open(mVideoDevice.c_str(), O_RDWR);
 	if (mLbDisplay == -1)
 	{

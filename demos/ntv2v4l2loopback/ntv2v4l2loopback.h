@@ -38,11 +38,13 @@
 #if defined (AJALinux)
 #include "v4l2loopback.h"
 #endif
-//#include "error.h"
 
 #define AUDIO_BYTESPERSAMPLE 4
 #if defined (AJALinux)
+//#define AJA_BUILD_FOR_LINUX_KERNEL_5_15 //uncomment this if building for Linux Kernel 5.15
+#if not defined (AJA_BUILD_FOR_LINUX_KERNEL_5_15)
 #define V4L2_DRIVER_NAME "/dev/v4l2loopback"
+#endif
 #endif
 
 using namespace std;
@@ -379,7 +381,9 @@ private:	//	PRIVATE INSTANCE DATA
 #if defined (AJALinux)
 	snd_pcm_t *					mPcmHandle			= AJA_NULL;
 	snd_pcm_uframes_t			mAudioFrames		= 2;
+#if not defined (AJA_BUILD_FOR_LINUX_KERNEL_5_15)
 	int							mLbDevice			= -1;
+#endif
 	int							mLbDeviceNR			= -1;
 	int							mLbDisplay			= -1;
 #endif
