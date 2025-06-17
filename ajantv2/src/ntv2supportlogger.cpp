@@ -897,6 +897,7 @@ void CNTV2SupportLogger::FetchRoutingLog (ostringstream & oss) const
 	mDevice.GetRouting (router);
 	oss << "(NTV2InputCrosspointID <== NTV2OutputCrosspointID)" << endl;
 	router.Print (oss, false);
+	oss << endl;
 /**
 	//	Dump routing registers...
 	NTV2RegNumSet		deviceRoutingRegs;
