@@ -1,4 +1,4 @@
-project(ntv2overlay)
+project(ntv2metale2e)
 
 set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
@@ -14,8 +14,8 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 set(DEMO_APP_SOURCES
-	ntv2overlay.h
-	ntv2overlay.cpp
+	ntv2metale2e.h
+	ntv2metale2e.cpp
 	main.cpp
 )
 set(DEMO_COMMON_SOURCES
@@ -43,8 +43,8 @@ install(TARGETS ${PROJECT_NAME}
 	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${DEMO_COMMON_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos)
-	install(FILES ${DEMO_APP_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2overlay)
+	install(FILES ${DEMO_APP_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2metale2e)
 endif()
 if (AJA_INSTALL_CMAKE)
-	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2overlay)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2metale2e)
 endif()
