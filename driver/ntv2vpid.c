@@ -68,17 +68,32 @@ static NTV2RegisterNumber gVPIDBOutRegs[] = {	kRegSDIOut1VPIDB, kRegSDIOut2VPIDB
 static NTV2RegisterNumber gSDIOutControlRegs[] = {	kRegSDIOut1Control, kRegSDIOut2Control, kRegSDIOut3Control, kRegSDIOut4Control,
 													kRegSDIOut5Control, kRegSDIOut6Control, kRegSDIOut7Control, kRegSDIOut8Control };
 
-static const ULWord	gChannelToSDIOutVPIDTransferCharacteristics[] = {	kVRegNTV2VPIDTransferCharacteristics1, kVRegNTV2VPIDTransferCharacteristics2, kVRegNTV2VPIDTransferCharacteristics3, kVRegNTV2VPIDTransferCharacteristics4,
+// default VPID parameters for sources without them
+static const ULWord	gChannelToDefaultVPIDTransferCharacteristics[] = {	kVRegNTV2VPIDTransferCharacteristics1, kVRegNTV2VPIDTransferCharacteristics2, kVRegNTV2VPIDTransferCharacteristics3, kVRegNTV2VPIDTransferCharacteristics4,
 																		kVRegNTV2VPIDTransferCharacteristics5, kVRegNTV2VPIDTransferCharacteristics6, kVRegNTV2VPIDTransferCharacteristics7, kVRegNTV2VPIDTransferCharacteristics8, 0 };
 
-static const ULWord	gChannelToSDIOutVPIDColorimetry[] =	{	kVRegNTV2VPIDColorimetry1, kVRegNTV2VPIDColorimetry2, kVRegNTV2VPIDColorimetry3, kVRegNTV2VPIDColorimetry4,
+static const ULWord	gChannelToDefaultVPIDColorimetry[] =	{	kVRegNTV2VPIDColorimetry1, kVRegNTV2VPIDColorimetry2, kVRegNTV2VPIDColorimetry3, kVRegNTV2VPIDColorimetry4,
 															kVRegNTV2VPIDColorimetry5, kVRegNTV2VPIDColorimetry6, kVRegNTV2VPIDColorimetry7, kVRegNTV2VPIDColorimetry8, 0 };
 
-static const ULWord	gChannelToSDIOutVPIDLuminance[] = {	kVRegNTV2VPIDLuminance1, kVRegNTV2VPIDLuminance2, kVRegNTV2VPIDLuminance3, kVRegNTV2VPIDLuminance4,
+static const ULWord	gChannelToDefaultVPIDLuminance[] = {	kVRegNTV2VPIDLuminance1, kVRegNTV2VPIDLuminance2, kVRegNTV2VPIDLuminance3, kVRegNTV2VPIDLuminance4,
 														kVRegNTV2VPIDLuminance5, kVRegNTV2VPIDLuminance6, kVRegNTV2VPIDLuminance7, kVRegNTV2VPIDLuminance8, 0 };
 
-static const ULWord	gChannelToSDIOutVPIDRGBRange[] = {	kVRegNTV2VPIDRGBRange1, kVRegNTV2VPIDRGBRange2, kVRegNTV2VPIDRGBRange3, kVRegNTV2VPIDRGBRange4,
+
+static const ULWord	gChannelToDefaultVPIDRGBRange[] = {	kVRegNTV2VPIDRGBRange1, kVRegNTV2VPIDRGBRange2, kVRegNTV2VPIDRGBRange3, kVRegNTV2VPIDRGBRange4,
 														kVRegNTV2VPIDRGBRange5, kVRegNTV2VPIDRGBRange6, kVRegNTV2VPIDRGBRange7, kVRegNTV2VPIDRGBRange8, 0 };
+
+// SDI output VPID overrides
+static const ULWord	gChannelToSDIOutVPIDTransferCharacteristics[] = {	kVRegSDIOutVPIDTransferCharacteristics1, kVRegSDIOutVPIDTransferCharacteristics2, kVRegSDIOutVPIDTransferCharacteristics3, kVRegSDIOutVPIDTransferCharacteristics4,
+																		kVRegSDIOutVPIDTransferCharacteristics5, kVRegSDIOutVPIDTransferCharacteristics6, kVRegSDIOutVPIDTransferCharacteristics7, kVRegSDIOutVPIDTransferCharacteristics8, 0 };
+
+static const ULWord	gChannelToSDIOutVPIDColorimetry[] =	{	kVRegSDIOutVPIDColorimetry1, kVRegSDIOutVPIDColorimetry2, kVRegSDIOutVPIDColorimetry3, kVRegSDIOutVPIDColorimetry4,
+															kVRegSDIOutVPIDColorimetry5, kVRegSDIOutVPIDColorimetry6, kVRegSDIOutVPIDColorimetry7, kVRegSDIOutVPIDColorimetry8, 0 };
+
+static const ULWord	gChannelToSDIOutVPIDLuminance[] = {	kVRegSDIOutVPIDLuminance1, kVRegSDIOutVPIDLuminance2, kVRegSDIOutVPIDLuminance3, kVRegSDIOutVPIDLuminance4,
+														kVRegSDIOutVPIDLuminance5, kVRegSDIOutVPIDLuminance6, kVRegSDIOutVPIDLuminance7, kVRegSDIOutVPIDLuminance8, 0 };
+
+static const ULWord	gChannelToSDIOutVPIDRGBRange[] = {	kVRegSDIOutVPIDRGBRange1, kVRegSDIOutVPIDRGBRange2, kVRegSDIOutVPIDRGBRange3, kVRegSDIOutVPIDRGBRange4,
+														kVRegSDIOutVPIDRGBRange5, kVRegSDIOutVPIDRGBRange6, kVRegSDIOutVPIDRGBRange7, kVRegSDIOutVPIDRGBRange8, 0 };
 
 static const ULWord	gChannelToLPIPOutConfig[] = { kRegLPIPOut1Config, kRegLPIPOut2Config, kRegLPIPOut3Config, kRegLPIPOut4Config, 0 };
 
@@ -92,6 +107,7 @@ bool SetLuminance(uint32_t* inOutVPIDValue, NTV2VPIDLuminance inLuminance);
 VPIDBitDepth GetBitDepth(uint32_t inOutVPIDValue);
 bool SetBitDepth(uint32_t* inOutVPIDValue, VPIDBitDepth inBitDepth);
 bool SetRGBRange(uint32_t* inOutVPIDValue, NTV2VPIDRGBRange inRGBRange);
+bool SetSDIOutVPIDOverrides(Ntv2SystemContext* context, uint32_t* inOutVPIDValue, NTV2Channel channel);
 
 VPIDChannel GetChannelFrom425XPT(ULWord index)
 {
@@ -376,6 +392,38 @@ bool SetRGBRange(uint32_t* inOutVPIDValue, NTV2VPIDRGBRange inRGBRange)
 	return true;
 }
 
+bool SetSDIOutVPIDOverrides(Ntv2SystemContext* context, uint32_t* inOutVPIDValue, NTV2Channel channel)
+{
+    uint32_t value = 0;
+    
+    value = ntv2ReadVirtualRegister(context, gChannelToSDIOutVPIDTransferCharacteristics[channel]);
+    if ((value & kVRegMaskSDIOutVPIDOverride) != 0)
+    {
+        if (!SetTransferCharacteristics(inOutVPIDValue, (NTV2VPIDXferChars)(value & kVRegMaskSDIOutVPIDValue)))
+            return false;
+    }
+    value = ntv2ReadVirtualRegister(context, gChannelToSDIOutVPIDColorimetry[channel]);
+    if ((value & kVRegMaskSDIOutVPIDOverride) != 0)
+    {
+        if (!SetColorimetry(inOutVPIDValue, (NTV2VPIDColorimetry)(value & kVRegMaskSDIOutVPIDValue)))
+            return false;
+    }
+    value = ntv2ReadVirtualRegister(context, gChannelToSDIOutVPIDLuminance[channel]);
+    if ((value & kVRegMaskSDIOutVPIDOverride) != 0)
+    {
+        if (!SetLuminance(inOutVPIDValue, (NTV2VPIDLuminance)(value & kVRegMaskSDIOutVPIDValue)))
+            return false;
+    }
+    value = ntv2ReadVirtualRegister(context, gChannelToSDIOutVPIDRGBRange[channel]);
+    if ((value & kVRegMaskSDIOutVPIDOverride) != 0)
+    {
+        if (!SetRGBRange(inOutVPIDValue, (NTV2VPIDRGBRange)(value & kVRegMaskSDIOutVPIDValue)))
+            return false;
+    }
+
+    return true;
+}
+
 ///////////
 
 bool FindVPID(Ntv2SystemContext* context, NTV2OutputXptID startingXpt, VPIDControl * pControl)
@@ -430,10 +478,10 @@ bool FindVPID(Ntv2SystemContext* context, NTV2OutputXptID startingXpt, VPIDContr
 			}
 
 			//Grab the HDR settings
-			pControl->vpidSpec.transferCharacteristics = (NTV2VPIDTransferCharacteristics)ntv2ReadVirtualRegister(context, gChannelToSDIOutVPIDTransferCharacteristics[pControl->frameStoreIndex]);
-			pControl->vpidSpec.colorimetry = (NTV2VPIDColorimetry)ntv2ReadVirtualRegister(context, gChannelToSDIOutVPIDColorimetry[pControl->frameStoreIndex]);
-			pControl->vpidSpec.luminance = (NTV2VPIDLuminance)ntv2ReadVirtualRegister(context, gChannelToSDIOutVPIDLuminance[pControl->frameStoreIndex]);
-			pControl->vpidSpec.rgbRange = (NTV2VPIDRGBRange)ntv2ReadVirtualRegister(context, gChannelToSDIOutVPIDRGBRange[pControl->frameStoreIndex]);
+			pControl->vpidSpec.transferCharacteristics = (NTV2VPIDTransferCharacteristics)ntv2ReadVirtualRegister(context, gChannelToDefaultVPIDTransferCharacteristics[pControl->frameStoreIndex]);
+			pControl->vpidSpec.colorimetry = (NTV2VPIDColorimetry)ntv2ReadVirtualRegister(context, gChannelToDefaultVPIDColorimetry[pControl->frameStoreIndex]);
+			pControl->vpidSpec.luminance = (NTV2VPIDLuminance)ntv2ReadVirtualRegister(context, gChannelToDefaultVPIDLuminance[pControl->frameStoreIndex]);
+			pControl->vpidSpec.rgbRange = (NTV2VPIDRGBRange)ntv2ReadVirtualRegister(context, gChannelToDefaultVPIDRGBRange[pControl->frameStoreIndex]);
 
 			//	Allows the formst to be psf, even though the hardware is i
 			if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(pControl->vpidSpec.videoFormat) && NTV2_IS_PSF_VIDEO_FORMAT(shadowFormat))
@@ -564,10 +612,10 @@ bool FindVPID(Ntv2SystemContext* context, NTV2OutputXptID startingXpt, VPIDContr
 				pControl->vpidSpec.vpidChannel = GetChannelFrom425XPT(source.registerNumber);
 			}
 			//Grab the HDR settings
-			pControl->vpidSpec.transferCharacteristics = (NTV2VPIDTransferCharacteristics)ntv2ReadVirtualRegister(context, gChannelToSDIOutVPIDTransferCharacteristics[NTV2CROSSPOINT_CHANNEL1]);
-			pControl->vpidSpec.colorimetry = (NTV2VPIDColorimetry)ntv2ReadVirtualRegister(context, gChannelToSDIOutVPIDColorimetry[NTV2CROSSPOINT_CHANNEL1]);
-			pControl->vpidSpec.luminance = (NTV2VPIDLuminance)ntv2ReadVirtualRegister(context, gChannelToSDIOutVPIDLuminance[NTV2CROSSPOINT_CHANNEL1]);
-			pControl->vpidSpec.rgbRange = (NTV2VPIDRGBRange)ntv2ReadVirtualRegister(context, gChannelToSDIOutVPIDRGBRange[NTV2CROSSPOINT_CHANNEL1]);
+			pControl->vpidSpec.transferCharacteristics = (NTV2VPIDTransferCharacteristics)ntv2ReadVirtualRegister(context, gChannelToDefaultVPIDTransferCharacteristics[NTV2CROSSPOINT_CHANNEL1]);
+			pControl->vpidSpec.colorimetry = (NTV2VPIDColorimetry)ntv2ReadVirtualRegister(context, gChannelToDefaultVPIDColorimetry[NTV2CROSSPOINT_CHANNEL1]);
+			pControl->vpidSpec.luminance = (NTV2VPIDLuminance)ntv2ReadVirtualRegister(context, gChannelToDefaultVPIDLuminance[NTV2CROSSPOINT_CHANNEL1]);
+			pControl->vpidSpec.rgbRange = (NTV2VPIDRGBRange)ntv2ReadVirtualRegister(context, gChannelToDefaultVPIDRGBRange[NTV2CROSSPOINT_CHANNEL1]);
 			pControl->isComplete = true;
 			break;
 		}
@@ -859,10 +907,10 @@ bool SetVPIDOutput(Ntv2SystemContext* context, NTV2Channel channel)
 			if (deviceID == DEVICE_ID_KONA5_3DLUT)
 			{
 				//override the E2E HDR outputs with user defined
-				SetTransferCharacteristics(&vpidControlDS1.value, (NTV2VPIDTransferCharacteristics)ntv2ReadVirtualRegister(context, gChannelToSDIOutVPIDTransferCharacteristics[NTV2_CHANNEL2]));
-				SetColorimetry(&vpidControlDS1.value, (NTV2VPIDColorimetry)ntv2ReadVirtualRegister(context, gChannelToSDIOutVPIDColorimetry[NTV2_CHANNEL2]));
-				SetLuminance(&vpidControlDS1.value, (NTV2VPIDLuminance)ntv2ReadVirtualRegister(context, gChannelToSDIOutVPIDLuminance[NTV2_CHANNEL2]));
-				SetRGBRange(&vpidControlDS1.value, (NTV2VPIDRGBRange)ntv2ReadVirtualRegister(context, gChannelToSDIOutVPIDRGBRange[NTV2_CHANNEL2]));
+				SetTransferCharacteristics(&vpidControlDS1.value, (NTV2VPIDTransferCharacteristics)ntv2ReadVirtualRegister(context, gChannelToDefaultVPIDTransferCharacteristics[NTV2_CHANNEL2]));
+				SetColorimetry(&vpidControlDS1.value, (NTV2VPIDColorimetry)ntv2ReadVirtualRegister(context, gChannelToDefaultVPIDColorimetry[NTV2_CHANNEL2]));
+				SetLuminance(&vpidControlDS1.value, (NTV2VPIDLuminance)ntv2ReadVirtualRegister(context, gChannelToDefaultVPIDLuminance[NTV2_CHANNEL2]));
+				SetRGBRange(&vpidControlDS1.value, (NTV2VPIDRGBRange)ntv2ReadVirtualRegister(context, gChannelToDefaultVPIDRGBRange[NTV2_CHANNEL2]));
 			}
 
 			if (((deviceID == DEVICE_ID_KONA5 || deviceID == DEVICE_ID_IO4KPLUS) && channel != NTV2_CHANNEL3))
@@ -876,6 +924,8 @@ bool SetVPIDOutput(Ntv2SystemContext* context, NTV2Channel channel)
 					vpidControlDS1.value -= 0x3b000000;
 				}
 			}
+
+            SetSDIOutVPIDOverrides(context, &vpidControlDS1.value, channel);
 		}
 	}
 
@@ -941,10 +991,10 @@ bool SetVPIDOutput(Ntv2SystemContext* context, NTV2Channel channel)
 			if (deviceID == DEVICE_ID_KONA5_3DLUT)
 			{
 				//override the E2E HDR outputs with user defined
-				SetTransferCharacteristics(&vpidControlDS2.value, (NTV2VPIDTransferCharacteristics)ntv2ReadVirtualRegister(context, gChannelToSDIOutVPIDTransferCharacteristics[NTV2_CHANNEL2]));
-				SetColorimetry(&vpidControlDS2.value, (NTV2VPIDColorimetry)ntv2ReadVirtualRegister(context, gChannelToSDIOutVPIDColorimetry[NTV2_CHANNEL2]));
-				SetLuminance(&vpidControlDS2.value, (NTV2VPIDLuminance)ntv2ReadVirtualRegister(context, gChannelToSDIOutVPIDLuminance[NTV2_CHANNEL2]));
-				SetRGBRange(&vpidControlDS2.value, (NTV2VPIDRGBRange)ntv2ReadVirtualRegister(context, gChannelToSDIOutVPIDRGBRange[NTV2_CHANNEL2]));
+				SetTransferCharacteristics(&vpidControlDS2.value, (NTV2VPIDTransferCharacteristics)ntv2ReadVirtualRegister(context, gChannelToDefaultVPIDTransferCharacteristics[NTV2_CHANNEL2]));
+				SetColorimetry(&vpidControlDS2.value, (NTV2VPIDColorimetry)ntv2ReadVirtualRegister(context, gChannelToDefaultVPIDColorimetry[NTV2_CHANNEL2]));
+				SetLuminance(&vpidControlDS2.value, (NTV2VPIDLuminance)ntv2ReadVirtualRegister(context, gChannelToDefaultVPIDLuminance[NTV2_CHANNEL2]));
+				SetRGBRange(&vpidControlDS2.value, (NTV2VPIDRGBRange)ntv2ReadVirtualRegister(context, gChannelToDefaultVPIDRGBRange[NTV2_CHANNEL2]));
 			}
 
 			if (((deviceID == DEVICE_ID_KONA5 || deviceID == DEVICE_ID_IO4KPLUS) && channel != NTV2_CHANNEL3))
@@ -958,6 +1008,8 @@ bool SetVPIDOutput(Ntv2SystemContext* context, NTV2Channel channel)
 					vpidControlDS2.value -= 0x3b000000;
 				}
 			}
+            
+            SetSDIOutVPIDOverrides(context, &vpidControlDS2.value, channel);
 		}
 	}
 	else

@@ -677,7 +677,47 @@ typedef enum
 	kVRegHDMIOutHDRLightLevel4              = VIRTUALREG_START+687,
 	kVRegHDMIOutHDRControl4                 = VIRTUALREG_START+688,
 
-    kVRegLastAJA							= VIRTUALREG_START+689,		///< @brief The last AJA virtual register slot
+	kVRegSDIOutVPIDTransferCharacteristics1	= VIRTUALREG_START+689,
+	kVRegSDIOutVPIDColorimetry1				= VIRTUALREG_START+690,
+	kVRegSDIOutVPIDLuminance1				= VIRTUALREG_START+691,
+	kVRegSDIOutVPIDRGBRange1				= VIRTUALREG_START+692,
+	
+	kVRegSDIOutVPIDTransferCharacteristics2	= VIRTUALREG_START+693,
+	kVRegSDIOutVPIDColorimetry2				= VIRTUALREG_START+694,
+	kVRegSDIOutVPIDLuminance2				= VIRTUALREG_START+695,
+	kVRegSDIOutVPIDRGBRange2				= VIRTUALREG_START+696,
+	
+	kVRegSDIOutVPIDTransferCharacteristics3	= VIRTUALREG_START+697,
+	kVRegSDIOutVPIDColorimetry3				= VIRTUALREG_START+698,
+	kVRegSDIOutVPIDLuminance3				= VIRTUALREG_START+699,
+	kVRegSDIOutVPIDRGBRange3				= VIRTUALREG_START+700,
+	
+	kVRegSDIOutVPIDTransferCharacteristics4	= VIRTUALREG_START+701,
+	kVRegSDIOutVPIDColorimetry4				= VIRTUALREG_START+702,
+	kVRegSDIOutVPIDLuminance4				= VIRTUALREG_START+703,
+	kVRegSDIOutVPIDRGBRange4				= VIRTUALREG_START+704,
+	
+	kVRegSDIOutVPIDTransferCharacteristics5	= VIRTUALREG_START+705,
+	kVRegSDIOutVPIDColorimetry5				= VIRTUALREG_START+706,
+	kVRegSDIOutVPIDLuminance5				= VIRTUALREG_START+707,
+	kVRegSDIOutVPIDRGBRange5				= VIRTUALREG_START+708,
+	
+	kVRegSDIOutVPIDTransferCharacteristics6	= VIRTUALREG_START+709,
+	kVRegSDIOutVPIDColorimetry6				= VIRTUALREG_START+710,
+	kVRegSDIOutVPIDLuminance6				= VIRTUALREG_START+711,
+	kVRegSDIOutVPIDRGBRange6				= VIRTUALREG_START+712,
+	
+	kVRegSDIOutVPIDTransferCharacteristics7	= VIRTUALREG_START+713,
+	kVRegSDIOutVPIDColorimetry7				= VIRTUALREG_START+714,
+	kVRegSDIOutVPIDLuminance7				= VIRTUALREG_START+715,
+	kVRegSDIOutVPIDRGBRange7				= VIRTUALREG_START+716,
+	
+	kVRegSDIOutVPIDTransferCharacteristics8	= VIRTUALREG_START+717,
+	kVRegSDIOutVPIDColorimetry8				= VIRTUALREG_START+718,
+	kVRegSDIOutVPIDLuminance8				= VIRTUALREG_START+719,
+	kVRegSDIOutVPIDRGBRange8				= VIRTUALREG_START+720,
+	
+    kVRegLastAJA							= VIRTUALREG_START+721,		///< @brief The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief Last virtual register slot
 
@@ -699,7 +739,10 @@ typedef enum
 	kVRegMaskHDMOutProtocol					= BIT(15),
 	kVRegMaskHDMOutAudioFormat				= BIT(19)+BIT(18)+BIT(17)+BIT(16),
 	kVRegMaskHDMOutAudioRate				= BIT(23)+BIT(22)+BIT(21)+BIT(20),
-	kVRegMaskHDMOutAudioChannels			= BIT(27)+BIT(26)+BIT(25)+BIT(24)
+	kVRegMaskHDMOutAudioChannels			= BIT(27)+BIT(26)+BIT(25)+BIT(24),
+
+    kVRegMaskSDIOutVPIDValue                = BIT(0)+BIT(1)+BIT(2)+BIT(3)+BIT(4)+BIT(5)+BIT(6)+BIT(7)+BIT(8)+BIT(9)+BIT(10)+BIT(11)+BIT(12)+BIT(13)+BIT(14)+BIT(15),
+    kVRegMaskSDIOutVPIDOverride             = BIT(16)
 } NTV2VirtualRegisterMasks;
 
 typedef enum
@@ -718,7 +761,10 @@ typedef enum
 	kVRegShiftHDMOutProtocol				= 15,
 	kVRegShiftHDMOutAudioFormat				= 16,
 	kVRegShiftHDMOutAudioRate				= 20,
-	kVRegShiftHDMOutAudioChannels			= 24
+	kVRegShiftHDMOutAudioChannels			= 24,
+
+    kVRegShiftSDIOutVPIDValue               = 0,
+    kVRegShiftSDIOutVPIDOverride            = 16
 } NTV2VirtualRegisterShifts;
 
 #endif// NTV2VIRTUALREGISTERS_H
