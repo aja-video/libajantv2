@@ -6703,15 +6703,23 @@ public:
 	AJA_VIRTUAL bool SetVPIDRGBRange (const NTV2VPIDRGBRange inValue, const NTV2Channel inChannel);	//	New in SDK 16.0
 	AJA_VIRTUAL bool GetVPIDRGBRange (NTV2VPIDRGBRange & outValue, const NTV2Channel inChannel);	//	New in SDK 16.0
 
+    // default channel key signal
+    AJA_VIRTUAL bool SetKeySignal(bool inValue, const NTV2Channel inChannel);
+    AJA_VIRTUAL bool GetKeySignal(bool & outValue, const NTV2Channel inChannel);
+
     // sdi output VPID parameter overrides
-    AJA_VIRTUAL bool SetSDIOutVPIDTransferCharacteristics(bool override, NTV2VPIDTransferCharacteristics inValue, const NTV2Channel inChannel);
-    AJA_VIRTUAL bool GetSDIOutVPIDTransferCharacteristics(bool & override, NTV2VPIDTransferCharacteristics & outValue, const NTV2Channel inChannel);
-    AJA_VIRTUAL bool SetSDIOutVPIDColorimetry(bool override, NTV2VPIDColorimetry inValue, const NTV2Channel inChannel);
-    AJA_VIRTUAL bool GetSDIOutVPIDColorimetry(bool & override, NTV2VPIDColorimetry & outValue, const NTV2Channel inChannel);
-    AJA_VIRTUAL bool SetSDIOutVPIDLuminance(bool override, NTV2VPIDLuminance inValue, const NTV2Channel inChannel);
-    AJA_VIRTUAL bool GetSDIOutVPIDLuminance(bool & override, NTV2VPIDLuminance & outValue, const NTV2Channel inChannel);
-    AJA_VIRTUAL bool SetSDIOutVPIDRGBRange(bool override, NTV2VPIDRGBRange inValue, const NTV2Channel inChannel);
-    AJA_VIRTUAL bool GetSDIOutVPIDRGBRange(bool & override, NTV2VPIDRGBRange & outValue, const NTV2Channel inChannel);
+    AJA_VIRTUAL bool SetSDIOutVPIDTransferCharacteristics(bool enable, NTV2VPIDTransferCharacteristics inValue, const NTV2Channel inChannel);
+    AJA_VIRTUAL bool GetSDIOutVPIDTransferCharacteristics(bool & enable, NTV2VPIDTransferCharacteristics & outValue, const NTV2Channel inChannel);
+    AJA_VIRTUAL bool SetSDIOutVPIDColorimetry(bool enable, NTV2VPIDColorimetry inValue, const NTV2Channel inChannel);
+    AJA_VIRTUAL bool GetSDIOutVPIDColorimetry(bool & enable, NTV2VPIDColorimetry & outValue, const NTV2Channel inChannel);
+    AJA_VIRTUAL bool SetSDIOutVPIDLuminance(bool enable, NTV2VPIDLuminance inValue, const NTV2Channel inChannel);
+    AJA_VIRTUAL bool GetSDIOutVPIDLuminance(bool & enable, NTV2VPIDLuminance & outValue, const NTV2Channel inChannel);
+    AJA_VIRTUAL bool SetSDIOutVPIDRGBRange(bool enable, NTV2VPIDRGBRange inValue, const NTV2Channel inChannel);
+    AJA_VIRTUAL bool GetSDIOutVPIDRGBRange(bool & enable, NTV2VPIDRGBRange & outValue, const NTV2Channel inChannel);
+
+    // sdi output key signal override
+    AJA_VIRTUAL bool SetSDIOutKeySignal(bool enable, bool inValue, const NTV2Channel inChannel);
+    AJA_VIRTUAL bool GetSDIOutKeySignal(bool & enable, bool & outValue, const NTV2Channel inChannel);
 
 	AJA_VIRTUAL bool Set3DLUTTableLocation (const ULWord inFrameNumber, ULWord inLUTIndex = 0);	//	New in SDK 16.0
 	AJA_VIRTUAL bool Load3DLUTTable (void);	//	New in SDK 16.0

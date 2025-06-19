@@ -97,6 +97,10 @@ static const ULWord	gChannelToSDIOutVPIDRGBRange[] = {	kVRegSDIOutVPIDRGBRange1,
 
 static const ULWord	gChannelToLPIPOutConfig[] = { kRegLPIPOut1Config, kRegLPIPOut2Config, kRegLPIPOut3Config, kRegLPIPOut4Config, 0 };
 
+static const ULWord gChannelToSDIOutKeySignal[] = { kVRegSDIOutKeySignal1, kVRegSDIOutKeySignal2, kVRegSDIOutKeySignal3, kVRegSDIOutKeySignal4,
+                                                    kVRegSDIOutKeySignal5, kVRegSDIOutKeySignal6, kVRegSDIOutKeySignal7, kVRegSDIOutKeySignal8 };
+
+
 /*********************************************/
 /* Prototypes for private utility functions. */
 /*********************************************/
@@ -249,10 +253,18 @@ bool SetSDIOutVPID(Ntv2SystemContext* context, NTV2Channel channel, ULWord value
 	return true;
 }	//	SetSDIOutVPID
 
-bool Set2110Key(Ntv2SystemContext* context, NTV2Channel channel, bool setKey)
+bool SetKeySignal(Ntv2SystemContext* context, NTV2Channel channel, bool setKey)
 {
+    ULWord regValue = 0;
+    
 	if (channel > NTV2_CHANNEL4)
 		return false;
+
+    regValue = ntv2ReadVirtualRegister(context, gChannelToSDIOutKeySignal[channel]);
+    if ((regValue & kVRegMaskSDIOutVPIDOverride) != 0)
+    {
+        setKey = (regValue & kVRegMaskSDIOutVPIDValue) != 0;
+    }
 	return ntv2WriteRegisterMS(context, gChannelToLPIPOutConfig[channel], setKey ? 1 : 0, kRegMaskIPIsKey, kRegShiftIPIsKey);
 }
 
@@ -482,6 +494,10 @@ bool FindVPID(Ntv2SystemContext* context, NTV2OutputXptID startingXpt, VPIDContr
 			pControl->vpidSpec.colorimetry = (NTV2VPIDColorimetry)ntv2ReadVirtualRegister(context, gChannelToDefaultVPIDColorimetry[pControl->frameStoreIndex]);
 			pControl->vpidSpec.luminance = (NTV2VPIDLuminance)ntv2ReadVirtualRegister(context, gChannelToDefaultVPIDLuminance[pControl->frameStoreIndex]);
 			pControl->vpidSpec.rgbRange = (NTV2VPIDRGBRange)ntv2ReadVirtualRegister(context, gChannelToDefaultVPIDRGBRange[pControl->frameStoreIndex]);
+
+            // Grab the key setting
+            if (ntv2ReadVirtualRegister(context, gChannelToDefaultVPIDRGBRange[pControl->frameStoreIndex]) != 0)
+                pControl->flags = (VPIDFlags)(pControl->flags | KeySignal);
 
 			//	Allows the formst to be psf, even though the hardware is i
 			if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(pControl->vpidSpec.videoFormat) && NTV2_IS_PSF_VIDEO_FORMAT(shadowFormat))
@@ -1028,7 +1044,7 @@ bool SetVPIDOutput(Ntv2SystemContext* context, NTV2Channel channel)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wtautological-compare"
 	if (((vpidControlDS1.flags & KeySignal) > 0) && NTV2DeviceCanDo25GIP(deviceID))
-		Set2110Key(context, channel, (vpidControlDS1.flags & KeySignal) > 0);
+		SetKeySignal(context, channel, (vpidControlDS1.flags & KeySignal) > 0);
 #pragma GCC diagnostic pop
 
     return SetSDIOutVPID(context, channel, vpidControlDS1.value, vpidControlDS2.value);

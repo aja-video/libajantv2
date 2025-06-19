@@ -716,8 +716,28 @@ typedef enum
 	kVRegSDIOutVPIDColorimetry8				= VIRTUALREG_START+718,
 	kVRegSDIOutVPIDLuminance8				= VIRTUALREG_START+719,
 	kVRegSDIOutVPIDRGBRange8				= VIRTUALREG_START+720,
+
+    // channel default key signal
+    kVRegNTV2KeySignal1                     = VIRTUALREG_START+721,
+    kVRegNTV2KeySignal2                     = VIRTUALREG_START+722,
+    kVRegNTV2KeySignal3                     = VIRTUALREG_START+723,
+    kVRegNTV2KeySignal4                     = VIRTUALREG_START+724,
+    kVRegNTV2KeySignal5                     = VIRTUALREG_START+725,
+    kVRegNTV2KeySignal6                     = VIRTUALREG_START+726,
+    kVRegNTV2KeySignal7                     = VIRTUALREG_START+727,
+    kVRegNTV2KeySignal8                     = VIRTUALREG_START+728,
+
+    // sdi out key signal override
+    kVRegSDIOutKeySignal1                   = VIRTUALREG_START+729,
+    kVRegSDIOutKeySignal2                   = VIRTUALREG_START+730,
+    kVRegSDIOutKeySignal3                   = VIRTUALREG_START+731,
+    kVRegSDIOutKeySignal4                   = VIRTUALREG_START+732,
+    kVRegSDIOutKeySignal5                   = VIRTUALREG_START+733,
+    kVRegSDIOutKeySignal6                   = VIRTUALREG_START+734,
+    kVRegSDIOutKeySignal7                   = VIRTUALREG_START+735,
+    kVRegSDIOutKeySignal8                   = VIRTUALREG_START+736,
 	
-    kVRegLastAJA							= VIRTUALREG_START+721,		///< @brief The last AJA virtual register slot
+    kVRegLastAJA							= VIRTUALREG_START+737,		///< @brief The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief Last virtual register slot
 
