@@ -401,6 +401,11 @@ AJAStatus NTV2LLBurn::SetupAudio (void)
 
 }	//	SetupAudio
 
+// Fixes internal issue #921
+// NTV2 device audio systems wrap after reading/writing 65,280 samples of 16-channel audio (or 130,560 samples of 8-channel audio)...
+// i.e. after reading/writing 4,177,920 bytes max.
+// A 4MB buffer (4,194,304 bytes) wastes 16K (16,384 bytes), but is page-sized, and readily page-aligned on most host OSes.
+#define HOST_AUDIO_BUFFER_SIZE 4194304
 
 AJAStatus NTV2LLBurn::SetupHostBuffers (void)
 {
@@ -409,7 +414,7 @@ AJAStatus NTV2LLBurn::SetupHostBuffers (void)
 	//	Allocate and add each in-host buffer to my member variables.
 	//	DMA performance can be accelerated slightly by using page-aligned video buffers...
 	mpHostVideoBuffer.Allocate(mFormatDesc.GetVideoWriteSize(ULWord(NTV2Buffer::DefaultPageSize())), true);
-	mpHostAudioBuffer.Allocate(NTV2_AUDIOSIZE_MAX, /*page-aligned*/true);
+	mpHostAudioBuffer.Allocate(HOST_AUDIO_BUFFER_SIZE, /*page-aligned*/true);
 	mpHostF1AncBuffer.Allocate(mConfig.WithAnc() ? NTV2_ANCSIZE_MAX : 0, /*pageAligned*/true);
 	mpHostF2AncBuffer = NTV2Buffer(mConfig.WithAnc() ? NTV2_ANCSIZE_MAX : 0);
 

@@ -132,8 +132,8 @@ set(AJANTV2_HEADERS
     includes/ntv2fixed.h
     includes/ntv2formatdescriptor.h
     includes/ntv2konaflashprogram.h
-    includes/ntv2m31enums.h
-    includes/ntv2m31publicinterface.h
+#   includes/ntv2m31enums.h				# removed in SDK 17.6
+#   includes/ntv2m31publicinterface.h	# removed in SDK 17.6
     includes/ntv2mailbox.h
     includes/ntv2mbcontroller.h
     includes/ntv2mcsfile.h
@@ -188,7 +188,7 @@ set(AJANTV2_SOURCES
     src/ntv2enhancedcsc.cpp
     src/ntv2formatdescriptor.cpp
     src/ntv2hdmi.cpp
-    src/ntv2hevc.cpp
+#   src/ntv2hevc.cpp			# removed in SDK 17.6
     src/ntv2interrupts.cpp
     src/ntv2konaflashprogram.cpp
     src/ntv2mailbox.cpp
@@ -245,44 +245,14 @@ set(AJANTV2_BM_SOURCES
     src/bm/ntv2baremetaldriverinterface.cpp)
 # ajantv2 utilityfiles
 set(AJANTV2_UTILITY_PUBLIC_HEADERS
-    utilityfiles/public/ntv2firmwareinstallerthread.h
-    utilityfiles/public/ntv2hevcfirmwareinstallerthread.h)
+    utilityfiles/public/ntv2firmwareinstallerthread.h)
 set(AJANTV2_UTILITY_PUBLIC_SOURCES
-    utilityfiles/public/ntv2firmwareinstallerthread.cpp
-    utilityfiles/public/ntv2hevcfirmwareinstallerthread.cpp)
+    utilityfiles/public/ntv2firmwareinstallerthread.cpp)
 
-if (NOT AJANTV2_BUILD_OPENSOURCE)
-    # ajantv2 hevc codec sources
-    if (EXISTS ${LIBAJANTV2_PRIVATE_DIR})
-        set(AJANTV2_HEVC_HEADERS
-            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31.h
-            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31cparam.h
-            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31ehparam.h
-            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31vaparam.h
-            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31vinparam.h
-            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31viparam.h)
-        set(AJANTV2_HEVC_SOURCES
-            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31.cpp
-            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31cparam.cpp
-            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31ehparam.cpp
-            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31vaparam.cpp
-            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31vinparam.cpp
-            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31viparam.cpp)
-        # `cmake --install` deployments
-        if (AJA_INSTALL_HEADERS)
-            install(FILES ${AJANTV2_HEVC_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/codecs/hevc/m31)
-        endif()
-        if (AJA_INSTALL_SOURCES)
-            install(FILES ${AJANTV2_HEVC_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajantv2/codecs/hevc/m31)
-        endif()
-        message(STATUS "added ajantv2 HEVC/M31 codec sources from ${LIBAJANTV2_PRIVATE_DIR}")
-    else()
-        message(STATUS "ajantv2 private repo sources not found: ${LIBAJANTV2_PRIVATE_DIR}")
-    endif()
+if(NOT AJANTV2_DISABLE_CONFIGURE_VERSION_FILE OR NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/includes/ntv2version.h)
+    configure_file(includes/ntv2version.h.in includes/ntv2version.h @ONLY)
+    configure_file(includes/ntv2version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/includes/ntv2version.h @ONLY)
 endif()
-
-configure_file(includes/ntv2version.h.in includes/ntv2version.h @ONLY)
-configure_file(includes/ntv2version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/includes/ntv2version.h @ONLY)
 
 # ajaanc
 set(AJAANC_HEADERS
@@ -641,11 +611,6 @@ set(TARGET_SOURCES
     ${AJABASE_HEADERS}
     ${AJANTV2_SOURCES}
     ${AJANTV2_HEADERS})
-if (NOT AJANTV2_BUILD_OPENSOURCE)
-    list(APPEND TARGET_SOURCES
-        ${AJANTV2_HEVC_HEADERS}
-        ${AJANTV2_HEVC_SOURCES})
-endif()
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     list(APPEND TARGET_SOURCES
         ${AJANTV2_WIN_HEADERS}

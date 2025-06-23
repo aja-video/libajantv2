@@ -8,6 +8,7 @@
 #include "ntv2overlay.h"
 #include "ntv2devicescanner.h"
 #include "ajabase/common/types.h"
+#include "ajabase/system/atomic.h"
 #include "ajabase/system/process.h"
 #include "ajabase/system/systemtime.h"
 #include "ajaanc/includes/ancillarylist.h"
@@ -25,9 +26,8 @@ NTV2Overlay::NTV2Overlay (const OverlayConfig & inConfig)
 		mPlayThread		(AJAThread()),
 		mCaptureThread	(AJAThread()),
 		mVideoFormat	(NTV2_FORMAT_UNKNOWN),
-		mHDMIColorSpace	(NTV2_LHIHDMIColorSpaceYCbCr),
 		mSavedTaskMode	(NTV2_DISABLE_TASKS),
-		mInputPixFormat	(inConfig.fPixelFormat),	//	fixed to 10-bit YCbCr
+		mInputPixFormat	(inConfig.fPixelFormat),
 		mOutputPixFormat(NTV2_FBF_ARGB),			//	fixed to 8-bit ARGB
 		mGlobalQuit		(false)
 {
@@ -129,19 +129,18 @@ AJAStatus NTV2Overlay::SetupVideo (void)
 	//	Flip the input spigot to "receive" if necessary...
 	mDevice.SetSDITransmitEnable (NTV2_CHANNEL1, false);
 	mDevice.SetSDITransmitEnable (NTV2_CHANNEL2, true);
-	
+
 	mDevice.WaitForOutputVerticalInterrupt (NTV2_CHANNEL1, 10);	
 
 	//	Since this demo runs in E-to-E mode (thru Mixer/Keyer), reference must be tied to the input...
-	mDevice.SetReference(NTV2_REFERENCE_INPUT1);
+	mDevice.SetReference(::NTV2InputSourceToReferenceSource(mConfig.fInputSource));
 
 	mDevice.SetMultiFormatMode(true);
-	
+
 	mDevice.ClearRouting();
-	RouteInputSignal();
 	RouteOverlaySignal();
 	RouteOutputSignal();
-	
+
 	//	Set up Mixer...
 	const UWord mixerNum (0);
 	mDevice.SetMixerMode (mixerNum, NTV2MIXERMODE_MIX);	//	"mix" mode
@@ -151,25 +150,49 @@ AJAStatus NTV2Overlay::SetupVideo (void)
 	mDevice.SetMixerFGInputControl (mixerNum, NTV2MIXERINPUTCONTROL_SHAPED);		//	respect FG alpha channel
 	mDevice.SetMixerBGInputControl (mixerNum, NTV2MIXERINPUTCONTROL_FULLRASTER);	//	BG uses full raster
 	mDevice.SetMixerVancOutputFromForeground (mixerNum, false);	//	false means "use BG VANC, not FG"
-	
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetupVideo
 
+bool NTV2Overlay::IsInputSignalRGB (void)
+{
+	if (NTV2_INPUT_SOURCE_IS_HDMI(mConfig.fInputSource))
+	{
+		NTV2LHIHDMIColorSpace cs2;
+		mDevice.GetHDMIInputColor (cs2, ::NTV2InputSourceToChannel(mConfig.fInputSource));
+		return cs2 == NTV2_LHIHDMIColorSpaceRGB;
+	}
+	return false;
+}
+
 void NTV2Overlay::RouteInputSignal (void)
 {
-	//	Connect SDIIn1 to Mixer1 background...
-	mDevice.Connect(NTV2_XptMixer1BGVidInput, NTV2_XptSDIIn1, false);			//	SDIIn1 => Mix1BGVid
-	mDevice.Connect(NTV2_XptMixer1BGKeyInput, NTV2_XptSDIIn1, false);			//	SDIIn1 => Mix1BGKey
+	const bool isCaptureBufferRGB(NTV2_IS_FBF_RGB(mConfig.fPixelFormat)), isSignalRGB(IsInputSignalRGB());
+	NTV2OutputXptID oXptInput (::GetInputSourceOutputXpt (mConfig.fInputSource, /*DS2*/false, isSignalRGB));
 
-	//	Connect SDIIn1 to FrameStore1...
-	if (NTV2_IS_FBF_RGB(mInputPixFormat))
-	{	//	Convert YUV to RGB...
-		mDevice.Connect(NTV2_XptCSC1VidInput, NTV2_XptSDIIn1, false);			//	SDIIn1 => CSC1
-		mDevice.Connect(NTV2_XptFrameBuffer1Input, NTV2_XptCSC1VidRGB, false);	//	CSC1RGB => FS1
+	//	Connect input to Mixer1 background...
+	if (isSignalRGB)
+	{	//	Must convert to YUV...
+		mDevice.Connect(NTV2_XptCSC1VidInput, oXptInput, false);	//	input => CSC1
+		mDevice.Connect(NTV2_XptMixer1BGVidInput, NTV2_XptCSC1VidYUV, false);	//	CSC1Vid => Mix1BGVid
+		mDevice.Connect(NTV2_XptMixer1BGKeyInput, NTV2_XptCSC1KeyYUV, false);	//	CSC1Key => Mix1BGKey
 	}
 	else
-		mDevice.Connect(NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1, false);		//	SDIIn1 => FS1
+	{
+		mDevice.Connect(NTV2_XptMixer1BGVidInput, oXptInput, false);		//	input => Mix1BGVid
+		mDevice.Connect(NTV2_XptMixer1BGKeyInput, oXptInput, false);		//	input => Mix1BGKey
+	}
+
+	//	Connect input to FrameStore1...
+	if (isCaptureBufferRGB  &&  !isSignalRGB)
+	{
+		mDevice.Connect(NTV2_XptCSC1VidInput, oXptInput, false);				//	input => CSC1
+		mDevice.Connect(NTV2_XptFrameBuffer1Input, NTV2_XptCSC1VidRGB, false);	//	CSC1RGB => FS1
+	}
+	else if (!isCaptureBufferRGB && isSignalRGB)
+		mDevice.Connect(NTV2_XptFrameBuffer1Input, NTV2_XptCSC1VidYUV, false);	//	CSC1YUV => FS1
+	else	//	isCaptureBufferRGB == isSignalRGB
+		mDevice.Connect(NTV2_XptFrameBuffer1Input, oXptInput, false);			//	input => FS1
 }	//	RouteInputSignal
 
 void NTV2Overlay::RouteOverlaySignal (void)
@@ -527,10 +550,12 @@ void NTV2Overlay::InputThread (void)
 
 		//	At this point, the input video format is stable.
 		//	Configure the input FrameStore...
+		const bool isRGBSignal (IsInputSignalRGB());
 		mDevice.SetMode (mConfig.fInputChannel, NTV2_MODE_CAPTURE);
-		mDevice.SetFrameBufferFormat (mConfig.fInputChannel, NTV2_FBF_10BIT_YCBCR);
+		mDevice.SetFrameBufferFormat (mConfig.fInputChannel, mInputPixFormat);
 		mDevice.SetVideoFormat (mVideoFormat, /*retail*/false,  /*keepVanc*/false, mConfig.fInputChannel);
 		mDevice.SetVANCMode (NTV2_VANCMODE_OFF, mConfig.fInputChannel);
+		RouteInputSignal();
 		if (AJA_FAILURE(SetupCaptureBuffers()))
 		{	cerr << "## NOTE:  Failed to [re]allocate host buffers" << endl;
 			mGlobalQuit = true;
@@ -578,7 +603,8 @@ void NTV2Overlay::InputThread (void)
 						<< DEC(badXfers) << " failed)");
 
 			//	Check input signal format...
-			if (mDevice.GetInputVideoFormat(mConfig.fInputSource) != mVideoFormat)
+			if (mDevice.GetInputVideoFormat(mConfig.fInputSource) != mVideoFormat
+				||	isRGBSignal != IsInputSignalRGB())
 			{	//	Input signal format changed!
 				++vfChgTally;
 				mAVCircularBuffer.StartProduceNextBuffer();	//	Unblock output thread

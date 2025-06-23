@@ -428,7 +428,7 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 				break;
 			case DEVICE_ID_KONAX:
 				// Do we have a BOB?
-				if(IsBreakoutBoardConnected())
+				if (IsSupported(kDeviceHasBreakoutBoard))
 					result = NTV2_BreakoutBoard;
 				break;
 			default:
@@ -438,7 +438,7 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 	return result;
 }
 
-bool CNTV2Card::GetLPExternalPortURLString (string & outURLString)
+bool CNTV2Card::GetLPExternalConfigurationURLString (string & outURLString)
 {
 	if (!NTV2DeviceHasLPProductCode(GetDeviceID()))
 		return false;
@@ -464,7 +464,7 @@ bool CNTV2Card::GetLPExternalPortURLString (string & outURLString)
 	return true;
 }
 
-bool CNTV2Card::GetLPTunnelPortURLString (string & outURLString)
+bool CNTV2Card::GetLPTunnelConfigurationURLString (string & outURLString)
 {
 	if (!NTV2DeviceHasLPProductCode(GetDeviceID()))
 		return false;
@@ -488,6 +488,37 @@ bool CNTV2Card::GetLPTunnelPortURLString (string & outURLString)
 	
 	outURLString = tempString.str();
 	return true;
+}
+
+int CNTV2Card::GetSFPConfigurationURLStrings(std::vector<std::string> & OutSFPURLStrings)
+{
+	if (!NTV2DeviceHasLPProductCode(GetDeviceID()) || NTV2DeviceGetNum25GSFPs(GetDeviceID()) == 0)
+		return 0;
+	
+	UWord numSFPs = NTV2DeviceGetNum25GSFPs(GetDeviceID());
+	
+	for (int i = 0; i < numSFPs; i++)
+	{
+		uint32_t portIP(0);
+		int ipOctet(0);
+		ostringstream tempString;
+		ReadRegister(kRegLPSFP1IP+i, portIP);
+		if (portIP == 0)
+			return false;
+		
+		tempString << "http://";
+		ipOctet = (portIP & 0xFF000000) >> 24;
+		tempString << ipOctet << ".";
+		ipOctet = (portIP & 0x00FF0000) >> 16;
+		tempString << ipOctet << ".";
+		ipOctet = (portIP & 0x0000FF00) >> 8;
+		tempString << ipOctet << ".";
+		ipOctet = (portIP & 0x000000FF);
+		tempString << ipOctet;
+		
+		OutSFPURLStrings.push_back(tempString.str());
+	}
+	return OutSFPURLStrings.size();
 }
 
 #if !defined(NTV2_DEPRECATE_16_3)

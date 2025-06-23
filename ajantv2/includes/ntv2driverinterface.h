@@ -372,13 +372,6 @@ class AJAExport CNTV2DriverInterface
 		**/
 		AJA_VIRTUAL bool		NTV2Message (NTV2_HEADER * pInMessage);
 
-		/**
-			@brief	Sends an HEVC message to the NTV2 driver.
-			@param	pMessage	Points to the HevcMessageHeader that contains the HEVC message.
-			@return	False. This must be implemented by the platform-specific subclass.
-		**/
-		AJA_VIRTUAL inline bool	HevcSendMessage (HevcMessageHeader * pMessage)		{(void) pMessage; return false;}
-
 		AJA_VIRTUAL bool	ControlDriverDebugMessages (NTV2_DriverDebugMessageSet msgSet,  bool enable);
 	///@}
 
@@ -458,6 +451,15 @@ class AJAExport CNTV2DriverInterface
 												ULWord64 bufferCookie,
 												ULWord flags,
 												NTV2StreamBuffer& status);
+
+        // mail buffer operations
+        AJA_VIRTUAL bool    MailBufferOps (const NTV2Channel inChannel,
+                                           NTV2Buffer& inBuffer,
+                                           ULWord dataSize,
+                                           ULWord flags,
+                                           ULWord delay,
+                                           ULWord timeout,
+                                           NTV2MailBuffer& status);
 
 	/**
 		@name	Device Ownership
@@ -571,6 +573,7 @@ class AJAExport CNTV2DriverInterface
 		AJA_VIRTUAL bool				ReadRP188Registers (const NTV2Channel inChannel, RP188_STRUCT * pRP188Data);
 		AJA_VIRTUAL inline std::string	GetHostName (void) const	{return IsRemote() ? _pRPCAPI->Name() : "";}	///< @return	String containing the remote device host name (if any).
 		AJA_VIRTUAL inline bool			IsRemote (void) const		{return _pRPCAPI ? true : false;}	///< @return	True if I'm connected to a non-local or non-physical device;  otherwise false.
+		AJA_VIRTUAL inline bool			IsRemoteConnected (void) const	{return IsRemote() ? _pRPCAPI->IsConnected() : false;}	///< @return	True if I'm connected to a non-local or non-physical device;  otherwise false.
 		/**
 			@return		String containing remote device description.
 		**/
@@ -609,6 +612,9 @@ class AJAExport CNTV2DriverInterface
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetDefaultDeviceForPID(const int32_t procID)) {(void)procID; return false;}	///< @deprecated	Obsolete, first deprecated in SDK 14.3 when classic Apple QuickTime support was dropped.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool IsDefaultDeviceForPID(const int32_t procID))  {(void)procID; return false;}	///< @deprecated	Obsolete, first deprecated in SDK 14.3 when classic Apple QuickTime support was dropped.
 #endif	//	!defined(NTV2_DEPRECATE_16_3)
+#if !defined(NTV2_DEPRECATE_17_6)
+	AJA_VIRTUAL inline bool	NTV2_DEPRECATED_f(HevcSendMessage(HevcMessageHeader* pMsg))	{(void)pMsg; return false;}	///< @deprecated	Corvid HEVC support dropped in SDK 17.6
+#endif//!defined(NTV2_DEPRECATE_17_6)
 
 #if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
 		/**
@@ -645,9 +651,10 @@ class AJAExport CNTV2DriverInterface
 			@brief		Answers with the NTV2RegInfo of the register associated with the given boolean (i.e., "Can Do") device feature.
 			@param[in]	inParamID		Specifies the device features parameter of interest.
 			@param[out] outRegInfo		Receives the associated NTV2RegInfo.
+			@param[out] outFlipSense	Receives true only if the sense of the resulting boolean read from ReadRegister should be inverted.
 			@return		True if successful; otherwise false.
 		**/
-		AJA_VIRTUAL bool	GetRegInfoForBoolParam (const NTV2BoolParamID inParamID, NTV2RegInfo & outRegInfo);
+		AJA_VIRTUAL bool	GetRegInfoForBoolParam (const NTV2BoolParamID inParamID, NTV2RegInfo & outRegInfo, bool & outFlipSense);
 		/**
 			@brief		Answers with the NTV2RegInfo of the register associated with the given numeric (i.e., "Get Num") device feature.
 			@param[in]	inParamID		Specifies the device features parameter of interest.

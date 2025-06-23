@@ -7,7 +7,7 @@
 
 #include "ntv2card.h"
 #include "ntv2devicefeatures.h"
-#include "ntv2utils.h"
+//#include "ntv2utils.h"
 #if defined (AJALinux)
 	//#include "ntv2linuxpublicinterface.h"
 #elif defined (MSWindows)
@@ -17,9 +17,32 @@
 using namespace std;
 
 
-static const ULWord gHDMIChannelToInputStatusRegNum [] =	{ kRegHDMIInputStatus1, kRegHDMIInputStatus2, kRegHDMIInputStatus3, kRegHDMIInputStatus4, 0 };
-static const ULWord gHDMIChannelToControlRegNum [] =	{ kRegHDMIControl1, kRegHDMIControl2, kRegHDMIControl3, kRegHDMIControl4, 0 };
+static const ULWord gHDMIChannelToInputStatusRegNum[]			= {	kRegHDMIInputStatus1,			kRegHDMIInputStatus2,				kRegHDMIInputStatus3,				kRegHDMIInputStatus4,	0 };
+static const ULWord gHDMIChannelToControlRegNum[]				= {	kRegHDMIControl1,				kRegHDMIControl2,					kRegHDMIControl3,					kRegHDMIControl4,		0 };
 
+//	HDMI V6 multiple output virtual registers:
+static const ULWord gHDMIChannelToOutControlVRegNum[]			= {	kVRegHDMIOutControl1,			kVRegHDMIOutControl2,				kVRegHDMIOutControl3,				kVRegHDMIOutControl4,				
+																	kVRegHDMIOutControl1,			kVRegHDMIOutControl1,				kVRegHDMIOutControl1,				kVRegHDMIOutControl1 };
+static const ULWord gHDMIChannelToInputStatusVRegNum[]			= {	kVRegHDMIInputStatus1,			kVRegHDMIInputStatus2,				kVRegHDMIInputStatus3,				kVRegHDMIInputStatus4,
+																	kVRegHDMIInputStatus1,			kVRegHDMIInputStatus1,				kVRegHDMIInputStatus1,				kVRegHDMIInputStatus1 };
+static const ULWord gHDMIChannelToInputControlVRegNum[]			= {	kVRegHDMIInputControl1,			kVRegHDMIInputControl2,				kVRegHDMIInputControl3,				kVRegHDMIInputControl4,
+																	kVRegHDMIInputControl1,			kVRegHDMIInputControl1,				kVRegHDMIInputControl1,				kVRegHDMIInputControl1 };
+static const ULWord gHDMIChannelToOutStatusVRegNum[]			= {	kVRegHDMIOutStatus1,			kVRegHDMIOutStatus2,				kVRegHDMIOutStatus3,				kVRegHDMIOutStatus4,
+																	kVRegHDMIOutStatus1,			kVRegHDMIOutStatus1,				kVRegHDMIOutStatus1,				kVRegHDMIOutStatus1 };
+static const ULWord gHDMIChannelToOutHDRGreenPrimaryVRegNum[]	= {	kVRegHDMIOutHDRGreenPrimary1,	kVRegHDMIOutHDRGreenPrimary2,		kVRegHDMIOutHDRGreenPrimary3,		kVRegHDMIOutHDRGreenPrimary4,
+																	kVRegHDMIOutHDRGreenPrimary1,	kVRegHDMIOutHDRGreenPrimary1,		kVRegHDMIOutHDRGreenPrimary1,		kVRegHDMIOutHDRGreenPrimary1 };
+static const ULWord gHDMIChannelToOutHDRRedPrimaryVRegNum[]		= {	kVRegHDMIOutHDRRedPrimary1,		kVRegHDMIOutHDRRedPrimary2,			kVRegHDMIOutHDRRedPrimary3,			kVRegHDMIOutHDRRedPrimary4,
+																	kVRegHDMIOutHDRRedPrimary1,		kVRegHDMIOutHDRRedPrimary1,			kVRegHDMIOutHDRRedPrimary1,			kVRegHDMIOutHDRRedPrimary1 };
+static const ULWord gHDMIChannelToOutHDRBluePrimaryVRegNum[]	= {	kVRegHDMIOutHDRBluePrimary1,	kVRegHDMIOutHDRBluePrimary2,		kVRegHDMIOutHDRBluePrimary3,		kVRegHDMIOutHDRBluePrimary4,
+																	kVRegHDMIOutHDRBluePrimary1,	kVRegHDMIOutHDRBluePrimary1,		kVRegHDMIOutHDRBluePrimary1,		kVRegHDMIOutHDRBluePrimary1 };
+static const ULWord gHDMIChannelToOutHDRWhitePointVRegNum[]		= {	kVRegHDMIOutHDRWhitePoint1,		kVRegHDMIOutHDRWhitePoint2,			kVRegHDMIOutHDRWhitePoint3,			kVRegHDMIOutHDRWhitePoint4,
+																	kVRegHDMIOutHDRWhitePoint1,		kVRegHDMIOutHDRWhitePoint1,			kVRegHDMIOutHDRWhitePoint1,			kVRegHDMIOutHDRWhitePoint1 };
+static const ULWord gHDMIChannelToOutHDRMasterLuminanceVRegNum[]= {	kVRegHDMIOutHDRMasterLuminance1,kVRegHDMIOutHDRMasterLuminance2,	kVRegHDMIOutHDRMasterLuminance3,	kVRegHDMIOutHDRMasterLuminance4,
+																	kVRegHDMIOutHDRMasterLuminance1,kVRegHDMIOutHDRMasterLuminance1,	kVRegHDMIOutHDRMasterLuminance1,	kVRegHDMIOutHDRMasterLuminance1 };
+static const ULWord gHDMIChannelToOutHDRLightLevelVRegNum[]		= {	kVRegHDMIOutHDRLightLevel1,		kVRegHDMIOutHDRLightLevel2,			kVRegHDMIOutHDRLightLevel3,			kVRegHDMIOutHDRLightLevel4,
+																	kVRegHDMIOutHDRLightLevel1,		kVRegHDMIOutHDRLightLevel1,			kVRegHDMIOutHDRLightLevel1,			kVRegHDMIOutHDRLightLevel1 };
+static const ULWord gHDMIChannelToOutHDRControlVRegNum[]		= {	kVRegHDMIOutHDRControl1,		kVRegHDMIOutHDRControl2,			kVRegHDMIOutHDRControl3,			kVRegHDMIOutHDRControl4,
+																	kVRegHDMIOutHDRControl1,		kVRegHDMIOutHDRControl1,			kVRegHDMIOutHDRControl1,			kVRegHDMIOutHDRControl1 };
 
 //////////////////////////////////////////////////////////////////
 // HDMI
@@ -27,57 +50,48 @@ static const ULWord gHDMIChannelToControlRegNum [] =	{ kRegHDMIControl1, kRegHDM
 // kRegHDMIInputStatus
 bool CNTV2Card::GetHDMIInputStatusRegNum (ULWord & outRegNum, const NTV2Channel inChannel, const bool in12BitDetection)
 {
-	const ULWord	numInputs	(::NTV2DeviceGetNumHDMIVideoInputs(_boardID));
+	const ULWord numInputs (GetNumSupported(kDeviceGetNumHDMIVideoInputs));
 	outRegNum = 0;
-	if (numInputs < 1)
-		return false;
-	if (inChannel >= NTV2Channel(numInputs))
+	if (ULWord(inChannel) >= numInputs)
 		return false;
 	if (numInputs == 1)
-	{
-		outRegNum = in12BitDetection ?	kRegHDMIInputControl : kRegHDMIInputStatus;
-		return true;
-	}
-	outRegNum = in12BitDetection ? gHDMIChannelToControlRegNum[inChannel] : gHDMIChannelToInputStatusRegNum[inChannel];
+		outRegNum = in12BitDetection ? kRegHDMIInputControl : kRegHDMIInputStatus;
+	else
+		outRegNum = in12BitDetection ? gHDMIChannelToControlRegNum[inChannel] : gHDMIChannelToInputStatusRegNum[inChannel];
 	return true;
 }
+
 bool CNTV2Card::GetHDMIInputStatus (ULWord & outValue, const NTV2Channel inChannel, const bool in12BitDetection)
 {
 	ULWord regNum (0);
-	if (!GetHDMIInputStatusRegNum(regNum, inChannel, in12BitDetection))
-		return false;
-	return ReadRegister (regNum, outValue);
+	return GetHDMIInputStatusRegNum(regNum, inChannel, in12BitDetection)  &&  ReadRegister (regNum, outValue);
 }
 
 bool CNTV2Card::GetHDMIInputColor (NTV2LHIHDMIColorSpace & outValue, const NTV2Channel inChannel)
 {
-	const ULWord numInputs(::NTV2DeviceGetNumHDMIVideoInputs(_boardID));
-	if (numInputs < 1)
+	const ULWord numInputs(GetNumSupported(kDeviceGetNumHDMIVideoInputs));
+	if (ULWord(inChannel) >= numInputs)
 		return false;
-	if (numInputs == 1)
-		return CNTV2DriverInterface::ReadRegister (kRegHDMIInputStatus, outValue, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
-	if (inChannel <= NTV2Channel(numInputs))
-		return CNTV2DriverInterface::ReadRegister (gHDMIChannelToInputStatusRegNum[inChannel], outValue, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
-	return false;
+	return driverInterface().ReadRegister (numInputs == 1 ? kRegHDMIInputStatus : gHDMIChannelToInputStatusRegNum[inChannel],
+											outValue, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
 }
 
 bool CNTV2Card::GetHDMIInVideoRange (NTV2HDMIRange & outValue, const NTV2Channel inChannel)
 {
-	const ULWord numInputs(::NTV2DeviceGetNumHDMIVideoInputs(_boardID));
-	if (numInputs < 1)
+	const ULWord numInputs(GetNumSupported(kDeviceGetNumHDMIVideoInputs));
+	if (ULWord(inChannel) >= numInputs)
 		return false;
-	if (numInputs == 1)
-		return CNTV2DriverInterface::ReadRegister (kRegHDMIInputControl, outValue, kRegMaskHDMIInfoRange, kRegShiftHDMIInfoRange);
-	if (inChannel <= NTV2Channel(numInputs))
-		return CNTV2DriverInterface::ReadRegister (gHDMIChannelToControlRegNum[inChannel], outValue, kRegMaskHDMIInfoRange, kRegShiftHDMIInfoRange);
-	return false;
+	return driverInterface().ReadRegister (numInputs == 1 ? kRegHDMIInputControl : gHDMIChannelToControlRegNum[inChannel],
+											outValue, kRegMaskHDMIInfoRange, kRegShiftHDMIInfoRange);
 }
 
 bool CNTV2Card::GetHDMIInDynamicRange (HDRRegValues & outRegValues, const NTV2Channel inChannel)
 {
-	ULWord outValue;
-	memset(&outRegValues, 0, sizeof(HDRRegValues));
+	outRegValues.zero();
+	if (inChannel > NTV2_CHANNEL2)
+		return false;
 
+	ULWord outValue(0);
 	if (inChannel == NTV2_CHANNEL1)
 	{
 		if (!ReadRegister(kVRegHDMIInDrmInfo1, outValue) || ((outValue & kVRegMaskHDMIInPresent) == 0))
@@ -128,21 +142,16 @@ bool CNTV2Card::GetHDMIInDynamicRange (HDRRegValues & outRegValues, const NTV2Ch
 		outRegValues.maxContentLightLevel = uint16_t((outValue & kRegMaskHDMIHDRMaxContentLightLevel) >> kRegShiftHDMIHDRMaxContentLightLevel);
 		outRegValues.maxFrameAverageLightLevel = uint16_t((outValue & kRegMaskHDMIHDRMaxFrameAverageLightLevel) >> kRegShiftHDMIHDRMaxFrameAverageLightLevel);
 	}
-	else
-		return false;
 	return true;
 }
 
 bool CNTV2Card::GetHDMIInDynamicRange (HDRFloatValues & outFloatValues, const NTV2Channel inChannel)
 {
-	HDRRegValues registerValues;
-
-	memset(&outFloatValues, 0, sizeof(HDRFloatValues));
-
-	if (!GetHDMIInDynamicRange(registerValues, inChannel))
+	HDRRegValues regValues;
+	outFloatValues.zero();
+	if (!GetHDMIInDynamicRange(regValues, inChannel))
 		return false;
-
-	return convertHDRRegisterToFloatValues(registerValues, outFloatValues);
+	return outFloatValues.setFromRegValues(regValues);
 }
 
 bool CNTV2Card::GetHDMIInColorimetry (NTV2HDMIColorimetry & outColorimetry, const NTV2Channel inChannel)
@@ -166,7 +175,7 @@ bool CNTV2Card::GetHDMIInDolbyVision (bool & outIsDolbyVision, const NTV2Channel
 // kRegHDMIInputControl
 bool CNTV2Card::SetHDMIInputRange (const NTV2HDMIRange inValue, const NTV2Channel inChannel)
 {
-	const ULWord numInputs(::NTV2DeviceGetNumHDMIVideoInputs(_boardID));
+	const ULWord numInputs(GetNumSupported(kDeviceGetNumHDMIVideoInputs));
 	if (numInputs < 1)
 		return false;
 	return inChannel == NTV2_CHANNEL1	//	FIX THIS!	MrBill
@@ -175,7 +184,7 @@ bool CNTV2Card::SetHDMIInputRange (const NTV2HDMIRange inValue, const NTV2Channe
 
 bool CNTV2Card::GetHDMIInputRange (NTV2HDMIRange & outValue, const NTV2Channel inChannel)
 {
-	const ULWord numInputs(::NTV2DeviceGetNumHDMIVideoInputs(_boardID));
+	const ULWord numInputs(GetNumSupported(kDeviceGetNumHDMIVideoInputs));
 	if (numInputs < 1)
 		return false;
 	return inChannel == NTV2_CHANNEL1	//	FIX THIS!	MrBill
@@ -184,7 +193,7 @@ bool CNTV2Card::GetHDMIInputRange (NTV2HDMIRange & outValue, const NTV2Channel i
 
 bool CNTV2Card::SetHDMIInColorSpace (const NTV2HDMIColorSpace inValue, const NTV2Channel inChannel)
 {
-	const ULWord numInputs(::NTV2DeviceGetNumHDMIVideoInputs(_boardID));
+	const ULWord numInputs(GetNumSupported(kDeviceGetNumHDMIVideoInputs));
 	if (numInputs < 1)
 		return false;
 	return inChannel == NTV2_CHANNEL1	//	FIX THIS!	MrBill
@@ -193,7 +202,7 @@ bool CNTV2Card::SetHDMIInColorSpace (const NTV2HDMIColorSpace inValue, const NTV
 
 bool CNTV2Card::GetHDMIInColorSpace (NTV2HDMIColorSpace & outValue, const NTV2Channel inChannel)
 {
-	const ULWord numInputs(::NTV2DeviceGetNumHDMIVideoInputs(_boardID));
+	const ULWord numInputs(GetNumSupported(kDeviceGetNumHDMIVideoInputs));
 	if (numInputs < 1)
 		return false;
 	return inChannel == NTV2_CHANNEL1	//	FIX THIS!	MrBill
@@ -202,7 +211,7 @@ bool CNTV2Card::GetHDMIInColorSpace (NTV2HDMIColorSpace & outValue, const NTV2Ch
 
 bool CNTV2Card::SetHDMIInBitDepth (const NTV2HDMIBitDepth inNewValue, const NTV2Channel inChannel)
 {
-	const UWord numInputs(::NTV2DeviceGetNumHDMIVideoInputs(_boardID));
+	const UWord numInputs(GetNumSupported(kDeviceGetNumHDMIVideoInputs));
 	if (numInputs < 1)
 		return false;
 	if (numInputs <= UWord(inChannel))
@@ -217,10 +226,10 @@ bool CNTV2Card::GetHDMIInBitDepth (NTV2HDMIBitDepth & outValue, const NTV2Channe
 {
 	outValue = NTV2_INVALID_HDMIBitDepth;
 	ULWord status(0), maskVal, shiftVal;
-	bool bV2(NTV2DeviceGetHDMIVersion(_boardID) >= 2);
-	maskVal = bV2 ? kRegMaskHDMIInColorDepth : kLHIRegMaskHDMIInputBitDepth;
-	shiftVal = bV2 ? kRegShiftHDMIInColorDepth : kLHIRegShiftHDMIInputBitDepth;
-	if (!GetHDMIInputStatus(status, inChannel, bV2))
+	bool isV2(GetNumSupported(kDeviceGetHDMIVersion) >= 2);
+	maskVal = isV2 ? kRegMaskHDMIInColorDepth : kLHIRegMaskHDMIInputBitDepth;
+	shiftVal = isV2 ? kRegShiftHDMIInColorDepth : kLHIRegShiftHDMIInputBitDepth;
+	if (!GetHDMIInputStatus(status, inChannel, isV2))
 		return false;
 	outValue = NTV2HDMIBitDepth((status & maskVal) >> shiftVal);
 	return NTV2_IS_VALID_HDMI_BITDEPTH(outValue);
@@ -261,11 +270,10 @@ bool CNTV2Card::GetHDMIInAudioSampleRateConverterEnable (bool & outEnabled, cons
 {
 	if (inChannel != NTV2_CHANNEL1)
 		return false;	//	FIX THIS	MrBill
-	ULWord	tempVal (0);
-	bool	retVal	(ReadRegister (kRegHDMIInputControl, tempVal, kRegMaskHDMISampleRateConverterEnable, kRegShiftHDMISampleRateConverterEnable));
-	if (retVal)
-		outEnabled = !(static_cast <bool> (tempVal));		// this is high to disable sample rate conversion
-	return retVal;
+	bool result(driverInterface().ReadRegister (kRegHDMIInputControl, outEnabled, kRegMaskHDMISampleRateConverterEnable, kRegShiftHDMISampleRateConverterEnable));
+	if (result)
+		outEnabled = !outEnabled;	// this is high to disable sample rate conversion
+	return result;
 }
 
 
@@ -286,16 +294,16 @@ static const ULWord gKonaHDMICtrlRegs[] = {0x1d16, 0x2516, 0x2c14, 0x3014}; //	K
 bool CNTV2Card::GetHDMIInAudioChannel34Swap (bool & outIsSwapped, const NTV2Channel inChannel)
 {
 	outIsSwapped = false;
-	if (inChannel >= ::NTV2DeviceGetNumHDMIVideoInputs(_boardID))
+	if (inChannel >= GetNumSupported(kDeviceGetNumHDMIVideoInputs))
 		return false;	//	No such HDMI input
 	if (_boardID == DEVICE_ID_KONAHDMI)
-		return CNTV2DriverInterface::WriteRegister(gKonaHDMICtrlRegs[inChannel], outIsSwapped ? 1 : 0, kRegMaskHDMISwapInputAudCh34, kRegShiftHDMISwapInputAudCh34);	//	TBD
+		return CNTV2DriverInterface::ReadRegister(gKonaHDMICtrlRegs[inChannel], outIsSwapped, kRegMaskHDMISwapInputAudCh34, kRegShiftHDMISwapInputAudCh34);	//	TBD
 	return CNTV2DriverInterface::ReadRegister(kRegHDMIInputControl, outIsSwapped, kRegMaskHDMISwapInputAudCh34, kRegShiftHDMISwapInputAudCh34);
 }
 
 bool CNTV2Card::SetHDMIInAudioChannel34Swap (const bool inIsSwapped, const NTV2Channel inChannel)
 {
-	if (inChannel >= ::NTV2DeviceGetNumHDMIVideoInputs(_boardID))
+	if (inChannel >= GetNumSupported(kDeviceGetNumHDMIVideoInputs))
 		return false;	//	No such HDMI input
 	if (_boardID == DEVICE_ID_KONAHDMI)
 		return WriteRegister(gKonaHDMICtrlRegs[inChannel], inIsSwapped ? 1 : 0, kRegMaskHDMISwapInputAudCh34, kRegShiftHDMISwapInputAudCh34);	//	TBD
@@ -305,123 +313,155 @@ bool CNTV2Card::SetHDMIInAudioChannel34Swap (const bool inIsSwapped, const NTV2C
 // kRegHDMIOut3DControl
 bool CNTV2Card::SetHDMIOut3DPresent (const bool value)
 {
-	return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
+	return GetNumSupported(kDeviceGetNumHDMIVideoOutputs)
 			&& WriteRegister (kRegHDMIOut3DControl, ULWord(value), kRegMaskHDMIOut3DPresent, kRegShiftHDMIOut3DPresent);
 }
 
 bool CNTV2Card::GetHDMIOut3DPresent (bool & outValue)
 {
-	return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
+	return GetNumSupported(kDeviceGetNumHDMIVideoOutputs)
 			&& CNTV2DriverInterface::ReadRegister (kRegHDMIOut3DControl, outValue, kRegMaskHDMIOut3DPresent, kRegShiftHDMIOut3DPresent);
 }
 
 bool CNTV2Card::SetHDMIOut3DMode (const NTV2HDMIOut3DMode inValue)
 {
-	return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
+	return GetNumSupported(kDeviceGetNumHDMIVideoOutputs)
 			&& WriteRegister (kRegHDMIOut3DControl, ULWord(inValue), kRegMaskHDMIOut3DMode, kRegShiftHDMIOut3DMode);
 }
 
 bool CNTV2Card::GetHDMIOut3DMode (NTV2HDMIOut3DMode & outValue)
 {
-	return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
+	return GetNumSupported(kDeviceGetNumHDMIVideoOutputs)
 			&& CNTV2DriverInterface::ReadRegister (kRegHDMIOut3DControl, outValue, kRegMaskHDMIOut3DMode, kRegShiftHDMIOut3DMode);
 }
 
 // kRegHDMIOutControl
-bool CNTV2Card::SetHDMIOutVideoStandard (const NTV2Standard inValue)
+bool CNTV2Card::SetHDMIOutVideoStandard (const NTV2Standard inValue, const NTV2Channel inWhichHDMIOut)
 {
-	const ULWord	hdmiVers	(::NTV2DeviceGetHDMIVersion(GetDeviceID()));
-	return hdmiVers > 0
-			&& ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
-			&& WriteRegister (kRegHDMIOutControl, ULWord(inValue),	hdmiVers == 1  ?  kRegMaskHDMIOutVideoStd  :  kRegMaskHDMIOutV2VideoStd,	kRegShiftHDMIOutVideoStd);
+	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
+	ULWord reg (kRegHDMIOutControl);
+
+	if (!GetHDMIOutControlReg(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister (reg, ULWord(inValue),	hdmiVers == 1  ?  kRegMaskHDMIOutVideoStd  :  kRegMaskHDMIOutV2VideoStd,	kRegShiftHDMIOutVideoStd);
 }
 
-bool CNTV2Card::GetHDMIOutVideoStandard (NTV2Standard & outValue)
+bool CNTV2Card::GetHDMIOutVideoStandard (NTV2Standard & outValue, const NTV2Channel inWhichHDMIOut)
 {
-	const ULWord	hdmiVers(::NTV2DeviceGetHDMIVersion(GetDeviceID()));
-	if (hdmiVers)
-		return CNTV2DriverInterface::ReadRegister (kRegHDMIOutControl, outValue,  hdmiVers == 1	 ?	kRegMaskHDMIOutVideoStd	 :	kRegMaskHDMIOutV2VideoStd,	kRegShiftHDMIOutVideoStd);
-	outValue = NTV2_STANDARD_INVALID;
-	return false;
+	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
+	ULWord reg (kRegHDMIOutControl);
+
+	if (!GetHDMIOutControlReg(reg, inWhichHDMIOut))
+	{
+		outValue = NTV2_STANDARD_INVALID;
+		return false;
+	}
+	return CNTV2DriverInterface::ReadRegister (reg, outValue,  hdmiVers == 1	 ?	kRegMaskHDMIOutVideoStd	 :	kRegMaskHDMIOutV2VideoStd,	kRegShiftHDMIOutVideoStd);
 }
 
 bool CNTV2Card::SetHDMIV2TxBypass (const bool bypass)
 {
-	return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
+	return GetNumSupported(kDeviceGetNumHDMIVideoOutputs)
 			&& WriteRegister (kRegHDMIOutControl,		bypass,				kRegMaskHDMIV2TxBypass,					kRegShiftHDMIV2TxBypass);
 }
 
-bool CNTV2Card::SetHDMIOutSampleStructure (const NTV2HDMISampleStructure inValue)		
+bool CNTV2Card::SetHDMIOutSampleStructure (const NTV2HDMISampleStructure inValue, const NTV2Channel inWhichHDMIOut)
 {
+	ULWord reg (kRegHDMIOutControl);
+
 	if (!NTV2_IS_VALID_HDMI_SAMPLE_STRUCT(inValue))
 		return false;
-	if (::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) == 0)
+	if (!GetHDMIOutControlReg(reg, inWhichHDMIOut))
 		return false;
-	return WriteRegister (kRegHDMIOutControl, ULWord(inValue), kRegMaskHDMISampling, kRegShiftHDMISampling);
+	return WriteRegister (reg, ULWord(inValue), kRegMaskHDMISampling, kRegShiftHDMISampling);
 }
 
-bool CNTV2Card::GetHDMIOutSampleStructure (NTV2HDMISampleStructure & outValue)
+bool CNTV2Card::GetHDMIOutSampleStructure (NTV2HDMISampleStructure & outValue, const NTV2Channel inWhichHDMIOut)
 {
-	if (::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) == 0)
+	ULWord reg (kRegHDMIOutControl);
+
+	if (!GetHDMIOutControlReg(reg, inWhichHDMIOut))
 		return false;
-	return CNTV2DriverInterface::ReadRegister (kRegHDMIOutControl, outValue, kRegMaskHDMISampling, kRegShiftHDMISampling);
+	return CNTV2DriverInterface::ReadRegister (reg, outValue, kRegMaskHDMISampling, kRegShiftHDMISampling);
 }
 
-bool CNTV2Card::SetHDMIOutVideoFPS (const NTV2FrameRate value)				
+bool CNTV2Card::SetHDMIOutVideoFPS (const NTV2FrameRate value, const NTV2Channel inWhichHDMIOut)
 {
-	return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
-			&& NTV2_IS_VALID_NTV2FrameRate(value)
-			&& WriteRegister (kRegHDMIOutControl, ULWord(value), kLHIRegMaskHDMIOutFPS, kLHIRegShiftHDMIOutFPS);
+	ULWord reg (kRegHDMIOutControl);
+
+	if (!NTV2_IS_VALID_NTV2FrameRate(value))
+		return false;
+	if (!GetHDMIOutControlReg(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister (reg, ULWord(value), kLHIRegMaskHDMIOutFPS, kLHIRegShiftHDMIOutFPS);
 }
 
-bool CNTV2Card::GetHDMIOutVideoFPS (NTV2FrameRate & outValue)			
+bool CNTV2Card::GetHDMIOutVideoFPS (NTV2FrameRate & outValue, const NTV2Channel inWhichHDMIOut)
 {
-	return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
-			&& CNTV2DriverInterface::ReadRegister (kRegHDMIOutControl, outValue, kLHIRegMaskHDMIOutFPS, kLHIRegShiftHDMIOutFPS);
+	ULWord reg (kRegHDMIOutControl);
+
+	if (!GetHDMIOutControlReg(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister (reg, outValue, kLHIRegMaskHDMIOutFPS, kLHIRegShiftHDMIOutFPS);
 }
 
-bool CNTV2Card::SetHDMIOutRange (const NTV2HDMIRange value)				
+bool CNTV2Card::SetHDMIOutRange (const NTV2HDMIRange value, const NTV2Channel inWhichHDMIOut)
 {
-	return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
-			&& NTV2_IS_VALID_HDMI_RANGE(value)
-			&& WriteRegister (kRegHDMIOutControl, ULWord(value), kRegMaskHDMIOutRange, kRegShiftHDMIOutRange);
+	ULWord reg (kRegHDMIOutControl);
+	if (!NTV2_IS_VALID_HDMI_RANGE(value))
+		return false;
+	if (!GetHDMIOutControlReg(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister (reg, ULWord(value), kRegMaskHDMIOutRange, kRegShiftHDMIOutRange);
 }
 
-bool CNTV2Card::GetHDMIOutRange (NTV2HDMIRange & outValue)			
+bool CNTV2Card::GetHDMIOutRange (NTV2HDMIRange & outValue, const NTV2Channel inWhichHDMIOut)
 {
-	return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
-			&& CNTV2DriverInterface::ReadRegister (kRegHDMIOutControl, outValue, kRegMaskHDMIOutRange, kRegShiftHDMIOutRange);
+	ULWord reg (kRegHDMIOutControl);
+	if (!GetHDMIOutControlReg(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister (reg, outValue, kRegMaskHDMIOutRange, kRegShiftHDMIOutRange);
 }
 
 
 
-bool CNTV2Card::SetHDMIOutColorSpace (const NTV2HDMIColorSpace inValue)			
+bool CNTV2Card::SetHDMIOutColorSpace (const NTV2HDMIColorSpace inValue, const NTV2Channel inWhichHDMIOut)
 {	//	Register 125		This function used to touch bits 4 & 5 (from the old FS/1 days) --- now obsolete.
 	//return WriteRegister (kRegHDMIOutControl,	 ULWord(value),	 kRegMaskHDMIColorSpace,  kRegShiftHDMIColorSpace);
 	//	Fixed in SDK 14.1 to work with modern NTV2 devices, but using the old NTV2HDMIColorSpace enum:
-	ULWord	newCorrectValue (0);
+	
+	ULWord reg (kRegHDMIOutControl);
+	ULWord newCorrectValue (0);
+
 	switch (inValue)
 	{
 		case NTV2_HDMIColorSpaceRGB:	newCorrectValue = NTV2_LHIHDMIColorSpaceRGB;	break;
 		case NTV2_HDMIColorSpaceYCbCr:	newCorrectValue = NTV2_LHIHDMIColorSpaceYCbCr;	break;
 		default:	return false;	//	Illegal value
 	}
+
+	if (!GetHDMIOutControlReg(reg, inWhichHDMIOut))
+		return false;
+
 	//						Register 125							Bit 8
-	return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
-			&& WriteRegister (kRegHDMIOutControl,  newCorrectValue,	 kLHIRegMaskHDMIOutColorSpace,	kLHIRegShiftHDMIOutColorSpace);
+	return WriteRegister (reg,  newCorrectValue,	 kLHIRegMaskHDMIOutColorSpace,	kLHIRegShiftHDMIOutColorSpace);
 }
 
-bool CNTV2Card::GetHDMIOutColorSpace (NTV2HDMIColorSpace & outValue)		
+bool CNTV2Card::GetHDMIOutColorSpace (NTV2HDMIColorSpace & outValue, const NTV2Channel inWhichHDMIOut)
 {	//	Register 125		This function used to read bits 4 & 5 (from the old FS/1 days) --- now obsolete.
 	//return ReadRegister (kRegHDMIOutControl,	outValue,  kRegMaskHDMIColorSpace,	kRegShiftHDMIColorSpace);
 	//	Fixed in SDK 14.1 to work with modern NTV2 devices, but using the old NTV2HDMIColorSpace enum:
-	if (!::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()))
-		return false;	//	No HDMI outputs
 
-	ULWord	correctValue(0);
+	ULWord reg (kRegHDMIOutControl);
+	ULWord correctValue (0);
+
+	if (!GetHDMIOutControlReg(reg, inWhichHDMIOut))
+		return false;
+
 	//					Register 125						Bit 8
-	if (!ReadRegister (kRegHDMIOutControl,	correctValue,  kLHIRegMaskHDMIOutColorSpace,  kLHIRegShiftHDMIOutColorSpace))
+	if (!ReadRegister (reg,	correctValue,  kLHIRegMaskHDMIOutColorSpace,  kLHIRegShiftHDMIOutColorSpace))
 		return false;	//	Fail
+
 	switch(correctValue)
 	{
 		case NTV2_LHIHDMIColorSpaceYCbCr:	outValue = NTV2_HDMIColorSpaceYCbCr;	break;
@@ -432,74 +472,91 @@ bool CNTV2Card::GetHDMIOutColorSpace (NTV2HDMIColorSpace & outValue)
 }
 
 
-bool CNTV2Card::SetLHIHDMIOutColorSpace (NTV2LHIHDMIColorSpace value)
+bool CNTV2Card::SetLHIHDMIOutColorSpace (NTV2LHIHDMIColorSpace value, const NTV2Channel inWhichHDMIOut)
 {	//	Register 125											Bit 8
-	return WriteRegister (kRegHDMIOutControl,  ULWord(value),  kLHIRegMaskHDMIOutColorSpace,  kLHIRegShiftHDMIOutColorSpace);
+	ULWord reg (kRegHDMIOutControl);
+	if (!GetHDMIOutControlReg(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister (reg,  ULWord(value),  kLHIRegMaskHDMIOutColorSpace,  kLHIRegShiftHDMIOutColorSpace);
 }
 
-bool CNTV2Card::GetLHIHDMIOutColorSpace (NTV2LHIHDMIColorSpace & outValue)	
+bool CNTV2Card::GetLHIHDMIOutColorSpace (NTV2LHIHDMIColorSpace & outValue, const NTV2Channel inWhichHDMIOut)
 {	//	Register 125												Bit 8
-	ULWord	value(0);
-	bool result (ReadRegister (kRegHDMIOutControl,	value,	kLHIRegMaskHDMIOutColorSpace,  kLHIRegShiftHDMIOutColorSpace));
+	ULWord reg(kRegHDMIOutControl), value(0);
+	if (!GetHDMIOutControlReg(reg, inWhichHDMIOut))
+		return false;
+	bool result (ReadRegister (reg,	value,	kLHIRegMaskHDMIOutColorSpace,  kLHIRegShiftHDMIOutColorSpace));
 	outValue = NTV2LHIHDMIColorSpace(value);
 	return result;
 }
 
 
 
-bool CNTV2Card::GetHDMIOutDownstreamBitDepth (NTV2HDMIBitDepth & outValue)
+bool CNTV2Card::GetHDMIOutDownstreamBitDepth (NTV2HDMIBitDepth & outValue, const NTV2Channel inWhichHDMIOut)
 {
-	return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
-			&& CNTV2DriverInterface::ReadRegister (kRegHDMIInputStatus, outValue, kLHIRegMaskHDMIOutputEDID10Bit, kLHIRegShiftHDMIOutputEDID10Bit);
-}
-
-bool CNTV2Card::GetHDMIOutDownstreamColorSpace (NTV2LHIHDMIColorSpace & outValue)
-{
-	return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
-			&& CNTV2DriverInterface::ReadRegister (kRegHDMIInputStatus, outValue, kLHIRegMaskHDMIOutputEDIDRGB, kLHIRegShiftHDMIOutputEDIDRGB);
-}
-
-bool CNTV2Card::SetHDMIOutBitDepth (const NTV2HDMIBitDepth value)
-{
-	bool ret = true;
-	
-	if ((::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) == 0) ||
-		!NTV2_IS_VALID_HDMI_BITDEPTH(value))
+	ULWord reg(kRegHDMIInputStatus);
+	if (!GetHDMIOutInputStatusRegNum(reg, inWhichHDMIOut))
 		return false;
+	return CNTV2DriverInterface::ReadRegister (reg, outValue, kLHIRegMaskHDMIOutputEDID10Bit, kLHIRegShiftHDMIOutputEDID10Bit);
+}
 
+bool CNTV2Card::GetHDMIOutDownstreamColorSpace (NTV2LHIHDMIColorSpace & outValue, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIInputStatus);
+	if (!GetHDMIOutInputStatusRegNum(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister (reg, outValue, kLHIRegMaskHDMIOutputEDIDRGB, kLHIRegShiftHDMIOutputEDIDRGB);
+}
+
+bool CNTV2Card::SetHDMIOutBitDepth (const NTV2HDMIBitDepth value, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord regOC(kRegHDMIOutControl);
+	ULWord regIC(kRegHDMIInputControl);
+	bool ret = true;
+
+	if (!NTV2_IS_VALID_HDMI_BITDEPTH(value))
+		return false;
+	if (!GetHDMIOutControlReg(regOC, inWhichHDMIOut))
+		return false;
+	if (!GetHDMIOutInputControlRegNum(regIC, inWhichHDMIOut))
+		return false;
 	if (value == NTV2_HDMI12Bit)
 	{
-		ret &= WriteRegister (kRegHDMIOutControl, 0, kLHIRegMaskHDMIOutBitDepth, kLHIRegShiftHDMIOutBitDepth);
-		ret &= WriteRegister (kRegHDMIOutControl, 2, kRegMaskHDMIVOBD, kRegShiftHDMIVOBD);
-		ret &= WriteRegister (kRegHDMIInputControl, 1, kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit);
+		ret &= WriteRegister (regOC, 0, kLHIRegMaskHDMIOutBitDepth, kLHIRegShiftHDMIOutBitDepth);
+		ret &= WriteRegister (regOC, 2, kRegMaskHDMIVOBD, kRegShiftHDMIVOBD);
+		ret &= WriteRegister (regIC, 1, kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit);
 	}
 	else if (value == NTV2_HDMI10Bit)
 	{
-		ret &= WriteRegister (kRegHDMIOutControl, 1, kLHIRegMaskHDMIOutBitDepth, kLHIRegShiftHDMIOutBitDepth);
-		ret &= WriteRegister (kRegHDMIOutControl, 0, kRegMaskHDMIVOBD, kRegShiftHDMIVOBD);
-		ret &= WriteRegister (kRegHDMIInputControl, 0, kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit);
+		ret &= WriteRegister (regOC, 1, kLHIRegMaskHDMIOutBitDepth, kLHIRegShiftHDMIOutBitDepth);
+		ret &= WriteRegister (regOC, 0, kRegMaskHDMIVOBD, kRegShiftHDMIVOBD);
+		ret &= WriteRegister (regIC, 0, kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit);
 	}
 	else
 	{
-		ret &= WriteRegister (kRegHDMIOutControl, 0, kLHIRegMaskHDMIOutBitDepth, kLHIRegShiftHDMIOutBitDepth);
-		ret &= WriteRegister (kRegHDMIOutControl, 0, kRegMaskHDMIVOBD, kRegShiftHDMIVOBD);
-		ret &= WriteRegister (kRegHDMIInputControl, 0, kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit);
+		ret &= WriteRegister (regOC, 0, kLHIRegMaskHDMIOutBitDepth, kLHIRegShiftHDMIOutBitDepth);
+		ret &= WriteRegister (regOC, 0, kRegMaskHDMIVOBD, kRegShiftHDMIVOBD);
+		ret &= WriteRegister (regIC, 0, kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit);
 	}
-
 	return ret;
 }
 
-bool CNTV2Card::GetHDMIOutBitDepth (NTV2HDMIBitDepth & outValue)
+bool CNTV2Card::GetHDMIOutBitDepth (NTV2HDMIBitDepth & outValue, const NTV2Channel inWhichHDMIOut)
 {
+	ULWord regOC(kRegHDMIOutControl);
+	ULWord regIC(kRegHDMIInputControl);
 	ULWord d10(0), d12(0);
+
 	outValue = NTV2_INVALID_HDMIBitDepth;
-	if (::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) == 0)
+
+	if (!GetHDMIOutControlReg(regOC, inWhichHDMIOut))
+		return false;
+	if (!GetHDMIOutInputControlRegNum(regIC, inWhichHDMIOut))
+		return false;
+	if (!(ReadRegister(regOC, d10, kLHIRegMaskHDMIOutBitDepth, kLHIRegShiftHDMIOutBitDepth)
+			&&	ReadRegister (regIC, d12,  kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit)))
 		return false;
 
-	if (!(ReadRegister(kRegHDMIOutControl, d10, kLHIRegMaskHDMIOutBitDepth, kLHIRegShiftHDMIOutBitDepth)
-			&&	ReadRegister (kRegHDMIInputControl, d12,  kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit)))
-		return false;
-	
 	if (d12 > 0)
 		outValue = NTV2_HDMI12Bit;
 	else if (d10 > 0)
@@ -509,41 +566,54 @@ bool CNTV2Card::GetHDMIOutBitDepth (NTV2HDMIBitDepth & outValue)
 	return true;
 }
 
-bool CNTV2Card::SetHDMIOutProtocol (const NTV2HDMIProtocol value)
+bool CNTV2Card::SetHDMIOutProtocol (const NTV2HDMIProtocol value, const NTV2Channel inWhichHDMIOut)
 {
-	return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
-			&& NTV2_IS_VALID_HDMI_PROTOCOL(value)
-			&& WriteRegister (kRegHDMIOutControl, ULWord(value), kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
+	ULWord reg(kRegHDMIOutControl);
+	if (!NTV2_IS_VALID_HDMI_PROTOCOL(value))
+		return false;
+	if (!GetHDMIOutControlReg(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister (reg, ULWord(value), kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
 }
 
-bool CNTV2Card::GetHDMIOutProtocol (NTV2HDMIProtocol & outValue)
+bool CNTV2Card::GetHDMIOutProtocol (NTV2HDMIProtocol & outValue, const NTV2Channel inWhichHDMIOut)
 {
-	return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
-			&& CNTV2DriverInterface::ReadRegister (kRegHDMIOutControl, outValue, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
+	ULWord reg(kRegHDMIOutControl);
+	if (!GetHDMIOutControlReg(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister (reg, outValue, kLHIRegMaskHDMIOutDVI, kLHIRegShiftHDMIOutDVI);
 }
 
-bool CNTV2Card::SetHDMIOutForceConfig (const bool value)
+bool CNTV2Card::SetHDMIOutForceConfig (const bool value, const NTV2Channel inWhichHDMIOut)
 {
-	return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
-			&& WriteRegister (kRegHDMIOutControl, ULWord(value), kRegMaskHDMIOutForceConfig, kRegShiftHDMIOutForceConfig);
+	ULWord reg(kRegHDMIOutControl);
+	if (!GetHDMIOutControlReg(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister (reg, ULWord(value), kRegMaskHDMIOutForceConfig, kRegShiftHDMIOutForceConfig);
 }
 
-bool CNTV2Card::GetHDMIOutForceConfig (bool & outValue)
+bool CNTV2Card::GetHDMIOutForceConfig (bool & outValue, const NTV2Channel inWhichHDMIOut)
 {
-	return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
-			&& CNTV2DriverInterface::ReadRegister (kRegHDMIOutControl, outValue, kRegMaskHDMIOutForceConfig, kRegShiftHDMIOutForceConfig);
+	ULWord reg(kRegHDMIOutControl);
+	if (!GetHDMIOutControlReg(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister (reg, outValue, kRegMaskHDMIOutForceConfig, kRegShiftHDMIOutForceConfig);
 }
 
-bool CNTV2Card::SetHDMIOutPrefer420 (const bool value)
+bool CNTV2Card::SetHDMIOutPrefer420 (const bool value, const NTV2Channel inWhichHDMIOut)
 {
-	return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
-			&& WriteRegister (kRegHDMIInputControl, ULWord(value), kRegMaskHDMIOutPrefer420, kRegShiftHDMIOutPrefer420);
+	ULWord reg(kRegHDMIInputControl);
+	if (!GetHDMIOutInputControlRegNum(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister (reg, ULWord(value), kRegMaskHDMIOutPrefer420, kRegShiftHDMIOutPrefer420);
 }
 
-bool CNTV2Card::GetHDMIOutPrefer420 (bool & outValue)
+bool CNTV2Card::GetHDMIOutPrefer420 (bool & outValue, const NTV2Channel inWhichHDMIOut)
 {
-	return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
-			&& CNTV2DriverInterface::ReadRegister (kRegHDMIInputControl, outValue, kRegMaskHDMIOutPrefer420, kRegShiftHDMIOutPrefer420);
+	ULWord reg(kRegHDMIInputControl);
+	if (!GetHDMIOutInputControlRegNum(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister (reg, outValue, kRegMaskHDMIOutPrefer420, kRegShiftHDMIOutPrefer420);
 }
 
 
@@ -603,476 +673,651 @@ bool CNTV2Card::GetHDMIV2Mode (NTV2HDMIV2Mode & outMode)
 }
 
 
-bool CNTV2Card::GetHDMIOutStatus (NTV2HDMIOutputStatus & outStatus)
+bool CNTV2Card::GetHDMIOutStatus (NTV2HDMIOutputStatus & outStatus, const NTV2Channel inWhichHDMIOut)
 {
+	ULWord reg(kVRegHDMIOutStatus1), data(0);
 	outStatus.Clear();
 	if (GetNumSupported(kDeviceGetHDMIVersion) < 4)
 		return false;	//	must have HDMI version 4 or higher
-
-	ULWord data(0);
-	if (!ReadRegister(kVRegHDMIOutStatus1, data))
+	if (!GetHDMIOutStatusReg(reg, inWhichHDMIOut))
+		return false;
+	if (!ReadRegister(reg, data))
 		return false;	//	ReadRegister failed
-
 	return outStatus.SetFromRegValue(data);
 }
 
 
-bool CNTV2Card::SetHDMIHDRGreenPrimaryX(const uint16_t inGreenPrimaryX)
+bool CNTV2Card::SetHDMIHDRGreenPrimaryX(const uint16_t inGreenPrimaryX, const NTV2Channel inWhichHDMIOut)
 {
-	NTV2EveryFrameTaskMode	taskMode	(NTV2_OEM_TASKS);
-	bool status(false);
-	GetEveryFrameServices(taskMode);
+	ULWord reg(kRegHDMIHDRGreenPrimary);
 	if(!NTV2_IS_VALID_HDR_PRIMARY(inGreenPrimaryX) ||  !IsSupported(kDeviceCanDoHDMIHDROut))
 		return false;
-	
-	status = WriteRegister(kVRegHdrGreenXCh1, uint32_t(inGreenPrimaryX));
-	if(!NTV2_IS_DRIVER_ACTIVE_TASKS(taskMode) && status)
-		return WriteRegister(kRegHDMIHDRGreenPrimary, uint32_t(inGreenPrimaryX), kRegMaskHDMIHDRGreenPrimaryX, kRegShiftHDMIHDRGreenPrimaryX);
-	return status;
-}
-
-bool CNTV2Card::GetHDMIHDRGreenPrimaryX(uint16_t & outGreenPrimaryX)
-{
-	return IsSupported(kDeviceCanDoHDMIHDROut)
-		&&	CNTV2DriverInterface::ReadRegister(kVRegHdrGreenXCh1, outGreenPrimaryX);
-}
-
-bool CNTV2Card::SetHDMIHDRGreenPrimaryY(const uint16_t inGreenPrimaryY)
-{
-	NTV2EveryFrameTaskMode	taskMode	(NTV2_OEM_TASKS);
-	bool status(false);
-	GetEveryFrameServices(taskMode);
-	if(!NTV2_IS_VALID_HDR_PRIMARY(inGreenPrimaryY) ||  !IsSupported(kDeviceCanDoHDMIHDROut))
+	if (inWhichHDMIOut == NTV2_CHANNEL1  &&  !WriteRegister(kVRegHdrGreenXCh1, uint32_t(inGreenPrimaryX)))
 		return false;
-	
-	status = WriteRegister(kVRegHdrGreenYCh1, uint32_t(inGreenPrimaryY));
-	if(!NTV2_IS_DRIVER_ACTIVE_TASKS(taskMode))
-		return WriteRegister(kRegHDMIHDRGreenPrimary, uint32_t(inGreenPrimaryY), kRegMaskHDMIHDRGreenPrimaryY, kRegShiftHDMIHDRGreenPrimaryY);
-	return status;
-}
-
-bool CNTV2Card::GetHDMIHDRGreenPrimaryY(uint16_t & outGreenPrimaryY)
-{
-	return	IsSupported(kDeviceCanDoHDMIHDROut)
-		&&	CNTV2DriverInterface::ReadRegister(kVRegHdrGreenYCh1, outGreenPrimaryY);
-}
-
-bool CNTV2Card::SetHDMIHDRBluePrimaryX(const uint16_t inBluePrimaryX)
-{
-	NTV2EveryFrameTaskMode	taskMode	(NTV2_OEM_TASKS);
-	bool status(false);
-	GetEveryFrameServices(taskMode);
-	if(!NTV2_IS_VALID_HDR_PRIMARY(inBluePrimaryX) ||  !IsSupported(kDeviceCanDoHDMIHDROut))
+	if (!GetHDMIOutHDRGreenPrimaryReg(reg, inWhichHDMIOut))
 		return false;
-	
-	status = WriteRegister(kVRegHdrBlueXCh1, uint32_t(inBluePrimaryX));
-	if(!NTV2_IS_DRIVER_ACTIVE_TASKS(taskMode))
-		return WriteRegister(kRegHDMIHDRBluePrimary, uint32_t(inBluePrimaryX), kRegMaskHDMIHDRBluePrimaryX, kRegShiftHDMIHDRBluePrimaryX);
-	return status;
+	return WriteRegister(reg, uint32_t(inGreenPrimaryX), kRegMaskHDMIHDRGreenPrimaryX, kRegShiftHDMIHDRGreenPrimaryX);
 }
 
-bool CNTV2Card::GetHDMIHDRBluePrimaryX(uint16_t & outBluePrimaryX)
+bool CNTV2Card::GetHDMIHDRGreenPrimaryX(uint16_t & outGreenPrimaryX, const NTV2Channel inWhichHDMIOut)
 {
-	return IsSupported(kDeviceCanDoHDMIHDROut)
-		&&	CNTV2DriverInterface::ReadRegister(kVRegHdrBlueXCh1, outBluePrimaryX);
-}
-
-bool CNTV2Card::SetHDMIHDRBluePrimaryY(const uint16_t inBluePrimaryY)
-{
-	NTV2EveryFrameTaskMode taskMode(NTV2_OEM_TASKS);
-	bool status(false);
-	GetEveryFrameServices(taskMode);
-	if(!NTV2_IS_VALID_HDR_PRIMARY(inBluePrimaryY) ||  !IsSupported(kDeviceCanDoHDMIHDROut))
+	ULWord reg(kRegHDMIHDRGreenPrimary);
+	if (!IsSupported(kDeviceCanDoHDMIHDROut))
 		return false;
-	
-	status = WriteRegister(kVRegHdrBlueYCh1, uint32_t(inBluePrimaryY));
-	if(!NTV2_IS_DRIVER_ACTIVE_TASKS(taskMode))
-		return WriteRegister(kRegHDMIHDRBluePrimary, uint32_t(inBluePrimaryY), kRegMaskHDMIHDRBluePrimaryY, kRegShiftHDMIHDRBluePrimaryY);
-	return status;
-}
-
-bool CNTV2Card::GetHDMIHDRBluePrimaryY(uint16_t & outBluePrimaryY)
-{
-	return IsSupported(kDeviceCanDoHDMIHDROut)
-		&&	CNTV2DriverInterface::ReadRegister(kVRegHdrBlueYCh1, outBluePrimaryY);
-}
-
-bool CNTV2Card::SetHDMIHDRRedPrimaryX(const uint16_t inRedPrimaryX)
-{
-	NTV2EveryFrameTaskMode taskMode(NTV2_OEM_TASKS);
-	bool status(false);
-	GetEveryFrameServices(taskMode);
-	if(!NTV2_IS_VALID_HDR_PRIMARY(inRedPrimaryX) ||	 !IsSupported(kDeviceCanDoHDMIHDROut))
+	if (!GetHDMIOutHDRGreenPrimaryReg(reg, inWhichHDMIOut))
 		return false;
-	
-	status = WriteRegister(kVRegHdrRedXCh1, uint32_t(inRedPrimaryX));
-	if(!NTV2_IS_DRIVER_ACTIVE_TASKS(taskMode))
-		return WriteRegister(kRegHDMIHDRRedPrimary, uint32_t(inRedPrimaryX), kRegMaskHDMIHDRRedPrimaryX, kRegShiftHDMIHDRRedPrimaryX);
-	return status;
+	return CNTV2DriverInterface::ReadRegister(reg, outGreenPrimaryX, kRegMaskHDMIHDRGreenPrimaryX, kRegShiftHDMIHDRGreenPrimaryX);
 }
 
-bool CNTV2Card::GetHDMIHDRRedPrimaryX(uint16_t & outRedPrimaryX)
+bool CNTV2Card::SetHDMIHDRGreenPrimaryY(const uint16_t inGreenPrimaryY, const NTV2Channel inWhichHDMIOut)
 {
-	return IsSupported(kDeviceCanDoHDMIHDROut)
-		&&	CNTV2DriverInterface::ReadRegister(kVRegHdrRedXCh1, outRedPrimaryX);
-}
-
-bool CNTV2Card::SetHDMIHDRRedPrimaryY(const uint16_t inRedPrimaryY)
-{
-	NTV2EveryFrameTaskMode taskMode(NTV2_OEM_TASKS);
-	bool status(false);
-	GetEveryFrameServices(taskMode);
-	if(!NTV2_IS_VALID_HDR_PRIMARY(inRedPrimaryY) ||	 !IsSupported(kDeviceCanDoHDMIHDROut))
+	ULWord reg(kRegHDMIHDRGreenPrimary);
+	if (!NTV2_IS_VALID_HDR_PRIMARY(inGreenPrimaryY)  ||  !IsSupported(kDeviceCanDoHDMIHDROut))
 		return false;
-	
-	status = WriteRegister(kVRegHdrRedYCh1, uint32_t(inRedPrimaryY));
-	if(!NTV2_IS_DRIVER_ACTIVE_TASKS(taskMode))
-		return WriteRegister(kRegHDMIHDRRedPrimary, uint32_t(inRedPrimaryY), kRegMaskHDMIHDRRedPrimaryY, kRegShiftHDMIHDRRedPrimaryY);
-	return status;
-}
-
-bool CNTV2Card::GetHDMIHDRRedPrimaryY(uint16_t & outRedPrimaryY)
-{
-	return IsSupported(kDeviceCanDoHDMIHDROut)
-		&&	CNTV2DriverInterface::ReadRegister(kVRegHdrRedYCh1, outRedPrimaryY);
-}
-
-bool CNTV2Card::SetHDMIHDRWhitePointX(const uint16_t inWhitePointX)
-{
-	NTV2EveryFrameTaskMode taskMode(NTV2_OEM_TASKS);
-	bool status(false);
-	GetEveryFrameServices(taskMode);
-	if(!NTV2_IS_VALID_HDR_PRIMARY(inWhitePointX) ||	 !IsSupported(kDeviceCanDoHDMIHDROut))
+	if (inWhichHDMIOut == NTV2_CHANNEL1  &&  !WriteRegister(kVRegHdrGreenYCh1, uint32_t(inGreenPrimaryY)))
 		return false;
-	
-	status = WriteRegister(kVRegHdrWhiteXCh1, uint32_t(inWhitePointX));
-	if(!NTV2_IS_DRIVER_ACTIVE_TASKS(taskMode))
-		return WriteRegister(kRegHDMIHDRWhitePoint, uint32_t(inWhitePointX), kRegMaskHDMIHDRWhitePointX, kRegShiftHDMIHDRWhitePointX);
-	return status;
-}
-
-bool CNTV2Card::GetHDMIHDRWhitePointX(uint16_t & outWhitePointX)
-{
-	return IsSupported(kDeviceCanDoHDMIHDROut)
-		&&	CNTV2DriverInterface::ReadRegister(kVRegHdrWhiteXCh1, outWhitePointX);
-}
-
-bool CNTV2Card::SetHDMIHDRWhitePointY(const uint16_t inWhitePointY)
-{
-	NTV2EveryFrameTaskMode taskMode(NTV2_OEM_TASKS);
-	bool status(false);
-	GetEveryFrameServices(taskMode);
-	if(!NTV2_IS_VALID_HDR_PRIMARY(inWhitePointY) ||	 !IsSupported(kDeviceCanDoHDMIHDROut))
+	if (!GetHDMIOutHDRGreenPrimaryReg(reg, inWhichHDMIOut))
 		return false;
-	
-	status = WriteRegister(kVRegHdrWhiteYCh1, uint32_t(inWhitePointY));
-	if(!NTV2_IS_DRIVER_ACTIVE_TASKS(taskMode))
-		return WriteRegister(kRegHDMIHDRWhitePoint, uint32_t(inWhitePointY), kRegMaskHDMIHDRWhitePointY, kRegShiftHDMIHDRWhitePointY);
-	return status;
+	return WriteRegister(reg, uint32_t(inGreenPrimaryY), kRegMaskHDMIHDRGreenPrimaryY, kRegShiftHDMIHDRGreenPrimaryY);
 }
 
-bool CNTV2Card::GetHDMIHDRWhitePointY(uint16_t & outWhitePointY)
+bool CNTV2Card::GetHDMIHDRGreenPrimaryY(uint16_t & outGreenPrimaryY, const NTV2Channel inWhichHDMIOut)
 {
-	return IsSupported(kDeviceCanDoHDMIHDROut)
-		&&	CNTV2DriverInterface::ReadRegister(kVRegHdrWhiteYCh1, outWhitePointY);
-}
-
-bool CNTV2Card::SetHDMIHDRMaxMasteringLuminance(const uint16_t inMaxMasteringLuminance)
-{
-	NTV2EveryFrameTaskMode taskMode(NTV2_OEM_TASKS);
-	bool status(false);
-	GetEveryFrameServices(taskMode);
-	if(!NTV2_IS_VALID_HDR_MASTERING_LUMINENCE(inMaxMasteringLuminance) ||  !IsSupported(kDeviceCanDoHDMIHDROut))
+	ULWord reg(kRegHDMIHDRGreenPrimary);
+	if (!IsSupported(kDeviceCanDoHDMIHDROut))
 		return false;
-	
-	status = WriteRegister(kVRegHdrMasterLumMaxCh1, uint32_t(inMaxMasteringLuminance));
-	if(!NTV2_IS_DRIVER_ACTIVE_TASKS(taskMode))
-		return WriteRegister(kRegHDMIHDRMasteringLuminence, uint32_t(inMaxMasteringLuminance), kRegMaskHDMIHDRMaxMasteringLuminance, kRegShiftHDMIHDRMaxMasteringLuminance);
-	return status;
-}
-
-bool CNTV2Card::GetHDMIHDRMaxMasteringLuminance(uint16_t & outMaxMasteringLuminance)
-{
-	return IsSupported(kDeviceCanDoHDMIHDROut)
-		&&	CNTV2DriverInterface::ReadRegister(kVRegHdrMasterLumMaxCh1, outMaxMasteringLuminance);
-}
-
-bool CNTV2Card::SetHDMIHDRMinMasteringLuminance(const uint16_t inMinMasteringLuminance)
-{
-	NTV2EveryFrameTaskMode taskMode(NTV2_OEM_TASKS);
-	bool status(false);
-	GetEveryFrameServices(taskMode);
-	if(!NTV2_IS_VALID_HDR_MASTERING_LUMINENCE(inMinMasteringLuminance) ||  !IsSupported(kDeviceCanDoHDMIHDROut))
+	if (!GetHDMIOutHDRGreenPrimaryReg(reg, inWhichHDMIOut))
 		return false;
-	
-	status = WriteRegister(kVRegHdrMasterLumMinCh1, uint32_t(inMinMasteringLuminance));
-	if(!NTV2_IS_DRIVER_ACTIVE_TASKS(taskMode))
-		return WriteRegister(kRegHDMIHDRMasteringLuminence, uint32_t(inMinMasteringLuminance), kRegMaskHDMIHDRMinMasteringLuminance, kRegShiftHDMIHDRMinMasteringLuminance);
-	return status;
+	return CNTV2DriverInterface::ReadRegister(reg, outGreenPrimaryY, kRegMaskHDMIHDRGreenPrimaryY, kRegShiftHDMIHDRGreenPrimaryY);
 }
 
-bool CNTV2Card::GetHDMIHDRMinMasteringLuminance(uint16_t & outMinMasteringLuminance)
+bool CNTV2Card::SetHDMIHDRBluePrimaryX(const uint16_t inBluePrimaryX, const NTV2Channel inWhichHDMIOut)
 {
-	return IsSupported(kDeviceCanDoHDMIHDROut)
-		&&	CNTV2DriverInterface::ReadRegister(kVRegHdrMasterLumMinCh1, outMinMasteringLuminance);
-}
-
-bool CNTV2Card::SetHDMIHDRMaxContentLightLevel(const uint16_t inMaxContentLightLevel)
-{
-	NTV2EveryFrameTaskMode taskMode(NTV2_OEM_TASKS);
-	bool status(false);
-	GetEveryFrameServices(taskMode);
-	if(!NTV2_IS_VALID_HDR_LIGHT_LEVEL(inMaxContentLightLevel) ||  !IsSupported(kDeviceCanDoHDMIHDROut))
+	ULWord reg(kRegHDMIHDRBluePrimary);
+	if (!NTV2_IS_VALID_HDR_PRIMARY(inBluePrimaryX)  ||  !IsSupported(kDeviceCanDoHDMIHDROut))
 		return false;
-	
-	status = WriteRegister(kVRegHdrMaxCLLCh1, uint32_t(inMaxContentLightLevel));
-	if(!NTV2_IS_DRIVER_ACTIVE_TASKS(taskMode))
-		return WriteRegister(kRegHDMIHDRLightLevel, uint32_t(inMaxContentLightLevel), kRegMaskHDMIHDRMaxContentLightLevel, kRegShiftHDMIHDRMaxContentLightLevel);
-	return status;
+	if (inWhichHDMIOut == NTV2_CHANNEL1  &&  !WriteRegister(kVRegHdrBlueXCh1, uint32_t(inBluePrimaryX)))
+		return false;
+	if (!GetHDMIOutHDRBluePrimaryReg(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister(reg, uint32_t(inBluePrimaryX), kRegMaskHDMIHDRBluePrimaryX, kRegShiftHDMIHDRBluePrimaryX);
 }
 
-bool CNTV2Card::GetHDMIHDRMaxContentLightLevel(uint16_t & outMaxContentLightLevel)
+bool CNTV2Card::GetHDMIHDRBluePrimaryX(uint16_t & outBluePrimaryX, const NTV2Channel inWhichHDMIOut)
 {
-	return IsSupported(kDeviceCanDoHDMIHDROut)
-		&&	CNTV2DriverInterface::ReadRegister(kVRegHdrMaxCLLCh1, outMaxContentLightLevel);
+	ULWord reg(kRegHDMIHDRBluePrimary);
+	if (!IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (!GetHDMIOutHDRBluePrimaryReg(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister(reg, outBluePrimaryX, kRegMaskHDMIHDRBluePrimaryX, kRegShiftHDMIHDRBluePrimaryX);
 }
 
-bool CNTV2Card::SetHDMIHDRMaxFrameAverageLightLevel(const uint16_t inMaxFrameAverageLightLevel)
+bool CNTV2Card::SetHDMIHDRBluePrimaryY(const uint16_t inBluePrimaryY, const NTV2Channel inWhichHDMIOut)
 {
-	NTV2EveryFrameTaskMode taskMode(NTV2_OEM_TASKS);
-	bool status(false);
-	GetEveryFrameServices(taskMode);
+	ULWord reg(kRegHDMIHDRBluePrimary);
+	if (!NTV2_IS_VALID_HDR_PRIMARY(inBluePrimaryY)  ||  !IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (inWhichHDMIOut == NTV2_CHANNEL1  &&  !WriteRegister(kVRegHdrBlueYCh1, uint32_t(inBluePrimaryY)))
+		return false;
+	if (!GetHDMIOutHDRBluePrimaryReg(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister(reg, uint32_t(inBluePrimaryY), kRegMaskHDMIHDRBluePrimaryY, kRegShiftHDMIHDRBluePrimaryY);
+}
+
+bool CNTV2Card::GetHDMIHDRBluePrimaryY(uint16_t & outBluePrimaryY, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIHDRBluePrimary);
+	if (!IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (!GetHDMIOutHDRBluePrimaryReg(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister(reg, outBluePrimaryY, kRegMaskHDMIHDRBluePrimaryY, kRegShiftHDMIHDRBluePrimaryY);
+}
+
+bool CNTV2Card::SetHDMIHDRRedPrimaryX(const uint16_t inRedPrimaryX, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIHDRRedPrimary);
+	if (!NTV2_IS_VALID_HDR_PRIMARY(inRedPrimaryX)  ||  !IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (inWhichHDMIOut == NTV2_CHANNEL1  &&  !WriteRegister(kVRegHdrRedXCh1, uint32_t(inRedPrimaryX)))
+	if (!GetHDMIOutHDRRedPrimaryReg(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister(reg, uint32_t(inRedPrimaryX), kRegMaskHDMIHDRRedPrimaryX, kRegShiftHDMIHDRRedPrimaryX);
+}
+
+bool CNTV2Card::GetHDMIHDRRedPrimaryX(uint16_t & outRedPrimaryX, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIHDRRedPrimary);
+	if (!IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (!GetHDMIOutHDRRedPrimaryReg(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister(reg, outRedPrimaryX, kRegMaskHDMIHDRRedPrimaryX, kRegShiftHDMIHDRRedPrimaryX);
+}
+
+bool CNTV2Card::SetHDMIHDRRedPrimaryY(const uint16_t inRedPrimaryY, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIHDRRedPrimary);
+	if (!NTV2_IS_VALID_HDR_PRIMARY(inRedPrimaryY)  ||  !IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (inWhichHDMIOut == NTV2_CHANNEL1  &&  !WriteRegister(kVRegHdrRedYCh1, uint32_t(inRedPrimaryY)))
+		return false;
+	if (!GetHDMIOutHDRRedPrimaryReg(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister(reg, uint32_t(inRedPrimaryY), kRegMaskHDMIHDRRedPrimaryY, kRegShiftHDMIHDRRedPrimaryY);
+}
+
+bool CNTV2Card::GetHDMIHDRRedPrimaryY(uint16_t & outRedPrimaryY, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIHDRRedPrimary);
+	if (!IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (!GetHDMIOutHDRRedPrimaryReg(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister(reg, outRedPrimaryY, kRegMaskHDMIHDRRedPrimaryY, kRegShiftHDMIHDRRedPrimaryY);
+}
+
+bool CNTV2Card::SetHDMIHDRWhitePointX(const uint16_t inWhitePointX, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIHDRWhitePoint);
+	if (!NTV2_IS_VALID_HDR_PRIMARY(inWhitePointX)  ||  !IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (inWhichHDMIOut == NTV2_CHANNEL1 &&  !WriteRegister(kVRegHdrWhiteXCh1, uint32_t(inWhitePointX)))
+	if (!GetHDMIOutHDRWhitePointReg(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister(reg, uint32_t(inWhitePointX), kRegMaskHDMIHDRWhitePointX, kRegShiftHDMIHDRWhitePointX);
+}
+
+bool CNTV2Card::GetHDMIHDRWhitePointX(uint16_t & outWhitePointX, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIHDRWhitePoint);
+	if (!IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (!GetHDMIOutHDRWhitePointReg(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister(reg, outWhitePointX, kRegMaskHDMIHDRWhitePointX, kRegShiftHDMIHDRWhitePointX);
+}
+
+bool CNTV2Card::SetHDMIHDRWhitePointY(const uint16_t inWhitePointY, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIHDRWhitePoint);
+	if (!NTV2_IS_VALID_HDR_PRIMARY(inWhitePointY)  ||  !IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (inWhichHDMIOut == NTV2_CHANNEL1  &&  !WriteRegister(kVRegHdrWhiteYCh1, uint32_t(inWhitePointY)))
+		return false;
+	if (!GetHDMIOutHDRWhitePointReg(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister(reg, uint32_t(inWhitePointY), kRegMaskHDMIHDRWhitePointY, kRegShiftHDMIHDRWhitePointY);
+}
+
+bool CNTV2Card::GetHDMIHDRWhitePointY(uint16_t & outWhitePointY, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIHDRWhitePoint);
+	if (!IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (!GetHDMIOutHDRWhitePointReg(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister(reg, outWhitePointY, kRegMaskHDMIHDRWhitePointY, kRegShiftHDMIHDRWhitePointY);
+}
+
+bool CNTV2Card::SetHDMIHDRMaxMasteringLuminance(const uint16_t inMaxMasteringLuminance, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIHDRMasteringLuminence);
+	if (!NTV2_IS_VALID_HDR_MASTERING_LUMINENCE(inMaxMasteringLuminance)  ||  !IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (inWhichHDMIOut == NTV2_CHANNEL1  &&  !WriteRegister(kVRegHdrMasterLumMaxCh1, uint32_t(inMaxMasteringLuminance)))
+		return false;
+	if (!GetHDMIOutHDRMasterLuminanceReg(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister(reg, uint32_t(inMaxMasteringLuminance), kRegMaskHDMIHDRMaxMasteringLuminance, kRegShiftHDMIHDRMaxMasteringLuminance);
+}
+
+bool CNTV2Card::GetHDMIHDRMaxMasteringLuminance(uint16_t & outMaxMasteringLuminance, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIHDRMasteringLuminence);
+	if (!IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (!GetHDMIOutHDRMasterLuminanceReg(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister(reg, outMaxMasteringLuminance, kRegMaskHDMIHDRMaxMasteringLuminance, kRegShiftHDMIHDRMaxMasteringLuminance);
+}
+
+bool CNTV2Card::SetHDMIHDRMinMasteringLuminance(const uint16_t inMinMasteringLuminance, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIHDRMasteringLuminence);
+	if (!NTV2_IS_VALID_HDR_MASTERING_LUMINENCE(inMinMasteringLuminance)  ||  !IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (inWhichHDMIOut == NTV2_CHANNEL1  &&  !WriteRegister(kVRegHdrMasterLumMinCh1, uint32_t(inMinMasteringLuminance)))
+	if (!GetHDMIOutHDRMasterLuminanceReg(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister(reg, uint32_t(inMinMasteringLuminance), kRegMaskHDMIHDRMinMasteringLuminance, kRegShiftHDMIHDRMinMasteringLuminance);
+}
+
+bool CNTV2Card::GetHDMIHDRMinMasteringLuminance(uint16_t & outMinMasteringLuminance, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIHDRMasteringLuminence);
+	if (!IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (!GetHDMIOutHDRMasterLuminanceReg(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister(reg, outMinMasteringLuminance, kRegMaskHDMIHDRMinMasteringLuminance, kRegShiftHDMIHDRMinMasteringLuminance);
+}
+
+bool CNTV2Card::SetHDMIHDRMaxContentLightLevel(const uint16_t inMaxContentLightLevel, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIHDRLightLevel);
+	if (!NTV2_IS_VALID_HDR_LIGHT_LEVEL(inMaxContentLightLevel)  ||  !IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (inWhichHDMIOut == NTV2_CHANNEL1  &&  !WriteRegister(kVRegHdrMaxCLLCh1, uint32_t(inMaxContentLightLevel)))
+		return false;
+	if (!GetHDMIOutHDRLightLevelReg(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister(reg, uint32_t(inMaxContentLightLevel), kRegMaskHDMIHDRMaxContentLightLevel, kRegShiftHDMIHDRMaxContentLightLevel);
+}
+
+bool CNTV2Card::GetHDMIHDRMaxContentLightLevel(uint16_t & outMaxContentLightLevel, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIHDRLightLevel);
+	if (!IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (!GetHDMIOutHDRLightLevelReg(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister(reg, outMaxContentLightLevel, kRegMaskHDMIHDRMaxContentLightLevel, kRegShiftHDMIHDRMaxContentLightLevel);
+}
+
+bool CNTV2Card::SetHDMIHDRMaxFrameAverageLightLevel(const uint16_t inMaxFrameAverageLightLevel, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIHDRLightLevel);
 	if(!NTV2_IS_VALID_HDR_LIGHT_LEVEL(inMaxFrameAverageLightLevel) ||  !IsSupported(kDeviceCanDoHDMIHDROut))
 		return false;
-	
-	status = WriteRegister(kVRegHdrMaxFALLCh1, uint32_t(inMaxFrameAverageLightLevel));
-	if(!NTV2_IS_DRIVER_ACTIVE_TASKS(taskMode))
-		return WriteRegister(kRegHDMIHDRLightLevel, uint32_t(inMaxFrameAverageLightLevel), kRegMaskHDMIHDRMaxFrameAverageLightLevel, kRegShiftHDMIHDRMaxFrameAverageLightLevel);
-	return status;
+	if (inWhichHDMIOut == NTV2_CHANNEL1  &&  !WriteRegister(kVRegHdrMaxFALLCh1, uint32_t(inMaxFrameAverageLightLevel)))
+		return false;
+	if (!GetHDMIOutHDRLightLevelReg(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister(reg, uint32_t(inMaxFrameAverageLightLevel), kRegMaskHDMIHDRMaxFrameAverageLightLevel, kRegShiftHDMIHDRMaxFrameAverageLightLevel);
 }
 
-bool CNTV2Card::GetHDMIHDRMaxFrameAverageLightLevel(uint16_t & outMaxFrameAverageLightLevel)
+bool CNTV2Card::GetHDMIHDRMaxFrameAverageLightLevel(uint16_t & outMaxFrameAverageLightLevel, const NTV2Channel inWhichHDMIOut)
 {
-	return IsSupported(kDeviceCanDoHDMIHDROut)
-		&&	CNTV2DriverInterface::ReadRegister(kVRegHdrMaxFALLCh1, outMaxFrameAverageLightLevel);
-}
-
-bool CNTV2Card::SetHDMIHDRConstantLuminance(const bool inEnableConstantLuminance)
-{
-	NTV2EveryFrameTaskMode taskMode(NTV2_OEM_TASKS);
-	bool status(false);
-	GetEveryFrameServices(taskMode);
+	ULWord reg(kRegHDMIHDRLightLevel);
 	if (!IsSupported(kDeviceCanDoHDMIHDROut))
 		return false;
-	
-	status = WriteRegister(kVRegHdrLuminanceCh1, inEnableConstantLuminance ? 1 : 0);
-	if(!NTV2_IS_DRIVER_ACTIVE_TASKS(taskMode))
-		return WriteRegister(kRegHDMIHDRControl, inEnableConstantLuminance ? 1 : 0, kRegMaskHDMIHDRNonContantLuminance, kRegShiftHDMIHDRNonContantLuminance);
-	return status;
+	if (!GetHDMIOutHDRLightLevelReg(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister(reg, outMaxFrameAverageLightLevel, kRegMaskHDMIHDRMaxFrameAverageLightLevel, kRegShiftHDMIHDRMaxFrameAverageLightLevel);
 }
 
-bool CNTV2Card::GetHDMIHDRConstantLuminance()
+bool CNTV2Card::SetHDMIHDRConstantLuminance(const bool inEnableConstantLuminance, const NTV2Channel inWhichHDMIOut)
 {
+	ULWord reg(kRegHDMIHDRControl);
 	if (!IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (inWhichHDMIOut == NTV2_CHANNEL1  &&  !WriteRegister(kVRegHdrLuminanceCh1, inEnableConstantLuminance ? 1 : 0))
+		return false;
+	if (!GetHDMIOutHDRControlReg(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister(reg, inEnableConstantLuminance ? 1 : 0, kRegMaskHDMIHDRNonContantLuminance, kRegShiftHDMIHDRNonContantLuminance);
+}
+
+bool CNTV2Card::GetHDMIHDRConstantLuminance(const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIHDRControl);
+	if (!IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (!GetHDMIOutHDRControlReg(reg, inWhichHDMIOut))
 		return false;
 	uint32_t regValue = 0;
-	ReadRegister(kVRegHdrLuminanceCh1, regValue);
+	ReadRegister(reg, regValue, kRegMaskHDMIHDRNonContantLuminance, kRegShiftHDMIHDRNonContantLuminance);
 	return regValue ? true : false;
 }
 
-bool CNTV2Card::SetHDMIHDRElectroOpticalTransferFunction(const uint8_t inEOTFByte)
+bool CNTV2Card::SetHDMIHDRElectroOpticalTransferFunction(const uint8_t inEOTFByte, const NTV2Channel inWhichHDMIOut)
 {
-	NTV2EveryFrameTaskMode taskMode(NTV2_OEM_TASKS);
-	bool status(false);
-	GetEveryFrameServices(taskMode);
+	ULWord reg(kRegHDMIHDRControl);
 	if (!IsSupported(kDeviceCanDoHDMIHDROut))
 		return false;
-	
-	status = WriteRegister(kVRegHdrTransferCh1, inEOTFByte);
-	if(!NTV2_IS_DRIVER_ACTIVE_TASKS(taskMode))
-		return WriteRegister(kRegHDMIHDRControl, inEOTFByte, kRegMaskElectroOpticalTransferFunction, kRegShiftElectroOpticalTransferFunction);
+	if (inWhichHDMIOut == NTV2_CHANNEL1  &&  !WriteRegister(kVRegHdrTransferCh1, inEOTFByte))
+		return false;
+	if (!GetHDMIOutHDRControlReg(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister(reg, inEOTFByte, kRegMaskElectroOpticalTransferFunction, kRegShiftElectroOpticalTransferFunction);
+}
+
+bool CNTV2Card::GetHDMIHDRElectroOpticalTransferFunction(uint8_t & outEOTFByte, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIHDRControl);
+	if (!IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (!GetHDMIOutHDRControlReg(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister(reg, outEOTFByte, kRegMaskElectroOpticalTransferFunction, kRegShiftElectroOpticalTransferFunction);
+}
+
+bool CNTV2Card::SetHDMIHDRStaticMetadataDescriptorID(const uint8_t inSMDId, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIHDRControl);
+	if (!IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (inWhichHDMIOut == NTV2_CHANNEL1  &&  !WriteRegister(kVRegHdrColorimetryCh1, uint32_t(inSMDId)))
+		return false;
+	if (!GetHDMIOutHDRControlReg(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister(reg, uint32_t(inSMDId), kRegMaskHDRStaticMetadataDescriptorID, kRegShiftHDRStaticMetadataDescriptorID);
+}
+
+bool CNTV2Card::GetHDMIHDRStaticMetadataDescriptorID(uint8_t & outSMDId, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIHDRControl);
+	if (!IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (!GetHDMIOutHDRControlReg(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister(reg, outSMDId, kRegMaskHDRStaticMetadataDescriptorID, kRegShiftHDRStaticMetadataDescriptorID);
+}
+
+bool CNTV2Card::EnableHDMIHDR(const bool inEnableHDMIHDR, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIHDRControl);
+	if (!IsSupported(kDeviceCanDoHDMIHDROut))
+		return false;
+	if (!GetHDMIOutHDRControlReg(reg, inWhichHDMIOut))
+		return false;
+
+	bool status = WriteRegister(reg, inEnableHDMIHDR ? 1 : 0, kRegMaskHDMIHDREnable, kRegShiftHDMIHDREnable);
+	if (GetNumSupported(kDeviceGetHDMIVersion) < 6)
+		WaitForOutputFieldID(NTV2_FIELD0, NTV2_CHANNEL1);
 	return status;
 }
 
-bool CNTV2Card::GetHDMIHDRElectroOpticalTransferFunction(uint8_t & outEOTFByte)
+bool CNTV2Card::GetHDMIHDREnabled (const NTV2Channel inWhichHDMIOut)
 {
-	return IsSupported(kDeviceCanDoHDMIHDROut)
-		&&	CNTV2DriverInterface::ReadRegister(kVRegHdrTransferCh1, outEOTFByte);
-}
-
-bool CNTV2Card::SetHDMIHDRStaticMetadataDescriptorID(const uint8_t inSMDId)
-{
-	NTV2EveryFrameTaskMode taskMode(NTV2_OEM_TASKS);
-	bool status(false);
-	GetEveryFrameServices(taskMode);
+	ULWord reg(kRegHDMIHDRControl);
 	if (!IsSupported(kDeviceCanDoHDMIHDROut))
 		return false;
-	
-	status = WriteRegister(kVRegHdrColorimetryCh1, uint32_t(inSMDId));
-	if(!NTV2_IS_DRIVER_ACTIVE_TASKS(taskMode))
-		return WriteRegister(kRegHDMIHDRControl, uint32_t(inSMDId), kRegMaskHDRStaticMetadataDescriptorID, kRegShiftHDRStaticMetadataDescriptorID);
-	return status;
-}
-
-bool CNTV2Card::GetHDMIHDRStaticMetadataDescriptorID(uint8_t & outSMDId)
-{
-	return IsSupported(kDeviceCanDoHDMIHDROut)
-		&&	CNTV2DriverInterface::ReadRegister(kVRegHdrColorimetryCh1, outSMDId);
-}
-
-bool CNTV2Card::EnableHDMIHDR(const bool inEnableHDMIHDR)
-{
-	bool status = true;
-	if (!IsSupported(kDeviceCanDoHDMIHDROut))
+	if (!GetHDMIOutHDRControlReg(reg, inWhichHDMIOut))
 		return false;
-	status = WriteRegister(kRegHDMIHDRControl, inEnableHDMIHDR ? 1 : 0, kRegMaskHDMIHDREnable, kRegShiftHDMIHDREnable);
-	WaitForOutputFieldID(NTV2_FIELD0, NTV2_CHANNEL1);
-	return status;
-}
 
-bool CNTV2Card::GetHDMIHDREnabled (void)
-{
-	if (!IsSupported(kDeviceCanDoHDMIHDROut))
-		return false;
 	uint32_t regValue = 0;
-	ReadRegister(kRegHDMIHDRControl, regValue, kRegMaskHDMIHDREnable, kRegShiftHDMIHDREnable);
+	ReadRegister(reg, regValue, kRegMaskHDMIHDREnable, kRegShiftHDMIHDREnable);
 	return regValue ? true : false;
 }
 
-bool CNTV2Card::EnableHDMIHDRDolbyVision(const bool inEnable)
+bool CNTV2Card::EnableHDMIHDRDolbyVision(const bool inEnable, const NTV2Channel inWhichHDMIOut)
 {
-	bool status = true;
 	if (!IsSupported(kDeviceCanDoHDMIHDROut))
 		return false;
-	status = WriteRegister(kRegHDMIHDRControl, inEnable ? 1 : 0, kRegMaskHDMIHDRDolbyVisionEnable, kRegShiftHDMIHDRDolbyVisionEnable);
-	WaitForOutputFieldID(NTV2_FIELD0, NTV2_CHANNEL1);
+	ULWord reg(kRegHDMIHDRControl);
+	if (!GetHDMIOutHDRControlReg(reg, inWhichHDMIOut))
+		return false;
+
+	bool status = WriteRegister(reg, inEnable ? 1 : 0, kRegMaskHDMIHDRDolbyVisionEnable, kRegShiftHDMIHDRDolbyVisionEnable);
+	if (GetNumSupported(kDeviceGetHDMIVersion) < 6)
+		WaitForOutputFieldID(NTV2_FIELD0, NTV2_CHANNEL1);
 	return status;
 }
 
-bool CNTV2Card::GetHDMIHDRDolbyVisionEnabled (void)
+bool CNTV2Card::GetHDMIHDRDolbyVisionEnabled (const NTV2Channel inWhichHDMIOut)
 {
 	if (!IsSupported(kDeviceCanDoHDMIHDROut))
 		return false;
-	uint32_t regValue = 0;
-	ReadRegister(kRegHDMIHDRControl, regValue, kRegMaskHDMIHDRDolbyVisionEnable, kRegShiftHDMIHDRDolbyVisionEnable);
-	return regValue ? true : false;
+	ULWord reg(kRegHDMIHDRControl);
+	if (!GetHDMIOutHDRControlReg(reg, inWhichHDMIOut))
+		return false;
+
+	bool enabled(false);
+	return driverInterface().ReadRegister(reg, enabled, kRegMaskHDMIHDRDolbyVisionEnable, kRegShiftHDMIHDRDolbyVisionEnable) ? enabled : false;
 }
 
-bool CNTV2Card::SetHDRData (const HDRFloatValues & inFloatValues)
+bool CNTV2Card::SetHDRData (const HDRFloatValues & inFloatValues, const NTV2Channel inWhichHDMIOut)
 {
-	HDRRegValues registerValues;
-	convertHDRFloatToRegisterValues(inFloatValues, registerValues);
-	SetHDRData(registerValues);
+	HDRRegValues regValues;
+	return inFloatValues.toRegValues(regValues) && SetHDRData(regValues, inWhichHDMIOut);
+}
+
+bool CNTV2Card::SetHDRData (const HDRRegValues & inRegisterValues, const NTV2Channel inWhichHDMIOut)
+{
+	return SetHDMIHDRGreenPrimaryX(inRegisterValues.greenPrimaryX, inWhichHDMIOut)
+		&& SetHDMIHDRGreenPrimaryY(inRegisterValues.greenPrimaryY, inWhichHDMIOut)
+		&& SetHDMIHDRBluePrimaryX(inRegisterValues.bluePrimaryX, inWhichHDMIOut)
+		&& SetHDMIHDRBluePrimaryY(inRegisterValues.bluePrimaryY, inWhichHDMIOut)
+		&& SetHDMIHDRRedPrimaryX(inRegisterValues.redPrimaryX, inWhichHDMIOut)
+		&& SetHDMIHDRRedPrimaryY(inRegisterValues.redPrimaryY, inWhichHDMIOut)
+		&& SetHDMIHDRWhitePointX(inRegisterValues.whitePointX, inWhichHDMIOut)
+		&& SetHDMIHDRWhitePointY(inRegisterValues.whitePointY, inWhichHDMIOut)
+		&& SetHDMIHDRMaxMasteringLuminance(inRegisterValues.maxMasteringLuminance, inWhichHDMIOut)
+		&& SetHDMIHDRMinMasteringLuminance(inRegisterValues.minMasteringLuminance, inWhichHDMIOut)
+		&& SetHDMIHDRMaxContentLightLevel(inRegisterValues.maxContentLightLevel, inWhichHDMIOut)
+		&& SetHDMIHDRMaxFrameAverageLightLevel(inRegisterValues.maxFrameAverageLightLevel, inWhichHDMIOut)
+		&& SetHDMIHDRElectroOpticalTransferFunction(inRegisterValues.electroOpticalTransferFunction, inWhichHDMIOut)
+		&& SetHDMIHDRStaticMetadataDescriptorID(inRegisterValues.staticMetadataDescriptorID, inWhichHDMIOut);
+}
+
+bool CNTV2Card::GetHDRData (HDRFloatValues & outFloatValues, const NTV2Channel inWhichHDMIOut)
+{
+	HDRRegValues regValues;
+	return GetHDRData(regValues, inWhichHDMIOut)  &&  outFloatValues.setFromRegValues(regValues);
+}
+
+bool CNTV2Card::GetHDRData (HDRRegValues & outRegisterValues, const NTV2Channel inWhichHDMIOut)
+{
+	return GetHDMIHDRGreenPrimaryX(outRegisterValues.greenPrimaryX, inWhichHDMIOut)
+		&& GetHDMIHDRGreenPrimaryY(outRegisterValues.greenPrimaryY, inWhichHDMIOut)
+		&& GetHDMIHDRBluePrimaryX(outRegisterValues.bluePrimaryX, inWhichHDMIOut)
+		&& GetHDMIHDRBluePrimaryY(outRegisterValues.bluePrimaryY, inWhichHDMIOut)
+		&& GetHDMIHDRRedPrimaryX(outRegisterValues.redPrimaryX, inWhichHDMIOut)
+		&& GetHDMIHDRRedPrimaryY(outRegisterValues.redPrimaryY, inWhichHDMIOut)
+		&& GetHDMIHDRWhitePointX(outRegisterValues.whitePointX, inWhichHDMIOut)
+		&& GetHDMIHDRWhitePointY(outRegisterValues.whitePointY, inWhichHDMIOut)
+		&& GetHDMIHDRMaxMasteringLuminance(outRegisterValues.maxMasteringLuminance, inWhichHDMIOut)
+		&& GetHDMIHDRMinMasteringLuminance(outRegisterValues.minMasteringLuminance, inWhichHDMIOut)
+		&& GetHDMIHDRMaxContentLightLevel(outRegisterValues.maxContentLightLevel, inWhichHDMIOut)
+		&& GetHDMIHDRMaxFrameAverageLightLevel(outRegisterValues.maxFrameAverageLightLevel, inWhichHDMIOut)
+		&& GetHDMIHDRElectroOpticalTransferFunction(outRegisterValues.electroOpticalTransferFunction, inWhichHDMIOut)
+		&& GetHDMIHDRStaticMetadataDescriptorID(outRegisterValues.staticMetadataDescriptorID, inWhichHDMIOut);
+}
+
+bool CNTV2Card::SetHDMIHDRBT2020(const NTV2Channel inWhichHDMIOut)
+{
+	HDRRegValues regValues;
+	regValues.setBT2020();
+	EnableHDMIHDR(false, inWhichHDMIOut);
+	SetHDRData(regValues, inWhichHDMIOut);
+	EnableHDMIHDR(true, inWhichHDMIOut);
 	return true;
 }
 
-bool CNTV2Card::SetHDRData(const HDRRegValues & inRegisterValues)
+bool CNTV2Card::SetHDMIHDRDCIP3(const NTV2Channel inWhichHDMIOut)
 {
-	SetHDMIHDRGreenPrimaryX(inRegisterValues.greenPrimaryX);
-	SetHDMIHDRGreenPrimaryY(inRegisterValues.greenPrimaryY);
-	SetHDMIHDRBluePrimaryX(inRegisterValues.bluePrimaryX);
-	SetHDMIHDRBluePrimaryY(inRegisterValues.bluePrimaryY);
-	SetHDMIHDRRedPrimaryX(inRegisterValues.redPrimaryX);
-	SetHDMIHDRRedPrimaryY(inRegisterValues.redPrimaryY);
-	SetHDMIHDRWhitePointX(inRegisterValues.whitePointX);
-	SetHDMIHDRWhitePointY(inRegisterValues.whitePointY);
-	SetHDMIHDRMaxMasteringLuminance(inRegisterValues.maxMasteringLuminance);
-	SetHDMIHDRMinMasteringLuminance(inRegisterValues.minMasteringLuminance);
-	SetHDMIHDRMaxContentLightLevel(inRegisterValues.maxContentLightLevel);
-	SetHDMIHDRMaxFrameAverageLightLevel(inRegisterValues.maxFrameAverageLightLevel);
-	SetHDMIHDRElectroOpticalTransferFunction(inRegisterValues.electroOpticalTransferFunction);
-	SetHDMIHDRStaticMetadataDescriptorID(inRegisterValues.staticMetadataDescriptorID);
+	HDRRegValues regValues;
+	regValues.setDCIP3();
+	EnableHDMIHDR(false, inWhichHDMIOut);
+	SetHDRData(regValues, inWhichHDMIOut);
+	EnableHDMIHDR(true, inWhichHDMIOut);
 	return true;
 }
 
-bool CNTV2Card::GetHDRData(HDRFloatValues & outFloatValues)
+bool CNTV2Card::GetHDMIOutAudioChannel34Swap (bool & outIsSwapped, const NTV2Channel inWhichHDMIOut)
 {
-	HDRRegValues registerValues;
-	GetHDRData(registerValues);
-	return convertHDRRegisterToFloatValues(registerValues, outFloatValues);
-}
-
-bool CNTV2Card::GetHDRData(HDRRegValues & outRegisterValues)
-{
-	GetHDMIHDRGreenPrimaryX(outRegisterValues.greenPrimaryX);
-	GetHDMIHDRGreenPrimaryY(outRegisterValues.greenPrimaryY);
-	GetHDMIHDRBluePrimaryX(outRegisterValues.bluePrimaryX);
-	GetHDMIHDRBluePrimaryY(outRegisterValues.bluePrimaryY);
-	GetHDMIHDRRedPrimaryX(outRegisterValues.redPrimaryX);
-	GetHDMIHDRRedPrimaryY(outRegisterValues.redPrimaryY);
-	GetHDMIHDRWhitePointX(outRegisterValues.whitePointX);
-	GetHDMIHDRWhitePointY(outRegisterValues.whitePointY);
-	GetHDMIHDRMaxMasteringLuminance(outRegisterValues.maxMasteringLuminance);
-	GetHDMIHDRMinMasteringLuminance(outRegisterValues.minMasteringLuminance);
-	GetHDMIHDRMaxContentLightLevel(outRegisterValues.maxContentLightLevel);
-	GetHDMIHDRMaxFrameAverageLightLevel(outRegisterValues.maxFrameAverageLightLevel);
-	GetHDMIHDRElectroOpticalTransferFunction(outRegisterValues.electroOpticalTransferFunction);
-	GetHDMIHDRStaticMetadataDescriptorID(outRegisterValues.staticMetadataDescriptorID);
-	return true;
-}
-
-bool CNTV2Card::SetHDMIHDRBT2020()
-{
-	HDRRegValues registerValues;
-	setHDRDefaultsForBT2020(registerValues);
-	EnableHDMIHDR(false);
-	SetHDRData(registerValues);
-	EnableHDMIHDR(true);
-	return true;
-}
-
-bool CNTV2Card::SetHDMIHDRDCIP3()
-{
-	HDRRegValues registerValues;
-	setHDRDefaultsForDCIP3(registerValues);
-	EnableHDMIHDR(false);
-	SetHDRData(registerValues);
-	EnableHDMIHDR(true);
-	return true;
-}
-
-bool CNTV2Card::GetHDMIOutAudioChannel34Swap (bool & outIsSwapped, const NTV2Channel inChannel)
-{	(void) inChannel;
 	outIsSwapped = false;
-	if (!GetNumSupported(kDeviceGetNumHDMIVideoOutputs))
+	if (ULWord(inWhichHDMIOut) >= GetNumSupported(kDeviceGetNumHDMIVideoOutputs))
 		return false;
-	return CNTV2DriverInterface::ReadRegister(kRegHDMIInputControl, outIsSwapped, kRegMaskHDMISwapOutputAudCh34, kRegShiftHDMISwapOutputAudCh34);
-}
-
-bool CNTV2Card::SetHDMIOutAudioChannel34Swap (const bool inIsSwapped, const NTV2Channel inChannel)
-{	(void) inChannel;
-	if (!GetNumSupported(kDeviceGetNumHDMIVideoOutputs))
+	ULWord reg(kRegHDMIInputControl);
+	if (!GetHDMIOutInputControlRegNum(reg, inWhichHDMIOut))
 		return false;
-	return WriteRegister(kRegHDMIInputControl, inIsSwapped ? 1 : 0, kRegMaskHDMISwapOutputAudCh34, kRegShiftHDMISwapOutputAudCh34);
+	return CNTV2DriverInterface::ReadRegister(reg, outIsSwapped, kRegMaskHDMISwapOutputAudCh34, kRegShiftHDMISwapOutputAudCh34);
 }
 
-bool CNTV2Card::EnableHDMIOutUserOverride(bool enable)
+bool CNTV2Card::SetHDMIOutAudioChannel34Swap (const bool inIsSwapped, const NTV2Channel inWhichHDMIOut)
 {
-	return WriteRegister(kRegHDMIInputControl, enable ? 1 : 0, kRegMaskHDMIOutForceConfig, kRegShiftHDMIOutForceConfig);
+	if (ULWord(inWhichHDMIOut) >= GetNumSupported(kDeviceGetNumHDMIVideoOutputs))
+		return false;
+	ULWord reg(kRegHDMIInputControl);
+	if (!GetHDMIOutInputControlRegNum(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister(reg, inIsSwapped ? 1 : 0, kRegMaskHDMISwapOutputAudCh34, kRegShiftHDMISwapOutputAudCh34);
 }
 
-bool CNTV2Card::GetEnableHDMIOutUserOverride(bool & isEnabled)
+bool CNTV2Card::EnableHDMIOutUserOverride (bool enable, const NTV2Channel inWhichHDMIOut)
 {
-	ULWord enable = 0;
-	bool status = ReadRegister(kRegHDMIInputControl, enable, kRegMaskHDMIOutForceConfig, kRegShiftHDMIOutForceConfig);
-	isEnabled = enable ? true : false;
-	return status;
+	if (ULWord(inWhichHDMIOut) >= GetNumSupported(kDeviceGetNumHDMIVideoOutputs))
+		return false;
+	ULWord reg(kRegHDMIInputControl);
+	if (!GetHDMIOutInputControlRegNum(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister(reg, enable ? 1 : 0, kRegMaskHDMIOutForceConfig, kRegShiftHDMIOutForceConfig);
 }
 
-bool CNTV2Card::EnableHDMIOutCenterCrop(bool enable)
+bool CNTV2Card::GetEnableHDMIOutUserOverride (bool & isEnabled, const NTV2Channel inWhichHDMIOut)
 {
-	return WriteRegister(kRegHDMIInputControl, enable ? 1 : 0, kRegMaskHDMIOutCropEnable, kRegShiftHDMIOutCropEnable);
+	if (ULWord(inWhichHDMIOut) >= GetNumSupported(kDeviceGetNumHDMIVideoOutputs))
+		return false;
+	ULWord reg(kRegHDMIInputControl);
+	if (!GetHDMIOutInputControlRegNum(reg, inWhichHDMIOut))
+		return false;
+	return driverInterface().ReadRegister(reg, isEnabled, kRegMaskHDMIOutForceConfig, kRegShiftHDMIOutForceConfig);
 }
 
-bool CNTV2Card::GetEnableHDMIOutCenterCrop(bool & isEnabled)
+bool CNTV2Card::EnableHDMIOutCenterCrop (bool enable, const NTV2Channel inWhichHDMIOut)
 {
-	ULWord enable = 0;
-	bool status = ReadRegister(kRegHDMIInputControl, enable, kRegMaskHDMIOutCropEnable, kRegShiftHDMIOutCropEnable);
-	isEnabled = enable ? true : false;
-	return status;
+	if (ULWord(inWhichHDMIOut) >= GetNumSupported(kDeviceGetNumHDMIVideoOutputs))
+		return false;
+	ULWord reg(kRegHDMIInputControl);
+	if (!GetHDMIOutInputControlRegNum(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister(reg, enable ? 1 : 0, kRegMaskHDMIOutCropEnable, kRegShiftHDMIOutCropEnable);
 }
 
+bool CNTV2Card::GetEnableHDMIOutCenterCrop (bool & isEnabled, const NTV2Channel inWhichHDMIOut)
+{
+	if (!GetNumSupported(kDeviceGetNumHDMIVideoOutputs))
+		return false;	
+	ULWord reg(kRegHDMIInputControl);
+	if (!GetHDMIOutInputControlRegNum(reg, inWhichHDMIOut))
+		return false;
+	return driverInterface().ReadRegister (reg, isEnabled, kRegMaskHDMIOutCropEnable, kRegShiftHDMIOutCropEnable);
+}
 
+bool CNTV2Card::GetHDMIOutControlReg (ULWord & outReg, const NTV2Channel inWhichHDMIOut)
+{
+	if (ULWord(inWhichHDMIOut) >= GetNumSupported(kDeviceGetNumHDMIVideoOutputs))
+		return false;
+	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
+	if (!hdmiVers)
+		return false;
+	outReg = hdmiVers < 6 ? kRegHDMIOutControl : gHDMIChannelToOutControlVRegNum[ULWord(inWhichHDMIOut)];
+	return true;
+}
+
+bool CNTV2Card::GetHDMIOutInputStatusRegNum (ULWord & outRegNum, const NTV2Channel inWhichHDMIOut)
+{
+	if (ULWord(inWhichHDMIOut) >= GetNumSupported(kDeviceGetNumHDMIVideoOutputs))
+		return false;
+	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
+	if (!hdmiVers)
+		return false;
+	outRegNum = hdmiVers < 6 ? kRegHDMIInputStatus : gHDMIChannelToInputStatusVRegNum[ULWord(inWhichHDMIOut)];
+	return true;
+}
+
+bool CNTV2Card::GetHDMIOutInputControlRegNum (ULWord & outRegNum, const NTV2Channel inWhichHDMIOut)
+{
+	if (ULWord(inWhichHDMIOut) >= GetNumSupported(kDeviceGetNumHDMIVideoOutputs))
+		return false;
+	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
+	if (!hdmiVers)
+		return false;
+	outRegNum = hdmiVers < 6 ? kRegHDMIInputControl : gHDMIChannelToInputControlVRegNum[ULWord(inWhichHDMIOut)];
+	return true;
+}
+
+bool CNTV2Card::GetHDMIOutStatusReg (ULWord & outRegNum, const NTV2Channel inWhichHDMIOut)
+{
+	if (ULWord(inWhichHDMIOut) >= GetNumSupported(kDeviceGetNumHDMIVideoOutputs))
+		return false;
+	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
+	if (!hdmiVers)
+		return false;
+	outRegNum = hdmiVers < 6 ? kVRegHDMIOutStatus1 : gHDMIChannelToOutStatusVRegNum[ULWord(inWhichHDMIOut)];
+	return true;
+}
+
+bool CNTV2Card::GetHDMIOutHDRGreenPrimaryReg (ULWord & outRegNum, const NTV2Channel inWhichHDMIOut)
+{
+	if (ULWord(inWhichHDMIOut) >= GetNumSupported(kDeviceGetNumHDMIVideoOutputs))
+		return false;
+	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
+	if (!hdmiVers)
+		return false;
+	outRegNum = hdmiVers < 6 ? kRegHDMIHDRGreenPrimary : gHDMIChannelToOutHDRGreenPrimaryVRegNum[ULWord(inWhichHDMIOut)];
+	return true;
+}
+
+bool CNTV2Card::GetHDMIOutHDRBluePrimaryReg (ULWord & outRegNum, const NTV2Channel inWhichHDMIOut)
+{
+	if (ULWord(inWhichHDMIOut) >= GetNumSupported(kDeviceGetNumHDMIVideoOutputs))
+		return false;
+	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
+	if (!hdmiVers)
+		return false;
+	outRegNum = hdmiVers < 6 ? kRegHDMIHDRBluePrimary : gHDMIChannelToOutHDRBluePrimaryVRegNum[ULWord(inWhichHDMIOut)];
+	return true;
+}
+
+bool CNTV2Card::GetHDMIOutHDRRedPrimaryReg (ULWord & outRegNum, const NTV2Channel inWhichHDMIOut)
+{
+	if (ULWord(inWhichHDMIOut) >= GetNumSupported(kDeviceGetNumHDMIVideoOutputs))
+		return false;
+	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
+	if (!hdmiVers)
+		return false;
+	outRegNum = hdmiVers < 6 ? kRegHDMIHDRRedPrimary : gHDMIChannelToOutHDRRedPrimaryVRegNum[ULWord(inWhichHDMIOut)];
+	return true;
+}
+
+bool CNTV2Card::GetHDMIOutHDRWhitePointReg (ULWord & outRegNum, const NTV2Channel inWhichHDMIOut)
+{
+	if (ULWord(inWhichHDMIOut) >= GetNumSupported(kDeviceGetNumHDMIVideoOutputs))
+		return false;
+	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
+	if (!hdmiVers)
+		return false;
+	outRegNum = hdmiVers < 6 ? kRegHDMIHDRWhitePoint : gHDMIChannelToOutHDRWhitePointVRegNum[ULWord(inWhichHDMIOut)];
+	return true;
+}
+
+bool CNTV2Card::GetHDMIOutHDRMasterLuminanceReg (ULWord & outRegNum, const NTV2Channel inWhichHDMIOut)
+{
+	if (ULWord(inWhichHDMIOut) >= GetNumSupported(kDeviceGetNumHDMIVideoOutputs))
+		return false;
+	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
+	if (!hdmiVers)
+		return false;
+	outRegNum = hdmiVers < 6 ? kRegHDMIHDRMasteringLuminence : gHDMIChannelToOutHDRMasterLuminanceVRegNum[ULWord(inWhichHDMIOut)];
+	return true;
+}
+
+bool CNTV2Card::GetHDMIOutHDRLightLevelReg (ULWord & outRegNum, const NTV2Channel inWhichHDMIOut)
+{
+	if (ULWord(inWhichHDMIOut) >= GetNumSupported(kDeviceGetNumHDMIVideoOutputs))
+		return false;
+	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
+	if (!hdmiVers)
+		return false;
+	outRegNum = hdmiVers < 6 ? kRegHDMIHDRLightLevel : gHDMIChannelToOutHDRLightLevelVRegNum[ULWord(inWhichHDMIOut)];
+	return true;
+}
+
+bool CNTV2Card::GetHDMIOutHDRControlReg (ULWord & outRegNum, const NTV2Channel inWhichHDMIOut)
+{
+	if (ULWord(inWhichHDMIOut) >= GetNumSupported(kDeviceGetNumHDMIVideoOutputs))
+		return false;
+	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
+	if (!hdmiVers)
+		return false;
+	outRegNum = hdmiVers < 6 ? kRegHDMIHDRControl : gHDMIChannelToOutHDRControlVRegNum[ULWord(inWhichHDMIOut)];
+	return true;
+}
 
 //////////////////////////////////////////////////////////////
 

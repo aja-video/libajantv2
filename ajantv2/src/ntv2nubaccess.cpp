@@ -12,9 +12,11 @@
 #include "ajabase/system/debug.h"
 #include "ajabase/common/common.h"
 #include "ajabase/system/systemtime.h"
-#include "ajabase/system/thread.h"
+#include "ajabase/system/atomic.h"
 #include <iomanip>
 #if !defined(NTV2_PREVENT_PLUGIN_LOAD)
+	#include "ajabase/common/ajarefptr.h"
+	#include "ajabase/system/thread.h"
 	#include <fstream>
 	#include "mbedtls/x509.h"
 	#include "mbedtls/error.h"
@@ -558,7 +560,7 @@ bool NTV2DeviceSpecParser::ParseAlphaNumeric (size_t & pos, string & outToken, c
 			break;
 		++pos;  tokAlphaNum += ch;
 	}
-	if (tokAlphaNum.length() > 1)	//	At least 2 chars
+	if (tokAlphaNum.length() > 0)
 		outToken = tokAlphaNum;
 	return !outToken.empty();
 }
@@ -646,7 +648,7 @@ bool NTV2DeviceSpecParser::ParseModelName (size_t & pos, string & outToken)
 {
 	outToken.clear();
 	string tokName;
-	if (!ParseAlphaNumeric(pos, tokName))
+	if (!ParseAlphaNumeric(pos, tokName, " "))
 		return false;
 	aja::lower(tokName);	//	Fold to lower case
 
@@ -745,7 +747,7 @@ bool NTV2DeviceSpecParser::ParseResourcePath (size_t & pos, string & outRsrc)
 	{
 		++rsrcPos;
 		rsrc += '/';
-		if (!ParseAlphaNumeric(rsrcPos, name))
+		if (!ParseAlphaNumeric(rsrcPos, name, " "))
 			break;
 		rsrc += name;
 		ch = CharAt(rsrcPos);

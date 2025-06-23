@@ -74,7 +74,6 @@ class AJAExport CNTV2WinDriverInterface : public CNTV2DriverInterface
 
 		AJA_VIRTUAL bool	AutoCirculate (AUTOCIRCULATE_DATA &autoCircData);
 		AJA_VIRTUAL bool	NTV2Message (NTV2_HEADER * pInMessage);
-		AJA_VIRTUAL bool	HevcSendMessage (HevcMessageHeader* pMessage);
 		AJA_VIRTUAL bool	ControlDriverDebugMessages(NTV2_DriverDebugMessageSet msgSet, bool enable)	{(void)msgSet; (void)enable; return false;}
 
 		AJA_VIRTUAL bool	SetAudioOutputMode (NTV2_GlobalAudioPlaybackMode mode);
@@ -102,6 +101,9 @@ class AJAExport CNTV2WinDriverInterface : public CNTV2DriverInterface
 		AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool CompleteMemoryForDMA(ULWord * pFrameBuffer));	///< @deprecated	Obsolete starting in SDK 16.0.
 		AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool PrepareMemoryForDMA(ULWord * pFrameBuffer, const ULWord ulNumBytes));	///< @deprecated	Obsolete starting in SDK 16.0.
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
+#if !defined(NTV2_DEPRECATE_17_6)
+		AJA_VIRTUAL inline bool	NTV2_DEPRECATED_f(HevcSendMessage(HevcMessageHeader* pMsg))	{(void)pMsg; return false;}	///< @deprecated	Corvid HEVC support dropped in SDK 17.6
+#endif//!defined(NTV2_DEPRECATE_17_6)
 
 #if !defined(NTV2_NULL_DEVICE)
 	//	PRIVATE INSTANCE METHODS

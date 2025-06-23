@@ -1375,20 +1375,6 @@ bool CNTV2WinDriverInterface::NTV2Message (NTV2_HEADER * pInMessage)
 }
 
 
-bool CNTV2WinDriverInterface::HevcSendMessage (HevcMessageHeader* pInMessage)
-{
-	if (!pInMessage)
-		{WDIFAIL("Failed: NULL pointer"); return false;}
-	DWORD dwBytesReturned(0);
-	AJADebug::StatTimerStart(AJA_DebugStat_HEVCSendMessage);
-	const bool ok = DeviceIoControl(_hDevice, IOCTL_AJAHEVC_MESSAGE, pInMessage, pInMessage->size, pInMessage, pInMessage->size, &dwBytesReturned, NULL);
-	AJADebug::StatTimerStop(AJA_DebugStat_HEVCSendMessage);
-	if (!ok)
-		{WDIFAIL("Failed: " << ::GetKernErrStr(GetLastError()));  return false;}
-	return true;
-}
-
-
 bool CNTV2WinDriverInterface::SetAudioOutputMode (NTV2_GlobalAudioPlaybackMode mode)
 {
 	return WriteRegister(kVRegGlobalAudioPlaybackMode,mode);

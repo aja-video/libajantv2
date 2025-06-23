@@ -399,22 +399,7 @@ bool FindHDMIOutputSource(Ntv2SystemContext* context, NTV2OutputXptID* source, N
 {
 	NTV2OutputXptID xptSelect = NTV2_XptBlack;
 
-	switch (channel)
-	{
-	default:
-	case NTV2_CHANNEL1:
-		GetXptHDMIOutInputSelect(context, &xptSelect);
-		break;
-	case NTV2_CHANNEL2:
-		GetXptHDMIOutQ2InputSelect(context, &xptSelect);
-		break;
-	case NTV2_CHANNEL3:
-		GetXptHDMIOutQ3InputSelect(context, &xptSelect);
-		break;
-	case NTV2_CHANNEL4:
-		GetXptHDMIOutQ4InputSelect(context, &xptSelect);
-		break;
-	}
+	GetXptHDMIOutInputSelect(context, channel, &xptSelect);
 
 	if(xptSelect != NTV2_XptConversionModule)
 	{
@@ -598,9 +583,24 @@ bool GetXptFrameBuffer2InputSelect(Ntv2SystemContext* context, NTV2OutputXptID* 
 	return ntv2ReadRegisterMS(context, kRegXptSelectGroup5, (ULWord*)value, kK2RegMaskFrameBuffer2InputSelect, kK2RegShiftFrameBuffer2InputSelect);
 }
 
-bool GetXptHDMIOutInputSelect(Ntv2SystemContext* context, NTV2OutputXptID* value)
+bool GetXptHDMIOutInputSelect(Ntv2SystemContext* context, NTV2Channel channel, NTV2OutputXptID* value)
 {
-	return ntv2ReadRegisterMS(context, kRegXptSelectGroup6, (ULWord*)value, kK2RegMaskHDMIOutInputSelect, kK2RegShiftHDMIOutInputSelect);
+    switch (channel)
+    {
+    case NTV2_CHANNEL2:
+        return ntv2ReadRegisterMS(context, kRegXptSelectGroup20, (ULWord*)value,
+                                  kK2RegMaskHDMIOutV2Q2InputSelect, kK2RegShiftHDMIOutV2Q2InputSelect);
+    case NTV2_CHANNEL3:
+        return ntv2ReadRegisterMS(context, kRegXptSelectGroup20, (ULWord*)value,
+                                  kK2RegMaskHDMIOutV2Q3InputSelect, kK2RegShiftHDMIOutV2Q3InputSelect);
+    case NTV2_CHANNEL4:
+        return ntv2ReadRegisterMS(context, kRegXptSelectGroup20, (ULWord*)value,
+                                  (ULWord)kK2RegMaskHDMIOutV2Q4InputSelect, (ULWord)kK2RegShiftHDMIOutV2Q4InputSelect);
+    default:
+        break;
+    }
+
+    return ntv2ReadRegisterMS(context, kRegXptSelectGroup6, (ULWord*)value, kK2RegMaskHDMIOutInputSelect, kK2RegShiftHDMIOutInputSelect);
 }
 
 bool GetXptHDMIOutQ2InputSelect(Ntv2SystemContext* context, NTV2OutputXptID* value)
@@ -624,3 +624,49 @@ bool GetXptMultiLinkOutInputSelect(Ntv2SystemContext* context, NTV2Channel chann
 	return ntv2ReadRegisterMS(context, source.registerNumber, (ULWord*)value, (ULWord)source.registerMask, (ULWord)source.registerShift);
 }
 
+bool IsXptFrameStore(NTV2OutputXptID source)
+{
+    bool fs = false;
+    
+    switch(source)
+    {
+    case NTV2_XptFrameBuffer1YUV:
+    case NTV2_XptFrameBuffer1RGB:
+    case NTV2_XptFrameBuffer2YUV:
+    case NTV2_XptFrameBuffer2RGB:
+    case NTV2_XptFrameBuffer3YUV:
+    case NTV2_XptFrameBuffer3RGB:
+    case NTV2_XptFrameBuffer4YUV:
+    case NTV2_XptFrameBuffer4RGB:
+    case NTV2_XptFrameBuffer5YUV:
+    case NTV2_XptFrameBuffer5RGB:
+    case NTV2_XptFrameBuffer6YUV:
+    case NTV2_XptFrameBuffer6RGB:
+    case NTV2_XptFrameBuffer7YUV:
+    case NTV2_XptFrameBuffer7RGB:
+    case NTV2_XptFrameBuffer8YUV:
+    case NTV2_XptFrameBuffer8RGB:
+    case NTV2_XptFrameBuffer1_DS2YUV:
+    case NTV2_XptFrameBuffer1_DS2RGB:
+    case NTV2_XptFrameBuffer2_DS2YUV:
+    case NTV2_XptFrameBuffer2_DS2RGB:
+    case NTV2_XptFrameBuffer3_DS2YUV:
+    case NTV2_XptFrameBuffer3_DS2RGB:
+    case NTV2_XptFrameBuffer4_DS2YUV:
+    case NTV2_XptFrameBuffer4_DS2RGB:
+    case NTV2_XptFrameBuffer5_DS2YUV:
+    case NTV2_XptFrameBuffer5_DS2RGB:
+    case NTV2_XptFrameBuffer6_DS2YUV:
+    case NTV2_XptFrameBuffer6_DS2RGB:
+    case NTV2_XptFrameBuffer7_DS2YUV:
+    case NTV2_XptFrameBuffer7_DS2RGB:
+    case NTV2_XptFrameBuffer8_DS2YUV:
+    case NTV2_XptFrameBuffer8_DS2RGB:
+        fs = true;
+        break;
+    default:
+        break;
+    }
+
+    return fs;
+}

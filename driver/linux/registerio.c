@@ -317,8 +317,6 @@ int WriteReg(	ULWord deviceNumber,
 	ULWord oldValue = 0;
     int status = 0;
 
-	//	printk("WR(%d): r(%x) v(%x)\n", deviceNumber, registerNumber, registerValue );
-
 	pNTV2Params = getNTV2Params(deviceNumber);
 	pNTV2ModuleParams = getNTV2ModuleParams();
 
@@ -733,9 +731,18 @@ int WriteReg(	ULWord deviceNumber,
 		case kVRegEveryFrameTaskFilter:
 			if (NTV2DeviceHasLPProductCode(pNTV2Params->_DeviceID))
 				ntv2WriteRegister (&pNTV2Params->systemContext, kRegLPFrameTask, registerValue);
-			// fallthrough
+			pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START] = registerValue;
+			break;
+
 		default:
 			// store virtual reg
+            if (registerMask != NO_MASK)
+            {
+                oldValue = pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START];
+                oldValue &= ~registerMask;
+                registerValue <<= registerShift;
+                registerValue |= oldValue;
+            }
 			pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START] = registerValue;
 			break;
 
@@ -830,7 +837,10 @@ int ReadReg(    ULWord deviceNumber,
 		!((registerNumber >= VIRTUALREG_START) && (registerNumber <= kVRegLast)))
 	{
 		if (registerNumber == kRegBoardID)
-			return pNTV2Params->_DeviceID;
+        {
+            *registerValue = pNTV2Params->_DeviceID;
+            return 0;
+        }
 		*registerValue = 0;
         return -EACCES;
 	}
@@ -1127,7 +1137,13 @@ int ReadReg(    ULWord deviceNumber,
 
 		default:
 			// return virtual reg
-			*registerValue = pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START];
+			value = pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START];
+            if (registerMask != NO_MASK)
+            {
+                value &= registerMask;
+                value >>= registerShift;
+            }
+            *registerValue = value;
 			return 0;
 		} // switch
 	}

@@ -905,8 +905,56 @@ private:
 		DefineRegister (kRegHDMIV2i2c2Control,						"", mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_NULL);
 		DefineRegister (kRegHDMIV2i2c2Data,							"", mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_NULL);
 
-		DefineRegister (0x1d00, "reg_hdmiin4_videocontrol",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
-		DefineRegister (0x1d01, "reg_hdmiin4_videodetect0",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+        DefineRegister (kVRegHDMIOutControl1,						"", mDecodeHDMIOutputControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+        DefineRegister (kVRegHDMIInputStatus1,						"", mDecodeHDMIInputStatus,		READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+        DefineRegister (kVRegHDMIInputControl1,						"", mDecodeHDMIInputControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+        DefineRegister (kVRegHDMIOutStatus1,						"", mDefaultRegDecoder,         READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+        DefineRegister (kVRegHDMIOutHDRGreenPrimary1,				"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRBluePrimary1,				"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRRedPrimary1,					"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRWhitePoint1,					"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRMasterLuminance1,			"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRLightLevel1,					"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRControl1,					"", mDecodeHDMIOutHDRControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+
+        DefineRegister (kVRegHDMIOutControl2,						"", mDecodeHDMIOutputControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+        DefineRegister (kVRegHDMIInputStatus2,						"", mDecodeHDMIInputStatus,		READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+        DefineRegister (kVRegHDMIInputControl2,						"", mDecodeHDMIInputControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+        DefineRegister (kVRegHDMIOutStatus2,						"", mDefaultRegDecoder,         READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+        DefineRegister (kVRegHDMIOutHDRGreenPrimary2,				"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRBluePrimary2,				"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRRedPrimary2,					"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRWhitePoint2,					"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRMasterLuminance2,			"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRLightLevel2,					"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRControl2,					"", mDecodeHDMIOutHDRControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+
+        DefineRegister (kVRegHDMIOutControl3,						"", mDecodeHDMIOutputControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+        DefineRegister (kVRegHDMIInputStatus3,						"", mDecodeHDMIInputStatus,		READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+        DefineRegister (kVRegHDMIInputControl3,						"", mDecodeHDMIInputControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+        DefineRegister (kVRegHDMIOutStatus3,						"", mDefaultRegDecoder,         READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+        DefineRegister (kVRegHDMIOutHDRGreenPrimary3,				"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRBluePrimary3,				"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRRedPrimary3,					"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRWhitePoint3,					"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRMasterLuminance3,			"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRLightLevel3,					"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRControl3,					"", mDecodeHDMIOutHDRControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+
+        DefineRegister (kVRegHDMIOutControl4,						"", mDecodeHDMIOutputControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+        DefineRegister (kVRegHDMIInputStatus4,						"", mDecodeHDMIInputStatus,		READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+        DefineRegister (kVRegHDMIInputControl4,						"", mDecodeHDMIInputControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+        DefineRegister (kVRegHDMIOutStatus4,						"", mDefaultRegDecoder,         READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+        DefineRegister (kVRegHDMIOutHDRGreenPrimary4,				"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRBluePrimary4,				"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRRedPrimary4,					"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRWhitePoint4,					"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRMasterLuminance4,			"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRLightLevel4,					"", mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+        DefineRegister (kVRegHDMIOutHDRControl4,					"", mDecodeHDMIOutHDRControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+
+        DefineRegister (0x1d00, "reg_hdmiin4_videocontrol",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
+        DefineRegister (0x1d01, "reg_hdmiin4_videodetect0",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
 		DefineRegister (0x1d02, "reg_hdmiin4_videodetect1",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
 		DefineRegister (0x1d03, "reg_hdmiin4_videodetect2",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
 		DefineRegister (0x1d04, "reg_hdmiin4_videodetect3",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_Channel1);
@@ -1022,6 +1070,32 @@ private:
 		DefineRegister (0x1d5f, "reg_hdmiout4_pixelcontrol",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
 		DefineRegister (0x1d60, "reg_hdmiout4_i2ccontrol",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
 		DefineRegister (0x1d61, "reg_hdmiout4_i2cedid",					mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+
+		DefineRegister (0x1d80, "reg_hdmiout4_videocontrol",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d81, "reg_hdmiout4_videosetup0",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d82, "reg_hdmiout4_videosetup1",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d83, "reg_hdmiout4_videosetup2",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d84, "reg_hdmiout4_videosetup3",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d85, "reg_hdmiout4_videosetup4",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d86, "reg_hdmiout4_videosetup5",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d87, "reg_hdmiout4_videosetup6",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d88, "reg_hdmiout4_videosetup7",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d89, "reg_hdmiout4_auxcontrol",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d8b, "reg_hdmiout4_audiocontrol",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d8f, "reg_hdmiout4_redrivercontrol",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d90, "reg_hdmiout4_refclockfrequency",		mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d91, "reg_hdmiout4_tmdsclockfrequency",		mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d92, "reg_hdmiout4_txclockfrequency",		mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d93, "reg_hdmiout4_fpllclockfrequency",		mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d94, "reg_hdmiout4_audio_cts1",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d95, "reg_hdmiout4_audio_cts2",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d96, "reg_hdmiout4_audio_cts3",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d97, "reg_hdmiout4_audio_cts4",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d98, "reg_hdmiout4_audio_n",					mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d9e, "reg_hdmiout4_croplocation",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1d9f, "reg_hdmiout4_pixelcontrol",			mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1da0, "reg_hdmiout4_i2ccontrol",				mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
+		DefineRegister (0x1da1, "reg_hdmiout4_i2cedid",					mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel2);
 	}
 
 	void SetupSDIErrorRegs(void)
@@ -3759,7 +3833,23 @@ private:
 				case kRegHDMIHDRBluePrimary:
 				case kRegHDMIHDRRedPrimary:
 				case kRegHDMIHDRWhitePoint:
-				{	//	Asserts to validate this one code block will handle all cases:
+                case kVRegHDMIOutHDRGreenPrimary1:
+                case kVRegHDMIOutHDRBluePrimary1:
+                case kVRegHDMIOutHDRRedPrimary1:
+                case kVRegHDMIOutHDRWhitePoint1:
+                case kVRegHDMIOutHDRGreenPrimary2:
+                case kVRegHDMIOutHDRBluePrimary2:
+                case kVRegHDMIOutHDRRedPrimary2:
+                case kVRegHDMIOutHDRWhitePoint2:
+                case kVRegHDMIOutHDRGreenPrimary3:
+                case kVRegHDMIOutHDRBluePrimary3:
+                case kVRegHDMIOutHDRRedPrimary3:
+                case kVRegHDMIOutHDRWhitePoint3:
+                case kVRegHDMIOutHDRGreenPrimary4:
+                case kVRegHDMIOutHDRBluePrimary4:
+                case kVRegHDMIOutHDRRedPrimary4:
+                case kVRegHDMIOutHDRWhitePoint4:
+                {	//	Asserts to validate this one code block will handle all cases:
 					NTV2_ASSERT (kRegMaskHDMIHDRGreenPrimaryX == kRegMaskHDMIHDRBluePrimaryX  &&  kRegMaskHDMIHDRBluePrimaryX == kRegMaskHDMIHDRRedPrimaryX);
 					NTV2_ASSERT (kRegMaskHDMIHDRGreenPrimaryY == kRegMaskHDMIHDRBluePrimaryY  &&  kRegMaskHDMIHDRBluePrimaryY == kRegMaskHDMIHDRRedPrimaryY);
 					NTV2_ASSERT (kRegMaskHDMIHDRRedPrimaryX == kRegMaskHDMIHDRWhitePointX  &&  kRegMaskHDMIHDRRedPrimaryY == kRegMaskHDMIHDRWhitePointY);
@@ -3781,7 +3871,11 @@ private:
 					break;
 				}
 				case kRegHDMIHDRMasteringLuminence:
-				{
+                case kVRegHDMIOutHDRMasterLuminance1:
+                case kVRegHDMIOutHDRMasterLuminance2:
+                case kVRegHDMIOutHDRMasterLuminance3:
+                case kVRegHDMIOutHDRMasterLuminance4:
+                {
 					const uint16_t	minValue	((inRegValue & kRegMaskHDMIHDRMinMasteringLuminance) >> kRegShiftHDMIHDRMinMasteringLuminance);
 					const uint16_t	maxValue	((inRegValue & kRegMaskHDMIHDRMaxMasteringLuminance) >> kRegShiftHDMIHDRMaxMasteringLuminance);
 					const double	minFloat	(double(minValue) * 0.00001);
@@ -3791,7 +3885,11 @@ private:
 					break;
 				}
 				case kRegHDMIHDRLightLevel:
-				{
+                case kVRegHDMIOutHDRLightLevel1:
+                case kVRegHDMIOutHDRLightLevel2:
+                case kVRegHDMIOutHDRLightLevel3:
+                case kVRegHDMIOutHDRLightLevel4:
+                {
 					const uint16_t	cntValue	((inRegValue & kRegMaskHDMIHDRMaxContentLightLevel) >> kRegShiftHDMIHDRMaxContentLightLevel);
 					const uint16_t	frmValue	((inRegValue & kRegMaskHDMIHDRMaxFrameAverageLightLevel) >> kRegShiftHDMIHDRMaxFrameAverageLightLevel);
 					const double	cntFloat	(cntValue);

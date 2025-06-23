@@ -625,10 +625,59 @@ typedef enum
 	kVRegHDMIOutStatus1						= VIRTUALREG_START+641,
 	kVRegAudioOutputToneSelect				= VIRTUALREG_START+642,
 	kVRegDynFirmwareUpdateCounts			= VIRTUALREG_START+643,		//	MS 16 bits: # attempts;  LS 16 bits: # successful
-	kVRegPCILinkSpeed       				= VIRTUALREG_START+644,
-	kVRegPCILinkWidth		        		= VIRTUALREG_START+645,
+	kVRegPCILinkSpeed                       = VIRTUALREG_START+644,
+	kVRegPCILinkWidth                       = VIRTUALREG_START+645,
 
-	kVRegLastAJA							= VIRTUALREG_START+646,		///< @brief The last AJA virtual register slot
+    // These replace the hardware registers for hdmi output version >= 6
+    kVRegHDMIOutControl1                    = VIRTUALREG_START+646,     // kRegHDMIOutControl 125
+    kVRegHDMIInputStatus1                   = VIRTUALREG_START+647,     // kRegHDMIInputStatus 126
+    kVRegHDMIInputControl1                  = VIRTUALREG_START+648,     // kRegHDMIInputControl 127
+//	kVRegHDMIOutStatus1                     = VIRTUALREG_START+641,     //  Already defined above...
+	kVRegHDMIOutHDRGreenPrimary1            = VIRTUALREG_START+649,
+	kVRegHDMIOutHDRBluePrimary1             = VIRTUALREG_START+650,
+	kVRegHDMIOutHDRRedPrimary1              = VIRTUALREG_START+651,
+	kVRegHDMIOutHDRWhitePoint1              = VIRTUALREG_START+652,
+	kVRegHDMIOutHDRMasterLuminance1         = VIRTUALREG_START+653,
+	kVRegHDMIOutHDRLightLevel1              = VIRTUALREG_START+654,
+	kVRegHDMIOutHDRControl1                 = VIRTUALREG_START+655,
+
+    kVRegHDMIOutControl2                    = VIRTUALREG_START+656,
+    kVRegHDMIInputStatus2                   = VIRTUALREG_START+657,
+    kVRegHDMIInputControl2                  = VIRTUALREG_START+658,
+	kVRegHDMIOutStatus2                     = VIRTUALREG_START+659,
+	kVRegHDMIOutHDRGreenPrimary2            = VIRTUALREG_START+660,
+	kVRegHDMIOutHDRBluePrimary2             = VIRTUALREG_START+661,
+	kVRegHDMIOutHDRRedPrimary2              = VIRTUALREG_START+662,
+	kVRegHDMIOutHDRWhitePoint2              = VIRTUALREG_START+663,
+	kVRegHDMIOutHDRMasterLuminance2         = VIRTUALREG_START+664,
+	kVRegHDMIOutHDRLightLevel2              = VIRTUALREG_START+665,
+	kVRegHDMIOutHDRControl2                 = VIRTUALREG_START+666,
+
+    kVRegHDMIOutControl3                    = VIRTUALREG_START+667,
+    kVRegHDMIInputStatus3                   = VIRTUALREG_START+668,
+    kVRegHDMIInputControl3                  = VIRTUALREG_START+669,
+	kVRegHDMIOutStatus3                     = VIRTUALREG_START+670,
+	kVRegHDMIOutHDRGreenPrimary3            = VIRTUALREG_START+671,
+	kVRegHDMIOutHDRBluePrimary3             = VIRTUALREG_START+672,
+	kVRegHDMIOutHDRRedPrimary3              = VIRTUALREG_START+673,
+	kVRegHDMIOutHDRWhitePoint3              = VIRTUALREG_START+674,
+	kVRegHDMIOutHDRMasterLuminance3         = VIRTUALREG_START+675,
+	kVRegHDMIOutHDRLightLevel3              = VIRTUALREG_START+676,
+	kVRegHDMIOutHDRControl3                 = VIRTUALREG_START+677,
+
+    kVRegHDMIOutControl4                    = VIRTUALREG_START+678,
+    kVRegHDMIInputStatus4                   = VIRTUALREG_START+679,
+    kVRegHDMIInputControl4                  = VIRTUALREG_START+680,
+	kVRegHDMIOutStatus4                     = VIRTUALREG_START+681,
+	kVRegHDMIOutHDRGreenPrimary4            = VIRTUALREG_START+682,
+	kVRegHDMIOutHDRBluePrimary4             = VIRTUALREG_START+683,
+	kVRegHDMIOutHDRRedPrimary4              = VIRTUALREG_START+684,
+	kVRegHDMIOutHDRWhitePoint4              = VIRTUALREG_START+685,
+	kVRegHDMIOutHDRMasterLuminance4         = VIRTUALREG_START+686,
+	kVRegHDMIOutHDRLightLevel4              = VIRTUALREG_START+687,
+	kVRegHDMIOutHDRControl4                 = VIRTUALREG_START+688,
+
+    kVRegLastAJA							= VIRTUALREG_START+689,		///< @brief The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief Last virtual register slot
 

@@ -111,20 +111,19 @@ int main(int argc, const char ** argv)
 		cout << logger << flush;	//	Write log to stdout...
 	else
 	{	//	Write log to file...
-		ostringstream SupportLogFileName, RamDumpFileName;
-		SupportLogFileName << CNTV2SupportLogger::InventLogFilePathAndName(device);
-		RamDumpFileName << CNTV2SupportLogger::InventLogFilePathAndName(device, "aja_sdram", "raw");
-		ofstream ofs(SupportLogFileName.str());
+		string supportLogFileName(CNTV2SupportLogger::InventLogFilePathAndName(device)), ramDumpFileName(supportLogFileName);
+		aja::replace(ramDumpFileName, ".log", ".raw");
+		ofstream ofs(supportLogFileName);
 		if (ofs)
 		{
 			ofs << logger << flush;
 			ofs.close();
 		}
 		if (isVerbose)
-			cout << "## NOTE: Support log for device '" << deviceName << "' written to '" << SupportLogFileName.str() << "'" << endl;
+			cout << "## NOTE: Support log for device '" << deviceName << "' written to '" << supportLogFileName << "'" << endl;
 		if (doSDRAM)
 		{	ostringstream oss;
-			if (!CNTV2SupportLogger::DumpDeviceSDRAM (device, RamDumpFileName.str(), oss))
+			if (!CNTV2SupportLogger::DumpDeviceSDRAM (device, ramDumpFileName, oss))
 				cerr << oss.str();
 			else if (isVerbose  &&  !oss.str().empty())
 				cout << oss.str();

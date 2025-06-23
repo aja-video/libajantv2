@@ -103,6 +103,7 @@ typedef struct _dmaParams
 	ULWord				ancF2Frame;				// anc field 2 frame
 	ULWord				ancF2NumBytes;			// number of anc field 2 bytes
 	ULWord				ancF2Offset;			// anc field 2 frame offset
+	ULWord				audioSystemCount;		// number of multi-link audio systems
 } DMA_PARAMS, *PDMA_PARAMS;
 
 // dma transfer context

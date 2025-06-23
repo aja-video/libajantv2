@@ -22,6 +22,8 @@ struct ntv2_hdmiout4 {
 	char				name[NTV2_HDMIOUT4_STRING_SIZE];
 	Ntv2SystemContext* 	system_context;
 	Ntv2SpinLock		state_lock;
+    uint32_t            device_id;
+    uint32_t            hdmi_version;
 
 	Ntv2Thread 			monitor_task;
 	bool				monitor_enable;
@@ -31,7 +33,7 @@ struct ntv2_hdmiout4 {
 
 	uint32_t			hot_plug_count;
 	uint32_t			hdmi_config;
-	uint32_t			hdmi_source;
+	uint32_t			hdmi_rgb;
 	uint32_t			hdmi_control;
 	uint32_t			hdmi_hdr;
 

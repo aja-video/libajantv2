@@ -23,6 +23,8 @@ bool ReadSDIInVPID(Ntv2SystemContext* context, NTV2Channel channel, ULWord* valu
 
 bool SetSDIOutVPID(Ntv2SystemContext* context, NTV2Channel channel, ULWord valueA, ULWord valueB);
 
+bool Set2110Key(Ntv2SystemContext* context, NTV2Channel channel, bool setKey);
+
 bool AdjustFor4KDC(Ntv2SystemContext* context, VPIDControl* pControl);
 
 bool FindVPID(Ntv2SystemContext* context, NTV2OutputXptID startingXpt, VPIDControl* pControl);
