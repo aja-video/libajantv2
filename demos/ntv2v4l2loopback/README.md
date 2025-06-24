@@ -67,14 +67,14 @@ Follow the instructions at `https://github.com/aja-video/libajantv2` to build th
 
 #### 1. AJA NTV2 SDK
 Follow the instructions at `https://github.com/aja-video/libajantv2` to build the SDK and demos.
-`v4l2loopback.dll` is built with the rest of the demo applications.
+`ntv2v4l2loopback.dll` is built with the rest of the demo applications.
 
 #### 2. Register DirectShow filter and output pins
 Run the following in a `cmd.exe` window that has elevated (Administrator) privileges
-(after `cd`ing into the build folder containing `v4l2loopback.dll`):
+(after `cd`ing into the build folder containing `ntv2v4l2loopback.dll`):
 
 ```bash
-regsvr32 path\to\v4l2loopback.dll
+regsvr32 bld\libajantv2\demos\ntv2v4l2loopback\ntv2v4l2loopback.dll
 ```
 
 ----
@@ -204,5 +204,5 @@ Run the following in a `cmd.exe` window that has elevated (Administrator) privil
 (after `cd`ing into the build folder containing `v4l2loopback.dll`):
 
 ```bash
-regsvr32 /u v4l2loopback.dll
+regsvr32 /u bld\libajantv2\demos\ntv2v4l2loopback\ntv2v4l2loopback.dll
 ```
