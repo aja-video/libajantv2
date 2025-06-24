@@ -596,7 +596,7 @@ NTV2V4L2Loopback::NTV2V4L2Loopback(LPUNKNOWN pUnk, HRESULT* phr)
 
 	mAjaDevice = "2";
 	mInputType = "hdmi";
-	mInputChannelArg = NTV2Channel(1);
+	mInputChannel = NTV2_CHANNEL1;
 	mPixelFormatStr = "uyvy";
 }
 #endif	//	AJA_WINDOWS
