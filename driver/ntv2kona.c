@@ -2314,7 +2314,7 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context, NTV2Channel channel)
         }
 	}
 
-	if(NTV2DeviceCanDoHDMIHDROut(deviceID))
+	if(NTV2DeviceCanDoHDMIHDROut(deviceID) && (hdmiVersion < 6))
 	{
 		if(	(hdrRegValues.electroOpticalTransferFunction > 0 && hdrRegValues.electroOpticalTransferFunction <= 3) ||
 			(hdrRegValues.staticMetadataDescriptorID > 0 && hdrRegValues.staticMetadataDescriptorID <= 3) ||
