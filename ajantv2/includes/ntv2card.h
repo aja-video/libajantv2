@@ -4423,6 +4423,20 @@ public:
 		@return		True if successful;	 otherwise false.
 	**/
 	AJA_VIRTUAL bool	GetPossibleConnections (NTV2PossibleConnections & outConnections);
+
+	/**
+		@brief		Returns all my widget input crosspoints.
+		@param[out] outInputs		Receives the ::NTV2InputXptIDSet (or empty upon failure).
+		@return		True if successful;	 otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetAllWidgetInputs (NTV2InputXptIDSet & outInputs);	//	New in SDK 17.6
+
+	/**
+		@brief		Returns all my widget output crosspoints.
+		@param[out] outOutputs		Receives the ::NTV2OutputXptIDSet (or empty upon failure).
+		@return		True if successful;	 otherwise false.
+	**/
+	AJA_VIRTUAL bool	GetAllWidgetOutputs (NTV2OutputXptIDSet & outOutputs);	//	New in SDK 17.6
 	///@}
 
 
