@@ -112,6 +112,7 @@ VPIDBitDepth GetBitDepth(uint32_t inOutVPIDValue);
 bool SetBitDepth(uint32_t* inOutVPIDValue, VPIDBitDepth inBitDepth);
 bool SetRGBRange(uint32_t* inOutVPIDValue, NTV2VPIDRGBRange inRGBRange);
 bool SetSDIOutVPIDOverrides(Ntv2SystemContext* context, uint32_t* inOutVPIDValue, NTV2Channel channel);
+bool SetKeySignal(Ntv2SystemContext* context, NTV2Channel channel, bool setKey);
 
 VPIDChannel GetChannelFrom425XPT(ULWord index)
 {
