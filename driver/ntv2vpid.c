@@ -1046,7 +1046,7 @@ bool SetVPIDOutput(Ntv2SystemContext* context, NTV2Channel channel)
 #pragma GCC diagnostic ignored "-Wtautological-compare"
     if(NTV2DeviceCanDo25GIP(deviceID))
     {
-        Set2110Key(context, channel, (vpidControlDS1.flags & KeySignal) > 0);
+        SetKeySignal(context, channel, (vpidControlDS1.flags & KeySignal) > 0);
     }
 #pragma GCC diagnostic pop
 
