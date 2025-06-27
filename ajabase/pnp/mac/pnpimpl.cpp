@@ -34,37 +34,47 @@ void PCIDeviceNotifierCallback (unsigned long message, void *refcon);
 
 
 
-AJAPnpImpl::AJAPnpImpl() : mRefCon(NULL), mCallback(NULL), mDevices(0)
+AJAPnpImpl::AJAPnpImpl() : mRefCon(nullptr), mCallback(nullptr), mDevices(0), mPciDevices(nullptr)
 {
-	mPciDevices = new KonaNotifier(PCIDeviceNotifierCallback, this);
 }
 
 
 AJAPnpImpl::~AJAPnpImpl()
 {
 	Uninstall();
-
-	delete mPciDevices;
-	mPciDevices = NULL;
 }
 
 
-AJAStatus AJAPnpImpl::Install (AJAPnpCallback callback, void* refCon, uint32_t devices)
+AJAStatus AJAPnpImpl::Install (AJAPnpCallback callback, void* refCon, uint32_t deviceKinds)
 {
 	mCallback = callback;
 	mRefCon   = refCon;
-	mDevices  = devices;
+	mDevices  = deviceKinds;
 
 	if (!mCallback)
-		return AJA_STATUS_NULL;	//	NULL callback
+		{PNPLOGS(AJA_DebugSeverity_Error, "NULL callback specified");  return AJA_STATUS_NULL;}
 
 	//	MacOS only handles PCIe devices
+	size_t numFails(0);
 	if (mDevices & AJA_Pnp_PciVideoDevices)	//	PCIe devices requested?
+	{
+		if (!mPciDevices)
+			mPciDevices = new KonaNotifier(PCIDeviceNotifierCallback, this);
 		if (mPciDevices)					//	DeviceNotifier or KonaNotifier exists?
-			if (mPciDevices->Install())		//	DeviceNotifier/KonaNotifier install successful?
-				return AJA_STATUS_SUCCESS;	//	Success!
-
-	return AJA_STATUS_FAIL;	//	Nothing installed
+			if (!mPciDevices->Install())	//	DeviceNotifier/KonaNotifier install successful?
+				numFails++;
+	}
+	if (mDevices & AJA_Pnp_UsbSerialDevices)//	USB/serial devices?
+	{	//	TBD
+		PNPLOGS(AJA_DebugSeverity_Warning, "USB/Serial devices requested but unsupported");
+	}
+	if (mDevices & AJA_Pnp_FireWireDevices)	//	FireWire devices?
+	{	//	Retired long ago
+		PNPLOGS(AJA_DebugSeverity_Warning, "FireWire devices requested but unsupported");
+	}
+	if (numFails)
+		Uninstall();
+	return numFails ? AJA_STATUS_FAIL : AJA_STATUS_SUCCESS;
 }
 	
 
@@ -73,6 +83,12 @@ AJAStatus AJAPnpImpl::Uninstall (void)
 	mCallback = NULL;
 	mRefCon = NULL;
 	mDevices = 0;
+	if (mPciDevices)
+	{
+		mPciDevices->Uninstall();
+		delete mPciDevices;
+		mPciDevices = nullptr;
+	}
 	return AJA_STATUS_SUCCESS;
 }
 
@@ -83,14 +99,14 @@ void PCIDeviceNotifierCallback	(unsigned long message, void *refcon)
 //	PNPLOGS(AJA_DebugSeverity_Debug, "msg=" << HEX8(message));
 
 	AJAPnpImpl* pnpObj = (AJAPnpImpl*) refcon;
-	if (pnpObj == NULL)
+	if (!pnpObj)
 	{
 		PNPLOGS(AJA_DebugSeverity_Error, "NULL refcon, msg=" << HEX8(message));
 		return;
 	}
 	
 	AJAPnpCallback callback = pnpObj->GetCallback();
-	if (callback == NULL)
+	if (!callback)
 	{
 		PNPLOGS(AJA_DebugSeverity_Error, "NULL callback, msg=" << HEX8(message));
 		return;
