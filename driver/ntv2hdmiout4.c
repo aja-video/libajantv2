@@ -1453,7 +1453,7 @@ static bool configure_hdmi_video(struct ntv2_hdmiout4 *ntv2_hout)
 
     // this toggles the clock select
 //    if (ntv2_hout->hdmi_version >= 6)
-    if (false)
+/*    if (false)
     {
         value &= ~NTV2_FLD_MASK(ntv2_fld_hdmiout4_videocontrol_clock_select);
         value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_videocontrol_clock_select, clock_select_n);
@@ -1463,7 +1463,7 @@ static bool configure_hdmi_video(struct ntv2_hdmiout4 *ntv2_hout)
         value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_videocontrol_clock_select, clock_select);
         ntv2_reg_write(ntv2_hout->system_context, ntv2_reg_hdmiout4_videocontrol, ntv2_hout->index, value);
     }
-    
+   */
 	value = NTV2_FLD_SET(ntv2_fld_hdmiout4_pixelcontrol_lineinterleave, lin_int);
 	value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_pixelcontrol_pixelinterleave, pix_int);
 	value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_pixelcontrol_420convert, pix_420);
