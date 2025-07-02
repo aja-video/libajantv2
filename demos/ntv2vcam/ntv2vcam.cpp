@@ -1,11 +1,11 @@
 /* SPDX-License-Identifier: MIT */
 /**
-	@file		ntv2v4l2loopback.cpp
-	@brief		Implementation of NTV2V4L2Loopback class.
+	@file		ntv2vcam.cpp
+	@brief		Implementation of NTV2VCAM class.
 	@copyright	(C) 2025 AJA Video Systems, Inc.  All rights reserved.
 **/
 
-#include "ntv2v4l2loopback.h"
+#include "ntv2vcam.h"
 
 //Globals
 static const ULWord	gDemoAppSignature NTV2_FOURCC('V', 'C', 'A', 'M');
@@ -83,7 +83,7 @@ STDMETHODIMP OutputVideoPin::CheckMediaType(const CMediaType* pmt)
 
 HRESULT OutputVideoPin::GetMediaType(CMediaType* pMediaType)
 {
-	if (static_cast<NTV2V4L2Loopback*>(m_pFilter)->Initialize())
+	if (static_cast<NTV2VCAM*>(m_pFilter)->Initialize())
 		return CopyMediaType(pMediaType, &m_mt);
 
 	return E_FAIL;
@@ -91,7 +91,7 @@ HRESULT OutputVideoPin::GetMediaType(CMediaType* pMediaType)
 
 HRESULT OutputVideoPin::FillBuffer(IMediaSample* pSample)
 {
-	return static_cast<NTV2V4L2Loopback*>(m_pFilter)->GetNextFrame(this, pSample);
+	return static_cast<NTV2VCAM*>(m_pFilter)->GetNextFrame(this, pSample);
 }
 
 HRESULT OutputVideoPin::DecideBufferSize(IMemAllocator* pAlloc, ALLOCATOR_PROPERTIES* pRequest)
@@ -308,13 +308,13 @@ STDMETHODIMP OutputAudioPin::CheckMediaType(const CMediaType* pmt)
 	if (pwfex->wFormatTag != WAVE_FORMAT_PCM && pwfex->wFormatTag != WAVE_FORMAT_EXTENSIBLE)
 		return E_INVALIDARG;
 
-	if (pwfex->nChannels != static_cast<NTV2V4L2Loopback*>(m_pFilter)->GetNumAudioChannels())
+	if (pwfex->nChannels != static_cast<NTV2VCAM*>(m_pFilter)->GetNumAudioChannels())
 		return E_INVALIDARG;
 
-	if (pwfex->nSamplesPerSec != static_cast<NTV2V4L2Loopback*>(m_pFilter)->GetAudioSampleRate())
+	if (pwfex->nSamplesPerSec != static_cast<NTV2VCAM*>(m_pFilter)->GetAudioSampleRate())
 		return E_INVALIDARG;
 
-	if (pwfex->wBitsPerSample != static_cast<NTV2V4L2Loopback*>(m_pFilter)->GetAudioBitsPerSample())
+	if (pwfex->wBitsPerSample != static_cast<NTV2VCAM*>(m_pFilter)->GetAudioBitsPerSample())
 		return E_INVALIDARG;
 
 	if (pwfex->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
@@ -329,7 +329,7 @@ STDMETHODIMP OutputAudioPin::CheckMediaType(const CMediaType* pmt)
 
 HRESULT OutputAudioPin::GetMediaType(CMediaType* pMediaType)
 {
-	if (static_cast<NTV2V4L2Loopback*>(m_pFilter)->Initialize())
+	if (static_cast<NTV2VCAM*>(m_pFilter)->Initialize())
 		return CopyMediaType(pMediaType, &m_mt);
 
 	return E_FAIL;
@@ -337,7 +337,7 @@ HRESULT OutputAudioPin::GetMediaType(CMediaType* pMediaType)
 
 HRESULT OutputAudioPin::FillBuffer(IMediaSample* pSample)
 {
-	return static_cast<NTV2V4L2Loopback*>(m_pFilter)->GetNextFrame(this, pSample);
+	return static_cast<NTV2VCAM*>(m_pFilter)->GetNextFrame(this, pSample);
 }
 
 HRESULT OutputAudioPin::DecideBufferSize(IMemAllocator* pAlloc, ALLOCATOR_PROPERTIES* pRequest)
@@ -352,7 +352,7 @@ HRESULT OutputAudioPin::DecideBufferSize(IMemAllocator* pAlloc, ALLOCATOR_PROPER
 		return E_UNEXPECTED;
 
 	pRequest->cBuffers = 1;
-	pRequest->cbBuffer = gAudMaxSizeBytes * static_cast<NTV2V4L2Loopback*>(m_pFilter)->GetNumAudioLinks();
+	pRequest->cbBuffer = gAudMaxSizeBytes * static_cast<NTV2VCAM*>(m_pFilter)->GetNumAudioLinks();
 
 	ALLOCATOR_PROPERTIES Actual;
 	HRESULT hr = pAlloc->SetProperties(pRequest, &Actual);
@@ -490,35 +490,35 @@ STDMETHODIMP OutputAudioPin::GetStreamCaps(int iIndex, AM_MEDIA_TYPE** ppmt, BYT
 	return S_OK;
 }
 
-CUnknown* WINAPI NTV2V4L2Loopback::CreateInstance(LPUNKNOWN pUnk, HRESULT* phr)
+CUnknown* WINAPI NTV2VCAM::CreateInstance(LPUNKNOWN pUnk, HRESULT* phr)
 {
-	NTV2V4L2Loopback* pFilter = new NTV2V4L2Loopback(pUnk, phr);
+	NTV2VCAM* pFilter = new NTV2VCAM(pUnk, phr);
 	if (pFilter == NULL)
 		*phr = E_OUTOFMEMORY;
 	return pFilter;
 }
 
-STDMETHODIMP NTV2V4L2Loopback::QueryInterface(REFIID riid, void** ppv)
+STDMETHODIMP NTV2VCAM::QueryInterface(REFIID riid, void** ppv)
 {
 	return CSource::QueryInterface(riid, ppv);
 }
 
-STDMETHODIMP_(ULONG) NTV2V4L2Loopback::AddRef()
+STDMETHODIMP_(ULONG) NTV2VCAM::AddRef()
 {
 	return CSource::AddRef();
 }
 
-STDMETHODIMP_(ULONG) NTV2V4L2Loopback::Release()
+STDMETHODIMP_(ULONG) NTV2VCAM::Release()
 {
 	return CSource::Release();
 }
 
-STDMETHODIMP NTV2V4L2Loopback::EnumPins(IEnumPins** ppEnum)
+STDMETHODIMP NTV2VCAM::EnumPins(IEnumPins** ppEnum)
 {
 	return CSource::EnumPins(ppEnum);
 }
 
-STDMETHODIMP NTV2V4L2Loopback::FindPin(LPCWSTR Id, IPin** ppPin)
+STDMETHODIMP NTV2VCAM::FindPin(LPCWSTR Id, IPin** ppPin)
 {
 	if (Id == nullptr || ppPin == nullptr)
 		return E_POINTER;
@@ -534,7 +534,7 @@ STDMETHODIMP NTV2V4L2Loopback::FindPin(LPCWSTR Id, IPin** ppPin)
 	return VFW_E_NOT_FOUND;
 }
 
-STDMETHODIMP NTV2V4L2Loopback::QueryFilterInfo(FILTER_INFO* pInfo)
+STDMETHODIMP NTV2VCAM::QueryFilterInfo(FILTER_INFO* pInfo)
 {
 	if (!pInfo)
 		return E_POINTER;
@@ -547,7 +547,7 @@ STDMETHODIMP NTV2V4L2Loopback::QueryFilterInfo(FILTER_INFO* pInfo)
 	return NOERROR;
 }
 
-STDMETHODIMP NTV2V4L2Loopback::JoinFilterGraph(IFilterGraph* pGraph, LPCWSTR pName)
+STDMETHODIMP NTV2VCAM::JoinFilterGraph(IFilterGraph* pGraph, LPCWSTR pName)
 {
 	m_pGraph = pGraph;
 	if (m_pGraph)
@@ -555,12 +555,12 @@ STDMETHODIMP NTV2V4L2Loopback::JoinFilterGraph(IFilterGraph* pGraph, LPCWSTR pNa
 	return NOERROR;
 }
 
-STDMETHODIMP NTV2V4L2Loopback::QueryVendorInfo(LPWSTR* pVendorInfo)
+STDMETHODIMP NTV2VCAM::QueryVendorInfo(LPWSTR* pVendorInfo)
 {
 	return S_OK;
 }
 
-NTV2V4L2Loopback::NTV2V4L2Loopback(LPUNKNOWN pUnk, HRESULT* phr)
+NTV2VCAM::NTV2VCAM(LPUNKNOWN pUnk, HRESULT* phr)
 	: CSource(NAME(VCAM_FILTER_NAME), pUnk, CLSID_VirtualWebcam)
 	, mVideos(MAX_VIDEOS)
 	, mAudios(MAX_AUDIOS)
@@ -601,7 +601,7 @@ NTV2V4L2Loopback::NTV2V4L2Loopback(LPUNKNOWN pUnk, HRESULT* phr)
 }
 #endif	//	AJA_WINDOWS
 
-NTV2V4L2Loopback::~NTV2V4L2Loopback()
+NTV2VCAM::~NTV2VCAM()
 {
 	cout << "Good bye!" << endl;
 
@@ -609,7 +609,7 @@ NTV2V4L2Loopback::~NTV2V4L2Loopback()
 	if (mLbDisplay > 0)
 	{
 		close(mLbDisplay);
-#if not defined (AJA_BUILD_FOR_LINUX_KERNEL_5_15)
+#if !defined(AJA_MISSING_DEV_V4L2LOOPBACK)
 		if (ioctl(mLbDevice, V4L2LOOPBACK_CTL_REMOVE, mLbDeviceNR) == -1)
 		{
 			cerr << "## ERROR (" << errno << "): failed to remove V4L2 device for output" << endl;
@@ -618,7 +618,7 @@ NTV2V4L2Loopback::~NTV2V4L2Loopback()
 		}
 #endif
 	}
-#if not defined (AJA_BUILD_FOR_LINUX_KERNEL_5_15)
+#if !defined(AJA_MISSING_DEV_V4L2LOOPBACK)
 	if (mLbDevice > 0)
 		close(mLbDevice);
 #endif
@@ -640,7 +640,7 @@ NTV2V4L2Loopback::~NTV2V4L2Loopback()
 }
 
 #if defined (AJALinux)
-bool NTV2V4L2Loopback::Initialize (int argc, const char** argv)
+bool NTV2VCAM::Initialize (int argc, const char** argv)
 {
 	{
 		int showVersion(0), useHDMI(0), inputChannel(0);
@@ -681,7 +681,7 @@ bool NTV2V4L2Loopback::Initialize (int argc, const char** argv)
 		mInputChannel = NTV2Channel(inputChannel ? inputChannel-1 : 0);
 	}
 #elif defined (AJA_WINDOWS)
-bool NTV2V4L2Loopback::Initialize()
+bool NTV2VCAM::Initialize()
 {
 	if (mInitialized)
 		return true;
@@ -1046,7 +1046,7 @@ bool NTV2V4L2Loopback::Initialize()
 	}
 
 #if defined (AJALinux)
-#if not defined (AJA_BUILD_FOR_LINUX_KERNEL_5_15)
+#if !defined(AJA_MISSING_DEV_V4L2LOOPBACK)
 	mLbDevice = open(V4L2_DRIVER_NAME, O_RDONLY);
 	if (mLbDevice == -1)
 	{
@@ -1195,7 +1195,7 @@ bool NTV2V4L2Loopback::Initialize()
 }
 
 #if defined (AJALinux)
-bool NTV2V4L2Loopback::Run(void)
+bool NTV2VCAM::Run(void)
 {
 	mDevice.AutoCirculateStop(mActiveFrameStores);
 
@@ -1268,7 +1268,7 @@ bool NTV2V4L2Loopback::Run(void)
 #endif
 
 #if defined (AJA_WINDOWS)
-HRESULT NTV2V4L2Loopback::GetNextFrame(OutputPin* pPin, IMediaSample* pSample)
+HRESULT NTV2VCAM::GetNextFrame(OutputPin* pPin, IMediaSample* pSample)
 {
 	ASSERT(mInitialized);
 
@@ -1376,14 +1376,14 @@ HRESULT NTV2V4L2Loopback::GetNextFrame(OutputPin* pPin, IMediaSample* pSample)
 }
 #endif
 
-string NTV2V4L2Loopback::ULWordToString(const ULWord inNum)
+string NTV2VCAM::ULWordToString(const ULWord inNum)
 {
 	ostringstream oss;
 	oss << inNum;
 	return oss.str();
 }
 
-bool NTV2V4L2Loopback::Get4KInputFormat(NTV2VideoFormat& inOutVideoFormat)
+bool NTV2VCAM::Get4KInputFormat(NTV2VideoFormat& inOutVideoFormat)
 {
 	static struct VideoFormatPair
 	{
@@ -1426,7 +1426,7 @@ bool NTV2V4L2Loopback::Get4KInputFormat(NTV2VideoFormat& inOutVideoFormat)
 	return false;
 }
 
-void NTV2V4L2Loopback::SetupAudio()
+void NTV2VCAM::SetupAudio()
 {
 #if defined (AJALinux)
 	if (mAudioDevice.empty())
@@ -1505,7 +1505,7 @@ void NTV2V4L2Loopback::SetupAudio()
 	}
 }
 
-bool NTV2V4L2Loopback::GetInputRouting(NTV2XptConnections& conns, const bool isInputRGB)
+bool NTV2VCAM::GetInputRouting(NTV2XptConnections& conns, const bool isInputRGB)
 {
 	const bool				isFrameRGB(::IsRGBFormat(mPixelFormat));
 	const NTV2InputXptID	fbIXpt(::GetFrameBufferInputXptFromChannel(mInputChannel));
@@ -1530,7 +1530,7 @@ bool NTV2V4L2Loopback::GetInputRouting(NTV2XptConnections& conns, const bool isI
 	return !conns.empty();
 }
 
-bool NTV2V4L2Loopback::GetInputRouting4K(NTV2XptConnections& conns, const bool isInputRGB)
+bool NTV2VCAM::GetInputRouting4K(NTV2XptConnections& conns, const bool isInputRGB)
 {
 	UWord sdi(0), mux(0), csc(0), fb(0), path(0);
 	NTV2InputXptID in(NTV2_INPUT_CROSSPOINT_INVALID);
@@ -1686,7 +1686,7 @@ bool NTV2V4L2Loopback::GetInputRouting4K(NTV2XptConnections& conns, const bool i
 }
 
 #if defined (AJALinux)
-int NTV2V4L2Loopback::ExtractNumber(const char* str)
+int NTV2VCAM::ExtractNumber(const char* str)
 {
 	string s(str);
 	int i = s.length() - 1;
@@ -1696,7 +1696,7 @@ int NTV2V4L2Loopback::ExtractNumber(const char* str)
 }
 #endif
 
-int NTV2V4L2Loopback::GetFps()
+int NTV2VCAM::GetFps()
 {
 	NTV2FrameRate frameRate = NTV2_FRAMERATE_INVALID;
 	mDevice.GetFrameRate(frameRate, mInputChannel);
@@ -1736,7 +1736,7 @@ int NTV2V4L2Loopback::GetFps()
 }
 
 #if defined (AJA_WINDOWS)
-EnumPins::EnumPins(NTV2V4L2Loopback* filter_, EnumPins* pEnum)
+EnumPins::EnumPins(NTV2VCAM* filter_, EnumPins* pEnum)
 	: mpFilter(filter_)
 	, mCurPin(pEnum ? pEnum->mCurPin : 0)
 {

@@ -32,7 +32,7 @@ add_subdirectory(ntv2player4k)
 add_subdirectory(ntv2player8k)
 add_subdirectory(ntv2streamplayer)
 add_subdirectory(ntv2switchbitfile)
-add_subdirectory(ntv2v4l2loopback)
+add_subdirectory(ntv2vcam)
 
 if(NOT AJANTV2_BUILD_OPENSOURCE)
     add_subdirectory(ntv2ccgrabber)  

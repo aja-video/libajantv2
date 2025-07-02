@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: MIT
 #
 #    @file		CMakeLists.txt
-#    @brief		Implementation of NTV2V4L2Loopback class.
+#    @brief		CMake build instructions for NTV2VCAM demo.
 #    @copyright	(C) 2025 AJA Video Systems, Inc.  All rights reserved.
 #
 
-project(ntv2v4l2loopback)
+project(ntv2vcam)
 
 set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
@@ -14,8 +14,8 @@ set(TARGET_INCLUDE_DIRS
 
 set(DEMO_APP_SOURCES
     main.cpp
-    ntv2v4l2loopback.cpp
-    ntv2v4l2loopback.h
+    ntv2vcam.cpp
+    ntv2vcam.h
 )
 
 set(DEMO_COMMON_SOURCES
@@ -34,7 +34,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     link_directories(${ALSA_LIBRARY_DIRS})
     list(APPEND TARGET_LINK_LIBS ${ALSA_LIBRARIES} rt pthread dl)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    list(APPEND DEMO_APP_SOURCES ntv2v4l2loopback.def)
+    list(APPEND DEMO_APP_SOURCES ntv2vcam.def)
     add_subdirectory(baseclasses)
 
     list(APPEND TARGET_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/baseclasses)
@@ -68,11 +68,11 @@ install(TARGETS ${PROJECT_NAME}
 
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${DEMO_COMMON_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos)
-	install(FILES ${DEMO_APP_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2v4l2loopback)
+	install(FILES ${DEMO_APP_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2vcam)
 endif()
 if (AJA_INSTALL_CMAKE)
-	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2v4l2loopback)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2vcam)
 endif()
 if (AJA_INSTALL_MISC)
-	install(FILES Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2v4l2loopback)
+	install(FILES Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2vcam)
 endif()
