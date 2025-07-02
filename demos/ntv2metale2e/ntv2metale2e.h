@@ -1,73 +1,72 @@
 /* SPDX-License-Identifier: MIT */
 /**
-	@file	ntv2overlay.h
-	@brief	Header file for the NTV2Overlay demonstration class.
-	@copyright	(C) 2012-2022 AJA Video Systems, Inc.  All rights reserved.
+    @file		ntv2metale2e.cpp
+	@brief		Header file for NTV2OutputTestPattern demonstration class
+	@copyright	(C) 2013-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
-#ifndef _NTV2OVERLAY_H
-#define _NTV2OVERLAY_H
 
-#include "ntv2card.h"
-#include "ntv2formatdescriptor.h"
+#ifndef _NTV2METALE2E_H
+#define _NTV2METALE2E_H
+
 #include "ntv2democommon.h"
-#include "ajabase/system/thread.h"
-
-typedef BurnConfig	OverlayConfig;
-
 
 /**
-	@brief	Outputs live input video overlaid with image having transparency.
+	@brief	I generate and transfer a test pattern into an AJA device's frame buffer for steady-state
+			playout using NTV2TestPatternGen::DrawTestPattern and CNTV2Card::DMAWriteFrame.
 **/
-class NTV2Overlay
+class NTV2MetalE2E
 {
 	//	Public Instance Methods
 	public:
-						NTV2Overlay (const OverlayConfig & inConfig);	///< @brief	Construct from OverlayConfig
-		virtual			~NTV2Overlay ();				///< @brief	My destructor
-		AJAStatus		Init (void);					///< @brief	Prepares me to Run()
-		AJAStatus		Run (void);						///< @brief	Runs me (only after Init called)
-		void			Quit (void);					///< @brief	Gracefully stops me
+
+		/**
+			@brief	Constructs me using the given configuration settings.
+			@note	I'm not completely initialized and ready for use until after my Init method has been called.
+			@param[in]	inConfig		Specifies the configuration parameters.
+		**/
+        NTV2MetalE2E (void);
+
+        ~NTV2MetalE2E (void);
+
+		/**
+			@brief		Initializes me and prepares me to Run.
+			@return		AJA_STATUS_SUCCESS if successful; otherwise another AJAStatus code if unsuccessful.
+		**/
+		AJAStatus		Init (void);
+
+		/**
+			@brief		Generates, transfers and displays the test pattern on the output.
+			@return		AJA_STATUS_SUCCESS if successful; otherwise another AJAStatus code if unsuccessful.
+			@note		Do not call this method without first calling my Init method.
+		**/
+		AJAStatus		EmitPattern (void);
+
 
 	//	Protected Instance Methods
 	protected:
-		AJAStatus		SetupVideo (void);				///< @brief	Performs all video setup
-		AJAStatus		SetupAudio (void);				///< @brief	Performs all audio setup
-		AJAStatus		SetupCaptureBuffers (void);		///< @brief	Allocates capture buffers & ring
-		void			ReleaseCaptureBuffers (void);	///< @brief	Frees capture buffers & ring
-		AJAStatus		SetupOverlayBug (void);			///< @brief	Sets up overlay "bug"
-		NTV2VideoFormat	WaitForStableInputSignal (void);///< @brief	Waits for stable input signal
-		bool			IsInputSignalRGB (void);		///< @returns	true if input signal is RGB
-		void			RouteInputSignal (void);		///< @brief	Performs input routing
-		void			RouteOverlaySignal (void);		///< @brief	Performs overlay routing
-		void			RouteOutputSignal (void);		///< @brief	Performs output routing
-		void			StartOutputThread (void);		///< @brief	Starts output thread
-		void			OutputThread (void);			///< @brief	The output/playout thread function
-		void			StartInputThread (void);		///< @brief	Starts input thread
-		void			InputThread (void);				///< @brief	The input/capture thread function
-		inline UWord	MixerNum (void)	{return mConfig.fInputChannel / 2;}	///< @returns	zero-based Mixer index number
+		/**
+            @brief		Sets up my AJA device's genlock
+			@return		AJA_STATUS_SUCCESS if successful; otherwise another AJAStatus code if unsuccessful.
+		**/
+        AJAStatus		SetUpGenlock (void);
 
-	//	Protected Class Methods
-	protected:
-		static void	OutputThreadStatic (AJAThread * pThread, void * pInstance);	/// @brief	Static output/playout thread function
-		static void	InputThreadStatic (AJAThread * pThread, void * pInstance);	/// @brief	Static input/capture thread function
+        /**
+            @brief		Sets up my AJA device's video/output format.
+            @return		AJA_STATUS_SUCCESS if successful; otherwise another AJAStatus code if unsuccessful.
+        **/
+        AJAStatus		SetUpVideo (void);
+
+		/**
+			@brief	Sets up board routing for playout.
+		**/
+        void			RouteE2ESignal (void);
+
 
 	//	Private Member Data
 	private:
-		OverlayConfig			mConfig;			///< @brief	My configuration info
-		AJAThread				mPlayThread;		///< @brief	My output thread object
-		AJAThread				mCaptureThread;		///< @brief	My input thread object
-		CNTV2Card				mDevice;			///< @brief	My CNTV2Card instance
-		NTV2VideoFormat			mVideoFormat;		///< @brief	Input video format (for change detection)
-		NTV2Buffer				mBug;				///< @brief	Overlay "bug" image buffer
-		NTV2RasterInfo			mBugRasterInfo;		///< @brief	Overlay "bug" raster info
-		NTV2TaskMode			mSavedTaskMode;		///< @brief	For restoring prior state
-		NTV2FrameDataArray		mBuffers;			///< @brief	Buffers used in mAVCircularBuffer
-		FrameDataRingBuffer		mAVCircularBuffer;	///< @brief	AJACircularBuffer (producer/consumer buffer ring)
-		const NTV2PixelFormat	mInputPixFormat;	///< @brief	Capture buffer pixel format
-		const NTV2PixelFormat	mOutputPixFormat;	///< @brief	Output buffer pixel format
-		bool					mGlobalQuit;		///< @brief	Set "true" to gracefully stop
+        CNTV2Card				mDevice;			///< @brief	My CNTV2Card instance
 
-};	//	NTV2Overlay
+};	//	NTV2MetalE2E
 
-#endif	//	_NTV2OVERLAY_H
+#endif	//	_NTV2MetalE2E_H

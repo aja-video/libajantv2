@@ -6,11 +6,12 @@ set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../../ajantv2/includes)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	# noop
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	find_library(FOUNDATION_FRAMEWORK Foundation)
-	list(APPEND TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
+	set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	list(APPEND TARGET_LINK_LIBS dl pthread rt)
+	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
 set(DEMO_APP_SOURCES
@@ -47,4 +48,7 @@ if (AJA_INSTALL_SOURCES)
 endif()
 if (AJA_INSTALL_CMAKE)
 	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2metale2e)
+endif()
+if (AJA_INSTALL_MISC)
+	install(FILES Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2metale2e)
 endif()

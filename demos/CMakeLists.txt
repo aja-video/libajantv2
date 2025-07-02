@@ -47,6 +47,10 @@ if (NOT AJA_DISABLE_NVIDIA)
     message(STATUS "Adding NVIDIA demos...")
 endif()
 
+if(NOT AJANTV2_BUILD_OPENSOURCE)
+    add_subdirectory(ntv2metale2e)
+endif()
+
 if(AJA_INSTALL_CMAKE)
     install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos)
 endif()
