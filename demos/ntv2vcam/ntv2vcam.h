@@ -144,7 +144,10 @@ DEFINE_GUID(IID_IAjaFilterInterface,
 				: buffer(size), head(0), tail(0), maxSize(size), isFull(false)
 			{
 			}
-	
+
+			bool isEmpty() const			{return !isFull && (head == tail);}
+			size_t capacity() const			{return maxSize;}
+
 			void reset()
 			{
 				std::lock_guard<std::mutex> lock(mtx);
@@ -152,7 +155,7 @@ DEFINE_GUID(IID_IAjaFilterInterface,
 				tail = 0;
 				isFull = false;
 			}
-	
+
 			bool push (const T& item)
 			{
 				std::lock_guard<std::mutex> lock(mtx);
@@ -163,7 +166,7 @@ DEFINE_GUID(IID_IAjaFilterInterface,
 				isFull = head == tail;
 				return true;
 			}
-	
+
 			bool pop (T& item)
 			{
 				std::lock_guard<std::mutex> lock(mtx);
@@ -175,12 +178,7 @@ DEFINE_GUID(IID_IAjaFilterInterface,
 				isFull = false;
 				return true;
 			}
-	
-			bool isEmpty() const
-			{
-				return !isFull && (head == tail);
-			}
-	
+
 			size_t size() const
 			{
 				size_t size = maxSize;
@@ -193,12 +191,7 @@ DEFINE_GUID(IID_IAjaFilterInterface,
 				}
 				return size;
 			}
-	
-			size_t capacity() const
-			{
-				return maxSize;
-			}
-	};	//	CircularBuffer
+		};	//	CircularBuffer
 
 	class OutputPin
 	{
@@ -212,30 +205,31 @@ DEFINE_GUID(IID_IAjaFilterInterface,
 		public:
 			OutputVideoPin (HRESULT* phr, CSource* pFilter, LPCWSTR pPinName);
 			~OutputVideoPin();
-	
+			NTV2VCAM * VCAM (void) const	{return reinterpret_cast<NTV2VCAM*>(m_pFilter);}
+
 		STDMETHODIMP QueryInterface(REFIID riid, void** ppv) override;
 		STDMETHODIMP_(ULONG) AddRef() override;
 		STDMETHODIMP_(ULONG) Release() override;
-	
+
 		// CSourceStream methods
 		STDMETHODIMP CheckMediaType(const CMediaType* pMediaType) override;
 		STDMETHODIMP GetMediaType(CMediaType* pMediaType) override;
 		STDMETHODIMP FillBuffer(IMediaSample* pSample) override;
-	
+
 		// CBaseOutputPin methods
 		STDMETHODIMP DecideBufferSize(IMemAllocator* pAlloc, ALLOCATOR_PROPERTIES* pRequest) override;
-	
+
 		// CBasePin methods
 		STDMETHODIMP EnumMediaTypes(IEnumMediaTypes** ppEnum) override;
-	
+
 		// IQualityControl methods
 		STDMETHODIMP Notify(IBaseFilter* pSender, Quality q) override;
-	
+
 		// IKsPropertySet methods
 		STDMETHODIMP Set(REFGUID guidPropSet, DWORD dwPropID, LPVOID pInstanceData, DWORD cbInstanceData, LPVOID pPropData, DWORD cbPropData) override;
 		STDMETHODIMP Get(REFGUID guidPropSet, DWORD dwPropID, LPVOID pInstanceData, DWORD cbInstanceData, LPVOID pPropData, DWORD cbPropData, DWORD* pcbReturned) override;
 		STDMETHODIMP QuerySupported(REFGUID guidPropSet, DWORD dwPropID, DWORD* pTypeSupport) override;
-	
+
 		// IAMStreamConfig methods
 		STDMETHODIMP SetFormat(AM_MEDIA_TYPE* pmt) override;
 		STDMETHODIMP GetFormat(AM_MEDIA_TYPE** ppmt) override;
@@ -249,6 +243,7 @@ DEFINE_GUID(IID_IAjaFilterInterface,
 		public:
 			OutputAudioPin(HRESULT* phr, CSource* pFilter, LPCWSTR pPinName);
 			~OutputAudioPin();
+			NTV2VCAM * VCAM (void) const	{return reinterpret_cast<NTV2VCAM*>(m_pFilter);}
 
 			STDMETHODIMP QueryInterface(REFIID riid, void** ppv) override;
 			STDMETHODIMP_(ULONG) AddRef() override;

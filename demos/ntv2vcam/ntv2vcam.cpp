@@ -16,7 +16,7 @@ static const uint32_t gAudMaxSizeBytes(256 * 1024);	//	Max audio bytes for singl
 		(void)inSignal;
 		gGlobalQuit = true;
 	}
-#else
+#else	//	begin AJA_WINDOWS section
 	OutputVideoPin::OutputVideoPin(HRESULT* phr, CSource* pFilter, LPCWSTR pPinName)
 		: CSourceStream(VCAM_VIDEO_PIN_NAME, phr, pFilter, pPinName)
 	{
@@ -73,7 +73,7 @@ static const uint32_t gAudMaxSizeBytes(256 * 1024);	//	Max audio bytes for singl
 
 	HRESULT OutputVideoPin::GetMediaType(CMediaType* pMediaType)
 	{
-		if (reinterpret_cast<NTV2VCAM*>(m_pFilter)->Initialize())
+		if (VCAM()->Initialize())
 			return CopyMediaType(pMediaType, &m_mt);
 
 		return E_FAIL;
@@ -81,7 +81,7 @@ static const uint32_t gAudMaxSizeBytes(256 * 1024);	//	Max audio bytes for singl
 
 	HRESULT OutputVideoPin::FillBuffer(IMediaSample* pSample)
 	{
-		return reinterpret_cast<NTV2VCAM*>(m_pFilter)->GetNextFrame(this, pSample);
+		return VCAM()->GetNextFrame(this, pSample);
 	}
 
 	HRESULT OutputVideoPin::DecideBufferSize(IMemAllocator* pAlloc, ALLOCATOR_PROPERTIES* pRequest)
@@ -298,13 +298,13 @@ static const uint32_t gAudMaxSizeBytes(256 * 1024);	//	Max audio bytes for singl
 		if (pwfex->wFormatTag != WAVE_FORMAT_PCM && pwfex->wFormatTag != WAVE_FORMAT_EXTENSIBLE)
 			return E_INVALIDARG;
 
-		if (pwfex->nChannels != reinterpret_cast<NTV2VCAM*>(m_pFilter)->GetNumAudioChannels())
+		if (pwfex->nChannels != VCAM()->GetNumAudioChannels())
 			return E_INVALIDARG;
 
-		if (pwfex->nSamplesPerSec != reinterpret_cast<NTV2VCAM*>(m_pFilter)->GetAudioSampleRate())
+		if (pwfex->nSamplesPerSec != VCAM()->GetAudioSampleRate())
 			return E_INVALIDARG;
 
-		if (pwfex->wBitsPerSample != reinterpret_cast<NTV2VCAM*>(m_pFilter)->GetAudioBitsPerSample())
+		if (pwfex->wBitsPerSample != VCAM()->GetAudioBitsPerSample())
 			return E_INVALIDARG;
 
 		if (pwfex->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
@@ -319,7 +319,7 @@ static const uint32_t gAudMaxSizeBytes(256 * 1024);	//	Max audio bytes for singl
 
 	HRESULT OutputAudioPin::GetMediaType(CMediaType* pMediaType)
 	{
-		if (reinterpret_cast<NTV2VCAM*>(m_pFilter)->Initialize())
+		if (VCAM()->Initialize())
 			return CopyMediaType(pMediaType, &m_mt);
 
 		return E_FAIL;
@@ -327,7 +327,7 @@ static const uint32_t gAudMaxSizeBytes(256 * 1024);	//	Max audio bytes for singl
 
 	HRESULT OutputAudioPin::FillBuffer(IMediaSample* pSample)
 	{
-		return reinterpret_cast<NTV2VCAM*>(m_pFilter)->GetNextFrame(this, pSample);
+		return VCAM()->GetNextFrame(this, pSample);
 	}
 
 	HRESULT OutputAudioPin::DecideBufferSize(IMemAllocator* pAlloc, ALLOCATOR_PROPERTIES* pRequest)
@@ -342,7 +342,7 @@ static const uint32_t gAudMaxSizeBytes(256 * 1024);	//	Max audio bytes for singl
 			return E_UNEXPECTED;
 
 		pRequest->cBuffers = 1;
-		pRequest->cbBuffer = gAudMaxSizeBytes * reinterpret_cast<NTV2VCAM*>(m_pFilter)->GetNumAudioLinks();
+		pRequest->cbBuffer = gAudMaxSizeBytes * VCAM()->GetNumAudioLinks();
 
 		ALLOCATOR_PROPERTIES Actual;
 		HRESULT hr = pAlloc->SetProperties(pRequest, &Actual);
@@ -586,13 +586,13 @@ static const uint32_t gAudMaxSizeBytes(256 * 1024);	//	Max audio bytes for singl
 		mInputChannel = NTV2_CHANNEL1;
 		mPixelFormatStr = "uyvy";
 	}
-#endif	//	else AJA_WINDOWS
+#endif	//	end AJA_WINDOWS section
 
 NTV2VCAM::~NTV2VCAM()
 {
 	cout << "## NOTE: NTV2VCAM terminated" << endl;
 
-#if defined (AJALinux)
+	#if defined(AJALinux)
 	if (mLbDisplay > 0)
 	{
 		close(mLbDisplay);
@@ -615,7 +615,7 @@ NTV2VCAM::~NTV2VCAM()
 		snd_pcm_drain(mPcmHandle);
 		snd_pcm_close(mPcmHandle);
 	}
-#endif	//	AJALinux
+	#endif	//	AJALinux
 
 	mDevice.AutoCirculateStop(mInputChannel);
 
@@ -626,10 +626,10 @@ NTV2VCAM::~NTV2VCAM()
 	}
 }
 
-#if defined (AJALinux)
+#if defined(AJALinux)
 bool NTV2VCAM::Initialize (int argc, const char** argv)
 {
-	{
+	{	//	Parse command-line params...
 		int showVersion(0), useHDMI(0), inputChannel(0);
 		char * pAjaDevSpec = AJA_NULL;
 		char * pPixFormat = AJA_NULL;
@@ -667,13 +667,15 @@ bool NTV2VCAM::Initialize (int argc, const char** argv)
 		}
 		mInputChannel = NTV2Channel(inputChannel ? inputChannel-1 : 0);
 	}
-#elif defined (AJA_WINDOWS)
+
+#elif defined(AJA_WINDOWS)
+
 bool NTV2VCAM::Initialize()
 {
 	if (mInitialized)
 		return true;
-
 #endif	//	AJA_WINDOWS or AJALinux
+
 	if (mAjaDevice.empty())
 	{
 		cerr << "## ERROR (" << errno << "): Parameter 'AJA device' is required." << endl;
@@ -692,7 +694,7 @@ bool NTV2VCAM::Initialize()
 		mErrorCode = AJA_VW_MISSINGARGS;
 		return false;
 	}
-	#if defined (AJALinux)
+	#if defined(AJALinux)
 	if (mVideoDevice.empty())
 	{
 		cerr << "## ERROR (" << errno << "): Parameter 'video device' is required." << endl;
@@ -1032,7 +1034,7 @@ bool NTV2VCAM::Initialize()
 		return false;
 	}
 
-	#if defined (AJALinux)
+	#if defined(AJALinux)
 		#if !defined(AJA_MISSING_DEV_V4L2LOOPBACK)
 		mLbDevice = open(V4L2_DRIVER_NAME, O_RDONLY);
 		if (mLbDevice == -1)
@@ -1411,7 +1413,7 @@ void NTV2VCAM::SetupAudio()
 		mErrorCode = AJA_VW_CONFIGAUDIOSYSTEMFAILED;
 		return;
 	}
-	#if defined (AJALinux)
+	#if defined(AJALinux)
 	int pcmReturn = snd_pcm_open(&mPcmHandle, mAudioDevice.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
 	if (pcmReturn < 0)
 	{
