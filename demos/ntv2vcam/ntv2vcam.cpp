@@ -4,624 +4,611 @@
 	@brief		Implementation of NTV2VCAM class.
 	@copyright	(C) 2025 AJA Video Systems, Inc.  All rights reserved.
 **/
-
 #include "ntv2vcam.h"
 
-//Globals
 static const ULWord	gDemoAppSignature NTV2_FOURCC('V', 'C', 'A', 'M');
-static bool gGlobalQuit(false);
-static void SignalHandler(int inSignal)
-{
-	(void)inSignal;
-	gGlobalQuit = true;
-}
+static const uint32_t gAudMaxSizeBytes(256 * 1024);	//	Max audio bytes for single frame (14.98fps 16ch 48kHz)
 
-/**
-	@brief	The maximum number of bytes of 48KHz audio that can be transferred for a single frame.
-			Worst case, assuming 16 channels of audio (max), 4 bytes per sample, and 67 msec per frame
-			(assuming the lowest possible frame rate of 14.98 fps)...
-			48,000 samples per second requires 3,204 samples x 4 bytes/sample x 16 = 205,056 bytes
-			201K min will suffice, with 768 bytes to spare
-			But it could be more efficient for page-aligned (and page-locked) memory to round to 256K.
-**/
-static const uint32_t gAudMaxSizeBytes(256 * 1024);
-
-#if defined (AJA_WINDOWS)
-OutputVideoPin::OutputVideoPin(HRESULT* phr, CSource* pFilter, LPCWSTR pPinName)
-	: CSourceStream(VCAM_VIDEO_PIN_NAME, phr, pFilter, pPinName)
-{
-}
-
-OutputVideoPin::~OutputVideoPin()
-{
-}
-
-STDMETHODIMP OutputVideoPin::QueryInterface(REFIID riid, void** ppv)
-{
-	if (!ppv)
-		return E_POINTER;
-
-	*ppv = nullptr;
-
-	if (riid == IID_IKsPropertySet)
-		*ppv = static_cast<IKsPropertySet*>(this);
-	else if (riid == IID_IAMStreamConfig)
-		*ppv = static_cast<IAMStreamConfig*>(this);
-	else
-		return CSourceStream::QueryInterface(riid, ppv);
-
-	AddRef();
-	return S_OK;
-}
-
-STDMETHODIMP_(ULONG) OutputVideoPin::AddRef()
-{
-	return CSourceStream::AddRef();
-}
-
-STDMETHODIMP_(ULONG) OutputVideoPin::Release()
-{
-	return CSourceStream::Release();
-}
-
-STDMETHODIMP OutputVideoPin::CheckMediaType(const CMediaType* pmt)
-{
-	if (!pmt)
-		return E_POINTER;
-
-	if (*pmt->Type() != MEDIATYPE_Video)
-		return E_INVALIDARG;
-
-	if (*pmt->FormatType() != FORMAT_VideoInfo)
-		return E_INVALIDARG;
-
-	if (*pmt->Subtype() != MEDIASUBTYPE_UYVY)
-		return E_INVALIDARG;
-
-	return S_OK;
-}
-
-HRESULT OutputVideoPin::GetMediaType(CMediaType* pMediaType)
-{
-	if (static_cast<NTV2VCAM*>(m_pFilter)->Initialize())
-		return CopyMediaType(pMediaType, &m_mt);
-
-	return E_FAIL;
-}
-
-HRESULT OutputVideoPin::FillBuffer(IMediaSample* pSample)
-{
-	return static_cast<NTV2VCAM*>(m_pFilter)->GetNextFrame(this, pSample);
-}
-
-HRESULT OutputVideoPin::DecideBufferSize(IMemAllocator* pAlloc, ALLOCATOR_PROPERTIES* pRequest)
-{
-	CAutoLock cAutoLock(m_pFilter->pStateLock());
-
-	if (!pAlloc)
-		return E_POINTER;
-
-	VIDEOINFO* pvi = reinterpret_cast<VIDEOINFO*>(m_mt.Format());
-	if (!pvi)
-		return E_UNEXPECTED;
-
-	pRequest->cBuffers = 1;
-	pRequest->cbBuffer = pvi->bmiHeader.biSizeImage;
-
-	ALLOCATOR_PROPERTIES Actual;
-	HRESULT hr = pAlloc->SetProperties(pRequest, &Actual);
-	if (FAILED(hr))
-		return hr;
-
-	if (Actual.cbBuffer < pRequest->cbBuffer)
-		return E_FAIL;
-
-	if (Actual.cBuffers != 1)
-		return E_FAIL;
-
-	return NOERROR;
-}
-
-STDMETHODIMP OutputVideoPin::EnumMediaTypes(IEnumMediaTypes** ppEnum)
-{
-	return CSourceStream::EnumMediaTypes(ppEnum);
-}
-
-STDMETHODIMP OutputVideoPin::Notify(IBaseFilter* pSender, Quality q)
-{
-	return CSourceStream::Notify(pSender, q);
-}
-
-STDMETHODIMP OutputVideoPin::Set(REFGUID guidPropSet, DWORD dwPropID, LPVOID pInstanceData, DWORD cbInstanceData, LPVOID pPropData, DWORD cbPropData)
-{
-	return E_NOTIMPL;
-}
-
-STDMETHODIMP OutputVideoPin::Get(REFGUID guidPropSet, DWORD dwPropID, LPVOID pInstanceData, DWORD cbInstanceData, LPVOID pPropData, DWORD cbPropData, DWORD* pcbReturned)
-{
-	if (guidPropSet != AMPROPSETID_Pin)
-		return E_PROP_SET_UNSUPPORTED;
-
-	if (dwPropID != AMPROPERTY_PIN_CATEGORY)
-		return E_PROP_ID_UNSUPPORTED;
-
-	if (pPropData == NULL && pcbReturned == NULL)
-		return E_POINTER;
-
-	if (pcbReturned)
-		*pcbReturned = sizeof(GUID);
-
-	if (pPropData == NULL)
-		return S_OK;
-
-	if (cbPropData < sizeof(GUID))
-		return E_UNEXPECTED;
-
-	*(GUID*)pPropData = PIN_CATEGORY_CAPTURE;
-
-	return S_OK;
-}
-
-STDMETHODIMP OutputVideoPin::QuerySupported(REFGUID guidPropSet, DWORD dwPropID, DWORD* pTypeSupport)
-{
-	if (guidPropSet != AMPROPSETID_Pin)
-		return E_PROP_SET_UNSUPPORTED;
-
-	if (dwPropID != AMPROPERTY_PIN_CATEGORY)
-		return E_PROP_ID_UNSUPPORTED;
-
-	if (pTypeSupport)
-		*pTypeSupport = KSPROPERTY_SUPPORT_GET;
-
-	return S_OK;
-}
-
-STDMETHODIMP OutputVideoPin::SetFormat(AM_MEDIA_TYPE* pmt)
-{
-	if (!pmt)
-		return E_POINTER;
-
-	if (pmt->majortype == m_mt.majortype &&
-		pmt->subtype == m_mt.subtype &&
-		pmt->formattype == m_mt.formattype)
+#if !defined(AJA_WINDOWS)
+	static bool gGlobalQuit(false);
+	static void SignalHandler(int inSignal)
 	{
-		m_mt = *pmt;
+		(void)inSignal;
+		gGlobalQuit = true;
+	}
+#else
+	OutputVideoPin::OutputVideoPin(HRESULT* phr, CSource* pFilter, LPCWSTR pPinName)
+		: CSourceStream(VCAM_VIDEO_PIN_NAME, phr, pFilter, pPinName)
+	{
+	}
+
+	OutputVideoPin::~OutputVideoPin()
+	{
+	}
+
+	STDMETHODIMP OutputVideoPin::QueryInterface(REFIID riid, void** ppv)
+	{
+		if (!ppv)
+			return E_POINTER;
+
+		*ppv = nullptr;
+
+		if (riid == IID_IKsPropertySet)
+			*ppv = static_cast<IKsPropertySet*>(this);
+		else if (riid == IID_IAMStreamConfig)
+			*ppv = static_cast<IAMStreamConfig*>(this);
+		else
+			return CSourceStream::QueryInterface(riid, ppv);
+
+		AddRef();
 		return S_OK;
 	}
 
-	return VFW_E_INVALIDMEDIATYPE;
-}
-
-STDMETHODIMP OutputVideoPin::GetFormat(AM_MEDIA_TYPE** ppmt)
-{
-	if (!ppmt)
-		return E_POINTER;
-
-	*ppmt = CreateMediaType(&m_mt);
-	if (!*ppmt)
-		return E_OUTOFMEMORY;
-
-	return S_OK;
-}
-
-STDMETHODIMP OutputVideoPin::GetNumberOfCapabilities(int* piCount, int* piSize)
-{
-	if (!piCount || !piSize)
-		return E_POINTER;
-
-	*piCount = 1;
-	*piSize = sizeof(VIDEO_STREAM_CONFIG_CAPS);
-
-	return S_OK;
-}
-
-STDMETHODIMP OutputVideoPin::GetStreamCaps(int iIndex, AM_MEDIA_TYPE** ppmt, BYTE* pSCC)
-{
-	if (!ppmt || !pSCC)
-		return E_POINTER;
-
-	if (iIndex < 0 || iIndex >= 1)
-		return S_FALSE;
-
-	CMediaType mediaType;
-	if (FAILED(GetMediaType(&mediaType)))
-		return E_FAIL;
-	*ppmt = CreateMediaType(&mediaType);
-	if (!*ppmt)
-		return E_OUTOFMEMORY;
-
-	VIDEOINFO* vih = reinterpret_cast<decltype(vih)>((*ppmt)->pbFormat);
-	VIDEO_STREAM_CONFIG_CAPS* caps = reinterpret_cast<VIDEO_STREAM_CONFIG_CAPS*>(pSCC);
-	ZeroMemory(caps, sizeof(VIDEO_STREAM_CONFIG_CAPS));
-	caps->guid = FORMAT_VideoInfo;
-	caps->MinFrameInterval = vih->AvgTimePerFrame;
-	caps->MaxFrameInterval = vih->AvgTimePerFrame;
-	caps->MinOutputSize.cx = vih->bmiHeader.biWidth;
-	caps->MinOutputSize.cy = vih->bmiHeader.biHeight;
-	caps->MaxOutputSize = caps->MinOutputSize;
-	caps->InputSize = caps->MinOutputSize;
-	caps->MinCroppingSize = caps->MinOutputSize;
-	caps->MaxCroppingSize = caps->MinOutputSize;
-	caps->CropGranularityX = vih->bmiHeader.biWidth;
-	caps->CropGranularityY = vih->bmiHeader.biHeight;
-	caps->MinBitsPerSecond = vih->dwBitRate;
-	caps->MaxBitsPerSecond = caps->MinBitsPerSecond;
-
-	return S_OK;
-}
-
-OutputAudioPin::OutputAudioPin(HRESULT* phr, CSource* pFilter, LPCWSTR pPinName)
-	: CSourceStream(VCAM_AUDIO_PIN_NAME, phr, pFilter, pPinName)
-{
-}
-
-OutputAudioPin::~OutputAudioPin()
-{
-}
-
-STDMETHODIMP OutputAudioPin::QueryInterface(REFIID riid, void** ppv)
-{
-	if (!ppv)
-		return E_POINTER;
-
-	*ppv = nullptr;
-
-	if (riid == IID_IKsPropertySet)
-		*ppv = static_cast<IKsPropertySet*>(this);
-	else if (riid == IID_IAMStreamConfig)
-		*ppv = static_cast<IAMStreamConfig*>(this);
-	else
-		return CSourceStream::QueryInterface(riid, ppv);
-
-	AddRef();
-	return S_OK;
-}
-
-STDMETHODIMP_(ULONG) OutputAudioPin::AddRef()
-{
-	return CSourceStream::AddRef();
-}
-
-STDMETHODIMP_(ULONG) OutputAudioPin::Release()
-{
-	return CSourceStream::Release();
-}
-
-STDMETHODIMP OutputAudioPin::CheckMediaType(const CMediaType* pmt)
-{
-	if (!pmt)
-		return E_POINTER;
-
-	if (*pmt->Type() != MEDIATYPE_Audio)
-		return E_INVALIDARG;
-
-	if (*pmt->Subtype() != MEDIASUBTYPE_PCM)
-		return E_INVALIDARG;
-
-	if (*pmt->FormatType() != FORMAT_WaveFormatEx)
-		return E_INVALIDARG;
-
-	WAVEFORMATEX* pwfex = reinterpret_cast<WAVEFORMATEX*>(pmt->Format());
-	if (!pwfex)
-		return E_INVALIDARG;
-
-	if (pwfex->wFormatTag != WAVE_FORMAT_PCM && pwfex->wFormatTag != WAVE_FORMAT_EXTENSIBLE)
-		return E_INVALIDARG;
-
-	if (pwfex->nChannels != static_cast<NTV2VCAM*>(m_pFilter)->GetNumAudioChannels())
-		return E_INVALIDARG;
-
-	if (pwfex->nSamplesPerSec != static_cast<NTV2VCAM*>(m_pFilter)->GetAudioSampleRate())
-		return E_INVALIDARG;
-
-	if (pwfex->wBitsPerSample != static_cast<NTV2VCAM*>(m_pFilter)->GetAudioBitsPerSample())
-		return E_INVALIDARG;
-
-	if (pwfex->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
+	STDMETHODIMP_(ULONG) OutputVideoPin::AddRef()
 	{
-		WAVEFORMATEXTENSIBLE* pwfxext = reinterpret_cast<WAVEFORMATEXTENSIBLE*>(pwfex);
-		if (pwfxext->SubFormat != KSDATAFORMAT_SUBTYPE_PCM)
+		return CSourceStream::AddRef();
+	}
+
+	STDMETHODIMP_(ULONG) OutputVideoPin::Release()
+	{
+		return CSourceStream::Release();
+	}
+
+	STDMETHODIMP OutputVideoPin::CheckMediaType(const CMediaType* pmt)
+	{
+		if (!pmt)
+			return E_POINTER;
+
+		if (*pmt->Type() != MEDIATYPE_Video)
 			return E_INVALIDARG;
-	}
 
-	return S_OK;
-}
+		if (*pmt->FormatType() != FORMAT_VideoInfo)
+			return E_INVALIDARG;
 
-HRESULT OutputAudioPin::GetMediaType(CMediaType* pMediaType)
-{
-	if (static_cast<NTV2VCAM*>(m_pFilter)->Initialize())
-		return CopyMediaType(pMediaType, &m_mt);
+		if (*pmt->Subtype() != MEDIASUBTYPE_UYVY)
+			return E_INVALIDARG;
 
-	return E_FAIL;
-}
-
-HRESULT OutputAudioPin::FillBuffer(IMediaSample* pSample)
-{
-	return static_cast<NTV2VCAM*>(m_pFilter)->GetNextFrame(this, pSample);
-}
-
-HRESULT OutputAudioPin::DecideBufferSize(IMemAllocator* pAlloc, ALLOCATOR_PROPERTIES* pRequest)
-{
-	CAutoLock cAutoLock(m_pFilter->pStateLock());
-
-	if (!pAlloc)
-		return E_POINTER;
-
-	WAVEFORMATEX* pwfx = reinterpret_cast<WAVEFORMATEX*>(m_mt.Format());
-	if (!pwfx)
-		return E_UNEXPECTED;
-
-	pRequest->cBuffers = 1;
-	pRequest->cbBuffer = gAudMaxSizeBytes * static_cast<NTV2VCAM*>(m_pFilter)->GetNumAudioLinks();
-
-	ALLOCATOR_PROPERTIES Actual;
-	HRESULT hr = pAlloc->SetProperties(pRequest, &Actual);
-	if (FAILED(hr))
-		return hr;
-
-	if (Actual.cbBuffer < pRequest->cbBuffer)
-		return E_FAIL;
-
-	if (Actual.cBuffers != 1)
-		return E_FAIL;
-
-	return S_OK;
-}
-
-STDMETHODIMP OutputAudioPin::EnumMediaTypes(IEnumMediaTypes** ppEnum)
-{
-	return CSourceStream::EnumMediaTypes(ppEnum);
-}
-
-STDMETHODIMP OutputAudioPin::Notify(IBaseFilter* pSender, Quality q)
-{
-	return S_OK;
-}
-
-STDMETHODIMP OutputAudioPin::Set(REFGUID guidPropSet, DWORD dwPropID, LPVOID pInstanceData, DWORD cbInstanceData, LPVOID pPropData, DWORD cbPropData)
-{
-	return E_NOTIMPL;
-}
-
-STDMETHODIMP OutputAudioPin::Get(REFGUID guidPropSet, DWORD dwPropID, LPVOID pInstanceData, DWORD cbInstanceData, LPVOID pPropData, DWORD cbPropData, DWORD* pcbReturned)
-{
-	if (guidPropSet != AMPROPSETID_Pin)
-		return E_PROP_SET_UNSUPPORTED;
-
-	if (dwPropID != AMPROPERTY_PIN_CATEGORY)
-		return E_PROP_ID_UNSUPPORTED;
-
-	if (pPropData == NULL && pcbReturned == NULL)
-		return E_POINTER;
-
-	if (pcbReturned)
-		*pcbReturned = sizeof(GUID);
-
-	if (pPropData == NULL)
-		return S_OK;
-
-	if (cbPropData < sizeof(GUID))
-		return E_UNEXPECTED;
-
-	*(GUID*)pPropData = PIN_CATEGORY_CAPTURE;
-
-	return S_OK;
-}
-
-STDMETHODIMP OutputAudioPin::QuerySupported(REFGUID guidPropSet, DWORD dwPropID, DWORD* pTypeSupport)
-{
-	if (guidPropSet != AMPROPSETID_Pin)
-		return E_PROP_SET_UNSUPPORTED;
-
-	if (dwPropID != AMPROPERTY_PIN_CATEGORY)
-		return E_PROP_ID_UNSUPPORTED;
-
-	if (pTypeSupport)
-		*pTypeSupport = KSPROPERTY_SUPPORT_GET;
-
-	return S_OK;
-}
-
-STDMETHODIMP OutputAudioPin::SetFormat(AM_MEDIA_TYPE* pmt)
-{
-	if (!pmt)
-		return E_POINTER;
-
-	if (pmt->majortype == m_mt.majortype &&
-		pmt->subtype == m_mt.subtype &&
-		pmt->formattype == m_mt.formattype)
-	{
-		m_mt = *pmt;
 		return S_OK;
 	}
 
-	return VFW_E_INVALIDMEDIATYPE;
-}
-
-STDMETHODIMP OutputAudioPin::GetFormat(AM_MEDIA_TYPE** ppmt)
-{
-	if (!ppmt)
-		return E_POINTER;
-
-	*ppmt = CreateMediaType(&m_mt);
-	if (!*ppmt)
-		return E_OUTOFMEMORY;
-
-	return S_OK;
-}
-
-STDMETHODIMP OutputAudioPin::GetNumberOfCapabilities(int* piCount, int* piSize)
-{
-	if (!piCount || !piSize)
-		return E_POINTER;
-
-	*piCount = 1;
-	*piSize = sizeof(AUDIO_STREAM_CONFIG_CAPS);
-
-	return S_OK;
-}
-
-STDMETHODIMP OutputAudioPin::GetStreamCaps(int iIndex, AM_MEDIA_TYPE** ppmt, BYTE* pSCC)
-{
-	if (!ppmt || !pSCC)
-		return E_POINTER;
-
-	if (iIndex < 0 || iIndex >= 1)
-		return E_INVALIDARG;
-
-	CMediaType mediaType;
-	if (FAILED(GetMediaType(&mediaType)))
-		return E_FAIL;
-	*ppmt = CreateMediaType(&mediaType);
-	if (!*ppmt)
-		return E_OUTOFMEMORY;
-
-	WAVEFORMATEX* wfex = reinterpret_cast<decltype(wfex)>((*ppmt)->pbFormat);
-	AUDIO_STREAM_CONFIG_CAPS* caps = reinterpret_cast<AUDIO_STREAM_CONFIG_CAPS*>(pSCC);
-	ZeroMemory(caps, sizeof(AUDIO_STREAM_CONFIG_CAPS));
-	caps->guid = FORMAT_WaveFormatEx;
-	caps->MinimumChannels = wfex->nChannels;
-	caps->MaximumChannels = wfex->nChannels;
-	caps->MinimumBitsPerSample = wfex->wBitsPerSample;
-	caps->MaximumBitsPerSample = wfex->wBitsPerSample;
-	caps->MinimumSampleFrequency = wfex->nSamplesPerSec;
-	caps->MaximumSampleFrequency = wfex->nSamplesPerSec;
-
-	return S_OK;
-}
-
-CUnknown* WINAPI NTV2VCAM::CreateInstance(LPUNKNOWN pUnk, HRESULT* phr)
-{
-	NTV2VCAM* pFilter = new NTV2VCAM(pUnk, phr);
-	if (pFilter == NULL)
-		*phr = E_OUTOFMEMORY;
-	return pFilter;
-}
-
-STDMETHODIMP NTV2VCAM::QueryInterface(REFIID riid, void** ppv)
-{
-	return CSource::QueryInterface(riid, ppv);
-}
-
-STDMETHODIMP_(ULONG) NTV2VCAM::AddRef()
-{
-	return CSource::AddRef();
-}
-
-STDMETHODIMP_(ULONG) NTV2VCAM::Release()
-{
-	return CSource::Release();
-}
-
-STDMETHODIMP NTV2VCAM::EnumPins(IEnumPins** ppEnum)
-{
-	return CSource::EnumPins(ppEnum);
-}
-
-STDMETHODIMP NTV2VCAM::FindPin(LPCWSTR Id, IPin** ppPin)
-{
-	if (Id == nullptr || ppPin == nullptr)
-		return E_POINTER;
-
-	if (lstrcmpW(Id, VCAM_VIDEO_PIN_NAME_W) == 0)
+	HRESULT OutputVideoPin::GetMediaType(CMediaType* pMediaType)
 	{
-		*ppPin = GetPin(0);
-		(*ppPin)->AddRef();
+		if (reinterpret_cast<NTV2VCAM*>(m_pFilter)->Initialize())
+			return CopyMediaType(pMediaType, &m_mt);
+
+		return E_FAIL;
+	}
+
+	HRESULT OutputVideoPin::FillBuffer(IMediaSample* pSample)
+	{
+		return reinterpret_cast<NTV2VCAM*>(m_pFilter)->GetNextFrame(this, pSample);
+	}
+
+	HRESULT OutputVideoPin::DecideBufferSize(IMemAllocator* pAlloc, ALLOCATOR_PROPERTIES* pRequest)
+	{
+		CAutoLock cAutoLock(m_pFilter->pStateLock());
+
+		if (!pAlloc)
+			return E_POINTER;
+
+		VIDEOINFO* pvi = reinterpret_cast<VIDEOINFO*>(m_mt.Format());
+		if (!pvi)
+			return E_UNEXPECTED;
+
+		pRequest->cBuffers = 1;
+		pRequest->cbBuffer = pvi->bmiHeader.biSizeImage;
+
+		ALLOCATOR_PROPERTIES Actual;
+		HRESULT hr = pAlloc->SetProperties(pRequest, &Actual);
+		if (FAILED(hr))
+			return hr;
+
+		if (Actual.cbBuffer < pRequest->cbBuffer)
+			return E_FAIL;
+
+		if (Actual.cBuffers != 1)
+			return E_FAIL;
+
+		return NOERROR;
+	}
+
+	STDMETHODIMP OutputVideoPin::EnumMediaTypes(IEnumMediaTypes** ppEnum)
+	{
+		return CSourceStream::EnumMediaTypes(ppEnum);
+	}
+
+	STDMETHODIMP OutputVideoPin::Notify(IBaseFilter* pSender, Quality q)
+	{
+		return CSourceStream::Notify(pSender, q);
+	}
+
+	STDMETHODIMP OutputVideoPin::Set(REFGUID guidPropSet, DWORD dwPropID, LPVOID pInstanceData, DWORD cbInstanceData, LPVOID pPropData, DWORD cbPropData)
+	{
+		return E_NOTIMPL;
+	}
+
+	STDMETHODIMP OutputVideoPin::Get(REFGUID guidPropSet, DWORD dwPropID, LPVOID pInstanceData, DWORD cbInstanceData, LPVOID pPropData, DWORD cbPropData, DWORD* pcbReturned)
+	{
+		if (guidPropSet != AMPROPSETID_Pin)
+			return E_PROP_SET_UNSUPPORTED;
+
+		if (dwPropID != AMPROPERTY_PIN_CATEGORY)
+			return E_PROP_ID_UNSUPPORTED;
+
+		if (pPropData == NULL && pcbReturned == NULL)
+			return E_POINTER;
+
+		if (pcbReturned)
+			*pcbReturned = sizeof(GUID);
+
+		if (pPropData == NULL)
+			return S_OK;
+
+		if (cbPropData < sizeof(GUID))
+			return E_UNEXPECTED;
+
+		*(GUID*)pPropData = PIN_CATEGORY_CAPTURE;
+
 		return S_OK;
 	}
 
-	*ppPin = nullptr;
-	return VFW_E_NOT_FOUND;
-}
-
-STDMETHODIMP NTV2VCAM::QueryFilterInfo(FILTER_INFO* pInfo)
-{
-	if (!pInfo)
-		return E_POINTER;
-
-	memcpy(pInfo->achName, VCAM_FILTER_NAME_W, sizeof(VCAM_FILTER_NAME_W));
-
-	pInfo->pGraph = m_pGraph;
-	if (m_pGraph)
-		m_pGraph->AddRef();
-	return NOERROR;
-}
-
-STDMETHODIMP NTV2VCAM::JoinFilterGraph(IFilterGraph* pGraph, LPCWSTR pName)
-{
-	m_pGraph = pGraph;
-	if (m_pGraph)
-		m_pGraph->AddRef();
-	return NOERROR;
-}
-
-STDMETHODIMP NTV2VCAM::QueryVendorInfo(LPWSTR* pVendorInfo)
-{
-	return S_OK;
-}
-
-NTV2VCAM::NTV2VCAM(LPUNKNOWN pUnk, HRESULT* phr)
-	: CSource(NAME(VCAM_FILTER_NAME), pUnk, CLSID_VirtualWebcam)
-	, mVideos(MAX_VIDEOS)
-	, mAudios(MAX_AUDIOS)
-{
-	CAutoLock cAutoLock(&m_cStateLock);
-
-	m_paStreams = (CSourceStream**) new OutputPin * [2];
-	if (m_paStreams == NULL)
+	STDMETHODIMP OutputVideoPin::QuerySupported(REFGUID guidPropSet, DWORD dwPropID, DWORD* pTypeSupport)
 	{
-		if (phr)
-			*phr = E_OUTOFMEMORY;
+		if (guidPropSet != AMPROPSETID_Pin)
+			return E_PROP_SET_UNSUPPORTED;
 
-		return;
+		if (dwPropID != AMPROPERTY_PIN_CATEGORY)
+			return E_PROP_ID_UNSUPPORTED;
+
+		if (pTypeSupport)
+			*pTypeSupport = KSPROPERTY_SUPPORT_GET;
+
+		return S_OK;
 	}
 
-	m_paStreams[0] = new OutputVideoPin(phr, this, VCAM_VIDEO_PIN_NAME_W);
-	if (m_paStreams[0] == NULL)
+	STDMETHODIMP OutputVideoPin::SetFormat(AM_MEDIA_TYPE* pmt)
 	{
-		if (phr)
-			*phr = E_OUTOFMEMORY;
+		if (!pmt)
+			return E_POINTER;
 
-		return;
+		if (pmt->majortype == m_mt.majortype &&
+			pmt->subtype == m_mt.subtype &&
+			pmt->formattype == m_mt.formattype)
+		{
+			m_mt = *pmt;
+			return S_OK;
+		}
+
+		return VFW_E_INVALIDMEDIATYPE;
 	}
 
-	m_paStreams[1] = new OutputAudioPin(phr, this, VCAM_AUDIO_PIN_NAME_W);
-	if (m_paStreams[1] == NULL)
+	STDMETHODIMP OutputVideoPin::GetFormat(AM_MEDIA_TYPE** ppmt)
 	{
-		if (phr)
-			*phr = E_OUTOFMEMORY;
+		if (!ppmt)
+			return E_POINTER;
 
-		return;
+		*ppmt = CreateMediaType(&m_mt);
+		if (!*ppmt)
+			return E_OUTOFMEMORY;
+
+		return S_OK;
 	}
 
-	mAjaDevice = "2";
-	mInputType = "hdmi";
-	mInputChannel = NTV2_CHANNEL1;
-	mPixelFormatStr = "uyvy";
-}
-#endif	//	AJA_WINDOWS
+	STDMETHODIMP OutputVideoPin::GetNumberOfCapabilities(int* piCount, int* piSize)
+	{
+		if (!piCount || !piSize)
+			return E_POINTER;
+
+		*piCount = 1;
+		*piSize = sizeof(VIDEO_STREAM_CONFIG_CAPS);
+
+		return S_OK;
+	}
+
+	STDMETHODIMP OutputVideoPin::GetStreamCaps(int iIndex, AM_MEDIA_TYPE** ppmt, BYTE* pSCC)
+	{
+		if (!ppmt || !pSCC)
+			return E_POINTER;
+
+		if (iIndex < 0 || iIndex >= 1)
+			return S_FALSE;
+
+		CMediaType mediaType;
+		if (FAILED(GetMediaType(&mediaType)))
+			return E_FAIL;
+		*ppmt = CreateMediaType(&mediaType);
+		if (!*ppmt)
+			return E_OUTOFMEMORY;
+
+		VIDEOINFO* vih = reinterpret_cast<decltype(vih)>((*ppmt)->pbFormat);
+		VIDEO_STREAM_CONFIG_CAPS* caps = reinterpret_cast<VIDEO_STREAM_CONFIG_CAPS*>(pSCC);
+		ZeroMemory(caps, sizeof(VIDEO_STREAM_CONFIG_CAPS));
+		caps->guid = FORMAT_VideoInfo;
+		caps->MinFrameInterval = vih->AvgTimePerFrame;
+		caps->MaxFrameInterval = vih->AvgTimePerFrame;
+		caps->MinOutputSize.cx = vih->bmiHeader.biWidth;
+		caps->MinOutputSize.cy = vih->bmiHeader.biHeight;
+		caps->MaxOutputSize = caps->MinOutputSize;
+		caps->InputSize = caps->MinOutputSize;
+		caps->MinCroppingSize = caps->MinOutputSize;
+		caps->MaxCroppingSize = caps->MinOutputSize;
+		caps->CropGranularityX = vih->bmiHeader.biWidth;
+		caps->CropGranularityY = vih->bmiHeader.biHeight;
+		caps->MinBitsPerSecond = vih->dwBitRate;
+		caps->MaxBitsPerSecond = caps->MinBitsPerSecond;
+
+		return S_OK;
+	}
+
+	OutputAudioPin::OutputAudioPin(HRESULT* phr, CSource* pFilter, LPCWSTR pPinName)
+		: CSourceStream(VCAM_AUDIO_PIN_NAME, phr, pFilter, pPinName)
+	{
+	}
+
+	OutputAudioPin::~OutputAudioPin()
+	{
+	}
+
+	STDMETHODIMP OutputAudioPin::QueryInterface(REFIID riid, void** ppv)
+	{
+		if (!ppv)
+			return E_POINTER;
+
+		*ppv = nullptr;
+
+		if (riid == IID_IKsPropertySet)
+			*ppv = static_cast<IKsPropertySet*>(this);
+		else if (riid == IID_IAMStreamConfig)
+			*ppv = static_cast<IAMStreamConfig*>(this);
+		else
+			return CSourceStream::QueryInterface(riid, ppv);
+
+		AddRef();
+		return S_OK;
+	}
+
+	STDMETHODIMP_(ULONG) OutputAudioPin::AddRef()
+	{
+		return CSourceStream::AddRef();
+	}
+
+	STDMETHODIMP_(ULONG) OutputAudioPin::Release()
+	{
+		return CSourceStream::Release();
+	}
+
+	STDMETHODIMP OutputAudioPin::CheckMediaType(const CMediaType* pmt)
+	{
+		if (!pmt)
+			return E_POINTER;
+
+		if (*pmt->Type() != MEDIATYPE_Audio)
+			return E_INVALIDARG;
+
+		if (*pmt->Subtype() != MEDIASUBTYPE_PCM)
+			return E_INVALIDARG;
+
+		if (*pmt->FormatType() != FORMAT_WaveFormatEx)
+			return E_INVALIDARG;
+
+		WAVEFORMATEX* pwfex = reinterpret_cast<WAVEFORMATEX*>(pmt->Format());
+		if (!pwfex)
+			return E_INVALIDARG;
+
+		if (pwfex->wFormatTag != WAVE_FORMAT_PCM && pwfex->wFormatTag != WAVE_FORMAT_EXTENSIBLE)
+			return E_INVALIDARG;
+
+		if (pwfex->nChannels != reinterpret_cast<NTV2VCAM*>(m_pFilter)->GetNumAudioChannels())
+			return E_INVALIDARG;
+
+		if (pwfex->nSamplesPerSec != reinterpret_cast<NTV2VCAM*>(m_pFilter)->GetAudioSampleRate())
+			return E_INVALIDARG;
+
+		if (pwfex->wBitsPerSample != reinterpret_cast<NTV2VCAM*>(m_pFilter)->GetAudioBitsPerSample())
+			return E_INVALIDARG;
+
+		if (pwfex->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
+		{
+			WAVEFORMATEXTENSIBLE* pwfxext = reinterpret_cast<WAVEFORMATEXTENSIBLE*>(pwfex);
+			if (pwfxext->SubFormat != KSDATAFORMAT_SUBTYPE_PCM)
+				return E_INVALIDARG;
+		}
+
+		return S_OK;
+	}
+
+	HRESULT OutputAudioPin::GetMediaType(CMediaType* pMediaType)
+	{
+		if (reinterpret_cast<NTV2VCAM*>(m_pFilter)->Initialize())
+			return CopyMediaType(pMediaType, &m_mt);
+
+		return E_FAIL;
+	}
+
+	HRESULT OutputAudioPin::FillBuffer(IMediaSample* pSample)
+	{
+		return reinterpret_cast<NTV2VCAM*>(m_pFilter)->GetNextFrame(this, pSample);
+	}
+
+	HRESULT OutputAudioPin::DecideBufferSize(IMemAllocator* pAlloc, ALLOCATOR_PROPERTIES* pRequest)
+	{
+		CAutoLock cAutoLock(m_pFilter->pStateLock());
+
+		if (!pAlloc)
+			return E_POINTER;
+
+		WAVEFORMATEX* pwfx = reinterpret_cast<WAVEFORMATEX*>(m_mt.Format());
+		if (!pwfx)
+			return E_UNEXPECTED;
+
+		pRequest->cBuffers = 1;
+		pRequest->cbBuffer = gAudMaxSizeBytes * reinterpret_cast<NTV2VCAM*>(m_pFilter)->GetNumAudioLinks();
+
+		ALLOCATOR_PROPERTIES Actual;
+		HRESULT hr = pAlloc->SetProperties(pRequest, &Actual);
+		if (FAILED(hr))
+			return hr;
+
+		if (Actual.cbBuffer < pRequest->cbBuffer)
+			return E_FAIL;
+
+		if (Actual.cBuffers != 1)
+			return E_FAIL;
+
+		return S_OK;
+	}
+
+	STDMETHODIMP OutputAudioPin::EnumMediaTypes(IEnumMediaTypes** ppEnum)
+	{
+		return CSourceStream::EnumMediaTypes(ppEnum);
+	}
+
+	STDMETHODIMP OutputAudioPin::Notify(IBaseFilter* pSender, Quality q)
+	{
+		return S_OK;
+	}
+
+	STDMETHODIMP OutputAudioPin::Set(REFGUID guidPropSet, DWORD dwPropID, LPVOID pInstanceData, DWORD cbInstanceData, LPVOID pPropData, DWORD cbPropData)
+	{
+		return E_NOTIMPL;
+	}
+
+	STDMETHODIMP OutputAudioPin::Get(REFGUID guidPropSet, DWORD dwPropID, LPVOID pInstanceData, DWORD cbInstanceData, LPVOID pPropData, DWORD cbPropData, DWORD* pcbReturned)
+	{
+		if (guidPropSet != AMPROPSETID_Pin)
+			return E_PROP_SET_UNSUPPORTED;
+
+		if (dwPropID != AMPROPERTY_PIN_CATEGORY)
+			return E_PROP_ID_UNSUPPORTED;
+
+		if (pPropData == NULL && pcbReturned == NULL)
+			return E_POINTER;
+
+		if (pcbReturned)
+			*pcbReturned = sizeof(GUID);
+
+		if (pPropData == NULL)
+			return S_OK;
+
+		if (cbPropData < sizeof(GUID))
+			return E_UNEXPECTED;
+
+		*(GUID*)pPropData = PIN_CATEGORY_CAPTURE;
+
+		return S_OK;
+	}
+
+	STDMETHODIMP OutputAudioPin::QuerySupported(REFGUID guidPropSet, DWORD dwPropID, DWORD* pTypeSupport)
+	{
+		if (guidPropSet != AMPROPSETID_Pin)
+			return E_PROP_SET_UNSUPPORTED;
+
+		if (dwPropID != AMPROPERTY_PIN_CATEGORY)
+			return E_PROP_ID_UNSUPPORTED;
+
+		if (pTypeSupport)
+			*pTypeSupport = KSPROPERTY_SUPPORT_GET;
+
+		return S_OK;
+	}
+
+	STDMETHODIMP OutputAudioPin::SetFormat(AM_MEDIA_TYPE* pmt)
+	{
+		if (!pmt)
+			return E_POINTER;
+
+		if (pmt->majortype == m_mt.majortype &&
+			pmt->subtype == m_mt.subtype &&
+			pmt->formattype == m_mt.formattype)
+		{
+			m_mt = *pmt;
+			return S_OK;
+		}
+
+		return VFW_E_INVALIDMEDIATYPE;
+	}
+
+	STDMETHODIMP OutputAudioPin::GetFormat(AM_MEDIA_TYPE** ppmt)
+	{
+		if (!ppmt)
+			return E_POINTER;
+
+		*ppmt = CreateMediaType(&m_mt);
+		if (!*ppmt)
+			return E_OUTOFMEMORY;
+
+		return S_OK;
+	}
+
+	STDMETHODIMP OutputAudioPin::GetNumberOfCapabilities(int* piCount, int* piSize)
+	{
+		if (!piCount || !piSize)
+			return E_POINTER;
+
+		*piCount = 1;
+		*piSize = sizeof(AUDIO_STREAM_CONFIG_CAPS);
+
+		return S_OK;
+	}
+
+	STDMETHODIMP OutputAudioPin::GetStreamCaps(int iIndex, AM_MEDIA_TYPE** ppmt, BYTE* pSCC)
+	{
+		if (!ppmt || !pSCC)
+			return E_POINTER;
+
+		if (iIndex < 0 || iIndex >= 1)
+			return E_INVALIDARG;
+
+		CMediaType mediaType;
+		if (FAILED(GetMediaType(&mediaType)))
+			return E_FAIL;
+		*ppmt = CreateMediaType(&mediaType);
+		if (!*ppmt)
+			return E_OUTOFMEMORY;
+
+		WAVEFORMATEX* wfex = reinterpret_cast<decltype(wfex)>((*ppmt)->pbFormat);
+		AUDIO_STREAM_CONFIG_CAPS* caps = reinterpret_cast<AUDIO_STREAM_CONFIG_CAPS*>(pSCC);
+		ZeroMemory(caps, sizeof(AUDIO_STREAM_CONFIG_CAPS));
+		caps->guid = FORMAT_WaveFormatEx;
+		caps->MinimumChannels = wfex->nChannels;
+		caps->MaximumChannels = wfex->nChannels;
+		caps->MinimumBitsPerSample = wfex->wBitsPerSample;
+		caps->MaximumBitsPerSample = wfex->wBitsPerSample;
+		caps->MinimumSampleFrequency = wfex->nSamplesPerSec;
+		caps->MaximumSampleFrequency = wfex->nSamplesPerSec;
+
+		return S_OK;
+	}
+
+	CUnknown* WINAPI NTV2VCAM::CreateInstance(LPUNKNOWN pUnk, HRESULT* phr)
+	{
+		NTV2VCAM* pFilter = new NTV2VCAM(pUnk, phr);
+		if (pFilter == NULL)
+			*phr = E_OUTOFMEMORY;
+		return pFilter;
+	}
+
+	STDMETHODIMP NTV2VCAM::QueryInterface(REFIID riid, void** ppv)
+	{
+		return CSource::QueryInterface(riid, ppv);
+	}
+
+	STDMETHODIMP_(ULONG) NTV2VCAM::AddRef()
+	{
+		return CSource::AddRef();
+	}
+
+	STDMETHODIMP_(ULONG) NTV2VCAM::Release()
+	{
+		return CSource::Release();
+	}
+
+	STDMETHODIMP NTV2VCAM::EnumPins(IEnumPins** ppEnum)
+	{
+		return CSource::EnumPins(ppEnum);
+	}
+
+	STDMETHODIMP NTV2VCAM::FindPin(LPCWSTR Id, IPin** ppPin)
+	{
+		if (Id == nullptr || ppPin == nullptr)
+			return E_POINTER;
+
+		if (lstrcmpW(Id, VCAM_VIDEO_PIN_NAME_W) == 0)
+		{
+			*ppPin = GetPin(0);
+			(*ppPin)->AddRef();
+			return S_OK;
+		}
+
+		*ppPin = nullptr;
+		return VFW_E_NOT_FOUND;
+	}
+
+	STDMETHODIMP NTV2VCAM::QueryFilterInfo(FILTER_INFO* pInfo)
+	{
+		if (!pInfo)
+			return E_POINTER;
+
+		memcpy(pInfo->achName, VCAM_FILTER_NAME_W, sizeof(VCAM_FILTER_NAME_W));
+
+		pInfo->pGraph = m_pGraph;
+		if (m_pGraph)
+			m_pGraph->AddRef();
+		return NOERROR;
+	}
+
+	STDMETHODIMP NTV2VCAM::JoinFilterGraph(IFilterGraph* pGraph, LPCWSTR pName)
+	{
+		m_pGraph = pGraph;
+		if (m_pGraph)
+			m_pGraph->AddRef();
+		return NOERROR;
+	}
+
+	STDMETHODIMP NTV2VCAM::QueryVendorInfo(LPWSTR* pVendorInfo)
+	{
+		return S_OK;
+	}
+
+	NTV2VCAM::NTV2VCAM (LPUNKNOWN pUnk, HRESULT* phr)
+		: CSource(NAME(VCAM_FILTER_NAME), pUnk, CLSID_VirtualWebcam)
+		, mVideos(MAX_VIDEOS)
+		, mAudios(MAX_AUDIOS)
+	{
+		CAutoLock cAutoLock(&m_cStateLock);
+		m_paStreams = (CSourceStream**) new OutputPin * [2];
+		if (m_paStreams == NULL)
+		{
+			if (phr)
+				*phr = E_OUTOFMEMORY;
+			return;
+		}
+
+		m_paStreams[0] = new OutputVideoPin(phr, this, VCAM_VIDEO_PIN_NAME_W);
+		if (m_paStreams[0] == NULL)
+		{
+			if (phr)
+				*phr = E_OUTOFMEMORY;
+			return;
+		}
+
+		m_paStreams[1] = new OutputAudioPin(phr, this, VCAM_AUDIO_PIN_NAME_W);
+		if (m_paStreams[1] == NULL)
+		{
+			if (phr)
+				*phr = E_OUTOFMEMORY;
+
+			return;
+		}
+
+		mAjaDevice = "2";
+		mInputType = "hdmi";
+		mInputChannel = NTV2_CHANNEL1;
+		mPixelFormatStr = "uyvy";
+	}
+#endif	//	else AJA_WINDOWS
 
 NTV2VCAM::~NTV2VCAM()
 {
-	cout << "Good bye!" << endl;
+	cout << "## NOTE: NTV2VCAM terminated" << endl;
 
 #if defined (AJALinux)
 	if (mLbDisplay > 0)
 	{
 		close(mLbDisplay);
-#if !defined(AJA_MISSING_DEV_V4L2LOOPBACK)
+		#if !defined(AJA_MISSING_DEV_V4L2LOOPBACK)
 		if (ioctl(mLbDevice, V4L2LOOPBACK_CTL_REMOVE, mLbDeviceNR) == -1)
 		{
 			cerr << "## ERROR (" << errno << "): failed to remove V4L2 device for output" << endl;
 			mErrorCode = AJA_VW_V4L2DEVICEREMOVEFAILED;
 			return;
 		}
-#endif
+		#endif
 	}
-#if !defined(AJA_MISSING_DEV_V4L2LOOPBACK)
+	#if !defined(AJA_MISSING_DEV_V4L2LOOPBACK)
 	if (mLbDevice > 0)
 		close(mLbDevice);
-#endif
+	#endif
 
 	if (mPcmHandle)
 	{
@@ -705,14 +692,14 @@ bool NTV2VCAM::Initialize()
 		mErrorCode = AJA_VW_MISSINGARGS;
 		return false;
 	}
-#if defined (AJALinux)
+	#if defined (AJALinux)
 	if (mVideoDevice.empty())
 	{
 		cerr << "## ERROR (" << errno << "): Parameter 'video device' is required." << endl;
 		mErrorCode = AJA_VW_MISSINGARGS;
 		return false;
 	}
-#endif
+	#endif	//	AJALinux
 	if (mPixelFormatStr == "list")
 	{
 		cout << CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, mAjaDevice) << endl;
@@ -1045,28 +1032,28 @@ bool NTV2VCAM::Initialize()
 		return false;
 	}
 
-#if defined (AJALinux)
-#if !defined(AJA_MISSING_DEV_V4L2LOOPBACK)
-	mLbDevice = open(V4L2_DRIVER_NAME, O_RDONLY);
-	if (mLbDevice == -1)
-	{
-		cerr << "## ERROR (" << errno << "): failed to open V4L2 driver" << endl;
-		mErrorCode = AJA_VW_V4L2DRIVEROPENFAILED;
-		return false;
-	}
-	v4l2_loopback_config cfg;
-	memset(&cfg, 0, sizeof(v4l2_loopback_config));
-	cfg.output_nr = mLbDeviceNR = ExtractNumber(mVideoDevice.c_str());
-	string labelName = "AJA virtual webcam device " + to_string(mLbDeviceNR);
-	strcpy(cfg.card_label, labelName.c_str());
-	mLbDeviceNR = ioctl(mLbDevice, V4L2LOOPBACK_CTL_ADD, &cfg);
-	if (mLbDeviceNR == -1)
-	{
-		cerr << "## ERROR (" << errno << "): failed to create V4L2 device for output" << endl;
-		mErrorCode = AJA_VW_V4L2DEVICECREATEFAILED;
-		return false;
-	}
-#endif
+	#if defined (AJALinux)
+		#if !defined(AJA_MISSING_DEV_V4L2LOOPBACK)
+		mLbDevice = open(V4L2_DRIVER_NAME, O_RDONLY);
+		if (mLbDevice == -1)
+		{
+			cerr << "## ERROR (" << errno << "): failed to open V4L2 driver" << endl;
+			mErrorCode = AJA_VW_V4L2DRIVEROPENFAILED;
+			return false;
+		}
+		v4l2_loopback_config cfg;
+		memset(&cfg, 0, sizeof(v4l2_loopback_config));
+		cfg.output_nr = mLbDeviceNR = ExtractNumber(mVideoDevice.c_str());
+		string labelName = "AJA virtual webcam device " + to_string(mLbDeviceNR);
+		strcpy(cfg.card_label, labelName.c_str());
+		mLbDeviceNR = ioctl(mLbDevice, V4L2LOOPBACK_CTL_ADD, &cfg);
+		if (mLbDeviceNR == -1)
+		{
+			cerr << "## ERROR (" << errno << "): failed to create V4L2 device for output" << endl;
+			mErrorCode = AJA_VW_V4L2DEVICECREATEFAILED;
+			return false;
+		}
+		#endif	//	!defined(AJA_MISSING_DEV_V4L2LOOPBACK)
 	mLbDisplay = open(mVideoDevice.c_str(), O_RDWR);
 	if (mLbDisplay == -1)
 	{
@@ -1093,7 +1080,7 @@ bool NTV2VCAM::Initialize()
 	streamParm.parm.output.timeperframe.denominator = GetFps();
 	if (ioctl(mLbDisplay, VIDIOC_S_PARM, &streamParm) == -1)
 		cerr << "## ERROR (" << errno << "): cannot set frame rate on video loopback device" << endl;
-#endif
+	#endif	//	AJALinux
 
 	bool retVal = false;
 	if (NTV2_IS_8K_VIDEO_FORMAT(mVideoFormat))
@@ -1116,7 +1103,7 @@ bool NTV2VCAM::Initialize()
 		return false;
 	}
 
-#if defined (AJA_WINDOWS)
+	#if defined(AJA_WINDOWS)
 	if (OutputVideoPin* pVideoPin = dynamic_cast<OutputVideoPin*>(m_paStreams[0]))
 	{
 		VIDEOINFO vi;
@@ -1189,192 +1176,133 @@ bool NTV2VCAM::Initialize()
 	}
 
 	mInitialized = true;
-#endif
-
+	#endif	//	AJA_WINDOWS
 	return true;
-}
+}	//	NTV2VCAM::Initialize
 
-#if defined (AJALinux)
-bool NTV2VCAM::Run(void)
-{
-	mDevice.AutoCirculateStop(mActiveFrameStores);
-
-	if (!mDevice.AutoCirculateInitForInput(mInputChannel, mFrames.count(), mAudioSystem, mACOptions, 1, mFrames.firstFrame(), mFrames.lastFrame()))
+#if defined(AJALinux)
+	bool NTV2VCAM::Run(void)
 	{
-		cerr << "## ERROR (" << errno << "): AC init for input failed" << endl;
-		mErrorCode = AJA_VW_ACINITFORINPUTFAILED;
-		return false;
-	}
+		mDevice.AutoCirculateStop(mActiveFrameStores);
+		if (!mDevice.AutoCirculateInitForInput(mInputChannel, mFrames.count(), mAudioSystem, mACOptions, 1, mFrames.firstFrame(), mFrames.lastFrame()))
+			{cerr << "## ERROR: AC init for input failed" << endl;  mErrorCode = AJA_VW_ACINITFORINPUTFAILED;  return false;}
+		if (!mDevice.AutoCirculateStart(mInputChannel))
+			{cerr << "## ERROR: AC start failed" << endl;  mErrorCode = AJA_VW_ACSTARTFAILED;  return false;}
+		if (!mAcTransfer.SetVideoBuffer(mVideoBuffer, mVideoBuffer.GetByteCount()))
+			{cerr << "## ERROR: AC set video buffer failed" << endl;  mErrorCode = AJA_VW_ACSETVIDEOBUFFERFAILED;  return false;}
+		if (mAudioBuffer && !mAcTransfer.SetAudioBuffer(mAudioBuffer, mAudioBuffer.GetByteCount()))
+			{cerr << "## ERROR: AC set audio buffer failed" << endl;  mErrorCode = AJA_VW_ACSETAUDIOBUFFERFAILED;  return false;}
 
-	if (!mDevice.AutoCirculateStart(mInputChannel))
+		signal(SIGINT, SignalHandler);
+
+		while (!gGlobalQuit)
+		{
+			AUTOCIRCULATE_STATUS acStatus;
+			if (!mDevice.AutoCirculateGetStatus(mInputChannel, acStatus))
+				return false;
+			if (acStatus.IsRunning() && acStatus.HasAvailableInputFrame())
+			{
+				if (!mDevice.AutoCirculateTransfer(mInputChannel, mAcTransfer))
+					{cerr << "## ERROR: AC transfer failed" << endl;  mErrorCode = AJA_VW_ACTRANSFERFAILED;  return false;}
+
+				if (write(mLbDisplay, mVideoBuffer, mVideoBuffer.GetByteCount()) == -1)
+					cerr << "## ERROR (" << errno << "): write to video loopback device failed" << endl;
+
+				if (mAudioBuffer)
+				{
+					mAudioFrames = mAcTransfer.GetCapturedAudioByteCount() / (AUDIO_BYTESPERSAMPLE * mNumAudioChannels);
+					unsigned long pcmReturn = snd_pcm_writei(mPcmHandle, mAudioBuffer, mAudioFrames);
+					if (pcmReturn < 0)
+						pcmReturn = snd_pcm_recover(mPcmHandle, pcmReturn, 0);
+					if (pcmReturn < 0)
+						cerr << "## ERROR (" << errno << "): snd_pcm_writei failed" << endl;
+					if (pcmReturn > 0 && pcmReturn < mAudioFrames)
+						cerr << "## ERROR (" << errno << "): short write - expected '" << mAudioFrames << "' frames, wrote '" << pcmReturn << "' frames" << endl;
+				}
+			}
+			else
+				mDevice.WaitForInputVerticalInterrupt(mInputChannel);
+		}	//	while !mGlobalQuit
+		return true;
+	}	//	NTV2VCAM::Run
+#endif	//	AJALinux
+
+#if defined(AJA_WINDOWS)
+	HRESULT NTV2VCAM::GetNextFrame (OutputPin* pPin, IMediaSample* pSample)
 	{
-		cerr << "## ERROR (" << errno << "): AC start failed" << endl;
-		mErrorCode = AJA_VW_ACSTARTFAILED;
-		return false;
-	}
+		ASSERT(mInitialized);
+		if (!mRunning)
+		{
+			mDevice.AutoCirculateStop(mActiveFrameStores);
+			if (!mDevice.AutoCirculateInitForInput(mInputChannel, mFrames.count(), mAudioSystem, mACOptions, 1, mFrames.firstFrame(), mFrames.lastFrame()))
+				{cerr << "## ERROR: AC init for input failed" << endl;  mErrorCode = AJA_VW_ACINITFORINPUTFAILED;  return S_FALSE;}
+			if (!mDevice.AutoCirculateStart(mInputChannel))
+				{cerr << "## ERROR: AC start failed" << endl;  mErrorCode = AJA_VW_ACSTARTFAILED;  return S_FALSE;}
+			if (!mAcTransfer.SetVideoBuffer(mVideoBuffer, mVideoBuffer.GetByteCount()))
+				{cerr << "## ERROR: AC set video buffer failed" << endl;  mErrorCode = AJA_VW_ACSETVIDEOBUFFERFAILED;  return S_FALSE;}
+			if (mAudioBuffer && !mAcTransfer.SetAudioBuffer(mAudioBuffer, mAudioBuffer.GetByteCount()))
+				{cerr << "## ERROR: AC set audio buffer failed" << endl;  mErrorCode = AJA_VW_ACSETAUDIOBUFFERFAILED;  return S_FALSE;}
+		}
 
-	if (!mAcTransfer.SetVideoBuffer(mVideoBuffer, mVideoBuffer.GetByteCount()))
-	{
-		cerr << "## ERROR (" << errno << "): AC set video buffer failed" << endl;
-		mErrorCode = AJA_VW_ACSETVIDEOBUFFERFAILED;
-		return false;
-	}
-
-	if (mAudioBuffer && !mAcTransfer.SetAudioBuffer(mAudioBuffer, mAudioBuffer.GetByteCount()))
-	{
-		cerr << "## ERROR (" << errno << "): AC set audio buffer failed" << endl;
-		mErrorCode = AJA_VW_ACSETAUDIOBUFFERFAILED;
-		return false;
-	}
-
-	signal(SIGINT, SignalHandler);
-
-	while (!gGlobalQuit)
-	{
 		AUTOCIRCULATE_STATUS acStatus;
 		if (!mDevice.AutoCirculateGetStatus(mInputChannel, acStatus))
-			return false;
+			return S_FALSE;
+
 		if (acStatus.IsRunning() && acStatus.HasAvailableInputFrame())
 		{
 			if (!mDevice.AutoCirculateTransfer(mInputChannel, mAcTransfer))
-			{
-				cerr << "## ERROR (" << errno << "): AC transfer failed" << endl;
-				mErrorCode = AJA_VW_ACTRANSFERFAILED;
-				return false;
-			}
-
-			if (write(mLbDisplay, mVideoBuffer, mVideoBuffer.GetByteCount()) == -1)
-				cerr << "## ERROR (" << errno << "): write to video loopback device failed" << endl;
-
-			if (mAudioBuffer)
-			{
-				mAudioFrames = mAcTransfer.GetCapturedAudioByteCount() / (AUDIO_BYTESPERSAMPLE * mNumAudioChannels);
-				unsigned long pcmReturn = snd_pcm_writei(mPcmHandle, mAudioBuffer, mAudioFrames);
-				if (pcmReturn < 0)
-					pcmReturn = snd_pcm_recover(mPcmHandle, pcmReturn, 0);
-				if (pcmReturn < 0)
-					cerr << "## ERROR (" << errno << "): snd_pcm_writei failed" << endl;
-				if (pcmReturn > 0 && pcmReturn < mAudioFrames)
-					cerr << "## ERROR (" << errno << "): short write - expected '" << mAudioFrames << "' frames, wrote '" << pcmReturn << "' frames" << endl;
-			}
+				{cerr << "## ERROR: AC transfer failed" << endl;  mErrorCode = AJA_VW_ACTRANSFERFAILED;  return S_FALSE;}
+	
+			mVideos.push(mVideoBuffer);
+			mAudioBuffer ? mAudios.push(mAudioBuffer) : 0;
 		}
 		else
-		{
 			mDevice.WaitForInputVerticalInterrupt(mInputChannel);
-		}
-	}
-	return true;
-}
-#endif
 
-#if defined (AJA_WINDOWS)
-HRESULT NTV2VCAM::GetNextFrame(OutputPin* pPin, IMediaSample* pSample)
-{
-	ASSERT(mInitialized);
-
-	if (!mRunning)
-	{
-		mDevice.AutoCirculateStop(mActiveFrameStores);
-
-		if (!mDevice.AutoCirculateInitForInput(mInputChannel, mFrames.count(), mAudioSystem, mACOptions, 1, mFrames.firstFrame(), mFrames.lastFrame()))
+		BYTE* pData;
+		HRESULT hr = pSample->GetPointer(&pData);
+		if (FAILED(hr))
 		{
-			cerr << "## ERROR (" << errno << "): AC init for input failed" << endl;
-			mErrorCode = AJA_VW_ACINITFORINPUTFAILED;
+			cerr << "## ERROR (" << errno << "): failed to get pointer to sample buffer" << endl;
+			mErrorCode = AJA_VW_GETPOINTERFAILED;
 			return S_FALSE;
 		}
-
-		if (!mDevice.AutoCirculateStart(mInputChannel))
+		ULWord cbData = pSample->GetSize();
+		if (OutputVideoPin* pVideoPin = dynamic_cast<OutputVideoPin*>(pPin))
 		{
-			cerr << "## ERROR (" << errno << "): AC start failed" << endl;
-			mErrorCode = AJA_VW_ACSTARTFAILED;
-			return S_FALSE;
-		}
-
-		if (!mAcTransfer.SetVideoBuffer(mVideoBuffer, mVideoBuffer.GetByteCount()))
-		{
-			cerr << "## ERROR (" << errno << "): AC set video buffer failed" << endl;
-			mErrorCode = AJA_VW_ACSETVIDEOBUFFERFAILED;
-			return S_FALSE;
-		}
-
-		if (mAudioBuffer && !mAcTransfer.SetAudioBuffer(mAudioBuffer, mAudioBuffer.GetByteCount()))
-		{
-			cerr << "## ERROR (" << errno << "): AC set audio buffer failed" << endl;
-			mErrorCode = AJA_VW_ACSETAUDIOBUFFERFAILED;
-			return S_FALSE;
-		}
-	}
-
-	AUTOCIRCULATE_STATUS acStatus;
-	if (!mDevice.AutoCirculateGetStatus(mInputChannel, acStatus))
-		return S_FALSE;
-
-	if (acStatus.IsRunning() && acStatus.HasAvailableInputFrame())
-	{
-		if (!mDevice.AutoCirculateTransfer(mInputChannel, mAcTransfer))
-		{
-			cerr << "## ERROR (" << errno << "): AC transfer failed" << endl;
-			mErrorCode = AJA_VW_ACTRANSFERFAILED;
-			return S_FALSE;
-		}
-
-		mVideos.push(mVideoBuffer);
-		mAudioBuffer ? mAudios.push(mAudioBuffer) : 0;
-	}
-	else
-	{
-		mDevice.WaitForInputVerticalInterrupt(mInputChannel);
-	}
-
-	BYTE* pData;
-	HRESULT hr = pSample->GetPointer(&pData);
-	if (FAILED(hr))
-	{
-		cerr << "## ERROR (" << errno << "): failed to get pointer to sample buffer" << endl;
-		mErrorCode = AJA_VW_GETPOINTERFAILED;
-		return S_FALSE;
-	}
-	ULWord cbData = pSample->GetSize();
-	if (OutputVideoPin* pVideoPin = dynamic_cast<OutputVideoPin*>(pPin))
-	{
-		NTV2Buffer tmpVideoBuffer;
-		if (mVideos.pop(tmpVideoBuffer))
-		{
-			if (tmpVideoBuffer.GetByteCount() != cbData)
+			NTV2Buffer tmpVideoBuffer;
+			if (mVideos.pop(tmpVideoBuffer))
 			{
-				cerr << "## ERROR (" << errno << "): sample buffer size mismatch - AJA buffer is " << tmpVideoBuffer.GetByteCount() << " and output buffer is " << cbData << endl;
-				mErrorCode = AJA_VW_SAMPLEBUFFERSIZEMISMATCH;
-				return S_FALSE;
+				if (tmpVideoBuffer.GetByteCount() != cbData)
+				{
+					cerr << "## ERROR: sample buffer size mismatch: AJA is " << tmpVideoBuffer.GetByteCount() << ", output is " << cbData << endl;
+					mErrorCode = AJA_VW_SAMPLEBUFFERSIZEMISMATCH;
+					return S_FALSE;
+				}
+				memcpy(pData, tmpVideoBuffer, cbData);
+				pSample->SetActualDataLength(tmpVideoBuffer.GetByteCount());
 			}
-
-			memcpy(pData, tmpVideoBuffer, cbData);
-
-			pSample->SetActualDataLength(tmpVideoBuffer.GetByteCount());
 		}
-	}
-	if (OutputAudioPin* pAudioPin = dynamic_cast<OutputAudioPin*>(pPin))
-	{
-		NTV2Buffer tmpAudioBuffer;
-		if (mAudios.pop(tmpAudioBuffer))
+		if (OutputAudioPin* pAudioPin = dynamic_cast<OutputAudioPin*>(pPin))
 		{
-			if (mAcTransfer.GetCapturedAudioByteCount() > cbData)
+			NTV2Buffer tmpAudioBuffer;
+			if (mAudios.pop(tmpAudioBuffer))
 			{
-				cerr << "## ERROR (" << errno << "): sample buffer size mismatch - AJA buffer is " << tmpAudioBuffer.GetByteCount() << " and output buffer is " << cbData << endl;
-				mErrorCode = AJA_VW_SAMPLEBUFFERSIZEMISMATCH;
-				return S_FALSE;
+				if (mAcTransfer.GetCapturedAudioByteCount() > cbData)
+				{
+					cerr << "## ERROR: sample buffer size mismatch: AJA is " << tmpAudioBuffer.GetByteCount() << ", output is " << cbData << endl;
+					mErrorCode = AJA_VW_SAMPLEBUFFERSIZEMISMATCH;
+					return S_FALSE;
+				}
+				memcpy(pData, tmpAudioBuffer, mAcTransfer.GetCapturedAudioByteCount());
+				pSample->SetActualDataLength(mAcTransfer.GetCapturedAudioByteCount());
 			}
-
-			memcpy(pData, tmpAudioBuffer, mAcTransfer.GetCapturedAudioByteCount());
-
-			pSample->SetActualDataLength(mAcTransfer.GetCapturedAudioByteCount());
 		}
-	}
-	pSample->SetSyncPoint(TRUE);
-
-	mRunning = true;
-	return S_OK;
-}
-#endif
+		pSample->SetSyncPoint(TRUE);
+		mRunning = true;
+		return S_OK;
+	}	//	GetNextFrame
+#endif	//	defined(AJA_WINDOWS)
 
 string NTV2VCAM::ULWordToString(const ULWord inNum)
 {
@@ -1428,10 +1356,10 @@ bool NTV2VCAM::Get4KInputFormat(NTV2VideoFormat& inOutVideoFormat)
 
 void NTV2VCAM::SetupAudio()
 {
-#if defined (AJALinux)
+	#if defined(AJALinux)
 	if (mAudioDevice.empty())
 		return;
-#endif
+	#endif	//	AJALinux
 
 	mAudioSystem = NTV2InputSourceToAudioSystem(mInputSource);
 	if (mIsKonaHDMI)
@@ -1483,7 +1411,7 @@ void NTV2VCAM::SetupAudio()
 		mErrorCode = AJA_VW_CONFIGAUDIOSYSTEMFAILED;
 		return;
 	}
-#if defined (AJALinux)
+	#if defined (AJALinux)
 	int pcmReturn = snd_pcm_open(&mPcmHandle, mAudioDevice.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
 	if (pcmReturn < 0)
 	{
@@ -1496,14 +1424,13 @@ void NTV2VCAM::SetupAudio()
 		cerr << "## ERROR (" << errno << "): snd_pcm_set_params failed" << endl;
 		return;
 	}
-#endif
-
+	#endif	//	AJALinux
 	if (NTV2_IS_VALID_AUDIO_SYSTEM(mAudioSystem))
 	{
 		mAudioBuffer.Allocate(gAudMaxSizeBytes * mNumAudioLinks);
 		mDevice.DMABufferLock(mAudioBuffer, true);
 	}
-}
+}	//	SetupAudio
 
 bool NTV2VCAM::GetInputRouting(NTV2XptConnections& conns, const bool isInputRGB)
 {
@@ -1685,248 +1612,241 @@ bool NTV2VCAM::GetInputRouting4K(NTV2XptConnections& conns, const bool isInputRG
 	return !conns.empty();
 }
 
-#if defined (AJALinux)
-int NTV2VCAM::ExtractNumber(const char* str)
-{
-	string s(str);
-	int i = s.length() - 1;
-	while (i >= 0 && isdigit(s[i]))
-		i--;
-	return stoi(s.substr(i + 1));
-}
-#endif
+#if defined(AJALinux)
+	int NTV2VCAM::ExtractNumber(const char* str)
+	{
+		string s(str);
+		int i = s.length() - 1;
+		while (i >= 0 && isdigit(s[i]))
+			i--;
+		return stoi(s.substr(i + 1));
+	}
+#endif	//	AJALinux
 
 int NTV2VCAM::GetFps()
 {
-	NTV2FrameRate frameRate = NTV2_FRAMERATE_INVALID;
+	NTV2FrameRate frameRate(NTV2_FRAMERATE_INVALID);
 	mDevice.GetFrameRate(frameRate, mInputChannel);
 	switch (frameRate)
 	{
-	case NTV2_FRAMERATE_6000:
-		return 60;
-	case NTV2_FRAMERATE_UNKNOWN:
-	case NTV2_FRAMERATE_1900:
-	case NTV2_FRAMERATE_1898:
-	case NTV2_FRAMERATE_1800:
-	case NTV2_FRAMERATE_1798:
-	case NTV2_NUM_FRAMERATES:
-	case NTV2_FRAMERATE_2400:
-	case NTV2_FRAMERATE_2398:
-		return 24;
-	case NTV2_FRAMERATE_5994:
-		return 60;
-	case NTV2_FRAMERATE_3000:
-	case NTV2_FRAMERATE_2997:
-		return 30;
-	case NTV2_FRAMERATE_2500:
-		return 25;
-	case NTV2_FRAMERATE_5000:
-		return 50;
-	case NTV2_FRAMERATE_4800:
-	case NTV2_FRAMERATE_4795:
-		return 48;
-	case NTV2_FRAMERATE_12000:
-	case NTV2_FRAMERATE_11988:
-		return 120;
-	case NTV2_FRAMERATE_1500:
-	case NTV2_FRAMERATE_1498:
-		return 15;
+		case NTV2_FRAMERATE_1500:
+		case NTV2_FRAMERATE_1498:			return 15;
+
+		case NTV2_FRAMERATE_2500:			return 25;
+
+		case NTV2_FRAMERATE_3000:
+		case NTV2_FRAMERATE_2997:			return 30;
+
+		case NTV2_FRAMERATE_4800:
+		case NTV2_FRAMERATE_4795:			return 48;
+
+		case NTV2_FRAMERATE_5000:			return 50;
+
+		case NTV2_FRAMERATE_5994:
+		case NTV2_FRAMERATE_6000:			return 60;
+
+		case NTV2_FRAMERATE_12000:
+		case NTV2_FRAMERATE_11988:			return 120;
+
+		case NTV2_FRAMERATE_UNKNOWN:	//	All others assume 24fps
+		case NTV2_FRAMERATE_1900:
+		case NTV2_FRAMERATE_1898:
+		case NTV2_FRAMERATE_1800:
+		case NTV2_FRAMERATE_1798:
+		case NTV2_NUM_FRAMERATES:
+		case NTV2_FRAMERATE_2400:
+		case NTV2_FRAMERATE_2398:			break;
 	}
 	return 24;
 }
 
-#if defined (AJA_WINDOWS)
-EnumPins::EnumPins(NTV2VCAM* filter_, EnumPins* pEnum)
-	: mpFilter(filter_)
-	, mCurPin(pEnum ? pEnum->mCurPin : 0)
-{
-}
-
-STDMETHODIMP EnumPins::QueryInterface(REFIID riid, void** ppv)
-{
-	if (!ppv)
-		return E_POINTER;
-
-	if (riid == IID_IUnknown || riid == IID_IEnumPins)
+#if defined(AJA_WINDOWS)
+	EnumPins::EnumPins(NTV2VCAM* filter_, EnumPins* pEnum)
+		: mpFilter(filter_)
+		, mCurPin(pEnum ? pEnum->mCurPin : 0)
 	{
-		*ppv = static_cast<IEnumPins*>(this);
-		AddRef();
+	}
+
+	STDMETHODIMP EnumPins::QueryInterface(REFIID riid, void** ppv)
+	{
+		if (!ppv)
+			return E_POINTER;
+
+		if (riid == IID_IUnknown || riid == IID_IEnumPins)
+		{
+			*ppv = static_cast<IEnumPins*>(this);
+			AddRef();
+			return S_OK;
+		}
+
+		*ppv = nullptr;
+		return E_NOINTERFACE;
+	}
+
+	STDMETHODIMP_(ULONG) EnumPins::AddRef()
+	{
+		return (ULONG)InterlockedIncrement(&mRefCount);
+	}
+
+	STDMETHODIMP_(ULONG) EnumPins::Release()
+	{
+		long ref = InterlockedDecrement(&mRefCount);
+		if (ref == 0)
+		{
+			delete this;
+			return 0;
+		}
+
+		return ref;
+	}
+
+	STDMETHODIMP EnumPins::Next(ULONG cPins, IPin * *ppPins, ULONG * pcFetched)
+	{
+		if (!ppPins || (cPins > 1 && !pcFetched))
+			return E_POINTER;
+
+		ULONG fetched = 0;
+		for (int i = 0; i < cPins && mCurPin < mpFilter->GetPinCount(); ++i)
+		{
+			IPin* pPin = mpFilter->GetPin(mCurPin);
+			if (!pPin)
+				return S_FALSE;
+
+			ppPins[fetched++] = pPin;
+			pPin->AddRef();
+			mCurPin++;
+		}
+
+		if (pcFetched)
+			*pcFetched = fetched;
+
+		return fetched == cPins ? S_OK : S_FALSE;
+	}
+
+	STDMETHODIMP EnumPins::Skip(ULONG cPins)
+	{
+		mCurPin += cPins;
+		if (mCurPin >= mpFilter->GetPinCount())
+		{
+			mCurPin = mpFilter->GetPinCount();
+			return S_FALSE;
+		}
 		return S_OK;
 	}
 
-	*ppv = nullptr;
-	return E_NOINTERFACE;
-}
-
-STDMETHODIMP_(ULONG) EnumPins::AddRef()
-{
-	return (ULONG)InterlockedIncrement(&mRefCount);
-}
-
-STDMETHODIMP_(ULONG) EnumPins::Release()
-{
-	long ref = InterlockedDecrement(&mRefCount);
-	if (ref == 0)
+	STDMETHODIMP EnumPins::Reset()
 	{
-		delete this;
-		return 0;
+		mCurPin = 0;
+		return S_OK;
 	}
 
-	return ref;
-}
-
-STDMETHODIMP EnumPins::Next(ULONG cPins, IPin * *ppPins, ULONG * pcFetched)
-{
-	if (!ppPins || (cPins > 1 && !pcFetched))
-		return E_POINTER;
-
-	ULONG fetched = 0;
-	for (int i = 0; i < cPins && mCurPin < mpFilter->GetPinCount(); ++i)
+	STDMETHODIMP EnumPins::Clone(IEnumPins * *ppEnum)
 	{
-		IPin* pPin = mpFilter->GetPin(mCurPin);
-		if (!pPin)
-			return S_FALSE;
+		if (!ppEnum)
+			return E_POINTER;
 
-		ppPins[fetched++] = pPin;
-		pPin->AddRef();
-		mCurPin++;
-	}
-
-	if (pcFetched)
-		*pcFetched = fetched;
-
-	return fetched == cPins ? S_OK : S_FALSE;
-}
-
-STDMETHODIMP EnumPins::Skip(ULONG cPins)
-{
-	mCurPin += cPins;
-	if (mCurPin >= mpFilter->GetPinCount())
-	{
-		mCurPin = mpFilter->GetPinCount();
-		return S_FALSE;
-	}
-
-	return S_OK;
-}
-
-STDMETHODIMP EnumPins::Reset()
-{
-	mCurPin = 0;
-	return S_OK;
-}
-
-STDMETHODIMP EnumPins::Clone(IEnumPins * *ppEnum)
-{
-	if (!ppEnum)
-		return E_POINTER;
-
-	EnumPins* pNew = new EnumPins(mpFilter, this);
-	if (!pNew)
-		return E_OUTOFMEMORY;
-
-	pNew->AddRef();
-	*ppEnum = pNew;
-	return S_OK;
-}
-
-EnumMediaTypes::EnumMediaTypes(OutputVideoPin * pin_) : pin(pin_)
-{
-}
-
-STDMETHODIMP EnumMediaTypes::QueryInterface(REFIID riid, void** ppv)
-{
-	if (riid == IID_IUnknown || riid == IID_IEnumMediaTypes)
-	{
-		AddRef();
-		*ppv = static_cast<IEnumMediaTypes*>(this);
-		return NOERROR;
-	}
-
-	*ppv = nullptr;
-	return E_NOINTERFACE;
-}
-
-STDMETHODIMP_(ULONG) EnumMediaTypes::AddRef()
-{
-	return (ULONG)InterlockedIncrement(&mRefCount);
-}
-
-STDMETHODIMP_(ULONG) EnumMediaTypes::Release()
-{
-	long ref = InterlockedDecrement(&mRefCount);
-	if (ref == 0)
-	{
-		delete this;
-		return 0;
-	}
-
-	return ref;
-}
-
-STDMETHODIMP EnumMediaTypes::Next(ULONG cMediaTypes, AM_MEDIA_TYPE** ppMediaTypes, ULONG * pcFetched)
-{
-	UINT nFetched = 0;
-
-	if (curMT == 0 && cMediaTypes > 0)
-	{
-		AM_MEDIA_TYPE* pmt = (AM_MEDIA_TYPE*)CoTaskMemAlloc(sizeof(AM_MEDIA_TYPE));
-		if (!pmt)
+		EnumPins* pNew = new EnumPins(mpFilter, this);
+		if (!pNew)
 			return E_OUTOFMEMORY;
 
-		ZeroMemory(pmt, sizeof(AM_MEDIA_TYPE));
-
-		CMediaType mt;
-		HRESULT hr = pin->GetMediaType(&mt);
-		if (FAILED(hr))
-		{
-			CoTaskMemFree(pmt);
-			pmt = nullptr;
-			return hr == VFW_S_NO_MORE_ITEMS ? S_FALSE : hr;
-		}
-		CopyMediaType(pmt, &mt);
-
-		ppMediaTypes[0] = pmt;
-		nFetched = 1;
-		curMT++;
+		pNew->AddRef();
+		*ppEnum = pNew;
+		return S_OK;
 	}
 
-	if (pcFetched)
-		*pcFetched = nFetched;
-
-	return (nFetched == cMediaTypes) ? S_OK : S_FALSE;
-}
-
-STDMETHODIMP EnumMediaTypes::Skip(ULONG cMediaTypes)
-{
-	if ((curMT + cMediaTypes) > 1)
+	EnumMediaTypes::EnumMediaTypes(OutputVideoPin * pin_) : pin(pin_)
 	{
-		curMT = 1;
-		return S_FALSE;
 	}
-	curMT += cMediaTypes;
-	return S_OK;
 
-}
+	STDMETHODIMP EnumMediaTypes::QueryInterface(REFIID riid, void** ppv)
+	{
+		if (riid == IID_IUnknown || riid == IID_IEnumMediaTypes)
+		{
+			AddRef();
+			*ppv = static_cast<IEnumMediaTypes*>(this);
+			return NOERROR;
+		}
 
-STDMETHODIMP EnumMediaTypes::Reset()
-{
-	curMT = 0;
-	return S_OK;
-}
+		*ppv = nullptr;
+		return E_NOINTERFACE;
+	}
 
-STDMETHODIMP EnumMediaTypes::Clone(IEnumMediaTypes** ppEnum)
-{
-	if (!ppEnum)
-		return E_POINTER;
+	STDMETHODIMP_(ULONG) EnumMediaTypes::AddRef()
+	{
+		return (ULONG)InterlockedIncrement(&mRefCount);
+	}
 
-	EnumMediaTypes* pNew = new EnumMediaTypes(pin);
-	if (!pNew)
-		return E_OUTOFMEMORY;
+	STDMETHODIMP_(ULONG) EnumMediaTypes::Release()
+	{
+		long ref = InterlockedDecrement(&mRefCount);
+		if (ref == 0)
+		{
+			delete this;
+			return 0;
+		}
+		return ref;
+	}
 
-	pNew->curMT = curMT;
-	pNew->AddRef();
-	*ppEnum = pNew;
-	return S_OK;
-}
-#endif
+	STDMETHODIMP EnumMediaTypes::Next(ULONG cMediaTypes, AM_MEDIA_TYPE** ppMediaTypes, ULONG * pcFetched)
+	{
+		UINT nFetched = 0;
+		if (curMT == 0 && cMediaTypes > 0)
+		{
+			AM_MEDIA_TYPE* pmt = (AM_MEDIA_TYPE*)CoTaskMemAlloc(sizeof(AM_MEDIA_TYPE));
+			if (!pmt)
+				return E_OUTOFMEMORY;
+
+			ZeroMemory(pmt, sizeof(AM_MEDIA_TYPE));
+			CMediaType mt;
+			HRESULT hr = pin->GetMediaType(&mt);
+			if (FAILED(hr))
+			{
+				CoTaskMemFree(pmt);
+				pmt = nullptr;
+				return hr == VFW_S_NO_MORE_ITEMS ? S_FALSE : hr;
+			}
+			CopyMediaType(pmt, &mt);
+
+			ppMediaTypes[0] = pmt;
+			nFetched = 1;
+			curMT++;
+		}
+
+		if (pcFetched)
+			*pcFetched = nFetched;
+
+		return (nFetched == cMediaTypes) ? S_OK : S_FALSE;
+	}
+
+	STDMETHODIMP EnumMediaTypes::Skip(ULONG cMediaTypes)
+	{
+		if ((curMT + cMediaTypes) > 1)
+		{
+			curMT = 1;
+			return S_FALSE;
+		}
+		curMT += cMediaTypes;
+		return S_OK;
+	}
+
+	STDMETHODIMP EnumMediaTypes::Reset()
+	{
+		curMT = 0;
+		return S_OK;
+	}
+
+	STDMETHODIMP EnumMediaTypes::Clone(IEnumMediaTypes** ppEnum)
+	{
+		if (!ppEnum)
+			return E_POINTER;
+
+		EnumMediaTypes* pNew = new EnumMediaTypes(pin);
+		if (!pNew)
+			return E_OUTOFMEMORY;
+
+		pNew->curMT = curMT;
+		pNew->AddRef();
+		*ppEnum = pNew;
+		return S_OK;
+	}
+#endif	//	defined(AJA_WINDOWS)
