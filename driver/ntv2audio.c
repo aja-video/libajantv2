@@ -22,26 +22,24 @@ static const uint32_t gAudioRateHighShift [] = {
 	kRegShiftAud1RateHigh, kRegShiftAud2RateHigh, kRegShiftAud3RateHigh, kRegShiftAud4RateHigh,
 	kRegShiftAud5RateHigh, kRegShiftAud6RateHigh, kRegShiftAud7RateHigh, kRegShiftAud8RateHigh };
 
+static const uint32_t gAudioControlReg [] = {
+    kRegAud1Control, kRegAud2Control, kRegAud3Control, kRegAud4Control,
+    kRegAud5Control, kRegAud6Control, kRegAud7Control, kRegAud8Control,0 };
+
+static const ULWord    gAudioSystemToAudioSrcSelRegNum []    =
+{
+    kRegAud1SourceSelect,    kRegAud2SourceSelect,    kRegAud3SourceSelect,    kRegAud4SourceSelect,
+    kRegAud5SourceSelect,    kRegAud6SourceSelect,    kRegAud7SourceSelect,    kRegAud8SourceSelect,    0
+};
+
+uint32_t GetAudioSourceSelectRegister(Ntv2SystemContext* context, NTV2AudioSystem audioSystem)
+{
+    return gAudioSystemToAudioSrcSelRegNum[audioSystem];
+}
+
 uint32_t GetAudioControlRegister(Ntv2SystemContext* context, NTV2AudioSystem audioSystem)
 {
-	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(context, kRegBoardID);
-
-	if(NTV2DeviceCanDoAudioN(deviceID, NTV2_AUDIOSYSTEM_2) && audioSystem == NTV2_AUDIOSYSTEM_2)
-		return kRegAud2Control;
-	else if(NTV2DeviceCanDoAudioN(deviceID, NTV2_AUDIOSYSTEM_3) && audioSystem == NTV2_AUDIOSYSTEM_3)
-		return kRegAud3Control;
-	else if(NTV2DeviceCanDoAudioN(deviceID, NTV2_AUDIOSYSTEM_4) && audioSystem == NTV2_AUDIOSYSTEM_4)
-		return kRegAud4Control;
-	else if(NTV2DeviceCanDoAudioN(deviceID, NTV2_AUDIOSYSTEM_5) && audioSystem == NTV2_AUDIOSYSTEM_5)
-		return kRegAud5Control;
-	else if(NTV2DeviceCanDoAudioN(deviceID, NTV2_AUDIOSYSTEM_6) && audioSystem == NTV2_AUDIOSYSTEM_6)
-		return kRegAud6Control;
-	else if(NTV2DeviceCanDoAudioN(deviceID, NTV2_AUDIOSYSTEM_7) && audioSystem == NTV2_AUDIOSYSTEM_7)
-		return kRegAud7Control;
-	else if(NTV2DeviceCanDoAudioN(deviceID, NTV2_AUDIOSYSTEM_8) && audioSystem == NTV2_AUDIOSYSTEM_8)
-		return kRegAud8Control;
-	else
-		return kRegAud1Control;
+    return gAudioControlReg[audioSystem];
 }
 
 void AudioUpdateRegister(Ntv2SystemContext* context, uint32_t reg, uint32_t preOr, uint32_t postAnd)
@@ -91,6 +89,17 @@ bool IsAudioPlaying(Ntv2SystemContext* context, NTV2AudioSystem audioSystem)
 		return 1;
 
 	return 0;
+}
+
+bool IsAudioRecording(Ntv2SystemContext* context, NTV2AudioSystem audioSystem)
+{
+    uint32_t control = GetAudioControlRegister(context, audioSystem);
+
+    // Audio is (supposed) to be recording if BIT_8 is cleared (not in reset)
+    if ((ntv2ReadRegister(context, control) & BIT_8) == 0)
+        return 1;
+
+    return 0;
 }
 
 void PauseAudioPlayback(Ntv2SystemContext* context, NTV2AudioSystem audioSystem)
@@ -168,7 +177,45 @@ uint32_t GetNumAudioChannels(Ntv2SystemContext* context, NTV2AudioSystem audioSy
 		return 6;
 }
 
-uint32_t oemAudioSampleAlign(Ntv2SystemContext* context, NTV2AudioSystem audioSystem, uint32_t ulReadSample) 
+void SetNumAudioChannels(
+                         Ntv2SystemContext* context,
+                         NTV2AudioSystem audioSystem,
+                         ULWord numChannels)
+{
+    uint32_t control = GetAudioControlRegister(context, audioSystem);
+    switch(numChannels) {
+        case 16:
+            AudioUpdateRegister(context, control, BIT_20, 0xFFFFFFFF);
+            break;
+        case 8:
+            AudioUpdateRegister(context, control, BIT_16, ~BIT_20);
+            break;
+        default:
+            AudioUpdateRegister(context, control, BIT_20, ~(BIT_20 | BIT_16));
+            break;
+            
+    }
+}
+
+bool IsAudioInputRunning(Ntv2SystemContext* context, NTV2AudioSystem audioSystem)
+{
+    if (audioSystem >= NTV2_NUM_AUDIOSYSTEMS) {
+        return false;
+    }
+    uint32_t stopped (0);
+    auto control = GetAudioControlRegister(context, audioSystem);
+    ntv2ReadRegisterMS(
+                       context,
+                       control,
+                       &stopped,
+                       kRegMaskResetAudioInput,
+                       kRegShiftResetAudioInput
+                       );
+    
+    return stopped == 0;
+}
+
+uint32_t oemAudioSampleAlign(Ntv2SystemContext* context, NTV2AudioSystem audioSystem, uint32_t ulReadSample)
 {
 	// 6 (samples) * 4 (bytes per sample)
 	uint32_t numBytesPerAudioSample = GetNumAudioChannels(context, audioSystem)*4;
@@ -709,3 +756,89 @@ uint32_t GetAudioReadOffset(Ntv2SystemContext* context, NTV2AudioSystem audioSys
 		return NTV2_AUDIO_READBUFFEROFFSET;
 }
 
+bool SupportStackedAudio(Ntv2SystemContext* context)
+{
+    auto deviceID = (NTV2DeviceID)ntv2ReadRegister(context, kRegBoardID);
+    
+    switch (deviceID)
+    {
+        case DEVICE_ID_CORVID24:
+        case DEVICE_ID_CORVID44:
+        case DEVICE_ID_CORVID44_2X4K:
+        case DEVICE_ID_CORVID44_8K:
+        case DEVICE_ID_CORVID44_8KMK:
+        case DEVICE_ID_CORVID44_PLNR:
+        case DEVICE_ID_CORVID88:
+        case DEVICE_ID_CORVIDHBR:
+        case DEVICE_ID_CORVIDHEVC:
+        case DEVICE_ID_IO4K:
+        case DEVICE_ID_IO4KPLUS:
+        case DEVICE_ID_IO4KUFC:
+        case DEVICE_ID_IOIP_2022:
+        case DEVICE_ID_IOIP_2110:
+        case DEVICE_ID_IOIP_2110_RGB12:
+        case DEVICE_ID_IOX3:
+        case DEVICE_ID_KONA1:
+        case DEVICE_ID_KONA3GQUAD:
+        case DEVICE_ID_KONA4:
+        case DEVICE_ID_KONA4UFC:
+        case DEVICE_ID_KONA5:
+        case DEVICE_ID_KONA5_2X4K:
+        case DEVICE_ID_KONA5_3DLUT:
+        case DEVICE_ID_KONA5_8K:
+        case DEVICE_ID_KONA5_8KMK:
+        case DEVICE_ID_KONA5_8K_MV_TX:
+        case DEVICE_ID_KONA5_OE1:
+        case DEVICE_ID_KONA5_OE10:
+        case DEVICE_ID_KONA5_OE11:
+        case DEVICE_ID_KONA5_OE12:
+        case DEVICE_ID_KONA5_OE2:
+        case DEVICE_ID_KONA5_OE3:
+        case DEVICE_ID_KONA5_OE4:
+        case DEVICE_ID_KONA5_OE5:
+        case DEVICE_ID_KONA5_OE6:
+        case DEVICE_ID_KONA5_OE7:
+        case DEVICE_ID_KONA5_OE8:
+        case DEVICE_ID_KONA5_OE9:
+        case DEVICE_ID_KONAHDMI:
+        case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
+        case DEVICE_ID_KONAIP_1RX_1TX_2110:
+        case DEVICE_ID_KONAIP_2022:
+        case DEVICE_ID_KONAIP_2110:
+        case DEVICE_ID_KONAIP_2110_RGB12:
+        case DEVICE_ID_KONAIP_25G:
+        case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
+        case DEVICE_ID_KONAIP_4CH_2SFP:
+        case DEVICE_ID_KONAX:
+        case DEVICE_ID_KONAXM:
+        case DEVICE_ID_SOFTWARE:
+        case DEVICE_ID_SOJI_3DLUT:
+        case DEVICE_ID_SOJI_DIAGS:
+        case DEVICE_ID_SOJI_OE1:
+        case DEVICE_ID_SOJI_OE2:
+        case DEVICE_ID_SOJI_OE3:
+        case DEVICE_ID_SOJI_OE4:
+        case DEVICE_ID_SOJI_OE5:
+        case DEVICE_ID_SOJI_OE6:
+        case DEVICE_ID_SOJI_OE7:
+        case DEVICE_ID_TTAP_PRO:
+            return true;
+    #if defined(_DEBUG)
+        case DEVICE_ID_CORVID1:
+        case DEVICE_ID_CORVID22:
+        case DEVICE_ID_CORVID3G:
+        case DEVICE_ID_IOEXPRESS:
+        case DEVICE_ID_IOXT:
+        case DEVICE_ID_KONA3G:
+        case DEVICE_ID_KONALHEPLUS:
+        case DEVICE_ID_KONALHI:
+        case DEVICE_ID_KONALHIDVI:
+        case DEVICE_ID_NOTFOUND:
+        case DEVICE_ID_TTAP:
+    #else
+        default:
+    #endif
+            break;
+    }    //    switch on inDeviceID
+    return false;
+}

@@ -25,8 +25,11 @@
 
 void StartAudioPlayback(Ntv2SystemContext* context, NTV2AudioSystem audioSystem);
 void StopAudioPlayback(Ntv2SystemContext* context, NTV2AudioSystem audioSystem);
+uint32_t GetAudioControlRegister(Ntv2SystemContext* context, NTV2AudioSystem audioSystem);
+uint32_t GetAudioSourceSelectRegister(Ntv2SystemContext* context, NTV2AudioSystem audioSystem);
 bool IsAudioPlaybackStopped(Ntv2SystemContext* context, NTV2AudioSystem audioSystem);
 bool IsAudioPlaying(Ntv2SystemContext* context, NTV2AudioSystem audioSystem);
+bool IsAudioRecording(Ntv2SystemContext* context, NTV2AudioSystem audioSystem);
 void PauseAudioPlayback(Ntv2SystemContext* context, NTV2AudioSystem audioSystem);
 void UnPauseAudioPlayback(Ntv2SystemContext* context, NTV2AudioSystem audioSystem);
 bool IsAudioPlaybackPaused(Ntv2SystemContext* context, NTV2AudioSystem audioSystem);
@@ -34,6 +37,8 @@ void StartAudioCapture(Ntv2SystemContext* context, NTV2AudioSystem audioSystem);
 void StopAudioCapture(Ntv2SystemContext* context, NTV2AudioSystem audioSystem);
 bool IsAudioCaptureStopped(Ntv2SystemContext* context, NTV2AudioSystem audioSystem);
 uint32_t GetNumAudioChannels(Ntv2SystemContext* context, NTV2AudioSystem audioSystem);
+void SetNumAudioChannels(Ntv2SystemContext* context, NTV2AudioSystem audioSystem, ULWord numChannels);
+bool IsAudioInputRunning(Ntv2SystemContext* context, NTV2AudioSystem audioSystem);
 uint32_t oemAudioSampleAlign(Ntv2SystemContext* context, NTV2AudioSystem audioSystem, uint32_t ulReadSample);
 uint32_t GetAudioLastOut(Ntv2SystemContext* context, NTV2AudioSystem audioSystem);
 uint32_t GetAudioLastIn(Ntv2SystemContext* context, NTV2AudioSystem audioSystem);
@@ -53,5 +58,5 @@ uint32_t GetAudioWrapAddress(Ntv2SystemContext* context, NTV2AudioSystem audioSy
 bool GetAudioBufferSize(Ntv2SystemContext* context, NTV2AudioSystem audioSystem, NTV2AudioBufferSize *value);
 uint32_t GetAudioReadOffset(Ntv2SystemContext* context, NTV2AudioSystem audioSystem);
 uint32_t GetAudioFrameBufferNumber(Ntv2SystemContext* context, NTV2AudioSystem audioSystem);
-
+bool SupportStackedAudio(Ntv2SystemContext* context);
 #endif

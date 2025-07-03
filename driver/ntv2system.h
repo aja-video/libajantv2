@@ -284,7 +284,19 @@
 			#include <DriverKit/IOLib.h>
 			#include <DriverKit/IODispatchQueue.h>
 			#include <DriverKit/IOLib.h>
-			#define DebugLog(fmt, args...)  os_log(OS_LOG_DEFAULT, "NTV2Shared.c::%{public}s:  " fmt, __FUNCTION__,##args)
+
+            constexpr const char* GetFileName(const char* path) {
+                const char* file = path;
+                for (const char* p = path; *p; ++p) {
+                    if (*p == '/' || *p == '\\') {
+                        file = p + 1;
+                    }
+                }
+                return file;
+            }
+
+            #define __FILENAME__ GetFileName(__FILE__)
+			#define DebugLog(fmt, args...)  os_log(OS_LOG_DEFAULT, "%{public}s::%{public}s:  L[%d] " fmt, __FILENAME__, __FUNCTION__, __LINE__, ##args)
 		#else
 			#include <IOKit/IOLocks.h>
 			#include <IOKit/IOLib.h>
