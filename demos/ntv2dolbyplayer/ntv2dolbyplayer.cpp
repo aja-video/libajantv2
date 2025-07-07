@@ -264,8 +264,6 @@ AJAStatus NTV2DolbyPlayer::SetUpVideo (void)
 
 AJAStatus NTV2DolbyPlayer::SetUpAudio (void)
 {
-    const uint16_t	numberOfAudioChannels	(8);
-
 	mAudioSystem = NTV2_AUDIOSYSTEM_1;										//	Use NTV2_AUDIOSYSTEM_1...
 	if (mDevice.features().GetNumAudioSystems() > 1)						//	...but if the device has more than one audio system...
 		mAudioSystem = ::NTV2ChannelToAudioSystem(mConfig.fOutputChannel);	//	...base it on the channel
@@ -274,7 +272,7 @@ AJAStatus NTV2DolbyPlayer::SetUpAudio (void)
 	if (!mDevice.features().CanDoFrameStore1Display())
 		mAudioSystem = NTV2_AUDIOSYSTEM_1;
 
-	mDevice.SetNumberAudioChannels (numberOfAudioChannels, mAudioSystem);
+	mDevice.SetNumberAudioChannels (8, mAudioSystem);	//	This demo uses 8 channels -- no more, no less
     mDevice.SetAudioRate (mAudioRate, mAudioSystem);
 
 	//	How big should the on-device audio buffer be?   1MB? 2MB? 4MB? 8MB?

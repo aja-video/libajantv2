@@ -2765,6 +2765,9 @@ private:
 			oss << "CPLD Version: "					<< DEC(inRegValue & (BIT(0)|BIT(1)))	<< endl
 				<< "Failsafe Bitfile Loaded: "		<< (inRegValue & BIT(4) ? "Yes" : "No") << endl
 				<< "Force Reload: "					<< YesNo(inRegValue & BIT(8));
+			ULWord pcbRev ((inRegValue & 0xF0000000) >> 28);
+			if (pcbRev)	oss << endl
+				<< "PCB Version: "					<< xHEX0N(pcbRev,2);
 			return oss.str();
 		}
 	}	mDecodeCPLDVersion;

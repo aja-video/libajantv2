@@ -1804,6 +1804,52 @@ bool CNTV2Card::GetPossibleConnections (NTV2PossibleConnections & outConnections
 			&&	CNTV2SignalRouter::GetPossibleConnections(ROMregs, outConnections);
 }
 
+bool CNTV2Card::GetAllWidgetInputs (NTV2InputXptIDSet & outInputs)
+{
+	outInputs.clear();
+	const ULWordSet widgetIDs (GetSupportedItems(kNTV2EnumsID_WidgetID));
+
+	for (ULWordSetConstIter iter(widgetIDs.begin());  iter != widgetIDs.end ();  ++iter)
+	{
+		const NTV2WidgetID wgtID(NTV2WidgetID(*iter + 0));
+		NTV2InputXptIDSet inputs;
+		CNTV2SignalRouter::GetWidgetInputs (wgtID, inputs);
+		for (NTV2InputXptIDSetConstIter it(inputs.begin());  it != inputs.end();  ++it)
+		{
+			if (CNTV2SignalRouter::WidgetIDToType(wgtID) == NTV2WidgetType_FrameStore)
+				if (!IsSupported(kDeviceCanDo425Mux))
+					if (!IsSupported(kDeviceCanDo8KVideo))
+						if (::NTV2InputCrosspointIDToString(*it, false).find("DS2") != string::npos)	//	is DS2 input?
+							continue;	//	do not include FrameStore DS2 inputs for IP25G
+			outInputs.insert(*it);
+		}
+	}
+	return true;
+}
+
+bool CNTV2Card::GetAllWidgetOutputs (NTV2OutputXptIDSet & outOutputs)
+{
+	outOutputs.clear();
+	const ULWordSet widgetIDs (GetSupportedItems(kNTV2EnumsID_WidgetID));
+
+	for (ULWordSetConstIter iter(widgetIDs.begin());	iter != widgetIDs.end ();  ++iter)
+	{
+		const NTV2WidgetID wgtID(NTV2WidgetID(*iter + 0));
+		NTV2OutputXptIDSet outputs;
+		CNTV2SignalRouter::GetWidgetOutputs (wgtID, outputs);
+		for (NTV2OutputXptIDSetConstIter it(outputs.begin());  it != outputs.end();  ++it)
+		{
+			if (CNTV2SignalRouter::WidgetIDToType(wgtID) == NTV2WidgetType_FrameStore)
+				if (!IsSupported(kDeviceCanDo425Mux))
+					if (!IsSupported(kDeviceCanDo8KVideo))
+						if (::NTV2OutputCrosspointIDToString(*it, false).find("DS2") != string::npos)	//	is DS2 output?
+							continue;	//	do not include FrameStore DS2 outputs for IP25G
+			outOutputs.insert(*it);
+		}
+	}
+	return true;
+}
+
 /////////////////////////////////
 
 // Method: SetFrameBufferFormat

@@ -261,6 +261,7 @@ static const int64_t c_default_timeout		= 50000;
 static const uint32_t c_i2c_timeout			= 200000;
 static const uint32_t c_lock_timeout		= 500000;
 static const uint32_t c_hdr_timeout			= 2000000;
+static const uint32_t c_clock_timeout		= 100000;
 static const uint32_t c_reset_timeout		= 10000;
 static const int64_t c_lock_wait_max		= 8;
 static const uint32_t c_vendor_name_size	= 8;
@@ -733,6 +734,7 @@ static Ntv2Status ntv2_hdmiout4_initialize(struct ntv2_hdmiout4 *ntv2_hout)
 	ntv2_hout->crop_enable = false;
 	ntv2_hout->full_range = false;
 	ntv2_hout->sd_wide = false;
+    ntv2_hout->uhd_downconvert = false;
 	ntv2_hout->video_standard = ntv2_video_standard_none;
 	ntv2_hout->frame_rate = ntv2_frame_rate_none;
 	ntv2_hout->color_space = ntv2_color_space_yuv422;
@@ -815,6 +817,7 @@ static bool configure_hardware(struct ntv2_hdmiout4 *ntv2_hout)
     bool is50 = false;
     bool is60 = false;
     bool is_444 = false;
+    bool downconvert = false;
 
 	uint32_t max_freq = vid->max_clock_freq;
 
@@ -881,12 +884,14 @@ static bool configure_hardware(struct ntv2_hdmiout4 *ntv2_hout)
 		if (video_standard == ntv2_video_standard_3840x2160p)
 		{
 			video_standard = ntv2_video_standard_1080p;
+            downconvert = true;
 		}
 		if ((video_standard == ntv2_video_standard_2048x1080p) ||
 			(video_standard == ntv2_video_standard_4096x2160p))
 		{
 			video_standard = ntv2_video_standard_1080p;
 			crop_enable = true;
+            downconvert = true;
 		}
 	}
 	else if (!force_config)
@@ -952,6 +957,7 @@ static bool configure_hardware(struct ntv2_hdmiout4 *ntv2_hout)
 				{
 					// 4k not supported
 					video_standard = ntv2_video_standard_2048x1080p;
+                    downconvert = true;
 				}
 			}
 		}
@@ -1007,12 +1013,14 @@ static bool configure_hardware(struct ntv2_hdmiout4 *ntv2_hout)
 					{
 						// uhd not supported
 						video_standard = ntv2_video_standard_1080p;
+                        downconvert = true;
 					}
 				}
 				else
 				{
 					// uhd not supported
 					video_standard = ntv2_video_standard_1080p;
+                    downconvert = true;
 				}
 			}
 		}
@@ -1128,6 +1136,7 @@ static bool configure_hardware(struct ntv2_hdmiout4 *ntv2_hout)
 	ntv2_hout->crop_enable = crop_enable;
 	ntv2_hout->full_range = full_range;
 	ntv2_hout->sd_wide = sd_wide;
+    ntv2_hout->uhd_downconvert = downconvert;
 	ntv2_hout->color_space = color_space; 
 	ntv2_hout->color_depth = color_depth;
 	ntv2_hout->audio_input = audio_input;
@@ -1198,12 +1207,14 @@ static bool configure_hdmi_video(struct ntv2_hdmiout4 *ntv2_hout)
 	uint32_t crop_mode;
 	uint32_t aud_mult;
     uint32_t clock_select;
+    uint32_t clock_select_n;
 
 	int i;
 
 	bool hdmi_mode = ntv2_hout->hdmi_mode;
 	bool scdc_mode = ntv2_hout->scdc_mode;
 	bool crop_enable = ntv2_hout->crop_enable;
+    bool downconvert = ntv2_hout->uhd_downconvert;
 	uint32_t video_standard = ntv2_hout->video_standard;
 	uint32_t frame_rate = ntv2_hout->frame_rate;
 	uint32_t color_space = ntv2_hout->color_space;
@@ -1312,8 +1323,7 @@ static bool configure_hdmi_video(struct ntv2_hdmiout4 *ntv2_hout)
     }
 
 	pix_clock = 1;
-
-    if (ntv2_hout->hdmi_version >= 6)
+    if (!downconvert && (ntv2_hout->hdmi_version >= 6))
     {
         pix_clock = 2;
     }
@@ -1412,6 +1422,7 @@ static bool configure_hdmi_video(struct ntv2_hdmiout4 *ntv2_hout)
 	}
 
     clock_select = ntv2_con_hdmiout4_clockselect_integer;
+    clock_select_n = ntv2_con_hdmiout4_clockselect_fractional;
     switch (frame_rate)
     {
     case ntv2_frame_rate_2398:
@@ -1419,7 +1430,10 @@ static bool configure_hdmi_video(struct ntv2_hdmiout4 *ntv2_hout)
     case ntv2_frame_rate_4795:
     case ntv2_frame_rate_5994:
         if (video_standard != ntv2_video_standard_525i)
+        {
             clock_select = ntv2_con_hdmiout4_clockselect_fractional;
+            clock_select_n = ntv2_con_hdmiout4_clockselect_integer;
+        }
         break;
     default:
         break;
@@ -1435,8 +1449,21 @@ static bool configure_hdmi_video(struct ntv2_hdmiout4 *ntv2_hout)
 	value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_videocontrol_clock_select, clock_select);
 	value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_videocontrol_audiomode, ntv2_con_hdmiout4_audiomode_disable);
 	value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_videocontrol_txconfigmode, ntv2_con_hdmiout4_txconfigmode_active);
-	ntv2_reg_write(ntv2_hout->system_context, ntv2_reg_hdmiout4_videocontrol, ntv2_hout->index, value);
+    ntv2_reg_write(ntv2_hout->system_context, ntv2_reg_hdmiout4_videocontrol, ntv2_hout->index, value);
 
+    // this toggles the clock select
+//    if (ntv2_hout->hdmi_version >= 6)
+/*    if (false)
+    {
+        value &= ~NTV2_FLD_MASK(ntv2_fld_hdmiout4_videocontrol_clock_select);
+        value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_videocontrol_clock_select, clock_select_n);
+        ntv2_reg_write(ntv2_hout->system_context, ntv2_reg_hdmiout4_videocontrol, ntv2_hout->index, value);
+        ntv2EventWaitForSignal(&ntv2_hout->monitor_event, c_clock_timeout, true);
+        value &= ~NTV2_FLD_MASK(ntv2_fld_hdmiout4_videocontrol_clock_select);
+        value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_videocontrol_clock_select, clock_select);
+        ntv2_reg_write(ntv2_hout->system_context, ntv2_reg_hdmiout4_videocontrol, ntv2_hout->index, value);
+    }
+   */
 	value = NTV2_FLD_SET(ntv2_fld_hdmiout4_pixelcontrol_lineinterleave, lin_int);
 	value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_pixelcontrol_pixelinterleave, pix_int);
 	value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_pixelcontrol_420convert, pix_420);

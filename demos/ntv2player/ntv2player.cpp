@@ -263,11 +263,10 @@ AJAStatus NTV2Player::SetUpVideo (void)
 AJAStatus NTV2Player::SetUpAudio (void)
 {
 	uint16_t numAudioChannels (mDevice.features().GetMaxAudioChannels());
-
-	//	If there are 2048 pixels on a line instead of 1920, reduce the number of audio channels
-	//	This is because HANC is narrower, and has space for only 8 channels
-    if ((NTV2_IS_2K_1080_VIDEO_FORMAT(mConfig.fVideoFormat)  &&  numAudioChannels > 8) || !NTV2DeviceCanDo25GIP(mDevice.GetDeviceID()))
-		numAudioChannels = 8;
+	if (numAudioChannels > 8)										//	If audio system handles more than 8 channels...
+		if (!mDevice.features().CanDo2110())						//	...and SDI (i.e. not ST 2110 IP streaming)...
+			if (NTV2_IS_2K_1080_VIDEO_FORMAT(mConfig.fVideoFormat))	//	...and 2K (narrower HANC only fits 8 audio channels)
+				numAudioChannels = 8;	//	...then reduce to 8 audio channels
 
 	mAudioSystem = NTV2_AUDIOSYSTEM_1;										//	Use NTV2_AUDIOSYSTEM_1...
 	if (mDevice.features().GetNumAudioSystems() > 1)						//	...but if the device has more than one audio system...

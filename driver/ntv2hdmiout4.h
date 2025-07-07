@@ -59,6 +59,7 @@ struct ntv2_hdmiout4 {
 	bool				crop_enable;
 	bool				full_range;
 	bool				sd_wide;
+    bool                uhd_downconvert;
 	uint32_t			video_standard;
 	uint32_t			frame_rate;
 	uint32_t			color_space;
