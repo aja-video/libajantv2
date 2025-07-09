@@ -296,7 +296,39 @@
             }
 
             #define __FILENAME__ GetFileName(__FILE__)
-			#define DebugLog(fmt, args...)  os_log(OS_LOG_DEFAULT, "%{public}s::%{public}s:  L[%d] " fmt, __FILENAME__, __FUNCTION__, __LINE__, ##args)
+			#define NTV2DebugMsg(fmt, args...)  os_log(OS_LOG_DEFAULT, "%{public}s::%{public}s:  L[%d] " fmt, __FILENAME__, __FUNCTION__, __LINE__, ##args)
+            #define DebugMsg NTV2DebugMsg
+            #define DebugLog NTV2DebugMsg
+            #define    NTV2FailIf(inCondition, inAction, inHandler, inMessage)               \
+            {                                                                                \
+                bool __failed = (inCondition);                                                \
+                if(__failed)                                                                \
+                {                                                                            \
+                    DebugMsg(inMessage);                                                    \
+                    { inAction; }                                                            \
+                    goto inHandler;                                                            \
+                }                                                                            \
+            }
+
+            #define    NTV2FailIfError(inError, inAction, inHandler, inMessage)              \
+            {                                                                                \
+                IOReturn __Err = (inError);                                                    \
+                if(__Err != 0)                                                                \
+                {                                                                            \
+                    DebugMsg(inMessage ", Error: %d (0x%X)", __Err, (unsigned int)__Err);    \
+                    { inAction; }                                                            \
+                    goto inHandler;                                                            \
+                }                                                                            \
+            }
+
+            #define    NTV2FailIfNULL(inPointer, inAction, inHandler, inMessage)               \
+            if((inPointer) == NULL)                                                            \
+            {                                                                                \
+                DebugMsg(inMessage);                                                        \
+                { inAction; }                                                                \
+                goto inHandler;                                                                \
+            }
+
 		#else
 			#include <IOKit/IOLocks.h>
 			#include <IOKit/IOLib.h>
