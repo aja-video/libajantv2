@@ -736,8 +736,8 @@ void InitializeVirtualRegisters(Ntv2SystemContext* pSystemContext)
 		ntv2WriteRegister(pSystemContext, gChannelToVPIDTransferCharacteristics[i], 0);
 		ntv2WriteRegister(pSystemContext, gChannelToVPIDColorimetry[i], 0);
 		ntv2WriteRegister(pSystemContext, gChannelToVPIDLuminance[i], 0);
-        ntv2WriteRegister(pSystemContext, gChannelToSDIOutVPIDRGBRange, 0);
-        ntv2WriteRegister(pSystemContext, gChannelToSDIOutKeySignal, 0);
+        ntv2WriteRegister(pSystemContext, gChannelToSDIOutVPIDRGBRange[i], 0);
+        ntv2WriteRegister(pSystemContext, gChannelToSDIOutKeySignal[i], 0);
 	}
 
 	ntv2WriteRegister(pSystemContext, kVRegBaseFirmwareDeviceID, (uint32_t)deviceID);
