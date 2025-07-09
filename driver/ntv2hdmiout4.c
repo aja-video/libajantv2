@@ -763,6 +763,7 @@ static Ntv2Status ntv2_hdmiout4_initialize(struct ntv2_hdmiout4 *ntv2_hout)
 	ntv2_hout->product_name = "Kona IO";
 
 	ntv2_hout->output_enable = true;
+	ntv2_hout->output_disable = false;
 	ntv2_hout->hdr_enable = false;
 	ntv2_hout->dolby_vision = false;
 
@@ -820,6 +821,14 @@ static bool configure_hardware(struct ntv2_hdmiout4 *ntv2_hout)
     bool downconvert = false;
 
 	uint32_t max_freq = vid->max_clock_freq;
+
+    // check output disable flag
+	ntv2_hout->output_disable = NTV2_FLD_GET(ntv2_fld_hdmiout_disable, ntv2_hout->hdmi_config) != 0;
+    if (ntv2_hout->output_disable)
+    {
+		disable_output(ntv2_hout);
+        return false;
+    }
 
 	// support old audio rate bits move
 	if ((vobd == 0x2) && (color_depth != ntv2_color_depth_12bit))
@@ -1452,8 +1461,7 @@ static bool configure_hdmi_video(struct ntv2_hdmiout4 *ntv2_hout)
     ntv2_reg_write(ntv2_hout->system_context, ntv2_reg_hdmiout4_videocontrol, ntv2_hout->index, value);
 
     // this toggles the clock select
-//    if (ntv2_hout->hdmi_version >= 6)
-/*    if (false)
+    if (ntv2_hout->hdmi_version >= 6)
     {
         value &= ~NTV2_FLD_MASK(ntv2_fld_hdmiout4_videocontrol_clock_select);
         value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_videocontrol_clock_select, clock_select_n);
@@ -1463,7 +1471,7 @@ static bool configure_hdmi_video(struct ntv2_hdmiout4 *ntv2_hout)
         value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_videocontrol_clock_select, clock_select);
         ntv2_reg_write(ntv2_hout->system_context, ntv2_reg_hdmiout4_videocontrol, ntv2_hout->index, value);
     }
-   */
+
 	value = NTV2_FLD_SET(ntv2_fld_hdmiout4_pixelcontrol_lineinterleave, lin_int);
 	value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_pixelcontrol_pixelinterleave, pix_int);
 	value |= NTV2_FLD_SET(ntv2_fld_hdmiout4_pixelcontrol_420convert, pix_420);
@@ -2095,6 +2103,7 @@ static void enable_output(struct ntv2_hdmiout4 *ntv2_hout)
 	uint32_t mask;
 
 	if (ntv2_hout->output_enable) return;
+	if (ntv2_hout->output_disable) return;
 
 	NTV2_MSG_HDMIOUT4_CONFIG("%s: enable output\n", ntv2_hout->name);
 	ntv2_hout->output_enable = true;
@@ -2256,7 +2265,8 @@ static bool has_config_changed(struct ntv2_hdmiout4 *ntv2_hout)
 		NTV2_FLD_MASK(ntv2_fld_hdmiout_audio_format) |
 		NTV2_FLD_MASK(ntv2_fld_hdmiout_full_range) |
 		NTV2_FLD_MASK(ntv2_fld_hdmiout_audio_8ch) |
-		NTV2_FLD_MASK(ntv2_fld_hdmiout_dvi);
+		NTV2_FLD_MASK(ntv2_fld_hdmiout_dvi) |
+        NTV2_FLD_MASK(ntv2_fld_hdmiout_disable);
 	uint32_t mask_control = 
 		NTV2_FLD_MASK(ntv2_fld_hdmiout_deep_12bit) |
 		NTV2_FLD_MASK(ntv2_fld_hdmiout_force_hpd) |

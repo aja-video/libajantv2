@@ -600,6 +600,22 @@ bool CNTV2Card::GetHDMIOutForceConfig (bool & outValue, const NTV2Channel inWhic
 	return CNTV2DriverInterface::ReadRegister (reg, outValue, kRegMaskHDMIOutForceConfig, kRegShiftHDMIOutForceConfig);
 }
 
+bool CNTV2Card::SetHDMIOutDisable (const bool value, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIOutControl);
+	if (!GetHDMIOutControlReg(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister (reg, ULWord(value), kRegMaskHDMIOutDisable, kRegShiftHDMIOutDisable);
+}
+
+bool CNTV2Card::GetHDMIOutDisable (bool & outValue, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIOutControl);
+	if (!GetHDMIOutControlReg(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister (reg, outValue, kRegMaskHDMIOutDisable, kRegShiftHDMIOutDisable);
+}
+
 bool CNTV2Card::SetHDMIOutPrefer420 (const bool value, const NTV2Channel inWhichHDMIOut)
 {
 	ULWord reg(kRegHDMIInputControl);

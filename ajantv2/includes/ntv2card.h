@@ -4790,6 +4790,8 @@ public:
 
 	AJA_VIRTUAL bool		SetHDMIOutForceConfig (const bool inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 	AJA_VIRTUAL bool		GetHDMIOutForceConfig (bool & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		SetHDMIOutDisable (const bool inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		GetHDMIOutDisable (bool & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
 	/**
 		@brief						Sets if the given HDMI output should prefer 4:2:0 or not.
