@@ -79,6 +79,8 @@
 #include "ntv2genlock.h"
 #include "../ntv2kona.h"
 
+#include "buildenv.h"
+
 #if  !defined(x86_64) && !defined(aarch64)
 #error "*** AJA driver must be built 64 bit ***"
 #endif
