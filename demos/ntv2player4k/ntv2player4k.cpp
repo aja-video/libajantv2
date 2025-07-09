@@ -275,11 +275,10 @@ AJAStatus NTV2Player4K::SetUpVideo (void)
 AJAStatus NTV2Player4K::SetUpAudio (void)
 {
 	uint16_t numAudioChannels (mDevice.features().GetMaxAudioChannels());
-
-	//	If there are 4096 pixels on a line instead of 3840, reduce the number of audio channels
-	//	This is because HANC is narrower, and has space for only 8 channels
-	if (NTV2_IS_4K_4096_VIDEO_FORMAT(mConfig.fVideoFormat)  &&  numAudioChannels > 8)
-		numAudioChannels = 8;
+	if (numAudioChannels > 8)										//	If audio system handles more than 8 channels...
+		if (!mDevice.features().CanDo2110())						//	...and SDI (i.e. not ST 2110 IP streaming)...
+			if (NTV2_IS_4K_4096_VIDEO_FORMAT(mConfig.fVideoFormat))	//	...and 4K (narrower HANC only fits 8 audio channels)
+				numAudioChannels = 8;	//	...then reduce to 8 audio channels
 
 	//	Use the NTV2AudioSystem that has the same ordinal value as the output FrameStore/Channel...
 	mAudioSystem = ::NTV2ChannelToAudioSystem(mConfig.fOutputChannel);

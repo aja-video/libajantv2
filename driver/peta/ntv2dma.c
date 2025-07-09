@@ -17,6 +17,7 @@
 #include <linux/dmaengine.h>
 #include <linux/pagemap.h>
 #include <linux/of_device.h>
+#include <linux/of.h> 
 
 #include "ntv2enums.h"
 #include "ntv2audiodefines.h"

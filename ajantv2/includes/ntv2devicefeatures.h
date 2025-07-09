@@ -29,6 +29,7 @@
 /**
 	@brief	Used with CNTV2DriverInterface::GetBoolParam to determine device capabilities.
 	@see	vidop-features
+	@note   Always add new entries at the bottom just before kNTV2BoolParam_LAST.
 **/
 typedef enum _NTV2BoolParamID
 {
@@ -164,6 +165,7 @@ typedef enum _NTV2BoolParamID
 
 /**
 	@brief	Used with CNTV2DriverInterface::GetNumericParam to determine device capabilities.
+	@note   Always add new entries at the bottom just before kNTV2NumericParam_LAST.
 	@see	vidop-features
 **/
 typedef enum _NTV2NumericParamID
@@ -228,6 +230,7 @@ typedef enum _NTV2NumericParamID
 
 /**
 	@brief	Identifies NTV2 enumerated types, used in CNTV2DriverInterface::GetSupportedItems.
+	@note   Always add new entries at the bottom just before kNTV2EnumsID_LAST.
 	@see	vidop-features
 **/
 typedef enum _NTV2EnumsID

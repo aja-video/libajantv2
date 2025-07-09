@@ -90,6 +90,12 @@ static const ULWord    gChannelToVPIDColorimetry[]			= {	kVRegNTV2VPIDColorimetr
 static const ULWord    gChannelToVPIDLuminance[]			= {	kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance,
 																kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance, 0 };
 
+static const ULWord	gChannelToSDIOutVPIDRGBRange[] = {	kVRegSDIOutVPIDRGBRange1, kVRegSDIOutVPIDRGBRange2, kVRegSDIOutVPIDRGBRange3, kVRegSDIOutVPIDRGBRange4,
+														kVRegSDIOutVPIDRGBRange5, kVRegSDIOutVPIDRGBRange6, kVRegSDIOutVPIDRGBRange7, kVRegSDIOutVPIDRGBRange8, 0 };
+
+static const ULWord gChannelToSDIOutKeySignal[] = { kVRegSDIOutKeySignal1, kVRegSDIOutKeySignal2, kVRegSDIOutKeySignal3, kVRegSDIOutKeySignal4,
+                                                    kVRegSDIOutKeySignal5, kVRegSDIOutKeySignal6, kVRegSDIOutKeySignal7, kVRegSDIOutKeySignal8 };
+
 // hdmi version 6 mulitple output virtual registers
 static const ULWord gHDMIChannelToOutControlVRegNum [] =	{ kVRegHDMIOutControl1, kVRegHDMIOutControl2, kVRegHDMIOutControl3, kVRegHDMIOutControl4, kVRegHDMIOutControl1, kVRegHDMIOutControl1, kVRegHDMIOutControl1, kVRegHDMIOutControl1 };
 static const ULWord gHDMIChannelToInputStatusVRegNum [] =	{ kVRegHDMIInputStatus1, kVRegHDMIInputStatus2, kVRegHDMIInputStatus3, kVRegHDMIInputStatus4, kVRegHDMIInputStatus1, kVRegHDMIInputStatus1, kVRegHDMIInputStatus1, kVRegHDMIInputStatus1 };
@@ -730,6 +736,8 @@ void InitializeVirtualRegisters(Ntv2SystemContext* pSystemContext)
 		ntv2WriteRegister(pSystemContext, gChannelToVPIDTransferCharacteristics[i], 0);
 		ntv2WriteRegister(pSystemContext, gChannelToVPIDColorimetry[i], 0);
 		ntv2WriteRegister(pSystemContext, gChannelToVPIDLuminance[i], 0);
+        ntv2WriteRegister(pSystemContext, gChannelToSDIOutVPIDRGBRange, 0);
+        ntv2WriteRegister(pSystemContext, gChannelToSDIOutKeySignal, 0);
 	}
 
 	ntv2WriteRegister(pSystemContext, kVRegBaseFirmwareDeviceID, (uint32_t)deviceID);
@@ -2306,7 +2314,7 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context, NTV2Channel channel)
         }
 	}
 
-	if(NTV2DeviceCanDoHDMIHDROut(deviceID))
+	if(NTV2DeviceCanDoHDMIHDROut(deviceID) && (hdmiVersion < 6))
 	{
 		if(	(hdrRegValues.electroOpticalTransferFunction > 0 && hdrRegValues.electroOpticalTransferFunction <= 3) ||
 			(hdrRegValues.staticMetadataDescriptorID > 0 && hdrRegValues.staticMetadataDescriptorID <= 3) ||
