@@ -4566,7 +4566,7 @@ private:
 			ostringstream	oss;
 			if (::NTV2DeviceCanDoBreakoutBoard(inDeviceID))
 				oss << "BOB : "							<< ((inRegValue & kRegMaskBOBAbsent) ? "Disconnected" : "Connected")			<< endl
-					<< "ADAV801 Initializatioin: "		<< ((inRegValue & kRegMaskBOBADAV801UpdateStatus) ? "Complete" : "In Progress") << endl
+					<< "ADAV801 Initialization: "		<< ((inRegValue & kRegMaskBOBADAV801UpdateStatus) ? "Complete" : "In Progress") << endl
 					<< "ADAV801 DIR Locked(Debug): "	<< DEC(inRegValue & kRegMaskBOBADAV801DIRLocked);
 			else
 				oss << "Device does not support a breakout board";
