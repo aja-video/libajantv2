@@ -76,7 +76,7 @@ AJAStatus NTV2MetalE2E::SetUpVideo (void)
 		mDevice.SetSDIOutVPID(vpidDS1, vpidDS2, NTV2_CHANNEL2);
 	}
 	
-	bool is3G = false, is6G = false, is12G = false;
+    bool is3G (false), is6G (false), is12G (false);
 	mDevice.GetSDIInput3GPresent(is3G, NTV2_CHANNEL1);
 	mDevice.GetSDIInput6GPresent(is6G, NTV2_CHANNEL1);
 	mDevice.GetSDIInput12GPresent(is12G, NTV2_CHANNEL1);
