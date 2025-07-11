@@ -827,7 +827,6 @@ static bool configure_hardware(struct ntv2_hdmiout4 *ntv2_hout)
     if (ntv2_hout->output_disable)
     {
 		disable_output(ntv2_hout);
-        return false;
     }
 
 	// support old audio rate bits move
@@ -2158,6 +2157,8 @@ static bool reset_transmit(struct ntv2_hdmiout4 *ntv2_hout, uint32_t timeout)
 	uint32_t value;
 	uint32_t mask;
 
+	if (ntv2_hout->output_disable) return true;
+
 	NTV2_MSG_HDMIOUT4_CONFIG("%s: reset transmit\n", ntv2_hout->name);
 
 	// toggle reset
@@ -2180,6 +2181,9 @@ static bool reset_transmit(struct ntv2_hdmiout4 *ntv2_hout, uint32_t timeout)
 		if (!ntv2_hout->monitor_enable) return false;
 		time += 100;
 	}
+
+	// wait again
+	ntv2TimeSleep(100);
 
 	if (time >= timeout) return false;
 	return true;
