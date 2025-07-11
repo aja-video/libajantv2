@@ -30,36 +30,26 @@ class NTV2MetalE2E
         ~NTV2MetalE2E (void);
 
 		/**
-			@brief		Initializes me and prepares me to Run.
+            @brief		Do something from the KonaX Xilinx Baremetal system
 			@return		AJA_STATUS_SUCCESS if successful; otherwise another AJAStatus code if unsuccessful.
 		**/
-		AJAStatus		Init (void);
-
-		/**
-			@brief		Generates, transfers and displays the test pattern on the output.
-			@return		AJA_STATUS_SUCCESS if successful; otherwise another AJAStatus code if unsuccessful.
-			@note		Do not call this method without first calling my Init method.
-		**/
-		AJAStatus		EmitPattern (void);
-
-
-	//	Protected Instance Methods
-	protected:
-		/**
-            @brief		Sets up my AJA device's genlock
-			@return		AJA_STATUS_SUCCESS if successful; otherwise another AJAStatus code if unsuccessful.
-		**/
-        AJAStatus		SetUpGenlock (void);
+        AJAStatus		DoSomething (void);
 
         /**
-            @brief		Sets up my AJA device's video/output format.
+            @brief	Sets up the genlock circuit
             @return		AJA_STATUS_SUCCESS if successful; otherwise another AJAStatus code if unsuccessful.
         **/
-        AJAStatus		SetUpVideo (void);
+        AJAStatus       SetUpGenlock (void);
 
-		/**
-			@brief	Sets up board routing for playout.
-		**/
+        /**
+            @brief	Setup video formats and outputs
+            @return		AJA_STATUS_SUCCESS if successful; otherwise another AJAStatus code if unsuccessful.
+        **/
+        AJAStatus       SetUpVideo (void);
+
+        /**
+            @brief	Sets up board routing for E2E.
+        **/
         void			RouteE2ESignal (void);
 
 

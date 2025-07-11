@@ -15,11 +15,9 @@ using namespace std;
 
 int main (int argc, const char ** argv)
 {	//	Create the object that will display the test pattern...
-    NTV2MetalE2E powerUpDemo(config);
-    AJAStatus status = powerUpDemo.Init();
+    NTV2MetalE2E powerUpDemo;
+    AJAStatus status = powerUpDemo.DoSomething();
 
-    //	Setup the genlock, route the SDI In 1 to SDI out 2, setup the output
-    status = powerUpDemo.doSomething();
 	if (AJA_FAILURE(status))
         {cout << "## ERROR:  doSomething failed: " << ::AJAStatusToString(status) << endl;	return 2;}
 
