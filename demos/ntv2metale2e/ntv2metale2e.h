@@ -10,7 +10,7 @@
 #define _NTV2METALE2E_H
 
 #include "ntv2democommon.h"
-
+#include "ntv2vpid.h"
 /**
 	@brief	I generate and transfer a test pattern into an AJA device's frame buffer for steady-state
 			playout using NTV2TestPatternGen::DrawTestPattern and CNTV2Card::DMAWriteFrame.
