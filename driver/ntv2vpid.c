@@ -941,8 +941,6 @@ bool SetVPIDOutput(Ntv2SystemContext* context, NTV2Channel channel)
 					vpidControlDS1.value -= 0x3b000000;
 				}
 			}
-
-            SetSDIOutVPIDOverrides(context, &vpidControlDS1.value, channel);
 		}
 	}
 
@@ -1025,8 +1023,6 @@ bool SetVPIDOutput(Ntv2SystemContext* context, NTV2Channel channel)
 					vpidControlDS2.value -= 0x3b000000;
 				}
 			}
-            
-            SetSDIOutVPIDOverrides(context, &vpidControlDS2.value, channel);
 		}
 	}
 	else
@@ -1050,5 +1046,11 @@ bool SetVPIDOutput(Ntv2SystemContext* context, NTV2Channel channel)
     }
 #pragma GCC diagnostic pop
 
+    if (vpidControlDS1.value != 0)
+        SetSDIOutVPIDOverrides(context, &vpidControlDS1.value, channel);
+            
+    if (vpidControlDS2.value != 0)
+        SetSDIOutVPIDOverrides(context, &vpidControlDS2.value, channel);
+    
     return SetSDIOutVPID(context, channel, vpidControlDS1.value, vpidControlDS2.value);
 }	//	SetVPIDOutput

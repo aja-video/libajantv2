@@ -1115,7 +1115,8 @@ typedef enum
 	kRegLPIPOut2Config	= 14088, // 		"	Out 2
 	kRegLPIPOut3Config	= 14089, // 		"	Out 3
 	kRegLPIPOut4Config	= 14090, // 		"	Out 4
-	//14086 - 14093 Available
+    kRegLPPTPSFPStatus  = 14091, // Which SFP is PTP locked to
+	//14092 - 14093 Available
 	kRegLPHeartBeat		= 14094, // Local Proc isAlive counter
 	kRegLPFrameTask		= 14095  // Used to report OEM/Retail configuration
 } NTV2LocalProcBlockRegisters;
@@ -1608,6 +1609,7 @@ typedef enum
 	kRegMaskHDMIOutRange			= BIT(28),
 	kRegMaskHDMIOutAudioCh			= BIT(29),
 	kLHIRegMaskHDMIOutDVI			= BIT(30),
+	kRegMaskHDMIOutDisable			= BIT(31),
 
 	//kRegHDMIInputStatus
 	kRegMaskInputStatusLock			= BIT(0),								// rename to kRegMaskAnalogInputStatusLock
@@ -2693,6 +2695,7 @@ typedef enum
 	kRegShiftHDMIOutRange				= 28,
 	kRegShiftHDMIOutAudioCh				= 29,
 	kLHIRegShiftHDMIOutDVI				= 30,
+	kRegShiftHDMIOutDisable				= 31,
 
 	//kRegHDMIInputStatus
 	kRegShiftInputStatusLock			= 0,

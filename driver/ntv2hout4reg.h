@@ -49,6 +49,7 @@ NTV2_REG(ntv2_reg_hdmiout_output_config,					125,
 	NTV2_FLD(ntv2_fld_hdmiout_full_range,						1,	28);		/* full range rgb (not smpte) */
 	NTV2_FLD(ntv2_fld_hdmiout_audio_8ch,						1,	29);		/* 8 audio channels (not 2) */
 	NTV2_FLD(ntv2_fld_hdmiout_dvi,								1,	30);		/* dvi mode (vs hdmi) */
+	NTV2_FLD(ntv2_fld_hdmiout_disable,							1,	31);		/* disable output */
 
 /* hdmi input status */
 NTV2_REG(ntv2_reg_hdmiin_input_status,						126,

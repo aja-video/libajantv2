@@ -1525,7 +1525,7 @@ bool CNTV2Card::GetReference (NTV2ReferenceSource & outValue)
 	ULWord	refControl2(0), ptpControl(0);
 	bool result (CNTV2DriverInterface::ReadRegister (kRegGlobalControl, outValue, kRegMaskRefSource, kRegShiftRefSource));
 
-	if (GetNumSupported(kDeviceGetNumVideoChannels) > 4 || IsIPDevice())
+    if ((GetNumSupported(kDeviceGetNumVideoChannels) > 4 || IsIPDevice()) && !NTV2DeviceCanDo25GIP(_boardID) )
 	{
 		ReadRegister (kRegGlobalControl2,  refControl2,	 kRegMaskRefSource2,  kRegShiftRefSource2);
 		if (refControl2)
@@ -1549,6 +1549,24 @@ bool CNTV2Card::GetReference (NTV2ReferenceSource & outValue)
 				default:	break;
 			}
 	}
+
+    if (NTV2DeviceCanDo25GIP(_boardID))
+    {
+        result = ReadRegister(kRegLPPTPSFPStatus, ptpControl);
+        switch(ptpControl)
+        {
+        default:
+        case 0:
+            outValue = NTV2_REFERENCE_FREERUN;
+            break;
+        case 1:
+            outValue = NTV2_REFERENCE_SFP1_PTP;
+            break;
+        case 2:
+            outValue = NTV2_REFERENCE_SFP2_PTP;
+            break;
+        }
+    }
 
 	if (_boardID == DEVICE_ID_KONAHDMI)
 		switch (outValue)

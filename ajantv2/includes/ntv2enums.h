@@ -4106,6 +4106,7 @@ typedef enum
 {
 	VPIDBitDepth_8				= 0x0,
 	VPIDBitDepth_10_Full		= 0x0,
+	VPIDBitDepth_10_Full_ST292  = 0x3,
 	VPIDBitDepth_10				= 0x1,
 	VPIDBitDepth_12				= 0x2,
 	VPIDBitDepth_12_Full		= 0x3

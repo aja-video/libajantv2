@@ -81,6 +81,7 @@ DRIVERINCS = $(A_LIB_NTV2_INC)/ntv2audiodefines.h \
 			$(A_PETA_DRIVER_PATH)/../ntv2xptlookup.h \
 			$(A_PETA_DRIVER_PATH)/registerio.h \
 			$(A_PETA_DRIVER_PATH)/ntv2serial.h \
+			$(A_DRIVER_PATH)/buildenv.h \
 			$(A_DRIVER_PATH)/ntv2commonreg.h \
 			$(A_DRIVER_PATH)/ntv2genlock2.h \
 			$(A_DRIVER_PATH)/ntv2hdmiin.h \

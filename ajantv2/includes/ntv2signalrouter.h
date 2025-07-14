@@ -193,7 +193,7 @@ class AJAExport CNTV2SignalRouter
 		{
 			bool		mShowComments;		///< @brief If true, show comments in the generated code
 			bool		mShowDeclarations;	///< @brief If true, show variable declarations in the generated code
-			bool		mUseRouter;			///< @brief If true, use calls to CNTV2DeviceRouter instead of CNTV2Card
+			bool		mUseRouter;			///< @brief If true, use calls to CNTV2SignalRouter instead of CNTV2Card
 			std::string mPreCommentText;	///< @brief Comment prefix text
 			std::string mPostCommentText;	///< @brief Comment postfix text
 			std::string mPreClassText;		///< @brief Class prefix text
@@ -205,7 +205,7 @@ class AJAExport CNTV2SignalRouter
 			std::string mPreFunctionText;	///< @brief Function name prefix text
 			std::string mPostFunctionText;	///< @brief Function name postfix text
 			std::string mDeviceVarName;		///< @brief Name to use for CNTV2Card variable
-			std::string mRouterVarName;		///< @brief Name to use for CNTV2DeviceRouter variable
+			std::string mRouterVarName;		///< @brief Name to use for CNTV2SignalRouter variable
 			std::string mLineBreakText;		///< @brief Text to use for line breaks
 			std::string mFieldBreakText;	///< @brief Text to use for field breaks
 			NTV2XptConnections mNew;		///< @brief Optional, to show new connections
