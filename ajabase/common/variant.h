@@ -11,6 +11,7 @@
 #include "ajabase/common/export.h"
 #include <string>
 #include <vector>
+#include <cstdint>
 
 /**
  *	\brief The data types that AJAVariant supports.
