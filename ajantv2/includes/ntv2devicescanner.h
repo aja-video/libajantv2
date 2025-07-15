@@ -14,25 +14,6 @@
 #endif	//	!defined(NTV2_DEPRECATE_17_1)
 #include "ntv2card.h"
 #include <vector>
-#include <algorithm>
-
-//#define VIRTUAL_DEVICES_SUPPORT
-
-#if defined(VIRTUAL_DEVICES_SUPPORT)
-#include "ajabase/system/info.h"
-#include "ajabase/common/json.hpp"
-#include <fstream>
-
-using json = nlohmann::json;
-
-typedef struct VirtualDeviceInfo
-{
-	std::string				vdID;
-	std::string				vdName;
-} VirtualDeviceInfo;
-
-typedef std::map<string, std::vector<VirtualDeviceInfo>> 	NTV2SerialToVirtualDevices;	/// Serial number to Virtual Device Names
-#endif	//	defined(VIRTUAL_DEVICES_SUPPORT)
 
 #if !defined(NTV2_DEPRECATE_17_1)
 typedef std::vector <AudioSampleRateEnum>				NTV2AudioSampleRateList;
@@ -118,11 +99,9 @@ typedef struct NTV2DeviceInfo
 	UWord							numDMAEngines;						///< @brief Total number of DMA engines
 	UWord							numSerialPorts;						///< @brief Total number of serial ports
 	ULWord							pingLED;
-#if defined(VIRTUAL_DEVICES_SUPPORT)
 	bool							isVirtualDevice=false;
-	std::string						virtualDeviceName;
-	std::string						virtualDeviceID;
-#endif	//	defined(VIRTUAL_DEVICES_SUPPORT)
+	std::string						vdevUrl;
+	std::string						vdevName;
 
 	AJAExport	bool operator == (const NTV2DeviceInfo & rhs) const;	///< @return	True if I'm equivalent to another ::NTV2DeviceInfo struct.
 	AJAExport	inline bool operator != (const NTV2DeviceInfo & rhs) const	{ return !(*this == rhs); } ///< @return	True if I'm different from another ::NTV2DeviceInfo struct.
@@ -264,6 +243,16 @@ public:
 	static bool									GetFirstDeviceWithName (const std::string & inNameSubString, CNTV2Card & outDevice);
 
 	/**
+		@brief		Rescans the host, and returns an open CNTV2Card instance for the first virtual device with a matching name.
+		@note		Only virtual devices are compared.  The name is compared case-insensitively (e.g., "KONA5_Playout1" == "kona5_playout1").
+		@return		True if successful; otherwise false.
+		@param[in]	inNameString		Specifies the virtual device name to search for.
+		@param[out] outDevice			Receives the open, ready-to-use CNTV2Card instance.
+		@param[in]  inRescan			Will rescan devices before returning the open CNTV2Card instance.
+	**/
+	static bool									GetVirtualDeviceWithName (const std::string & inNameString, CNTV2Card & outDevice, const bool inRescan = true);
+
+	/**
 		@brief		Rescans the host, and returns an open CNTV2Card instance for the first AJA device whose serial number contains the given value.
 		@note		The serial value is compared case-sensitively.
 		@return		True if successful; otherwise false.
@@ -343,11 +332,9 @@ public:
 											NTV2DeviceInfoList & outDevicesAdded,
 											NTV2DeviceInfoList & outDevicesRemoved);
 private:
+	static void		SetDeviceAttributes (NTV2DeviceInfo & inDeviceInfo, CNTV2Card & inDevice);
 	static void		SetAudioAttributes (NTV2DeviceInfo & inDeviceInfo, CNTV2Card & inDevice);
-#if defined(VIRTUAL_DEVICES_SUPPORT)
-	static bool		GetSerialToVirtualDeviceMap(NTV2SerialToVirtualDevices & outSerialToVirtualDevMap);
-	static bool 	GetCP2ConfigPath(string & outCP2ConfigPath);
-#endif	//	defined(VIRTUAL_DEVICES_SUPPORT)
+	static bool		GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevList);
 #endif	//	!defined(NTV2_DEPRECATE_17_1)
 };	//	CNTV2DeviceScanner
 

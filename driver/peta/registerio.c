@@ -36,6 +36,7 @@
 #include "registerio.h"
 #include "ntv2devicefeatures.h"
 #include "../ntv2kona.h"
+#include "../ntv2videoraster.h"
 #include "../ntv2pciconfig.h"
 
 #include "driverdbg.h"
@@ -50,6 +51,8 @@
 /*********************************************/
 /* Prototypes for private utility functions. */
 /*********************************************/
+void EnableDMAInterrupts(ULWord deviceNumber);
+void DisableDMAInterrupts(ULWord deviceNumber);
 
 /********************/
 /* Static variables */
@@ -84,7 +87,7 @@ void dmaHardwareRelease(PDMA_ENGINE pDmaEngine);
 
 static const ULWord gHdrFirst = 330;
 static const ULWord gHdrLast = 336;
-static ULWord gHdrReg[7] = { 0, 0, 0, 0, 0, 0, 0 };
+//static ULWord gHdrReg[7] = { 0, 0, 0, 0, 0, 0, 0 };
 
 static const ULWord gChannelTo1DLutControlRegNum []	=
 { kReg1DLUTLoadControl1, kReg1DLUTLoadControl2, kReg1DLUTLoadControl3, kReg1DLUTLoadControl4,
@@ -137,11 +140,10 @@ GetRegisterAddress(	ULWord deviceNumber,
 }
 
 
-ULWord READ_REGISTER_ULWord( unsigned long address)
+ULWord READ_REGISTER_ULWord( ULWord deviceNumber, unsigned long address)
 {
+	NTV2PrivateParams* pNTV2Params = getNTV2Params(deviceNumber);
 	ULWord value = 0xffffffff;
-	NTV2PrivateParams* pNTV2Params;
-	pNTV2Params = getNTV2Params(0);
 
 	if(address == (pNTV2Params->_VideoAddress+0x118) ) {
 #ifdef DEBUG_UART
@@ -160,7 +162,10 @@ ULWord READ_REGISTER_ULWord( unsigned long address)
 			value = readl((void *)address);
 			if(value == 0xffffffff)
 			{
-				printk("AJA Driver Error: checked register read error count %d\n", count);
+                if (count == 0)
+                {
+                    printk("AJA Driver Error: checked register read error\n");
+                }
 			}
 		}
 		return value;
@@ -185,7 +190,7 @@ ULWord READ_REGISTER_ULWord( unsigned long address)
 	return value;
 }
 
-ULWord READ_REGISTER_UWord( unsigned long address)
+ULWord READ_REGISTER_UWord( ULWord deviceNumber, unsigned long address)
 {
 	// The 16 bit registers read by this function are not on the PCI bus so we assume
 	// they are memory mapped and do not use readw().
@@ -196,17 +201,26 @@ ULWord READ_REGISTER_UWord( unsigned long address)
 	return value;
 }
 
-
-void WRITE_REGISTER_ULWord( unsigned long address, ULWord regValue)
+ULWord READ_REGISTER_UByte( ULWord deviceNumber, unsigned long address)
 {
-	NTV2PrivateParams* pNTV2Params;
-	pNTV2Params = getNTV2Params(0);
+	// The 16 bit registers read by this function are not on the PCI bus so we assume
+	// they are memory mapped and do not use readw().
+	ULWord value = (ULWord)*((UByte *)address);
 
+	// printk("RRuw_: r = %lx\n", value);
+
+	return value;
+}
+
+void WRITE_REGISTER_ULWord( ULWord deviceNumber, unsigned long address, ULWord regValue)
+{
+	//NTV2PrivateParams* pNTV2Params = getNTV2Params(deviceNumber);
 	//	printk("WR_: r(%lx) v(%x)\n", (address-pNTV2Params->_BAR0Address)/4, regValue);
+
 	writel(regValue, (void *)address);
 }
 
-void WRITE_REGISTER_UWord( unsigned long address, ULWord regValue)
+void WRITE_REGISTER_UWord( ULWord deviceNumber, unsigned long address, ULWord regValue)
 {
 	UWord shortRegValue = regValue & 0xFFFF;
 	// The 16 bit registers read by this function are not on the PCI bus so we assume
@@ -214,7 +228,7 @@ void WRITE_REGISTER_UWord( unsigned long address, ULWord regValue)
 	*(UWord *)address = shortRegValue;
 }
 
-void WRITE_REGISTER_UByte( unsigned long address, ULWord regValue)
+void WRITE_REGISTER_UByte( ULWord deviceNumber, unsigned long address, ULWord regValue)
 {
 	UByte byteRegValue = regValue & 0xFF;
 	// The 8 bit registers read by this function are not on the PCI bus so we assume
@@ -226,7 +240,10 @@ void GetActiveFrameBufferSize(ULWord deviceNumber, NTV2FrameDimensions * frameBu
 {
 	Ntv2SystemContext systemContext;
 	NTV2Standard  standard;
+    
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
+
 	standard = GetStandard(&systemContext, NTV2_CHANNEL1);
 
 	switch ( standard )
@@ -285,6 +302,19 @@ void WriteRegister(	ULWord deviceNumber,
 					ULWord registerMask,
 					ULWord registerShift)
 {
+    WriteReg(   deviceNumber,
+                registerNumber,
+                registerValue,
+                registerMask,
+                registerShift);
+}
+
+int WriteReg(	ULWord deviceNumber,
+					ULWord registerNumber,
+					ULWord registerValue,
+					ULWord registerMask,
+					ULWord registerShift)
+{
 	unsigned long flags = 0;
 	NTV2PrivateParams *pNTV2Params;
 	NTV2ModulePrivateParams *pNTV2ModuleParams;
@@ -292,6 +322,7 @@ void WriteRegister(	ULWord deviceNumber,
 	ULWord oldValue = 0;
     bool dmaHardware = false;
     bool lutLoad = false;
+    int status = 0;
 
 	//	printk("WR(%d): r(%x) v(%x)\n", deviceNumber, registerNumber, registerValue );
 
@@ -301,7 +332,7 @@ void WriteRegister(	ULWord deviceNumber,
 	if (!pNTV2Params->registerEnable &&
 		!((registerNumber >= VIRTUALREG_START) && (registerNumber <= kVRegLast)))
 	{
-		return;
+		return -EACCES;
 	}
 
 	address = GetRegisterAddress(deviceNumber, registerNumber);
@@ -314,9 +345,8 @@ void WriteRegister(	ULWord deviceNumber,
 		if ( !IsRegisterNumValid(pNTV2Params, registerNumber, address))
 		{
 //			printk("%s: attempt to write unsupported hardware register %d address 0x%08lx\n", __FUNCTION__, registerNumber, address);
-			return;
+			return -EINVAL;
 		}
-
 		if (registerNumber <= pNTV2Params->_numberOfHWRegisters)
 		{
 # ifdef SOFTWARE_UART_FIFO		/* this is here to prevent a deadlock in the software UART.  Seems that the register access in the ISR and driver initialization deadlock when probe()ing */
@@ -330,7 +360,7 @@ void WriteRegister(	ULWord deviceNumber,
 		// Doesn't make sense to have a shift with no mask, so just check mask
 		if (registerMask != NO_MASK)
 		{
-			oldValue = READ_REGISTER_ULWord(address);
+			oldValue = READ_REGISTER_ULWord(deviceNumber, address);
 			oldValue &= ~registerMask;
 			registerValue <<= registerShift;
 			registerValue |= oldValue;
@@ -367,7 +397,7 @@ void WriteRegister(	ULWord deviceNumber,
 			ntv2_spin_unlock_irqrestore(&pNTV2Params->uartTxFifoLock, flags);
 # endif	// UARTTXFIFOSIZE
 
-			WRITE_REGISTER_ULWord(address,registerValue);
+			WRITE_REGISTER_ULWord(deviceNumber, address,registerValue);
 		}
 		break;
 
@@ -399,7 +429,7 @@ void WriteRegister(	ULWord deviceNumber,
 			ntv2_spin_unlock_irqrestore(&pNTV2Params->uartTxFifoLock2, flags);
 # endif	// UARTTXFIFOSIZE
 
-			WRITE_REGISTER_ULWord(address,registerValue);
+			WRITE_REGISTER_ULWord(deviceNumber, address,registerValue);
 		}
 		break;
 
@@ -470,7 +500,7 @@ void WriteRegister(	ULWord deviceNumber,
 # endif	// UARTTXFIFOSIZE
 
 		default:
-			WRITE_REGISTER_ULWord(address,registerValue);
+			WRITE_REGISTER_ULWord(deviceNumber, address,registerValue);
 
 			if (registerNumber <= pNTV2Params->_numberOfHWRegisters)
 #  ifdef SOFTWARE_UART_FIFO
@@ -484,7 +514,7 @@ void WriteRegister(	ULWord deviceNumber,
 
 #else // !defined(SOFTWARE_UART_FIFO)
 
-		WRITE_REGISTER_ULWord(address,registerValue);
+		WRITE_REGISTER_ULWord(deviceNumber, address,registerValue);
 
 		if (registerNumber <= pNTV2Params->_numberOfHWRegisters)
 			ntv2_spin_unlock_irqrestore(&(pNTV2Params->_registerSpinLock), flags);
@@ -501,13 +531,107 @@ void WriteRegister(	ULWord deviceNumber,
 //            printk("lut load released dma engine\n");
         }
         
-		return;
+        // handle ntv2->ntv4 frame store real-time frame buffer address update
+        if (pNTV2Params->m_pRasterMonitor != NULL)
+        {
+            switch(registerNumber) {
+            case kRegGlobalControl:
+            case kRegGlobalControl2:
+            case kRegGlobalControl3:
+                ntv2_videoraster_update_global(pNTV2Params->m_pRasterMonitor, registerNumber, registerValue);
+                break;
+            case kRegCh1Control:
+                ntv2_videoraster_update_channel(pNTV2Params->m_pRasterMonitor, 0);
+                break;
+            case kRegCh1OutputFrame:
+                ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 0, false, registerValue);
+                break;
+            case kRegCh1InputFrame:
+                ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 0, true, registerValue);
+                break;
+            case kRegGlobalControlCh2:
+            case kRegCh2Control:
+                ntv2_videoraster_update_channel(pNTV2Params->m_pRasterMonitor, 1);
+                break;
+            case kRegCh2OutputFrame:
+                ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 1, false, registerValue);
+                break;
+            case kRegCh2InputFrame:
+                ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 1, true, registerValue);
+                break;
+            case kRegGlobalControlCh3:
+            case kRegCh3Control:
+                ntv2_videoraster_update_channel(pNTV2Params->m_pRasterMonitor, 2);
+                break;
+            case kRegCh3OutputFrame:
+                ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 2, false, registerValue);
+                break;
+            case kRegCh3InputFrame:
+                ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 2, true, registerValue);
+                break;
+            case kRegGlobalControlCh4:
+            case kRegCh4Control:
+                ntv2_videoraster_update_channel(pNTV2Params->m_pRasterMonitor, 3);
+                break;
+            case kRegCh4OutputFrame:
+                ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 3, false, registerValue);
+                break;
+            case kRegCh4InputFrame:
+                ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 3, true, registerValue);
+                break;
+            case kRegGlobalControlCh5:
+            case kRegCh5Control:
+                ntv2_videoraster_update_channel(pNTV2Params->m_pRasterMonitor, 4);
+                break;
+            case kRegCh5OutputFrame:
+                ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 4, false, registerValue);
+                break;
+            case kRegCh5InputFrame:
+                ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 4, true, registerValue);
+                break;
+            case kRegGlobalControlCh6:
+            case kRegCh6Control:
+                ntv2_videoraster_update_channel(pNTV2Params->m_pRasterMonitor, 5);
+                break;
+            case kRegCh6OutputFrame:
+                ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 5, false, registerValue);
+                break;
+            case kRegCh6InputFrame:
+                ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 5, true, registerValue);
+                break;
+            case kRegGlobalControlCh7:
+            case kRegCh7Control:
+                ntv2_videoraster_update_channel(pNTV2Params->m_pRasterMonitor, 6);
+                break;
+            case kRegCh7OutputFrame:
+                ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 6, false, registerValue);
+                break;
+            case kRegCh7InputFrame:
+                ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 6, true, registerValue);
+                break;
+            case kRegGlobalControlCh8:
+            case kRegCh8Control:
+                ntv2_videoraster_update_channel(pNTV2Params->m_pRasterMonitor, 7);
+                break;
+            case kRegCh8OutputFrame:
+                ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 7, false, registerValue);
+                break;
+            case kRegCh8InputFrame:
+                ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 7, true, registerValue);
+                break;
+            default:
+                break;
+            }
+        }
+
+		return 0;
 	}
 
 	// Handle virtual registers
 	if ( (registerNumber >= VIRTUALREG_START) && (registerNumber <= kVRegLast) )
 	{
 		ntv2_spin_lock_irqsave(&(pNTV2Params->_virtualRegisterLock), flags);
+        status = 0;
 
 		switch(registerNumber)
 		{
@@ -582,7 +706,10 @@ void WriteRegister(	ULWord deviceNumber,
 			break;
 
 		case kVRegApplicationCode:
+			if( pNTV2Params->_ApplicationPID == 0 )
 			pNTV2Params->_ApplicationCode = registerValue;
+            else
+                status = -EBUSY;
 			break;
 
 		case kVRegReleaseApplication:
@@ -621,8 +748,21 @@ void WriteRegister(	ULWord deviceNumber,
 			ntv2WritePciMaxReadRequestSize(&pNTV2Params->systemContext, registerValue);
 			break;
 
+		case kVRegEveryFrameTaskFilter:
+			if (NTV2DeviceHasLPProductCode(pNTV2Params->_DeviceID))
+				ntv2WriteRegister (&pNTV2Params->systemContext, kRegLPFrameTask, registerValue);
+			pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START] = registerValue;
+			break;
+
 		default:
 			// store virtual reg
+            if (registerMask != NO_MASK)
+            {
+                oldValue = pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START];
+                oldValue &= ~registerMask;
+                registerValue <<= registerShift;
+                registerValue |= oldValue;
+            }
 			pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START] = registerValue;
 			break;
 
@@ -630,11 +770,17 @@ void WriteRegister(	ULWord deviceNumber,
 
 		ntv2_spin_unlock_irqrestore(&(pNTV2Params->_virtualRegisterLock), flags);
 
-		return;
+		return status;
 	}
 
-	MSG("%s: BUG BUG %s: Attempt to write register %u with value 0x%x was not handled\n",
-		pNTV2Params->name, __FUNCTION__, registerNumber, registerValue);
+    if ((registerNumber != kRegPWMFanControl) &&
+        (registerNumber != kRegPWMFanStatus))
+    {
+        MSG("%s: BUG BUG %s: Attempt to write register %u with value 0x%x was not handled\n",
+            pNTV2Params->name, __FUNCTION__, registerNumber, registerValue);
+    }
+    
+    return -EINVAL;
 }
 
 // Write a group of registers as a block
@@ -679,7 +825,26 @@ void WriteRegisterBufferULWord(	ULWord deviceNumber,
 
 // Read a register by number.  Reading of virual registers is done here too.
 //
-ULWord ReadRegister(ULWord deviceNumber, ULWord registerNumber, ULWord registerMask, ULWord registerShift)
+ULWord ReadRegister(    ULWord deviceNumber,
+                        ULWord registerNumber,
+                        ULWord registerMask,
+                        ULWord registerShift)
+{
+    ULWord value = 0;
+    ReadReg(deviceNumber,
+            registerNumber,
+            &value,
+            registerMask,
+            registerShift);
+
+    return value;
+}
+
+int ReadReg(    ULWord deviceNumber,
+                ULWord registerNumber,
+                ULWord* registerValue,
+                ULWord registerMask,
+                ULWord registerShift)
 {
 	ULWord value;
 	NTV2PrivateParams* pNTV2Params;
@@ -690,14 +855,27 @@ ULWord ReadRegister(ULWord deviceNumber, ULWord registerNumber, ULWord registerM
 	pNTV2ModuleParams = getNTV2ModuleParams();
 	pNTV2Params = getNTV2Params(deviceNumber);
 
+	if (registerValue == NULL)
+		return -EPERM;
+
 	if (!pNTV2Params->registerEnable &&
 		!((registerNumber >= VIRTUALREG_START) && (registerNumber <= kVRegLast)))
 	{
 		if (registerNumber == kRegBoardID)
-			return pNTV2Params->_DeviceID;
-		return 0;
+        {
+            *registerValue = pNTV2Params->_DeviceID;
+			return 0;
+        }
+		*registerValue = 0;
+        return -EACCES;
 	}
-
+#if 0
+	if (registerNumber == kRegBoardID)
+    {
+        *registerValue = pNTV2Params->_DeviceID;
+        return 0;
+    }
+#endif
 	address = GetRegisterAddress( deviceNumber, registerNumber);
 
 
@@ -712,7 +890,8 @@ ULWord ReadRegister(ULWord deviceNumber, ULWord registerNumber, ULWord registerM
 //			MSG("%s: attempt to read unsupported hardware register %u address 0x%08lx\n",
 //				pNTV2Params->name, registerNumber, address);
 //			return 0xFFFFFFFF;
-			return 0;
+            *registerValue = 0;
+			return -EINVAL;
 		}
 
 #ifdef SOFTWARE_UART_FIFO
@@ -836,7 +1015,7 @@ ULWord ReadRegister(ULWord deviceNumber, ULWord registerNumber, ULWord registerM
 		if (registerNumber <= pNTV2Params->_numberOfHWRegisters)
 			ntv2_spin_lock_irqsave(&(pNTV2Params->_registerSpinLock), flags);
 
-		value = READ_REGISTER_ULWord(address);
+		value = READ_REGISTER_ULWord(deviceNumber, address);
 
 		if (registerNumber <= pNTV2Params->_numberOfHWRegisters)
 			ntv2_spin_unlock_irqrestore(&(pNTV2Params->_registerSpinLock), flags);
@@ -849,7 +1028,8 @@ ULWord ReadRegister(ULWord deviceNumber, ULWord registerNumber, ULWord registerM
 		// Mask and shift is only applied to real registers.
 		value &= registerMask;
 		value >>= registerShift;
-		return value;
+		*registerValue = value;
+        return 0;
 	}
 
 	// It is a virtual register, return the right value here.
@@ -858,15 +1038,19 @@ ULWord ReadRegister(ULWord deviceNumber, ULWord registerNumber, ULWord registerM
 		switch(registerNumber)
 		{
 		case kVRegBA0MemorySize:
-			return pNTV2Params->_BAR0MemorySize;
+			*registerValue = pNTV2Params->_BAR0MemorySize;
+            return 0;
 
 		case kVRegBA1MemorySize:
-			return pNTV2Params->_BAR1MemorySize;
+			*registerValue = pNTV2Params->_BAR1MemorySize;
+            return 0;
 
 		case kVRegBA2MemorySize:
-			return pNTV2Params->_BAR2MemorySize;
+			*registerValue = pNTV2Params->_BAR2MemorySize;
+            return 0;
 
 		case kVRegBA4MemorySize:
+			*registerValue = 0;
 			return 0;
 
 			//			case kRegBA4MemoryBase:
@@ -877,14 +1061,17 @@ ULWord ReadRegister(ULWord deviceNumber, ULWord registerNumber, ULWord registerM
 
 		case kVRegDMADriverBufferPhysicalAddress:
 			// If value is 0, failure or bigphysarea patch not applied
-			return pNTV2Params->_dmaBuffer ?  : -1;
+			*registerValue = pNTV2Params->_dmaBuffer ?  : -1;
+            return 0;
 
 		case kVRegNumDmaDriverBuffers:
+			*registerValue = 0;
 			return 0;
 
 		case kVRegGlobalAudioPlaybackMode:
 			// If value is 0, failure or bigphysarea patch not applied
-			return pNTV2Params->_globalAudioPlaybackMode;
+			*registerValue = pNTV2Params->_globalAudioPlaybackMode;
+            return 0;
 
 		case kVRegProcAmpSDRegsInitialized:
 		case kVRegProcAmpStandardDefBrightness:
@@ -907,32 +1094,39 @@ ULWord ReadRegister(ULWord deviceNumber, ULWord registerNumber, ULWord registerM
 			{
 //				MSG("%s: Attempt to read virtual procamp register %u failed\n",
 //					pNTV2Params->name, registerNumber );
-				return -1;
+				*registerValue = -1;
+                return -EIO;
 			}
 			else
-				return value;
+            {
+				*registerValue = value;
+                return 0;
+            }
 
 		case kVRegAudioSyncTolerance:
-			return pNTV2Params->_audioSyncTolerance;
+			*registerValue = pNTV2Params->_audioSyncTolerance;
+            return 0;
 
 		case kVRegDmaSerialize:
-			return pNTV2Params->_dmaSerialize;
+			*registerValue = pNTV2Params->_dmaSerialize;
+            return 0;
 
 		case kVRegSyncChannels:
-			return pNTV2Params->_syncChannels;
+			*registerValue = pNTV2Params->_syncChannels;
+            return 0;
 
 		// Control panel
 		case kVRegApplicationPID:
-			return pNTV2Params->_ApplicationPID;
-			break;
+			*registerValue = pNTV2Params->_ApplicationPID;
+			return 0;
 
 		case kVRegApplicationCode:
-			return pNTV2Params->_ApplicationCode;
-			break;
+			*registerValue = pNTV2Params->_ApplicationCode;
+			return 0;
 
 		case kVRegAcquireLinuxReferenceCount:
-			return pNTV2Params->_ApplicationReferenceCount;
-			break;
+			*registerValue = pNTV2Params->_ApplicationReferenceCount;
+			return 0;
 
 		case kVRegMailBoxAcquire:
 			{
@@ -941,138 +1135,117 @@ ULWord ReadRegister(ULWord deviceNumber, ULWord registerNumber, ULWord registerM
 				ULWord	timeout = ntv2_getRoundedUpTimeoutJiffies(pNTV2Params->_VirtualMailBoxTimeoutNS / 10000);
 
 				status = down_timeout(&pNTV2Params->_mailBoxSemaphore, timeout);
-				return (status < 0) ? false : true;
+				*registerValue = (status < 0) ? false : true;
+                return 0;
 			}
 			break;
 
 		case kVRegMailBoxRelease:
 			up(&pNTV2Params->_mailBoxSemaphore);
-			return true;
-			break;
+			*registerValue = (ULWord)true;
+			return 0;
 
 		case kVRegMailBoxAbort:
 			up(&pNTV2Params->_mailBoxSemaphore);
-			return true;
-			break;
+			*registerValue = (ULWord)true;
+			return 0;
 
 		case kVRegMailBoxTimeoutNS:
-			return pNTV2Params->_VirtualMailBoxTimeoutNS;
-			break;
+			*registerValue = pNTV2Params->_VirtualMailBoxTimeoutNS;
+			return 0;
 
 		case kVRegPCIMaxReadRequestSize:
-			return ntv2ReadPciMaxReadRequestSize(&pNTV2Params->systemContext);
-			break;
+			*registerValue = ntv2ReadPciMaxReadRequestSize(&pNTV2Params->systemContext);
+			return 0;
 			
+		case kVRegPCILinkSpeed:
+			*registerValue = ntv2ReadPciLinkSpeed(&pNTV2Params->systemContext);
+			return 0;
+
+		case kVRegPCILinkWidth:
+			*registerValue = ntv2ReadPciLinkWidth(&pNTV2Params->systemContext);
+			return 0;
+
 		default:
 			// return virtual reg
-			return pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START];
-			break;
+			value = pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START];
+            if (registerMask != NO_MASK)
+            {
+                value &= registerMask;
+                value >>= registerShift;
+            }
+            *registerValue = value;
+			return 0;
 		} // switch
 	}
 
-	MSG("%s: BUG BUG: Attempt to read register %u was not handled\n",
-		pNTV2Params->name, registerNumber );
+    if ((registerNumber != kRegPWMFanControl) &&
+        (registerNumber != kRegPWMFanStatus))
+    {
+        MSG("%s: BUG BUG: Attempt to read register %u was not handled\n",
+            pNTV2Params->name, registerNumber );
+    }
 
-	return 0xFFFFFFFF;
+	*registerValue = 0xFFFFFFFF;
+    return -EINVAL;
 }
 
 void WriteVideoProcessingControl(ULWord deviceNumber,ULWord value)
 {
-	WRITE_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pVideoProcessingControl,value);
+	WRITE_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pVideoProcessingControl,value);
 }
 
 ULWord ReadVideoProcessingControl(ULWord deviceNumber)
 {
-	return  READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pVideoProcessingControl);
+	return  READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pVideoProcessingControl);
 }
 
 void WriteVideoProcessingControlCrosspoint(ULWord deviceNumber,ULWord value)
 {
-	WRITE_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pVideoProcessingCrossPointControl,value);
+	WRITE_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pVideoProcessingCrossPointControl,value);
 }
 
 ULWord ReadVideoProcessingControlCrosspoint(ULWord deviceNumber)
 {
-	return  READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pVideoProcessingCrossPointControl);
-}
-
-void SetForegroundVideoCrosspoint(ULWord deviceNumber, NTV2Crosspoint crosspoint)
-{
-	ULWord regValue;
-
-	regValue = ReadVideoProcessingControlCrosspoint(deviceNumber);
-	regValue &= ~(FGVCROSSPOINTMASK);
-	regValue |= (crosspoint<<FGVCROSSPOINTSHIFT);
-	WriteVideoProcessingControlCrosspoint(deviceNumber, regValue);
-}
-
-void SetForegroundKeyCrosspoint(ULWord deviceNumber, NTV2Crosspoint crosspoint)
-{
-	ULWord regValue;
-
-	regValue = ReadVideoProcessingControlCrosspoint(deviceNumber);
-	regValue &= ~(FGKCROSSPOINTMASK);
-	regValue |= (crosspoint<<FGKCROSSPOINTSHIFT);
-	WriteVideoProcessingControlCrosspoint(deviceNumber, regValue);
-
-}
-
-void SetBackgroundVideoCrosspoint(ULWord deviceNumber, NTV2Crosspoint crosspoint)
-{
-	ULWord regValue;
-
-	regValue = ReadVideoProcessingControlCrosspoint(deviceNumber);
-	regValue &= ~(BGVCROSSPOINTMASK);
-	regValue |= (crosspoint<<BGVCROSSPOINTSHIFT);
-	WriteVideoProcessingControlCrosspoint(deviceNumber, regValue);
-
-}
-
-void SetBackgroundKeyCrosspoint(ULWord deviceNumber, NTV2Crosspoint crosspoint)
-{
-	ULWord regValue;
-
-	regValue = ReadVideoProcessingControlCrosspoint(deviceNumber);
-	regValue &= ~(BGKCROSSPOINTMASK);
-	regValue |= (crosspoint<<BGKCROSSPOINTSHIFT);
-	WriteVideoProcessingControlCrosspoint(deviceNumber, regValue);
-
+	return  READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pVideoProcessingCrossPointControl);
 }
 
 void WriteInterruptRegister(ULWord deviceNumber ,ULWord value)
 {
-	WRITE_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pInterruptControl,value);
+	WRITE_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pInterruptControl,value);
 }
 
 ULWord ReadInterruptRegister(ULWord deviceNumber)
 {
-	return READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pInterruptControl);
+	return READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pInterruptControl);
 }
 
 ULWord ReadStatusRegister(ULWord deviceNumber)
 {
-	return  READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pStatus);
+	return  READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pStatus);
 }
 
 void WriteInterrupt2Register(ULWord deviceNumber ,ULWord value)
 {
-	WRITE_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pInterruptControl2,value);
+	WRITE_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pInterruptControl2,value);
 }
 
 ULWord ReadInterrupt2Register(ULWord deviceNumber)
 {
-	return READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pInterruptControl2);
+	return READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pInterruptControl2);
 }
 
 ULWord ReadStatus2Register(ULWord deviceNumber)
 {
-	return  READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pStatus2);
+	return  READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pStatus2);
 }
 
 void SetRegisterWriteMode(ULWord deviceNumber, NTV2Channel channel, NTV2RegisterWriteMode value)
 {
 	Ntv2SystemContext systemContext;
 	ULWord regNum = 0;
+    
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 	
 	if (!IsMultiFormatActive(&systemContext))
@@ -1090,6 +1263,8 @@ NTV2RegisterWriteMode GetRegisterWriteMode(ULWord deviceNumber, NTV2Channel chan
 {
 	Ntv2SystemContext systemContext;
 	ULWord regNum = 0;
+    
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 	
 	if (!IsMultiFormatActive(&systemContext))
@@ -1111,7 +1286,7 @@ void SetLEDState(ULWord deviceNumber,ULWord value)
 
 ULWord GetLEDState(ULWord deviceNumber)
 {
-	ULWord regValue =  READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pGlobalControl);
+	ULWord regValue =  READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pGlobalControl);
 	regValue &= NTV2LEDSTATEMASK;
 	regValue >>= NTV2LEDSTATESHIFT;
 	return (ULWord)regValue;
@@ -1137,42 +1312,42 @@ void ClearSingleLED(ULWord deviceNumber,ULWord bitNum)
 
 ULWord ReadAudioLastOut(ULWord deviceNumber)
 {
-	return READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pAudioLastOut);
+	return READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pAudioLastOut);
 }
 
 ULWord ReadAudioLastOut2(ULWord deviceNumber)
 {
-	return READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pAudio2LastOut);
+	return READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pAudio2LastOut);
 }
 
 ULWord ReadAudioLastOut3(ULWord deviceNumber)
 {
-	return READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pAudio3LastOut);
+	return READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pAudio3LastOut);
 }
 
 ULWord ReadAudioLastOut4(ULWord deviceNumber)
 {
-	return READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pAudio4LastOut);
+	return READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pAudio4LastOut);
 }
 
 ULWord ReadAudioLastOut5(ULWord deviceNumber)
 {
-	return READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pAudio5LastOut);
+	return READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pAudio5LastOut);
 }
 
 ULWord ReadAudioLastOut6(ULWord deviceNumber)
 {
-	return READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pAudio6LastOut);
+	return READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pAudio6LastOut);
 }
 
 ULWord ReadAudioLastOut7(ULWord deviceNumber)
 {
-	return READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pAudio7LastOut);
+	return READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pAudio7LastOut);
 }
 
 ULWord ReadAudioLastOut8(ULWord deviceNumber)
 {
-	return READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pAudio8LastOut);
+	return READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pAudio8LastOut);
 }
 
 // Method: ReadAudioLastIn
@@ -1180,42 +1355,42 @@ ULWord ReadAudioLastOut8(ULWord deviceNumber)
 	// Output: Audio last in address
 ULWord ReadAudioLastIn(ULWord deviceNumber)
 {
-	return READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pAudioLastIn);
+	return READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pAudioLastIn);
 }
 
 ULWord ReadAudioLastIn2(ULWord deviceNumber)
 {
-	return READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pAudio2LastIn);
+	return READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pAudio2LastIn);
 }
 
 ULWord ReadAudioLastIn3(ULWord deviceNumber)
 {
-	return READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pAudio3LastIn);
+	return READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pAudio3LastIn);
 }
 
 ULWord ReadAudioLastIn4(ULWord deviceNumber)
 {
-	return READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pAudio4LastIn);
+	return READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pAudio4LastIn);
 }
 
 ULWord ReadAudioLastIn5(ULWord deviceNumber)
 {
-	return READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pAudio5LastIn);
+	return READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pAudio5LastIn);
 }
 
 ULWord ReadAudioLastIn6(ULWord deviceNumber)
 {
-	return READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pAudio6LastIn);
+	return READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pAudio6LastIn);
 }
 
 ULWord ReadAudioLastIn7(ULWord deviceNumber)
 {
-	return READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pAudio7LastIn);
+	return READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pAudio7LastIn);
 }
 
 ULWord ReadAudioLastIn8(ULWord deviceNumber)
 {
-	return READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pAudio8LastIn);
+	return READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pAudio8LastIn);
 }
 
 //
@@ -1224,7 +1399,7 @@ ULWord ReadAudioLastIn8(ULWord deviceNumber)
 	// Output: Value of Audio Sample Counter
 ULWord ReadAudioSampleCounter(ULWord deviceNumber)
 {
-	return  READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pAudioSampleCounter);
+	return  READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pAudioSampleCounter);
 }
 
 void AvInterruptControl(ULWord deviceNumber,
@@ -1422,7 +1597,7 @@ ULWord ReadDeviceIDRegister(ULWord deviceNumber)
 	if (getNTV2Params(deviceNumber)->pci_device == NTV2_DEVICE_ID_IO4KPLUS)
 		return DEVICE_ID_IO4KPLUS;
 
-	return  READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pDeviceID);
+	return  READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pDeviceID);
 }
 
 // NTV2 DMA functions
@@ -1432,7 +1607,7 @@ ULWord ReadDMARegister(ULWord deviceNumber, ULWord registerNumber)
 	unsigned long address;
 
 	address = GetRegisterAddress(deviceNumber, registerNumber);
-	return READ_REGISTER_ULWord(address);
+	return READ_REGISTER_ULWord(deviceNumber, address);
 }
 
 void WriteDMARegister(ULWord deviceNumber, ULWord registerNumber, ULWord value)
@@ -1440,21 +1615,21 @@ void WriteDMARegister(ULWord deviceNumber, ULWord registerNumber, ULWord value)
 	unsigned long address;
 
 	address = GetRegisterAddress(deviceNumber, registerNumber);
-	WRITE_REGISTER_ULWord(address, value);
+	WRITE_REGISTER_ULWord(deviceNumber, address, value);
 }
 
 bool ConfigureDMAChannels(ULWord deviceNumber)
 {
 	NTV2PrivateParams *pNTV2Params = getNTV2Params(deviceNumber);
 
-	WRITE_REGISTER_ULWord(pNTV2Params->_pDMA1HostAddressHigh, 0);
-	WRITE_REGISTER_ULWord(pNTV2Params->_pDMA1NextDescriptorHigh, 0);
-	WRITE_REGISTER_ULWord(pNTV2Params->_pDMA2HostAddressHigh, 0);
-	WRITE_REGISTER_ULWord(pNTV2Params->_pDMA2NextDescriptorHigh, 0);
-	WRITE_REGISTER_ULWord(pNTV2Params->_pDMA3HostAddressHigh, 0);
-	WRITE_REGISTER_ULWord(pNTV2Params->_pDMA3NextDescriptorHigh, 0);
-	WRITE_REGISTER_ULWord(pNTV2Params->_pDMA4HostAddressHigh, 0);
-	WRITE_REGISTER_ULWord(pNTV2Params->_pDMA4NextDescriptorHigh, 0);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pDMA1HostAddressHigh, 0);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pDMA1NextDescriptorHigh, 0);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pDMA2HostAddressHigh, 0);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pDMA2NextDescriptorHigh, 0);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pDMA3HostAddressHigh, 0);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pDMA3NextDescriptorHigh, 0);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pDMA4HostAddressHigh, 0);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pDMA4NextDescriptorHigh, 0);
 
 	MSG("%s: configure ntv dma engines\n", pNTV2Params->name);
 
@@ -1535,12 +1710,12 @@ void WriteDMANextDescriptorHigh(ULWord deviceNumber, ULWord index, ULWord value)
 
 ULWord ReadDMAControlStatus(ULWord deviceNumber)
 {
-	return READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pDMAControlStatus);
+	return READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pDMAControlStatus);
 }
 
 void WriteDMAControlStatus(ULWord deviceNumber,ULWord value)
 {
-	WRITE_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pDMAControlStatus,value);
+	WRITE_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pDMAControlStatus,value);
 }
 
 void SetDMAEngineStatus(ULWord deviceNumber, int index, bool enable)
@@ -1552,7 +1727,7 @@ void SetDMAEngineStatus(ULWord deviceNumber, int index, bool enable)
 
 	ntv2_spin_lock_irqsave(&(pNTV2Params->_registerSpinLock), flags);
 
-	regValue =  READ_REGISTER_ULWord(pNTV2Params->_pDMAControlStatus);
+	regValue =  READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pDMAControlStatus);
 	if (enable)
 	{
 		regValue |= engineBit;
@@ -1561,7 +1736,7 @@ void SetDMAEngineStatus(ULWord deviceNumber, int index, bool enable)
 	{
 		regValue &= ~engineBit;
 	}
-	WRITE_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pDMAControlStatus, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pDMAControlStatus, regValue);
 
 	ntv2_spin_unlock_irqrestore(&(pNTV2Params->_registerSpinLock), flags);
 }
@@ -1569,7 +1744,7 @@ void SetDMAEngineStatus(ULWord deviceNumber, int index, bool enable)
 int GetDMAEngineStatus(ULWord deviceNumber, int index)
 {
 	NTV2PrivateParams *pNTV2Params = getNTV2Params(deviceNumber);
-	ULWord regValue =  READ_REGISTER_ULWord(pNTV2Params->_pDMAControlStatus);
+	ULWord regValue =  READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pDMAControlStatus);
 	int engineBit = (regValue >> index) & 0x1;
 
 	return engineBit;
@@ -1577,12 +1752,12 @@ int GetDMAEngineStatus(ULWord deviceNumber, int index)
 
 ULWord ReadDMAInterruptControl(ULWord deviceNumber)
 {
-	return  READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pDMAInterruptControl);
+	return  READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pDMAInterruptControl);
 }
 
 void WriteDMAInterruptControl(ULWord deviceNumber,ULWord value)
 {
-	WRITE_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pDMAInterruptControl, value);
+	WRITE_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pDMAInterruptControl, value);
 }
 
 void EnableDMAInterrupt(ULWord deviceNumber, NTV2DMAInterruptMask interruptMask)
@@ -1708,7 +1883,7 @@ ULWord ReadNwlRegister(ULWord deviceNumber, ULWord regNumber)
 		return 0;
 	}
 
-	value = READ_REGISTER_ULWord(baseAddress + regOffset);
+	value = READ_REGISTER_ULWord(deviceNumber, baseAddress + regOffset);
 
 	return value;
 }
@@ -1725,7 +1900,7 @@ void WriteNwlRegister(ULWord deviceNumber, ULWord regNumber, ULWord value)
 		return;
 	}
 
-	WRITE_REGISTER_ULWord(baseAddress + regOffset, value);
+	WRITE_REGISTER_ULWord(deviceNumber, baseAddress + regOffset, value);
 }
 
 bool ConfigureNwlChannels(ULWord deviceNumber)
@@ -2032,7 +2207,7 @@ ULWord ReadXlnxRegister(ULWord deviceNumber, ULWord regNum)
 		return 0;
 	}
 
-	value = READ_REGISTER_ULWord(pNTV2Params->_XlnxAddress + offset);
+	value = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_XlnxAddress + offset);
 
 	return value;
 }
@@ -2047,7 +2222,7 @@ void WriteXlnxRegister(ULWord deviceNumber, ULWord registerNumber, ULWord value)
 		return;
 	}
 
-	WRITE_REGISTER_ULWord(pNTV2Params->_XlnxAddress + offset, value);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_XlnxAddress + offset, value);
 }
 
 bool ConfigureXlnxChannels(ULWord deviceNumber)
@@ -2180,6 +2355,47 @@ ULWord XlnxIrqBitMask(ULWord deviceNumber, bool bC2H, int index)
 	return ((ULWord)0x1) << bit;
 }
 
+ULWord XlnxReadChannelIdentifier(ULWord deviceNumber, bool bC2H, ULWord index)
+{
+	if (!IsXlnxChannel(deviceNumber, bC2H, index))
+	{
+		return 0;
+	}
+
+	return ReadXlnxRegister(deviceNumber, XlnxChannelRegBase(deviceNumber, bC2H, index) + kRegXlnxChannelIdentifier);
+}
+
+bool IsXlnxChannelStream(ULWord idReg)
+{
+	return ((idReg & kRegMaskXlnxStreamInterface) != 0) ? true : false;
+}
+
+bool IsXlnxChannelMapped(ULWord idReg)
+{
+	return ((idReg & kRegMaskXlnxStreamInterface) != 0) ? false : true;
+}
+
+
+ULWord XlnxReadChannelAlignments(ULWord deviceNumber, bool bC2H, ULWord index)
+{
+	if (!IsXlnxChannel(deviceNumber, bC2H, index))
+	{
+		return 0;
+	}
+
+	return ReadXlnxRegister(deviceNumber, XlnxChannelRegBase(deviceNumber, bC2H, index) + kRegXlnxChannelAlignments);
+}
+
+ULWord GetXlnxAddressAlignment(ULWord alReg)
+{
+	return (alReg & kRegMaskXlnxAddressAlignment) >> kRegShiftXlnxAddressAlignment;
+}
+
+ULWord GetXlnxTransferAlignment(ULWord alReg)
+{
+	return (alReg & kRegMaskXlnxTransferAlignment) >> kRegShiftXlnxTransferAlignment;
+}
+
 void EnableXlnxUserInterrupt(ULWord deviceNumber, int index)
 {
 	WriteXlnxRegister(deviceNumber,
@@ -2294,6 +2510,7 @@ bool StartXlnxDma(ULWord deviceNumber, bool bC2H, int index)
 	value |= kRegMaskXlnxIntReadError;
 	value |= kRegMaskXlnxIntMagicStop;
 	value |= kRegMaskXlnxIntAlignMismatch;
+    value |= kRegMaskXlnxIntDescComplete;
 	value |= kRegMaskXlnxIntDescStop;
 	WriteXlnxRegister(deviceNumber, base + kRegXlnxChannelInterruptEnable, value);
 
@@ -2303,6 +2520,7 @@ bool StartXlnxDma(ULWord deviceNumber, bool bC2H, int index)
 	value |= kRegMaskXlnxIntReadError;
 	value |= kRegMaskXlnxIntMagicStop;
 	value |= kRegMaskXlnxIntAlignMismatch;
+    value |= kRegMaskXlnxIntDescComplete;
 	value |= kRegMaskXlnxIntDescStop;
 	WriteXlnxRegister(deviceNumber, base + kRegXlnxChannelControl, value);
 
@@ -2487,6 +2705,8 @@ void EnableAllInterrupts(ULWord deviceNumber)
 
 	MSG("%s: enable video interrupts\n", pNTV2Params->name);
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 	switch( outputChannelCount )
 	{
 	// Fall through on purpose
@@ -2517,7 +2737,7 @@ void EnableAllInterrupts(ULWord deviceNumber)
 		AvInterruptControl(deviceNumber, eVerticalInterrupt, 1);
 		break;
 	}
-
+    
 	inputChannelCount = NTV2DeviceGetNumVideoChannels(boardID);
 
 	switch( inputChannelCount )
@@ -2549,61 +2769,13 @@ void EnableAllInterrupts(ULWord deviceNumber)
 	default:
 		AvInterruptControl(deviceNumber, eInput1, 1);
 	}
+#pragma GCC diagnostic pop
 
+//	MSG("%s: enable audio interrupts\n", pNTV2Params->name);
 //	AvInterruptControl(deviceNumber, eAudio, 1);
 //	AvInterruptControl(deviceNumber, eAudioInWrap, 1);
 //	AvInterruptControl(deviceNumber, eAudioOutWrap, 1);
 //	AvInterruptControl(deviceNumber, eWrapRate, 1);
-
-	// Don't enable Xena's 422 UART interrupts in case
-	// the user wants to poll
-	//
-	// AvInterruptControl(deviceNumber, eUartRx, 1);
-	// AvInterruptControl(deviceNumber, eUartTx, 1);
-	// AvInterruptControl(deviceNumber, eUartTx2, 1);
-
-	// Enable DMA interrupts
-	switch(pNTV2Params->_dmaMethod)
-	{
-	case DmaMethodAja:
-		MSG("%s: enable aja dma interrupts\n", pNTV2Params->name);
-		EnableDMAInterrupts(deviceNumber);
-		break;
-	case DmaMethodNwl:
-		MSG("%s: enable nwl dma interrupts\n", pNTV2Params->name);
-		EnableNwlUserInterrupt(deviceNumber);
-		EnableNwlDmaInterrupt(deviceNumber);
-		break;
-	case DmaMethodXlnx:
-		MSG("%s: enable xlnx user interrupt\n", pNTV2Params->name);
-		EnableXlnxUserInterrupt(deviceNumber, 0);
-		break;
-	default:
-		break;
-	}
-
-	// enable p2p message interrupts
-	if(DeviceCanDoP2P(deviceNumber) && (getNTV2Params(deviceNumber)->_FrameApertureBaseAddress != 0))
-	{
-		ULWord numChannels = NTV2DeviceGetNumVideoChannels(getNTV2Params(deviceNumber)->_DeviceID);
-
-		if(numChannels > 0)
-		{
-			EnableMessageChannel1Interrupt(deviceNumber);
-		}
-		if(numChannels > 1)
-		{
-			EnableMessageChannel2Interrupt(deviceNumber);
-		}
-		if(numChannels > 2)
-		{
-			EnableMessageChannel3Interrupt(deviceNumber);
-		}
-		if(numChannels > 3)
-		{
-			EnableMessageChannel4Interrupt(deviceNumber);
-		}
-	}
 }
 
 void DisableAllInterrupts(ULWord deviceNumber)
@@ -2615,6 +2787,10 @@ void DisableAllInterrupts(ULWord deviceNumber)
 							 ? NTV2DeviceGetNumVideoChannels(boardID)
 							 : 1;
 
+    MSG("%s: disable all interrupts\n", pNTV2Params->name);
+    
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 	switch( outputChannelCount )
 	{
 	// Fall through on purpose
@@ -2675,43 +2851,12 @@ void DisableAllInterrupts(ULWord deviceNumber)
 	default:
 		AvInterruptControl(deviceNumber, eInput1, 0);
 	}
+#pragma GCC diagnostic pop
 
 	AvInterruptControl(deviceNumber, eAudio, 0);
 	AvInterruptControl(deviceNumber, eAudioInWrap, 0);
 	AvInterruptControl(deviceNumber, eAudioOutWrap, 0);
 	AvInterruptControl(deviceNumber, eWrapRate, 0);
-	AvInterruptControl(deviceNumber, eUartRx,  0);
-	AvInterruptControl(deviceNumber, eUartTx,  0);
-	AvInterruptControl(deviceNumber, eUartTx2, 0);
-
-	if (pNTV2Params->_FrameApertureBaseAddress)
-	{
-		DisableMessageChannel1Interrupt(deviceNumber);
-		DisableMessageChannel2Interrupt(deviceNumber);
-		DisableMessageChannel3Interrupt(deviceNumber);
-		DisableMessageChannel4Interrupt(deviceNumber);
-	}
-
-	// Disable DMA interrupts
-	switch(pNTV2Params->_dmaMethod)
-	{
-	case DmaMethodAja:
-		MSG("%s: disable aja dma interrupts\n", pNTV2Params->name);
-		DisableDMAInterrupts(deviceNumber);
-		break;
-	case DmaMethodNwl:
-		MSG("%s: disable nwl user and dma interrupts\n", pNTV2Params->name);
-		DisableNwlUserInterrupt(deviceNumber);
-		DisableNwlDmaInterrupt(deviceNumber);
-		break;
-	case DmaMethodXlnx:
-		MSG("%s: disable xlnx user and dma interrupts\n", pNTV2Params->name);
-		DisableXlnxUserInterrupt(deviceNumber, 0);
-		DisableXlnxDmaInterrupts(deviceNumber);
-		break;
-	default:
-		break;
-	}
 }
 
 void StopAllDMAEngines(ULWord deviceNumber)
@@ -2812,6 +2957,7 @@ void SetCustomAncillaryDataMode(ULWord deviceNumber, NTV2Channel channel, bool b
 {
 }
 
+#if 0
 //////////////////////////////////////////////////////////////////
 // OEM Color Correction Methods
 //
@@ -3092,7 +3238,7 @@ GetColorCorrectionSaturation (ULWord deviceNumber, NTV2Channel channel)
 						kRegMaskSaturationValue,
 						kRegShiftSaturationValue);
 }
-
+#endif
 
 // Method: SetCustomAncillaryData
 // Input:  Custom ancillary data struct
@@ -3124,7 +3270,7 @@ void  Init422Uart(ULWord deviceNumber)
 	// Output: ULWord or equivalent(i.e. ULWord).
 ULWord ReadUARTReceiveData(ULWord deviceNumber)
 {
-	return  READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pUARTReceiveData);
+	return  READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pUARTReceiveData);
 }
 
 // Method: ReadUARTReceiveData2
@@ -3132,19 +3278,19 @@ ULWord ReadUARTReceiveData(ULWord deviceNumber)
 	// Output: ULWord or equivalent(i.e. ULWord).
 ULWord ReadUARTReceiveData2(ULWord deviceNumber)
 {
-	return  READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pUARTReceiveData2);
+	return  READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pUARTReceiveData2);
 }
 #endif // UARTRXFIFOSIZE
 
 #ifdef UARTTXFIFOSIZE
 void WriteUARTTransmitData(ULWord deviceNumber, ULWord value)
 {
-	WRITE_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pUARTTransmitData,value);
+	WRITE_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pUARTTransmitData,value);
 }
 
 void WriteUARTTransmitData2(ULWord deviceNumber, ULWord value)
 {
-	WRITE_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pUARTTransmitData2,value);
+	WRITE_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pUARTTransmitData2,value);
 }
 #endif // UARTTXFIFOSIZE
 
@@ -3153,7 +3299,7 @@ void WriteUARTTransmitData2(ULWord deviceNumber, ULWord value)
 	// Output: ULWord or equivalent(i.e. ULWord).
 ULWord ReadUARTControl(ULWord deviceNumber)
 {
-	return  READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pUARTControl);
+	return  READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pUARTControl);
 }
 
 // Method: ReadUARTControl2
@@ -3161,7 +3307,7 @@ ULWord ReadUARTControl(ULWord deviceNumber)
 	// Output: ULWord or equivalent(i.e. ULWord).
 ULWord ReadUARTControl2(ULWord deviceNumber)
 {
-	return  READ_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pUARTControl2);
+	return  READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pUARTControl2);
 }
 
 #endif	// SOFTWARE_UART_FIFO
@@ -3366,7 +3512,7 @@ ULWord ReadMessageChannel1(ULWord deviceNumber)
 	NTV2PrivateParams *pNTV2Params;
 	pNTV2Params = getNTV2Params(deviceNumber);
 
-	return READ_REGISTER_ULWord(pNTV2Params->_pMessageChannel1);
+	return READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageChannel1);
 }
 
 ULWord ReadMessageChannel2(ULWord deviceNumber)
@@ -3374,7 +3520,7 @@ ULWord ReadMessageChannel2(ULWord deviceNumber)
 	NTV2PrivateParams *pNTV2Params;
 	pNTV2Params = getNTV2Params(deviceNumber);
 
-	return READ_REGISTER_ULWord(pNTV2Params->_pMessageChannel2);
+	return READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageChannel2);
 }
 
 ULWord ReadMessageChannel3(ULWord deviceNumber)
@@ -3382,7 +3528,7 @@ ULWord ReadMessageChannel3(ULWord deviceNumber)
 	NTV2PrivateParams *pNTV2Params;
 	pNTV2Params = getNTV2Params(deviceNumber);
 
-	return READ_REGISTER_ULWord(pNTV2Params->_pMessageChannel3);
+	return READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageChannel3);
 }
 
 ULWord ReadMessageChannel4(ULWord deviceNumber)
@@ -3390,7 +3536,7 @@ ULWord ReadMessageChannel4(ULWord deviceNumber)
 	NTV2PrivateParams *pNTV2Params;
 	pNTV2Params = getNTV2Params(deviceNumber);
 
-	return READ_REGISTER_ULWord(pNTV2Params->_pMessageChannel4);
+	return READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageChannel4);
 }
 
 ULWord ReadMessageChannel5(ULWord deviceNumber)
@@ -3398,7 +3544,7 @@ ULWord ReadMessageChannel5(ULWord deviceNumber)
 	NTV2PrivateParams *pNTV2Params;
 	pNTV2Params = getNTV2Params(deviceNumber);
 
-	return READ_REGISTER_ULWord(pNTV2Params->_pMessageChannel5);
+	return READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageChannel5);
 }
 
 ULWord ReadMessageChannel6(ULWord deviceNumber)
@@ -3406,7 +3552,7 @@ ULWord ReadMessageChannel6(ULWord deviceNumber)
 	NTV2PrivateParams *pNTV2Params;
 	pNTV2Params = getNTV2Params(deviceNumber);
 
-	return READ_REGISTER_ULWord(pNTV2Params->_pMessageChannel6);
+	return READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageChannel6);
 }
 
 ULWord ReadMessageChannel7(ULWord deviceNumber)
@@ -3414,7 +3560,7 @@ ULWord ReadMessageChannel7(ULWord deviceNumber)
 	NTV2PrivateParams *pNTV2Params;
 	pNTV2Params = getNTV2Params(deviceNumber);
 
-	return READ_REGISTER_ULWord(pNTV2Params->_pMessageChannel7);
+	return READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageChannel7);
 }
 
 ULWord ReadMessageChannel8(ULWord deviceNumber)
@@ -3422,7 +3568,7 @@ ULWord ReadMessageChannel8(ULWord deviceNumber)
 	NTV2PrivateParams *pNTV2Params;
 	pNTV2Params = getNTV2Params(deviceNumber);
 
-	return READ_REGISTER_ULWord(pNTV2Params->_pMessageChannel8);
+	return READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageChannel8);
 }
 
 ULWord ReadMessageInterruptStatus(ULWord deviceNumber)
@@ -3430,7 +3576,7 @@ ULWord ReadMessageInterruptStatus(ULWord deviceNumber)
 	NTV2PrivateParams *pNTV2Params;
 	pNTV2Params = getNTV2Params(deviceNumber);
 
-	return READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptStatus);
+	return READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptStatus);
 }
 
 ULWord ReadMessageInterruptControl(ULWord deviceNumber)
@@ -3438,7 +3584,7 @@ ULWord ReadMessageInterruptControl(ULWord deviceNumber)
 	NTV2PrivateParams *pNTV2Params;
 	pNTV2Params = getNTV2Params(deviceNumber);
 
-	return READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	return READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 }
 
 void EnableMessageChannel1Interrupt(ULWord deviceNumber)
@@ -3450,9 +3596,9 @@ void EnableMessageChannel1Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue |= kRegMaskMessageInterruptControlEnable1;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3466,9 +3612,9 @@ void DisableMessageChannel1Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue &= ~kRegMaskMessageInterruptControlEnable1;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3482,9 +3628,9 @@ void ClearMessageChannel1Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue |= kRegMaskMessageInterruptControlClear1;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3498,9 +3644,9 @@ void EnableMessageChannel2Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue |= kRegMaskMessageInterruptControlEnable2;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3514,9 +3660,9 @@ void DisableMessageChannel2Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue &= ~kRegMaskMessageInterruptControlEnable2;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3530,9 +3676,9 @@ void ClearMessageChannel2Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue |= kRegMaskMessageInterruptControlClear2;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3546,9 +3692,9 @@ void EnableMessageChannel3Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue |= kRegMaskMessageInterruptControlEnable3;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3562,9 +3708,9 @@ void DisableMessageChannel3Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue &= ~kRegMaskMessageInterruptControlEnable3;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3578,9 +3724,9 @@ void ClearMessageChannel3Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue |= kRegMaskMessageInterruptControlClear3;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3594,9 +3740,9 @@ void EnableMessageChannel4Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue |= kRegMaskMessageInterruptControlEnable4;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3610,9 +3756,9 @@ void DisableMessageChannel4Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue &= ~kRegMaskMessageInterruptControlEnable4;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3626,9 +3772,9 @@ void ClearMessageChannel4Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue |= kRegMaskMessageInterruptControlClear4;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3642,9 +3788,9 @@ void EnableMessageChannel5Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue |= kRegMaskMessageInterruptControlEnable5;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3658,9 +3804,9 @@ void DisableMessageChannel5Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue &= ~kRegMaskMessageInterruptControlEnable5;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3674,9 +3820,9 @@ void ClearMessageChannel5Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue |= kRegMaskMessageInterruptControlClear5;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3690,9 +3836,9 @@ void EnableMessageChannel6Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue |= kRegMaskMessageInterruptControlEnable6;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3706,9 +3852,9 @@ void DisableMessageChannel6Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue &= ~kRegMaskMessageInterruptControlEnable6;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3722,9 +3868,9 @@ void ClearMessageChannel6Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue |= kRegMaskMessageInterruptControlClear6;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3738,9 +3884,9 @@ void EnableMessageChannel7Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue |= kRegMaskMessageInterruptControlEnable7;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3754,9 +3900,9 @@ void DisableMessageChannel7Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue &= ~kRegMaskMessageInterruptControlEnable7;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3770,9 +3916,9 @@ void ClearMessageChannel7Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue |= kRegMaskMessageInterruptControlClear7;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3786,9 +3932,9 @@ void EnableMessageChannel8Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue |= kRegMaskMessageInterruptControlEnable8;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3802,9 +3948,9 @@ void DisableMessageChannel8Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue &= ~kRegMaskMessageInterruptControlEnable8;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3818,9 +3964,9 @@ void ClearMessageChannel8Interrupt(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 	ntv2_spin_lock_irqsave(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 
-	regValue = READ_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl);
+	regValue = READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl);
 	regValue |= kRegMaskMessageInterruptControlClear8;
-	WRITE_REGISTER_ULWord(pNTV2Params->_pMessageInterruptControl, regValue);
+	WRITE_REGISTER_ULWord(deviceNumber, pNTV2Params->_pMessageInterruptControl, regValue);
 
 	ntv2_spin_unlock_irqrestore(&pNTV2Params->_p2pInterruptControlRegisterLock, flags);
 }
@@ -3830,12 +3976,12 @@ ULWord ReadFrameApertureOffset(ULWord deviceNumber)
 	NTV2PrivateParams *pNTV2Params;
 	pNTV2Params = getNTV2Params(deviceNumber);
 
-	return READ_REGISTER_ULWord(pNTV2Params->_pFrameApertureOffset);
+	return READ_REGISTER_ULWord(deviceNumber, pNTV2Params->_pFrameApertureOffset);
 }
 
 void WriteFrameApertureOffset(ULWord deviceNumber, ULWord value)
 {
-	WRITE_REGISTER_ULWord(getNTV2Params(deviceNumber)->_pFrameApertureOffset, value);
+	WRITE_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pFrameApertureOffset, value);
 }
 
 void WriteFrameAperture(ULWord deviceNumber, ULWord offset , ULWord value)
@@ -3845,7 +3991,7 @@ void WriteFrameAperture(ULWord deviceNumber, ULWord offset , ULWord value)
 
 	if (pNTV2Params->_FrameApertureBaseAddress && (offset < pNTV2Params->_FrameApertureBaseSize))
 	{
-		WRITE_REGISTER_ULWord( (unsigned long)(pNTV2Params->_FrameApertureBaseAddress + offset), value );
+		WRITE_REGISTER_ULWord(deviceNumber, (unsigned long)(pNTV2Params->_FrameApertureBaseAddress + offset), value );
 	}
 }
 
@@ -3867,6 +4013,7 @@ bool DeviceCanDoP2P(ULWord deviceNumber)
 	}
 }
 
+#if 0
 void
 SetLUTEnable(ULWord deviceNumber, NTV2Channel channel, ULWord value)
 {
@@ -4138,6 +4285,7 @@ GetLUTV2OutputBank(ULWord deviceNumber, NTV2Channel channel)
 
 	return bank;
 }
+#endif
 
 ULWord ntv2_getRoundedUpTimeoutJiffies(ULWord timeOutMs)
 {

@@ -626,10 +626,10 @@ static bool has_config_changed(struct ntv2_videoraster *ntv2_raster, uint32_t in
 
 static bool update_format(struct ntv2_videoraster *ntv2_raster, uint32_t index)
 {
-    uint32_t base = ntv2_raster->widget_base + index*ntv2_raster->widget_size;
-	uint32_t value = ntv2_regnum_read(ntv2_raster->system_context, base + ntv2_reg_videoraster_control);
+	uint32_t value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_channel_control, index);
 
-	if (NTV2_FLD_GET(ntv2_fld_videoraster_control_disable_auto_update, value) != 0)
+	if ((NTV2_FLD_GET(ntv2_fld_channel_control_channel_disable, value) != 0) &&
+        (NTV2_FLD_GET(ntv2_fld_channel_control_vanc_shift, value) != 0))
 	{
 	    NTV2_MSG_VIDEORASTER_STATE("%s: chn %d auto update disabled\n", ntv2_raster->name, index);
 		return true;
@@ -677,6 +677,7 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     bool top_first = false;
 	bool quad = false;
     char* channel_mode = "unknown";
+	uint64_t pixelScale = 0;
 
     standard = NTV2_FLD_GET(ntv2_fld_global_control_standard, global_control);
     if (standard >= s_standard_size) return false;
@@ -910,7 +911,7 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     /* total lines */
     total_lines = c_standard_data[standard].line_total;
 
-	uint64_t pixelScale = c_pixel_rate_data[pixel_rate].scale;
+	pixelScale = c_pixel_rate_data[pixel_rate].scale;
 	if (quad && ntv2_raster->useFullRasterValues)
 	{
 		pixelScale *= 4;

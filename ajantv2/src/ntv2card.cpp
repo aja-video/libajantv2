@@ -85,8 +85,27 @@ string CNTV2Card::GetModelName (void)
 
 string CNTV2Card::GetDisplayName (void)
 {
-	ostringstream	oss;
-	oss << GetModelName() << " - " << GetIndexNumber();
+	ostringstream oss;
+	if (IsRemote())
+	{
+		auto params = CNTV2DriverInterface::ConnectParams();
+		if (params.hasKey("displayname"))
+		{
+			oss << params.valueForKey("displayname");
+		}
+		else if (params.hasKey(kNTV2PluginRegInfoKey_LongName))
+		{
+			oss << params.valueForKey(kNTV2PluginRegInfoKey_LongName);
+		}
+		else if (params.hasKey(kNTV2PluginRegInfoKey_ShortName))
+		{
+			oss << params.valueForKey(kNTV2PluginRegInfoKey_ShortName);
+		}
+	}
+	else
+	{
+		oss << GetModelName() << " - " << GetIndexNumber();
+	}
 	return oss.str();
 }
 
@@ -211,42 +230,46 @@ string CNTV2Card::SerialNum64ToString (const uint64_t inSerialNumber)	//	Class m
 }	//	SerialNum64ToString
 
 
-bool CNTV2Card::GetSerialNumberString (string & outStr)
+bool CNTV2Card::GetSerialNumberString (string & outSerialNumberString)
 {
-	outStr.clear();
 	ULWord spiFlashVers(0);
 	if (!GetNumericParam(kDeviceGetSPIFlashVersion, spiFlashVers))
 		return false;
-	if (spiFlashVers < 6)
+    const NTV2DeviceID deviceID(GetDeviceID());
+    bool hasLPPC = NTV2DeviceHasLPProductCode(deviceID);
+    if (hasLPPC || spiFlashVers >= 6)
+    {
+        //	Newer devices use 4 regs:  kRegReserved54 thru kRegReserved57
+        ULWord serialArray[] = {0,0,0,0};
+        ReadRegister(hasLPPC ? kRegReserved54 : kRegReserved56, serialArray[0]);
+        ReadRegister(hasLPPC ? kRegReserved55 : kRegReserved57, serialArray[1]);
+        ReadRegister(hasLPPC ? kRegReserved56 : kRegReserved54, serialArray[2]);
+        ReadRegister(hasLPPC ? kRegReserved57 : kRegReserved55, serialArray[3]);
+        outSerialNumberString.clear();
+        for (int serialIndex = 0;  serialIndex < 4;  serialIndex++)
+            if (serialArray[serialIndex] != 0xffffffff)
+                for (int i = 0;  i < 4;  i++)
+                {
+                    const char tempChar(((serialArray[serialIndex] >> (i*8)) & 0xff));
+                    if (tempChar > 0 && tempChar != '.')
+                        outSerialNumberString.push_back(tempChar);
+                }
+    }
+	else
 	{	//	Older devices use 2 regs:  kRegReserved54 & kRegReserved55
-		outStr = ::SerialNum64ToString(GetSerialNumber());
-		if (outStr.empty())
-			{outStr = "INVALID?";  return false;}
+		outSerialNumberString = ::SerialNum64ToString(GetSerialNumber());
+		if (outSerialNumberString.empty())
+			{outSerialNumberString = "INVALID?";  return false;}
 
 		//	Prepend 5/6/7 for Io4K+/IoIP/IoX3, respectively...
-		const NTV2DeviceID devID(GetDeviceID());
-		if (devID == DEVICE_ID_IO4KPLUS)
-			outStr = "5" + outStr;	//	Io4K+/DNXIV: prepend "5"
-		else if (devID == DEVICE_ID_IOIP_2022 || devID == DEVICE_ID_IOIP_2110 || devID == DEVICE_ID_IOIP_2110_RGB12)
-			outStr = "6" + outStr;	//	IoIP: prepend "6"
-		else if (devID == DEVICE_ID_IOX3)
-			outStr = "7" + outStr;	//	IoX3: prepend "7"
-	}
-	else
-	{	//	Newer devices use 4 regs:  kRegReserved54 thru kRegReserved57
-		ULWord serialArray[] = {0,0,0,0};
-		ReadRegister(kRegReserved56, serialArray[0]);
-		ReadRegister(kRegReserved57, serialArray[1]);
-		ReadRegister(kRegReserved54, serialArray[2]);
-		ReadRegister(kRegReserved55, serialArray[3]);
-		for (int serialIndex(0);  serialIndex < 4;  serialIndex++)
-			if (serialArray[serialIndex] != 0xffffffff)
-				for (int i(0);  i < 4;  i++)
-				{
-					const char tempChar(((serialArray[serialIndex] >> (i*8)) & 0xff));
-					if (tempChar > 0 && tempChar != '.')
-						outStr.push_back(tempChar);
-				}
+		if (deviceID == DEVICE_ID_IO4KPLUS)
+			outSerialNumberString = "5" + outSerialNumberString;	//	Io4K+/DNXIV: prepend "5"
+		else if (deviceID == DEVICE_ID_IOIP_2022 ||
+                 deviceID == DEVICE_ID_IOIP_2110 ||
+                 deviceID == DEVICE_ID_IOIP_2110_RGB12)
+			outSerialNumberString = "6" + outSerialNumberString;	//	IoIP: prepend "6"
+		else if (deviceID == DEVICE_ID_IOX3)
+			outSerialNumberString = "7" + outSerialNumberString;	//	IoX3: prepend "7"
 	}
 	return true;
 }	//	GetSerialNumberString
@@ -405,7 +428,7 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 				break;
 			case DEVICE_ID_KONAX:
 				// Do we have a BOB?
-				if(IsBreakoutBoardConnected())
+				if (IsSupported(kDeviceHasBreakoutBoard))
 					result = NTV2_BreakoutBoard;
 				break;
 			default:
@@ -413,6 +436,89 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 		}
 	}
 	return result;
+}
+
+bool CNTV2Card::GetLPExternalConfigurationURLString (string & outURLString)
+{
+	if (!NTV2DeviceHasLPProductCode(GetDeviceID()))
+		return false;
+	uint32_t portIP(0);
+	int ipOctet(0);
+	ostringstream tempString;
+	ReadRegister(kRegLPRJ45IP, portIP);
+	if (portIP == 0)
+		return false;
+	
+	outURLString.clear();
+	tempString << "http://";
+	ipOctet = (portIP & 0xFF000000) >> 24;
+	tempString << ipOctet << ".";
+	ipOctet = (portIP & 0x00FF0000) >> 16;
+	tempString << ipOctet << ".";
+	ipOctet = (portIP & 0x0000FF00) >> 8;
+	tempString << ipOctet << ".";
+	ipOctet = (portIP & 0x000000FF);
+	tempString << ipOctet;
+	
+	outURLString = tempString.str();
+	return true;
+}
+
+bool CNTV2Card::GetLPTunnelConfigurationURLString (string & outURLString)
+{
+	if (!NTV2DeviceHasLPProductCode(GetDeviceID()))
+		return false;
+	uint32_t portIP(0);
+	int ipOctet(0);
+	ostringstream tempString;
+	ReadRegister(kRegLPTunnelIP, portIP);
+	if (portIP == 0)
+		return false;
+	
+	outURLString.clear();
+	tempString << "http://";
+	ipOctet = (portIP & 0xFF000000) >> 24;
+	tempString << ipOctet << ".";
+	ipOctet = (portIP & 0x00FF0000) >> 16;
+	tempString << ipOctet << ".";
+	ipOctet = (portIP & 0x0000FF00) >> 8;
+	tempString << ipOctet << ".";
+	ipOctet = (portIP & 0x000000FF);
+	tempString << ipOctet;
+	
+	outURLString = tempString.str();
+	return true;
+}
+
+int CNTV2Card::GetSFPConfigurationURLStrings(std::vector<std::string> & OutSFPURLStrings)
+{
+	if (!NTV2DeviceHasLPProductCode(GetDeviceID()) || NTV2DeviceGetNum25GSFPs(GetDeviceID()) == 0)
+		return 0;
+	
+	UWord numSFPs = NTV2DeviceGetNum25GSFPs(GetDeviceID());
+	
+	for (int i = 0; i < numSFPs; i++)
+	{
+		uint32_t portIP(0);
+		int ipOctet(0);
+		ostringstream tempString;
+		ReadRegister(kRegLPSFP1IP+i, portIP);
+		if (portIP == 0)
+			return false;
+		
+		tempString << "http://";
+		ipOctet = (portIP & 0xFF000000) >> 24;
+		tempString << ipOctet << ".";
+		ipOctet = (portIP & 0x00FF0000) >> 16;
+		tempString << ipOctet << ".";
+		ipOctet = (portIP & 0x0000FF00) >> 8;
+		tempString << ipOctet << ".";
+		ipOctet = (portIP & 0x000000FF);
+		tempString << ipOctet;
+		
+		OutSFPURLStrings.push_back(tempString.str());
+	}
+	return OutSFPURLStrings.size();
 }
 
 #if !defined(NTV2_DEPRECATE_16_3)

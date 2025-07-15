@@ -601,6 +601,15 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 	cerr << ::NTV2StandardToString(st) << " " << ::NTV2FrameBufferFormatToString(pf) << endl;
 #endif
 				//	Make black test pattern buffer for comparison later...
+				if (st == NTV2_STANDARD_720)
+					cout << "720" << endl;
+				else if (st == NTV2_STANDARD_2Kx1080p)
+					cout << "2K" << endl;
+				else if (st == NTV2_STANDARD_4096x2160p)
+					cout << "4K" << endl;
+				else if (st == NTV2_STANDARD_8192)
+					cout << "8K" << endl;
+
 				NTV2TestPatternGen gen;
 				NTV2Buffer tpBuffer(fd.GetTotalBytes());	//	Allocate test pattern buffer
 				if (!gen.DrawTestPattern (NTV2_TestPatt_Black, fd, tpBuffer))	//	Fill with black test pattern
@@ -630,13 +639,14 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 					//	but NTV2TestPatternGen stops writing after the "logical" end of line,
 					//	which causes mis-compares between the two buffers.
 					//	In these cases, the two buffers are compared logical-line-by-logical-line.
+					//  Line lengths (truncated) calculated by rasterWidth / 6 * 16.
 					ULWord logicalLineLength(0);
 					switch (st)
 					{
 						case NTV2_STANDARD_720:			logicalLineLength = 0xD55;	break;
-						case NTV2_STANDARD_2Kx1080p:	logicalLineLength = 0x1556;	break;
-						case NTV2_STANDARD_4096x2160p:	logicalLineLength = 0x2AAB;	break;
-						case NTV2_STANDARD_8192:		logicalLineLength = 0x5556;	break;
+						case NTV2_STANDARD_2Kx1080p:	logicalLineLength = 0x1555;	break;
+						case NTV2_STANDARD_4096x2160p:	logicalLineLength = 0x2AAA;	break;
+						case NTV2_STANDARD_8192:		logicalLineLength = 0x5555;	break;
 						default:						NTV2_ASSERT(false);  break;
 					}
 					NTV2Buffer rowBuff(fd.GetBytesPerRow()), tpRowBuff(fd.GetBytesPerRow());
@@ -646,6 +656,14 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 						CHECK(fd.GetRowBuffer(buff, rowBuff, rowNdx));
 						CHECK(rowBuff.IsContentEqual(tpRowBuff, /*byteOffset*/0, /*byteCount*/logicalLineLength));
 					}	//	for each row
+
+					// TODO: Check this test case on Big Endian machine
+					// Check last 10-bits of the buffers
+					uint8_t * rowBuffPtr = rowBuff;
+					uint8_t * patBuffPtr = tpRowBuff;
+					uint16_t rowBufEnd = (rowBuffPtr[logicalLineLength-1] << 2 | (rowBuffPtr[logicalLineLength] & 0x3));
+					uint16_t patBufEnd = (patBuffPtr[logicalLineLength-1] << 2 | (patBuffPtr[logicalLineLength] & 0x3));
+					CHECK_EQ(rowBufEnd, patBufEnd);
 				}	//	if 10-bit YUV and special-case geometry
 				else
 					CHECK(buff.IsContentEqual(tpBuffer));	//	Verify frame buffer content matches
@@ -3672,3 +3690,21 @@ TEST_SUITE("NTV2ScanMethod" * doctest::description("NTV2ScanMethod tests"))
 		}
 	}	//	TEST_CASE("ScanMethodMacros")
 }	//	TEST_SUITE("NTV2ScanMethod")
+
+
+TEST_SUITE("NTV2GetRegisters" * doctest::description("NTV2GetRegisters tests"))
+{
+	TEST_CASE("Basic")
+	{
+		NTV2GetRegisters a;
+		NTV2_HEADER * pMsg = reinterpret_cast<NTV2_HEADER*>(&a);
+		CHECK(pMsg->IsValid());
+		CHECK_EQ(pMsg->GetTag(), NTV2_HEADER_TAG);
+		CHECK_EQ(pMsg->GetType(), NTV2_TYPE_GETREGS);
+		CHECK_EQ(NTV2_HEADER::FourCCToString(pMsg->GetTag()), string("'NTV2'"));
+		CHECK_EQ(NTV2_HEADER::FourCCToString(pMsg->GetType()), string("'regR'"));
+//		NTV2RegNumSet regNums;
+//		CHECK(a.NTV2_IS_STRUCT_VALID());
+//		CHECK_FALSE(a.GetGoodRegisters(regNums));
+	}	//	TEST_CASE("Basic")
+}	//	TEST_SUITE("NTV2GetRegisters")

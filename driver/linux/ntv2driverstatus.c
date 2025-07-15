@@ -87,6 +87,7 @@ void getDeviceVersionString(ULWord deviceNumber, char *deviceVersionString, ULWo
 	case DEVICE_ID_KONA5_8K: deviceStr = "KONA5_8K"; break;
 	case DEVICE_ID_KONA5_3DLUT: deviceStr = "KONA5_3DLUT"; break;
 	case DEVICE_ID_KONA5_8K_MV_TX: deviceStr = "KONA5_8K_MV_TX"; break;
+	case DEVICE_ID_KONA5_2X4K: deviceStr = "KONA5_2X4K"; break;
 	case DEVICE_ID_KONA5_OE1:
 	case DEVICE_ID_KONA5_OE2:
 	case DEVICE_ID_KONA5_OE3:

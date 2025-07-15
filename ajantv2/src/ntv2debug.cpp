@@ -86,6 +86,7 @@ const char * NTV2DeviceIDString (const NTV2DeviceID id)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_SOJI_OE7)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_TTAP)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_TTAP_PRO)
+		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_ZEFRAM)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_NOTFOUND)
 	}
 	return "";
@@ -148,7 +149,7 @@ const char * NTV2DeviceString (const NTV2DeviceID id)
 		case DEVICE_ID_KONAIP_2110_RGB12:			return "KonaIP_2110_RGB12";
 		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "KonaIP_2Tx1SFPJ2K";
 		case DEVICE_ID_KONAIP_4CH_2SFP:				return "KonaIP_4ch2SFP";
-		case DEVICE_ID_KONAIP_25G:					return "KonaIO_25G";
+		case DEVICE_ID_KONAIP_25G:					return "KonaIP_25G";
 		case DEVICE_ID_KONALHEPLUS:					return "KonaLHePlus";
 		case DEVICE_ID_KONALHI:						return "KonaLHi";
 		case DEVICE_ID_KONALHIDVI:					return "KonaLHiDVI";
@@ -166,6 +167,7 @@ const char * NTV2DeviceString (const NTV2DeviceID id)
 		case DEVICE_ID_SOJI_OE7:					return "SOJI_OE7";
 		case DEVICE_ID_TTAP:						return "TTap";
 		case DEVICE_ID_TTAP_PRO:					return "TTapPro";
+		case DEVICE_ID_ZEFRAM:						return "Zefram";
 		case DEVICE_ID_NOTFOUND:					return "Unknown";
 	}
 
@@ -481,6 +483,7 @@ const char *NTV2VideoFormatString (NTV2VideoFormat fmt)
 		case NTV2_FORMAT_END_HIGH_DEF_FORMATS2:		return "";
 		case NTV2_FORMAT_END_4K_TSI_DEF_FORMATS:	return "";
 		case NTV2_FORMAT_END_4K_DEF_FORMATS2:		return "";
+		case NTV2_FORMAT_END_UHD_TSI_DEF_FORMAT:	return "";
 		case NTV2_FORMAT_END_UHD2_DEF_FORMATS:		return "";
 		case NTV2_FORMAT_END_UHD2_FULL_DEF_FORMATS:	return "";
 		case NTV2_FORMAT_UNKNOWN:					return "";

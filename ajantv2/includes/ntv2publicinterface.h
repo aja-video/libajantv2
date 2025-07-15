@@ -87,13 +87,31 @@
 
 #if !defined (NTV2_BUILDING_DRIVER)
 	typedef	UByteSequence	NTV2_RPC_BLOB_TYPE;
-	#define	NTV2_RPC_ENCODE_DECL	bool RPCEncode (NTV2_RPC_BLOB_TYPE & outBlob);
-	#define	NTV2_RPC_DECODE_DECL	bool RPCDecode (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex);
+	#define	NTV2_RPC_ENCODE_DECL		bool RPCEncode (NTV2_RPC_BLOB_TYPE & outBlob);
+	#define	NTV2_RPC_DECODE_DECL		bool RPCDecode (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex);
+	#define	NTV2_RPC_DECODECLIENT_DECL	bool RPCDecodeClient (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex);
+	#define	NTV2_RPC_ENCODECLIENT_DECL	bool RPCEncodeClient (NTV2_RPC_BLOB_TYPE & inBlob);
+	#define	NTV2_RPC_DECODESERVER_DECL	bool RPCDecodeServer (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex);
+	#define	NTV2_RPC_ENCODESERVER_DECL	bool RPCEncodeServer (NTV2_RPC_BLOB_TYPE & inBlob);
 
 	#define NTV2_RPC_CODEC_DECLS	NTV2_RPC_ENCODE_DECL	\
-									NTV2_RPC_DECODE_DECL
+									NTV2_RPC_DECODE_DECL	\
+									NTV2_RPC_DECODECLIENT_DECL	\
+									NTV2_RPC_ENCODECLIENT_DECL	\
+									NTV2_RPC_DECODESERVER_DECL	\
+									NTV2_RPC_ENCODESERVER_DECL	
+
+	// NTV2Buffer has it's own RPC encode / decode methods
+	#define	NTV2_RPC_BUFFER_ENCODE_DECL		bool RPCEncode (NTV2_RPC_BLOB_TYPE & outBlob, bool fillBuffer=true);
+	#define	NTV2_RPC_BUFFER_DECODE_DECL		bool RPCDecode (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex, bool fillBuffer=true);
+	#define	NTV2_RPC_BUFFER_DECODE2_DECL	bool RPCDecodeNoAllocate (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex);
+	#define NTV2_RPC_BUFFER_CODEC_DECLS		NTV2_RPC_BUFFER_ENCODE_DECL		\
+											NTV2_RPC_BUFFER_DECODE_DECL		\
+											NTV2_RPC_BUFFER_DECODE2_DECL
+									
 #else
 	#define NTV2_RPC_CODEC_DECLS
+	#define NTV2_RPC_BUFFER_CODEC_DECLS
 #endif	//	NTV2_BUILDING_DRIVER
 
 
@@ -1084,6 +1102,63 @@ typedef enum
 	kRegCMWHDMIOut
 } NTV2ClockMonitorWidgetRegisters;
 
+typedef enum
+{
+	kRegLPRJ45IP		= 14080, // External IP Address
+	kRegLPTunnelIP		= 14081, // ajatun IP Address
+	kRegLPSFP1IP		= 14082, // SFP 1 IP Address
+	kRegLPSFP2IP		= 14083, // SFP 1 IP Address
+	kRegLPIPVidStatus	= 14084, // Video Enabled/Active Statuses : 0-7: Input enabled
+	kRegLPIPAudStatus	= 14085, // Audio Enabled/Active Statuses : 16-23: Output enabled
+	kRegLPIPAncStatus	= 14086, // Anc Enabled/Active Statuses	  : 24-31: Output Active	
+	kRegLPIPOut1Config	= 14087, // Stuff beyond VPID definition Out 1
+	kRegLPIPOut2Config	= 14088, // 		"	Out 2
+	kRegLPIPOut3Config	= 14089, // 		"	Out 3
+	kRegLPIPOut4Config	= 14090, // 		"	Out 4
+    kRegLPPTPSFPStatus  = 14091, // Which SFP is PTP locked to
+	//14092 - 14093 Available
+	kRegLPHeartBeat		= 14094, // Local Proc isAlive counter
+	kRegLPFrameTask		= 14095  // Used to report OEM/Retail configuration
+} NTV2LocalProcBlockRegisters;
+
+typedef enum
+{
+	kRegMaskIPIn1Enabled	= BIT(0),
+	kRegMaskIPIn2Enabled	= BIT(1),
+	kRegMaskIPIn3Enabled	= BIT(2),
+	kRegMaskIPIn4Enabled	= BIT(3),
+	kRegMaskIPOut1Enabled	= BIT(16),
+	kRegMaskIPOut2Enabled	= BIT(17),
+	kRegMaskIPOut3Enabled	= BIT(18),
+	kRegMaskIPOut4Enabled	= BIT(19),
+	kRegMaskIPOut1Active	= BIT(24),
+	kRegMaskIPOut2Active	= BIT(25),
+	kRegMaskIPOut3Active	= BIT(26),
+	kRegMaskIPOut4Active	= BIT(27),
+
+	kRegMaskIPIsKey			= BIT(0)
+} NTV2LocalProcRegisterMask;
+
+typedef enum
+{
+	kRegShiftIPIn1Enabled	= 0,
+	kRegShiftIPIn2Enabled	= 1,
+	kRegShiftIPIn3Enabled	= 2,
+	kRegShiftIPIn4Enabled	= 3,
+	kRegShiftIPOut1Enabled	= 16,
+	kRegShiftIPOut2Enabled	= 17,
+	kRegShiftIPOut3Enabled	= 18,
+	kRegShiftIPOut4Enabled	= 19,
+	kRegShiftIPOut1Active	= 24,
+	kRegShiftIPOut2Active	= 25,
+	kRegShiftIPOut3Active	= 26,
+	kRegShiftIPOut4Active	= 27,
+
+	kRegShiftIPIsKey		= 0
+} NTV2LocalProcRegisterShift;
+
+
+
 #define NTV2_HDMIAuxMaxFrames	8
 #define NTV2_HDMIAuxDataSize	32
 
@@ -1534,6 +1609,7 @@ typedef enum
 	kRegMaskHDMIOutRange			= BIT(28),
 	kRegMaskHDMIOutAudioCh			= BIT(29),
 	kLHIRegMaskHDMIOutDVI			= BIT(30),
+	kRegMaskHDMIOutDisable			= BIT(31),
 
 	//kRegHDMIInputStatus
 	kRegMaskInputStatusLock			= BIT(0),								// rename to kRegMaskAnalogInputStatusLock
@@ -1602,8 +1678,15 @@ typedef enum
 	kLHIRegMaskSDIOutSMPTELevelBMode = BIT(25),
 	kK2RegMaskVPIDInsertionEnable = BIT(26),
 	kK2RegMaskVPIDInsertionOverwrite = BIT(27), 
-	kK2RegMaskSDIOutDS1AudioSelect = BIT(28)+BIT(30),
-	kK2RegMaskSDIOutDS2AudioSelect = BIT(29)+BIT(31),
+	kK2RegMaskSDIOutDS1Audio_Bit2 = BIT(18), // MSB
+	kK2RegMaskSDIOutDS1Audio_Bit1 = BIT(28),
+	kK2RegMaskSDIOutDS1Audio_Bit0 = BIT(30),
+	kK2RegMaskSDIOutDS2Audio_Bit2 = BIT(19), //MSB
+	kK2RegMaskSDIOutDS2Audio_Bit1 = BIT(29),
+	kK2RegMaskSDIOutDS2Audio_Bit0 = BIT(31),
+	kK2RegMaskSDIOutDS1AudioSelect = kK2RegMaskSDIOutDS1Audio_Bit2 + kK2RegMaskSDIOutDS1Audio_Bit1 + kK2RegMaskSDIOutDS1Audio_Bit0,
+	kK2RegMaskSDIOutDS2AudioSelect = kK2RegMaskSDIOutDS2Audio_Bit2 + kK2RegMaskSDIOutDS2Audio_Bit1 + kK2RegMaskSDIOutDS2Audio_Bit0,
+
 
 	//kK2RegConversionControl and kK2Reg2ndConversionControl,
 	kK2RegMaskConverterOutStandard = BIT(12)+BIT(13)+BIT(14),
@@ -2612,6 +2695,7 @@ typedef enum
 	kRegShiftHDMIOutRange				= 28,
 	kRegShiftHDMIOutAudioCh				= 29,
 	kLHIRegShiftHDMIOutDVI				= 30,
+	kRegShiftHDMIOutDisable				= 31,
 
 	//kRegHDMIInputStatus
 	kRegShiftInputStatusLock			= 0,
@@ -2679,8 +2763,8 @@ typedef enum
 	kLHIRegShiftSDIOutSMPTELevelBMode	= 25,
 	kK2RegShiftVPIDInsertionEnable		= 26,
 	kK2RegShiftVPIDInsertionOverwrite	= 27,
-	kK2RegShiftSDIOutDS1AudioSelect		= 28,//30,
-	kK2RegShiftSDIOutDS2AudioSelect		= 29,//31,
+	kK2RegShiftSDIOutDS1AudioSelect		= 18, //28,//30,
+	kK2RegShiftSDIOutDS2AudioSelect		= 19, //29,//31,
 
 	//kK2RegConversionControl,
 	kK2RegShiftConverterOutStandard		= 12,
@@ -3922,14 +4006,44 @@ typedef enum
 		@return		An NTV2AudioSystemSet having the specified contiguous range of NTV2AudioSystems.
 	**/
 	AJAExport NTV2AudioSystemSet NTV2MakeAudioSystemSet (const NTV2AudioSystem inFirstAudioSystem, const UWord inCount = 1);	//	New in SDK 16.2
+
+
+	/**
+		Convenience macros that delimit NTV2Message structs.
+		For driver builds, the structs are simply structs.
+		For client builds, the structs are classes with the appropriate __declspec(dllexport)
+		or __declspec(dllimport) decorations, constructors, ostream writers, etc.
+	**/
+	#define NTV2_STRUCT_BEGIN(__struct_name__)		class AJAExport __struct_name__ {public:
+	#define NTV2_STRUCT_END(__struct_name__)		};
+	#define NTV2_BEGIN_PRIVATE						private:
+	#define NTV2_END_PRIVATE						public:
+	#define NTV2_BEGIN_PROTECTED					protected:
+	#define NTV2_END_PROTECTED						public:
+
+	#if defined (_DEBUG)
+		#define NTV2_IS_STRUCT_VALID_IMPL(__hr__,__tr__)	bool NTV2_IS_STRUCT_VALID (void) const		{return __hr__.IsValid() && __tr__.IsValid();}
+		#define NTV2_ASSERT_STRUCT_VALID					do	{NTV2_ASSERT (NTV2_IS_STRUCT_VALID ());} while (false)
+	#else
+		#define NTV2_IS_STRUCT_VALID_IMPL(__hr__,__tr__)
+		#define NTV2_ASSERT_STRUCT_VALID
+	#endif
+#else	//	defined (NTV2_BUILDING_DRIVER)
+	#define NTV2_STRUCT_BEGIN(__struct_name__)		typedef struct __struct_name__ {
+	#define NTV2_STRUCT_END(__struct_name__)		} __struct_name__;
+	#define NTV2_BEGIN_PRIVATE
+	#define NTV2_END_PRIVATE
+	#define NTV2_BEGIN_PROTECTED
+	#define NTV2_END_PROTECTED
+	#define NTV2_IS_STRUCT_VALID_IMPL(__hr__,__tr__)
+	#define NTV2_ASSERT_STRUCT_VALID
 #endif	//	!defined (NTV2_BUILDING_DRIVER)
 
 
 /**
 	@brief	Everything needed to call CNTV2Card::ReadRegister or CNTV2Card::WriteRegister functions.
 **/
-typedef struct NTV2RegInfo
-{
+NTV2_STRUCT_BEGIN(NTV2RegInfo)
 	ULWord	registerNumber;		///< @brief My register number to use in a ReadRegister or WriteRegister call.
 	ULWord	registerValue;		///< @brief My register value to use in a ReadRegister or WriteRegister call.
 	ULWord	registerMask;		///< @brief My register mask value to use in a ReadRegister or WriteRegister call.
@@ -3939,50 +4053,55 @@ typedef struct NTV2RegInfo
 		/**
 			@brief	Constructs me from the given parameters.
 			@param[in]	inRegNum	Specifies the register number to use. If not specified, defaults to zero.
-			@param[in]	inRegValue	Specifies the register value to use. If not specified, defaults to zero.
-			@param[in]	inRegMask	Specifies the bit mask to use. If not specified, defaults to 0xFFFFFFFF.
-			@param[in]	inRegShift	Specifies the shift to use. If not specified, defaults to zero.
+			@param[in]	inValue		Specifies the register value to use. If not specified, defaults to zero.
+			@param[in]	inMask		Specifies the bit mask to use. If not specified, defaults to 0xFFFFFFFF.
+			@param[in]	inShift		Specifies the shift to use. If not specified, defaults to zero.
 		**/
-		AJAExport NTV2RegInfo (const ULWord inRegNum = 0, const ULWord inRegValue = 0, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0)
+		NTV2RegInfo (const ULWord inRegNum = 0, const ULWord inValue = 0, const ULWord inMask = 0xFFFFFFFF, const ULWord inShift = 0)
 			:	registerNumber	(inRegNum),
-				registerValue	(inRegValue),
-				registerMask	(inRegMask),
-				registerShift	(inRegShift)
+				registerValue	(inValue),
+				registerMask	(inMask),
+				registerShift	(inShift)
 		{
 		}
 
 		/**
 			@brief	Sets me from the given parameters.
 			@param[in]	inRegNum	Specifies the register number to use.
-			@param[in]	inRegValue	Specifies the register value to use.
-			@param[in]	inRegMask	Specifies the bit mask to use. If not specified, defaults to 0xFFFFFFFF.
-			@param[in]	inRegShift	Specifies the shift to use. If not specified, defaults to zero.
+			@param[in]	inValue		Specifies the register value to use.
+			@param[in]	inMask		Specifies the bit mask to use. If not specified, defaults to 0xFFFFFFFF.
+			@param[in]	inShift		Specifies the shift to use. If not specified, defaults to zero.
 		**/
-		AJAExport inline void	Set (const ULWord inRegNum, const ULWord inRegValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0)
-													{registerNumber = inRegNum; registerValue = inRegValue; registerMask = inRegMask; registerShift = inRegShift;}
+		inline void	Set (const ULWord inRegNum, const ULWord inValue,
+							const ULWord inMask = 0xFFFFFFFF, const ULWord inShift = 0)
+									{setRegNum(inRegNum).setValue(inValue).setMask(inMask).setShift(inShift);}
 		/**
 			@brief	Invalidates me, setting my register number, value, mask and shift values to 0xFFFFFFFF.
 		**/
-		AJAExport inline void	MakeInvalid (void)				{registerNumber = registerValue = registerMask	= registerShift = 0xFFFFFFFF;}
+		inline void		MakeInvalid (void)
+									{registerNumber = registerValue = registerMask	= registerShift = 0xFFFFFFFF;}
 
 		/**
-			@return True if I'm considered "valid", or false if my register number, value, mask and shift values are all 0xFFFFFFFF.
+			@return True if I'm considered "valid" -- i.e. non-zero mask and < 32 bits of shift;
+					or false if all my values are 0xFFFFFFFF, or if my mask is zero, or my shift > 31.
 		**/
-		AJAExport inline bool	IsValid (void) const			{return registerNumber != 0xFFFFFFFF || registerValue != 0xFFFFFFFF || registerMask != 0xFFFFFFFF || registerShift != 0xFFFFFFFF;}
+		inline bool		IsValid (void) const	{return !(regNum() == 0xFFFFFFFF && value() == 0xFFFFFFFF && mask() == 0xFFFFFFFF && shift() == 0xFFFFFFFF)
+														&& mask() && shift() < 32;}
 
 		/**
 			@return		True if I'm identical to the right-hand-side NTV2RegInfo.
 			@param[in]	inRHS	Specifies the right-hand-side NTV2RegInfo that will be compared to me.
-			@note		To synthesize the other comparison operators (!=, <=, >, >=), in client code, add "#include <utility>", and "using namespace std::rel_ops;".
+			@note		To synthesize the other comparison operators (!=, <=, >, >=), in client code,
+						add "#include <utility>", and "using namespace std::rel_ops;".
 		**/
-		AJAExport inline bool	operator == (const NTV2RegInfo & inRHS) const	{return registerNumber == inRHS.registerNumber && registerValue == inRHS.registerValue
-																			&& registerMask == inRHS.registerMask && registerShift == inRHS.registerShift;}
+		inline bool	operator == (const NTV2RegInfo & inRHS) const	{return regNum() == inRHS.regNum() && value() == inRHS.value()
+																			&& mask() == inRHS.mask() && shift() == inRHS.shift();}
 		/**
 			@return		True if I'm less than the right-hand-side NTV2RegInfo.
 			@param[in]	inRHS		Specifies the right-hand-side NTV2RegInfo that will be compared to me.
 			@note		To synthesize the other comparison operators (!=, <=, >, >=), in client code, add "#include <utility>", and "using namespace std::rel_ops;".
 		**/
-		AJAExport bool			operator < (const NTV2RegInfo & inRHS) const;
+		bool			operator < (const NTV2RegInfo & inRHS) const;
 
 		/**
 			@brief		Renders me to the given output stream in a human-readable format.
@@ -3991,7 +4110,7 @@ typedef struct NTV2RegInfo
 										If true, renders me as source code.
 			@return		The output stream.
 		**/
-		AJAExport std::ostream & Print (std::ostream & outputStream, const bool inAsCode = false) const;
+		std::ostream &	Print (std::ostream & outputStream, const bool inAsCode = false) const;
 
 		/**
 			@brief		Renders me to the given output stream as source code using a "WriteRegister" function call.
@@ -4000,10 +4119,18 @@ typedef struct NTV2RegInfo
 			@param[in]	inDeviceID		Optionally specifies the ::NTV2DeviceID for properly interpreting my register values.
 			@return		The output stream.
 		**/
-		AJAExport std::ostream & PrintCode (std::ostream & outputStream, const int inRadix = 16, const NTV2DeviceID inDeviceID = DEVICE_ID_INVALID) const; //	New in SDK 16.0, added inDeviceID in 16.2
-	#endif	//	not NTV2_BUILDING_DRIVER
-} NTV2RegInfo;
+		std::ostream &	PrintCode (std::ostream & outputStream, const int inRadix = 16, const NTV2DeviceID inDeviceID = DEVICE_ID_INVALID) const; //	New in SDK 16.0, added inDeviceID in 16.2
 
+		inline ULWord			regNum (void) const	{return registerNumber;}	//	New in SDK 17.5
+		inline ULWord			value (void) const	{return registerValue;}		//	New in SDK 17.5
+		inline ULWord			mask (void) const	{return registerMask;}		//	New in SDK 17.5
+		inline ULWord			shift (void) const	{return registerShift;}		//	New in SDK 17.5
+		inline NTV2RegInfo &	setRegNum (const ULWord val){registerNumber = val; return *this;}	//	New in SDK 17.5
+		inline NTV2RegInfo &	setValue (const ULWord val)	{registerShift = val; return *this;}	//	New in SDK 17.5
+		inline NTV2RegInfo &	setMask (const ULWord val)	{registerMask = val; return *this;}	//	New in SDK 17.5
+		inline NTV2RegInfo &	setShift (const ULWord val)	{if (val < 32) registerShift = val; return *this;}	//	New in SDK 17.5
+	#endif	//	!defined(NTV2_BUILDING_DRIVER)
+NTV2_STRUCT_END(NTV2RegInfo)
 
 typedef NTV2RegInfo NTV2ReadWriteRegisterSingle;	///< @brief This is an alias for NTV2RegInfo -- everything needed to make a future ReadRegister or WriteRegister call.
 
@@ -4184,6 +4311,53 @@ typedef struct {
 //		 changes (i.e. there are "gaps" between tables) then code will need to change!
 #define kColorCorrectionLUTOffset_Base	(0x0800)	// BYTE offset
 #define kColorCorrection12BitLUTOffset_Base (0xe000)	// BYTE offset
+
+//  cc lut v3 locations
+
+#define kColorCorrectionLUTV3WidgetOffset (0xd800)   // byte offset
+#define kColorCorrectionLUTV3WidgetSize (16)         // byte size
+#define kColorCorrectionLUTV3DataOffset (0xe000)	 // byte offset
+
+//  cc lut v3 registers
+typedef enum
+{
+	regCCLUTV3_FIRST,
+	regCCLUTV3Capabilities	=	regCCLUTV3_FIRST,   //	Reg 0 - read only  
+	regCCLUTV3DmaLoad,                              //	Reg 1 - dma load address and trigger
+    regCCLUTV3HostLoad,                             //  Reg 2 - host load enable and bank/plain selects
+	regCCLUTV3_LAST
+} CCLUTV3Registers;
+
+typedef enum
+{
+    // regCCLUTV3Capabilities
+    maskCCLUTV3Depth12 = BIT(0),    // lut supports 12/10 bits
+    shiftCCLUTV3Depth12 = 0,
+    maskCCLUTV3DmaLoad = BIT(4),    // lut supports dma loading
+    shiftCCLUTV3DmaLoad = 4,
+    maskCCLUTV3Banks2 = BIT(8),     // lut supports 2 banks
+    shiftCCLUTV3Banks2 = 8,
+    maskCCLUTV3HostLoad = BIT(12),  // lut supports host loading
+    shiftCCLUTV3HostLoad = 12,
+	// regCCLUTV3DmaLoad
+	maskCCLUTV3Address =
+        BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) +
+        BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15) +         \
+        BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) +
+        BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29),
+	shiftCCLUTV3Address = 0,
+	maskCCLUTV3Load = BIT(31),
+	shiftCCLUTV3Load = 31,
+    // regCCLUTV3HostLoad
+    maskCCLUTV3LoadEnable = BIT(0),
+    shiftCCLUTV3LoadEnable = 0,
+    maskCCLUTV3BankSelect = BIT(4),
+    shiftCCLUTV3BankSelect = 4,
+    maskLUTV3PlaneSelect = BIT(8) + BIT(9),
+    shiftLUTV3PlaneSelect = 8,
+    maskCCLUTV3OutputBank = BIT(12),
+    shiftCCLUTV3OutputBank = 12
+} CCLUTV3MaskShift;
 
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -4395,6 +4569,7 @@ typedef struct AUTOCIRCULATE_DATA
 	#if !defined (NTV2_BUILDING_DRIVER)
 		public:
 			AJAExport explicit AUTOCIRCULATE_DATA (const AUTO_CIRC_COMMAND inCommand = AUTO_CIRC_COMMAND_INVALID, const NTV2Crosspoint inCrosspoint = NTV2CROSSPOINT_INVALID);
+			AJAExport std::ostream & Print (std::ostream & oss) const;
 			NTV2_RPC_CODEC_DECLS
 	#endif	//	user-space clients only
 } AUTOCIRCULATE_DATA;
@@ -5476,6 +5651,7 @@ typedef enum
 		#define NTV2_TYPE_AJABITSTREAM			NTV2_FOURCC ('b', 't', 's', 't')	///< @brief Identifies NTV2Bitstream struct
 		#define NTV2_TYPE_AJASTREAMCHANNEL		NTV2_FOURCC ('s', 't', 'c', 'h')	///< @brief Identifies NTV2StreamChannel struct
 		#define NTV2_TYPE_AJASTREAMBUFFER		NTV2_FOURCC ('s', 't', 'b', 'u')	///< @brief Identifies NTV2StreamBuffer struct
+		#define NTV2_TYPE_AJAMAILBUFFER    		NTV2_FOURCC ('m', 'a', 'i', 'l')	///< @brief Identifies NTV2MailBuffer struct
 		#if defined(NTV2_DEPRECATE_16_3)
 			#define AUTOCIRCULATE_TYPE_STATUS		NTV2_TYPE_ACSTATUS
 			#define AUTOCIRCULATE_TYPE_XFER			NTV2_TYPE_ACXFER
@@ -5501,7 +5677,8 @@ typedef enum
 													(_x_) == NTV2_TYPE_AJABUFFERLOCK	||	\
 													(_x_) == NTV2_TYPE_AJABITSTREAM		||	\
 													(_x_) == NTV2_TYPE_AJASTREAMCHANNEL	||	\
-													(_x_) == NTV2_TYPE_AJASTREAMBUFFER)
+													(_x_) == NTV2_TYPE_AJASTREAMBUFFER  ||  \
+                                                    (_x_) == NTV2_TYPE_AJAMAILBUFFER)
 
 		//	NTV2Buffer FLAGS
 		#define NTV2Buffer_ALLOCATED				BIT(0)		///< @brief Allocated using Allocate function?
@@ -5570,26 +5747,8 @@ typedef enum
 		#define BITSTREAM_MCAP_CONTROL				5			///< @brief MCAP control register
 		#define BITSTREAM_MCAP_DATA					6			///< @brief MCAP data register
 		#define BITSTREAM_NUM_REGISTERS				7			///< @brief Number of MCAP registes
-	
+
 		#if !defined (NTV2_BUILDING_DRIVER)
-			/**
-				Convenience macros that delimit the new structs.
-				For driver builds, the structs are simply structs.
-				For client builds, the structs are classes with the appropriate __declspec(dllexport) or __declspec(dllimport) decorations.
-			**/
-			#define NTV2_STRUCT_BEGIN(__struct_name__)		class AJAExport __struct_name__ {public:
-			#define NTV2_STRUCT_END(__struct_name__)		};
-			#define NTV2_BEGIN_PRIVATE						private:
-			#define NTV2_END_PRIVATE						public:
-
-			#if defined (_DEBUG)
-				#define NTV2_IS_STRUCT_VALID_IMPL(__hr__,__tr__)	bool NTV2_IS_STRUCT_VALID (void) const		{return __hr__.IsValid() && __tr__.IsValid();}
-				#define NTV2_ASSERT_STRUCT_VALID					do	{NTV2_ASSERT (NTV2_IS_STRUCT_VALID ());} while (false)
-			#else
-				#define NTV2_IS_STRUCT_VALID_IMPL(__hr__,__tr__)
-				#define NTV2_ASSERT_STRUCT_VALID
-			#endif
-
 			//	Convenience macros for compactly formatting ostream output...
 			#define Hex(__x__)				std::hex << (__x__) << std::dec
 			#define xHex(__x__)				"0x" << Hex(__x__)
@@ -5638,14 +5797,7 @@ typedef enum
 			#define bBIN04(__x__)			"b" << BIN04(__x__)
 			#define bBIN0N(__x__,__n__)		"b" << BIN0N(__x__,__n__)
 			#define fDEC(__x__,__w__,__p__) std::dec << std::fixed << std::setw(__w__) << std::setprecision(__p__) << (__x__)
-		#else
-			#define NTV2_STRUCT_BEGIN(__struct_name__)		typedef struct __struct_name__ {
-			#define NTV2_STRUCT_END(__struct_name__)		} __struct_name__;
-			#define NTV2_BEGIN_PRIVATE
-			#define NTV2_END_PRIVATE
-			#define NTV2_IS_STRUCT_VALID_IMPL(__hr__,__tr__)
-			#define NTV2_ASSERT_STRUCT_VALID
-		#endif
+		#endif	//	!defined (NTV2_BUILDING_DRIVER)
 
 
 		#if defined (AJAMac)
@@ -5655,8 +5807,9 @@ typedef enum
 
 		/**
 			@brief	Describes the horizontal and vertical size dimensions of a raster, bitmap, frame or image.
+			@note   Renamed in SDK 17.5 from NTV2FrameDimensions to NTV2FrameSize.
 		**/
-		NTV2_STRUCT_BEGIN(NTV2FrameDimensions)
+		NTV2_STRUCT_BEGIN(NTV2FrameSize)
 			#if !defined (NTV2_BUILDING_DRIVER)
 				//	Member Functions
 
@@ -5665,26 +5818,29 @@ typedef enum
 					@param[in]	inWidth		Optionally specifies my initial width dimension, in pixels. Defaults to zero.
 					@param[in]	inHeight	Optionally specifies my initial height dimension, in lines. Defaults to zero.
 				**/
-				inline NTV2FrameDimensions (const ULWord inWidth = 0, const ULWord inHeight = 0)	{Set (inWidth, inHeight);}
-				inline ULWord					GetWidth (void) const		{return mWidth;}	///< @return	My width, in pixels.
-				inline ULWord					GetHeight (void) const		{return mHeight;}	///< @return	My height, in lines/rows.
-				inline ULWord					Width (void) const			{return mWidth;}	///< @return	My width, in pixels.
-				inline ULWord					Height (void) const			{return mHeight;}	///< @return	My height, in lines/rows.
-				inline bool						IsValid (void) const		{return Width() && Height();}	///< @return	True if both my width and height are non-zero.
+				explicit inline NTV2FrameSize (const ULWord inWidth = 0, const ULWord inHeight = 0)	{Set (inWidth, inHeight);}
+				explicit inline	NTV2FrameSize (const NTV2FrameGeometry inFG)	{set(FGWidth(inFG), FGHeight(inFG));}
+				inline ULWord	width (void) const		{return mWidth;}	///< @return	My width, in pixels.
+				inline ULWord	height (void) const		{return mHeight;}	///< @return	My height, in lines/rows.
+				inline bool		isValid (void) const	{return magnitude() > 0;}	///< @return	True if both my width and height are non-zero.
+				inline bool		operator == (const NTV2FrameSize & rhs) const	{return magnitude() == rhs.magnitude();}	///< @return	True if I'm equal to the rhs argument
+				inline bool		operator < (const NTV2FrameSize & rhs) const	{return magnitude() < rhs.magnitude();}	///< @return	True if I precede the rhs argument
+				inline operator	bool() const	{return isValid();}	///< @return	True if I'm valid (cast to bool)
+				operator		NTV2FrameGeometry() const;	///< @returns	my NTV2FrameGeometry or NTV2_FG_INVALID if invalid or non-SMPTE
 
 				/**
 					@brief		Sets my width dimension.
 					@param[in]	inValue		Specifies the new width dimension, in pixels.
 					@return		A non-constant reference to me.
 				**/
-				inline NTV2FrameDimensions &	SetWidth (const ULWord inValue)						{mWidth = inValue; return *this;}
+				inline NTV2FrameSize &	setWidth (const ULWord inValue)			{mWidth = inValue; return *this;}
 
 				/**
 					@brief		Sets my height dimension.
 					@param[in]	inValue		Specifies the new height dimension, in lines.
 					@return		A non-constant reference to me.
 				**/
-				inline NTV2FrameDimensions &	SetHeight (const ULWord inValue)					{mHeight = inValue; return *this;}
+				inline NTV2FrameSize &	setHeight (const ULWord inValue)		{mHeight = inValue; return *this;}
 
 				/**
 					@brief		Sets my dimension values.
@@ -5692,21 +5848,57 @@ typedef enum
 					@param[in]	inHeight	Specifies the new height dimension, in lines.
 					@return		A non-constant reference to me.
 				**/
-				inline NTV2FrameDimensions &	Set (const ULWord inWidth, const ULWord inHeight)	{return SetWidth (inWidth).SetHeight (inHeight);}
+				inline NTV2FrameSize &	set (const ULWord inWidth, const ULWord inHeight)	{return setWidth(inWidth).setHeight(inHeight);}
+
+				/**
+					@brief		Assigns me from an NTV2FrameGeometry.
+					@param[in]	rhs		Specifies the NTV2FrameGeometry.
+					@return		A non-constant reference to me.
+				**/
+				inline NTV2FrameSize &	operator = (const NTV2FrameGeometry & rhs)	{return set(FGWidth(rhs), FGHeight(rhs));}
 
 				/**
 					@brief		Sets both my width and height to zero (an invalid state).
 					@return		A non-constant reference to me.
 				**/
-				inline NTV2FrameDimensions &	Reset (void)										{return Set (0, 0);}
+				inline NTV2FrameSize &	reset (void)			{return set (0, 0);}
+
+				/**
+					@brief		Swaps my width and height.
+					@return		A non-constant reference to me.
+				**/
+				inline NTV2FrameSize &	swap (void)				{return set (height(), width());}
+
+				#if !defined(NTV2_DEPRECATE_17_5)
+					inline ULWord GetWidth (void) const  {return width();}	///< @deprecated	Use width() instead
+					inline ULWord GetHeight (void) const  {return height();}///< @deprecated	Use height() instead
+					inline ULWord Width (void) const  {return width();}		///< @deprecated	Use width() instead
+					inline ULWord Height (void) const  {return height();}	///< @deprecated	Use height() instead
+					inline bool IsValid (void) const  {return isValid();}	///< @deprecated	Use isValid() instead
+					inline NTV2FrameSize & SetWidth (const ULWord v)	{return setWidth(v);}	///< @deprecated	Use setWidth() instead
+					inline NTV2FrameSize & SetHeight (const ULWord v)	{return setHeight(v);}	///< @deprecated	Use setHeight() instead
+					inline NTV2FrameSize & Set (const ULWord w, const ULWord h)	{return set(w,h);}	///< @deprecated	Use set() instead
+					inline NTV2FrameSize & Reset (void)	{return reset();}	///< @deprecated	Use reset() instead
+				#endif	//	!defined(NTV2_DEPRECATE_17_5)
+
+				static ULWord	FGWidth (const NTV2FrameGeometry fg);
+				static ULWord	FGHeight (const NTV2FrameGeometry fg);
+
+				NTV2_BEGIN_PROTECTED
+					inline uint64_t		magnitude(void) const	{return (uint64_t(width()) << 32) | uint64_t(height());}
+					typedef std::map<NTV2FrameGeometry, ULWord>		FGSizesMap;
+					typedef FGSizesMap::const_iterator				FGSizesMapCI;
+				NTV2_END_PROTECTED
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
 
 			NTV2_BEGIN_PRIVATE
 				ULWord	mWidth;		///< @brief The horizontal dimension, in pixels.
 				ULWord	mHeight;	///< @brief The vertical dimension, in lines.
 			NTV2_END_PRIVATE
-		NTV2_STRUCT_END(NTV2FrameDimensions)
-
+		NTV2_STRUCT_END(NTV2FrameSize)
+		#if !defined(NTV2_DEPRECATE_17_5)
+			typedef NTV2FrameSize	NTV2FrameDimensions;
+		#endif	//	!defined(NTV2_DEPRECATE_17_5)
 
 		/**
 			@brief		Describes a segmented data transfer (copy or move) from a source memory location to a
@@ -5961,12 +6153,12 @@ typedef enum
 					@name	Scan Direction Constants
 				**/
 				///@{
-				static bool Direction_TopToBottom;	///< @brief Use this in setDestDirection or setSourceDirection for top-to-bottom scanning
-				static bool Direction_TopDown;		///< @brief Use this in setDestDirection or setSourceDirection for top-to-bottom scanning
-				static bool Direction_Normal;		///< @brief Use this in setDestDirection or setSourceDirection for top-to-bottom scanning
-				static bool Direction_BottomToTop;	///< @brief Use this in setDestDirection or setSourceDirection for bottom-to-top scanning
-				static bool Direction_BottomUp;		///< @brief Use this in setDestDirection or setSourceDirection for bottom-to-top scanning
-				static bool Direction_Flipped;		///< @brief Use this in setDestDirection or setSourceDirection for bottom-to-top scanning
+				static const bool Direction_TopToBottom	= true;		///< @brief Use this in setDestDirection or setSourceDirection for top-to-bottom scanning
+				static const bool Direction_TopDown		= true;		///< @brief Use this in setDestDirection or setSourceDirection for top-to-bottom scanning
+				static const bool Direction_Normal		= true;		///< @brief Use this in setDestDirection or setSourceDirection for top-to-bottom scanning
+				static const bool Direction_BottomToTop	= false;	///< @brief Use this in setDestDirection or setSourceDirection for bottom-to-top scanning
+				static const bool Direction_BottomUp	= false;	///< @brief Use this in setDestDirection or setSourceDirection for bottom-to-top scanning
+				static const bool Direction_Flipped		= false;	///< @brief Use this in setDestDirection or setSourceDirection for bottom-to-top scanning
 				///@}
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
 
@@ -5982,39 +6174,37 @@ typedef enum
 		NTV2_STRUCT_END(NTV2SegmentedXferInfo)
 
 		/**
-			@brief	A generic user-space buffer object that has an address and a length.
-					Used most often to share an arbitrary-sized chunk of host memory with the NTV2 kernel driver
-					through a CNTV2DriverInterface::NTV2Message call.
-
+			@brief	Describes a user-space buffer on the host computer.
+					I have an address and a length, plus some optional attributes (allocated by SDK?, page-aligned?  etc.).
 					-	For a static or global buffer, simply construct from the variable:
 						@code
-							static ULWord pFoo [1000];
+							static ULWord pFoo[1000];
 							{
-								NTV2Buffer foo (pFoo, sizeof (pFoo));
+								NTV2Buffer foo (pFoo, sizeof(pFoo));
 								. . .
 							}	//	When foo goes out of scope, it won't try to free pFoo
 						@endcode
 					-	For stack-based buffers, simply construct from the variable:
 						@code
 							{
-								ULWord pFoo [100];
-								NTV2Buffer foo (pFoo, sizeof (pFoo));
+								ULWord pFoo[100];
+								NTV2Buffer foo (pFoo, sizeof(pFoo));
 								. . .
-							}	//	No need to do anything, as both foo and pFoo are automatically freed when they go out of scope
+							}	//	Both foo and pFoo are automatically freed when they go out of scope
 						@endcode
-					-	For a buffer you allocate and free yourself:
+					-	To allocate and free a buffer of 100 Bar's:
 						@code
-							NTV2Buffer	foo (new Bar [1], sizeof (Bar));
+							NTV2Buffer	foo (new Bar[100], sizeof(Bar));
 							. . .
-							delete [] (Bar*) foo.GetHostPointer ();		//	You must free the memory yourself
+							delete [] (Bar*) foo.GetHostPointer();		//	You must free the memory yourself
 						@endcode
-					-	For a 2K-byte buffer that's allocated and freed automatically by the SDK:
+					-	Let the SDK allocate and free a buffer of 100 Bar's:
 						@code
 							{
-								NTV2Buffer foo (2048);
+								NTV2Buffer foo (100 * sizeof(Bar));
 								::memset (foo.GetHostPointer(), 0, foo.GetByteCount());
 								. . .
-							}	//	The memory is freed automatically when foo goes out of scope
+							}	//	Automatically freed when foo goes out of scope
 						@endcode
 			@note	This struct uses a constructor to properly initialize itself.
 					Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
@@ -6024,13 +6214,13 @@ typedef enum
 				ULWord64	fUserSpacePtr;			///< @brief User space pointer. Do not set directly. Use constructor or Set method.
 				ULWord		fByteCount;				///< @brief The (maximum) size of the buffer pointed to by fUserSpacePtr, in bytes.
 													///			Do not set directly. Instead, use the constructor or the Set method.
-				ULWord		fFlags;					///< @brief Reserved for future use
+				ULWord		fFlags;					///< @brief	Reserved -- for internal SDK use only
 				#if defined (AJAMac)
 					ULWord64	fKernelSpacePtr;	///< @brief Reserved -- Mac driver use only
 					ULWord64	fIOMemoryDesc;		///< @brief Reserved -- Mac driver use only
 					ULWord64	fIOMemoryMap;		///< @brief Reserved -- Mac driver use only
 				#else
-					ULWord64	fKernelSpacePtr;	///< @brief Reserved -- New in SDK 17.5
+					//ULWord64	fKernelSpacePtr;	///< @brief Reserved -- New in SDK 17.5
 					ULWord64	fKernelHandle;		///< @brief Reserved -- driver use only
 				#endif
 			NTV2_END_PRIVATE
@@ -6247,12 +6437,21 @@ typedef enum
 				**/
 				template<typename T>	bool Fill (const T & inValue)
 				{
-					T * pT	(reinterpret_cast<T*>(GetHostPointer()));
-					const size_t loopCount(GetByteCount() / sizeof(T));
-					if (pT)
-						for (size_t n(0);  n < loopCount;  n++)
-							pT[n] = inValue;
-					return pT ? true : false;
+    				T* pT = reinterpret_cast<T*>(GetHostPointer());
+    				if (!pT) {
+        				return false;
+    				}
+
+					size_t bufferSize = GetByteCount() / sizeof(T);
+					if (bufferSize == 0) {
+						return false;
+    				}
+
+    				for (size_t i = 0; i < bufferSize; ++i) {
+        				pT[i] = inValue;
+    				}
+
+    				return true;
 				}
 
 				/**
@@ -6428,6 +6627,15 @@ typedef enum
 					@return A string containing a human-readable representation of me.
 				**/
 				std::string		AsString (UWord inDumpMaxBytes = 0) const;
+
+				/**
+					@param	inBytesPerWord	Word size, in bytes. Must be 1, 2, 4 or 8. Defaults to 4.
+					@param	inVarName		Optionally specifies the variable name to use.
+					@param	inUseSTL		Optionally specifies if std::vector should be used instead of a C-style array.
+					@param	inByteSwap		Optionally specifies if 2/4/8-byte words should be byte-swapped.
+					@return A string containing C/C++ code that will reproduce my contents.
+				**/
+				std::string		AsCode (const size_t inBytesPerWord = 4, const std::string & inVarName = "", const bool inUseSTL = false, const bool inByteSwap = false) const;
 
 				/**
 					@brief	Converts my contents into a hex-encoded string.
@@ -6775,7 +6983,7 @@ typedef enum
 				static size_t				HostPageSize (void);	//	New in SDK 16.3
 				///@}
 
-				NTV2_RPC_CODEC_DECLS
+				NTV2_RPC_BUFFER_CODEC_DECLS
 			#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2Buffer)
 
@@ -8875,6 +9083,49 @@ typedef enum
 
         NTV2_STRUCT_END (NTV2StreamBuffer)
 
+		// Mail buffer action flags
+		#define NTV2_MAIL_BUFFER_SEND          			BIT(0)			///< @brief Used in ::NTV2MailBuffer to send data
+        #define NTV2_MAIL_BUFFER_RECEIVE    			BIT(1)			///< @brief Used in ::NTV2MailBuffer to receive data
+
+		// Mail buffer status flags
+		#define NTV2_MAIL_BUFFER_SUCCESS				BIT(0)			///< @brief Used in ::NTV2MailBuffer success
+		#define NTV2_MAIL_BUFFER_FAIL					BIT(1)			///< @brief Used in ::NTV2MailBuffer fail
+		#define NTV2_MAIL_BUFFER_OVERFLOW				BIT(2)			///< @brief Used in ::NTV2MailBuffer buffer overflow
+		#define NTV2_MAIL_BUFFER_TIMEOUT				BIT(3)			///< @brief Used in ::NTV2MailBuffer transfer timeout
+
+        // Mail buffer maximum size
+        #define NTV2_MAIL_BUFFER_MAX                    4096        
+                
+        NTV2_STRUCT_BEGIN (NTV2MailBuffer)
+			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
+				NTV2Channel		mChannel;			///< @brief Mail buffer channel
+				NTV2Buffer		mBuffer;			///< @brief Virtual address of a mail buffer and its length.
+				ULWord  		mDataSize;			///< @brief Size of data in the buffer
+				ULWord			mFlags;				///< @brief Action flags
+				ULWord			mDelay;				///< @brief Trial delay (us)
+				ULWord			mTimeout;			///< @brief Timeout (us)
+				ULWord			mStatus;			///< @brief Action status
+				ULWord			mReserved[32];		///< @brief Reserved for future expansion.
+			NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
+
+			#if !defined (NTV2_BUILDING_DRIVER)
+				/**
+					@name	Construction & Destruction
+				**/
+				///@{
+				explicit	NTV2MailBuffer ();		///< @brief Constructs a default NTV2MailBuffer struct.
+				inline		~NTV2MailBuffer ()	{}	///< @brief My default destructor, which frees all allocatable fields that I own.
+				///@}
+
+				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 16.3
+
+				std::ostream &	Print (std::ostream & inOutStream) const;
+
+				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)
+
+			#endif	//	!defined (NTV2_BUILDING_DRIVER)
+
+        NTV2_STRUCT_END (NTV2MailBuffer)
 
 		#if !defined (NTV2_BUILDING_DRIVER)
 			typedef std::set <NTV2VideoFormat>					NTV2VideoFormatSet;					///< @brief A set of distinct NTV2VideoFormat values.
@@ -9106,7 +9357,7 @@ typedef enum
 				@brief		Returns a set of distinct ::NTV2OutputDest values supported on the given device.
 				@param[in]	inDeviceID			Specifies the ::NTV2DeviceID of the device of interest.
 												Specify ::DEVICE_ID_INVALID to disable the "is supported" check.
-				@param[out] outOutputSources	Receives the set of distinct ::NTV2OutputDest values supported by the device.
+				@param[out] outOutputDests		Receives the set of distinct ::NTV2OutputDest values supported by the device.
 				@param[in]	inKinds				Specifies the kinds of outputs of interest.  Defaults to ALL.
 				@return		True if successful;	 otherwise false.
 				@todo		Needs to be moved to a C++ compatible "device features" module.
@@ -9354,593 +9605,597 @@ typedef enum
 		#endif	//	defined (AJAMac)
 //////////////////////////////////////////////////////////////////////////////////////////////	END NEW AUTOCIRCULATE API
 
+#if !defined(NTV2_DEPRECATE_17_6)
+	//// NOTE: HEVC support removed in SDK 17.6
 
-// maximum number of hevc streams
-#define HEVC_STREAM_MAX						4
+	// maximum number of hevc streams
+	#define HEVC_STREAM_MAX						4
 
-// maximum number of gpio ports
-#define HEVC_GPIO_MAX						64
+	// maximum number of gpio ports
+	#define HEVC_GPIO_MAX						64
 
-// version string maximum size (bytes)
-#define HEVC_VERSION_STRING_SIZE			64
+	// version string maximum size (bytes)
+	#define HEVC_VERSION_STRING_SIZE			64
 
-// picture and encoded information additional data size (bytes)
-#define HEVC_ADDITIONAL_DATA_SIZE			((4 + 4 + 256) * 16)
+	// picture and encoded information additional data size (bytes)
+	#define HEVC_ADDITIONAL_DATA_SIZE			((4 + 4 + 256) * 16)
 
-// codec state flags 
-#define HEVC_STATE_FLAG_VIDEO_STARTED		0x00000001U			// codec video input capture started
+	// codec state flags 
+	#define HEVC_STATE_FLAG_VIDEO_STARTED		0x00000001U			// codec video input capture started
 
-// transfer flags 
-#define HEVC_TRANSFER_FLAG_IS_LAST_FRAME	0x00000001U			// last stream frame
+	// transfer flags 
+	#define HEVC_TRANSFER_FLAG_IS_LAST_FRAME	0x00000001U			// last stream frame
 
-// driver io status codes
-#define HEVC_STATUS_SUCCESS					0x00000001U
+	// driver io status codes
+	#define HEVC_STATUS_SUCCESS					0x00000001U
 
-// fatal error registers
-#define HEVC_FATAL_ERROR_INFO_REG			0x08000100U			// codec error register base
-#define HEVC_FATAL_ERROR_INFO_COUNT			64					// number of codec error registers
+	// fatal error registers
+	#define HEVC_FATAL_ERROR_INFO_REG			0x08000100U			// codec error register base
+	#define HEVC_FATAL_ERROR_INFO_COUNT			64					// number of codec error registers
 
-// driver debug register output enable bits
-#define HEVC_DEBUG_DRIVER_REGISTER			0x080000FCU			// register address of debug bits
-#define HEVC_DEBUG_MASK_INFO				0x00000001			// general probe and cleanup
-#define HEVC_DEBUG_MASK_WARNING				0x00000002			// general warinings
-#define HEVC_DEBUG_MASK_ERROR				0x00000004			// general erros
-#define HEVC_DEBUG_MASK_INT_PRIMARY			0x00000008			// primary interrupt info
-#define HEVC_DEBUG_MASK_INT_COMMAND			0x00000010			// command tasklet info
-#define HEVC_DEBUG_MASK_INT_VEI				0x00000020			// raw stream tasklet info
-#define HEVC_DEBUG_MASK_INT_SEO				0x00000040			// encoded stream tasklet info
-#define HEVC_DEBUG_MASK_INT_ERROR			0x00000080			// interrupt errors
-#define HEVC_DEBUG_MASK_REGISTER_INFO		0x00000100			// register read/write info
-#define HEVC_DEBUG_MASK_REGISTER_STATE		0x00000200			// detailed register access info
-#define HEVC_DEBUG_MASK_REGISTER_ERROR		0x00000400			// register access errors
-#define HEVC_DEBUG_MASK_COMMAND_INFO		0x00000800			// command queue info
-#define HEVC_DEBUG_MASK_COMMAND_STATE		0x00001000			// detailed command processing info
-#define HEVC_DEBUG_MASK_COMMAND_ERROR		0x00002000			// command queue errors
-#define HEVC_DEBUG_MASK_STREAM_INFO			0x00004000			// stream (dma) queue info
-#define HEVC_DEBUG_MASK_STREAM_STATE		0x00008000			// detailed stream processing info
-#define HEVC_DEBUG_MASK_STREAM_COPY			0x00010000			// stream data copy info
-#define HEVC_DEBUG_MASK_STREAM_SEGMENT		0x00020000			// stream data segment info
-#define HEVC_DEBUG_MASK_STREAM_FRAME		0x00040000			// stream vif frame info
-#define HEVC_DEBUG_MASK_STREAM_ERROR		0x00080000			// stream queue errors
-#define HEVC_DEBUG_MASK_MEMORY_ALLOC		0x00100000			// buffer memory allocation info
-#define HEVC_DEBUG_MASK_MEMORY_ERROR		0x00200000			// buffer memory allocation errors
-#define HEVC_DEBUG_MASK_DMA_INFO			0x00400000			// dma send info
-#define HEVC_DEBUG_MASK_DMA_DESCRIPTOR		0x00800000			// dma descriptor dump
-#define HEVC_DEBUG_MASK_DMA_ERROR			0x01000000			// dma errors
-#define HEVC_DEBUG_MASK_STATUS_INFO			0x02000000			// status info requests
-#define HEVC_DEBUG_MASK_RESERVED_0			0x04000000
-#define HEVC_DEBUG_MASK_RESERVED_1			0x08000000
-#define HEVC_DEBUG_MASK_RESERVED_2			0x10000000
-#define HEVC_DEBUG_MASK_RESERVED_3			0x20000000
-#define HEVC_DEBUG_MASK_RESERVED_4			0x40000000
-#define HEVC_DEBUG_MASK_RESERVED_5			0x80000000
+	// driver debug register output enable bits
+	#define HEVC_DEBUG_DRIVER_REGISTER			0x080000FCU			// register address of debug bits
+	#define HEVC_DEBUG_MASK_INFO				0x00000001			// general probe and cleanup
+	#define HEVC_DEBUG_MASK_WARNING				0x00000002			// general warinings
+	#define HEVC_DEBUG_MASK_ERROR				0x00000004			// general erros
+	#define HEVC_DEBUG_MASK_INT_PRIMARY			0x00000008			// primary interrupt info
+	#define HEVC_DEBUG_MASK_INT_COMMAND			0x00000010			// command tasklet info
+	#define HEVC_DEBUG_MASK_INT_VEI				0x00000020			// raw stream tasklet info
+	#define HEVC_DEBUG_MASK_INT_SEO				0x00000040			// encoded stream tasklet info
+	#define HEVC_DEBUG_MASK_INT_ERROR			0x00000080			// interrupt errors
+	#define HEVC_DEBUG_MASK_REGISTER_INFO		0x00000100			// register read/write info
+	#define HEVC_DEBUG_MASK_REGISTER_STATE		0x00000200			// detailed register access info
+	#define HEVC_DEBUG_MASK_REGISTER_ERROR		0x00000400			// register access errors
+	#define HEVC_DEBUG_MASK_COMMAND_INFO		0x00000800			// command queue info
+	#define HEVC_DEBUG_MASK_COMMAND_STATE		0x00001000			// detailed command processing info
+	#define HEVC_DEBUG_MASK_COMMAND_ERROR		0x00002000			// command queue errors
+	#define HEVC_DEBUG_MASK_STREAM_INFO			0x00004000			// stream (dma) queue info
+	#define HEVC_DEBUG_MASK_STREAM_STATE		0x00008000			// detailed stream processing info
+	#define HEVC_DEBUG_MASK_STREAM_COPY			0x00010000			// stream data copy info
+	#define HEVC_DEBUG_MASK_STREAM_SEGMENT		0x00020000			// stream data segment info
+	#define HEVC_DEBUG_MASK_STREAM_FRAME		0x00040000			// stream vif frame info
+	#define HEVC_DEBUG_MASK_STREAM_ERROR		0x00080000			// stream queue errors
+	#define HEVC_DEBUG_MASK_MEMORY_ALLOC		0x00100000			// buffer memory allocation info
+	#define HEVC_DEBUG_MASK_MEMORY_ERROR		0x00200000			// buffer memory allocation errors
+	#define HEVC_DEBUG_MASK_DMA_INFO			0x00400000			// dma send info
+	#define HEVC_DEBUG_MASK_DMA_DESCRIPTOR		0x00800000			// dma descriptor dump
+	#define HEVC_DEBUG_MASK_DMA_ERROR			0x01000000			// dma errors
+	#define HEVC_DEBUG_MASK_STATUS_INFO			0x02000000			// status info requests
+	#define HEVC_DEBUG_MASK_RESERVED_0			0x04000000
+	#define HEVC_DEBUG_MASK_RESERVED_1			0x08000000
+	#define HEVC_DEBUG_MASK_RESERVED_2			0x10000000
+	#define HEVC_DEBUG_MASK_RESERVED_3			0x20000000
+	#define HEVC_DEBUG_MASK_RESERVED_4			0x40000000
+	#define HEVC_DEBUG_MASK_RESERVED_5			0x80000000
 
-// ntv2 gpio input registers
-#define HEVC_NTV2_GPIO_REGISTER_LOW			510
-#define HEVC_NTV2_GPIO_REGISTER_HIGH		511
+	// ntv2 gpio input registers
+	#define HEVC_NTV2_GPIO_REGISTER_LOW			510
+	#define HEVC_NTV2_GPIO_REGISTER_HIGH		511
 
 
-// hevc version information
-typedef struct HevcVersion
+	// hevc version information
+	typedef struct HevcVersion
+	{
+		ULWord					major;
+		ULWord					minor;
+		ULWord					point;
+		ULWord					build;
+	} HevcVersion;
+
+	// pci id information
+	typedef struct HevcPciId
+	{
+		ULWord					vendor;
+		ULWord					device;
+		ULWord					subVendor;
+		ULWord					subDevice;
+	} HevcPciId;
+
+	// hevc device mode
+	typedef enum HevcDeviceMode
+	{
+		Hevc_DeviceMode_Unknown,
+		Hevc_DeviceMode_Codec,							// codec mode
+		Hevc_DeviceMode_Maintenance,					// maintenance mode
+		Hevc_DeviceMode_Size
+	} HevcDeviceMode;
+
+	// hevc device information message
+	typedef struct HevcDeviceInfo
+	{
+		HevcVersion				driverVersion;			// driver version
+		HevcVersion				mcpuVersion;			// firmware versions
+		char					systemFirmware[HEVC_VERSION_STRING_SIZE];
+		char					standardFirmwareSingle[HEVC_VERSION_STRING_SIZE];
+		char					standardFirmwareMultiple[HEVC_VERSION_STRING_SIZE];
+		char					userFirmwareSingle[HEVC_VERSION_STRING_SIZE];
+		char					userFirmwareMultiple[HEVC_VERSION_STRING_SIZE];
+		HevcPciId				pciId;					// pci ids
+		HevcDeviceMode			deviceMode;				// hardware device mode
+		bool					mcpuVersionCheck;		// mcpu version supported 
+		bool					systemVersionCheck;		// system version supported
+		bool					standardSingleCheck;	// standard firmware single version supported
+		bool					standardMultipleCheck;	// standard fimwrare multiple version supported
+		bool					pciIdCheck;				// pci id supported
+	} HevcDeviceInfo;
+
+	// hevc register
+	typedef struct HevcDeviceRegister
+	{
+		ULWord					address;				// register address
+		ULWord					writeValue;				// register write value
+		ULWord					readValue;				// register read value
+		ULWord					mask;					// register value mask
+		ULWord					shift;					// register value shift
+		bool					write;					// write flag
+		bool					read;					// read flag
+		bool					forceBar4;				// force bar4 access
+	} HevcDeviceRegister;
+
+	// hevc main state
+	typedef enum HevcMainState
+	{
+		Hevc_MainState_Unknown,
+		Hevc_MainState_Boot,							// codec has booted
+		Hevc_MainState_Init,							// initialize codec
+		Hevc_MainState_Encode,							// configure encoding (load firmware?)
+		Hevc_MainState_Error,							// codec must be reset
+		Hevc_MainState_Size
+	} HevcMainState;
+
+	// encoder mode
+	typedef enum HevcEncodeMode
+	{
+		Hevc_EncodeMode_Unknown,
+		Hevc_EncodeMode_Single,							// encode a sigle stream
+		Hevc_EncodeMode_Multiple,						// encode multiple streams
+		Hevc_EncodeMode_Size
+	} HevcEncodeMode;
+
+	// encoder firmware type
+	typedef enum HevcFirmwareType
+	{
+		Hevc_FirmwareType_Unknown,
+		Hevc_FirmwareType_Standard,						// encode firmware standard
+		Hevc_FirmwareType_User,							// encode firmware user
+		Hevc_FirmwareType_Size
+	} HevcFirmwareType;
+
+	// hevc video interface state
+	typedef enum HevcVifState
+	{
+		Hevc_VifState_Unknown,
+		Hevc_VifState_Stop,								// video interface stop
+		Hevc_VifState_Start,							// video interface start
+		Hevc_VifState_Size
+	} HevcVifState;
+
+	// hevc video input state
+	typedef enum HevcVinState
+	{
+		Hevc_VinState_Unknown,
+		Hevc_VinState_Stop,								// video input stop
+		Hevc_VinState_Start,							// video input start
+		Hevc_VinState_Size
+	} HevcVinState;
+
+	// hevc encoder state
+	typedef enum HevcEhState
+	{
+		Hevc_EhState_Unknown,
+		Hevc_EhState_Stop,								// encoder stop
+		Hevc_EhState_Start,								// encoder start
+		Hevc_EhState_ReadyToStop,						// encoder ready to stop
+		Hevc_EhState_Size
+	} HevcEhState;
+
+	// hevc gpio control
+	typedef enum HevcGpioControl
+	{
+		Hevc_GpioControl_Unknown,
+		Hevc_GpioControl_Function,						// configure gpio port function
+		Hevc_GpioControl_Direction,						// configure gpio port direction
+		Hevc_GpioControl_Set,							// set gpio port value
+		Hevc_GpioControl_Get,							// get pgio port value
+		Hevc_GpioControl_Size
+	} HevcGpioControl;
+
+	// hevc gpio function
+	typedef enum HevcGpioFunction
+	{
+		Hevc_GpioFunction_Unknown,
+		Hevc_GpioFunction_Gpio,							// gpio function is gpio
+		Hevc_GpioFunction_Peripheral,					// gpio function is peripheral
+		Hevc_GpioFunction_Size
+	} HevcGpioFunction;
+
+	// hevc gpio direction
+	typedef enum HevcGpioDirection
+	{
+		Hevc_GpioDirection_Unknown,
+		Hevc_GpioDirection_Input,						// gpio direction is input
+		Hevc_GpioDirection_Output,						// gpio direction is output
+		Hevc_GpioDirection_Size
+	} HevcGpioDirection;
+
+	// hevc gpio value
+	typedef enum HevcGpioValue
+	{
+		Hevc_GpioValue_Unknown,
+		Hevc_GpioValue_Low,								// gpio direction is input
+		Hevc_GpioValue_High,							// gpio direction is output
+		Hevc_GpioValue_Size
+	} HevcGpioValue;
+
+	typedef enum HevcChangeSequence
+	{
+		Hevc_ChangeSequence_Unknown,
+		Hevc_ChangeSequence_Enabled,
+		Hevc_ChangeSequence_Disabled,
+		Hevc_ChangeSequence_Size
+	} HevcChangeSequence;
+
+	// hevc change param target
+	#define Hevc_ParamTarget_None			0x00000000
+	#define Hevc_ParamTarget_Vbr			0x00000001	// change variable bitrate
+	#define Hevc_ParamTarget_Cbr			0x00000002	// change constant bitrate
+	#define Hevc_ParamTarget_Resolution		0x00000004	// change size, crop, pan, etc.
+	#define Hevc_ParamTarget_Frame_Rate		0x00000008	// change frame rate
+	#define Hevc_ParamTarget_All			0x0000000f
+
+	// hevc commands
+	typedef enum HevcCommand
+	{
+		Hevc_Command_Unknown,
+		Hevc_Command_MainState,							// set main state
+		Hevc_Command_VinState,							// set video input state
+		Hevc_Command_EhState,							// set encoder state
+		Hevc_Command_Gpio,								// control gpio
+		Hevc_Command_Reset,								// reset codec
+		Hevc_Command_ChangeParam,						// change dynamic params during encode
+		Hevc_Command_ChangePicture,						// change picture type
+		Hevc_Command_Size
+	} HevcCommand;
+
+	// hevc command information
+	typedef struct HevcDeviceCommand
+	{
+		HevcCommand				command;				// command type
+		// main state command info
+		HevcMainState			mainState;				// set main state
+		HevcEncodeMode			encodeMode;				// set encoder mode
+		HevcFirmwareType		firmwareType;			// set encode firmware type
+		// vin/eh state command info
+		HevcVinState			vinState;				// set video input state
+		HevcEhState				ehState;				// set encoder state
+		ULWord					streamBits;				// command applies to each stream bit
+		// gpio command info
+		HevcGpioControl			gpioControl;			// gpio control type
+		ULWord					gpioNumber;				// gpio port number (function, direction, set, get)
+		HevcGpioFunction		gpioFunction;			// gpio port function (function)
+		HevcGpioDirection		gpioDirection;			// gpio port direction (direction)
+		HevcGpioValue			gpioValue;				// gpio port value (set, get)
+		// change encode params
+		ULWord					paramTarget;			// parameters to change
+		ULWord					paramStreamId;			// stream id
+		HevcChangeSequence		changeSequence;			// start new sequence (vbr)
+		ULWord					maxBitRate;				// maximum bitrate (vbr)
+		ULWord					aveBitRate;				// average bitrate (vbr and cbr)
+		ULWord					minBitRate;				// minimum bitrate (vbr)
+		ULWord					seqEndPicNumber;		// last picture number of sequence (resolution and frame rate)
+		ULWord					hSizeEh;				// resolution parameters
+		ULWord					vSizeEh;
+		ULWord					cropLeft;
+		ULWord					cropRight;
+		ULWord					cropTop;
+		ULWord					cropBottom;
+		ULWord					panScanRectLeft;
+		ULWord					panScanRectRight;
+		ULWord					panScanRectTop;
+		ULWord					panScanRectBottom;
+		ULWord					videoSignalType;
+		ULWord					videoFormat;
+		ULWord					videoFullRangeFlag;
+		ULWord					colourDescriptionPresentFlag;
+		ULWord					colourPrimaries;
+		ULWord					transferCharacteristics;
+		ULWord					matrixCoeffs;
+		ULWord					aspectRatioIdc;
+		ULWord					sarWidth;
+		ULWord					sarHeight;
+		ULWord					frameRateCode;			// frame rate parameter
+		// change picture type
+		ULWord					picType;				// picture type
+		ULWord					picStreamId;			// stream id
+		ULWord					gopEndPicNumber;		// last picture number of gop
+		// general command flags
+		ULWord					flags;					// command flags
+	} HevcDeviceCommand;
+
+	// hevc stream types
+	typedef enum HevcStream
+	{
+		Hevc_Stream_Unknown,
+		Hevc_Stream_VideoRaw,							// raw data stream
+		Hevc_Stream_VideoEnc,							// encoded data stream
+		Hevc_Stream_Size
+	} HevcStream;
+
+	// hevc picture data (raw streams)
+	typedef struct HevcPictureData
+	{
+		ULWord					serialNumber;			// serial number (application data)
+		ULWord					ptsValueLow;			// presentation time stamp (90kHz)
+		ULWord					ptsValueHigh;			// pts high bit only (33 bit roll over)
+		ULWord					pictureNumber;			// start with 1 and increment for each picture
+		ULWord					numAdditionalData;		// number of additional data entries
+	} HevcPictureData;
+
+	// hevc picture information (raw streams)
+	typedef struct HevcPictureInfo
+	{
+		HevcPictureData			pictureData;			// raw stream picture data
+	//
+	//	additional data format
+	//	u32 additional_data_type
+	//	u32 additional_data_size (256 bytes max)
+	//	u8... additional_data_payload
+	//	... more additional data
+	//
+	//	additional data types
+	//	1 = sei data
+	//	2 = passthrough data (to encoded additional data of encoded frame)
+	//	4 = cancel sei on every gop (set additional size to 0)
+	//
+	//	sei data format
+	//	u8 user_sei_location
+	//	u8 user_sei_type
+	//	u8 user_sei_length
+	//	u8... user_sei_payload
+	//
+	//	user sei location
+	//	2 = every gop head picture
+	//	3 = this picture only
+	//
+	//	passthrough data format
+	//	u8... passthrough_data_payload
+	//
+		UByte					additionalData[HEVC_ADDITIONAL_DATA_SIZE];
+	} HevcPictureInfo;
+
+	// hevc encoded stream data (encoded streams)
+	typedef struct HevcEncodedData
+	{
+		ULWord					serialNumber;			// serial number (from picture information)
+		ULWord					esOffsetLow;			// encoded stream frame location (?)
+		ULWord					esOffsetHigh;			// es frame location high 32 bits
+		ULWord					esSize;					// encoded stream frame size (?)
+		ULWord					ptsValueLow;			// presentation time stamp (picture information)
+		ULWord					ptsValueHigh;			// pts high bit (33 bit roll over)
+		ULWord					dtsValueLow;			// decoding time stamp (90 kHz)
+		ULWord					dtsValueHigh;			// dts high bit (33 bit roll over)
+		ULWord					itcValueLow;			// internal time clock (90 kHz)
+		ULWord					itcValueHigh;			// itc high bit (33 bit roll over)
+		ULWord					itcExtension;			// internal time extension (27 MHz)
+		ULWord					temporalId;				// temporal ID
+		ULWord					esIdrType;				// 0 = not IDR, 1 = IDR, 3 = IDR command
+		ULWord					pictureType;			// 0 = I-frame, 1 = P-frame, 2 = B-frame
+		ULWord					nalOffset;				// offset to the nal top of the idr/i picture
+		ULWord					cpbValue;				// codec picture buffer occupancy value
+		ULWord					esHSize;				// horizontal resolution
+		ULWord					esVSize;				// vertical resolution
+		ULWord					esUnitsInTick;			// frame duration (2x eh param value for half rate)
+		ULWord					esBitRate;				// bit rate (Kbps)
+		ULWord					esEndFlag;				// 0 = not end of sequence, 1 = end of sequence
+		ULWord					esLastFrame;			// 0xffffffff = last frame
+		ULWord					reserved0;
+		ULWord					reserved1;
+		ULWord					reserved2;
+		ULWord					reserved3;
+		ULWord					reserved4;
+		ULWord					reserved5;
+		ULWord					reserved6;
+		ULWord					reserved7;
+		ULWord					numAdditionalData;		// number of additional data entries
+	} HevcEncodedData;
+
+	// hevc encode stream information (encoded streams)
+	typedef struct HevcEncodedInfo
+	{
+		HevcEncodedData			encodedData;			// encoded stream data
+		UByte					additionalData[HEVC_ADDITIONAL_DATA_SIZE];
+	} HevcEncodedInfo;
+
+	// hevc stream transfer information
+	typedef struct HevcDeviceTransfer
+	{
+		HevcStream				streamType;				// transfer stream type
+		ULWord					streamId;				// transfer stream id
+
+		UByte*					pVideoBuffer;			// video buffer
+		ULWord					videoBufferSize;		// total video buffer size
+		ULWord					videoDataSize;			// video data size in buffer
+
+		ULWord					segVideoPitch;			// video segment pitch
+		ULWord					segCodecPitch;			// codec segment pitch
+		ULWord					segSize;				// segment size
+		ULWord					segCount;				// number of segments
+
+		UByte*					pInfoBuffer;			// information buffer (picture or encoded)
+		ULWord					infoBufferSize;			// total information buffer size
+		ULWord					infoDataSize;			// information size in buffer
+
+		LWord64					encodeTime;				// frame encode time (100ns host system clock)
+		ULWord					flags;					// transfer flags (see above for last frame flag)
+	} HevcDeviceTransfer;
+
+	// hevc gpio port status
+	typedef struct hevc_gpio_state
+	{
+		HevcGpioFunction		function;				// gpio last set port function
+		HevcGpioDirection		direction;				// gpio last set port direction
+		HevcGpioValue			setValue;				// gpio last set value
+		HevcGpioValue			getValue;				// gpio last get value
+	} HevcGpioState;	
+
+	// hevc stream statistics (nsec, bytes)
+	typedef struct hevc_stream_statistics
+	{
+		LWord64				transferCount;				// number of transfers queued
+		LWord64				minTransferTime;			// minimum time between transfers
+		LWord64				avrTransferTime;			// average time between transfers
+		LWord64				maxTransferTime;			// maximum time between transfers
+		LWord64				minTransferSize;			// minimum transfer size
+		LWord64				maxTransferSize;			// maximum transfer size
+		LWord64				avrTransferSize;			// average transfer size
+		LWord64				minCopyDuration;			// time for io thread to copy frames 
+		LWord64				maxCopyDuration;			//	 to/from bounce buffer
+		LWord64				avrCopyDuration;
+		LWord64				minEnqueueDuration;			// time from io thread enqueue
+		LWord64				maxEnqueueDuration;			//	 to send to codec
+		LWord64				avrEnqueueDuration;
+		LWord64				minSendDuration;			// time from send to codec
+		LWord64				maxSendDuration;			//	 to codec acknowledge
+		LWord64				avrSendDuration;
+		LWord64				minDmaDuration;				// time from codec acknowledge
+		LWord64				maxDmaDuration;				//	 to codec dma completion
+		LWord64				avrDmaDuration;
+		LWord64				minDequeueDuration;			// time from io thread enqueue
+		LWord64				maxDequeueDuration;			//	 to io thread dequeue
+		LWord64				avrDequeueDuration;
+	} HevcStreamStatistics;
+
+	// hevc status information
+	typedef struct HevcDeviceStatus
+	{
+		HevcMainState			mainState;				// codec main state
+		HevcEncodeMode			encodeMode;				// codec encode mode
+		HevcFirmwareType		firmwareType;			// codec firmware type
+
+		HevcVifState			vifState[HEVC_STREAM_MAX];	// video interface state
+		HevcVinState			vinState[HEVC_STREAM_MAX];	// video input state
+		HevcEhState				ehState[HEVC_STREAM_MAX];	// encoder state
+		HevcGpioState			gpioState[HEVC_GPIO_MAX];	// gpio state
+
+		LWord64					commandCount;			// number of commands processed
+		LWord64					rawTransferCount;		// number of raw transfers processed
+		LWord64					encTransferCount;		// number of encoded transfers processed
+
+		ULWord					commandQueueLevel;		// number of commands in command queue
+		ULWord					rawTransferQueueLevel;	// number of transfers in raw transfer queue
+		ULWord					encTransferQueueLevel;	// number of transfers in encoded transfer queue
+	} HevcDeviceStatus;
+
+	// hevc debug information
+	typedef struct HevcDeviceDebug
+	{
+		HevcDeviceStatus		deviceStatus;			// device status structure
+
+		HevcStreamStatistics	rawStats[HEVC_STREAM_MAX];		// raw stream statistics
+		HevcStreamStatistics	encStats[HEVC_STREAM_MAX];		// encoded stream statistics
+		ULWord					queueLevel[HEVC_STREAM_MAX];	// stream queue level
+		ULWord					clearRawStatsBits;		// stream bits to clear raw stream statistics
+		ULWord					clearEncStatsBits;		// stream bits to clear encodec stream statistics
+
+		ULWord					cmdContCount;			// codec command continuity count
+		ULWord					cmdAckContCount;		// codec command acknowledge count
+		ULWord					cmdMsgContCount;		// codec command message count
+		ULWord					rawContCount;			// raw dma continuity count 
+		ULWord					rawAckContCount;		// raw dma acknowledge count
+		ULWord					rawMsgContCount;		// raw dma message count
+		ULWord					encContCount;			// encoded dma continuity count
+		ULWord					encAckContCount;		// encoded dma acnowledge count
+		ULWord					encMsgContCount;		// encoded dma message count
+	} HevcDeviceDebug;
+
+	// hevc driver ioctl message types
+	typedef enum HevcMessageId
+	{
+		Hevc_MessageId_Unknown,
+		Hevc_MessageId_Info,							// get device information
+		Hevc_MessageId_Register,						// write/read codec register
+		Hevc_MessageId_Command,							// send a codec command
+		Hevc_MessageId_Transfer,						// transfer codec stream data
+		Hevc_MessageId_Status,							// get codec status
+		Hevc_MessageId_Debug,							// get debug information
+		Hevc_MessageId_Size
+	} HevcMessageId;
+
+	// hevc common driver ioctl message header
+	typedef struct hevcMessageHeader
+	{
+		HevcMessageId			type;
+		ULWord					size;
+		ULWord					status;
+		ULWord					reverved0;
+		ULWord					reverved1;
+		ULWord					reverved2;
+	} HevcMessageHeader;
+
+	// hevc stream transfer data
+	typedef struct HevcTransferData
+	{
+		HevcStream				streamType;
+		ULWord					streamId;
+		ULWord64				videoBuffer;
+		ULWord					videoBufferSize;
+		ULWord					videoDataSize;
+		ULWord					segVideoPitch;
+		ULWord					segCodecPitch;
+		ULWord					segSize;
+		ULWord					segCount;
+		ULWord64				infoBuffer;
+		ULWord					infoBufferSize;
+		ULWord					infoDataSize;
+		LWord64					encodeTime;
+		ULWord					flags;
+	} HevcTransferData;
+
+	// hevc driver device information message
+	typedef struct HevcMessageInfo
+	{
+		HevcMessageHeader		header;
+		HevcDeviceInfo			data;
+	} HevcMessageInfo;
+
+	// hevc driver register message
+	typedef struct HevcMessageRegister
+	{
+		HevcMessageHeader		header;
+		HevcDeviceRegister		data;
+	} HevcMessageRegister;
+
+	// hevc driver command message
+	typedef struct HevcMessageCommand
+	{
+		HevcMessageHeader		header;
+		HevcDeviceCommand		data;
+	} HevcMessageCommand;
+
+	// hevc driver transfer message
+	typedef struct HevcMessageTransfer
+	{
+		HevcMessageHeader		header;
+		HevcTransferData		data;
+	} HevcMessageTransfer;
+
+	// hevc driver status message
+	typedef struct HevcMessageStatus
+	{
+		HevcMessageHeader		header;
+		HevcDeviceStatus		data;
+	} HevcMessageStatus;
+
+	// hevc driver debug message
+	typedef struct HevcMessageDebug
+	{
+		HevcMessageHeader		header;
+		HevcDeviceDebug			data;
+	} HevcMessageDebug;
+#endif//!defined(NTV2_DEPRECATE_17_6)
+
+typedef struct HDRRegValues
 {
-	ULWord					major;
-	ULWord					minor;
-	ULWord					point;
-	ULWord					build;
-} HevcVersion;
-
-// pci id information
-typedef struct HevcPciId
-{
-	ULWord					vendor;
-	ULWord					device;
-	ULWord					subVendor;
-	ULWord					subDevice;
-} HevcPciId;
-
-// hevc device mode
-typedef enum HevcDeviceMode
-{
-	Hevc_DeviceMode_Unknown,
-	Hevc_DeviceMode_Codec,							// codec mode
-	Hevc_DeviceMode_Maintenance,					// maintenance mode
-	Hevc_DeviceMode_Size
-} HevcDeviceMode;
-
-// hevc device information message
-typedef struct HevcDeviceInfo
-{
-	HevcVersion				driverVersion;			// driver version
-	HevcVersion				mcpuVersion;			// firmware versions
-	char					systemFirmware[HEVC_VERSION_STRING_SIZE];
-	char					standardFirmwareSingle[HEVC_VERSION_STRING_SIZE];
-	char					standardFirmwareMultiple[HEVC_VERSION_STRING_SIZE];
-	char					userFirmwareSingle[HEVC_VERSION_STRING_SIZE];
-	char					userFirmwareMultiple[HEVC_VERSION_STRING_SIZE];
-	HevcPciId				pciId;					// pci ids
-	HevcDeviceMode			deviceMode;				// hardware device mode
-	bool					mcpuVersionCheck;		// mcpu version supported 
-	bool					systemVersionCheck;		// system version supported
-	bool					standardSingleCheck;	// standard firmware single version supported
-	bool					standardMultipleCheck;	// standard fimwrare multiple version supported
-	bool					pciIdCheck;				// pci id supported
-} HevcDeviceInfo;
-
-// hevc register
-typedef struct HevcDeviceRegister
-{
-	ULWord					address;				// register address
-	ULWord					writeValue;				// register write value
-	ULWord					readValue;				// register read value
-	ULWord					mask;					// register value mask
-	ULWord					shift;					// register value shift
-	bool					write;					// write flag
-	bool					read;					// read flag
-	bool					forceBar4;				// force bar4 access
-} HevcDeviceRegister;
-
-// hevc main state
-typedef enum HevcMainState
-{
-	Hevc_MainState_Unknown,
-	Hevc_MainState_Boot,							// codec has booted
-	Hevc_MainState_Init,							// initialize codec
-	Hevc_MainState_Encode,							// configure encoding (load firmware?)
-	Hevc_MainState_Error,							// codec must be reset
-	Hevc_MainState_Size
-} HevcMainState;
-
-// encoder mode
-typedef enum HevcEncodeMode
-{
-	Hevc_EncodeMode_Unknown,
-	Hevc_EncodeMode_Single,							// encode a sigle stream
-	Hevc_EncodeMode_Multiple,						// encode multiple streams
-	Hevc_EncodeMode_Size
-} HevcEncodeMode;
-
-// encoder firmware type
-typedef enum HevcFirmwareType
-{
-	Hevc_FirmwareType_Unknown,
-	Hevc_FirmwareType_Standard,						// encode firmware standard
-	Hevc_FirmwareType_User,							// encode firmware user
-	Hevc_FirmwareType_Size
-} HevcFirmwareType;
-
-// hevc video interface state
-typedef enum HevcVifState
-{
-	Hevc_VifState_Unknown,
-	Hevc_VifState_Stop,								// video interface stop
-	Hevc_VifState_Start,							// video interface start
-	Hevc_VifState_Size
-} HevcVifState;
-
-// hevc video input state
-typedef enum HevcVinState
-{
-	Hevc_VinState_Unknown,
-	Hevc_VinState_Stop,								// video input stop
-	Hevc_VinState_Start,							// video input start
-	Hevc_VinState_Size
-} HevcVinState;
-
-// hevc encoder state
-typedef enum HevcEhState
-{
-	Hevc_EhState_Unknown,
-	Hevc_EhState_Stop,								// encoder stop
-	Hevc_EhState_Start,								// encoder start
-	Hevc_EhState_ReadyToStop,						// encoder ready to stop
-	Hevc_EhState_Size
-} HevcEhState;
-
-// hevc gpio control
-typedef enum HevcGpioControl
-{
-	Hevc_GpioControl_Unknown,
-	Hevc_GpioControl_Function,						// configure gpio port function
-	Hevc_GpioControl_Direction,						// configure gpio port direction
-	Hevc_GpioControl_Set,							// set gpio port value
-	Hevc_GpioControl_Get,							// get pgio port value
-	Hevc_GpioControl_Size
-} HevcGpioControl;
-
-// hevc gpio function
-typedef enum HevcGpioFunction
-{
-	Hevc_GpioFunction_Unknown,
-	Hevc_GpioFunction_Gpio,							// gpio function is gpio
-	Hevc_GpioFunction_Peripheral,					// gpio function is peripheral
-	Hevc_GpioFunction_Size
-} HevcGpioFunction;
-
-// hevc gpio direction
-typedef enum HevcGpioDirection
-{
-	Hevc_GpioDirection_Unknown,
-	Hevc_GpioDirection_Input,						// gpio direction is input
-	Hevc_GpioDirection_Output,						// gpio direction is output
-	Hevc_GpioDirection_Size
-} HevcGpioDirection;
-
-// hevc gpio value
-typedef enum HevcGpioValue
-{
-	Hevc_GpioValue_Unknown,
-	Hevc_GpioValue_Low,								// gpio direction is input
-	Hevc_GpioValue_High,							// gpio direction is output
-	Hevc_GpioValue_Size
-} HevcGpioValue;
-
-typedef enum HevcChangeSequence
-{
-	Hevc_ChangeSequence_Unknown,
-	Hevc_ChangeSequence_Enabled,
-	Hevc_ChangeSequence_Disabled,
-	Hevc_ChangeSequence_Size
-} HevcChangeSequence;
-
-// hevc change param target
-#define Hevc_ParamTarget_None			0x00000000
-#define Hevc_ParamTarget_Vbr			0x00000001	// change variable bitrate
-#define Hevc_ParamTarget_Cbr			0x00000002	// change constant bitrate
-#define Hevc_ParamTarget_Resolution		0x00000004	// change size, crop, pan, etc.
-#define Hevc_ParamTarget_Frame_Rate		0x00000008	// change frame rate
-#define Hevc_ParamTarget_All			0x0000000f
-
-// hevc commands
-typedef enum HevcCommand
-{
-	Hevc_Command_Unknown,
-	Hevc_Command_MainState,							// set main state
-	Hevc_Command_VinState,							// set video input state
-	Hevc_Command_EhState,							// set encoder state
-	Hevc_Command_Gpio,								// control gpio
-	Hevc_Command_Reset,								// reset codec
-	Hevc_Command_ChangeParam,						// change dynamic params during encode
-	Hevc_Command_ChangePicture,						// change picture type
-	Hevc_Command_Size
-} HevcCommand;
-
-// hevc command information
-typedef struct HevcDeviceCommand
-{
-	HevcCommand				command;				// command type
-	// main state command info
-	HevcMainState			mainState;				// set main state
-	HevcEncodeMode			encodeMode;				// set encoder mode
-	HevcFirmwareType		firmwareType;			// set encode firmware type
-	// vin/eh state command info
-	HevcVinState			vinState;				// set video input state
-	HevcEhState				ehState;				// set encoder state
-	ULWord					streamBits;				// command applies to each stream bit
-	// gpio command info
-	HevcGpioControl			gpioControl;			// gpio control type
-	ULWord					gpioNumber;				// gpio port number (function, direction, set, get)
-	HevcGpioFunction		gpioFunction;			// gpio port function (function)
-	HevcGpioDirection		gpioDirection;			// gpio port direction (direction)
-	HevcGpioValue			gpioValue;				// gpio port value (set, get)
-	// change encode params
-	ULWord					paramTarget;			// parameters to change
-	ULWord					paramStreamId;			// stream id
-	HevcChangeSequence		changeSequence;			// start new sequence (vbr)
-	ULWord					maxBitRate;				// maximum bitrate (vbr)
-	ULWord					aveBitRate;				// average bitrate (vbr and cbr)
-	ULWord					minBitRate;				// minimum bitrate (vbr)
-	ULWord					seqEndPicNumber;		// last picture number of sequence (resolution and frame rate)
-	ULWord					hSizeEh;				// resolution parameters
-	ULWord					vSizeEh;
-	ULWord					cropLeft;
-	ULWord					cropRight;
-	ULWord					cropTop;
-	ULWord					cropBottom;
-	ULWord					panScanRectLeft;
-	ULWord					panScanRectRight;
-	ULWord					panScanRectTop;
-	ULWord					panScanRectBottom;
-	ULWord					videoSignalType;
-	ULWord					videoFormat;
-	ULWord					videoFullRangeFlag;
-	ULWord					colourDescriptionPresentFlag;
-	ULWord					colourPrimaries;
-	ULWord					transferCharacteristics;
-	ULWord					matrixCoeffs;
-	ULWord					aspectRatioIdc;
-	ULWord					sarWidth;
-	ULWord					sarHeight;
-	ULWord					frameRateCode;			// frame rate parameter
-	// change picture type
-	ULWord					picType;				// picture type
-	ULWord					picStreamId;			// stream id
-	ULWord					gopEndPicNumber;		// last picture number of gop
-	// general command flags
-	ULWord					flags;					// command flags
-} HevcDeviceCommand;
-
-// hevc stream types
-typedef enum HevcStream
-{
-	Hevc_Stream_Unknown,
-	Hevc_Stream_VideoRaw,							// raw data stream
-	Hevc_Stream_VideoEnc,							// encoded data stream
-	Hevc_Stream_Size
-} HevcStream;
-
-// hevc picture data (raw streams)
-typedef struct HevcPictureData
-{
-	ULWord					serialNumber;			// serial number (application data)
-	ULWord					ptsValueLow;			// presentation time stamp (90kHz)
-	ULWord					ptsValueHigh;			// pts high bit only (33 bit roll over)
-	ULWord					pictureNumber;			// start with 1 and increment for each picture
-	ULWord					numAdditionalData;		// number of additional data entries
-} HevcPictureData;
-
-// hevc picture information (raw streams)
-typedef struct HevcPictureInfo
-{
-	HevcPictureData			pictureData;			// raw stream picture data
-//
-//	additional data format
-//	u32 additional_data_type
-//	u32 additional_data_size (256 bytes max)
-//	u8... additional_data_payload
-//	... more additional data
-//
-//	additional data types
-//	1 = sei data
-//	2 = passthrough data (to encoded additional data of encoded frame)
-//	4 = cancel sei on every gop (set additional size to 0)
-//
-//	sei data format
-//	u8 user_sei_location
-//	u8 user_sei_type
-//	u8 user_sei_length
-//	u8... user_sei_payload
-//
-//	user sei location
-//	2 = every gop head picture
-//	3 = this picture only
-//
-//	passthrough data format
-//	u8... passthrough_data_payload
-//
-	UByte					additionalData[HEVC_ADDITIONAL_DATA_SIZE];
-} HevcPictureInfo;
-
-// hevc encoded stream data (encoded streams)
-typedef struct HevcEncodedData
-{
-	ULWord					serialNumber;			// serial number (from picture information)
-	ULWord					esOffsetLow;			// encoded stream frame location (?)
-	ULWord					esOffsetHigh;			// es frame location high 32 bits
-	ULWord					esSize;					// encoded stream frame size (?)
-	ULWord					ptsValueLow;			// presentation time stamp (picture information)
-	ULWord					ptsValueHigh;			// pts high bit (33 bit roll over)
-	ULWord					dtsValueLow;			// decoding time stamp (90 kHz)
-	ULWord					dtsValueHigh;			// dts high bit (33 bit roll over)
-	ULWord					itcValueLow;			// internal time clock (90 kHz)
-	ULWord					itcValueHigh;			// itc high bit (33 bit roll over)
-	ULWord					itcExtension;			// internal time extension (27 MHz)
-	ULWord					temporalId;				// temporal ID
-	ULWord					esIdrType;				// 0 = not IDR, 1 = IDR, 3 = IDR command
-	ULWord					pictureType;			// 0 = I-frame, 1 = P-frame, 2 = B-frame
-	ULWord					nalOffset;				// offset to the nal top of the idr/i picture
-	ULWord					cpbValue;				// codec picture buffer occupancy value
-	ULWord					esHSize;				// horizontal resolution
-	ULWord					esVSize;				// vertical resolution
-	ULWord					esUnitsInTick;			// frame duration (2x eh param value for half rate)
-	ULWord					esBitRate;				// bit rate (Kbps)
-	ULWord					esEndFlag;				// 0 = not end of sequence, 1 = end of sequence
-	ULWord					esLastFrame;			// 0xffffffff = last frame
-	ULWord					reserved0;
-	ULWord					reserved1;
-	ULWord					reserved2;
-	ULWord					reserved3;
-	ULWord					reserved4;
-	ULWord					reserved5;
-	ULWord					reserved6;
-	ULWord					reserved7;
-	ULWord					numAdditionalData;		// number of additional data entries
-} HevcEncodedData;
-
-// hevc encode stream information (encoded streams)
-typedef struct HevcEncodedInfo
-{
-	HevcEncodedData			encodedData;			// encoded stream data
-	UByte					additionalData[HEVC_ADDITIONAL_DATA_SIZE];
-} HevcEncodedInfo;
-
-// hevc stream transfer information
-typedef struct HevcDeviceTransfer
-{
-	HevcStream				streamType;				// transfer stream type
-	ULWord					streamId;				// transfer stream id
-
-	UByte*					pVideoBuffer;			// video buffer
-	ULWord					videoBufferSize;		// total video buffer size
-	ULWord					videoDataSize;			// video data size in buffer
-
-	ULWord					segVideoPitch;			// video segment pitch
-	ULWord					segCodecPitch;			// codec segment pitch
-	ULWord					segSize;				// segment size
-	ULWord					segCount;				// number of segments
-
-	UByte*					pInfoBuffer;			// information buffer (picture or encoded)
-	ULWord					infoBufferSize;			// total information buffer size
-	ULWord					infoDataSize;			// information size in buffer
-
-	LWord64					encodeTime;				// frame encode time (100ns host system clock)
-	ULWord					flags;					// transfer flags (see above for last frame flag)
-} HevcDeviceTransfer;
-
-// hevc gpio port status
-typedef struct hevc_gpio_state
-{
-	HevcGpioFunction		function;				// gpio last set port function
-	HevcGpioDirection		direction;				// gpio last set port direction
-	HevcGpioValue			setValue;				// gpio last set value
-	HevcGpioValue			getValue;				// gpio last get value
-} HevcGpioState;	
-
-// hevc stream statistics (nsec, bytes)
-typedef struct hevc_stream_statistics
-{
-	LWord64				transferCount;				// number of transfers queued
-	LWord64				minTransferTime;			// minimum time between transfers
-	LWord64				avrTransferTime;			// average time between transfers
-	LWord64				maxTransferTime;			// maximum time between transfers
-	LWord64				minTransferSize;			// minimum transfer size
-	LWord64				maxTransferSize;			// maximum transfer size
-	LWord64				avrTransferSize;			// average transfer size
-	LWord64				minCopyDuration;			// time for io thread to copy frames 
-	LWord64				maxCopyDuration;			//	 to/from bounce buffer
-	LWord64				avrCopyDuration;
-	LWord64				minEnqueueDuration;			// time from io thread enqueue
-	LWord64				maxEnqueueDuration;			//	 to send to codec
-	LWord64				avrEnqueueDuration;
-	LWord64				minSendDuration;			// time from send to codec
-	LWord64				maxSendDuration;			//	 to codec acknowledge
-	LWord64				avrSendDuration;
-	LWord64				minDmaDuration;				// time from codec acknowledge
-	LWord64				maxDmaDuration;				//	 to codec dma completion
-	LWord64				avrDmaDuration;
-	LWord64				minDequeueDuration;			// time from io thread enqueue
-	LWord64				maxDequeueDuration;			//	 to io thread dequeue
-	LWord64				avrDequeueDuration;
-} HevcStreamStatistics;
-
-// hevc status information
-typedef struct HevcDeviceStatus
-{
-	HevcMainState			mainState;				// codec main state
-	HevcEncodeMode			encodeMode;				// codec encode mode
-	HevcFirmwareType		firmwareType;			// codec firmware type
-
-	HevcVifState			vifState[HEVC_STREAM_MAX];	// video interface state
-	HevcVinState			vinState[HEVC_STREAM_MAX];	// video input state
-	HevcEhState				ehState[HEVC_STREAM_MAX];	// encoder state
-	HevcGpioState			gpioState[HEVC_GPIO_MAX];	// gpio state
-
-	LWord64					commandCount;			// number of commands processed
-	LWord64					rawTransferCount;		// number of raw transfers processed
-	LWord64					encTransferCount;		// number of encoded transfers processed
-
-	ULWord					commandQueueLevel;		// number of commands in command queue
-	ULWord					rawTransferQueueLevel;	// number of transfers in raw transfer queue
-	ULWord					encTransferQueueLevel;	// number of transfers in encoded transfer queue
-} HevcDeviceStatus;
-
-// hevc debug information
-typedef struct HevcDeviceDebug
-{
-	HevcDeviceStatus		deviceStatus;			// device status structure
-
-	HevcStreamStatistics	rawStats[HEVC_STREAM_MAX];		// raw stream statistics
-	HevcStreamStatistics	encStats[HEVC_STREAM_MAX];		// encoded stream statistics
-	ULWord					queueLevel[HEVC_STREAM_MAX];	// stream queue level
-	ULWord					clearRawStatsBits;		// stream bits to clear raw stream statistics
-	ULWord					clearEncStatsBits;		// stream bits to clear encodec stream statistics
-
-	ULWord					cmdContCount;			// codec command continuity count
-	ULWord					cmdAckContCount;		// codec command acknowledge count
-	ULWord					cmdMsgContCount;		// codec command message count
-	ULWord					rawContCount;			// raw dma continuity count 
-	ULWord					rawAckContCount;		// raw dma acknowledge count
-	ULWord					rawMsgContCount;		// raw dma message count
-	ULWord					encContCount;			// encoded dma continuity count
-	ULWord					encAckContCount;		// encoded dma acnowledge count
-	ULWord					encMsgContCount;		// encoded dma message count
-} HevcDeviceDebug;
-
-// hevc driver ioctl message types
-typedef enum HevcMessageId
-{
-	Hevc_MessageId_Unknown,
-	Hevc_MessageId_Info,							// get device information
-	Hevc_MessageId_Register,						// write/read codec register
-	Hevc_MessageId_Command,							// send a codec command
-	Hevc_MessageId_Transfer,						// transfer codec stream data
-	Hevc_MessageId_Status,							// get codec status
-	Hevc_MessageId_Debug,							// get debug information
-	Hevc_MessageId_Size
-} HevcMessageId;
-
-// hevc common driver ioctl message header
-typedef struct hevcMessageHeader
-{
-	HevcMessageId			type;
-	ULWord					size;
-	ULWord					status;
-	ULWord					reverved0;
-	ULWord					reverved1;
-	ULWord					reverved2;
-} HevcMessageHeader;
-
-// hevc stream transfer data
-typedef struct HevcTransferData
-{
-	HevcStream				streamType;
-	ULWord					streamId;
-	ULWord64				videoBuffer;
-	ULWord					videoBufferSize;
-	ULWord					videoDataSize;
-	ULWord					segVideoPitch;
-	ULWord					segCodecPitch;
-	ULWord					segSize;
-	ULWord					segCount;
-	ULWord64				infoBuffer;
-	ULWord					infoBufferSize;
-	ULWord					infoDataSize;
-	LWord64					encodeTime;
-	ULWord					flags;
-} HevcTransferData;
-
-// hevc driver device information message
-typedef struct HevcMessageInfo
-{
-	HevcMessageHeader		header;
-	HevcDeviceInfo			data;
-} HevcMessageInfo;
-
-// hevc driver register message
-typedef struct HevcMessageRegister
-{
-	HevcMessageHeader		header;
-	HevcDeviceRegister		data;
-} HevcMessageRegister;
-
-// hevc driver command message
-typedef struct HevcMessageCommand
-{
-	HevcMessageHeader		header;
-	HevcDeviceCommand		data;
-} HevcMessageCommand;
-
-// hevc driver transfer message
-typedef struct HevcMessageTransfer
-{
-	HevcMessageHeader		header;
-	HevcTransferData		data;
-} HevcMessageTransfer;
-
-// hevc driver status message
-typedef struct HevcMessageStatus
-{
-	HevcMessageHeader		header;
-	HevcDeviceStatus		data;
-} HevcMessageStatus;
-
-// hevc driver debug message
-typedef struct HevcMessageDebug
-{
-	HevcMessageHeader		header;
-	HevcDeviceDebug			data;
-} HevcMessageDebug;
-
-typedef struct HDRRegValues{
 	uint16_t	greenPrimaryX;
 	uint16_t	greenPrimaryY;
 	uint16_t	bluePrimaryX;
@@ -9955,9 +10210,31 @@ typedef struct HDRRegValues{
 	uint16_t	maxFrameAverageLightLevel;
 	uint8_t		electroOpticalTransferFunction;
 	uint8_t		staticMetadataDescriptorID;
-}HDRRegValues;
 
-typedef struct HDRFloatValues{
+	#if !defined(NTV2_BUILDING_DRIVER)
+	inline HDRRegValues &	zero(void)	 {	greenPrimaryX	= greenPrimaryY = bluePrimaryX = bluePrimaryY = redPrimaryX = redPrimaryY = whitePointX = whitePointY
+															= maxMasteringLuminance = minMasteringLuminance = maxContentLightLevel = maxFrameAverageLightLevel = 0;
+											electroOpticalTransferFunction = staticMetadataDescriptorID = 0;	return *this;}
+	inline bool				validPrimariesAndWhitePoint (void) const	{	const uint16_t kMax(0xC350);
+																			return	greenPrimaryX <= kMax || greenPrimaryY <= kMax ||
+																					bluePrimaryX <= kMax  || bluePrimaryY <= kMax  ||
+																					redPrimaryX <= kMax   || redPrimaryY <= kMax   ||
+																					whitePointX <= kMax   || whitePointY <= kMax;  }
+	inline HDRRegValues &	setBT2020 (void)	{	greenPrimaryX = 0x2134;	greenPrimaryY = 0x9BAA;		bluePrimaryX = 0x1996;	bluePrimaryY = 0x08FC;
+													redPrimaryX = 0x8A48;	redPrimaryY = 0x3908;		whitePointX = 0x3D13;	whitePointY = 0x4042;
+													maxMasteringLuminance = 0x2710;	minMasteringLuminance = 0x0032;
+													maxContentLightLevel = 0;		maxFrameAverageLightLevel = 0;
+													electroOpticalTransferFunction = 0x02;	staticMetadataDescriptorID = 0x00;	return *this; }
+	inline HDRRegValues &	setDCIP3 (void)		{	greenPrimaryX = 0x33C2;	greenPrimaryY = 0x86C4;		bluePrimaryX = 0x1D4C;	bluePrimaryY = 0x0BB8;
+													redPrimaryX = 0x84D0;	redPrimaryY = 0x3E80;		whitePointX = 0x3D13;	whitePointY = 0x4042;
+													maxMasteringLuminance = 0x02E8;	minMasteringLuminance = 0x0032;
+													maxContentLightLevel = 0;		maxFrameAverageLightLevel = 0;
+													electroOpticalTransferFunction = 0x02;	staticMetadataDescriptorID = 0x00;	return *this; }
+	#endif	//	!defined(NTV2_BUILDING_DRIVER)
+} HDRRegValues;
+
+typedef struct HDRFloatValues
+{
 	float		greenPrimaryX;
 	float		greenPrimaryY;
 	float		bluePrimaryX;
@@ -9972,7 +10249,60 @@ typedef struct HDRFloatValues{
 	uint16_t	maxFrameAverageLightLevel;
 	uint8_t		electroOpticalTransferFunction;
 	uint8_t		staticMetadataDescriptorID;
-}HDRFloatValues;
+
+	#if !defined(NTV2_BUILDING_DRIVER)
+	inline HDRFloatValues & zero(void)	{	greenPrimaryX = greenPrimaryY = bluePrimaryX = bluePrimaryY = redPrimaryX = redPrimaryY = whitePointX = whitePointY = minMasteringLuminance = 0.0;
+											maxMasteringLuminance = maxContentLightLevel = maxFrameAverageLightLevel = 0;
+											electroOpticalTransferFunction = staticMetadataDescriptorID = 0;	return *this;}
+
+	inline bool	validPrimariesAndWhitePoint (void) const	{	return	greenPrimaryX >= 0.0f || greenPrimaryX <= float(1.0f) ||
+																		greenPrimaryY >= 0.0f || greenPrimaryY <= float(1.0f) ||
+																		bluePrimaryX  >= 0.0f || bluePrimaryX  <= float(1.0f) ||
+																		bluePrimaryY  >= 0.0f || bluePrimaryY  <= float(1.0f) ||
+																		redPrimaryX   >= 0.0f || redPrimaryX   <= float(1.0f) ||
+																		redPrimaryY   >= 0.0f || redPrimaryY   <= float(1.0f) ||
+																		whitePointX   >= 0.0f || whitePointX   <= float(1.0f) ||
+																		whitePointY   >= 0.0f || whitePointY   <= float(1.0f) ||
+																		minMasteringLuminance >= 0 || minMasteringLuminance <= float(6.5535f);	}
+
+	inline bool setFromRegValues (const HDRRegValues & inRegValues)		{	if (!inRegValues.validPrimariesAndWhitePoint())
+																				return false;
+																			const float kMult(0.00002f), kMultLum(0.0001f);
+																			greenPrimaryX					= float(inRegValues.greenPrimaryX * kMult);
+																			greenPrimaryY					= float(inRegValues.greenPrimaryY * kMult);
+																			bluePrimaryX					= float(inRegValues.bluePrimaryX * kMult);
+																			bluePrimaryY					= float(inRegValues.bluePrimaryY * kMult);
+																			redPrimaryX						= float(inRegValues.redPrimaryX * kMult);
+																			redPrimaryY						= float(inRegValues.redPrimaryY * kMult);
+																			whitePointX						= float(inRegValues.whitePointX * kMult);
+																			whitePointY						= float(inRegValues.whitePointY * kMult);
+																			minMasteringLuminance			= float(inRegValues.minMasteringLuminance * kMultLum);
+																			maxMasteringLuminance			= inRegValues.maxMasteringLuminance;
+																			maxContentLightLevel			= inRegValues.maxContentLightLevel;
+																			maxFrameAverageLightLevel		= inRegValues.maxFrameAverageLightLevel;
+																			electroOpticalTransferFunction	= inRegValues.electroOpticalTransferFunction;
+																			staticMetadataDescriptorID		= inRegValues.staticMetadataDescriptorID;
+																			return true;	}
+
+	inline bool toRegValues (HDRRegValues & outVals) const				{	if (!validPrimariesAndWhitePoint())
+																				return false;
+																			outVals.greenPrimaryX					= uint16_t(greenPrimaryX / float(0.00002f));
+																			outVals.greenPrimaryY					= uint16_t(greenPrimaryY / float(0.00002f));
+																			outVals.bluePrimaryX					= uint16_t(bluePrimaryX / float(0.00002f));
+																			outVals.bluePrimaryY					= uint16_t(bluePrimaryY / float(0.00002f));
+																			outVals.redPrimaryX						= uint16_t(redPrimaryX / float(0.00002f));
+																			outVals.redPrimaryY						= uint16_t(redPrimaryY / float(0.00002f));
+																			outVals.whitePointX						= uint16_t(whitePointX / float(0.00002f));
+																			outVals.whitePointY						= uint16_t(whitePointY / float(0.00002f));
+																			outVals.minMasteringLuminance			= uint16_t(minMasteringLuminance / float(0.0001f));
+																			outVals.maxMasteringLuminance			= maxMasteringLuminance;
+																			outVals.maxContentLightLevel			= maxContentLightLevel;
+																			outVals.maxFrameAverageLightLevel		= maxFrameAverageLightLevel;
+																			outVals.electroOpticalTransferFunction	= electroOpticalTransferFunction;
+																			outVals.staticMetadataDescriptorID		= staticMetadataDescriptorID;
+																			return true;	}
+	#endif	//	!defined(NTV2_BUILDING_DRIVER)
+} HDRFloatValues;
 
 typedef struct HDRDriverValues{
 	uint16_t	greenPrimaryX;

@@ -12,9 +12,11 @@
 #include "ajabase/system/debug.h"
 #include "ajabase/common/common.h"
 #include "ajabase/system/systemtime.h"
-#include "ajabase/system/thread.h"
+#include "ajabase/system/atomic.h"
 #include <iomanip>
 #if !defined(NTV2_PREVENT_PLUGIN_LOAD)
+	#include "ajabase/common/ajarefptr.h"
+	#include "ajabase/system/thread.h"
 	#include <fstream>
 	#include "mbedtls/x509.h"
 	#include "mbedtls/error.h"
@@ -387,9 +389,7 @@ void NTV2DeviceSpecParser::Parse (void)
 		if (isScheme)
 		{	//	Continue parsing URLspec...
 			mPos = posScheme;
-			if (!IsSupportedScheme(tokScheme))
-				{err << "Unsupported scheme '" << tokScheme << "'";  AddError(err.str());  mPos -= 3;  break;}
-			//	"ntv2://swdevice/?"
+			//	"xxxx://swdevice/?"
 			//		"nosharedmemory"
 			//		"&supportlog=file%3A%2F%2F%2FUsers%2Fdemo%2FDesktop%2FAJAWatcherSupport.log"
 			//		"&sdram=file%3A%2F%2F%2FUsers%2Fdemo%2FDesktop%2FSDRAMsnapshot.dat");
@@ -560,7 +560,7 @@ bool NTV2DeviceSpecParser::ParseAlphaNumeric (size_t & pos, string & outToken, c
 			break;
 		++pos;  tokAlphaNum += ch;
 	}
-	if (tokAlphaNum.length() > 1)	//	At least 2 chars
+	if (tokAlphaNum.length() > 0)
 		outToken = tokAlphaNum;
 	return !outToken.empty();
 }
@@ -648,7 +648,7 @@ bool NTV2DeviceSpecParser::ParseModelName (size_t & pos, string & outToken)
 {
 	outToken.clear();
 	string tokName;
-	if (!ParseAlphaNumeric(pos, tokName))
+	if (!ParseAlphaNumeric(pos, tokName, " "))
 		return false;
 	aja::lower(tokName);	//	Fold to lower case
 
@@ -747,7 +747,7 @@ bool NTV2DeviceSpecParser::ParseResourcePath (size_t & pos, string & outRsrc)
 	{
 		++rsrcPos;
 		rsrc += '/';
-		if (!ParseAlphaNumeric(rsrcPos, name))
+		if (!ParseAlphaNumeric(rsrcPos, name, " "))
 			break;
 		rsrc += name;
 		ch = CharAt(rsrcPos);
@@ -805,11 +805,6 @@ bool NTV2DeviceSpecParser::ParseQuery (size_t & pos, NTV2Dictionary & outParams)
 	if (!outParams.empty())
 		pos = queryPos;
 	return !outParams.empty();
-}
-
-bool NTV2DeviceSpecParser::IsSupportedScheme (const string & inScheme)
-{
-	return inScheme.find("ntv2") == 0;	//	Starts with "ntv2"
 }
 
 bool NTV2DeviceSpecParser::IsUpperLetter (const char inChar)
@@ -990,7 +985,7 @@ bool NTV2Plugin::LoadPlugin (const string & path, const string & folderPath, NTV
 			loadErr << "AddDllDirectory '" << path << "' failed: " << WinErrStr(::GetLastError());
 			return false;
 		}	//	AddDllDirectory failed
-		HMODULE h = ::LoadLibraryExA(LPCSTR(path.c_str()), AJA_NULL, LOAD_LIBRARY_SEARCH_USER_DIRS);
+		HMODULE h = ::LoadLibraryExA(LPCSTR(path.c_str()), AJA_NULL, LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
 		if (!h)
 			loadErr << "Unable to open '" << path << "': " << WinErrStr(::GetLastError());
 	#else	//	MacOS or Linux
@@ -1572,9 +1567,6 @@ bool NTV2PluginLoader::getBaseNameFromScheme (string & outName) const
 	if (!mDict.hasKey(kConnectParamScheme))
 		{P_FAIL("Missing scheme -- params: " << mDict);  return false;}	//	No scheme
 	string scheme(mDict.valueForKey(kConnectParamScheme));
-	if (scheme.find("ntv2") != 0)	//	Scheme must start with "ntv2"
-		{P_FAIL("Scheme '" << scheme << "' doesn't start with 'ntv2'");  return false;}	//	Bad scheme
-	scheme.erase(0,4);	//	Remove 1st 4 characters;  remainder yields base name
 	outName = scheme;
 	mDict.insert(kNTV2PluginInfoKey_PluginBaseName, outName);
 	return !outName.empty();	//	Success if not empty

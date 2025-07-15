@@ -268,8 +268,8 @@ template <typename T> class AJAMovingAvg
 /**
  *	Streams the AJAMovingAvg into the given output stream.
  *
- *	@param		oss				The target output stream.
- *	@param[in]	inDetailed		Specifies the AJAMovingAvg of interest.
+ *	@param		oss			The target output stream.
+ *	@param[in]	inAvg		Specifies the AJAMovingAvg of interest.
  */
 template <typename T> inline std::ostream & operator << (std::ostream & oss,  const AJAMovingAvg<T> & inAvg)
 {

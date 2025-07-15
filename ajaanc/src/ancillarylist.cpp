@@ -17,6 +17,9 @@
 #if defined(AJAANCLISTIMPL_VECTOR)
 	#include <algorithm>
 #endif
+#if defined(AJA_USE_CPLUSPLUS11)
+	#include <utility>		//	For std::move
+#endif
 
 using namespace std;
 
@@ -163,6 +166,21 @@ AJAAncillaryList::AJAAncillaryList ()
 	SetAnalogAncillaryDataTypeForLine (285, AJAAncDataType_Cea608_Line21);
 }
 
+#if defined(AJA_USE_CPLUSPLUS11)
+AJAAncillaryList::AJAAncillaryList (AJAAncillaryList && inRHS) noexcept
+	:	m_ancList		(std::move(inRHS.m_ancList)),
+		m_rcvMultiRTP	(inRHS.m_rcvMultiRTP),		//	By default, handle receiving multiple RTP packets
+		m_xmitMultiRTP	(inRHS.m_xmitMultiRTP),	//	By default, transmit single RTP packet
+		m_ignoreCS		(inRHS.m_ignoreCS)
+{
+	//	Reset RHS...
+	inRHS.m_rcvMultiRTP = true;
+	inRHS.m_xmitMultiRTP = false;
+	inRHS.m_ignoreCS = false;
+	//	inRHS.m_ancList - already moved/reset
+}
+#endif	//	defined(AJA_USE_CPLUSPLUS11)
+
 
 AJAAncillaryList::~AJAAncillaryList ()
 {
@@ -185,18 +203,42 @@ AJAAncillaryList & AJAAncillaryList::operator = (const AJAAncillaryList & inRHS)
 	return *this;
 }
 
+#if defined(AJA_USE_CPLUSPLUS11)
+AJAAncillaryList & AJAAncillaryList::operator = (AJAAncillaryList && inRHS)
+{
+	if (this != &inRHS)
+	{
+		m_xmitMultiRTP = inRHS.m_xmitMultiRTP;
+		inRHS.m_xmitMultiRTP = false;
+
+		m_rcvMultiRTP = inRHS.m_rcvMultiRTP;			
+		inRHS.m_rcvMultiRTP	= true;
+		
+		m_ignoreCS = inRHS.m_ignoreCS;
+		inRHS.m_ignoreCS = false;
+		
+		Clear(); // Clear down any packets currently being held in 'this'
+		m_ancList = std::move(inRHS.m_ancList);
+	}
+	return *this;
+}
+#endif	//	defined(AJA_USE_CPLUSPLUS11)
 
 AJAAncillaryData * AJAAncillaryList::GetAncillaryDataAtIndex (const uint32_t inIndex) const
 {
 	AJAAncillaryData *	pAncData(AJA_NULL);
 
-	if (!m_ancList.empty()	&&	inIndex < m_ancList.size())
+	if (inIndex < m_ancList.size())
 	{
+#if defined(AJAANCLISTIMPL_VECTOR)
+		pAncData = m_ancList[inIndex]; // Yay! std::vector has random access.
+#else
 		AJAAncDataListConstIter it	(m_ancList.begin());
 
 		for (uint32_t i(0);	 i < inIndex;  i++) //	Dang, std::list has no random access
 			++it;
 		pAncData = *it;
+#endif
 	}
 	return pAncData;
 }
@@ -644,10 +686,16 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const NTV2Buffer & inRecei
 			bMoreData = false;
 	}	// while (bMoreData)
 
-	if (AJA_SUCCESS(status)  &&  !rawPkts.empty())
-	{	//	Append accumulated analog/raw packets...
-		while (AJA_SUCCESS(status)  &&  !rawPkts.empty())
-		{
+	if (!rawPkts.empty())
+	{
+		if (AJA_FAILURE(status))
+			while (!rawPkts.empty())
+			{	//	Failed -- delete accumulated analog/raw packets
+				delete rawPkts.at(0);
+				rawPkts.erase(rawPkts.begin());
+			}
+		else while (AJA_SUCCESS(status)  &&  !rawPkts.empty())
+		{	//	Append accumulated analog/raw packets...
 			try {
 				m_ancList.push_back(rawPkts.back());
 			} catch(...) {status = AJA_STATUS_FAIL;}
@@ -655,7 +703,7 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const NTV2Buffer & inRecei
 		}
 		if (AJA_SUCCESS(status))
 			status = SortListByLocation();	//	Re-sort by location
-	}
+	}	//	if any accumulated raw pkts
 
 	return status;
 

@@ -3452,6 +3452,36 @@ cout << "AnalogTest -- " << pkts << endl;
 #endif	//	DISABLED FOR NOW
 
 
+#if defined(AJA_USE_CPLUSPLUS11)
+		TEST_CASE("BFT_AncListMoveSemantics")
+		{
+			const string myPacketData ("This is a test packet to be used with the new move semantics added to AJAAncillaryList");
+			AJAAncillaryData pkt;
+			pkt.SetDID(0xAA);  pkt.SetSID(0xBB);
+			pkt.SetPayloadData(reinterpret_cast<const uint8_t*>(myPacketData.c_str()), myPacketData.length());
+			AJAAncillaryList pktsC;
+
+			//	Create "A" list of 1024 packets...
+			AJAAncillaryList pktsA;
+			while (pktsA.CountAncillaryData() < 1024)
+				pktsA.AddAncillaryData(pkt);
+			CHECK_EQ(pktsA.CountAncillaryData(), 1024);
+			CHECK_EQ(pktsC.CountAncillaryData(), 0);
+
+			//	Move A's packets into new "B" list...
+			AJAAncillaryList pktsB(std::move(pktsA));
+			CHECK_EQ(pktsC.CountAncillaryData(), 0);
+			CHECK_EQ(pktsA.CountAncillaryData(), 0);
+			CHECK_EQ(pktsB.CountAncillaryData(), 1024);
+
+			//	Move B's packets into "C"...
+			pktsC = std::move(pktsB);
+			CHECK_EQ(pktsB.CountAncillaryData(), 0);
+			CHECK_EQ(pktsC.CountAncillaryData(), 1024);
+		}	//	TEST_CASE("BFT_AncDataCompare")
+#endif	//	defined(AJA_USE_CPLUSPLUS11)
+
+
 //	This explicitly tests AJAAncillaryData::GenerateTransmitData:
 #if 0
 static bool GenerateIPPacketWordsBFT (void)

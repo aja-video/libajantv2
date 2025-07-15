@@ -124,6 +124,8 @@ void InitLUTRegs(Ntv2SystemContext* context)
 	if (Has12BitLUTSupport(context))
 		return;
 	
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 	if ( NTV2DeviceCanDoColorCorrection(deviceID) )
 	{
 		ntv2Message("Initializing LUTs\n");
@@ -165,6 +167,7 @@ void InitLUTRegs(Ntv2SystemContext* context)
 			break;
 		}
 	}
+#pragma GCC diagnostic pop
 
 	ntv2WriteRegister(context, kVRegLUTType, NTV2_LUTUnknown);
 }

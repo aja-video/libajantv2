@@ -40,6 +40,15 @@ if (NOT CMAKE_CUDA_COMPILER)
 	message(STATUS "CUDA Compiler override: ${CUDA_NVCC_EXECUTABLE}")
 endif()
 
+if (NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+    if(CUDA_VERSION VERSION_GREATER_EQUAL "11.8")
+        set(CMAKE_CUDA_ARCHITECTURES 50;60;70;80;90)
+        message(STATUS "Define default CMAKE_CUDA_ARCHITECTURES=${CMAKE_CUDA_ARCHITECTURES}")
+    else()
+        message(STATUS "CMAKE_CUDA_ARCHITECTURES not defined")
+    endif()  
+endif()
+
 project(cudalowlatencydemo LANGUAGES CUDA CXX)
 
 set(TARGET_INCLUDE_DIRS
@@ -102,7 +111,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	list(APPEND TARGET_LINK_DIRS
 		${LIBAJANTV2_DIR}/thirdparty/glew/lib/x64)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	list(APPEND TARGET_COMPILE_DEFS -DAJA_RDMA=1)
+    if (NOT AJANTV2_DISABLE_RDMA)
+    	list(APPEND TARGET_COMPILE_DEFS -DAJA_RDMA=1)
+    endif()  
 	list(APPEND TARGET_LINK_LIBS GLEW::GLEW X11 dl pthread rt)
 endif()
 

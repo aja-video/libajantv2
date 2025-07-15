@@ -296,7 +296,7 @@ struct ntv2_serial *ntv2_serial_open(Ntv2SystemContext* sys_con,
 	memset(ntv2_ser, 0, sizeof(struct ntv2_serial));
 
 	ntv2_ser->index = index;
-	sprintf(ntv2_ser->name, "%s%d", name, index);
+	snprintf(ntv2_ser->name, sizeof(ntv2_ser->name), "%s%d", name, index);
 	ntv2_ser->system_context = sys_con;
 
 	spin_lock_init(&ntv2_ser->state_lock);

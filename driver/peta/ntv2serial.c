@@ -20,9 +20,7 @@
 #include "ntv2devicefeatures.h"
 #include "registerio.h"
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0))
-#define NTV2_USE_TTY_GROUP
-#endif
+#include "buildenv.h"
 
 /* debug messages */
 #define NTV2_DEBUG_INFO					0x00000001
@@ -168,9 +166,17 @@ static void ntv2_uartops_shutdown(struct uart_port *port)
 	ntv2_serial_disable(ntv2_ser);
 }
 
+#if defined(KERNEL_6_1_0_SET_TERMIOS)
+static void ntv2_uartops_set_termios(struct uart_port *port,
+									 struct ktermios *termios,
+									 const struct ktermios *old)
+
+#else
 static void ntv2_uartops_set_termios(struct uart_port *port,
 									 struct ktermios *termios,
 									 struct ktermios *old)
+#endif
+
 {
 	struct ntv2_serial *ntv2_ser = container_of(port, struct ntv2_serial, uart_port);
 	u32 valid = ntv2_kona_fld_serial_rx_valid;
@@ -290,7 +296,7 @@ struct ntv2_serial *ntv2_serial_open(Ntv2SystemContext* sys_con,
 	memset(ntv2_ser, 0, sizeof(struct ntv2_serial));
 
 	ntv2_ser->index = index;
-	sprintf(ntv2_ser->name, "%s%d", name, index);
+	snprintf(ntv2_ser->name, sizeof(ntv2_ser->name), "%s%d", name, index);
 	ntv2_ser->system_context = sys_con;
 
 	spin_lock_init(&ntv2_ser->state_lock);
@@ -562,6 +568,46 @@ static bool ntv2_serial_receive(struct ntv2_serial *ntv2_ser)
 	return true;
 }
 
+#if defined(KERNEL_6_10_0_SERIAL_SWITCH_TO_KFIFO)
+static bool ntv2_serial_transmit(struct ntv2_serial *ntv2_ser)
+{
+	struct uart_port *port = &ntv2_ser->uart_port;
+	struct tty_port *tport = &port->state->port;
+	u32 full = ntv2_kona_fld_serial_tx_full;
+	u32 status;
+    unsigned char ch;
+
+	status = ntv2ReadRegister32(ntv2_ser->uart_reg + ntv2_kona_reg_serial_status);
+	if (status & full)
+		return false;
+
+	/* tx xon/xoff */
+	if ((port->x_char) != 0) {
+		NTV2_MSG_SERIAL_STREAM("%s: uart tx %02x\n", ntv2_ser->name, (u8)port->x_char);
+		ntv2WriteRegister32(ntv2_ser->uart_reg + ntv2_kona_reg_serial_tx, (u32)port->x_char);
+		port->x_char = 0;
+		port->icount.tx++;
+		return true;
+	}
+
+	if (kfifo_is_empty(&tport->xmit_fifo) || uart_tx_stopped(port))
+		return false;
+
+	/* tx data */
+    if (!uart_fifo_get(port, &ch))
+        return false;
+
+    /* send to uart */
+	NTV2_MSG_SERIAL_STREAM("%s: uart tx %02x\n", ntv2_ser->name, (u8)ch);
+	ntv2WriteRegister32(ntv2_ser->uart_reg + ntv2_kona_reg_serial_tx, (u32)ch);
+
+	/* wake up */
+	if (kfifo_len(&tport->xmit_fifo) < WAKEUP_CHARS)
+		uart_write_wakeup(port);
+
+	return true;
+}
+#else
 static bool ntv2_serial_transmit(struct ntv2_serial *ntv2_ser)
 {
 	struct uart_port *port = &ntv2_ser->uart_port;
@@ -597,6 +643,7 @@ static bool ntv2_serial_transmit(struct ntv2_serial *ntv2_ser)
 
 	return true;
 }
+#endif
 
 static void ntv2_serial_control(struct ntv2_serial *ntv2_ser, u32 clear_bits, u32 set_bits)
 {

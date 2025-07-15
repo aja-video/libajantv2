@@ -17,11 +17,11 @@
 #define NTV2_NUM_IMAGES		(10)
 
 //	Convenience macros for EZ logging:
-#define	FGFAIL(_expr_)		AJA_sERROR  (AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
-#define	FGWARN(_expr_)		AJA_sWARNING(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
-#define	FGDBG(_expr_)		AJA_sDEBUG	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
-#define	FGNOTE(_expr_)		AJA_sNOTICE	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
-#define	FGINFO(_expr_)		AJA_sINFO	(AJA_DebugUnit_Application, AJAFUNC << ": " << _expr_)
+#define	FGFAIL(_expr_)		AJA_sERROR  (AJA_DebugUnit_DemoCapture, AJAFUNC << ": " << _expr_)
+#define	FGWARN(_expr_)		AJA_sWARNING(AJA_DebugUnit_DemoCapture, AJAFUNC << ": " << _expr_)
+#define	FGDBG(_expr_)		AJA_sDEBUG	(AJA_DebugUnit_DemoCapture, AJAFUNC << ": " << _expr_)
+#define	FGNOTE(_expr_)		AJA_sNOTICE	(AJA_DebugUnit_DemoCapture, AJAFUNC << ": " << _expr_)
+#define	FGINFO(_expr_)		AJA_sINFO	(AJA_DebugUnit_DemoCapture, AJAFUNC << ": " << _expr_)
 
 static QMutex	gMutex;
 
@@ -75,7 +75,7 @@ void NTV2FrameGrabber::SetInputSource (const NTV2InputSource inInputSource)
 {
 	if (inInputSource != mInputSource)
 	{
-		qDebug() << "## DEBUG:  NTV2FrameGrabber::SetInputSource" << ::NTV2InputSourceToString (inInputSource).c_str ();
+		FGDBG("From " << ::NTV2InputSourceToString (mInputSource) << " to " << ::NTV2InputSourceToString (inInputSource));
 		gMutex.lock();
 			mInputSource = inInputSource;
 			mRestart = true;
@@ -288,7 +288,7 @@ void NTV2FrameGrabber::run (void)
 		if (!mDoMultiChannel && !mNTV2Card.AcquireStreamForApplicationWithReference (kDemoAppSignature, int32_t(AJAProcess::GetPid())))
 		{
 			//	We have not acquired the board continue until something changes...
-			qDebug ("Could not acquire board number %d", GetDeviceIndex());
+			FGWARN("Could not acquire " << mNTV2Card.GetDescription());
 			mNTV2Card.Close ();
 			mDeviceID = DEVICE_ID_NOTFOUND;
 		}
@@ -357,7 +357,7 @@ void NTV2FrameGrabber::run (void)
 				if (!mDoMultiChannel  &&  !mNTV2Card.AcquireStreamForApplicationWithReference (kDemoAppSignature, int32_t(AJAProcess::GetPid())))
 				{
 					//	Haven't acquired the device --- continue til other app releases it...
-					qDebug() << mNTV2Card.GetDisplayName().c_str() << "is busy";
+					FGWARN(mNTV2Card.GetDisplayName() << " is busy");
 					QImage * currentImage (images[framesCaptured % NTV2_NUM_IMAGES]);
 					currentImage->fill(Qt::lightGray);
 					QString	status (QString("%1 is busy").arg(mNTV2Card.GetDisplayName().c_str()));
@@ -378,7 +378,7 @@ void NTV2FrameGrabber::run (void)
 
                 if (!mNTV2Card.IsDeviceReady(false))
 				{
-					qDebug() << mNTV2Card.GetDisplayName().c_str() << "not ready";
+					FGWARN(mNTV2Card.GetDisplayName() << " not ready");
 					QImage * currentImage (images[framesCaptured % NTV2_NUM_IMAGES]);
 					currentImage->fill(Qt::lightGray);
 					QString	status (QString("%1 is not ready").arg(mNTV2Card.GetDisplayName().c_str()));
@@ -386,15 +386,25 @@ void NTV2FrameGrabber::run (void)
 					emit newFrame(*currentImage, true);
 					AJATime::Sleep(1000);	//	Keep the UI responsive while waiting for device to become ready
 				}
-				else if (!mNTV2Card.features().GetNumCSCs())
+				else if (!mNTV2Card.features().CanDoCapture())
 				{
-					qDebug() << mNTV2Card.GetDisplayName().c_str() << "has no CSCs, won't work with NTV2FrameGrabberthis demo";
+					FGWARN(mNTV2Card.GetDisplayName() << " is output-only device");
 					QImage * currentImage (images[framesCaptured % NTV2_NUM_IMAGES]);
 					currentImage->fill(qRgba(40, 40, 40, 255));
-					QString	status (QString("%1 won't work with NTV2QtPreview (no CSCs)").arg(mNTV2Card.GetDisplayName().c_str()));
+					QString	status (QString("%1 is output-only device").arg(mNTV2Card.GetDisplayName().c_str()));
 					emit newStatusString(status);
 					emit newFrame(*currentImage, true);
-					AJATime::Sleep(1000);	//	Keep the UI responsive while waiting for device to become ready
+					AJATime::Sleep(1000);	//	Keep the UI responsive
+				}
+				else if (!mNTV2Card.features().GetNumCSCs())
+				{
+					FGWARN(mNTV2Card.GetDisplayName() << " has no CSCs, won't work with NTV2FrameGrabber");
+					QImage * currentImage (images[framesCaptured % NTV2_NUM_IMAGES]);
+					currentImage->fill(qRgba(40, 40, 40, 255));
+					QString	status (QString("%1 has no CSCs, won't work for this demo").arg(mNTV2Card.GetDisplayName().c_str()));
+					emit newStatusString(status);
+					emit newFrame(*currentImage, true);
+					AJATime::Sleep(1000);	//	Keep the UI responsive
 				}
 				else if (SetupInput())
 				{
@@ -431,7 +441,7 @@ void NTV2FrameGrabber::run (void)
 			}	//	if board opened ok
 			else
 			{
-				qDebug() << "## WARNING:  Open failed for device " << GetDeviceIndex ();
+				FGWARN("Open failed for device " << DEC(GetDeviceIndex()));
 				AJATime::Sleep(200);
 				continue;
 			}
@@ -518,7 +528,7 @@ void NTV2FrameGrabber::run (void)
 	for (int i(0);  i < NTV2_NUM_IMAGES;  i++)
 		delete images[i];
 
-	FGNOTE("Thread completed, will exit for device" << mNTV2Card.GetDisplayName() << " input source " << ::NTV2InputSourceToString(mInputSource));
+	FGNOTE("Thread completed, will exit for " << mNTV2Card.GetDisplayName() << " input " << ::NTV2InputSourceToString(mInputSource));
 
 }	//	run
 
@@ -565,7 +575,8 @@ bool NTV2FrameGrabber::SetupInput (void)
 	const NTV2FormatDescriptor fd (mCurrentVideoFormat, mFrameBufferFormat, vm);
 	mFrameDimensions.Set (fd.GetRasterWidth(), fd.GetRasterHeight());
 	const QString vfString (::NTV2VideoFormatToString(mCurrentVideoFormat).c_str());
-	qDebug() << "## DEBUG:  mInputSource=" << mChannel << ", mCurrentVideoFormat=" << vfString << ", width=" << mFrameDimensions.Width() << ", height=" << mFrameDimensions.Height();
+	FGDBG("mInputSource=" << mChannel << " mCurrentVideoFormat=" << vfString.toStdString()
+			<< " wdth=" << mFrameDimensions.Width() << " hght=" << mFrameDimensions.Height());
 
 	mFormatIsProgressive = IsProgressivePicture(mCurrentVideoFormat);
 	if (!mbFixedReference)
@@ -731,7 +742,7 @@ bool NTV2FrameGrabber::SetupInput (void)
 				mNTV2Card.SetHDMIV2Mode (NTV2_IS_4K_VIDEO_FORMAT(mCurrentVideoFormat) ? NTV2_HDMI_V2_4K_CAPTURE : NTV2_HDMI_V2_HDSD_BIDIRECTIONAL);
 		}
 		else
-			qDebug () << "## DEBUG:  NTV2FrameGrabber::SetupInput:  Bad mInputSource switch value " << ::NTV2InputSourceToChannelSpec (mInputSource);
+			FGWARN("Bad mInputSource value " << DEC(mInputSource));
 
 	return true;
 

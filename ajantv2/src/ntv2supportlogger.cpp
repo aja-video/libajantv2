@@ -491,6 +491,22 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 			AJASystemInfo::append(infoTable, "Installed Bitfile ByteCount", DECStr(numBytes));
 			AJASystemInfo::append(infoTable, "Installed Bitfile Build Date",	dateStr + " " + timeStr);
 		}
+		
+		if (::NTV2DeviceHasLPProductCode(mDevice.GetDeviceID()))
+		{
+			AJASystemInfo::append(infoTable, "URL INFO", "");
+			std::string urlString;
+			bool hasIP = mDevice.GetLPTunnelConfigurationURLString(urlString);
+			AJASystemInfo::append(infoTable, "Tunnel URL", hasIP ? urlString : "No URL");
+			hasIP = mDevice.GetLPExternalConfigurationURLString(urlString);
+			AJASystemInfo::append(infoTable, "External URL", hasIP ? urlString : "No URL");
+			std::vector<std::string> sfpURLStings;
+			int numSFPs = mDevice.GetSFPConfigurationURLStrings(sfpURLStings);
+			for (int i = 0; i < numSFPs; i++)
+			{
+				AJASystemInfo::append(infoTable, "SFP URL", sfpURLStings[i]);
+			}
+		}
 
 		if (mDevice.IsIPDevice())
 		{
@@ -881,6 +897,7 @@ void CNTV2SupportLogger::FetchRoutingLog (ostringstream & oss) const
 	mDevice.GetRouting (router);
 	oss << "(NTV2InputCrosspointID <== NTV2OutputCrosspointID)" << endl;
 	router.Print (oss, false);
+	oss << endl;
 /**
 	//	Dump routing registers...
 	NTV2RegNumSet		deviceRoutingRegs;
@@ -1081,7 +1098,7 @@ bool CNTV2SupportLogger::LoadFromLog (const string & inLogFilePath, const bool b
 	return true;
 }
 
-string CNTV2SupportLogger::InventLogFilePathAndName (CNTV2Card & inDevice, const string inPrefix, const string inExtension)
+string CNTV2SupportLogger::InventLogFilePathAndName (CNTV2Card & inDevice, const string inPrefix, const string inExtension)	//	STATIC
 {
 	string homePath;
 	AJASystemInfo info;
@@ -1096,7 +1113,7 @@ string CNTV2SupportLogger::InventLogFilePathAndName (CNTV2Card & inDevice, const
 	return oss.str();
 }
 
-bool CNTV2SupportLogger::DumpDeviceSDRAM (CNTV2Card & inDevice, const string & inFilePath, ostream & msgStrm)
+bool CNTV2SupportLogger::DumpDeviceSDRAM (CNTV2Card & inDevice, const string & inFilePath, ostream & msgStrm)	//	STATIC
 {
 	if (!inDevice.IsOpen())
 		return false;

@@ -30,6 +30,7 @@
 #include "ntv2publicinterface.h"
 #include "ntv2linuxpublicinterface.h"
 
+#include "ntv2drivertask.h"
 #include "registerio.h"
 #include "driverdbg.h"
 #include "ntv2driverdbgmsgctl.h"

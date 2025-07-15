@@ -328,6 +328,12 @@ bool CNTV2WinDriverInterface::ReadRegister (const ULWord inRegNum,	ULWord & outV
 	if (ok)
 	{
 		outValue = propStruct.ulRegisterValue;
+#if 0	//	Fake KONAIP25G from C4412G (see also NTV2GetRegisters::GetRegisterValues):
+		if (inRegNum == kRegBoardID  &&  outValue == DEVICE_ID_CORVID44_8K)
+			outValue = DEVICE_ID_KONAIP_25G;
+		else if (inRegNum == kRegReserved83  ||  inRegNum == kRegLPRJ45IP)
+			outValue = 0x0A03FAD9;	//	Local IPv4    10.3.250.217
+#endif	//	0
 		return true;
 	}
 	WDIFAIL("reg=" << DEC(inRegNum) << " val=" << xHEX0N(outValue,8) << " msk=" << xHEX0N(inMask,8) << " shf=" << DEC(inShift) << " failed: " << ::GetKernErrStr(GetLastError()));
@@ -1363,20 +1369,6 @@ bool CNTV2WinDriverInterface::NTV2Message (NTV2_HEADER * pInMessage)
 	AJADebug::StatTimerStart(AJA_DebugStat_NTV2Message);
 	const bool ok = DeviceIoControl(_hDevice, IOCTL_AJANTV2_MESSAGE, pInMessage, pInMessage->GetSizeInBytes (), pInMessage, pInMessage->GetSizeInBytes(), &dwBytesReturned, NULL);
 	AJADebug::StatTimerStop(AJA_DebugStat_NTV2Message);
-	if (!ok)
-		{WDIFAIL("Failed: " << ::GetKernErrStr(GetLastError()));  return false;}
-	return true;
-}
-
-
-bool CNTV2WinDriverInterface::HevcSendMessage (HevcMessageHeader* pInMessage)
-{
-	if (!pInMessage)
-		{WDIFAIL("Failed: NULL pointer"); return false;}
-	DWORD dwBytesReturned(0);
-	AJADebug::StatTimerStart(AJA_DebugStat_HEVCSendMessage);
-	const bool ok = DeviceIoControl(_hDevice, IOCTL_AJAHEVC_MESSAGE, pInMessage, pInMessage->size, pInMessage, pInMessage->size, &dwBytesReturned, NULL);
-	AJADebug::StatTimerStop(AJA_DebugStat_HEVCSendMessage);
 	if (!ok)
 		{WDIFAIL("Failed: " << ::GetKernErrStr(GetLastError()));  return false;}
 	return true;

@@ -6,7 +6,6 @@
 
 <h1 style="text-align: center;">libajantv2</h1>
 
-
 This is the open-source SDK for discovering, interrogating and controlling NTV2 professional video I/O devices from AJA Video Systems, Inc. All code herein is licensed under the MIT license.
 
 > **NOTE:**\
@@ -16,6 +15,7 @@ This is the open-source SDK for discovering, interrogating and controlling NTV2 
 
 # Table of Contents
 1. [Directory Layout](#directory-layout)
+1. [Documentation](#documentation)
 1. [Obtaining ‘libajantv2’](#obtaining-libajantv2)
 1. [Building ‘libajantv2’](#building-libajantv2)
 1. [Building the NTV2 Device Driver](#building-driver)
@@ -50,6 +50,12 @@ Clone the libajantv2 repository from GitHub:
 > git clone git@github.com:aja-video/libajantv2.git
 ```
 
+## Documentation
+
+* You can access our SDK documentation by going to [sdkdocs.aja.com](https://sdkdocs.aja.com/).
+ * Source: https://github.com/aja-video/aja-video.github.io
+* For registered OEMs, you can gain access to past SDK downloads as well as other specific how-to's from the [SDK Support portal](https://sdksupport.aja.com/).
+
 ## Building libajantv2 <a name="building-libajantv2"></a>
 Starting in the NTV2 SDK version 17.0, AJA has standardized on [CMake](https://cmake.org/) for describing how to build the libraries, demonstration applications, command-line tools, unit tests, and plugins. AJA requires CMake version 3.15 or later.
 
@@ -69,6 +75,7 @@ Command-line tools are normally built by default.
 The test programs are normally built by default.
 - `AJANTV2_DISABLE_PLUGIN_LOAD` — If `ON`, prevents the NTV2 library from loading plugins (and also eliminates the dependency on the third-party `mbedtls` library).\
 The default is `OFF`, which includes the `mbedtls` library depdendency and the ability to load AJA-signed plugins.
+- `AJANTV2_DISABLE_CONFIGURE_VERSION_FILE` - If `ON`, prevents recreating the `ntv2version.h` file if it's already been created. This may be useful for some developers who don't wish to rebuild their project upon each configure of `libajantv2`. 
 
 Please follow the instructions below to build `libajantv2` on the supported platform and development environment of your preference.
 

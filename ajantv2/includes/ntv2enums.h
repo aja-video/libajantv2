@@ -48,6 +48,7 @@ typedef enum
 	DEVICE_ID_KONA5						= 0x10798400,	///< @brief See \ref kona5
 	DEVICE_ID_KONA5_8KMK				= 0x10798401,	///< @brief See \ref kona5
 	DEVICE_ID_KONA5_8K					= 0x10798402,	///< @brief See \ref kona5
+	DEVICE_ID_KONA5_8K_MV_TX			= 0x10798420,	///< @brief See \ref kona5
 	DEVICE_ID_KONA5_2X4K				= 0x10798403,	///< @brief See \ref kona5
 	DEVICE_ID_KONA5_3DLUT				= 0x10798404,	///< @brief See \ref kona5
 	DEVICE_ID_KONA5_OE1					= 0x10798405,	///< @brief See \ref kona5
@@ -62,13 +63,13 @@ typedef enum
 	DEVICE_ID_KONA5_OE10				= 0x1079840E,	///< @brief See \ref kona5
 	DEVICE_ID_KONA5_OE11				= 0x1079840F,	///< @brief See \ref kona5
 	DEVICE_ID_KONA5_OE12				= 0x10798410,	///< @brief See \ref kona5
-	DEVICE_ID_KONA5_8K_MV_TX			= 0x10798420,	///< @brief See \ref kona5
 	DEVICE_ID_KONAHDMI					= 0x10767400,	///< @brief See \ref konahdmi
 	DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K	= 0x10646702,	///< @brief See \ref konaip
 	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,	///< @brief See \ref konaip
 	DEVICE_ID_KONAIP_2022				= 0x10646700,	///< @brief See \ref konaip
 	DEVICE_ID_KONAIP_2110				= 0x10646706,	///< @brief See \ref konaip
 	DEVICE_ID_KONAIP_2110_RGB12			= 0x10646707,	///< @brief See \ref konaip
+    DEVICE_ID_KONAIP_25G				= 0X11001400,	///< @brief See \ref konaip25g
 	DEVICE_ID_KONAIP_2TX_1SFP_J2K		= 0x10646703,	///< @brief See \ref konaip
 	DEVICE_ID_KONAIP_4CH_2SFP			= 0x10646701,	///< @brief See \ref konaip
 	DEVICE_ID_KONALHEPLUS				= 0x10352300,	///< @brief See \ref konalheplus
@@ -76,7 +77,7 @@ typedef enum
 	DEVICE_ID_KONALHIDVI				= 0x10266401,	///< @brief See \ref konalhi
 	DEVICE_ID_KONAX						= 0X10958501,	///< @brief See \ref konax
 	DEVICE_ID_KONAXM					= 0X10958500,	///< @brief See \ref konaxm
-    DEVICE_ID_KONAIP_25G				= 0X11001400,	///< @brief See \ref konaip25g
+	DEVICE_ID_SOFTWARE					= 0x534F4654,	///< @brief Software device that doesn't emulate one of the above devices
 	DEVICE_ID_SOJI_3DLUT				= 0x10922400,
     DEVICE_ID_SOJI_DIAGS                = 0x10922499,
 	DEVICE_ID_SOJI_OE1					= 0x10922401,
@@ -88,7 +89,7 @@ typedef enum
 	DEVICE_ID_SOJI_OE7					= 0x10922407,
 	DEVICE_ID_TTAP						= 0x10416000,	///< @brief See \ref ttap
 	DEVICE_ID_TTAP_PRO					= 0x10879000,	///< @brief See \ref ttappro
-	DEVICE_ID_SOFTWARE					= 0x534F4654,	///< @brief Software device that doesn't emulate one of the above devices
+	DEVICE_ID_ZEFRAM					= 0x11033300,
 	DEVICE_ID_NOTFOUND					= 0xFFFFFFFF,	///< @brief Invalid or "not found"
 	DEVICE_ID_INVALID					= DEVICE_ID_NOTFOUND
 
@@ -144,7 +145,8 @@ typedef enum
 													||	(__d__) == DEVICE_ID_KONAIP_1RX_1TX_2110	\
 													||	(__d__) == DEVICE_ID_IOIP_2110				\
 													||	(__d__) == DEVICE_ID_IOIP_2110_RGB12		\
-													||	(__d__) == DEVICE_ID_KONAIP_25G)
+													||	(__d__) == DEVICE_ID_KONAIP_25G				\
+													||	(__d__) == DEVICE_ID_ZEFRAM	)
 
 #define NTV2_DEVICE_SUPPORTS_SMPTE2022(__d__)	(		(__d__) == DEVICE_ID_KONAIP_2022			\
 													||	(__d__) == DEVICE_ID_IOIP_2022	)
@@ -217,7 +219,7 @@ typedef enum
 	,NTV2_FBF_10BIT_RGB									///< @brief See \ref fbformats10bitrgb
 	,NTV2_FBF_8BIT_YCBCR_YUY2							///< @brief See \ref fbformatsyuy2
 	,NTV2_FBF_ABGR										///< @brief See \ref fbformats8bitrgb
-	,NTV2_FBF_LAST_SD_FBF = NTV2_FBF_ABGR
+	,NTV2_FBF_LAST_SD_FBF			= NTV2_FBF_ABGR
 	,NTV2_FBF_10BIT_DPX									///< @brief See \ref fbformats10bitrgbdpx
 	,NTV2_FBF_10BIT_YCBCR_DPX							///< @brief See \ref fbformats10bitycbcrdpx
 	,NTV2_FBF_8BIT_DVCPRO								///< @brief See \ref fbformats8bitdvcpro
@@ -356,9 +358,13 @@ typedef enum
 	NTV2_FG_720x514		= 14,	///< @brief 720x486, for NTSC 525i and 525p60, ::NTV2_VANCMODE_TALLER
 	NTV2_FG_720x612		= 15,	///< @brief 720x576, for PAL 625i, ::NTV2_VANCMODE_TALLER
 	NTV2_FG_4x1920x1080 = 16,	///< @brief 3840x2160, for UHD, ::NTV2_VANCMODE_OFF
+	NTV2_FG_3840x2160	= NTV2_FG_4x1920x1080,
 	NTV2_FG_4x2048x1080 = 17,	///< @brief 4096x2160, for 4K, ::NTV2_VANCMODE_OFF
+	NTV2_FG_4096x2160	= NTV2_FG_4x2048x1080,
 	NTV2_FG_4x3840x2160 = 18,	///< @brief 7680x4320, for UHD2, ::NTV2_VANCMODE_OFF
+	NTV2_FG_7680x4320	= NTV2_FG_4x3840x2160,
 	NTV2_FG_4x4096x2160 = 19,	///< @brief 8192x4320, for 8K, ::NTV2_VANCMODE_OFF
+	NTV2_FG_8192x4320	= NTV2_FG_4x4096x2160,
 	NTV2_FG_LAST		= NTV2_FG_4x4096x2160,	///< @brief The ordinally last geometry (New in SDK 16.0)
 	NTV2_FG_NUMFRAMEGEOMETRIES,
 	NTV2_FG_INVALID = NTV2_FG_NUMFRAMEGEOMETRIES
@@ -640,6 +646,7 @@ typedef enum _NTV2VideoFormat
 	,NTV2_FORMAT_3840x2160p_5000_B
 	,NTV2_FORMAT_3840x2160p_5994_B
 	,NTV2_FORMAT_3840x2160p_6000_B
+	,NTV2_FORMAT_END_UHD_TSI_DEF_FORMAT
 
 	,NTV2_FORMAT_4096x2160psf_2398		= NTV2_FORMAT_FIRST_4K_TSI_DEF_FORMAT
 	,NTV2_FORMAT_4096x2160psf_2400
@@ -770,6 +777,10 @@ typedef enum _NTV2VideoFormat
 	(	((__f__) >= NTV2_FORMAT_FIRST_4K_DEF_FORMAT &&				\
 		(__f__) < NTV2_FORMAT_END_4K_DEF_FORMATS	)	||			\
 		((__f__) >= NTV2_FORMAT_FIRST_UHD_TSI_DEF_FORMAT &&			\
+		(__f__) < NTV2_FORMAT_END_UHD_TSI_DEF_FORMAT)	||			\
+		((__f__) >= NTV2_FORMAT_FIRST_4K_TSI_DEF_FORMAT &&			\
+		(__f__) < NTV2_FORMAT_END_4K_TSI_DEF_FORMATS)	||			\
+		((__f__) >= NTV2_FORMAT_FIRST_4K_DEF_FORMAT2 &&				\
 		(__f__) < NTV2_FORMAT_END_4K_DEF_FORMATS2)					\
 	)
 
@@ -2717,146 +2728,152 @@ typedef enum NTV2OutputCrosspointID
 /**
 	@brief	Identifies a widget input that potentially can accept a signal emitted
 			from another widget's output (identified by ::NTV2OutputCrosspointID).
+	@note	When first introduced in SDK 12.3, these enum values were completely arbitrary and had no
+			connection or relevance to NTV2 firmware. This changed when the "can connect ROM" was introduced
+			into some device firmware. The NTV2_FIRST_INPUT_CROSSPOINT value is still arbitrary, but the input
+			crosspoint values relative to NTV2_FIRST_INPUT_CROSSPOINT are now fixed and utilized in firmware.
+	@note	In SDK 17.1, NTV2_FIRST_INPUT_CROSSPOINT was changed to 0x00 to help better correlate between these
+			values and what's seen in Verilog code.
 	@see	CNTV2Card::Connect and also \ref ntv2signalrouting
 	@warning	Firmware now depends on the order of these values.
 **/
 typedef enum NTV2InputCrosspointID
 {
-	NTV2_FIRST_INPUT_CROSSPOINT		= 0x01,
-	NTV2_XptFrameBuffer1Input		= 0x01,
-	NTV2_XptFrameBuffer1DS2Input	= 0x02,
-	NTV2_XptFrameBuffer2Input		= 0x03,
-	NTV2_XptFrameBuffer2DS2Input	= 0x04,
-	NTV2_XptFrameBuffer3Input		= 0x05,
-	NTV2_XptFrameBuffer3DS2Input	= 0x06,
-	NTV2_XptFrameBuffer4Input		= 0x07,
-	NTV2_XptFrameBuffer4DS2Input	= 0x08,
-	NTV2_XptFrameBuffer5Input		= 0x09,
-	NTV2_XptFrameBuffer5DS2Input	= 0x0A,
-	NTV2_XptFrameBuffer6Input		= 0x0B,
-	NTV2_XptFrameBuffer6DS2Input	= 0x0C,
-	NTV2_XptFrameBuffer7Input		= 0x0D,
-	NTV2_XptFrameBuffer7DS2Input	= 0x0E,
-	NTV2_XptFrameBuffer8Input		= 0x0F,
-	NTV2_XptFrameBuffer8DS2Input	= 0x10,
-	NTV2_XptCSC1VidInput			= 0x11,
-	NTV2_XptCSC1KeyInput			= 0x12,
-	NTV2_XptCSC2VidInput			= 0x13,
-	NTV2_XptCSC2KeyInput			= 0x14,
-	NTV2_XptCSC3VidInput			= 0x15,
-	NTV2_XptCSC3KeyInput			= 0x16,
-	NTV2_XptCSC4VidInput			= 0x17,
-	NTV2_XptCSC4KeyInput			= 0x18,
-	NTV2_XptCSC5VidInput			= 0x19,
-	NTV2_XptCSC5KeyInput			= 0x1A,
-	NTV2_XptCSC6VidInput			= 0x1B,
-	NTV2_XptCSC6KeyInput			= 0x1C,
-	NTV2_XptCSC7VidInput			= 0x1D,
-	NTV2_XptCSC7KeyInput			= 0x1E,
-	NTV2_XptCSC8VidInput			= 0x1F,
-	NTV2_XptCSC8KeyInput			= 0x20,
-	NTV2_XptLUT1Input				= 0x21,
-	NTV2_XptLUT2Input				= 0x22,
-	NTV2_XptLUT3Input				= 0x23,
-	NTV2_XptLUT4Input				= 0x24,
-	NTV2_XptLUT5Input				= 0x25,
-	NTV2_XptLUT6Input				= 0x26,
-	NTV2_XptLUT7Input				= 0x27,
-	NTV2_XptLUT8Input				= 0x28,
-	NTV2_XptMultiLinkOut1Input		= 0x29, ///< @brief New in SDK 16.0
-	NTV2_XptMultiLinkOut1InputDS2	= 0x2A, ///< @brief New in SDK 16.0
-	NTV2_XptMultiLinkOut2Input		= 0x2B, ///< @brief New in SDK 16.0
-	NTV2_XptMultiLinkOut2InputDS2	= 0x2C, ///< @brief New in SDK 16.0
-	NTV2_XptSDIOut1Input			= 0x2D,
-	NTV2_XptSDIOut1InputDS2			= 0x2E,
-	NTV2_XptSDIOut2Input			= 0x2F,
-	NTV2_XptSDIOut2InputDS2			= 0x30,
-	NTV2_XptSDIOut3Input			= 0x31,
-	NTV2_XptSDIOut3InputDS2			= 0x32,
-	NTV2_XptSDIOut4Input			= 0x33,
-	NTV2_XptSDIOut4InputDS2			= 0x34,
-	NTV2_XptSDIOut5Input			= 0x35,
-	NTV2_XptSDIOut5InputDS2			= 0x36,
-	NTV2_XptSDIOut6Input			= 0x37,
-	NTV2_XptSDIOut6InputDS2			= 0x38,
-	NTV2_XptSDIOut7Input			= 0x39,
-	NTV2_XptSDIOut7InputDS2			= 0x3A,
-	NTV2_XptSDIOut8Input			= 0x3B,
-	NTV2_XptSDIOut8InputDS2			= 0x3C,
-	NTV2_XptDualLinkIn1Input		= 0x3D,
-	NTV2_XptDualLinkIn1DSInput		= 0x3E,
-	NTV2_XptDualLinkIn2Input		= 0x3F,
-	NTV2_XptDualLinkIn2DSInput		= 0x40,
-	NTV2_XptDualLinkIn3Input		= 0x41,
-	NTV2_XptDualLinkIn3DSInput		= 0x42,
-	NTV2_XptDualLinkIn4Input		= 0x43,
-	NTV2_XptDualLinkIn4DSInput		= 0x44,
-	NTV2_XptDualLinkIn5Input		= 0x45,
-	NTV2_XptDualLinkIn5DSInput		= 0x46,
-	NTV2_XptDualLinkIn6Input		= 0x47,
-	NTV2_XptDualLinkIn6DSInput		= 0x48,
-	NTV2_XptDualLinkIn7Input		= 0x49,
-	NTV2_XptDualLinkIn7DSInput		= 0x4A,
-	NTV2_XptDualLinkIn8Input		= 0x4B,
-	NTV2_XptDualLinkIn8DSInput		= 0x4C,
-	NTV2_XptDualLinkOut1Input		= 0x4D,
-	NTV2_XptDualLinkOut2Input		= 0x4E,
-	NTV2_XptDualLinkOut3Input		= 0x4F,
-	NTV2_XptDualLinkOut4Input		= 0x50,
-	NTV2_XptDualLinkOut5Input		= 0x51,
-	NTV2_XptDualLinkOut6Input		= 0x52,
-	NTV2_XptDualLinkOut7Input		= 0x53,
-	NTV2_XptDualLinkOut8Input		= 0x54,
-	NTV2_XptMixer1BGKeyInput		= 0x55,
-	NTV2_XptMixer1BGVidInput		= 0x56,
-	NTV2_XptMixer1FGKeyInput		= 0x57,
-	NTV2_XptMixer1FGVidInput		= 0x58,
-	NTV2_XptMixer2BGKeyInput		= 0x59,
-	NTV2_XptMixer2BGVidInput		= 0x5A,
-	NTV2_XptMixer2FGKeyInput		= 0x5B,
-	NTV2_XptMixer2FGVidInput		= 0x5C,
-	NTV2_XptMixer3BGKeyInput		= 0x5D,
-	NTV2_XptMixer3BGVidInput		= 0x5E,
-	NTV2_XptMixer3FGKeyInput		= 0x5F,
-	NTV2_XptMixer3FGVidInput		= 0x60,
-	NTV2_XptMixer4BGKeyInput		= 0x61,
-	NTV2_XptMixer4BGVidInput		= 0x62,
-	NTV2_XptMixer4FGKeyInput		= 0x63,
-	NTV2_XptMixer4FGVidInput		= 0x64,
-	NTV2_XptHDMIOutInput			= 0x65,
+	NTV2_FIRST_INPUT_CROSSPOINT		= 0x00,		///< @brief	Originally 0x01. Changed to 0x00 in SDK 17.1
+	NTV2_XptFrameBuffer1Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x00,
+	NTV2_XptFrameBuffer1DS2Input	= NTV2_FIRST_INPUT_CROSSPOINT + 0x01,
+	NTV2_XptFrameBuffer2Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x02,
+	NTV2_XptFrameBuffer2DS2Input	= NTV2_FIRST_INPUT_CROSSPOINT + 0x03,
+	NTV2_XptFrameBuffer3Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x04,
+	NTV2_XptFrameBuffer3DS2Input	= NTV2_FIRST_INPUT_CROSSPOINT + 0x05,
+	NTV2_XptFrameBuffer4Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x06,
+	NTV2_XptFrameBuffer4DS2Input	= NTV2_FIRST_INPUT_CROSSPOINT + 0x07,
+	NTV2_XptFrameBuffer5Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x08,
+	NTV2_XptFrameBuffer5DS2Input	= NTV2_FIRST_INPUT_CROSSPOINT + 0x09,
+	NTV2_XptFrameBuffer6Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x0A,
+	NTV2_XptFrameBuffer6DS2Input	= NTV2_FIRST_INPUT_CROSSPOINT + 0x0B,
+	NTV2_XptFrameBuffer7Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x0C,
+	NTV2_XptFrameBuffer7DS2Input	= NTV2_FIRST_INPUT_CROSSPOINT + 0x0D,
+	NTV2_XptFrameBuffer8Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x0E,
+	NTV2_XptFrameBuffer8DS2Input	= NTV2_FIRST_INPUT_CROSSPOINT + 0x0F,
+	NTV2_XptCSC1VidInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x10,
+	NTV2_XptCSC1KeyInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x11,
+	NTV2_XptCSC2VidInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x12,
+	NTV2_XptCSC2KeyInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x13,
+	NTV2_XptCSC3VidInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x14,
+	NTV2_XptCSC3KeyInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x15,
+	NTV2_XptCSC4VidInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x16,
+	NTV2_XptCSC4KeyInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x17,
+	NTV2_XptCSC5VidInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x18,
+	NTV2_XptCSC5KeyInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x19,
+	NTV2_XptCSC6VidInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x1A,
+	NTV2_XptCSC6KeyInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x1B,
+	NTV2_XptCSC7VidInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x1C,
+	NTV2_XptCSC7KeyInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x1D,
+	NTV2_XptCSC8VidInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x1E,
+	NTV2_XptCSC8KeyInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x1F,
+	NTV2_XptLUT1Input				= NTV2_FIRST_INPUT_CROSSPOINT + 0x20,
+	NTV2_XptLUT2Input				= NTV2_FIRST_INPUT_CROSSPOINT + 0x21,
+	NTV2_XptLUT3Input				= NTV2_FIRST_INPUT_CROSSPOINT + 0x22,
+	NTV2_XptLUT4Input				= NTV2_FIRST_INPUT_CROSSPOINT + 0x23,
+	NTV2_XptLUT5Input				= NTV2_FIRST_INPUT_CROSSPOINT + 0x24,
+	NTV2_XptLUT6Input				= NTV2_FIRST_INPUT_CROSSPOINT + 0x25,
+	NTV2_XptLUT7Input				= NTV2_FIRST_INPUT_CROSSPOINT + 0x26,
+	NTV2_XptLUT8Input				= NTV2_FIRST_INPUT_CROSSPOINT + 0x27,
+	NTV2_XptMultiLinkOut1Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x28, ///< @brief New in SDK 16.0
+	NTV2_XptMultiLinkOut1InputDS2	= NTV2_FIRST_INPUT_CROSSPOINT + 0x29, ///< @brief New in SDK 16.0
+	NTV2_XptMultiLinkOut2Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x2A, ///< @brief New in SDK 16.0
+	NTV2_XptMultiLinkOut2InputDS2	= NTV2_FIRST_INPUT_CROSSPOINT + 0x2B, ///< @brief New in SDK 16.0
+	NTV2_XptSDIOut1Input			= NTV2_FIRST_INPUT_CROSSPOINT + 0x2C,
+	NTV2_XptSDIOut1InputDS2			= NTV2_FIRST_INPUT_CROSSPOINT + 0x2D,
+	NTV2_XptSDIOut2Input			= NTV2_FIRST_INPUT_CROSSPOINT + 0x2E,
+	NTV2_XptSDIOut2InputDS2			= NTV2_FIRST_INPUT_CROSSPOINT + 0x2F,
+	NTV2_XptSDIOut3Input			= NTV2_FIRST_INPUT_CROSSPOINT + 0x30,
+	NTV2_XptSDIOut3InputDS2			= NTV2_FIRST_INPUT_CROSSPOINT + 0x31,
+	NTV2_XptSDIOut4Input			= NTV2_FIRST_INPUT_CROSSPOINT + 0x32,
+	NTV2_XptSDIOut4InputDS2			= NTV2_FIRST_INPUT_CROSSPOINT + 0x33,
+	NTV2_XptSDIOut5Input			= NTV2_FIRST_INPUT_CROSSPOINT + 0x34,
+	NTV2_XptSDIOut5InputDS2			= NTV2_FIRST_INPUT_CROSSPOINT + 0x35,
+	NTV2_XptSDIOut6Input			= NTV2_FIRST_INPUT_CROSSPOINT + 0x36,
+	NTV2_XptSDIOut6InputDS2			= NTV2_FIRST_INPUT_CROSSPOINT + 0x37,
+	NTV2_XptSDIOut7Input			= NTV2_FIRST_INPUT_CROSSPOINT + 0x38,
+	NTV2_XptSDIOut7InputDS2			= NTV2_FIRST_INPUT_CROSSPOINT + 0x39,
+	NTV2_XptSDIOut8Input			= NTV2_FIRST_INPUT_CROSSPOINT + 0x3A,
+	NTV2_XptSDIOut8InputDS2			= NTV2_FIRST_INPUT_CROSSPOINT + 0x3B,
+	NTV2_XptDualLinkIn1Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x3C,
+	NTV2_XptDualLinkIn1DSInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x3D,
+	NTV2_XptDualLinkIn2Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x3E,
+	NTV2_XptDualLinkIn2DSInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x3F,
+	NTV2_XptDualLinkIn3Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x40,
+	NTV2_XptDualLinkIn3DSInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x41,
+	NTV2_XptDualLinkIn4Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x42,
+	NTV2_XptDualLinkIn4DSInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x43,
+	NTV2_XptDualLinkIn5Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x44,
+	NTV2_XptDualLinkIn5DSInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x45,
+	NTV2_XptDualLinkIn6Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x46,
+	NTV2_XptDualLinkIn6DSInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x47,
+	NTV2_XptDualLinkIn7Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x48,
+	NTV2_XptDualLinkIn7DSInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x49,
+	NTV2_XptDualLinkIn8Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x4A,
+	NTV2_XptDualLinkIn8DSInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x4B,
+	NTV2_XptDualLinkOut1Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x4C,
+	NTV2_XptDualLinkOut2Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x4D,
+	NTV2_XptDualLinkOut3Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x4E,
+	NTV2_XptDualLinkOut4Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x4F,
+	NTV2_XptDualLinkOut5Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x50,
+	NTV2_XptDualLinkOut6Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x51,
+	NTV2_XptDualLinkOut7Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x52,
+	NTV2_XptDualLinkOut8Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x53,
+	NTV2_XptMixer1BGKeyInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x54,
+	NTV2_XptMixer1BGVidInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x55,
+	NTV2_XptMixer1FGKeyInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x56,
+	NTV2_XptMixer1FGVidInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x57,
+	NTV2_XptMixer2BGKeyInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x58,
+	NTV2_XptMixer2BGVidInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x59,
+	NTV2_XptMixer2FGKeyInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x5A,
+	NTV2_XptMixer2FGVidInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x5B,
+	NTV2_XptMixer3BGKeyInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x5C,
+	NTV2_XptMixer3BGVidInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x5D,
+	NTV2_XptMixer3FGKeyInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x5E,
+	NTV2_XptMixer3FGVidInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x5F,
+	NTV2_XptMixer4BGKeyInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x60,
+	NTV2_XptMixer4BGVidInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x61,
+	NTV2_XptMixer4FGKeyInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x62,
+	NTV2_XptMixer4FGVidInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x63,
+	NTV2_XptHDMIOutInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x64,
 	NTV2_XptHDMIOutQ1Input			= NTV2_XptHDMIOutInput,
-	NTV2_XptHDMIOutQ2Input			= 0x66,
-	NTV2_XptHDMIOutQ3Input			= 0x67,
-	NTV2_XptHDMIOutQ4Input			= 0x68,
-	NTV2_Xpt4KDCQ1Input				= 0x69,
-	NTV2_Xpt4KDCQ2Input				= 0x6A,
-	NTV2_Xpt4KDCQ3Input				= 0x6B,
-	NTV2_Xpt4KDCQ4Input				= 0x6C,
-	NTV2_Xpt425Mux1AInput			= 0x6D,
-	NTV2_Xpt425Mux1BInput			= 0x6E,
-	NTV2_Xpt425Mux2AInput			= 0x6F,
-	NTV2_Xpt425Mux2BInput			= 0x70,
-	NTV2_Xpt425Mux3AInput			= 0x71,
-	NTV2_Xpt425Mux3BInput			= 0x72,
-	NTV2_Xpt425Mux4AInput			= 0x73,
-	NTV2_Xpt425Mux4BInput			= 0x74,
-	NTV2_XptAnalogOutInput			= 0x75,
-	NTV2_Xpt3DLUT1Input				= 0x76, ///< @brief New in SDK 16.0
-	NTV2_XptAnalogOutCompositeOut	= 0x77, //	deprecate?
-	NTV2_XptStereoLeftInput			= 0x78, //	deprecate?
-	NTV2_XptStereoRightInput		= 0x79, //	deprecate?
-	NTV2_XptProAmpInput				= 0x7A, //	deprecate?
-	NTV2_XptIICT1Input				= 0x7B, //	deprecate?
-	NTV2_XptWaterMarker1Input		= 0x7C, //	deprecate?
-	NTV2_XptWaterMarker2Input		= 0x7D, //	deprecate?
-	NTV2_XptUpdateRegister			= 0x7E, //	deprecate?
-	NTV2_XptOEInput					= 0x7F,
-	NTV2_XptCompressionModInput		= 0x80, //	deprecate?
-	NTV2_XptConversionModInput		= 0x81, //	deprecate?
-	NTV2_XptCSC1KeyFromInput2		= 0x82, //	deprecate?
-	NTV2_XptFrameSync2Input			= 0x83, //	deprecate?
-	NTV2_XptFrameSync1Input			= 0x84, //	deprecate?
-	NTV2_LAST_INPUT_CROSSPOINT		= 0x84,
+	NTV2_XptHDMIOutQ2Input			= NTV2_FIRST_INPUT_CROSSPOINT + 0x65,
+	NTV2_XptHDMIOutQ3Input			= NTV2_FIRST_INPUT_CROSSPOINT + 0x66,
+	NTV2_XptHDMIOutQ4Input			= NTV2_FIRST_INPUT_CROSSPOINT + 0x67,
+	NTV2_Xpt4KDCQ1Input				= NTV2_FIRST_INPUT_CROSSPOINT + 0x68,
+	NTV2_Xpt4KDCQ2Input				= NTV2_FIRST_INPUT_CROSSPOINT + 0x69,
+	NTV2_Xpt4KDCQ3Input				= NTV2_FIRST_INPUT_CROSSPOINT + 0x6A,
+	NTV2_Xpt4KDCQ4Input				= NTV2_FIRST_INPUT_CROSSPOINT + 0x6B,
+	NTV2_Xpt425Mux1AInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x6C,
+	NTV2_Xpt425Mux1BInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x6D,
+	NTV2_Xpt425Mux2AInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x6E,
+	NTV2_Xpt425Mux2BInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x6F,
+	NTV2_Xpt425Mux3AInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x70,
+	NTV2_Xpt425Mux3BInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x71,
+	NTV2_Xpt425Mux4AInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x72,
+	NTV2_Xpt425Mux4BInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x73,
+	NTV2_XptAnalogOutInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x74,
+	NTV2_Xpt3DLUT1Input				= NTV2_FIRST_INPUT_CROSSPOINT + 0x75, ///< @brief New in SDK 16.0
+	NTV2_XptAnalogOutCompositeOut	= NTV2_FIRST_INPUT_CROSSPOINT + 0x76, //	deprecate?
+	NTV2_XptStereoLeftInput			= NTV2_FIRST_INPUT_CROSSPOINT + 0x77, //	deprecate?
+	NTV2_XptStereoRightInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x78, //	deprecate?
+	NTV2_XptProAmpInput				= NTV2_FIRST_INPUT_CROSSPOINT + 0x79, //	deprecate?
+	NTV2_XptIICT1Input				= NTV2_FIRST_INPUT_CROSSPOINT + 0x7A, //	deprecate?
+	NTV2_XptWaterMarker1Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x7B, //	deprecate?
+	NTV2_XptWaterMarker2Input		= NTV2_FIRST_INPUT_CROSSPOINT + 0x7C, //	deprecate?
+	NTV2_XptUpdateRegister			= NTV2_FIRST_INPUT_CROSSPOINT + 0x7D, //	deprecate?
+	NTV2_XptOEInput					= NTV2_FIRST_INPUT_CROSSPOINT + 0x7E,
+	NTV2_XptCompressionModInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x7F, //	deprecate?
+	NTV2_XptConversionModInput		= NTV2_FIRST_INPUT_CROSSPOINT + 0x80, //	deprecate?
+	NTV2_XptCSC1KeyFromInput2		= NTV2_FIRST_INPUT_CROSSPOINT + 0x81, //	deprecate?
+	NTV2_XptFrameSync2Input			= NTV2_FIRST_INPUT_CROSSPOINT + 0x82, //	deprecate?
+	NTV2_XptFrameSync1Input			= NTV2_FIRST_INPUT_CROSSPOINT + 0x83, //	deprecate?
+	NTV2_LAST_INPUT_CROSSPOINT		= NTV2_FIRST_INPUT_CROSSPOINT + 0x83,
 	NTV2_INPUT_CROSSPOINT_INVALID	= 0xFFFFFFFF
 	#if !defined(NTV2_DEPRECATE_16_0)
 		,NTV2_XptConversionMod2Input = NTV2_XptOEInput				///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptOEInput
@@ -2991,6 +3008,10 @@ typedef enum
 	,NTV2_WgtHDMIIn4v4
 	,NTV2_WgtHDMIOut1v4
 	,NTV2_WgtHDMIOut1v5
+	,NTV2_WgtHDMIOut1v6
+	,NTV2_WgtHDMIOut2v6
+	,NTV2_WgtHDMIOut3v6
+	,NTV2_WgtHDMIOut4v6
 	,NTV2_WgtMultiLinkOut1
 	,NTV2_Wgt3DLUT1
 	,NTV2_WgtMultiLinkOut2
@@ -3039,6 +3060,7 @@ typedef enum {
 	,NTV2WidgetType_HDMIOutV3
 	,NTV2WidgetType_HDMIOutV4
 	,NTV2WidgetType_HDMIOutV5
+	,NTV2WidgetType_HDMIOutV6
 	,NTV2WidgetType_SMPTE425Mux
 	,NTV2WidgetType_SDIIn12G
 	,NTV2WidgetType_SDIOut12G
@@ -4084,6 +4106,7 @@ typedef enum
 {
 	VPIDBitDepth_8				= 0x0,
 	VPIDBitDepth_10_Full		= 0x0,
+	VPIDBitDepth_10_Full_ST292  = 0x3,
 	VPIDBitDepth_10				= 0x1,
 	VPIDBitDepth_12				= 0x2,
 	VPIDBitDepth_12_Full		= 0x3

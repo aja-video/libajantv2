@@ -204,17 +204,17 @@ class NTV2DolbyPlayer
 
 		/**
 			@brief	Inserts audio test ramp into the given NTV2FrameData's audio buffer.
-			@param		inFrameData		The NTV2FrameData object having the audio buffer that is to receive 
-										the audio ramp data.
+			@param	inFrameData		The NTV2FrameData object having the audio buffer that is to receive 
+									the audio ramp data.
 			@return	Total number of bytes written into the buffer.
 		**/
 		virtual uint32_t	AddRamp (NTV2FrameData & inFrameData);
 
 		/**
-             @brief	Inserts dolby audio into the given NTV2FrameData's audio buffer.
-             @param[out]	audioBuffer		Specifies a valid, non-NULL pointer to the buffer that is to receive
-                                            the audio tone data.
-             @return	Total number of bytes written into the buffer.
+			@brief	Inserts dolby audio into the given NTV2FrameData's audio buffer.
+			@param	inFrameData		Specifies a valid, non-NULL pointer to the buffer that is to receive
+									the audio tone data.
+			@return	Total number of bytes written into the buffer.
 		 **/
 		virtual uint32_t	AddDolby (NTV2FrameData & inFrameData);
 

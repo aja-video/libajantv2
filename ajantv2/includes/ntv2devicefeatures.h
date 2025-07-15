@@ -29,6 +29,7 @@
 /**
 	@brief	Used with CNTV2DriverInterface::GetBoolParam to determine device capabilities.
 	@see	vidop-features
+	@note   Always add new entries at the bottom just before kNTV2BoolParam_LAST.
 **/
 typedef enum _NTV2BoolParamID
 {
@@ -103,6 +104,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceIs64Bit,								///< @brief True if device is 64-bit addressable.
 	kDeviceIsDirectAddressable,					///< @brief True if device is direct addressable.
 	kDeviceIsExternalToHost,					///< @brief True if device connects to the host with a cable.
+	kDeviceIsLocalPhysical,						///< @brief True if device is local-host-attached, and not remote, software or virtual (new in SDK 17.5)
 	kDeviceIsSupported,							///< @brief True if device is supported by this SDK.
 	kDeviceNeedsRoutingSetup,					///< @brief True if device widget routing can be queried or changed.
 	kDeviceSoftwareCanChangeFrameBufferSize,	///< @brief True if device frame buffer size can be changed.
@@ -152,6 +154,8 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoCustomHancInsertion,			///< @brief	True if device supports custom HANC packet insertion.	(New in SDK 17.1)
 	kDeviceCanDoStreamingDMA,					///< @brief	True if device supports streaming DMA.	(New in SDK 17.1)
 	kDeviceHasPWMFanControl,					///< @brief	True if device has a PWM-controlled cooling fan.	(New in SDK 17.1)
+	kDeviceROMHasBankSelect,					///< @brief	True if device SPIFlash ROM is bank-selected.	(New in SDK 17.1)
+	kDeviceCanDoVersalSysMon,					///< @brief	True if device supports Versal Adaptive SoC System Monitor.
 	kNTV2BoolParam_LAST,
 	kNTV2BoolParam_COUNT	= kNTV2BoolParam_LAST-kNTV2BoolParam_FIRST,
 	kDeviceCanDo_INVALID	= kNTV2BoolParam_LAST
@@ -161,6 +165,7 @@ typedef enum _NTV2BoolParamID
 
 /**
 	@brief	Used with CNTV2DriverInterface::GetNumericParam to determine device capabilities.
+	@note   Always add new entries at the bottom just before kNTV2NumericParam_LAST.
 	@see	vidop-features
 **/
 typedef enum _NTV2NumericParamID
@@ -225,6 +230,7 @@ typedef enum _NTV2NumericParamID
 
 /**
 	@brief	Identifies NTV2 enumerated types, used in CNTV2DriverInterface::GetSupportedItems.
+	@note   Always add new entries at the bottom just before kNTV2EnumsID_LAST.
 	@see	vidop-features
 **/
 typedef enum _NTV2EnumsID

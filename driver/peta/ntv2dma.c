@@ -17,6 +17,7 @@
 #include <linux/dmaengine.h>
 #include <linux/pagemap.h>
 #include <linux/of_device.h>
+#include <linux/of.h> 
 
 #include "ntv2enums.h"
 #include "ntv2audiodefines.h"
@@ -221,7 +222,7 @@ static int64_t timeMicro(void);
 
 static uint32_t ofpd_ioread32(uint64_t addr, uint32_t shift, uint32_t mask)
 {
-    void *ioaddr = ioremap_nocache(addr, sizeof(uint32_t));
+    void *ioaddr = ioremap(addr, sizeof(uint32_t));
     uint32_t reg = (ioread32(ioaddr) >> shift) & mask;
     iounmap(ioaddr);
     return reg;
@@ -229,7 +230,7 @@ static uint32_t ofpd_ioread32(uint64_t addr, uint32_t shift, uint32_t mask)
 
 static uint32_t ofpd_iormw32(uint64_t addr, uint32_t value, uint32_t shift, uint32_t mask)
 {
-    void *ioaddr = ioremap_nocache(addr, sizeof(uint32_t));
+    void *ioaddr = ioremap(addr, sizeof(uint32_t));
     uint32_t ret = ioread32(ioaddr);
     ret &= ~(mask << shift);
     ret |= ((value & mask) << shift);
@@ -390,10 +391,13 @@ int dmaInit(ULWord deviceNumber)
 			pDmaEngine->engName = "zynq";
 			break;
 		default:
+			pDmaEngine->dmaIndex = 0;
+			pDmaEngine->dmaC2H = false; // not used
+			pDmaEngine->engName = "unknown";
 			NTV2_MSG_ERROR("%s%d:%s%d: dmaInit unsupported dma method %d\n",
 						   DMA_MSG_ENGINE, pDmaEngine->dmaMethod);
 			pDmaEngine->state = DmaStateDead;
-			break;
+			continue;
 		}
 		
 		// max resources
@@ -745,6 +749,7 @@ int dmaTransfer(PDMA_PARAMS pDmaParams)
 	LWord64 softDoneTime = 0;
 	Ntv2SystemContext systemContext;
 	
+    memset(&systemContext, 0, sizeof(Ntv2SystemContext));
 	systemContext.devNum = deviceNumber;
 
 	if (NTV2_DEBUG_ACTIVE(NTV2_DEBUG_STATISTICS))
@@ -2290,7 +2295,7 @@ static int dmaPageLock(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer,
 	}
 
 	// determine if buffer will be written
-	write = (direction == PCI_DMA_BIDIRECTIONAL) || (direction == PCI_DMA_FROMDEVICE);
+	write = (direction == DMA_BIDIRECTIONAL) || (direction == DMA_FROM_DEVICE);
 
 	// page in and lock the user buffer
 	numPinned = get_user_pages_fast(
@@ -2386,7 +2391,7 @@ static void dmaPageUnlock(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
 		// release the locked pages
 		for (i = 0; i < pBuffer->numPages; i++)
 		{
-			if ((pBuffer->direction == PCI_DMA_FROMDEVICE) &&
+			if ((pBuffer->direction == DMA_FROM_DEVICE) &&
 				!PageReserved(pBuffer->pPageList[i]))
 			{
 				set_page_dirty(pBuffer->pPageList[i]);
@@ -2568,7 +2573,9 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 	ULWord 		deviceNumber = pDmaContext->deviceNumber;
 	PDMA_ENGINE	pDmaEngine = getDmaEngine(deviceNumber, pDmaContext->engIndex);
 	NTV2PrivateParams *pNTV2Params = getNTV2Params(deviceNumber);
+#ifdef ZEFRAM
 	unsigned long dmaFlags = DMA_CTRL_ACK | DMA_PREP_INTERRUPT;
+#endif
 	struct dma_async_tx_descriptor*	pDmaDesc;
 	struct scatterlist sg[2];
 	int sgCount;
@@ -2608,6 +2615,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 		
 		// iniatlize dma descriptor
 		pDmaDesc = NULL;
+#ifdef ZEFRAM
 		if (pDmaContext->dmaC2H)
 		{
 			pDmaDesc = zynqmp_dma_prep_sg(pDmaEngine->dmaChannel,
@@ -2626,6 +2634,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 										  dmaSgCount(pDmaContext->pVideoPageBuffer),
 										  dmaFlags);
 		}
+#endif        
 		if (pDmaDesc != NULL)
 		{
 			pDmaDesc->callback = dmaZynqVideoCallback;
@@ -2672,6 +2681,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 
 		// iniatlize dma descriptor
 		pDmaDesc = NULL;
+#ifdef ZEFRAM
 		if (pDmaContext->dmaC2H)
 		{
 			pDmaDesc = zynqmp_dma_prep_sg(pDmaEngine->dmaChannel,
@@ -2690,6 +2700,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 										  dmaSgCount(pDmaContext->pAudioPageBuffer),
 										  dmaFlags);
 		}
+#endif        
 		if (pDmaDesc != NULL)
 		{
 			pDmaDesc->callback = dmaZynqAudioCallback;
@@ -2723,6 +2734,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 
 		// iniatlize dma descriptor
 		pDmaDesc = NULL;
+#ifdef ZEFRAM
 		if (pDmaContext->dmaC2H)
 		{
 			pDmaDesc = zynqmp_dma_prep_sg(pDmaEngine->dmaChannel,
@@ -2741,6 +2753,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 										  dmaSgCount(pDmaContext->pAncF1PageBuffer),
 										  dmaFlags);
 		}
+#endif        
 		if (pDmaDesc != NULL)
 		{
 			pDmaDesc->callback = dmaZynqAncF1Callback;
@@ -2774,6 +2787,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 
 		// iniatlize dma descriptor
 		pDmaDesc = NULL;
+#ifdef ZEFRAM
 		if (pDmaContext->dmaC2H)
 		{
 			pDmaDesc = zynqmp_dma_prep_sg(pDmaEngine->dmaChannel,
@@ -2792,6 +2806,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 										  dmaSgCount(pDmaContext->pAncF2PageBuffer),
 										  dmaFlags);
 		}
+#endif        
 		if (pDmaDesc != NULL)
 		{
 			pDmaDesc->callback = dmaZynqAncF2Callback;
@@ -2985,3 +3000,100 @@ static int64_t timeMicro(void)
 	ktime_get_real_ts64(&ts64);
 	return (((int64_t)ts64.tv_sec * 1000000) + (ts64.tv_nsec / 1000));
 }
+
+#if 0
+/**
+ * zynqmp_dma_prep_slave_sg - prepare descriptors for a memory sg transaction
+ * @dchan: DMA channel
+ * @dst_sg: Destination scatter list
+ * @dst_sg_len: Number of entries in destination scatter list
+ * @src_sg: Source scatter list
+ * @src_sg_len: Number of entries in source scatter list
+ * @flags: transfer ack flags
+ *
+ * Return: Async transaction descriptor on success and NULL on failure
+ */
+
+#define to_chan(chan) container_of(chan, struct zynqmp_dma_chan, common)
+
+struct dma_async_tx_descriptor *zynqmp_dma_prep_sg(
+	struct dma_chan *dchan, struct scatterlist *dst_sg,
+	unsigned int dst_sg_len, struct scatterlist *src_sg,
+	unsigned int src_sg_len, unsigned long flags)
+{
+	struct zynqmp_dma_desc_sw *new, *first = NULL;
+	struct zynqmp_dma_chan *chan = to_chan(dchan);
+	void *desc = NULL, *prev = NULL;
+	size_t len, dst_avail, src_avail;
+	dma_addr_t dma_dst, dma_src;
+	u32 desc_cnt = 0, i;
+	struct scatterlist *sg;
+
+	for_each_sg(src_sg, sg, src_sg_len, i)
+		desc_cnt += DIV_ROUND_UP(sg_dma_len(sg),
+					 ZYNQMP_DMA_MAX_TRANS_LEN);
+
+	spin_lock_bh(&chan->lock);
+	if (desc_cnt > chan->desc_free_cnt) {
+		spin_unlock_bh(&chan->lock);
+		dev_dbg(chan->dev, "chan %p descs are not available\n", chan);
+		return NULL;
+	}
+	chan->desc_free_cnt = chan->desc_free_cnt - desc_cnt;
+	spin_unlock_bh(&chan->lock);
+
+	dst_avail = sg_dma_len(dst_sg);
+	src_avail = sg_dma_len(src_sg);
+
+	/* Run until we are out of scatterlist entries */
+	while (true) {
+		/* Allocate and populate the descriptor */
+		new = zynqmp_dma_get_descriptor(chan);
+		desc = (struct zynqmp_dma_desc_ll *)new->src_v;
+		len = min_t(size_t, src_avail, dst_avail);
+		len = min_t(size_t, len, ZYNQMP_DMA_MAX_TRANS_LEN);
+		if (len == 0)
+			goto fetch;
+		dma_dst = sg_dma_address(dst_sg) + sg_dma_len(dst_sg) -
+			dst_avail;
+		dma_src = sg_dma_address(src_sg) + sg_dma_len(src_sg) -
+			src_avail;
+
+		zynqmp_dma_config_sg_ll_desc(chan, desc, dma_src, dma_dst,
+					     len, prev);
+		prev = desc;
+		dst_avail -= len;
+		src_avail -= len;
+
+		if (!first)
+			first = new;
+		else
+			list_add_tail(&new->node, &first->tx_list);
+fetch:
+		/* Fetch the next dst scatterlist entry */
+		if (dst_avail == 0) {
+			if (dst_sg_len == 0)
+				break;
+			dst_sg = sg_next(dst_sg);
+			if (dst_sg == NULL)
+				break;
+			dst_sg_len--;
+			dst_avail = sg_dma_len(dst_sg);
+		}
+		/* Fetch the next src scatterlist entry */
+		if (src_avail == 0) {
+			if (src_sg_len == 0)
+				break;
+			src_sg = sg_next(src_sg);
+			if (src_sg == NULL)
+				break;
+			src_sg_len--;
+			src_avail = sg_dma_len(src_sg);
+		}
+	}
+
+	zynqmp_dma_desc_config_eod(chan, desc);
+	first->async_tx.flags = flags;
+	return &first->async_tx;
+}
+#endif

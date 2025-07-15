@@ -14,6 +14,7 @@
 #include "ntv2registerexpert.h"
 #include "ntv2nubtypes.h"
 #include "ntv2version.h"
+#include "ntv2debug.h"
 #include <iomanip>
 #include <locale>		//	For std::locale, std::numpunct, std::use_facet
 #include <string.h>		//	For memset, et al.
@@ -235,6 +236,73 @@ AUTOCIRCULATE_DATA::AUTOCIRCULATE_DATA (const AUTO_CIRC_COMMAND inCommand, const
 {
 }
 
+ostream & AUTOCIRCULATE_DATA::Print (ostream & oss) const
+{
+	static const string sCmds [] = {"ACInit","ACStart","ACStop","ACPause","GetAC","ACFrmStmp",
+									"ACFlush","ACPreRoll","ACXfer","ACAbort","ACStartAt",
+									"ACXfer1","ACXfer2","ACFrmStmp2","ACTask","ACSetActFrm"};
+	if (size_t(eCommand) < sizeof(sCmds))
+	{	oss << sCmds[eCommand];
+		switch (eCommand)
+		{
+			case eInitAutoCirc:
+				oss << " " << ::NTV2CrosspointToString(channelSpec);
+				oss	<< " frms " << DEC(lVal1) << "-" << DEC(lVal2);
+				if (lVal4 > 1)				oss << " +" << DEC(lVal4) << " chls";
+				if (lVal6 & AUTOCIRCULATE_WITH_FIELDS)		oss << " +FieldMode";
+				if (lVal6 & AUTOCIRCULATE_WITH_HDMIAUX)		oss << " +HDMIAux";
+				if (bVal2)									oss << " +RP188";
+				if (bVal3)									oss << " +FBFChg";
+				if (bVal4)									oss << " +FBOChg";
+				if (bVal5)									oss << " +ColCorr";
+				if (bVal6)									oss << " +VidProc";
+				if (bVal7)									oss << " +Anc";
+				if (bVal8)									oss << " +LTC";
+				oss	<< " " << ::NTV2AudioSystemToString(NTV2AudioSystem(lVal3 & 0xF), true);
+				if (!bVal1 && ((lVal3 & 0xF) == NTV2_MAX_NUM_AudioSystemEnums))	oss << " +AudCtrl";
+				if (lVal3 & NTV2_AUDIOSYSTEM_Plus1)			oss << " +MLAud1";
+				if (lVal3 & NTV2_AUDIOSYSTEM_Plus2)			oss << " +MLAud2";
+				if (lVal3 & NTV2_AUDIOSYSTEM_Plus3)			oss << " +MLAud3";
+				break;
+			case eStartAutoCirc:
+				break;
+			case eStartAutoCircAtTime:
+				if (lVal1 || lVal2)
+					oss << " at " << xHEX0N((uint64_t(lVal1) << 32) | uint64_t(lVal2),16);
+				break;
+			case eStopAutoCirc:
+				oss << " " << ::NTV2CrosspointToString(channelSpec);
+				break;
+			case eAbortAutoCirc:
+				oss << " " << ::NTV2CrosspointToString(channelSpec);
+				break;
+			case ePauseAutoCirc:
+				oss << " " << ::NTV2CrosspointToString(channelSpec);
+				if (!bVal1  &&  lVal6)	oss << " at frame " << DEC(lVal6);
+				if (bVal1)	oss << " +resume";
+				if (bVal1  &&  bVal2)	oss << " +clearDropCount";
+				break;
+			case eFlushAutoCirculate:
+				oss << " " << ::NTV2CrosspointToString(channelSpec);
+				if (bVal1)	oss << " +clearDropCount";
+				break;
+			case ePrerollAutoCirculate:
+				oss << " " << ::NTV2CrosspointToString(channelSpec) << " " << DEC(ULWord(lVal1)) << " frame(s)";
+				break;
+			case eGetAutoCirc:
+				oss << " " << ::NTV2CrosspointToString(channelSpec);
+				break;
+			case eSetActiveFrame:
+			case eGetFrameStamp:
+				oss << " " << ::NTV2CrosspointToString(channelSpec) << " frm " << DEC(ULWord(lVal1));
+				break;
+			default:
+				break;
+		}
+	}
+	return oss;
+}
+
 
 NTV2_HEADER::NTV2_HEADER (const ULWord inStructureType, const ULWord inStructSizeInBytes)
 	:	fHeaderTag		(NTV2_HEADER_TAG),
@@ -338,6 +406,47 @@ string NTV2Buffer::AsString (UWord inDumpMaxBytes) const
 		for (UWord ndx(0);	ndx < inDumpMaxBytes;  ndx++)
 			oss << HEX0N(uint16_t(pBytes[ndx]),2);
 	}
+	return oss.str();
+}
+
+string NTV2Buffer::AsCode (const size_t inBytesPerWord, const std::string & inVarName, const bool inUseSTL, const bool inByteSwap) const
+{
+	ostringstream oss;
+	if (inBytesPerWord != 1 && inBytesPerWord != 2 && inBytesPerWord != 4 && inBytesPerWord != 8) return string();
+	NTV2Buffer tmp;
+	if (inBytesPerWord > 1)
+	{	//	Use a copy for U16s, U32s, or U64s...
+		tmp = *this;
+		if (!tmp)
+			return string();
+	}
+	const string cType (inBytesPerWord == 1 ? "uint8_t" : (inBytesPerWord == 2 ? "uint16_t" : (inBytesPerWord == 4 ? "uint32_t" : "uint64_t")));
+	const size_t numWords (GetByteCount() / inBytesPerWord);
+	const string vecType = "std::vector<" + cType + ">";
+	const string varName (inVarName.empty() ? (inUseSTL ? "tmpVector" : "tmpArray") : inVarName);
+	oss << "const " << (inUseSTL ? vecType : cType) << " " << varName << (inUseSTL ? "" : "[]") << " = {" << endl;
+	if (inByteSwap && inBytesPerWord > 1)
+		switch (inBytesPerWord)
+		{
+			case 2:	tmp.ByteSwap16();  break;
+			case 4:	tmp.ByteSwap32();  break;
+			case 8:	tmp.ByteSwap64();  break;
+		}
+	for (size_t ndx(0);  ndx < numWords;  )
+	{
+		switch (inBytesPerWord)
+		{
+			case 1:	oss << xHEX0N(UWord(U8(int(ndx))),2);	break;
+			case 2:	oss << xHEX0N(tmp.U16(int(ndx)),4);		break;
+			case 4:	oss << xHEX0N(tmp.U32(int(ndx)),8);		break;
+			case 8:	oss << xHEX0N(tmp.U64(int(ndx)),16);		break;
+		}
+		if (++ndx < numWords)
+			oss << ",";
+		if (ndx % 128 == 0)
+			oss << endl;
+	}
+	oss << "};" << endl;
 	return oss.str();
 }
 
@@ -648,8 +757,8 @@ bool NTV2Buffer::AppendU8s (UByteSequence & outU8s) const
 	const size_t maxSize (GetByteCount());
 	try
 	{
-		for (size_t ndx(0);	 ndx < maxSize;	 ndx++)
-			outU8s.push_back(*pU8++);
+		outU8s.reserve(outU8s.size() + maxSize);
+		outU8s.insert(outU8s.end(),pU8, pU8 + maxSize);
 	}
 	catch (...)
 	{
@@ -1380,13 +1489,65 @@ NTV2_TRAILER::NTV2_TRAILER ()
 }
 
 
+NTV2FrameSize::operator NTV2FrameGeometry() const		//	Cast to NTV2FrameGeometry
+{
+	return isValid() ? ::GetGeometryFromFrameDimensions(*this) : NTV2_FG_INVALID;
+}
+
+ULWord NTV2FrameSize::FGWidth (const NTV2FrameGeometry fg)
+{	//	Requires C++11:
+	static const FGSizesMap sFGWdths = {	{NTV2_FG_720x486,	720},
+											{NTV2_FG_720x508,	720},
+											{NTV2_FG_720x514,	720},
+											{NTV2_FG_720x576,	720},
+											{NTV2_FG_720x598,	720},
+											{NTV2_FG_720x612,	720},
+											{NTV2_FG_1280x720,	1280},
+											{NTV2_FG_1280x740,	1280},
+											{NTV2_FG_1920x1080,	1920},
+											{NTV2_FG_1920x1114,	1920},
+											{NTV2_FG_1920x1112,	1920},
+											{NTV2_FG_2048x1080,	2048},
+											{NTV2_FG_2048x1112,	2048},
+											{NTV2_FG_2048x1114,	2048},
+											{NTV2_FG_2048x1556,	2048},
+											{NTV2_FG_2048x1588,	2048},
+											{NTV2_FG_3840x2160,	3840},
+											{NTV2_FG_4096x2160,	4096},
+											{NTV2_FG_7680x4320,	7680},
+											{NTV2_FG_8192x4320,	8192}	};
+	FGSizesMapCI it (sFGWdths.find(fg));
+	return it != sFGWdths.end() ? it->second : 0;
+}
+
+ULWord NTV2FrameSize::FGHeight (const NTV2FrameGeometry fg)
+{	//	Requires C++11:
+	static const FGSizesMap sFGHghts = {	{NTV2_FG_720x486,	486},
+											{NTV2_FG_720x508,	508},
+											{NTV2_FG_720x514,	514},
+											{NTV2_FG_720x576,	576},
+											{NTV2_FG_720x598,	598},
+											{NTV2_FG_720x612,	612},
+											{NTV2_FG_1280x720,	720},
+											{NTV2_FG_1280x740,	740},
+											{NTV2_FG_2048x1556,	1556},
+											{NTV2_FG_2048x1588,	1588},
+											{NTV2_FG_1920x1080,	1080},
+											{NTV2_FG_2048x1080,	1080},
+											{NTV2_FG_1920x1114,	1114},
+											{NTV2_FG_2048x1114,	1114},
+											{NTV2_FG_1920x1112,	1112},
+											{NTV2_FG_2048x1112,	1112},
+											{NTV2_FG_3840x2160,	2160},
+											{NTV2_FG_4096x2160,	2160},
+											{NTV2_FG_7680x4320,	4320},
+											{NTV2_FG_8192x4320,	4320}	};
+	FGSizesMapCI it (sFGHghts.find(fg));
+	return it != sFGHghts.end() ? it->second : 0;
+}
+
+
 static const string sSegXferUnits[] = {"", " U8", " U16", "", " U32", "", "", "", " U64", ""};
-bool NTV2SegmentedXferInfo::Direction_TopToBottom (true);
-bool NTV2SegmentedXferInfo::Direction_TopDown (true);
-bool NTV2SegmentedXferInfo::Direction_Normal (true);
-bool NTV2SegmentedXferInfo::Direction_BottomToTop (false);
-bool NTV2SegmentedXferInfo::Direction_BottomUp (false);
-bool NTV2SegmentedXferInfo::Direction_Flipped (false);
 
 ostream & NTV2SegmentedXferInfo::Print (ostream & inStrm, const bool inDumpSegments) const
 {
@@ -1518,7 +1679,7 @@ NTV2Buffer::NTV2Buffer (const void * pInUserPointer, const size_t inByteCount)
 		fIOMemoryDesc		(0),
 		fIOMemoryMap		(0)
 	#else
-		fKernelSpacePtr		(0),
+		//fKernelSpacePtr		(0),
 		fKernelHandle		(0)
 	#endif
 {
@@ -1534,7 +1695,7 @@ NTV2Buffer::NTV2Buffer (const size_t inByteCount)
 		fIOMemoryDesc		(0),
 		fIOMemoryMap		(0)
 	#else
-		fKernelSpacePtr		(0),
+		//fKernelSpacePtr		(0),
 		fKernelHandle		(0)
 	#endif
 {
@@ -1552,7 +1713,7 @@ NTV2Buffer::NTV2Buffer (const NTV2Buffer & inObj)
 		fIOMemoryDesc		(0),
 		fIOMemoryMap		(0)
 	#else
-		fKernelSpacePtr		(0),
+		//fKernelSpacePtr		(0),
 		fKernelHandle		(0)
 	#endif
 {
@@ -3001,6 +3162,19 @@ ostream & NTV2StreamBuffer::Print (ostream & inOutStream) const
 	return inOutStream;
 }
 
+NTV2MailBuffer::NTV2MailBuffer()
+	:	mHeader (NTV2_TYPE_AJAMAILBUFFER, sizeof(NTV2MailBuffer))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+}
+
+ostream & NTV2MailBuffer::Print (ostream & inOutStream) const
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	inOutStream << mHeader << mChannel << " flags=" << xHEX0N(mFlags,8) << xHEX0N(mStatus, 8) << " " << mTrailer;
+	return inOutStream;
+}
+
 NTV2GetRegisters::NTV2GetRegisters (const NTV2RegNumSet & inRegisterNumbers)
 	:	mHeader				(NTV2_TYPE_GETREGS, sizeof(NTV2GetRegisters)),
 		mInNumRegisters		(ULWord (inRegisterNumbers.size ())),
@@ -3127,19 +3301,27 @@ bool NTV2GetRegisters::GetRegisterValues (NTV2RegisterValueMap & outValues) cons
 	outValues.clear ();
 	if (!mOutGoodRegisters)
 		return false;		//	Empty/null 'mOutGoodRegisters' array!
-	//if (!mOutNumRegisters)
-	//	return false;		//	Driver says zero successfully read!
-	//if (mOutNumRegisters > mInNumRegisters)
-	//	return false;		//	Sanity check failed:  mOutNumRegisters must be less than or equal to mInNumRegisters!
-	//if (!mOutValues)
-	//	return false;		//	Empty/null 'mOutValues' array!
-	//if (mOutGoodRegisters.GetByteCount() != mOutValues.GetByteCount())
-	//	return false;		//	Sanity check failed:  These sizes should match
+	if (!mOutNumRegisters)
+		return false;		//	Driver says zero successfully read!
+	if (mOutNumRegisters > mInNumRegisters)
+		return false;		//	Sanity check failed:  mOutNumRegisters must be less than or equal to mInNumRegisters!
+	if (!mOutValues)
+		return false;		//	Empty/null 'mOutValues' array!
+	if (mOutGoodRegisters.GetByteCount() != mOutValues.GetByteCount())
+		return false;		//	Sanity check failed:  These sizes should match
 
 	const ULWord *	pRegArray	(mOutGoodRegisters);
 	const ULWord *	pValArray	(mOutValues);
 	for (ULWord ndx(0);  ndx < mOutNumRegisters;  ndx++)
+	{
 		outValues [pRegArray[ndx]] = pValArray[ndx];
+#if 0	//	Fake KONAIP25G from C4412G (see also CNTV2XXXXDriverInterface::ReadRegister):
+	if (pRegArray[ndx] == kRegBoardID  &&  pValArray[ndx] == DEVICE_ID_CORVID44_8K)
+		outValues [pRegArray[ndx]] = DEVICE_ID_KONAIP_25G;
+	else if (pRegArray[ndx] == kRegReserved83  ||  pRegArray[ndx] == kRegLPRJ45IP)
+		outValues [pRegArray[ndx]] = 0x0A03FAD9;	//	Local IPv4    10.3.250.217
+#endif	//	0
+	}
 	return true;
 }
 
@@ -3153,7 +3335,16 @@ bool NTV2GetRegisters::GetRegisterValues (NTV2RegisterReads & outValues) const
 	if (outValues.empty())
 	{
 		for (NTV2RegValueMapConstIter it(regValMap.begin());  it != regValMap.end();  ++it)
-			outValues.push_back(NTV2RegInfo(/*regNum*/it->first, /*regVal*/it->second));
+		{
+			NTV2RegInfo regInfo(/*regNum*/it->first, /*regVal*/it->second);
+#if 0		//	Fake KONAIP25G from C4412G (see also CNTV2XXXXDriverInterface::ReadRegister):
+			if (regInfo.regNum() == kRegBoardID  &&  regInfo.value() == DEVICE_ID_CORVID44_8K)
+				regInfo.setValue(DEVICE_ID_KONAIP_25G);
+			else if (regInfo.regNum() == kRegReserved83  ||  regInfo.regNum() == kRegLPRJ45IP)
+				regInfo.setValue(0x0A03FAD9);	//	Local IPv4    10.3.250.217
+#endif	//	0
+			outValues.push_back(regInfo);
+		}
 		return true;
 	}
 	else
@@ -3162,9 +3353,17 @@ bool NTV2GetRegisters::GetRegisterValues (NTV2RegisterReads & outValues) const
 		for (NTV2RegisterReadsIter it (outValues.begin());	it != outValues.end();	++it)
 		{
 			NTV2RegValueMapConstIter mapIter(regValMap.find(it->registerNumber));
-			if (mapIter == regValMap.end())
+			if (mapIter != regValMap.end())
+				it->registerValue = mapIter->second;
+			else
 				missingTally++; //	Missing register
-			it->registerValue = mapIter->second;
+				
+#if 0		//	Fake KONAIP25G from C4412G (see also CNTV2XXXXDriverInterface::ReadRegister):
+			if (it->registerNumber == kRegBoardID  &&  it->registerValue == DEVICE_ID_CORVID44_8K)
+				it->registerValue = DEVICE_ID_KONAIP_25G;
+			else if (it->registerNumber == kRegReserved83  ||  it->registerNumber == kRegLPRJ45IP)
+				it->registerValue = 0x0A03FAD9;	//	Local IPv4    10.3.250.217
+#endif	//	0
 		}
 		return !missingTally;
 	}
@@ -3559,12 +3758,13 @@ using namespace ntv2nub;
 	}
 
 	bool NTV2_HEADER::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
-	{
+	{	uint32_t v32(0);
 		POPU32(fHeaderTag, inBlob, inOutIndex);					//	ULWord		fHeaderTag
 		POPU32(fType, inBlob, inOutIndex);						//	ULWord		fType
 		POPU32(fHeaderVersion, inBlob, inOutIndex);				//	ULWord		fHeaderVersion
 		POPU32(fVersion, inBlob, inOutIndex);					//	ULWord		fVersion
-		POPU32(fSizeInBytes, inBlob, inOutIndex);				//	ULWord		fSizeInBytes
+		// Do not decode fSizeInBytes, use native size because size can vary based on OS specific struct padding
+		POPU32(v32, inBlob, inOutIndex);						//	ULWord		fSizeInBytes - dummy read
 		POPU32(fPointerSize, inBlob, inOutIndex);				//	ULWord		fPointerSize
 		POPU32(fOperation, inBlob, inOutIndex);					//	ULWord		fOperation
 		POPU32(fResultStatus, inBlob, inOutIndex);				//	ULWord		fResultStatus
@@ -3586,30 +3786,47 @@ using namespace ntv2nub;
 	}
 
 
-	bool NTV2Buffer::RPCEncode (UByteSequence & outBlob)
+	bool NTV2Buffer::RPCEncode (UByteSequence & outBlob, bool fillBuffer)
 	{
 		PUSHU32(fByteCount, outBlob);							//	ULWord		fByteCount
 		PUSHU32(fFlags, outBlob);								//	ULWord		fFlags
-		if (!IsNULL())
+		if (!IsNULL() && fillBuffer)
 			AppendU8s(outBlob);	//	NOTE: My buffer content should already have been made BigEndian, if necessary
 		return true;
 	}
 
-	bool NTV2Buffer::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool NTV2Buffer::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex, bool fillBuffer)
 	{
 		ULWord byteCount(0), flags(0);
 		POPU32(byteCount, inBlob, inOutIndex);					//	ULWord		fByteCount
 		POPU32(flags, inBlob, inOutIndex);						//	ULWord		fFlags
 		if (!Allocate(byteCount, flags & NTV2Buffer_PAGE_ALIGNED))
 			return false;
-		if ((inOutIndex + byteCount) > inBlob.size())
-			return false;	//	past end of inBlob
-		for (ULWord cnt(0);  cnt < byteCount;  cnt++)
-			U8(int(cnt)) = inBlob.at(inOutIndex++);	//	Caller is responsible for byte-swapping if needed
+		if (fillBuffer)
+		{
+			if ((inOutIndex + byteCount) > inBlob.size())
+				return false;	//	past end of inBlob
+			::memcpy(GetHostPointer(), inBlob.data() + inOutIndex, byteCount); //	Caller is responsible for byte-swapping if needed
+			inOutIndex += byteCount;
+		}	
 		return true;
 	}
 
-	bool NTV2GetRegisters::RPCEncode (UByteSequence & outBlob)
+	// Created for DMATransfer, removed Allocate().
+	bool NTV2Buffer::RPCDecodeNoAllocate (const UByteSequence & inBlob, size_t & inOutIndex)
+	{
+		ULWord byteCount(0), flags(0);
+		POPU32(byteCount, inBlob, inOutIndex);					//	ULWord		fByteCount
+		POPU32(flags, inBlob, inOutIndex);						//	ULWord		fFlags
+		if ((inOutIndex + byteCount) > inBlob.size())
+			return false;	//	past end of inBlob
+
+		::memcpy(GetHostPointer(), inBlob.data() + inOutIndex, byteCount); //	Caller is responsible for byte-swapping if needed
+		inOutIndex += byteCount;
+		return true;
+	}
+
+	bool NTV2GetRegisters::RPCEncodeClient (UByteSequence & outBlob)
 	{
 		const size_t totBytes	(mHeader.GetSizeInBytes()	//	Header + natural size of all structs/fields inbetween + Trailer
 								+ mInRegisters.GetByteCount() + mOutGoodRegisters.GetByteCount() + mOutValues.GetByteCount());	//	NTV2Buffer fields
@@ -3618,38 +3835,76 @@ using namespace ntv2nub;
 		if (!NTV2HostIsBigEndian)
 		{	//	All of my NTV2Buffers store arrays of ULWords that must be BigEndian BEFORE encoding into outBlob...
 			mInRegisters.ByteSwap32();
-			mOutGoodRegisters.ByteSwap32();
-			mOutValues.ByteSwap32();
 		}
-		bool ok = mHeader.RPCEncode(outBlob);					//	NTV2_HEADER		mHeader
-		PUSHU32(mInNumRegisters, outBlob);						//		ULWord			mInNumRegisters
-		ok &= mInRegisters.RPCEncode(outBlob);					//		NTV2Buffer		mInRegisters
-		PUSHU32(mOutNumRegisters, outBlob);						//		ULWord			mOutNumRegisters
-		ok &= mOutGoodRegisters.RPCEncode(outBlob)				//		NTV2Buffer		mOutGoodRegisters
-			&& mOutValues.RPCEncode(outBlob)					//		NTV2Buffer		mOutValues
-			&& mTrailer.RPCEncode(outBlob);						//	NTV2_TRAILER	mTrailer
+		bool ok = mHeader.RPCEncode(outBlob);								//	NTV2_HEADER		mHeader
+		PUSHU32(mInNumRegisters, outBlob);									//		ULWord			mInNumRegisters
+		ok &= mInRegisters.RPCEncode(outBlob, /*fillbuffer=*/true);			//		NTV2Buffer		mInRegisters
+		PUSHU32(mOutNumRegisters, outBlob);									//		ULWord			mOutNumRegisters
+		ok &= mOutGoodRegisters.RPCEncode(outBlob, /*fillbuffer=*/false)	//		NTV2Buffer		mOutGoodRegisters
+			&& mOutValues.RPCEncode(outBlob, /*fillbuffer=*/false)			//		NTV2Buffer		mOutValues
+			&& mTrailer.RPCEncode(outBlob);									//	NTV2_TRAILER	mTrailer
 		if (!NTV2HostIsBigEndian  &&  !ok)
 		{	//	FAILED:  Un-byteswap NTV2Buffer data...
 			mInRegisters.ByteSwap32();
+		}
+		return ok;
+	}
+
+	bool NTV2GetRegisters::RPCDecodeServer (const UByteSequence & inBlob, size_t & inOutIndex)
+	{
+		bool ok = mHeader.RPCDecode(inBlob, inOutIndex);								//	NTV2_HEADER		mHeader
+		if (!ok) return false;
+		POPU32(mInNumRegisters, inBlob, inOutIndex);									//		ULWord			mInNumRegisters
+		ok &= mInRegisters.RPCDecode(inBlob, inOutIndex, /*fillbuffer=*/true);			//		NTV2Buffer		mInRegisters
+		POPU32(mOutNumRegisters, inBlob, inOutIndex);									//		ULWord			mOutNumRegisters
+		ok &= mOutGoodRegisters.RPCDecode(inBlob, inOutIndex, /*fillbuffer=*/false);	//		NTV2Buffer		mOutGoodRegisters
+		ok &= mOutValues.RPCDecode(inBlob, inOutIndex, /*fillbuffer=*/false);			//		NTV2Buffer		mOutValues
+		ok &= mTrailer.RPCDecode(inBlob, inOutIndex);									//	NTV2_TRAILER	mTrailer
+		if (!NTV2HostIsBigEndian)
+		{	//	Re-byteswap NTV2Buffer data after decoding...
+			mInRegisters.ByteSwap32();
+		}
+		return ok;
+	}
+
+	bool NTV2GetRegisters::RPCEncodeServer (UByteSequence & outBlob)
+	{
+		const size_t totBytes	(mHeader.GetSizeInBytes()	//	Header + natural size of all structs/fields inbetween + Trailer
+								+ mInRegisters.GetByteCount() + mOutGoodRegisters.GetByteCount() + mOutValues.GetByteCount());	//	NTV2Buffer fields
+		if (outBlob.capacity() < totBytes)
+			outBlob.reserve(totBytes);
+		if (!NTV2HostIsBigEndian)
+		{	//	All of my NTV2Buffers store arrays of ULWords that must be BigEndian BEFORE encoding into outBlob...
+			mOutGoodRegisters.ByteSwap32();
+			mOutValues.ByteSwap32();
+		}
+		bool ok = mHeader.RPCEncode(outBlob);							//	NTV2_HEADER		mHeader
+		PUSHU32(mInNumRegisters, outBlob);								//		ULWord			mInNumRegisters
+		ok &= mInRegisters.RPCEncode(outBlob, /*fillbuffer=*/false);	//		NTV2Buffer		mInRegisters
+		PUSHU32(mOutNumRegisters, outBlob);								//		ULWord			mOutNumRegisters
+		ok &= mOutGoodRegisters.RPCEncode(outBlob, /*fillbuffer=*/true)	//		NTV2Buffer		mOutGoodRegisters
+			&& mOutValues.RPCEncode(outBlob, /*fillbuffer=*/true)		//		NTV2Buffer		mOutValues
+			&& mTrailer.RPCEncode(outBlob);								//	NTV2_TRAILER	mTrailer
+		if (!NTV2HostIsBigEndian  &&  !ok)
+		{	//	FAILED:  Un-byteswap NTV2Buffer data...
 			mOutGoodRegisters.ByteSwap32();
 			mOutValues.ByteSwap32();
 		}
 		return ok;
 	}
 
-	bool NTV2GetRegisters::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool NTV2GetRegisters::RPCDecodeClient (const UByteSequence & inBlob, size_t & inOutIndex)
 	{
-		bool ok = mHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER		mHeader
+		bool ok = mHeader.RPCDecode(inBlob, inOutIndex);							//	NTV2_HEADER		mHeader
 		if (!ok) return false;
-		POPU32(mInNumRegisters, inBlob, inOutIndex);			//		ULWord			mInNumRegisters
-		ok &= mInRegisters.RPCDecode(inBlob, inOutIndex);		//		NTV2Buffer		mInRegisters
-		POPU32(mOutNumRegisters, inBlob, inOutIndex);			//		ULWord			mOutNumRegisters
-		ok &= mOutGoodRegisters.RPCDecode(inBlob, inOutIndex);	//		NTV2Buffer		mOutGoodRegisters
-		ok &= mOutValues.RPCDecode(inBlob, inOutIndex);			//		NTV2Buffer		mOutValues
-		ok &= mTrailer.RPCDecode(inBlob, inOutIndex);			//	NTV2_TRAILER	mTrailer
+		POPU32(mInNumRegisters, inBlob, inOutIndex);								//		ULWord			mInNumRegisters
+		ok &= mInRegisters.RPCDecode(inBlob, inOutIndex, /*fillbuffer=*/false);		//		NTV2Buffer		mInRegisters
+		POPU32(mOutNumRegisters, inBlob, inOutIndex);								//		ULWord			mOutNumRegisters
+		ok &= mOutGoodRegisters.RPCDecode(inBlob, inOutIndex, /*fillbuffer=*/true);	//		NTV2Buffer		mOutGoodRegisters
+		ok &= mOutValues.RPCDecode(inBlob, inOutIndex, /*fillbuffer=*/true);		//		NTV2Buffer		mOutValues
+		ok &= mTrailer.RPCDecode(inBlob, inOutIndex);								//	NTV2_TRAILER	mTrailer
 		if (!NTV2HostIsBigEndian)
 		{	//	Re-byteswap NTV2Buffer data after decoding...
-			mInRegisters.ByteSwap32();
 			mOutGoodRegisters.ByteSwap32();
 			mOutValues.ByteSwap32();
 		}

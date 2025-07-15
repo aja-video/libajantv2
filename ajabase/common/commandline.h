@@ -92,7 +92,7 @@ public:
 	/**
 	 * Set the default value string for this AJACommandLineOption.
 	 *
-	 * @param[in] desc	The default value string.
+	 * @param[in] value	The default value string.
 	 */
 	void SetDefaultValue(const std::string &value);
 
@@ -169,7 +169,7 @@ typedef std::pair<std::string, AJACommandLineParser*> AJASubParserPair;
 typedef enum {
 	kShortOptionsAsLong = 1 << 0,
 	kNoDefaultHelpOption = 1 << 1,
-	kNoDefaultUsageOption = 1 << 2,
+	kNoDefaultUsageOption = 1 << 2
 } AJACommandLineParserFlags;
 
 /**
@@ -248,7 +248,7 @@ public:
 	/**
 	 * Parse a list of strings containing command-line args.
 	 *
-	 * @param[in] desc	The list of arg strings.
+	 * @param[in] args	The list of arg strings.
 	 *
 	 * @return	Returns `true` if the command-line args were parsed successfully, otherwise `false`.
 	 */
@@ -259,6 +259,8 @@ public:
 	 *
 	 * @param[in] argc	The arg count.
 	 * @param[in] argv	The list of arg strings.
+	 *
+	 * @return	Returns a non-zero exit code upon failure or use of --help or --usage.
 	 */
 	bool ParseArgs(int argc, const char *argv[], bool errUnknown=false);
 
@@ -267,6 +269,8 @@ public:
 	 *
 	 * @param[in] argc	The arg count.
 	 * @param[in] argv	The list of arg strings.
+	 *
+	 * @return	Returns a non-zero exit code upon failure or use of --help or --usage.
 	 */
 	bool ParseArgs(int argc, char *argv[], bool errUnknown=false);
 
@@ -367,7 +371,7 @@ public:
 	/**
 	 * Set the usage text string to print if help is invoked by the args parser.
 	 *
-	 * @param[in] name	The usage text string.
+	 * @param[in] usageText	The usage text string.
 	 */
 	void SetUsageText(const std::string &usageText);
 
@@ -381,7 +385,7 @@ public:
 	/**
 	 * Set the help text string to print if help is invoked by the args parser.
 	 *
-	 * @param[in] name	The help text string.
+	 * @param[in] helpText	The help text string.
 	 */
 	void SetHelpText(const std::string &helpText);
 
@@ -393,9 +397,7 @@ public:
 	std::string HelpText();
 
 	/**
-	 * Get the name of the command (if-any) represented by this args parser.
-	 *
-	 * @return The command name string, if set, otherwise empty string.
+	 * @returns a copy of the command name string, if set; otherwise an empty string.
 	 */
 	std::string CommandName();
 

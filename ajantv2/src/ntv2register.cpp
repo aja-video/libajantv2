@@ -1511,7 +1511,7 @@ bool CNTV2Card::SetReference (const NTV2ReferenceSource inRefSource, const bool 
 	if (IsIPDevice())
 		WriteRegister(kRegGlobalControl2, ptpControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
 
-	if (GetNumSupported(kDeviceGetNumVideoChannels) > 4 || IsIPDevice())
+	if (GetNumSupported(kDeviceGetNumVideoChannels) > 4 || (IsIPDevice() || Is25GIPDevice()) )
 		WriteRegister (kRegGlobalControl2, refControl2, kRegMaskRefSource2, kRegShiftRefSource2);
 		
 	return WriteRegister (kRegGlobalControl, refControl1, kRegMaskRefSource, kRegShiftRefSource);
@@ -1525,7 +1525,7 @@ bool CNTV2Card::GetReference (NTV2ReferenceSource & outValue)
 	ULWord	refControl2(0), ptpControl(0);
 	bool result (CNTV2DriverInterface::ReadRegister (kRegGlobalControl, outValue, kRegMaskRefSource, kRegShiftRefSource));
 
-	if (GetNumSupported(kDeviceGetNumVideoChannels) > 4 || IsIPDevice())
+    if ((GetNumSupported(kDeviceGetNumVideoChannels) > 4 || IsIPDevice()) && !NTV2DeviceCanDo25GIP(_boardID) )
 	{
 		ReadRegister (kRegGlobalControl2,  refControl2,	 kRegMaskRefSource2,  kRegShiftRefSource2);
 		if (refControl2)
@@ -1549,6 +1549,24 @@ bool CNTV2Card::GetReference (NTV2ReferenceSource & outValue)
 				default:	break;
 			}
 	}
+
+    if (NTV2DeviceCanDo25GIP(_boardID))
+    {
+        result = ReadRegister(kRegLPPTPSFPStatus, ptpControl);
+        switch(ptpControl)
+        {
+        default:
+        case 0:
+            outValue = NTV2_REFERENCE_FREERUN;
+            break;
+        case 1:
+            outValue = NTV2_REFERENCE_SFP1_PTP;
+            break;
+        case 2:
+            outValue = NTV2_REFERENCE_SFP2_PTP;
+            break;
+        }
+    }
 
 	if (_boardID == DEVICE_ID_KONAHDMI)
 		switch (outValue)
@@ -1802,6 +1820,52 @@ bool CNTV2Card::GetPossibleConnections (NTV2PossibleConnections & outConnections
 	return CNTV2SignalRouter::MakeRouteROMRegisters(ROMregs)
 			&&	ReadRegisters(ROMregs)
 			&&	CNTV2SignalRouter::GetPossibleConnections(ROMregs, outConnections);
+}
+
+bool CNTV2Card::GetAllWidgetInputs (NTV2InputXptIDSet & outInputs)
+{
+	outInputs.clear();
+	const ULWordSet widgetIDs (GetSupportedItems(kNTV2EnumsID_WidgetID));
+
+	for (ULWordSetConstIter iter(widgetIDs.begin());  iter != widgetIDs.end ();  ++iter)
+	{
+		const NTV2WidgetID wgtID(NTV2WidgetID(*iter + 0));
+		NTV2InputXptIDSet inputs;
+		CNTV2SignalRouter::GetWidgetInputs (wgtID, inputs);
+		for (NTV2InputXptIDSetConstIter it(inputs.begin());  it != inputs.end();  ++it)
+		{
+			if (CNTV2SignalRouter::WidgetIDToType(wgtID) == NTV2WidgetType_FrameStore)
+				if (!IsSupported(kDeviceCanDo425Mux))
+					if (!IsSupported(kDeviceCanDo8KVideo))
+						if (::NTV2InputCrosspointIDToString(*it, false).find("DS2") != string::npos)	//	is DS2 input?
+							continue;	//	do not include FrameStore DS2 inputs for IP25G
+			outInputs.insert(*it);
+		}
+	}
+	return true;
+}
+
+bool CNTV2Card::GetAllWidgetOutputs (NTV2OutputXptIDSet & outOutputs)
+{
+	outOutputs.clear();
+	const ULWordSet widgetIDs (GetSupportedItems(kNTV2EnumsID_WidgetID));
+
+	for (ULWordSetConstIter iter(widgetIDs.begin());	iter != widgetIDs.end ();  ++iter)
+	{
+		const NTV2WidgetID wgtID(NTV2WidgetID(*iter + 0));
+		NTV2OutputXptIDSet outputs;
+		CNTV2SignalRouter::GetWidgetOutputs (wgtID, outputs);
+		for (NTV2OutputXptIDSetConstIter it(outputs.begin());  it != outputs.end();  ++it)
+		{
+			if (CNTV2SignalRouter::WidgetIDToType(wgtID) == NTV2WidgetType_FrameStore)
+				if (!IsSupported(kDeviceCanDo425Mux))
+					if (!IsSupported(kDeviceCanDo8KVideo))
+						if (::NTV2OutputCrosspointIDToString(*it, false).find("DS2") != string::npos)	//	is DS2 output?
+							continue;	//	do not include FrameStore DS2 outputs for IP25G
+			outOutputs.insert(*it);
+		}
+	}
+	return true;
 }
 
 /////////////////////////////////
@@ -3932,15 +3996,17 @@ bool CNTV2Card::GetSDIOutputAudioSystem (const NTV2Channel inChannel, NTV2AudioS
 	if (ULWord(inChannel) >= GetNumSupported(kDeviceGetNumVideoOutputs))
 		return false;	//	illegal channel
 
-	ULWord	b2(0),	b1(0),	b0(0);	//	The three bits that determine which audio system feeds the SDI output
+	ULWord readVal;
 	const ULWord regNum (gChannelToSDIOutControlRegNum[inChannel]);
-	if (!ReadRegister (regNum, b2, BIT(18), 18))	//	bit 18 is MSB
+	if (!ReadRegister (regNum, readVal, kK2RegMaskSDIOutDS1AudioSelect, kK2RegShiftSDIOutDS1AudioSelect))
 		return false;
-	if (!ReadRegister (regNum, b1, BIT(28), 28))
-		return false;
-	if (!ReadRegister (regNum, b0, BIT(30), 30))	//	bit 30 is LSB
-		return false;
-	outAudioSystem = NTV2AudioSystem(b2 * 4	+  b1 * 2  +  b0);
+
+	readVal <<= kK2RegShiftSDIOutDS1AudioSelect;
+	ULWord b2 = (readVal & kK2RegMaskSDIOutDS1Audio_Bit2) ? 1 : 0;
+	ULWord b1 = (readVal & kK2RegMaskSDIOutDS1Audio_Bit1) ? 1 : 0;
+	ULWord b0 = (readVal & kK2RegMaskSDIOutDS1Audio_Bit0) ? 1 : 0;
+	
+	outAudioSystem = NTV2AudioSystem(b2 * 4  +  b1 * 2  +  b0);
 	return true;
 
 }	//	GetSDIOutputAudioSystem
@@ -3948,27 +4014,20 @@ bool CNTV2Card::GetSDIOutputAudioSystem (const NTV2Channel inChannel, NTV2AudioS
 
 bool CNTV2Card::SetSDIOutputAudioSystem (const NTV2Channel inChannel, const NTV2AudioSystem inAudioSystem)
 {
+	
 	if (ULWord(inChannel) >= GetNumSupported(kDeviceGetNumVideoOutputs))
 		return false;	//	Invalid channel
 	if (ULWord(inAudioSystem) >= GetNumSupported(kDeviceGetTotalNumAudioSystems))
 		return false;	//	Invalid audio system
 
-	ULWord	value	(inAudioSystem);
-	ULWord	b2		(value / 4);
-	if (!WriteRegister (gChannelToSDIOutControlRegNum [inChannel], b2, BIT(18), 18))	//	bit 18 is MSB
-		return false;
+	//  shift each bit from it's position in inAudioSystem to it's position in the register
+	//  bit 18 (MSB), bit 28, bit 30 (LSB)
+	ULWord b2 = (inAudioSystem << 16) & kK2RegMaskSDIOutDS1Audio_Bit2;
+	ULWord b1 = (inAudioSystem << 27) & kK2RegMaskSDIOutDS1Audio_Bit1;
+	ULWord b0 = (inAudioSystem << 30) & kK2RegMaskSDIOutDS1Audio_Bit0;
 
-	value -= b2 * 4;
-	ULWord	b1		(value / 2);
-	if (!WriteRegister (gChannelToSDIOutControlRegNum [inChannel], b1, BIT(28), 28))
-		return false;
-
-	value -= b1 * 2;
-	ULWord	b0		(value);
-	if (!WriteRegister (gChannelToSDIOutControlRegNum [inChannel], b0, BIT(30), 30))	//	bit 30 is LSB
-		return false;
-
-	return true;
+	return WriteRegister (gChannelToSDIOutControlRegNum [inChannel], (b2 | b1 | b0) >> kK2RegShiftSDIOutDS1AudioSelect , 
+							kK2RegMaskSDIOutDS1AudioSelect, kK2RegShiftSDIOutDS1AudioSelect);
 
 }	//	SetSDIOutputAudioSystem
 
@@ -3989,14 +4048,16 @@ bool CNTV2Card::GetSDIOutputDS2AudioSystem (const NTV2Channel inChannel, NTV2Aud
 	if (ULWord(inChannel) >= GetNumSupported(kDeviceGetNumVideoOutputs))
 		return false;	//	illegal channel
 
-	ULWord			b2(0),	b1(0),	b0(0);		//	The three bits that determine which audio system feeds the SDI output's DS2
-	const ULWord	regNum	(gChannelToSDIOutControlRegNum[inChannel]);
-	if (!ReadRegister (regNum, b2, BIT(19), 19))	//	bit 19 is MSB
+	ULWord readVal;
+	const ULWord regNum (gChannelToSDIOutControlRegNum[inChannel]);
+	if (!ReadRegister (regNum, readVal, kK2RegMaskSDIOutDS2AudioSelect, kK2RegShiftSDIOutDS2AudioSelect))
 		return false;
-	if (!ReadRegister (regNum, b1, BIT(29), 29))
-		return false;
-	if (!ReadRegister (regNum, b0, BIT(31), 31))	//	bit 31 is LSB
-		return false;
+
+	readVal <<= kK2RegShiftSDIOutDS2AudioSelect;
+	ULWord b2 = (readVal & kK2RegMaskSDIOutDS2Audio_Bit2) ? 1 : 0;
+	ULWord b1 = (readVal & kK2RegMaskSDIOutDS2Audio_Bit1) ? 1 : 0;
+	ULWord b0 = (readVal & kK2RegMaskSDIOutDS2Audio_Bit0) ? 1 : 0;
+	
 	outAudioSystem = NTV2AudioSystem(b2 * 4  +  b1 * 2  +  b0);
 	return true;
 
@@ -4010,25 +4071,14 @@ bool CNTV2Card::SetSDIOutputDS2AudioSystem (const NTV2Channel inChannel, const N
 	if (ULWord(inAudioSystem) >= GetNumSupported(kDeviceGetTotalNumAudioSystems))
 		return false;	//	Invalid audio system
 
-	ULWord	value	(inAudioSystem);
-	ULWord	b2		(value / 4);
-	if (!WriteRegister (gChannelToSDIOutControlRegNum [inChannel], b2, BIT(19), 19))	//	bit 19 is MSB
-		return false;
+	//  shift each bit from it's position in inAudioSystem to it's position in the register
+	//  bit 19 (MSB), bit 29, bit 31 (LSB)
+	ULWord b2 = (inAudioSystem << 17) & kK2RegMaskSDIOutDS2Audio_Bit2;
+	ULWord b1 = (inAudioSystem << 28) & kK2RegMaskSDIOutDS2Audio_Bit1;
+	ULWord b0 = (inAudioSystem << 31) & kK2RegMaskSDIOutDS2Audio_Bit0;
 
-	value -= b2 * 4;
-	ULWord	b1		(value / 2);
-	if (!WriteRegister (gChannelToSDIOutControlRegNum [inChannel], b1, BIT(29), 29))
-		return false;
-
-	value -= b1 * 2;
-	ULWord	b0		(value);
-	if (!WriteRegister (gChannelToSDIOutControlRegNum [inChannel], b0, BIT(31), 31))	//	bit 31 is LSB
-		return false;
-
-	//NTV2AudioSystem	compareA;
-	//GetSDIOutputDS2AudioSystem (inChannel, compareA);
-	//NTV2_ASSERT(compareA == inAudioSystem);
-	return true;
+	return WriteRegister (gChannelToSDIOutControlRegNum [inChannel], (b2 | b1 | b0) >> kK2RegShiftSDIOutDS2AudioSelect , 
+							kK2RegMaskSDIOutDS2AudioSelect, kK2RegShiftSDIOutDS2AudioSelect);
 
 }	//	SetSDIOutputDS2AudioSystem
 
@@ -4514,9 +4564,18 @@ bool CNTV2Card::GetDieTemperature (double & outTemp, const NTV2DieTempScale inTe
 	ULWord			rawRegValue (0);
 	if (!ReadRegister (kRegSysmonVccIntDieTemp, rawRegValue))
 		return false;
-
-	const UWord		dieTempRaw	((rawRegValue & 0x0000FFFF) >> 6);
-	const double	celsius		(double (dieTempRaw) * 503.975 / 1024.0 - 273.15);
+	
+	double celsius (0);
+	if (IsSupported(kDeviceCanDoVersalSysMon))
+	{
+		UWord dieTempRaw (rawRegValue & 0x0000FFFF);
+		celsius = double (dieTempRaw) / 128.0;
+	}
+	else
+	{
+		UWord dieTempRaw ((rawRegValue & 0x0000FFFF) >> 6);
+		celsius = (double (dieTempRaw) * 503.975 / 1024.0 - 273.15);
+	}
 	switch (inTempScale)
 	{
 		case NTV2DieTempScale_Celsius:		outTemp = celsius;							break;
@@ -4718,14 +4777,6 @@ bool CNTV2Card::GetMultiRasterBypassEnable (bool & outEnabled)
 bool CNTV2Card::IsMultiRasterWidgetChannel (const NTV2Channel inChannel)
 {
 	return HasMultiRasterWidget() && inChannel == NTV2Channel(GetNumSupported(kDeviceGetNumVideoChannels));
-}
-
-bool CNTV2Card::IsBreakoutBoardConnected (void)
-{
-	bool BOBConnected(false);
-	return NTV2DeviceCanDoBreakoutBoard(_boardID)
-		   &&  CNTV2DriverInterface::ReadRegister(kRegBOBStatus, BOBConnected, kRegMaskBOBAbsent, kRegShiftBOBAbsent)
-		   &&  (BOBConnected == 0);
 }
 
 

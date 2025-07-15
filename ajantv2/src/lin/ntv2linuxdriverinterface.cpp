@@ -154,6 +154,12 @@ bool CNTV2LinuxDriverInterface::ReadRegister (const ULWord inRegNum,  ULWord & o
 	if (result)
 		{LDIFAIL("IOCTL_NTV2_READ_REGISTER failed");	return false;}
 	outValue = ra.RegisterValue;
+#if 0	//	Fake KONAIP25G from C4412G (see also NTV2GetRegisters::GetRegisterValues):
+	if (inRegNum == kRegBoardID  &&  outValue == DEVICE_ID_CORVID44_8K)
+		outValue = DEVICE_ID_KONAIP_25G;
+	else if (inRegNum == kRegReserved83  ||  inRegNum == kRegLPRJ45IP)
+		outValue = 0x0A03FAD9;	//	Local IPv4    10.3.250.217
+#endif	//	0
 	return true;
 }
 
@@ -1094,22 +1100,6 @@ bool CNTV2LinuxDriverInterface::NTV2Message (NTV2_HEADER * pInMessage)
 	AJADebug::StatTimerStart(AJA_DebugStat_NTV2Message);
 	const int result (ioctl(int(_hDevice), IOCTL_AJANTV2_MESSAGE, pInMessage));
 	AJADebug::StatTimerStop(AJA_DebugStat_NTV2Message);
-	if (result)
-		{LDIFAIL("IOCTL_AJANTV2_MESSAGE failed");	return false;}
-	return true;
-}
-
-bool CNTV2LinuxDriverInterface::HevcSendMessage (HevcMessageHeader* pMessage)
-{
-	if (!pMessage)
-		return false;	//	NULL message pointer
-	if (_hDevice == INVALID_HANDLE_VALUE)
-		return false;
-	if (_hDevice == 0)
-		return false;
-	AJADebug::StatTimerStart(AJA_DebugStat_HEVCSendMessage);
-	const int result = ioctl(int(_hDevice), IOCTL_HEVC_MESSAGE, pMessage);
-	AJADebug::StatTimerStop(AJA_DebugStat_HEVCSendMessage);
 	if (result)
 		{LDIFAIL("IOCTL_AJANTV2_MESSAGE failed");	return false;}
 	return true;

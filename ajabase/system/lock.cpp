@@ -8,6 +8,7 @@
 #include "ajabase/system/lock.h"
 #if defined(AJA_USE_CPLUSPLUS11) && !defined(AJA_BAREMETAL)
 	#include <chrono>
+	using namespace std;
 #else
 	// include the system dependent implementation class
 	#if defined(AJA_WINDOWS)
@@ -27,7 +28,7 @@ AJALock::AJALock(const char* pName)
 #if defined(AJA_USE_CPLUSPLUS11) && !defined(AJA_BAREMETAL)
 	mpMutex = new recursive_timed_mutex;
 	if (pName != nullptr)
-		name = pName;
+		mName = pName;
 #else
 	mpImpl = NULL;
 	mpImpl = new AJALockImpl(pName);
@@ -38,7 +39,7 @@ AJALock::AJALock (const AJALock & inLock)
 {	//	Copy constructor -- only name is copied...
 #if defined(AJA_USE_CPLUSPLUS11) && !defined(AJA_BAREMETAL)
 	mpMutex = new recursive_timed_mutex;
-	name = inLock.name;
+	mName = inLock.mName;
 #else
 	mpImpl = NULL;
 	mpImpl = new AJALockImpl(NULL);	//	FOR NOW, NAME NOT COPIED -- TBD:  inLock.mpImpl->mName);

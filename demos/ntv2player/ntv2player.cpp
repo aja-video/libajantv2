@@ -247,11 +247,6 @@ AJAStatus NTV2Player::SetUpVideo (void)
 	//	in order to be able to wait on its event/semaphore...
 	mDevice.SubscribeOutputVerticalEvent (mConfig.fOutputChannel);
 
-	//	Check if HDR anc is permissible...
-	if (IS_KNOWN_AJAAncDataType(mConfig.fTransmitHDRType)  &&  !mDevice.features().CanDoCustomAnc())
-		{cerr << "## WARNING:  HDR Anc requested, but device can't do custom anc" << endl;
-			mConfig.fTransmitHDRType = AJAAncDataType_Unknown;}
-
 	//	Get current per-field maximum Anc buffer size...
 	if (!mDevice.GetAncRegionOffsetFromBottom (gAncMaxSizeBytes, NTV2_AncRgn_Field2))
 		gAncMaxSizeBytes = NTV2_ANCSIZE_MAX;
@@ -268,11 +263,10 @@ AJAStatus NTV2Player::SetUpVideo (void)
 AJAStatus NTV2Player::SetUpAudio (void)
 {
 	uint16_t numAudioChannels (mDevice.features().GetMaxAudioChannels());
-
-	//	If there are 2048 pixels on a line instead of 1920, reduce the number of audio channels
-	//	This is because HANC is narrower, and has space for only 8 channels
-	if (NTV2_IS_2K_1080_VIDEO_FORMAT(mConfig.fVideoFormat)  &&  numAudioChannels > 8)
-		numAudioChannels = 8;
+	if (numAudioChannels > 8)										//	If audio system handles more than 8 channels...
+		if (!mDevice.features().CanDo2110())						//	...and SDI (i.e. not ST 2110 IP streaming)...
+			if (NTV2_IS_2K_1080_VIDEO_FORMAT(mConfig.fVideoFormat))	//	...and 2K (narrower HANC only fits 8 audio channels)
+				numAudioChannels = 8;	//	...then reduce to 8 audio channels
 
 	mAudioSystem = NTV2_AUDIOSYSTEM_1;										//	Use NTV2_AUDIOSYSTEM_1...
 	if (mDevice.features().GetNumAudioSystems() > 1)						//	...but if the device has more than one audio system...
@@ -408,7 +402,6 @@ AJAStatus NTV2Player::SetUpTestPatternBuffers (void)
 bool NTV2Player::RouteOutputSignal (void)
 {
 	const NTV2Standard	outputStandard	(::GetNTV2StandardFromVideoFormat(mConfig.fVideoFormat));
-	const UWord			numSDIOutputs	(mDevice.features().GetNumVideoOutputs());
 	const bool			isRGB			(::IsRGBFormat(mConfig.fPixelFormat));
 	const bool			canVerify		(mDevice.features().HasCrosspointConnectROM());
 	UWord				connectFailures	(0);
@@ -517,20 +510,6 @@ void NTV2Player::ConsumeFrames (void)
 	mDevice.WaitForOutputVerticalInterrupt(mConfig.fOutputChannel, 4);	//	Let it stop
 	PLNOTE("Thread started");
 
-	if (IS_KNOWN_AJAAncDataType(mConfig.fTransmitHDRType))
-	{	//	HDR anc doesn't change per-frame, so fill outputXfer.acANCBuffer with the packet data...
-		static AJAAncillaryData_HDR_SDR		sdrPkt;
-		static AJAAncillaryData_HDR_HDR10	hdr10Pkt;
-		static AJAAncillaryData_HDR_HLG		hlgPkt;
-
-		switch (mConfig.fTransmitHDRType)
-		{
-			case AJAAncDataType_HDR_SDR:	pPkt = &sdrPkt;		break;
-			case AJAAncDataType_HDR_HDR10:	pPkt = &hdr10Pkt;	break;
-			case AJAAncDataType_HDR_HLG:	pPkt = &hlgPkt;		break;
-			default:											break;
-		}
-	}
 	if (pPkt)
 	{	//	Allocate page-aligned host Anc buffer...
 		uint32_t hdrPktSize	(0);

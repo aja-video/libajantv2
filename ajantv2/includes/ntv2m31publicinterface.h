@@ -1,14 +1,16 @@
 /* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2m31publicinterface.h
-	@brief		Declares structs used for the Corvid HEVC.
+	@deprecated	Corvid HEVC support removed in SDK 17.6.
 	@copyright	(C) 2012-2022 AJA Video Systems, Inc.	 All rights reserved.
 **/
 
 #ifndef NTV2M31PUBLICINTERFACE_H
 #define NTV2M31PUBLICINTERFACE_H
-
 #include "ajatypes.h"
+
+#if !defined(NTV2_DEPRECATE_17_6)	//	Corvid HEVC support removed in SDK 17.6
+
 #include "ntv2m31enums.h"
 
 #define		   CPARAM_REG_START			0x20000000
@@ -878,5 +880,6 @@ typedef enum
 	
 } EHParamRegisterShift;
 
+#endif//defined(NTV2_DEPRECATE_17_6)
 
 #endif	  //	NTV2M31PUBLICINTERFACE_H

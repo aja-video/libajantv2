@@ -339,24 +339,24 @@ public:
 		@return		True if successful;	 otherwise false.
 		@note		This only affects 4K RX mode.
 		@note		This parameter can be set in the \ref ntv2konaipjsonsetup. Both JSON examples specify it in the "network2110" area.
-		@detail		Normally the audio combiner is disabled when transmitting 16 audio channels over a single flow.
+		@details	Normally the audio combiner is disabled when transmitting 16 audio channels over a single flow.
 					However, it is possible to divide the audio into multiple flows of 4 channels each, so in this case, on the RX side,
-					you would enable the audio combiner, so that it combines all the separate flows into a single 16-channel audio buffer.
+					enable the audio combiner, so that it combines all the separate flows into a single 16-channel audio buffer.
 		@see		CNTV2Config2110::GetAudioCombineEnable
 	**/
 	bool		SetAudioCombineEnable (const bool enable);
 
 	/**
 		@brief		Answers with the enable/disable state of the audio combiner.
-		@param[in]	enable	Receives true if the audio combiner is enabled;	 otherwise false if it's disabled.
+		@param[out]	outEnabled	Receives true if the audio combiner is enabled;	 otherwise false if it's disabled.
 		@return		True if successful;	 otherwise false.
 		@note		This only affects 4K RX mode.
-		@detail		Normally the audio combiner is off when transmitting 16 audio channels over a single flow.
+		@details	Normally the audio combiner is off when transmitting 16 audio channels over a single flow.
 					However, it is possible to divide the audio into multiple flows of 4 channels each, so in this case, on the RX side,
-					you would enable the audio combiner so, that it combines all the separate flows into a single 16-channel audio buffer.
+					enable the audio combiner so, that it combines all the separate flows into a single 16-channel audio buffer.
 		@see		CNTV2Config2110::SetAudioCombineEnable
 	**/
-	bool		GetAudioCombineEnable (bool & enable);
+	bool		GetAudioCombineEnable (bool & outEnabled);
 
 	bool		SetIPServicesControl (const bool enable, const bool forceReconfig);
 	bool		GetIPServicesControl (bool & enable, bool & forceReconfig);

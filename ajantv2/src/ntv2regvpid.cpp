@@ -46,6 +46,23 @@ static const ULWord gChannelToVPIDLuminance []	= { kVRegNTV2VPIDLuminance1,		kVR
 static const ULWord gChannelToVPIDRGBRange []	= { kVRegNTV2VPIDRGBRange1,		kVRegNTV2VPIDRGBRange2,		kVRegNTV2VPIDRGBRange3,		kVRegNTV2VPIDRGBRange4,
 													kVRegNTV2VPIDRGBRange5,		kVRegNTV2VPIDRGBRange6,		kVRegNTV2VPIDRGBRange7,		kVRegNTV2VPIDRGBRange8, 0};
 
+static const ULWord gChannelToNTV2KeySignal[] = { kVRegNTV2KeySignal1, kVRegNTV2KeySignal2, kVRegNTV2KeySignal3, kVRegNTV2KeySignal4,
+                                                    kVRegNTV2KeySignal5, kVRegNTV2KeySignal6, kVRegNTV2KeySignal7, kVRegNTV2KeySignal8 };
+
+static const ULWord	gChannelToSDIOutVPIDTransferCharacteristics[] = {	kVRegSDIOutVPIDTransferCharacteristics1, kVRegSDIOutVPIDTransferCharacteristics2, kVRegSDIOutVPIDTransferCharacteristics3, kVRegSDIOutVPIDTransferCharacteristics4,
+																		kVRegSDIOutVPIDTransferCharacteristics5, kVRegSDIOutVPIDTransferCharacteristics6, kVRegSDIOutVPIDTransferCharacteristics7, kVRegSDIOutVPIDTransferCharacteristics8, 0 };
+
+static const ULWord	gChannelToSDIOutVPIDColorimetry[] =	{	kVRegSDIOutVPIDColorimetry1, kVRegSDIOutVPIDColorimetry2, kVRegSDIOutVPIDColorimetry3, kVRegSDIOutVPIDColorimetry4,
+															kVRegSDIOutVPIDColorimetry5, kVRegSDIOutVPIDColorimetry6, kVRegSDIOutVPIDColorimetry7, kVRegSDIOutVPIDColorimetry8, 0 };
+
+static const ULWord	gChannelToSDIOutVPIDLuminance[] = {	kVRegSDIOutVPIDLuminance1, kVRegSDIOutVPIDLuminance2, kVRegSDIOutVPIDLuminance3, kVRegSDIOutVPIDLuminance4,
+														kVRegSDIOutVPIDLuminance5, kVRegSDIOutVPIDLuminance6, kVRegSDIOutVPIDLuminance7, kVRegSDIOutVPIDLuminance8, 0 };
+
+static const ULWord	gChannelToSDIOutVPIDRGBRange[] = {	kVRegSDIOutVPIDRGBRange1, kVRegSDIOutVPIDRGBRange2, kVRegSDIOutVPIDRGBRange3, kVRegSDIOutVPIDRGBRange4,
+														kVRegSDIOutVPIDRGBRange5, kVRegSDIOutVPIDRGBRange6, kVRegSDIOutVPIDRGBRange7, kVRegSDIOutVPIDRGBRange8, 0 };
+
+static const ULWord gChannelToSDIOutKeySignal[] = { kVRegSDIOutKeySignal1, kVRegSDIOutKeySignal2, kVRegSDIOutKeySignal3, kVRegSDIOutKeySignal4,
+                                                    kVRegSDIOutKeySignal5, kVRegSDIOutKeySignal6, kVRegSDIOutKeySignal7, kVRegSDIOutKeySignal8 };
 
 bool CNTV2Card::GetVPIDValidA (const NTV2Channel inChannel)
 {
@@ -170,6 +187,7 @@ bool CNTV2Card::GetSDIOutVPID (ULWord & outValueA, ULWord & outValueB, const UWo
 
 }	//	GetSDIOutVPID
 
+// channel default VPID parameters
 bool CNTV2Card::SetVPIDTransferCharacteristics (const NTV2VPIDTransferCharacteristics inValue, const NTV2Channel inChannel)
 {
 	return IS_CHANNEL_VALID(inChannel) && WriteRegister(gChannelToVPIDTransferCharacteristics[inChannel], inValue);
@@ -209,3 +227,112 @@ bool CNTV2Card::GetVPIDRGBRange (NTV2VPIDRGBRange & outValue, const NTV2Channel 
 {
 	return IS_CHANNEL_VALID(inChannel) && CNTV2DriverInterface::ReadRegister(gChannelToVPIDRGBRange[inChannel], outValue);
 }
+
+bool CNTV2Card::SetKeySignal (bool inValue, const NTV2Channel inChannel)
+{
+	return IS_CHANNEL_VALID(inChannel) && WriteRegister(gChannelToNTV2KeySignal[inChannel], (inValue? 1 : 0));
+}
+
+bool CNTV2Card::GetKeySignal (bool & outValue, const NTV2Channel inChannel)
+{
+    ULWord regValue = 0;
+	if (!IS_CHANNEL_VALID(inChannel))
+        return false;
+    if (!CNTV2DriverInterface::ReadRegister(gChannelToNTV2KeySignal[inChannel], regValue))
+        return false;
+    outValue = regValue != 0;
+    return true;
+}
+
+// sdi output VPID parameter overrides
+bool CNTV2Card::SetSDIOutVPIDTransferCharacteristics(bool enable, NTV2VPIDTransferCharacteristics inValue, const NTV2Channel inChannel)
+{
+    ULWord regValue = (enable? kVRegMaskSDIOutVPIDOverride : 0) | (inValue & kVRegMaskSDIOutVPIDValue);
+	return IS_CHANNEL_VALID(inChannel) && WriteRegister(gChannelToSDIOutVPIDTransferCharacteristics[inChannel], regValue);    
+}
+
+bool CNTV2Card::GetSDIOutVPIDTransferCharacteristics(bool & enable, NTV2VPIDTransferCharacteristics & outValue, const NTV2Channel inChannel)
+{
+    if (!IS_CHANNEL_VALID(inChannel))
+        return false;
+    ULWord regValue = 0;
+    if (!CNTV2DriverInterface::ReadRegister(gChannelToSDIOutVPIDTransferCharacteristics[inChannel], regValue))
+        return false;
+    enable = (regValue & kVRegMaskSDIOutVPIDOverride) != 0;
+    outValue = (NTV2VPIDTransferCharacteristics)(regValue & kVRegMaskSDIOutVPIDValue);
+    return true;
+}
+
+bool CNTV2Card::SetSDIOutVPIDColorimetry(bool enable, NTV2VPIDColorimetry inValue, const NTV2Channel inChannel)
+{
+    ULWord regValue = (enable? kVRegMaskSDIOutVPIDOverride : 0) | (inValue & kVRegMaskSDIOutVPIDValue);
+	return IS_CHANNEL_VALID(inChannel) && WriteRegister(gChannelToSDIOutVPIDColorimetry[inChannel], regValue);    
+}
+
+bool CNTV2Card::GetSDIOutVPIDColorimetry(bool & enable, NTV2VPIDColorimetry & outValue, const NTV2Channel inChannel)
+{
+    if (!IS_CHANNEL_VALID(inChannel))
+        return false;
+    ULWord regValue = 0;
+    if (!CNTV2DriverInterface::ReadRegister(gChannelToSDIOutVPIDColorimetry[inChannel], regValue))
+        return false;
+    enable = (regValue & kVRegMaskSDIOutVPIDOverride) != 0;
+    outValue = (NTV2VPIDColorimetry)(regValue & kVRegMaskSDIOutVPIDValue);
+    return true;
+}
+
+bool CNTV2Card::SetSDIOutVPIDLuminance(bool enable, NTV2VPIDLuminance inValue, const NTV2Channel inChannel)
+{
+    ULWord regValue = (enable? kVRegMaskSDIOutVPIDOverride : 0) | (inValue & kVRegMaskSDIOutVPIDValue);
+	return IS_CHANNEL_VALID(inChannel) && WriteRegister(gChannelToSDIOutVPIDLuminance[inChannel], regValue);    
+}
+
+bool CNTV2Card::GetSDIOutVPIDLuminance(bool & enable, NTV2VPIDLuminance & outValue, const NTV2Channel inChannel)
+{
+    if (!IS_CHANNEL_VALID(inChannel))
+        return false;
+    ULWord regValue = 0;
+    if (!CNTV2DriverInterface::ReadRegister(gChannelToSDIOutVPIDLuminance[inChannel], regValue))
+        return false;
+    enable = (regValue & kVRegMaskSDIOutVPIDOverride) != 0;
+    outValue = (NTV2VPIDLuminance)(regValue & kVRegMaskSDIOutVPIDValue);
+    return true;
+}
+
+bool CNTV2Card::SetSDIOutVPIDRGBRange(bool enable, NTV2VPIDRGBRange inValue, const NTV2Channel inChannel)
+{
+    ULWord regValue = (enable? kVRegMaskSDIOutVPIDOverride : 0) | (inValue & kVRegMaskSDIOutVPIDValue);
+	return IS_CHANNEL_VALID(inChannel) && WriteRegister(gChannelToSDIOutVPIDRGBRange[inChannel], regValue);    
+}
+
+bool CNTV2Card::GetSDIOutVPIDRGBRange(bool & enable, NTV2VPIDRGBRange & outValue, const NTV2Channel inChannel)
+{
+    if (!IS_CHANNEL_VALID(inChannel))
+        return false;
+    ULWord regValue = 0;
+    if (!CNTV2DriverInterface::ReadRegister(gChannelToSDIOutVPIDRGBRange[inChannel], regValue))
+        return false;
+    enable = (regValue & kVRegMaskSDIOutVPIDOverride) != 0;
+    outValue = (NTV2VPIDRGBRange)(regValue & kVRegMaskSDIOutVPIDValue);
+    return true;
+}
+
+bool CNTV2Card::SetSDIOutKeySignal(bool enable, bool inValue, const NTV2Channel inChannel)
+{
+    ULWord regValue = (enable? kVRegMaskSDIOutVPIDOverride : 0) | ((inValue? 1 : 0) & kVRegMaskSDIOutVPIDValue);
+	return IS_CHANNEL_VALID(inChannel) && WriteRegister(gChannelToSDIOutKeySignal[inChannel], regValue);    
+}
+
+bool CNTV2Card::GetSDIOutKeySignal(bool & enable, bool & outValue, const NTV2Channel inChannel)
+{
+    if (!IS_CHANNEL_VALID(inChannel))
+        return false;
+    ULWord regValue = 0;
+    if (!CNTV2DriverInterface::ReadRegister(gChannelToSDIOutKeySignal[inChannel], regValue))
+        return false;
+    enable = (regValue & kVRegMaskSDIOutVPIDOverride) != 0;
+    outValue = (regValue & kVRegMaskSDIOutVPIDValue) != 0;
+    return true;
+}
+
+

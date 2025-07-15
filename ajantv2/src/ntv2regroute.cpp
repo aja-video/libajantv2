@@ -86,48 +86,7 @@ bool CNTV2Card::GetConnectedInputs (const NTV2OutputCrosspointID inOutputXpt, NT
 
 bool CNTV2Card::Connect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, const bool inValidate)
 {
-	if (inOutputXpt == NTV2_XptBlack)
-		return Disconnect (inInputXpt);
-
-	const ULWord	maxRegNum	(GetNumSupported(kDeviceGetMaxRegisterNumber));
-	uint32_t		regNum		(0);
-	uint32_t		ndx			(0);
-	bool			canConnect	(true);
-
-	if (!CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo(inInputXpt, regNum, ndx))
-		{ROUTEFAIL(GetDisplayName() << ": GetCrosspointSelectGroupRegisterInfo failed, inputXpt=" << DEC(inInputXpt));  return false;}
-	if (!regNum  ||  regNum > maxRegNum)
-		{ROUTEFAIL(GetDisplayName() << ": GetCrosspointSelectGroupRegisterInfo returned bad register number '" << DEC(regNum) << "' for inputXpt=" << DEC(inInputXpt));  return false;}
-	if (ndx > 3)
-		{ROUTEFAIL(GetDisplayName() << ": GetCrosspointSelectGroupRegisterInfo returned bad index '" << DEC(ndx) << "' for inputXpt=" << DEC(inInputXpt));  return false;}
-
-	if (inValidate)		//	If caller requested xpt validation
-		if (CanConnect(inInputXpt, inOutputXpt, canConnect))	//	If answer can be trusted
-			if (!canConnect)	//	If route not valid
-			{
-				ROUTEFAIL (GetDisplayName() << ": Unsupported route " << ::NTV2InputCrosspointIDToString(inInputXpt) << " <== " << ::NTV2OutputCrosspointIDToString(inOutputXpt)
-							<< ": reg=" << DEC(regNum) << " val=" << DEC(inOutputXpt) << " mask=" << xHEX0N(sMasks[ndx],8) << " shift=" << DEC(sShifts[ndx]));
-				return false;
-			}
-
-	ULWord	outputXpt(0);
-	const bool isLogging (LOGGING_ROUTING_CHANGES);
-	if (isLogging)
-		ReadRegister(regNum, outputXpt, sMasks[ndx], sShifts[ndx]);
-	const bool result (WriteRegister(regNum, inOutputXpt, sMasks[ndx], sShifts[ndx]));
-	if (isLogging)
-	{
-		if (!result)
-			ROUTEFAIL(GetDisplayName() << ": Failed to connect " << ::NTV2InputCrosspointIDToString(inInputXpt) << " <== " << ::NTV2OutputCrosspointIDToString(inOutputXpt)
-						<< ": reg=" << DEC(regNum) << " val=" << DEC(inOutputXpt) << " mask=" << xHEX0N(sMasks[ndx],8) << " shift=" << DEC(sShifts[ndx]));
-		else if (outputXpt	&&	inOutputXpt != outputXpt)
-			ROUTENOTE(GetDisplayName() << ": Connected " << ::NTV2InputCrosspointIDToString(inInputXpt) << " <== " << ::NTV2OutputCrosspointIDToString(inOutputXpt)
-						<< " -- was from " << ::NTV2OutputCrosspointIDToString(NTV2OutputXptID(outputXpt)));
-		else if (!outputXpt	 &&	 inOutputXpt != outputXpt)
-			ROUTENOTE(GetDisplayName() << ": Connected " << ::NTV2InputCrosspointIDToString(inInputXpt) << " <== " << ::NTV2OutputCrosspointIDToString(inOutputXpt) << " -- was disconnected");
-		//else	ROUTEDBG(GetDisplayName() << ": Connection " << ::NTV2InputCrosspointIDToString(inInputXpt) << " <== " << ::NTV2OutputCrosspointIDToString(inOutputXpt) << " unchanged -- already connected");
-	}
-	return result;
+	return Connect(NTV2XptConnection(inInputXpt, inOutputXpt), inValidate);
 }
 
 
@@ -167,14 +126,7 @@ bool CNTV2Card::Disconnect (const NTV2InputCrosspointID inInputXpt)
 
 bool CNTV2Card::IsConnectedTo (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, bool & outIsConnected)
 {
-	NTV2OutputCrosspointID	outputID	(NTV2_XptBlack);
-
-	outIsConnected = false;
-	if (!GetConnectedOutput (inInputXpt, outputID))
-		return false;
-
-	outIsConnected = outputID == inOutputXpt;
-	return true;
+	return IsConnected(NTV2XptConnection(inInputXpt, inOutputXpt), outIsConnected);
 }
 
 
@@ -188,8 +140,23 @@ bool CNTV2Card::IsConnected (const NTV2InputCrosspointID inInputXpt, bool & outI
 	return true;
 }
 
+bool CNTV2Card::IsConnected (const NTV2XptConnection inConnection, bool & outIsConnected)
+{
+	NTV2OutputCrosspointID outputID (NTV2_XptBlack);
+	outIsConnected = false;
+	if (!GetConnectedOutput (inConnection.first, outputID))
+		return false;
+
+	outIsConnected = outputID == inConnection.second;
+	return true;
+}
 
 bool CNTV2Card::CanConnect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, bool & outCanConnect)
+{
+	return CanConnect (NTV2XptConnection(inInputXpt, inOutputXpt), outCanConnect);
+}
+
+bool CNTV2Card::CanConnect (const NTV2XptConnection & inConnection, bool & outCanConnect)
 {
 	outCanConnect = false;
 	if (!IsSupported(kDeviceHasXptConnectROM))
@@ -201,28 +168,31 @@ bool CNTV2Card::CanConnect (const NTV2InputCrosspointID inInputXpt, const NTV2Ou
 	//			so its answer will be trustworthy.
 
 	//	Check for reasonable input xpt...
-	if (ULWord(inInputXpt) < ULWord(NTV2_FIRST_INPUT_CROSSPOINT)  ||  ULWord(inInputXpt) > NTV2_LAST_INPUT_CROSSPOINT)
+	if (ULWord(inConnection.first) < ULWord(NTV2_FIRST_INPUT_CROSSPOINT)
+		||  ULWord(inConnection.first) > NTV2_LAST_INPUT_CROSSPOINT)
 	{
-		ROUTEFAIL(GetDisplayName() << ": " << xHEX0N(UWord(inInputXpt),4) << " > "
+		ROUTEFAIL(GetDisplayName() << ": " << xHEX0N(UWord(inConnection.first),4) << " > "
 				<< xHEX0N(UWord(NTV2_LAST_INPUT_CROSSPOINT),4) << " (out of range)");
 		return false;
 	}
 
 	//	Every input xpt can connect to XptBlack...
-	if (inOutputXpt == NTV2_XptBlack)
+	if (inConnection.second == NTV2_XptBlack)
 		{outCanConnect = true;	return true;}
 
 	//	Check for reasonable output xpt...
-	if (ULWord(inOutputXpt) >= UWord(NTV2_LAST_OUTPUT_CROSSPOINT))
+	if (ULWord(inConnection.second) >= UWord(NTV2_LAST_OUTPUT_CROSSPOINT))
 	{
-		ROUTEFAIL(GetDisplayName() << ":  Bad output xpt " << xHEX0N(ULWord(inOutputXpt),4) << " >= "
+		ROUTEFAIL(GetDisplayName() << ":  Bad output xpt " << xHEX0N(ULWord(inConnection.second),4) << " >= "
 					<< xHEX0N(UWord(NTV2_LAST_OUTPUT_CROSSPOINT),4));
 		return false;
 	}
 
 	//	Determine all legal output xpts for this input xpt...
 	NTV2OutputXptIDSet legalOutputXpts;
-	const uint32_t regBase(uint32_t(kRegFirstValidXptROMRegister)  +  4UL * uint32_t(inInputXpt - NTV2_FIRST_INPUT_CROSSPOINT));
+	const uint32_t regBase (uint32_t(kRegFirstValidXptROMRegister)
+							+  4UL * uint32_t(inConnection.first
+							- NTV2_FIRST_INPUT_CROSSPOINT));
 	for (uint32_t ndx(0);  ndx < 4;	 ndx++)
 	{
 		ULWord regVal(0);
@@ -230,12 +200,57 @@ bool CNTV2Card::CanConnect (const NTV2InputCrosspointID inInputXpt, const NTV2Ou
 		ReadRegister(regBase + ndx, regVal);
 		if (!CNTV2SignalRouter::GetRouteROMInfoFromReg (regBase + ndx, regVal, inputXpt, legalOutputXpts, true/*append*/))
 			ROUTEWARN(GetDisplayName() << ":  GetRouteROMInfoFromReg failed for register " << DEC(regBase+ndx)
-					<< ", input xpt ' " << ::NTV2InputCrosspointIDToString(inInputXpt) << "' " << xHEX0N(UWord(inInputXpt),2));
+					<< ", input xpt ' " << ::NTV2InputCrosspointIDToString(inConnection.first) << "' "
+					<< xHEX0N(UWord(inConnection.first),2));
 	}
 
 	//	Is the route implemented?
-	outCanConnect = legalOutputXpts.find(inOutputXpt) != legalOutputXpts.end();
+	outCanConnect = legalOutputXpts.find(inConnection.second) != legalOutputXpts.end();
 	return true;
+}
+
+bool CNTV2Card::Connect (const NTV2XptConnection & inConnection, const bool inValidate)
+{
+	if (inConnection.second == NTV2_XptBlack)
+		return Disconnect (inConnection.first);
+
+	ULWord	maxRegNum(GetNumSupported(kDeviceGetMaxRegisterNumber)), regNum(0), ndx(0);
+	bool canConnect (true);
+	if (!CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo(inConnection.first, regNum, ndx))
+		{ROUTEFAIL(GetDisplayName() << ": GetCrosspointSelectGroupRegisterInfo failed, inputXpt=" << DEC(inConnection.first));  return false;}
+	if (!regNum  ||  regNum > maxRegNum)
+		{ROUTEFAIL(GetDisplayName() << ": GetCrosspointSelectGroupRegisterInfo returned bad reg num '" << DEC(regNum) << "' for inputXpt=" << DEC(inConnection.first));  return false;}
+	if (ndx > 3)
+		{ROUTEFAIL(GetDisplayName() << ": GetCrosspointSelectGroupRegisterInfo returned bad index '" << DEC(ndx) << "' for inputXpt=" << DEC(inConnection.first));  return false;}
+
+	if (inValidate)		//	If caller requested xpt validation
+		if (CanConnect(inConnection, canConnect))	//	If answer can be trusted
+			if (!canConnect)	//	If route not valid
+			{
+				ROUTEFAIL (GetDisplayName() << ": Unsupported connection '" << inConnection << "': reg=" << DEC(regNum)
+							<< " val=" << DEC(inConnection.second) << " mask=" << xHEX0N(sMasks[ndx],8) << " shift=" << DEC(sShifts[ndx]));
+				return false;
+			}
+
+	ULWord	outputXpt(0);
+	const bool isLogging (LOGGING_ROUTING_CHANGES);
+	if (isLogging)
+		ReadRegister(regNum, outputXpt, sMasks[ndx], sShifts[ndx]);
+	const bool result (WriteRegister(regNum, inConnection.second, sMasks[ndx], sShifts[ndx]));
+	if (isLogging)
+	{
+		if (!result)
+			ROUTEFAIL(GetDisplayName() << ": Failed to connect '" << inConnection << ": reg=" << DEC(regNum)
+						<< " val=" << DEC(inConnection.second) << " mask=" << xHEX0N(sMasks[ndx],8)
+						<< " shift=" << DEC(sShifts[ndx]));
+		else if (outputXpt	&&	inConnection.second != outputXpt)
+			ROUTENOTE(GetDisplayName() << ": Connected '" << inConnection << "' -- was from "
+						<< ::NTV2OutputCrosspointIDToString(NTV2OutputXptID(outputXpt)));
+		else if (!outputXpt	 &&	 inConnection.second != outputXpt)
+			ROUTENOTE(GetDisplayName() << ": Connected '" << inConnection << "' -- was disconnected");
+		//else	ROUTEDBG(GetDisplayName() << ": Connection '" << inConnection << "' unchanged -- already connected");
+	}
+	return result;
 }
 
 bool CNTV2Card::SupportedOutputXptsForInputXpt (const NTV2InputXptID inInputXptID, NTV2OutputXptIDSet & outputXpts)

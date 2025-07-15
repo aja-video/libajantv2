@@ -61,15 +61,16 @@ int main (int argc, const char ** argv)
 
 	//	VideoFormat
 	const string videoFormatStr (pVideoFormat  ?  pVideoFormat  :  "");
+	const NTV2VideoFormatKinds vfKinds (VIDEO_FORMATS_SDHD | VIDEO_FORMATS_4KUHD);
+	if (videoFormatStr == "?"  ||  videoFormatStr == "list")
+		{cout	<< CNTV2DemoCommon::GetVideoFormatStrings(vfKinds, pDeviceSpec ? deviceSpec : "") << endl;  return 0;}
 	config.fVideoFormat = videoFormatStr.empty()	?	NTV2_FORMAT_1080i_5994
 													:	CNTV2DemoCommon::GetVideoFormatFromString(videoFormatStr,
-																									VIDEO_FORMATS_SDHD | VIDEO_FORMATS_4KUHD,
+																									vfKinds,
 																									deviceSpec);
-	if (videoFormatStr == "?"  ||  videoFormatStr == "list")
-		{cout	<< CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_SDHD, pDeviceSpec ? deviceSpec : "") << endl;  return 0;}
-	else if (!videoFormatStr.empty()  &&  config.fVideoFormat == NTV2_FORMAT_UNKNOWN)
+	if (!videoFormatStr.empty()  &&  config.fVideoFormat == NTV2_FORMAT_UNKNOWN)
 	{	cerr	<< "## ERROR:  Invalid '--videoFormat' value '" << videoFormatStr << "' -- expected values:" << endl
-				<< CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_SDHD, deviceSpec) << endl;
+				<< CNTV2DemoCommon::GetVideoFormatStrings(vfKinds, deviceSpec) << endl;
 		return 2;
 	}
 

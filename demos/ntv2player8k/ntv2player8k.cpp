@@ -19,12 +19,6 @@ using namespace std;
 
 #define NTV2_BUFFER_LOCKING		//	IMPORTANT FOR 8K: Define this to pre-lock video/audio buffers in kernel
 
-//	Convenience macros for EZ logging:
-#define	TCFAIL(_expr_)	AJA_sERROR  (AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
-#define	TCWARN(_expr_)	AJA_sWARNING(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
-#define	TCNOTE(_expr_)	AJA_sNOTICE	(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
-#define	TCINFO(_expr_)	AJA_sINFO	(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
-#define	TCDBG(_expr_)	AJA_sDEBUG	(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
 
 /**
 	@brief	The maximum number of bytes of ancillary data that can be transferred for a single field.
@@ -200,6 +194,11 @@ AJAStatus NTV2Player8K::SetUpVideo (void)
 				<< ::NTV2FrameBufferFormatString(mConfig.fPixelFormat) << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
+	if (::IsRGBFormat(mConfig.fPixelFormat) != mConfig.fDoRGBOnWire  &&  mDevice.features().GetNumCSCs() == 0)
+	{	cerr	<< "## ERROR: '" << mDevice.GetDisplayName() << "' has no CSCs, and '--pixelFormat' \""
+				<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, true) << "\" contradicts '--rgb' setting" << endl;
+		return AJA_STATUS_UNSUPPORTED;
+	}
 
 	NTV2ChannelSet channels13, frameStores;
 	channels13.insert(NTV2_CHANNEL1);  channels13.insert(NTV2_CHANNEL3);
@@ -239,11 +238,6 @@ AJAStatus NTV2Player8K::SetUpVideo (void)
 	//	in order to be able to wait on its event/semaphore...
 	mDevice.SubscribeOutputVerticalEvent (mConfig.fOutputChannel);
 
-	//	Check if HDR anc is permissible...
-	if (IS_KNOWN_AJAAncDataType(mConfig.fTransmitHDRType)  &&  !mDevice.features().CanDoCustomAnc())
-		{cerr << "## WARNING:  HDR Anc requested, but device can't do custom anc" << endl;
-			mConfig.fTransmitHDRType = AJAAncDataType_Unknown;}
-
 	//	Get current per-field maximum Anc buffer size...
 	if (!mDevice.GetAncRegionOffsetFromBottom (gAncMaxSizeBytes, NTV2_AncRgn_Field2))
 		gAncMaxSizeBytes = NTV2_ANCSIZE_MAX;
@@ -260,11 +254,10 @@ AJAStatus NTV2Player8K::SetUpVideo (void)
 AJAStatus NTV2Player8K::SetUpAudio (void)
 {
 	uint16_t numAudioChannels (mDevice.features().GetMaxAudioChannels());
-
-	//	If there are 8192 pixels on a line instead of 7680, reduce the number of audio channels
-	//	This is because HANC is narrower, and has space for only 8 channels
-	if (NTV2_IS_UHD2_FULL_VIDEO_FORMAT(mConfig.fVideoFormat)  &&  numAudioChannels > 8)
-		numAudioChannels = 8;
+	if (numAudioChannels > 8)											//	If audio system handles more than 8 channels...
+		if (!mDevice.features().CanDo2110())							//	...and SDI (i.e. not ST 2110 IP streaming)...
+			if (NTV2_IS_UHD2_FULL_VIDEO_FORMAT(mConfig.fVideoFormat))	//	...and 8K (narrower HANC only fits 8 audio channels)
+				numAudioChannels = 8;	//	...then reduce to 8 audio channels
 
 	//	Use the NTV2AudioSystem that has the same ordinal value as the output FrameStore/Channel...
 	mAudioSystem = ::NTV2ChannelToAudioSystem(mConfig.fOutputChannel);
@@ -349,7 +342,6 @@ AJAStatus NTV2Player8K::SetUpHostBuffers (void)
 		}
 		mFrameDataRing.Add (&frameData);
 	}	//	for each NTV2FrameData
-
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetUpHostBuffers
@@ -408,7 +400,8 @@ AJAStatus NTV2Player8K::SetUpTestPatternBuffers (void)
 				PLWARN("Test pattern buffer " << DEC(tpNdx+1) << " of " << DEC(testPatIDs.size()) << ": failed to pre-lock");
 		#endif
 	}	//	loop for each predefined pattern
-
+	PLNOTE(DEC(testPatIDs.size()) << " test pattern buffers created, " << DEC(mFormatDesc.GetVideoWriteSize() / 1024 / 1024)
+			<< "MB each, " << DEC(mFormatDesc.GetVideoWriteSize() / 1024 / 1024 * testPatIDs.size()) << "MB total");
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetUpTestPatternBuffers
@@ -421,7 +414,7 @@ bool NTV2Player8K::RouteOutputSignal (void)
 	if (mConfig.fDoTsiRouting)
 	{
 		if (::IsRGBFormat(mConfig.fPixelFormat))
-		{
+		{	//	RGB on wire requires DualLinkOut widgets
 			if (mConfig.fOutputChannel < NTV2_CHANNEL3)
 			{
 				connections.insert(NTV2XptConnection(NTV2_XptDualLinkOut1Input,	NTV2_XptFrameBuffer1RGB));
@@ -546,7 +539,7 @@ bool NTV2Player8K::RouteOutputSignal (void)
 	else
 	{
 		if (::IsRGBFormat(mConfig.fPixelFormat))
-		{
+		{	//	RGB on wire requires DualLinkOut widgets
 			connections.insert(NTV2XptConnection(NTV2_XptDualLinkOut1Input,	NTV2_XptFrameBuffer1RGB));
 			connections.insert(NTV2XptConnection(NTV2_XptDualLinkOut2Input,	NTV2_XptFrameBuffer2RGB));
 			connections.insert(NTV2XptConnection(NTV2_XptDualLinkOut3Input,	NTV2_XptFrameBuffer3RGB));
@@ -647,20 +640,6 @@ void NTV2Player8K::ConsumeFrames (void)
 	mDevice.WaitForOutputVerticalInterrupt(mConfig.fOutputChannel, 4);	//	Let it stop
 	PLNOTE("Thread started");
 
-	if (IS_KNOWN_AJAAncDataType(mConfig.fTransmitHDRType))
-	{	//	HDR anc doesn't change per-frame, so fill outputXfer.acANCBuffer with the packet data...
-		static AJAAncillaryData_HDR_SDR		sdrPkt;
-		static AJAAncillaryData_HDR_HDR10	hdr10Pkt;
-		static AJAAncillaryData_HDR_HLG		hlgPkt;
-
-		switch (mConfig.fTransmitHDRType)
-		{
-			case AJAAncDataType_HDR_SDR:	pPkt = &sdrPkt;		break;
-			case AJAAncDataType_HDR_HDR10:	pPkt = &hdr10Pkt;	break;
-			case AJAAncDataType_HDR_HLG:	pPkt = &hlgPkt;		break;
-			default:											break;
-		}
-	}
 	if (pPkt)
 	{	//	Allocate page-aligned host Anc buffer...
 		uint32_t hdrPktSize	(0);

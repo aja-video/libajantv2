@@ -19,8 +19,8 @@
 #include "ajabase/common/circularbuffer.h"
 #include "ajabase/system/debug.h"
 #include "ajabase/system/info.h"
-#include "ajabase/system/systemtime.h"	//	convenience to get AJATime
-#include "ajabase/common/common.h"	//	convenience to get aja::strip & etc.
+#include "ajabase/system/systemtime.h"	//	for AJATime
+#include "ajabase/common/common.h"	//	for aja::strip & etc.
 #include <algorithm>
 #include <string>
 
@@ -327,7 +327,6 @@ typedef struct PlayerConfig
 		NTV2PixelFormat		fPixelFormat;		///< @brief	The pixel format to use
 		NTV2VideoFormat		fVideoFormat;		///< @brief	The video format to use
 		NTV2VANCMode		fVancMode;			///< @brief	VANC mode to use
-		AJAAncDataType		fTransmitHDRType;	///< @brief	Specifies the HDR anc data packet to transmit, if any.
 		UWord				fNumAudioLinks;		///< @brief	The number of audio systems to control for multi-link audio (4K/8K)
 		bool				fDoMultiFormat;		///< @brief	If true, enable device-sharing;  otherwise take exclusive control of device
 		bool				fSuppressAudio;		///< @brief	If true, suppress audio;  otherwise generate & xfer audio tone
@@ -351,7 +350,6 @@ typedef struct PlayerConfig
 				fPixelFormat		(NTV2_FBF_8BIT_YCBCR),
 				fVideoFormat		(NTV2_FORMAT_1080i_5994),
 				fVancMode			(NTV2_VANCMODE_OFF),
-				fTransmitHDRType	(AJAAncDataType_Unknown),
 				fNumAudioLinks		(1),
 				fDoMultiFormat		(false),
 				fSuppressAudio		(false),
@@ -670,12 +668,14 @@ class AJAExport CNTV2DemoCommon
 
 		/**
 			@brief		Returns the ::NTV2TCIndex that matches the given string.
-			@param[in]	inStr	Specifies the string to be converted to an ::NTV2TCIndex.
+			@param[in]	inStr		Specifies the string to be converted to an ::NTV2TCIndex.
+			@param[in]	inKinds		Optionally specifies the timecode types to filter for.
+			@param[in]	inDevSpec	Optionally specifies the device specification.
 			@return		The given string converted to an ::NTV2TCIndex, or ::NTV2_TCINDEX_INVALID if there's no match.
 		**/
 		static NTV2TCIndex					GetTCIndexFromString (const std::string & inStr,
-																		const NTV2TCIndexKinds inKinds = TC_INDEXES_ALL,
-																		const std::string inDevSpec = std::string());
+																const NTV2TCIndexKinds inKinds = TC_INDEXES_ALL,
+																const std::string inDevSpec = std::string());
 	///@}
 
 	/**
@@ -763,10 +763,11 @@ class AJAExport CNTV2DemoCommon
 
 		/**
 			@brief		Answers with the crosspoint connections needed to implement the given 8K/UHD2 capture configuration.
+			@param[out]	outConnections	Receives the crosspoint connection set.
 			@param[in]	inConfig		Specifies the CaptureConfig to route for.
+			@param[in]	inVidFormat		Specifies the NTV2VideoFormat.
 			@param[in]	inDevID			Optionally specifies the NTV2DeviceID.
 			@param[in]	isInputRGB		Optionally specifies if the input is RGB. Defaults to false (YUV).
-			@param[out]	outConnections	Receives the crosspoint connection set.
 		**/
 		static bool							GetInputRouting8K (	NTV2XptConnections & outConnections,
 																const CaptureConfig & inConfig,

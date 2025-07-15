@@ -12,7 +12,7 @@
 #
 
 SDKVER_MAJ ?= 17
-SDKVER_MIN ?=  5
+SDKVER_MIN ?=  6
 SDKVER_PNT ?=  0
 
 ifeq ($(TC_BUILD_COUNTER),)

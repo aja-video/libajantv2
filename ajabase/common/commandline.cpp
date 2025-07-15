@@ -186,7 +186,7 @@ void AJACommandLineParser::operator=(const AJACommandLineParser &other)
 	_helpText = other._helpText;
 	_options = other._options;
     _subParsers.clear();
-    for (SubParserMapConstIter iter = other._subParsers.begin(); iter != other._subParsers.end(); iter++) {
+    for (SubParserMapConstIter iter = other._subParsers.begin(); iter != other._subParsers.end(); ++iter) {
         _subParsers.insert(AJASubParserPair(iter->first, iter->second));
     }
 }
@@ -232,14 +232,14 @@ void AJACommandLineParser::Dump()
         }
     } else {
         for (AJACommandLineOptionListIter iter = _options.begin();
-            iter != _options.end(); iter++) {
+            iter != _options.end(); ++iter) {
             const AJACommandLineOption &o = *iter;
             const AJAStringList & names = o.Names();
             std::ostringstream oss;
             oss << "[";
             std::string name;
             size_t count = 0;
-            for (AJAStringListConstIter sIter = names.begin(); sIter != names.end(); sIter++) {
+            for (AJAStringListConstIter sIter = names.begin(); sIter != names.end(); ++sIter) {
                 name = *sIter;
                 oss << name;
                 if (++count < names.size()) {
@@ -311,9 +311,9 @@ bool AJACommandLineParser::ParseArgs(const AJAStringList &args, bool errUnknown)
     }
 
     AJAStringList::const_iterator iter = args.begin();
-    ++iter;
+    ++iter; //  Skip exe path
 
-    for (SubParserMap::iterator spIter = _subParsers.begin(); spIter != _subParsers.end(); spIter++) {
+    for (SubParserMap::iterator spIter = _subParsers.begin(); spIter != _subParsers.end(); ++spIter) {
         // Is second arg a command name which belongs to a sub-parser?
         if (*iter == spIter->first) {
             _commandName = *iter;
@@ -415,7 +415,7 @@ bool AJACommandLineParser::ParseArgs(const AJAStringList &args, bool errUnknown)
                         }
                     }
                 }
-            }
+            }   //  else no assignment operator
 
             if (HaveOption(optName)) {
                 if (!optValue.empty()) {
@@ -426,11 +426,19 @@ bool AJACommandLineParser::ParseArgs(const AJAStringList &args, bool errUnknown)
                 std::cerr << "Unknown arg: " << optName << std::endl;
                 return false;
             }
-        }
-    }
+        }   //  if hasOptionPrefix
+    }   //  for each arg
+
+    if (!(_flags & kNoDefaultHelpOption))
+        if (IsSet("help"))
+            {std::cout << HelpText();  return false;}
+        
+    if (!(_flags & kNoDefaultUsageOption))
+        if (IsSet("usage"))
+            {std::cout << UsageText();  return false;}
 
     return true;
-}
+}   //  ParseArgs (AJAStringList)
 
 bool AJACommandLineParser::ParseArgs(int argc, const char *argv[], bool errUnknown)
 {
@@ -482,7 +490,7 @@ AJAVariantList AJACommandLineParser::Values(const std::string &name) const
     AJAStringList values = ValueStrings(name);
     if (!values.empty()) {
         AJAVariantList variants;
-        for (AJAStringListConstIter it = values.begin(); it != values.end(); it++) {
+        for (AJAStringListConstIter it = values.begin(); it != values.end(); ++it) {
             variants.push_back(AJAVariant(*it));
         }
         return variants;
@@ -531,10 +539,10 @@ bool AJACommandLineParser::AddOption(const AJACommandLineOption &option)
 {
     bool exists = false;
     const AJAStringList &wantNames = option.Names();
-    for (AJACommandLineOptionListIter optIter = _options.begin(); optIter != _options.end(); optIter++) {
+    for (AJACommandLineOptionListIter optIter = _options.begin(); optIter != _options.end(); ++optIter) {
         const AJAStringList &names = optIter->Names();
-        for (AJAStringListConstIter nameIter = names.begin(); nameIter != names.end(); nameIter++) {
-            for (AJAStringListConstIter wantIter = wantNames.begin(); wantIter != wantNames.end(); wantIter++) {
+        for (AJAStringListConstIter nameIter = names.begin(); nameIter != names.end(); ++nameIter) {
+            for (AJAStringListConstIter wantIter = wantNames.begin(); wantIter != wantNames.end(); ++wantIter) {
                 if (*wantIter == *nameIter) {
                     exists = true;
                     goto next;
@@ -554,13 +562,17 @@ next:
 
 bool AJACommandLineParser::AddOptions(const AJACommandLineOptionList &options)
 {
-    uint32_t okCount = 0;
+    size_t okCount = 0;
     for (size_t i = 0; i < options.size(); i++) {
         if (AddOption(options.at(i))) {
             ++okCount;
         }
     }
-    return options.size() > 0 ? (okCount == (uint32_t)options.size() ? true : false) : false;
+//	if (_Flags & kAutoProcessUsage)
+//        AddOption(AJACommandLineOption("usage", "Show command usage"));
+//	if (_Flags & (kAutoProcessHelp | kAutoProcessUsage))
+//        AddHelpOption();
+    return options.size() ? (okCount == options.size() ? true : false) : false;
 }
 
 bool AJACommandLineParser::AddHelpOption(bool useShortName)
@@ -817,7 +829,6 @@ bool AJACommandLineParser::setOptionValue(const std::string &name, const std::st
             }
         }
     }
-
     return false;
 }
 
@@ -833,6 +844,5 @@ bool AJACommandLineParser::setOption(const std::string &name, bool isSet)
             }
         }
     }
-
     return false;
 }

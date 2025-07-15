@@ -84,6 +84,8 @@
 #include "ntv2mcap.h"
 #include "ntv2stream.h"
 #include "../ntv2video.h"
+#include "../ntv2pciconfig.h"
+#include "../ntv2mailbox.h"
 
 #if  !defined(x86_64) && !defined(aarch64)
 #error "*** AJA driver must be built 64 bit ***"
@@ -216,6 +218,7 @@ static int DoMessageBufferLock(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot, NTV2Bu
 static int DoMessageBitstream(ULWord deviceNumber, NTV2Bitstream* pBitstream);
 static int DoMessageStreamChannel(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamChannel* pStreamChannel);
 static int DoMessageStreamBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamBuffer* pStreamBuffer);
+static int DoMessageMailBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2MailBuffer* pMailBuffer);
 
 /* PCI Device Module functions */
 static int probe(struct pci_dev *pdev, const struct pci_device_id *id);	/* New device inserted */
@@ -378,44 +381,14 @@ static struct pci_device_id pci_device_id_tab[] =
 	   0, 0,											// Class, class_mask
 	   0												// Opaque data
 	},
-	{  // KONAIP_CH1SFP
-	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_KONAIP_CH1SFP,	// Vendor and device IDs
-	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
-	   0, 0,											// Class, class_mask
-	   0												// Opaque data
-	},
-	{  // KONAIP_PHANTOM
-	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_KONAIP_PHANTOM,	// Vendor and device IDs
-	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
-	   0, 0,											// Class, class_mask
-	   0												// Opaque data
-	},
-	{  // KONAIP_CH2SFP
-	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_KONAIP_CH2SFP,	// Vendor and device IDs
-	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
-	   0, 0,											// Class, class_mask
-	   0												// Opaque data
-	},
 	{  // IO4KPLUS
 	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_IO4KPLUS,			// Vendor and device IDs
 	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
 	   0, 0,											// Class, class_mask
 	   0												// Opaque data
 	},
-    {  // IOIP
-        NTV2_VENDOR_ID, NTV2_DEVICE_ID_IOIP,			// Vendor and device IDs
-        PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
-        0, 0,											// Class, class_mask
-        0												// Opaque data
-    },
 	{  // KONA4PLUS
        NTV2_VENDOR_ID, NTV2_DEVICE_ID_KONA5,        	// Vendor and device IDs
-	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
-	   0, 0,											// Class, class_mask
-	   0												// Opaque data
-	},
-	{  // KONA4IP
-       NTV2_VENDOR_ID, NTV2_DEVICE_ID_KONA5IP,			// Vendor and device IDs
 	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
 	   0, 0,											// Class, class_mask
 	   0												// Opaque data
@@ -1554,8 +1527,8 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 			NTV2_HEADER *	pMessage	= NULL;
 			void *			pInBuff		= NULL;
 			void *			pOutBuff	= NULL;
-			void *			pOutBuff2	= NULL;
 			int				returnCode	= 0;
+            void *          pVirtBuf[3] = { NULL, NULL, NULL };
 
 			// This limits the message size to one page, which should not be a problem, nor is sleeping on the alloc
 			pMessage = (NTV2_HEADER *) get_zeroed_page(GFP_KERNEL);
@@ -1600,13 +1573,6 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 			// Scratch areas for returned data
 			pOutBuff = (void *) get_zeroed_page(GFP_KERNEL);
 			if (!pOutBuff)
-			{
-				returnCode = -ENOMEM;
-				goto messageError;
-			}
-
-			pOutBuff2 = (void *) get_zeroed_page(GFP_KERNEL);
-			if (!pOutBuff2)
 			{
 				returnCode = -ENOMEM;
 				goto messageError;
@@ -1672,22 +1638,47 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					NTV2Buffer *	pInRegisters		= &((NTV2GetRegisters*)pMessage)->mInRegisters;
 					NTV2Buffer *	pOutGoodRegisters	= &((NTV2GetRegisters*)pMessage)->mOutGoodRegisters;
 					NTV2Buffer *	pOutValues			= &((NTV2GetRegisters*)pMessage)->mOutValues;
-					ULWord *		pInRegArray			= (ULWord*) pInBuff;
-					ULWord *		pOutRegArray		= (ULWord*) pOutBuff;
-					ULWord *		pOutValuesArray		= (ULWord*) pOutBuff2;
+					ULWord *		pInRegArray			= NULL;
+					ULWord *		pOutRegArray		= NULL;
+					ULWord *		pOutValuesArray		= NULL;
 					ULWord			i;
 
 					//	Check for buffer overrun
-					if((pInRegisters->fByteCount > PAGE_SIZE) ||
-					   (pOutGoodRegisters->fByteCount > PAGE_SIZE) ||
-					   (pOutValues->fByteCount > PAGE_SIZE))
+					if((pInRegisters->fByteCount > (PAGE_SIZE * 1000)) ||
+					   (pOutGoodRegisters->fByteCount > (PAGE_SIZE * 1000)) ||
+					   (pOutValues->fByteCount > (PAGE_SIZE * 1000)))
 					{
 						returnCode = -ENOMEM;
 						goto messageError;
 					}
 
+                    //  Allocate register buffers
+                    pVirtBuf[0] = vmalloc(pInRegisters->fByteCount);
+                    if (pVirtBuf[0] == NULL)
+					{
+						returnCode = -ENOMEM;
+						goto messageError;
+					}
+                    pInRegArray = (ULWord*)pVirtBuf[0];
+                    
+                    pVirtBuf[1] = vmalloc(pOutGoodRegisters->fByteCount);
+                    if (pVirtBuf[1] == NULL)
+					{
+						returnCode = -ENOMEM;
+						goto messageError;
+					}
+                    pOutRegArray = (ULWord*)pVirtBuf[1];
+                    
+                    pVirtBuf[2] = vmalloc(pOutValues->fByteCount);
+                    if (pVirtBuf[2] == NULL)
+					{
+						returnCode = -ENOMEM;
+						goto messageError;
+					}
+                    pOutValuesArray = (ULWord*)pVirtBuf[2];
+
 					//	List of registers to read
-					if(copy_from_user((void*) pInBuff,
+					if(copy_from_user((void*) pInRegArray,
 									  (const void*)(pInRegisters->fUserSpacePtr),
 									  pInRegisters->fByteCount))
 					{
@@ -1696,7 +1687,7 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					}
 
 					//	List of registers read to return
-					if(copy_from_user((void*) pOutBuff,
+					if(copy_from_user((void*) pOutRegArray,
 									  (const void*)(pOutGoodRegisters->fUserSpacePtr),
 									  pOutGoodRegisters->fByteCount))
 					{
@@ -1705,7 +1696,7 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					}
 
 					//	List of register values to return
-					if(copy_from_user((void*) pOutBuff2,
+					if(copy_from_user((void*) pOutValuesArray,
 									  (const void*)(pOutValues->fUserSpacePtr),
 									  pOutValues->fByteCount))
 					{
@@ -1723,14 +1714,14 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					}
 
 					//	Send back the list of registers read
-					if(copy_to_user((void*)(pOutGoodRegisters->fUserSpacePtr), (const void*)pOutBuff, pOutGoodRegisters->fByteCount))
+					if(copy_to_user((void*)(pOutGoodRegisters->fUserSpacePtr), (const void*)pOutRegArray, pOutGoodRegisters->fByteCount))
 					{
 						returnCode = -EFAULT;
 						goto messageError;
 					}
 
 					//	Send back the list of values read
-					if(copy_to_user((void*)(pOutValues->fUserSpacePtr), (const void*)pOutBuff2, pOutValues->fByteCount))
+					if(copy_to_user((void*)(pOutValues->fUserSpacePtr), (const void*)pOutValuesArray, pOutValues->fByteCount))
 					{
 						returnCode = -EFAULT;
 						goto messageError;
@@ -1931,6 +1922,22 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 				}
 				break;
 
+            case NTV2_TYPE_AJAMAILBUFFER:
+				{
+					returnCode = DoMessageMailBuffer (deviceNumber, pFileData, (NTV2MailBuffer*)pMessage);
+					if (returnCode)
+					{
+						goto messageError;
+					}
+
+					if(copy_to_user((void*)arg, (const void*)pMessage, sizeof(NTV2MailBuffer)))
+					{
+						returnCode = -EFAULT;
+						goto messageError;
+					}
+				}
+				break;
+
 			case NTV2_TYPE_VIRTUAL_DATA_RW:
 				{
                     NTV2VirtualData *msg = (NTV2VirtualData *)pMessage;
@@ -1998,11 +2005,18 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 
 messageError:
 
-			free_page((unsigned long) pOutBuff2);
-			free_page((unsigned long) pOutBuff);
-			free_page((unsigned long) pInBuff);
-			free_page((unsigned long) pMessage);
-
+            {
+                int i;
+                for (i = 0; i < 3; i++)
+                {
+                    if (pVirtBuf[i] != NULL)
+                        vfree(pVirtBuf[i]);
+                }
+                free_page((unsigned long) pOutBuff);
+                free_page((unsigned long) pInBuff);
+                free_page((unsigned long) pMessage);
+            }
+            
 			return returnCode;
 		}
 		break;
@@ -3307,7 +3321,6 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
 		(id->device == NTV2_DEVICE_ID_IO4K) ||
 		(id->device == NTV2_DEVICE_ID_IO4K_UFC) ||
 		(id->device == NTV2_DEVICE_ID_IO4KPLUS) ||
-		(id->device == NTV2_DEVICE_ID_IOIP) ||
 		(id->device == NTV2_DEVICE_ID_TTAPPRO) ||
 		(id->device == NTV2_DEVICE_ID_IOX3))
 	{
@@ -3529,7 +3542,10 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
         MSG("%s: serial number %s\n", ntv2pp->name, versionString);
         getPCIFPGAVersionString(deviceNumber, versionString, STRMAX);
         MSG("%s: firmware version %s\n", ntv2pp->name, versionString);
-        MSG("%s: hotplug %s\n", ntv2pp->name, ntv2pp->hotplug? "enabled":"disabled");
+        MSG("%s: pci speed %d  width %d  hotplug %s\n", ntv2pp->name,
+            ntv2ReadPciLinkSpeed(&ntv2pp->systemContext),
+            ntv2ReadPciLinkWidth(&ntv2pp->systemContext),
+            ntv2pp->hotplug? "enabled":"disabled");
 
         // initialize dma
         dmaInit(deviceNumber);
@@ -3756,6 +3772,16 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
                     ntv2pp->m_pRasterMonitor = NULL;
                 }
             }
+            ntv2pp->m_pMailbox[0] = ntv2_mailbox_open(&ntv2pp->systemContext, "ntv2mailbox", 0);
+            if (ntv2pp->m_pMailbox[0] != NULL)
+            {
+                status = ntv2_mailbox_configure(ntv2pp->m_pMailbox[0], 0x100000);
+                if (status != NTV2_STATUS_SUCCESS)
+                {
+                    ntv2_mailbox_close(ntv2pp->m_pMailbox[0]);
+                    ntv2pp->m_pMailbox[0] = NULL;
+                }
+            }
         }
 	
         ntv2pp->m_pSetupMonitor = ntv2_setup_open(&ntv2pp->systemContext, "ntv2setup");
@@ -3789,6 +3815,14 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
         if (ntv2pp->m_pRasterMonitor != NULL)
         {
             ntv2_videoraster_enable(ntv2pp->m_pRasterMonitor);
+        }
+
+        for (i = 0; i < NTV2_MAX_MAILBOX; i++)
+        {
+            if (ntv2pp->m_pMailbox[i] != NULL)
+            {
+                ntv2_mailbox_enable(ntv2pp->m_pMailbox[i]);
+            }
         }
     
         // configure tty uart
@@ -4036,6 +4070,23 @@ static void remove(struct pci_dev *pdev)
     {
         ntv2_videoraster_close(ntv2pp->m_pRasterMonitor);
         ntv2pp->m_pRasterMonitor = NULL;
+    }
+
+    for (i = 0; i < NTV2_MAX_MAILBOX; i++)
+    {
+        if (ntv2pp->m_pMailbox[i] != NULL)
+        {
+            ntv2_mailbox_disable(ntv2pp->m_pMailbox[i]);
+        }
+    }
+    
+    for (i = 0; i < NTV2_MAX_MAILBOX; i++)
+    {
+        if (ntv2pp->m_pMailbox[i] != NULL)
+        {
+            ntv2_mailbox_close(ntv2pp->m_pMailbox[i]);
+            ntv2pp->m_pMailbox[i] = NULL;
+        }
     }
 
 	// close the serial port
@@ -4517,10 +4568,10 @@ int ValidateAjaNTV2Message(NTV2_HEADER * pHeaderIn)
 #endif
 		return -EINVAL;
 	}
-	if (pHeaderIn->fOperation || pHeaderIn->fResultStatus)
+	if (pHeaderIn->fResultStatus)
 	{
 #ifdef LOG_VALIDATE_ERRORS
-		MSG("fOperation or fResultStatus non-zero\n");
+		MSG("fResultStatus non-zero\n");
 #endif
 		return -EINVAL;
 	}
@@ -4890,6 +4941,93 @@ int DoMessageStreamBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamBuffe
         ntv2_stream_buffer_status(pStr, pBuffer);
 	}
 
+	return 0;
+}
+
+int DoMessageMailBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2MailBuffer* pBuffer)
+{
+	NTV2PrivateParams * pNTV2Params = getNTV2Params(deviceNumber);
+    int chn = 0;
+    struct ntv2_mailbox* pMail = NULL;
+    uint32_t offset = 0;
+    int ret = 0;
+    
+	if (pBuffer == NULL)
+		return -EINVAL;
+
+    chn = (int)pBuffer->mChannel;
+    if (chn >= NTV2_MAX_MAILBOX)
+    {
+        pBuffer->mStatus = NTV2_MAIL_BUFFER_FAIL;
+        return -EINVAL;
+    }
+
+    pMail = pNTV2Params->m_pMailbox[chn];
+    if (pMail == NULL)
+    {
+        pBuffer->mStatus = NTV2_MAIL_BUFFER_FAIL;
+        return -EINVAL;
+    }
+
+	if ((pBuffer->mFlags & NTV2_MAIL_BUFFER_SEND) != 0)
+	{
+        if (pBuffer->mBuffer.fByteCount > NTV2_MAIL_BUFFER_MAX)
+        {
+			// MSG("%s: DoMessageMailBuffer: Send buffer too large (%u > %u)\n",
+			// 	pMail->name, pBuffer->mBuffer.fByteCount, NTV2_MAIL_BUFFER_MAX);
+            pBuffer->mStatus = NTV2_MAIL_BUFFER_FAIL;
+            return -EINVAL;
+        }
+        
+		// copy data buffer from user
+		ret = copy_from_user(pMail->send_data,
+							 (void*)pBuffer->mBuffer.fUserSpacePtr,
+							 pBuffer->mDataSize);
+		if (ret < 0)
+		{
+			return ret;
+		}
+
+        pBuffer->mStatus = ntv2_packet_send(pMail,
+                                            pMail->send_data,
+                                            pBuffer->mDataSize,
+                                            &offset,
+                                            pBuffer->mDelay,
+                                            pBuffer->mTimeout);
+    }    
+	if ((pBuffer->mFlags & NTV2_MAIL_BUFFER_RECEIVE) != 0)
+	{
+        if (pBuffer->mBuffer.fByteCount > NTV2_MAIL_BUFFER_MAX)
+        {
+			// MSG("%s: DoMessageMailBuffer: Receive buffer too large (%u > %u)\n",
+			// 	pMail->name, pBuffer->mBuffer.fByteCount, NTV2_MAIL_BUFFER_MAX);
+            pBuffer->mStatus = NTV2_MAIL_BUFFER_FAIL;
+            return -EINVAL;
+        }
+
+        pBuffer->mStatus = ntv2_packet_recv(pMail,
+                                            pMail->recv_data,
+                                            pBuffer->mBuffer.fByteCount,
+                                            &offset,
+                                            pBuffer->mDelay,
+                                            pBuffer->mTimeout);
+        if (pBuffer->mStatus == NTV2_STATUS_SUCCESS)
+        {
+            pBuffer->mDataSize = offset;
+            ret = copy_to_user((void*)pBuffer->mBuffer.fUserSpacePtr,
+                               pMail->recv_data,
+                               pBuffer->mDataSize);
+            if (ret < 0)
+            {
+                return ret;
+            }
+        }
+        else
+        {
+            return -EPERM;
+        }
+    }
+    
 	return 0;
 }
 
@@ -5533,6 +5671,14 @@ static int suspend(struct pci_dev *pdev, pm_message_t state)
 		ntv2_genlock2_disable(ntv2pp->m_pGenlock2Monitor);
 	}
 
+    for (j = 0; j < NTV2_MAX_MAILBOX; j++)
+    {
+        if (ntv2pp->m_pMailbox[j] != NULL)
+        {
+            ntv2_mailbox_disable(ntv2pp->m_pMailbox[j]);
+        }
+    }
+
 	// disable the serial driver
 	if (ntv2pp->m_pSerialPort)
 	{
@@ -5665,6 +5811,14 @@ static int resume(struct pci_dev *pdev)
             ntv2_genlock2_enable(ntv2pp->m_pGenlock2Monitor);
         }
 
+        for (i = 0; i < NTV2_MAX_MAILBOX; i++)
+        {
+            if (ntv2pp->m_pMailbox[i] != NULL)
+            {
+                ntv2_mailbox_enable(ntv2pp->m_pMailbox[i]);
+            }
+        }
+        
         // Enable interrupts
         EnableAllInterrupts(deviceNumber);
 

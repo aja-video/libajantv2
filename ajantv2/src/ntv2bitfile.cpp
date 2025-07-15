@@ -515,11 +515,14 @@ string CNTV2Bitfile::GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID
 		case DEVICE_ID_KONAIP_2022:				break;
 		case DEVICE_ID_KONAIP_2110:				return "konaip_s2110";
 		case DEVICE_ID_KONAIP_2110_RGB12:		return "konaip_s2110_RGB12";
+        case DEVICE_ID_KONAIP_25G:				break;
 		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:		break;
 		case DEVICE_ID_KONAIP_4CH_2SFP:			break;
 		case DEVICE_ID_KONALHEPLUS:				return "lhe_12_pcie";		//	lhe_12_pcie.ncd
 		case DEVICE_ID_KONALHI:					return "top_pike";			//	top_pike.ncd
 		case DEVICE_ID_KONALHIDVI:				break;
+		case DEVICE_ID_KONAX:					return "konax";
+		case DEVICE_ID_KONAXM:					return "konaxm";
 		case DEVICE_ID_SOJI_3DLUT:				return "soji_3dlut";
 		case DEVICE_ID_SOJI_OE1:				return "soji_oe_cfg1";
 		case DEVICE_ID_SOJI_OE2:				return "soji_oe_cfg2";
@@ -531,9 +534,7 @@ string CNTV2Bitfile::GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID
 		case DEVICE_ID_SOJI_DIAGS:				return "soji_diags";
 		case DEVICE_ID_TTAP:					return "t_tap_top";			//	t_tap_top.ncd
 		case DEVICE_ID_TTAP_PRO:				return "t_tap_pro";
-		case DEVICE_ID_KONAX:					return "konax";
-		case DEVICE_ID_KONAXM:					return "konaxm";
-        case DEVICE_ID_KONAIP_25G:				return "konaip_25g";
+		case DEVICE_ID_ZEFRAM:					break;
 		case DEVICE_ID_SOFTWARE:				break;
 		case DEVICE_ID_NOTFOUND:				break;
 #if !defined(_DEBUG)
@@ -554,9 +555,10 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 
 	//	Special cases -- e.g. bitfile flipping, P2P, etc...
 	switch (inDeviceID)
-	{
+	{	//////////	Order's not important in this switch	//////////
 		case DEVICE_ID_CORVID44:			return GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44) == designName
 													|| designName == "corvid_446"; //	Corvid 446
+
 		case DEVICE_ID_KONA3GQUAD:			return GetPrimaryHardwareDesignName (DEVICE_ID_KONA3G) == designName
 													|| designName == "K3G_quad_p2p";	//	K3G_quad_p2p.ncd
 		case DEVICE_ID_KONA3G:				return GetPrimaryHardwareDesignName (DEVICE_ID_KONA3GQUAD) == designName
@@ -571,8 +573,10 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 		case DEVICE_ID_CORVID88:			return GetPrimaryHardwareDesignName (DEVICE_ID_CORVID88) == designName
 													|| designName == "CORVID88"
 													|| designName == "corvid88_top";
+
 		case DEVICE_ID_CORVIDHBR:			return GetPrimaryHardwareDesignName (DEVICE_ID_CORVIDHBR) == designName
 													|| designName == "ZARTAN";
+
 		case DEVICE_ID_IO4KPLUS:			return GetPrimaryHardwareDesignName(DEVICE_ID_IO4KPLUS) == designName;
 		case DEVICE_ID_IOIP_2022:			return GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2022) == designName;
 		case DEVICE_ID_KONAIP_2110:			return GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_2110) == designName;
@@ -581,6 +585,13 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 		case DEVICE_ID_IOIP_2110_RGB12:		return GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2110_RGB12) == designName;
 		case DEVICE_ID_KONAHDMI:			return GetPrimaryHardwareDesignName(DEVICE_ID_KONAHDMI) == designName
 													|| designName == "Corvid_HDMI_4Rx_Top";
+
+		case DEVICE_ID_KONA5:
+		case DEVICE_ID_KONA5_2X4K:
+		case DEVICE_ID_KONA5_3DLUT:
+		case DEVICE_ID_KONA5_8K:
+		case DEVICE_ID_KONA5_8KMK:
+		case DEVICE_ID_KONA5_8K_MV_TX:
 		case DEVICE_ID_KONA5_OE1:
 		case DEVICE_ID_KONA5_OE2:
 		case DEVICE_ID_KONA5_OE3:
@@ -601,13 +612,7 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 		case DEVICE_ID_SOJI_OE5:
 		case DEVICE_ID_SOJI_OE6:
 		case DEVICE_ID_SOJI_OE7:
-		case DEVICE_ID_SOJI_DIAGS:
-		case DEVICE_ID_KONA5_3DLUT:
-		case DEVICE_ID_KONA5_2X4K:
-		case DEVICE_ID_KONA5_8KMK:
-		case DEVICE_ID_KONA5_8K:
-		case DEVICE_ID_KONA5_8K_MV_TX:
-		case DEVICE_ID_KONA5:		return GetPrimaryHardwareDesignName (DEVICE_ID_KONA5) == designName
+		case DEVICE_ID_SOJI_DIAGS:		return GetPrimaryHardwareDesignName (DEVICE_ID_KONA5) == designName
 											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_8KMK)
 											|| designName == "kona5"
 											|| designName == "kona5_12g"	//	original 4x12g used in our 15.2 release
@@ -642,19 +647,22 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_SOJI_OE7).append("_tprom")
 											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_SOJI_3DLUT).append("_tprom");
 
+		case DEVICE_ID_KONAX:
+		case DEVICE_ID_KONAXM:			return GetPrimaryHardwareDesignName (DEVICE_ID_KONAX) == designName
+											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_KONAXM);
+
 		case DEVICE_ID_CORVID44_8KMK:
 		case DEVICE_ID_CORVID44_8K:
 		case DEVICE_ID_CORVID44_PLNR:
-		case DEVICE_ID_CORVID44_2X4K: return GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44_8KMK) == designName
+		case DEVICE_ID_CORVID44_2X4K:	return GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44_8KMK) == designName
 											|| designName == GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44_8K)
 											|| designName == GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44_2X4K)
 											|| designName == GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44_PLNR)
 											|| designName == "c44_12g";		//	original 4x12g OEM used in 15.2 release
+
 		case DEVICE_ID_TTAP_PRO:		return GetPrimaryHardwareDesignName (DEVICE_ID_TTAP_PRO) == designName;
-		case DEVICE_ID_KONAX:
-		case DEVICE_ID_KONAXM:			return GetPrimaryHardwareDesignName (DEVICE_ID_KONAX) == designName
-											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_KONAXM);
-		default:					break;
+
+		default:  break;	//////////	Fail for any others not handled above
 	}
 	return false;
 }

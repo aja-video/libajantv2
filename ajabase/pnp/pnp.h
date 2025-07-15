@@ -49,6 +49,17 @@ class AJAPnpImpl;
 **/
 class AJA_EXPORT AJAPnp
 {
+public:	//	CLASS METHODS
+
+	/**
+	 *  @brief		Converts an AJAPnpMessage into a human-readable string.
+	 *
+	 *	@param[in]	inMsg		Specifies the AJAPnpMessage to be converted into a string.
+	 *
+	 *	@return		A std::string containing the human-readable representation of AJAPnpMessage.
+	 */
+	static std::string MessageToString (const AJAPnpMessage inMsg);
+
 public:	//	INSTANCE METHODS
 
 	/**
