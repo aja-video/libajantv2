@@ -131,6 +131,8 @@ typedef std::map<std::string, OptionEntry> OptionEntryMap;
 
 typedef enum {
 	kShortOptionsAsLong = 1 << 0,
+	kAutoProcessHelp    = 1 << 1,
+	kAutoProcessUsage   = 1 << 2,
 } AJACommandLineParserFlags;
 
 /**
@@ -162,23 +164,27 @@ public:
 	 *
 	 * @param[in] args	The list of arg strings.
 	 *
-	 * @return	Returns `true` if the command line args were parsed successfully, otherwise `false`.
+	 * @return	Returns a non-zero exit code upon failure or use of --help or --usage.
 	 */
-	void ParseArgs(const AJAStringList &args);
+	int ParseArgs(const AJAStringList &args);
 	/**
 	 * Parse a list of strings containing command line args.
 	 *
 	 * @param[in] argc	The arg count.
 	 * @param[in] argv	The list of arg strings.
+	 *
+	 * @return	Returns a non-zero exit code upon failure or use of --help or --usage.
 	 */
-	void ParseArgs(int argc, const char *argv[]);
+	int ParseArgs(int argc, const char *argv[]);
 	/**
 	 * Parse a list of strings containing command line args.
 	 *
 	 * @param[in] argc	The arg count.
 	 * @param[in] argv	The list of arg strings.
+	 *
+	 * @return	Returns a non-zero exit code upon failure or use of --help or --usage.
 	 */
-	void ParseArgs(int argc, char *argv[]);
+	int ParseArgs(int argc, char *argv[]);
 	/**
 	 * Tests if the specified arg was set on the command line.
 	 *
