@@ -14,7 +14,6 @@
 #endif	//	!defined(NTV2_DEPRECATE_17_1)
 #include "ntv2card.h"
 #include <vector>
-#include <algorithm>
 
 #if !defined(NTV2_DEPRECATE_17_1)
 typedef std::vector <AudioSampleRateEnum>				NTV2AudioSampleRateList;
