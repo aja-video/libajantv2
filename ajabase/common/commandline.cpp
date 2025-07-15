@@ -684,10 +684,10 @@ std::string AJACommandLineParser::generateHelpText() const
     // Get the longest line size first...
     size_t longestSize = 0;
     for (AJACommandLineOptionListIter it = _options.begin();
-        it != _options.end(); it++) {
+        it != _options.end(); ++it) {
         const AJAStringList &names = it->Names();
         size_t namesLength = 0;
-        for (AJAStringListConstIter sIter = names.begin(); sIter != names.end(); sIter++) {
+        for (AJAStringListConstIter sIter = names.begin(); sIter != names.end(); ++sIter) {
             const std::string &name = *sIter;
             namesLength += name.length();
             // add size of dashes
@@ -706,12 +706,12 @@ std::string AJACommandLineParser::generateHelpText() const
 
     // ...now calculate all of the line padding.
     for (AJACommandLineOptionListIter it = _options.begin();
-        it != _options.end(); it++) {
+        it != _options.end(); ++it) {
         oss << std::setw(2) << std::right;
         const AJAStringList &names = it->Names();
         size_t nameCount = 0;
         size_t namesLength = 0;
-        for (AJAStringListConstIter sIter = names.begin(); sIter != names.end(); sIter++) {
+        for (AJAStringListConstIter sIter = names.begin(); sIter != names.end(); ++sIter) {
             const std::string &name = *sIter;
             namesLength += name.length();
             if (name.length() == 1) {
@@ -821,7 +821,7 @@ bool AJACommandLineParser::setOptionValue(const std::string &name, const std::st
         for (size_t i = 0; i < _options.size(); i++) {
             AJACommandLineOption opt = _options.at(i);
             const AJAStringList &names = opt.Names();
-            for (AJAStringListConstIter iter = names.begin(); iter != names.end(); iter++) {
+            for (AJAStringListConstIter iter = names.begin(); iter != names.end(); ++iter) {
                 if (name == *iter) {
                     _options[i].AddValue(value);
                     return true;
@@ -837,7 +837,7 @@ bool AJACommandLineParser::setOption(const std::string &name, bool isSet)
     for (size_t i = 0; i < _options.size(); i++) {
         AJACommandLineOption opt = _options.at(i);
         const AJAStringList &names = opt.Names();
-        for (AJAStringListConstIter iter = names.begin(); iter != names.end(); iter++) {
+        for (AJAStringListConstIter iter = names.begin(); iter != names.end(); ++iter) {
             if (name == *iter) {
                 _options[i].MarkSet(isSet);
                 return true;
