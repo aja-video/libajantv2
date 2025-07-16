@@ -325,7 +325,11 @@ class AJAExport NTV2RPCClientAPI : public NTV2RPCBase
 			@param[out]	outErrMsg		An error message if NTV2QueryDevices is unsuccessful.
 			@return		True if successful;  otherwise false.
 		**/
-		virtual bool	NTV2QueryDevices (NTV2StringList & outDeviceInfos, std::string & outErrMsg)	{outDeviceInfos.clear(); return true;}
+		virtual bool	NTV2QueryDevices (NTV2StringList & outDeviceInfos, std::string & outErrMsg)
+		{
+			(void)outErrMsg;
+			outDeviceInfos.clear(); return true;
+		}
 
 		#if !defined(NTV2_DEPRECATE_16_3)	//	These functions are going away
 		virtual bool	NTV2DriverGetBitFileInformationRemote	(BITFILE_INFO_STRUCT & bitFileInfo, const NTV2BitFileType bitFileType);
