@@ -327,8 +327,9 @@ class AJAExport NTV2RPCClientAPI : public NTV2RPCBase
 		**/
 		virtual bool	NTV2QueryDevices (NTV2StringList & outDeviceInfos, std::string & outErrMsg)
 		{
-			(void)outErrMsg;
-			outDeviceInfos.clear(); return true;
+			outErrMsg.clear();
+			outDeviceInfos.clear();
+			return true;
 		}
 
 		#if !defined(NTV2_DEPRECATE_16_3)	//	These functions are going away
