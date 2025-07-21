@@ -167,9 +167,10 @@ typedef SubParserMap::const_iterator SubParserMapConstIter;
 typedef std::pair<std::string, AJACommandLineParser*> AJASubParserPair;
 
 typedef enum {
-	kShortOptionsAsLong = 1 << 0,
-	kNoDefaultHelpOption = 1 << 1,
-	kNoDefaultUsageOption = 1 << 2
+	kShortOptionsAsLong   = 1 << 0,
+	kNoDefaultHelpOption  = 1 << 1,
+	kNoDefaultUsageOption = 1 << 2,
+	kErrorOnUnknownArgs   = 1 << 3
 } AJACommandLineParserFlags;
 
 /**
@@ -252,7 +253,7 @@ public:
 	 *
 	 * @return	Returns `true` if the command-line args were parsed successfully, otherwise `false`.
 	 */
-	bool ParseArgs(const AJAStringList &args, bool errUnknown=false);
+	bool Parse(const AJAStringList &args);
 
 	/**
 	 * Parse a list of strings containing command-line args.
@@ -262,7 +263,7 @@ public:
 	 *
 	 * @return	Returns a non-zero exit code upon failure or use of --help or --usage.
 	 */
-	bool ParseArgs(int argc, const char *argv[], bool errUnknown=false);
+	bool Parse(int argc, const char *argv[]);
 
 	/**
 	 * Parse a list of strings containing command-line args.
@@ -272,7 +273,7 @@ public:
 	 *
 	 * @return	Returns a non-zero exit code upon failure or use of --help or --usage.
 	 */
-	bool ParseArgs(int argc, char *argv[], bool errUnknown=false);
+	bool Parse(int argc, char *argv[]);
 
 	/**
 	 * Tests if the specified arg was set on the command-line.

@@ -303,7 +303,7 @@ bool AJACommandLineParser::AddSubParser(AJACommandLineParser *p)
     return false;
 }
 
-bool AJACommandLineParser::ParseArgs(const AJAStringList &args, bool errUnknown)
+bool AJACommandLineParser::Parse(const AJAStringList &args)
 {
     // Must have at least 2 args (args[0] is the binary name, and args[1..N] are the user-specified args).
     if (args.size() <= 1) {
@@ -320,7 +320,7 @@ bool AJACommandLineParser::ParseArgs(const AJAStringList &args, bool errUnknown)
         }
         // Iterate all args with all sub-parsers...
         if (spIter->second != NULL) {
-            if (!spIter->second->ParseArgs(args)) {
+            if (!spIter->second->Parse(args)) {
                 std::cerr << "Error parsing args with sub-parser: " << spIter->second->Name() << std::endl;
                 return false;
             }
@@ -394,7 +394,7 @@ bool AJACommandLineParser::ParseArgs(const AJAStringList &args, bool errUnknown)
                                 size_t count = (arg.length()-1)-optName.length();
                                 optValue = arg.substr(optName.length()+1, count);
                                 break;
-                            } else if (errUnknown) {
+                            } else if (_flags & kErrorOnUnknownArgs) {
                                 std::cerr << "Unknown arg: " << subStr << std::endl;
                                 return false;
                             }
@@ -422,7 +422,7 @@ bool AJACommandLineParser::ParseArgs(const AJAStringList &args, bool errUnknown)
                     setOptionValue(optName, optValue);
                 }
                 setOption(optName, true);
-            } else if (errUnknown) {
+            } else if (_flags & kErrorOnUnknownArgs) {
                 std::cerr << "Unknown arg: " << optName << std::endl;
                 return false;
             }
@@ -438,9 +438,9 @@ bool AJACommandLineParser::ParseArgs(const AJAStringList &args, bool errUnknown)
             {std::cout << UsageText();  return false;}
 
     return true;
-}   //  ParseArgs (AJAStringList)
+}   //  Parse (AJAStringList)
 
-bool AJACommandLineParser::ParseArgs(int argc, const char *argv[], bool errUnknown)
+bool AJACommandLineParser::Parse(int argc, const char *argv[])
 {
     if (argc == 0 || argc == 1 || argv == NULL) {
         return false;
@@ -449,10 +449,10 @@ bool AJACommandLineParser::ParseArgs(int argc, const char *argv[], bool errUnkno
     for (int i = 0; i < argc; i++) {
         argList.push_back(std::string(argv[i]));
     }
-    return ParseArgs(argList, errUnknown);
+    return Parse(argList);
 }
 
-bool AJACommandLineParser::ParseArgs(int argc, char *argv[], bool errUnknown)
+bool AJACommandLineParser::Parse(int argc, char *argv[])
 {
     if (argc == 0 || argc == 1 || argv == NULL) {
         return false;
@@ -461,7 +461,7 @@ bool AJACommandLineParser::ParseArgs(int argc, char *argv[], bool errUnknown)
     for (int i = 0; i < argc; i++) {
         argList.push_back(std::string(argv[i]));
     }
-    return ParseArgs(argList, errUnknown);
+    return Parse(argList);
 }
 
 bool AJACommandLineParser::IsSet(const std::string &name) const
