@@ -736,6 +736,12 @@ uint32_t GetAudioWrapAddress(Ntv2SystemContext* context, NTV2AudioSystem audioSy
 
 bool GetAudioBufferSize(Ntv2SystemContext* context, NTV2AudioSystem audioSystem, NTV2AudioBufferSize *value)
 {
+    if (SupportStackedAudio(context))
+    {
+        *value = NTV2_AUDIO_BUFFER_SIZE_4MB;
+        return true;
+    }
+    
 	uint32_t control = GetAudioControlRegister(context, audioSystem);
 
 	return ntv2ReadRegisterMS(context,
