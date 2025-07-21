@@ -307,7 +307,7 @@ public:
 	static NTV2_DEPRECATED_f(bool IsAlphaNumeric (const std::string & inStr)); ///< @deprecated	Use aja::is_alpha_numeric instead
 #endif	//	!defined(NTV2_DEPRECATE_17_1)
 #if !defined(NTV2_DEPRECATE_17_5)
-	static NTV2_MUST_DEPRECATE(bool GetDeviceWithSerial (const uint64_t sn, CNTV2Card & dev)); ///< @deprecated	Use the string version of this function instead
+	static NTV2_DEPRECATED_f(bool GetDeviceWithSerial (const uint64_t sn, CNTV2Card & dev)); ///< @deprecated	Use the string version of this function instead
 #endif	//	!defined(NTV2_DEPRECATE_17_5)
 
 #if !defined(NTV2_DEPRECATE_17_1)
