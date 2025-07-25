@@ -81,6 +81,16 @@ typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter
 #define	kNTV2PluginX500AttrKey_OrganizationalUnitName	"OU"
 #define	kNTV2PluginX500AttrKey_CountryName				"C"
 
+extern uint32_t gBaseConstructCount;	//	Number of NTV2RPCBase constructor calls made
+extern uint32_t gBaseDestructCount;		//	Number of NTV2RPCBase destructor calls made
+extern uint32_t gClientConstructCount;	//	Number of NTV2RPCClient constructor calls made
+extern uint32_t gClientDestructCount;	//	Number of NTV2RPCClient destructor calls made
+extern uint32_t gServerConstructCount;	//	Number of NTV2RPCServer constructor calls made
+extern uint32_t gServerDestructCount;	//	Number of NTV2RPCServer destructor calls made
+extern uint32_t gLoaderConstructCount;	//	Number of NTV2PluginLoader constructor calls made
+extern uint32_t gLoaderDestructCount;	//	Number of NTV2PluginLoader destructor calls made
+extern uint32_t gPluginConstructCount;	//	Number of NTV2Plugin constructor calls made
+extern uint32_t gPluginDestructCount;	//	Number of NTV2Plugin destructor calls made
 
 /**
 	@brief	A simple (not thread-safe) set of key/value pairs. (New in SDK 16.3)
