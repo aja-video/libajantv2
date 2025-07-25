@@ -426,6 +426,26 @@ bool StartDriverProcesses(Ntv2DriverProcessContext* inProcessContext)
 			}
 		}
 	#endif
+    
+    #ifdef AJA_MAILBOX
+        // Clear all mailboxes
+        for (int i = 0; i < NTV2_MAX_MAILBOX; i++)
+        {
+            inProcessContext->pMailbox[i] = NULL;
+        }
+        
+        // Open the first mailbox
+        inProcessContext->pMailbox[0] = ntv2_mailbox_open(pSystemContext, "ntv2mailbox", 0);
+        if (inProcessContext->pMailbox[0] != NULL)
+        {
+            status = ntv2_mailbox_configure(inProcessContext->pMailbox[0], 0x100000);
+            if (status != NTV2_STATUS_SUCCESS)
+            {
+                ntv2_mailbox_close(inProcessContext->pMailbox[0]);
+                inProcessContext->pMailbox[0] = NULL;
+            }
+        }
+    #endif
 
 	// Turn on interrupts
 	EnableNtv2Interrupts(inProcessContext->pSystemContext);
@@ -498,6 +518,13 @@ void StopDriverProcesses(Ntv2DriverProcessContext* inProcessContext)
 		ntv2_setup_disable(inProcessContext->pSetupMonitor);
 	}
 
+    for (int i = 0; i < NTV2_MAX_MAILBOX; i++)
+    {
+        ntv2_mailbox_disable(inProcessContext->pMailbox[i]);
+        ntv2_mailbox_close(inProcessContext->pMailbox[i]);
+        inProcessContext->pMailbox[i] = NULL;
+    }
+        
 	ntv2Message("<- Exit\n");
 }
 

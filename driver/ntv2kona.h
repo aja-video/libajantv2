@@ -28,6 +28,7 @@
 #include "ntv2videoraster.h"
 #include "ntv2setup.h"
 #include "ntv2mcap.h"
+#include "ntv2mailbox.h"
 
 //Monitor processes
 #define AJA_OUTPUT_SETUP
@@ -35,18 +36,16 @@
 #define AJA_HDMI_OUT
 #define AJA_GENLOCK
 #define AJA_RASTERIZER
-
-
-
+#define AJA_MAILBOX
 
 
 enum
 {
 	kIntAudioWrapEnable             = BIT (3),
-	kIntAuxVerticalEnable   = BIT (11),
+	kIntAuxVerticalEnable           = BIT (11),
 	
 	// Status register
-	kIntOutput1VBLActive    = BIT (31),
+	kIntOutput1VBLActive            = BIT (31),
 	kIntOutput1VBLClear             = BIT (31),
 	
 	kIntInput1VBLActive             = BIT (30),
@@ -58,23 +57,23 @@ enum
 	kIntAudioWrapActive             = BIT (28),
 	kIntAudioWrapClear              = BIT (28),
 	
-	kIntAudioOutWrapActive  = BIT (27),
-	kIntAudioOutWrapClear   = BIT (27),
+	kIntAudioOutWrapActive          = BIT (27),
+	kIntAudioOutWrapClear           = BIT (27),
 	
 	kIntUartTx2Active               = BIT (26),
 	kIntUartTx2Clear                = BIT (26),
 	
-	kIntOutput2VBLActive    = BIT (8),
+	kIntOutput2VBLActive            = BIT (8),
 	kIntOutput2VBLClear             = BIT (23),
 	
-	kIntOutput3VBLActive    = BIT (7),
+	kIntOutput3VBLActive            = BIT (7),
 	kIntOutput3VBLClear             = BIT (22),
 	
-	kIntOutput4VBLActive    = BIT (6),
+	kIntOutput4VBLActive            = BIT (6),
 	kIntOutput4VBL                  = BIT (21),
 	
-	kIntAuxVerticalActive   = BIT (12),
-	kIntAuxVerticalClear    = BIT (12),
+	kIntAuxVerticalActive           = BIT (12),
+	kIntAuxVerticalClear            = BIT (12),
 	
 	kIntI2C2Active                  = BIT (13),
 	kIntI2C2Clear                   = BIT (13),
@@ -101,16 +100,16 @@ enum
 	kIntInput8VBLActive             = BIT (25),
 	kIntInput8VBLClear              = BIT (25),
 	
-	kIntOutput5VBLActive    = BIT (31),
+	kIntOutput5VBLActive            = BIT (31),
 	kIntOutput5VBLClear             = BIT (19),
 	
-	kIntOutput6VBLActive    = BIT (24),
+	kIntOutput6VBLActive            = BIT (24),
 	kIntOutput6VBLClear             = BIT (18),
 	
-	kIntOutput7VBLActive    = BIT (23),
+	kIntOutput7VBLActive            = BIT (23),
 	kIntOutput7VBLClear             = BIT (17),
 	
-	kIntOutput8VBLActive    = BIT (22),
+	kIntOutput8VBLActive            = BIT (22),
 	kIntOutput8VBLClear             = BIT (16),
 	
 	kIntPBChange                    = BIT (0),
@@ -119,7 +118,7 @@ enum
 	kIntSATAChange                  = BIT (3),                      // CF Presence Detect Change in Bones product ....
 	kIntTemp1High                   = BIT (4),
 	kIntTemp2High                   = BIT (5),
-	kIntPowerButtonChange   = BIT (6),
+	kIntPowerButtonChange           = BIT (6),
 	kIntCPLDMask                    = BIT (0) + BIT (1) + BIT (2) + BIT (3) + BIT (4) + BIT(5) + BIT(6),
 };
 
@@ -249,11 +248,14 @@ enum
 #if defined(AJAMacDext)
 
 #define NTV2_MAX_HDMI_MONITOR	4
+#define NTV2_MAX_MAILBOX 4
+
 typedef struct Ntv2DriverProcessContext
 {
 	Ntv2SystemContext*	pSystemContext;
 	ntv2_hdmiin*		pHDMIInMonitor[NTV2_MAX_HDMI_MONITOR];
 	ntv2_hdmiin4*		pHDMIIn4Monitor[NTV2_MAX_HDMI_MONITOR];
+    ntv2_mailbox*       pMailbox[NTV2_MAX_MAILBOX];
 	ntv2_hdmiout4*		pHDMIOut4Monitor;
 	ntv2_genlock*		pGenlockMonitor;
 	ntv2_genlock2*		pGenlock2Monitor;
