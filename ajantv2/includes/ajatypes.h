@@ -524,6 +524,7 @@
 #define NTV2_SHOULD_BE_DEPRECATED(__f__)			__f__
 #define NTV2_SHOULD_DEPRECATE(__f__)				__f__
 #define NTV2_MUST_DEPRECATE(__f__)					__f__
+#define NTV2_WILL_BE_DEPRECATED(__f__)				__f__
 #if defined(NTV2_BUILDING_DRIVER)
 	//	Disable deprecation warnings in driver builds
 	#define NTV2_DEPRECATED_f(__f__)				__f__

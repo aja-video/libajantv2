@@ -133,8 +133,8 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanReportRunningFirmwareDate,		///< @brief True if device can report its running (and not necessarily installed) firmware date.
 	kDeviceHasAudioMonitorRCAJacks,				///< @brief True if device has a pair of unbalanced RCA audio monitor output connectors.
 	kDeviceHasBiDirectionalAnalogAudio,			///< @brief True if device has a bi-directional analog audio connector.
-	kDeviceHasGenlockv2,						///< @brief True if device has version 2 genlock hardware and/or firmware.
-	kDeviceHasGenlockv3,						///< @brief True if device has version 3 genlock hardware and/or firmware.
+	kDeviceHasGenlockv2,						///< @brief True if device has version 2 genlock hardware and/or firmware. (Deprecate -- use kDeviceGetGenlockVersion)
+	kDeviceHasGenlockv3,						///< @brief True if device has version 3 genlock hardware and/or firmware. (Deprecate -- use kDeviceGetGenlockVersion)
 	kDeviceHasHeadphoneJack,					///< @brief True if device has a headphone jack.
 	kDeviceHasLEDAudioMeters,					///< @brief True if device has LED audio meters.
 	kDeviceHasRotaryEncoder,					///< @brief True if device has a rotary encoder volume control.
@@ -221,6 +221,7 @@ typedef enum _NTV2NumericParamID
 	kDeviceGetNumBufferedAudioSystems,			///< @brief The total number of audio systems on the device that can read/write audio buffer memory. Includes host audio system, if present. (New in SDK 17.0)
 	kDeviceGetNumTSIMuxers,						///< @brief	The number of TSI muxers on the device. (New in SDK 17.0)
 	kDeviceGetSPIFlashVersion,					///< @brief	The SPI-flash version on the device. (New in SDK 17.1)
+	kDeviceGetGenlockVersion,					///< @brief	The version number of the device's genlock hardware/firmware. (New in SDK 17.6)
 	kNTV2NumericParam_LAST,
 	kNTV2NumericParam_COUNT	= kNTV2NumericParam_LAST-kNTV2NumericParam_FIRST,
 	kDeviceGetNum_INVALID	= kNTV2NumericParam_LAST

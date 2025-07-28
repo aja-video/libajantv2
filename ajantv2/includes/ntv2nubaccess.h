@@ -81,6 +81,16 @@ typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter
 #define	kNTV2PluginX500AttrKey_OrganizationalUnitName	"OU"
 #define	kNTV2PluginX500AttrKey_CountryName				"C"
 
+extern uint32_t gBaseConstructCount;	//	Number of NTV2RPCBase constructor calls made
+extern uint32_t gBaseDestructCount;		//	Number of NTV2RPCBase destructor calls made
+extern uint32_t gClientConstructCount;	//	Number of NTV2RPCClient constructor calls made
+extern uint32_t gClientDestructCount;	//	Number of NTV2RPCClient destructor calls made
+extern uint32_t gServerConstructCount;	//	Number of NTV2RPCServer constructor calls made
+extern uint32_t gServerDestructCount;	//	Number of NTV2RPCServer destructor calls made
+extern uint32_t gLoaderConstructCount;	//	Number of NTV2PluginLoader constructor calls made
+extern uint32_t gLoaderDestructCount;	//	Number of NTV2PluginLoader destructor calls made
+extern uint32_t gPluginConstructCount;	//	Number of NTV2Plugin constructor calls made
+extern uint32_t gPluginDestructCount;	//	Number of NTV2Plugin destructor calls made
 
 /**
 	@brief	A simple (not thread-safe) set of key/value pairs. (New in SDK 16.3)
@@ -325,7 +335,12 @@ class AJAExport NTV2RPCClientAPI : public NTV2RPCBase
 			@param[out]	outErrMsg		An error message if NTV2QueryDevices is unsuccessful.
 			@return		True if successful;  otherwise false.
 		**/
-		virtual bool	NTV2QueryDevices (NTV2StringList & outDeviceInfos, std::string & outErrMsg)	{outDeviceInfos.clear(); return true;}
+		virtual bool	NTV2QueryDevices (NTV2StringList & outDeviceInfos, std::string & outErrMsg)
+		{
+			outErrMsg.clear();
+			outDeviceInfos.clear();
+			return true;
+		}
 
 		#if !defined(NTV2_DEPRECATE_16_3)	//	These functions are going away
 		virtual bool	NTV2DriverGetBitFileInformationRemote	(BITFILE_INFO_STRUCT & bitFileInfo, const NTV2BitFileType bitFileType);

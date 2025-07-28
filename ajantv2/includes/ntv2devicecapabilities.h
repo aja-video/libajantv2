@@ -144,6 +144,7 @@ class AJAExport DeviceCapabilities
 		inline ULWord	GetActiveMemorySize (void)				{return dev.GetNumSupported(kDeviceGetActiveMemorySize);}						///< @returns	The size, in bytes, of the device's active RAM available for video and audio
 		inline UWord	GetDACVersion (void)					{return UWord(dev.GetNumSupported(kDeviceGetDACVersion));}						///< @returns	The version number of the DAC on the device
 		inline UWord	GetDownConverterDelay (void)			{return UWord(dev.GetNumSupported(kDeviceGetDownConverterDelay));}				///< @returns	The down-converter delay on the device
+		inline ULWord	GetGenlockVersion (void)				{return dev.GetNumSupported(kDeviceGetGenlockVersion);}							///< @returns	The version number of the device genlock hardware/firmware
 		inline ULWord	GetHDMIVersion (void)					{return dev.GetNumSupported(kDeviceGetHDMIVersion);}							///< @returns	The version number of the HDMI chipset on the device
 		inline ULWord	GetLUTVersion (void)					{return dev.GetNumSupported(kDeviceGetLUTVersion);}								///< @returns	The version number of the LUT(s) on the device
 		inline ULWord	GetSPIFlashVersion (void)				{return dev.GetNumSupported(kDeviceGetSPIFlashVersion);}						///< @returns	The version number of the SPI-flash chipset used on the device

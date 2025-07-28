@@ -96,16 +96,16 @@ using namespace std;
 
 
 //	Stats
-static uint32_t gBaseConstructCount(0);		//	Number of NTV2RPCBase constructor calls made
-static uint32_t gBaseDestructCount(0);		//	Number of NTV2RPCBase destructor calls made
-static uint32_t gClientConstructCount(0);	//	Number of NTV2RPCClient constructor calls made
-static uint32_t gClientDestructCount(0);	//	Number of NTV2RPCClient destructor calls made
-static uint32_t gServerConstructCount(0);	//	Number of NTV2RPCServer constructor calls made
-static uint32_t gServerDestructCount(0);	//	Number of NTV2RPCServer destructor calls made
-static uint32_t gLoaderConstructCount(0);	//	Number of NTV2PluginLoader constructor calls made
-static uint32_t gLoaderDestructCount(0);	//	Number of NTV2PluginLoader destructor calls made
-static uint32_t gPluginConstructCount(0);	//	Number of NTV2Plugin constructor calls made
-static uint32_t gPluginDestructCount(0);	//	Number of NTV2Plugin destructor calls made
+uint32_t gBaseConstructCount(0);		//	Number of NTV2RPCBase constructor calls made
+uint32_t gBaseDestructCount(0);		//	Number of NTV2RPCBase destructor calls made
+uint32_t gClientConstructCount(0);	//	Number of NTV2RPCClient constructor calls made
+uint32_t gClientDestructCount(0);	//	Number of NTV2RPCClient destructor calls made
+uint32_t gServerConstructCount(0);	//	Number of NTV2RPCServer constructor calls made
+uint32_t gServerDestructCount(0);	//	Number of NTV2RPCServer destructor calls made
+uint32_t gLoaderConstructCount(0);	//	Number of NTV2PluginLoader constructor calls made
+uint32_t gLoaderDestructCount(0);	//	Number of NTV2PluginLoader destructor calls made
+uint32_t gPluginConstructCount(0);	//	Number of NTV2Plugin constructor calls made
+uint32_t gPluginDestructCount(0);	//	Number of NTV2Plugin destructor calls made
 
 
 string NTV2Dictionary::valueForKey (const string & inKey) const
