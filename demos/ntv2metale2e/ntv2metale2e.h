@@ -469,15 +469,15 @@ class NTV2MetalE2E
 	private:
         CNTV2Card				mDevice;			///< @brief	My CNTV2Card instance
 		
-		bool spi_wait_write_empty();
-		bool spi_wait_read_not_empty();
-		bool reset_dtr_status();
-		bool spi_genlock2_write(uint32_t size, uint16_t addr, uint8_t* data, bool triggerWait);
-		bool spi_genlock2_read(uint16_t addr, uint8_t* data, uint32_t numBytes);
-		bool wait_genlock2(uint32_t numMicrosSeconds);
-		void spi_reset();
-		void spi_reset_fifos();
-		uint32_t reg_read(uint32_t reg);
+		bool SPIWaitWriteEmpty (void);
+		bool SPIWaitReadNotEmpty (void);
+		bool ResetDTRStatus (void);
+		bool SPIGenlock2Write (uint32_t size, uint16_t addr, uint8_t* data, bool triggerWait);
+		bool SPIGenlock2Read (uint16_t addr, uint8_t* data, uint32_t numBytes);
+		bool WaitGenlock2 (uint32_t numMicrosSeconds);
+		void SPIReset (void);
+		void SPIResetFIFOs (void);
+		uint32_t RegRead(uint32_t reg);
 
 };	//	NTV2MetalE2E
 
