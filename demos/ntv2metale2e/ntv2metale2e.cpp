@@ -16,6 +16,19 @@ static void spi_reset_fifos(struct ntv2_genlock2 *ntv2_gen);
 static uint32_t reg_read(struct ntv2_genlock2 *ntv2_gen, const uint32_t *reg);
 static void reg_write(struct ntv2_genlock2 *ntv2_gen, const uint32_t *reg, uint32_t data);
 
+void hex_to_bytes(char *hex, uint8_t *output, uint32_t array_length)
+{
+	uint32_t i;
+	uint32_t j;
+	
+	for (i = 0, j = 0; i < array_length; i++, j+=2)
+	{
+		uint8_t bottom = hex[j+1] - (hex[j+1] > '9' ? 'A' - 10 : '0');
+		uint8_t top = hex[j] - (hex[j] > '9' ? 'A' - 10 : '0');
+		output[i] = (top * 16) + bottom;
+	}
+}
+
 NTV2MetalE2E::NTV2MetalE2E ()
 {
 }	//	constructor
@@ -39,14 +52,13 @@ AJAStatus NTV2MetalE2E::DoSomething (void)
 		if (AJA_FAILURE(status))
             return status;
 	
-	//	Set up the E2E routing
-	RouteE2ESignal();
-	
 	//  Set up the desired video configuration...
 	status = SetUpVideo();
 	if (AJA_FAILURE(status))
 		return status;
-
+	
+	//	Set up the E2E routing
+	RouteE2ESignal();
 
 	return AJA_STATUS_SUCCESS;
 
@@ -64,17 +76,18 @@ AJAStatus NTV2MetalE2E::SetUpGenlock (void)
     uint32_t outFreq1 = 0, outFreq2 = 0, outFreq3 = 0, outFreq4 = 0, outFreq5 = 0;
     uint8_t dpll0Status[1] = { 0 };
     uint32_t gpioValue;
+	bool check = false;
 
-    spi_reset(ntv2_gen);
+    spi_reset();
 
     while ((gdat->size != 0))
     {
-        //NTV2_MSG_GENLOCK_INFO("Writing offset %02X %s", gdat->offset, gdat->data);
+        //ntv2Message("Writing offset %02X %s", gdat->addr, gdat->data);
         hex_to_bytes(gdat->data+2, writeBytes, gdat->size);
-        if (!spi_genlock2_write(ntv2_gen, gdat->size, gdat->addr, writeBytes, true))
+        if (!spi_genlock2_write(gdat->size, gdat->addr, writeBytes, true))
         {
-            NTV2_MSG_ERROR("%s: genlock spi write failed\n", ntv2_gen->name);
-            return false;
+            //ntv2Message("genlock spi write failed\n");
+            return AJA_STATUS_FAIL;
         }
         totalBytes += gdat->size;
 
@@ -82,27 +95,27 @@ AJAStatus NTV2MetalE2E::SetUpGenlock (void)
         {
             uint8_t readBytes[256];
             uint16_t i;
-            if (spi_genlock2_read(ntv2_gen, gdat->addr, readBytes, gdat->size))
+            if (spi_genlock2_read(gdat->addr, readBytes, gdat->size))
             {
                 for (i = 0; i < gdat->size; i++)
                 {
-                    spi_genlock2_read(ntv2_gen, gdat->addr+i, readBytes+i, 1);
+                    spi_genlock2_read(gdat->addr+i, readBytes+i, 1);
                     if (readBytes[i] != writeBytes[i])
                     {
                         errorCount++;
-                        NTV2_MSG_GENLOCK_INFO("%s: Set: %d, Offset: %04X, size: %d, data: %s", ntv2_gen->name, count, gdat->addr, gdat->size, gdat->data);
-                        NTV2_MSG_GENLOCK_INFO("%s: Bytes did not match i : %d read : %02X write : %02X\n", ntv2_gen->name, i, readBytes[i], writeBytes[i]);
+                        ntv2Message("Set: %d, Offset: %04X, size: %d, data: %s", count, gdat->addr, gdat->size, gdat->data);
+                        ntv2Message("Bytes did not match i : %d read : %02X write : %02X\n", i, readBytes[i], writeBytes[i]);
                     }
                     else
                     {
-                        //NTV2_MSG_GENLOCK_INFO("%s: Bytes matched\n", ntv2_gen->name);
+                        //ntv2Message("Bytes matched\n");
                     }
                 }
             }
         }
         else
         {
-            NTV2_MSG_GENLOCK_INFO("%s: Set: %d, Offset: %04X No check", ntv2_gen->name, count, gdat->addr);
+            ntv2Message("Set: %d, Offset: %04X No check", count, gdat->addr);
         }
         count++;
         gdat++;
@@ -159,23 +172,63 @@ void NTV2MetalE2E::RouteE2ESignal (void)
 
 }	//	RouteOutputSignal
 
-
-// ---------------------------------------------
-// Helpers for genlock configuration
-void hex_to_bytes(char *hex, uint8_t *output, uint32_t array_length)
+bool NTV2MetalE2E::spi_wait_write_empty (void)
 {
-    uint32_t i;
-    uint32_t j;
-
-    for (i = 0, j = 0; i < array_length; i++, j+=2)
-    {
-        uint8_t bottom = hex[j+1] - (hex[j+1] > '9' ? 'A' - 10 : '0');
-        uint8_t top = hex[j] - (hex[j] > '9' ? 'A' - 10 : '0');
-        output[i] = (top * 16) + bottom;
-    }
+	uint32_t dtrStatus = 0;
+	uint32_t count = 0;
+	
+	/*status = reg_read(ntv2_reg_spi_status);
+    while ((status & GENL_SPI_WRITE_FIFO_EMPTY) == 0)
+	{
+		if (count++ > c_spi_timeout) return false;
+		status = reg_read(ntv2_reg_spi_status);
+		ntv2Message("FIFO NOT EMPTY!\n");
+	}
+*/
+	dtrStatus = reg_read(ntv2_reg_spi_ip_status);
+	count = 0;
+	while ((dtrStatus & DTR_EMPTY) == 0)
+	{
+		if (count++ > c_spi_timeout) return false;
+		dtrStatus = reg_read(ntv2_reg_spi_ip_status);
+		//ntv2Message("DTR NOT EMPTY!\n");
+	}
+	
+	//ntv2Message("Transfer Complete! %d\n", count);
+	return true;
 }
 
-static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, uint16_t addr, uint8_t* data, bool triggerWait)
+bool NTV2MetalE2E::spi_wait_read_not_empty (void)
+{
+	uint32_t status = 0;
+	uint32_t count = 0;
+	
+	status = reg_read(ntv2_reg_spi_status);
+	while ((status & GENL_SPI_READ_FIFO_EMPTY) != 0)
+	{
+		if (count++ > c_spi_timeout) return false;
+		status = reg_read(ntv2_reg_spi_status);
+		//ntv2Message("READ FIFO EMPTY!");
+	}
+	//ntv2Message("READ FIFO NOT EMPTY! %d", count);
+	return true;
+}
+
+bool NTV2MetalE2E::reset_dtr_status (void)
+{
+	uint32_t dtrStatus = reg_read(ntv2_reg_spi_ip_status);
+	if ((dtrStatus & DTR_EMPTY) != 0)
+	{
+		//ntv2Message("DTR High!\n");
+		mDevice.WriteRegister(ntv2_reg_spi_ip_status, 1, BIT(2), 2);
+		//dtrStatus = reg_read(ntv2_reg_spi_ip_status);
+		//ntv2Message("DTR Reset Value: %08X!\n", dtrStatus);
+		return true;
+	}
+	return false;
+}
+
+bool NTV2MetalE2E::spi_genlock2_write(uint32_t size, uint16_t addr, uint8_t* data, bool triggerWait)
 {
     uint32_t controlVal;
     uint8_t   page_select_buffer[10];
@@ -184,7 +237,7 @@ static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, ui
     //if (!spi_wait_write_empty(ntv2_gen)) return false;
 
     // Step 1 reset FIFOs
-    spi_reset_fifos(ntv2_gen);
+    spi_reset_fifos();
 
     if (addr != 0x7C)
     {
@@ -194,47 +247,47 @@ static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, ui
         page_select_buffer[2] = 0x10;
         page_select_buffer[3] = 0x20;
 
-        //NTV2_MSG_GENLOCK_INFO("Write: Set Page");
-        spi_genlock2_write(ntv2_gen, 4, 0x7C, page_select_buffer, true);
+        //ntv2Message("Write: Set Page");
+        spi_genlock2_write(4, 0x7C, page_select_buffer, true);
     }
 
     // Step 2 load data
-    reg_write(ntv2_gen, ntv2_reg_spi_write, addr & 0x7f);
-    //NTV2_MSG_GENLOCK_INFO("Wrote %02X", offset);
+    mDevice.WriteRegister(ntv2_reg_spi_write, addr & 0x7f);
+    //ntv2message("Wrote %02X", offset);
     for (i = 0; i < size; i++)
     {
-        reg_write(ntv2_gen, ntv2_reg_spi_write, data[i]);
-        //NTV2_MSG_GENLOCK_INFO("Wrote %02X", data[i]);
+        mDevice.WriteRegister(ntv2_reg_spi_write, data[i]);
+        //ntv2Message("Wrote %02X", data[i]);
     }
 
     // Reset DRT Shift bit
-    reset_dtr_status(ntv2_gen);
+    reset_dtr_status();
 
     // Step 3 chip select low
-    reg_write(ntv2_gen, ntv2_reg_spi_slave, 0x0);
+    mDevice.WriteRegister(ntv2_reg_spi_slave, 0x0);
 
     // Step 4 enable master transactions
-    controlVal = reg_read(ntv2_gen, ntv2_reg_spi_control);
+    controlVal = reg_read(ntv2_reg_spi_control);
     controlVal &= ~0x100;
-    reg_write(ntv2_gen, ntv2_reg_spi_control, controlVal);
+    mDevice.WriteRegister(ntv2_reg_spi_control, controlVal);
 
-    spi_wait_write_empty(ntv2_gen);
+    spi_wait_write_empty();
 
     // Step 5 deassert chip select
-    reg_write(ntv2_gen, ntv2_reg_spi_slave, 0x01);
+    mDevice.WriteRegister(ntv2_reg_spi_slave, 0x01);
 
     // Step 6 disable master transactions
-    controlVal = reg_read(ntv2_gen, ntv2_reg_spi_control);
+    controlVal = reg_read(ntv2_reg_spi_control);
     controlVal |= 0x100;
-    reg_write(ntv2_gen, ntv2_reg_spi_control, controlVal);
+    mDevice.WriteRegister(ntv2_reg_spi_control, controlVal);
 
     if (triggerWait)
-        wait_genlock2(ntv2_gen, 200);
+        wait_genlock2(200);
 
     return true;
 }
 
-static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uint8_t* data, uint32_t numBytes)
+bool NTV2MetalE2E::spi_genlock2_read(uint16_t addr, uint8_t* data, uint32_t numBytes)
 {
     uint32_t  val, status;
     uint8_t   tx_buffer[10];
@@ -244,7 +297,7 @@ static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uin
     //return false;
 
     // Step 1 reset FIFOs
-    spi_reset_fifos(ntv2_gen);
+    spi_reset_fifos();
 
     if (addr != 0x7c)
     {
@@ -255,62 +308,95 @@ static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uin
         tx_buffer[3] = 0x20;
 
         //NTV2_MSG_GENLOCK_INFO("Read: Set Page");
-        spi_genlock2_write(ntv2_gen, 4, 0x7C, tx_buffer, true);
+        spi_genlock2_write(4, 0x7C, tx_buffer, true);
     }
 
-    reg_write(ntv2_gen, ntv2_reg_spi_control, 0xfe);//0xe6);
-    wait_genlock2(ntv2_gen, 1000);
-    reg_write(ntv2_gen, ntv2_reg_spi_slave, 0x00);
-    wait_genlock2(ntv2_gen, 1000);
+    mDevice.WriteRegister(ntv2_reg_spi_control, 0xfe);
+    wait_genlock2(1000);
+    mDevice.WriteRegister(ntv2_reg_spi_slave, 0x00);
+    wait_genlock2(1000);
 
-    reg_write(ntv2_gen, ntv2_reg_spi_write, 0x80 | (addr & 0x7f));
-    wait_genlock2(ntv2_gen, 1000);
+    mDevice.WriteRegister(ntv2_reg_spi_write, 0x80 | (addr & 0x7f));
+    wait_genlock2(1000);
 
     for (i = 0; i < numBytes; i++)
-        reg_write(ntv2_gen, ntv2_reg_spi_write, 0);
+        mDevice.WriteRegister(ntv2_reg_spi_write, 0);
 
-    if (!spi_wait_write_empty(ntv2_gen))
+    if (!spi_wait_write_empty())
         return false;
 
-    reg_write(ntv2_gen, ntv2_reg_spi_slave, 0x01);
-    wait_genlock2(ntv2_gen, 10000);
+    mDevice.WriteRegister(ntv2_reg_spi_slave, 0x01);
+    wait_genlock2(10000);
 
-    if(!spi_wait_read_not_empty(ntv2_gen))
+    if(!spi_wait_read_not_empty())
         return false;
 
-    //wait_genlock2(ntv2_gen, 1000);
+    //wait_genlock2(1000);
 
-    val = reg_read(ntv2_gen, ntv2_reg_spi_read); // dummy read for address sent
-    //NTV2_MSG_GENLOCK_INFO("Read: Val: %02X", val);
+    val = reg_read(ntv2_reg_spi_read); // dummy read for address sent
+    //ntv2Message("Read: Val: %02X", val);
     for (i = 0; i < numBytes; i++)
     {
-        status = reg_read(ntv2_gen, ntv2_reg_spi_status);
-        if(!spi_wait_read_not_empty(ntv2_gen))
+        status = reg_read(ntv2_reg_spi_status);
+        if(!spi_wait_read_not_empty())
             return false;
-        val = reg_read(ntv2_gen, ntv2_reg_spi_read);
-        //NTV2_MSG_GENLOCK_INFO("Read: Val: %02X", val);
+        val = reg_read(ntv2_reg_spi_read);
+        //ntv2Message("Read: Val: %02X", val);
         data[i] = (uint8_t)val;
     }
 
-    reg_write(ntv2_gen, ntv2_reg_spi_control, 0xfe);//0xe6);
+    mDevice.WriteRegister(ntv2_reg_spi_control, 0xfe);//0xe6);
 
     return true;
 }
 
-static void spi_reset_fifos(struct ntv2_genlock2 *ntv2_gen)
+bool NTV2MetalE2E::wait_genlock2(uint32_t numMicrosSeconds)
 {
-    //reg_write(ntv2_gen, ntv2_reg_spi_control, 0x1e6);
-    reg_write(ntv2_gen, ntv2_reg_spi_control, 0x1fe);
+	uint32_t usTicks = 0;
+	uint32_t timeoutCount = 0;
+	
+	mDevice.WriteRegister(0x3606, 0);
+	while (usTicks < numMicrosSeconds)
+	{
+		usTicks = reg_read(0x3606);
+#if 1
+		if(timeoutCount++ > 100) return false;
+#else
+		if (timeoutCount++ > 100)
+		{
+			ntv2Message("Genlock2 200us wait TIMEDOUT");
+			return false;
+		}
+		else
+		{
+			ntv2Message("Genlock2 timeout count: %d", timeoutCount);
+			return true;
+		}
+#endif
+	}
+	return true;
 }
 
-static uint32_t reg_read(struct ntv2_genlock2 *ntv2_gen, const uint32_t *reg)
-{
-    return ntv2_reg_read(ntv2_gen->system_context, reg, ntv2_gen->index);
+void NTV2MetalE2E::spi_reset (void)
+{	
+	// reset spi hardware
+	mDevice.WriteRegister(ntv2_reg_spi_reset, 0x0a);
+	
+	// configure spi & reset fifos
+	mDevice.WriteRegister(ntv2_reg_spi_slave, 0x1);
+	mDevice.WriteRegister(ntv2_reg_spi_control, 0x1fe);
 }
 
-static void reg_write(struct ntv2_genlock2 *ntv2_gen, const uint32_t *reg, uint32_t data)
+void NTV2MetalE2E::spi_reset_fifos (void)
 {
-    ntv2_reg_write(ntv2_gen->system_context, reg, ntv2_gen->index, data);
+    mDevice.WriteRegister(ntv2_reg_spi_control, 0x1fe);
+}
+
+uint32_t NTV2MetalE2E::reg_read(uint32_t reg)
+{
+	uint32_t outVal(0);
+	mDevice.ReadRegister(reg, outVal);
+	return outVal;
 }
 
 
