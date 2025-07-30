@@ -743,6 +743,8 @@ bool CNTV2SignalRouter::CreateFromString (const string & inString, NTV2XptConnec
 			string line(*pLine);  aja::strip(line);
 			if (line.empty())
 				continue;
+			if (line.find("//") == 0)	//	starts with "//"
+				continue;
 //			SRDBG("	 line '" << line << "'");
 			size_t	openParenPos(line.find("(")), closedParenPos(line.find(");"));
 			if (openParenPos == string::npos  ||  closedParenPos == string::npos  ||  openParenPos > closedParenPos)

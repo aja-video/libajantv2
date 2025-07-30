@@ -72,7 +72,7 @@ bool CNTV2Card::GetHDMIInputColor (NTV2LHIHDMIColorSpace & outValue, const NTV2C
 	const ULWord numInputs(GetNumSupported(kDeviceGetNumHDMIVideoInputs));
 	if (ULWord(inChannel) >= numInputs)
 		return false;
-	return driverInterface().ReadRegister (numInputs == 1 ? kRegHDMIInputStatus : gHDMIChannelToInputStatusRegNum[inChannel],
+	return driverInterface().ReadRegister (numInputs == 1 ? ULWord(kRegHDMIInputStatus) : gHDMIChannelToInputStatusRegNum[inChannel],
 											outValue, kLHIRegMaskHDMIInputColorSpace, kLHIRegShiftHDMIInputColorSpace);
 }
 
@@ -81,7 +81,7 @@ bool CNTV2Card::GetHDMIInVideoRange (NTV2HDMIRange & outValue, const NTV2Channel
 	const ULWord numInputs(GetNumSupported(kDeviceGetNumHDMIVideoInputs));
 	if (ULWord(inChannel) >= numInputs)
 		return false;
-	return driverInterface().ReadRegister (numInputs == 1 ? kRegHDMIInputControl : gHDMIChannelToControlRegNum[inChannel],
+	return driverInterface().ReadRegister (numInputs == 1 ? ULWord(kRegHDMIInputControl) : gHDMIChannelToControlRegNum[inChannel],
 											outValue, kRegMaskHDMIInfoRange, kRegShiftHDMIInfoRange);
 }
 
@@ -598,6 +598,22 @@ bool CNTV2Card::GetHDMIOutForceConfig (bool & outValue, const NTV2Channel inWhic
 	if (!GetHDMIOutControlReg(reg, inWhichHDMIOut))
 		return false;
 	return CNTV2DriverInterface::ReadRegister (reg, outValue, kRegMaskHDMIOutForceConfig, kRegShiftHDMIOutForceConfig);
+}
+
+bool CNTV2Card::SetHDMIOutDisable (const bool value, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIOutControl);
+	if (!GetHDMIOutControlReg(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister (reg, ULWord(value), kRegMaskHDMIOutDisable, kRegShiftHDMIOutDisable);
+}
+
+bool CNTV2Card::GetHDMIOutDisable (bool & outValue, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIOutControl);
+	if (!GetHDMIOutControlReg(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister (reg, outValue, kRegMaskHDMIOutDisable, kRegShiftHDMIOutDisable);
 }
 
 bool CNTV2Card::SetHDMIOutPrefer420 (const bool value, const NTV2Channel inWhichHDMIOut)
@@ -1205,7 +1221,7 @@ bool CNTV2Card::GetHDMIOutControlReg (ULWord & outReg, const NTV2Channel inWhich
 	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
 	if (!hdmiVers)
 		return false;
-	outReg = hdmiVers < 6 ? kRegHDMIOutControl : gHDMIChannelToOutControlVRegNum[ULWord(inWhichHDMIOut)];
+	outReg = hdmiVers < 6 ? ULWord(kRegHDMIOutControl) : gHDMIChannelToOutControlVRegNum[ULWord(inWhichHDMIOut)];
 	return true;
 }
 
@@ -1216,7 +1232,7 @@ bool CNTV2Card::GetHDMIOutInputStatusRegNum (ULWord & outRegNum, const NTV2Chann
 	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
 	if (!hdmiVers)
 		return false;
-	outRegNum = hdmiVers < 6 ? kRegHDMIInputStatus : gHDMIChannelToInputStatusVRegNum[ULWord(inWhichHDMIOut)];
+	outRegNum = hdmiVers < 6 ? ULWord(kRegHDMIInputStatus) : gHDMIChannelToInputStatusVRegNum[ULWord(inWhichHDMIOut)];
 	return true;
 }
 
@@ -1227,7 +1243,7 @@ bool CNTV2Card::GetHDMIOutInputControlRegNum (ULWord & outRegNum, const NTV2Chan
 	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
 	if (!hdmiVers)
 		return false;
-	outRegNum = hdmiVers < 6 ? kRegHDMIInputControl : gHDMIChannelToInputControlVRegNum[ULWord(inWhichHDMIOut)];
+	outRegNum = hdmiVers < 6 ? ULWord(kRegHDMIInputControl) : gHDMIChannelToInputControlVRegNum[ULWord(inWhichHDMIOut)];
 	return true;
 }
 
@@ -1238,7 +1254,7 @@ bool CNTV2Card::GetHDMIOutStatusReg (ULWord & outRegNum, const NTV2Channel inWhi
 	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
 	if (!hdmiVers)
 		return false;
-	outRegNum = hdmiVers < 6 ? kVRegHDMIOutStatus1 : gHDMIChannelToOutStatusVRegNum[ULWord(inWhichHDMIOut)];
+	outRegNum = hdmiVers < 6 ? ULWord(kVRegHDMIOutStatus1) : gHDMIChannelToOutStatusVRegNum[ULWord(inWhichHDMIOut)];
 	return true;
 }
 
@@ -1249,7 +1265,7 @@ bool CNTV2Card::GetHDMIOutHDRGreenPrimaryReg (ULWord & outRegNum, const NTV2Chan
 	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
 	if (!hdmiVers)
 		return false;
-	outRegNum = hdmiVers < 6 ? kRegHDMIHDRGreenPrimary : gHDMIChannelToOutHDRGreenPrimaryVRegNum[ULWord(inWhichHDMIOut)];
+	outRegNum = hdmiVers < 6 ? ULWord(kRegHDMIHDRGreenPrimary) : gHDMIChannelToOutHDRGreenPrimaryVRegNum[ULWord(inWhichHDMIOut)];
 	return true;
 }
 
@@ -1260,7 +1276,7 @@ bool CNTV2Card::GetHDMIOutHDRBluePrimaryReg (ULWord & outRegNum, const NTV2Chann
 	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
 	if (!hdmiVers)
 		return false;
-	outRegNum = hdmiVers < 6 ? kRegHDMIHDRBluePrimary : gHDMIChannelToOutHDRBluePrimaryVRegNum[ULWord(inWhichHDMIOut)];
+	outRegNum = hdmiVers < 6 ? ULWord(kRegHDMIHDRBluePrimary) : gHDMIChannelToOutHDRBluePrimaryVRegNum[ULWord(inWhichHDMIOut)];
 	return true;
 }
 
@@ -1271,7 +1287,7 @@ bool CNTV2Card::GetHDMIOutHDRRedPrimaryReg (ULWord & outRegNum, const NTV2Channe
 	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
 	if (!hdmiVers)
 		return false;
-	outRegNum = hdmiVers < 6 ? kRegHDMIHDRRedPrimary : gHDMIChannelToOutHDRRedPrimaryVRegNum[ULWord(inWhichHDMIOut)];
+	outRegNum = hdmiVers < 6 ? ULWord(kRegHDMIHDRRedPrimary) : gHDMIChannelToOutHDRRedPrimaryVRegNum[ULWord(inWhichHDMIOut)];
 	return true;
 }
 
@@ -1282,7 +1298,7 @@ bool CNTV2Card::GetHDMIOutHDRWhitePointReg (ULWord & outRegNum, const NTV2Channe
 	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
 	if (!hdmiVers)
 		return false;
-	outRegNum = hdmiVers < 6 ? kRegHDMIHDRWhitePoint : gHDMIChannelToOutHDRWhitePointVRegNum[ULWord(inWhichHDMIOut)];
+	outRegNum = hdmiVers < 6 ? ULWord(kRegHDMIHDRWhitePoint) : gHDMIChannelToOutHDRWhitePointVRegNum[ULWord(inWhichHDMIOut)];
 	return true;
 }
 
@@ -1293,7 +1309,7 @@ bool CNTV2Card::GetHDMIOutHDRMasterLuminanceReg (ULWord & outRegNum, const NTV2C
 	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
 	if (!hdmiVers)
 		return false;
-	outRegNum = hdmiVers < 6 ? kRegHDMIHDRMasteringLuminence : gHDMIChannelToOutHDRMasterLuminanceVRegNum[ULWord(inWhichHDMIOut)];
+	outRegNum = hdmiVers < 6 ? ULWord(kRegHDMIHDRMasteringLuminence) : gHDMIChannelToOutHDRMasterLuminanceVRegNum[ULWord(inWhichHDMIOut)];
 	return true;
 }
 
@@ -1304,7 +1320,7 @@ bool CNTV2Card::GetHDMIOutHDRLightLevelReg (ULWord & outRegNum, const NTV2Channe
 	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
 	if (!hdmiVers)
 		return false;
-	outRegNum = hdmiVers < 6 ? kRegHDMIHDRLightLevel : gHDMIChannelToOutHDRLightLevelVRegNum[ULWord(inWhichHDMIOut)];
+	outRegNum = hdmiVers < 6 ? ULWord(kRegHDMIHDRLightLevel) : gHDMIChannelToOutHDRLightLevelVRegNum[ULWord(inWhichHDMIOut)];
 	return true;
 }
 
@@ -1315,7 +1331,7 @@ bool CNTV2Card::GetHDMIOutHDRControlReg (ULWord & outRegNum, const NTV2Channel i
 	const ULWord hdmiVers (GetNumSupported(kDeviceGetHDMIVersion));
 	if (!hdmiVers)
 		return false;
-	outRegNum = hdmiVers < 6 ? kRegHDMIHDRControl : gHDMIChannelToOutHDRControlVRegNum[ULWord(inWhichHDMIOut)];
+	outRegNum = hdmiVers < 6 ? ULWord(kRegHDMIHDRControl) : gHDMIChannelToOutHDRControlVRegNum[ULWord(inWhichHDMIOut)];
 	return true;
 }
 

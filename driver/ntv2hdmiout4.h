@@ -50,6 +50,7 @@ struct ntv2_hdmiout4 {
 	bool				scdc_mode;
 	bool				scdc_active;
 	bool				output_enable;
+	bool				output_disable;
 	bool				sink_present;
 	bool				force_hpd;
 

@@ -1747,8 +1747,8 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanReportRunningFirmwareDate:	outValue = ::NTV2DeviceCanReportRunningFirmwareDate(devID);			break;
 		case kDeviceHasAudioMonitorRCAJacks:		outValue = ::NTV2DeviceHasAudioMonitorRCAJacks(devID);				break;
 		case kDeviceHasBiDirectionalAnalogAudio:	outValue = ::NTV2DeviceHasBiDirectionalAnalogAudio(devID);			break;
-		case kDeviceHasGenlockv2:					outValue = ::NTV2DeviceGetGenlockVersion(devID) == 2;				break;
-		case kDeviceHasGenlockv3:					outValue = ::NTV2DeviceGetGenlockVersion(devID) == 3;				break;
+		case kDeviceHasGenlockv2:					outValue = GetNumSupported(kDeviceGetGenlockVersion) == 2;			break;	//	Deprecate
+		case kDeviceHasGenlockv3:					outValue = GetNumSupported(kDeviceGetGenlockVersion) == 3;			break;	//	Deprecate
 		case kDeviceHasHeadphoneJack:				outValue = ::NTV2DeviceHasHeadphoneJack(devID);						break;
 		case kDeviceHasLEDAudioMeters:				outValue = ::NTV2DeviceHasLEDAudioMeters(devID);					break;
 		case kDeviceHasRotaryEncoder:				outValue = ::NTV2DeviceHasRotaryEncoder(devID);						break;
@@ -1795,16 +1795,14 @@ bool CNTV2DriverInterface::GetNumericParam (const ULWord inParamID, ULWord & out
 		case kDeviceGetActiveMemorySize:				outVal = ::NTV2DeviceGetActiveMemorySize (devID);				break;
 		case kDeviceGetDACVersion:						outVal = ::NTV2DeviceGetDACVersion (devID);						break;
 		case kDeviceGetDownConverterDelay:				outVal = ::NTV2DeviceGetDownConverterDelay (devID);				break;
+		case kDeviceGetGenlockVersion:					outVal = ULWord(::NTV2DeviceGetGenlockVersion (devID));			break;
 		case kDeviceGetHDMIVersion:						outVal = ::NTV2DeviceGetHDMIVersion (devID);					break;
 		case kDeviceGetLUTVersion:						outVal = ::NTV2DeviceGetLUTVersion (devID);						break;
-		case kDeviceGetSPIFlashVersion:					outVal = ::NTV2DeviceGetSPIFlashVersion (devID);				break;
 		case kDeviceGetMaxAudioChannels:				outVal = ::NTV2DeviceGetMaxAudioChannels (devID);				break;
 		case kDeviceGetMaxRegisterNumber:				outVal = ::NTV2DeviceGetMaxRegisterNumber (devID);				break;
 		case kDeviceGetMaxTransferCount:				outVal = ::NTV2DeviceGetMaxTransferCount (devID);				break;
-		case kDeviceGetNumDMAEngines:					outVal = ::NTV2DeviceGetNumDMAEngines (devID);					break;
-		case kDeviceGetNumVideoChannels:				outVal = ::NTV2DeviceGetNumVideoChannels (devID);				break;
-		case kDeviceGetPingLED:							outVal = ::NTV2DeviceGetPingLED (devID);						break;
-		case kDeviceGetUFCVersion:						outVal = ::NTV2DeviceGetUFCVersion (devID);						break;
+		case kDeviceGetNum2022ChannelsSFP1:				outVal = ::NTV2DeviceGetNum2022ChannelsSFP1 (devID);			break;
+		case kDeviceGetNum2022ChannelsSFP2:				outVal = ::NTV2DeviceGetNum2022ChannelsSFP2 (devID);			break;
 		case kDeviceGetNum4kQuarterSizeConverters:		outVal = ::NTV2DeviceGetNum4kQuarterSizeConverters (devID);		break;
 		case kDeviceGetNumAESAudioInputChannels:		outVal = ::NTV2DeviceGetNumAESAudioInputChannels (devID);		break;
 		case kDeviceGetNumAESAudioOutputChannels:		outVal = ::NTV2DeviceGetNumAESAudioOutputChannels (devID);		break;
@@ -1813,8 +1811,11 @@ bool CNTV2DriverInterface::GetNumericParam (const ULWord inParamID, ULWord & out
 		case kDeviceGetNumAnalogVideoInputs:			outVal = ::NTV2DeviceGetNumAnalogVideoInputs (devID);			break;
 		case kDeviceGetNumAnalogVideoOutputs:			outVal = ::NTV2DeviceGetNumAnalogVideoOutputs (devID);			break;
 		case kDeviceGetNumAudioSystems:					outVal = ::NTV2DeviceGetNumAudioSystems (devID);				break;
+		case kDeviceGetNumBufferedAudioSystems:			outVal = ::NTV2DeviceGetNumAudioSystems(devID)
+																	+ (IsSupported(kDeviceCanDoAudioMixer) ? 1 : 0);	break;
 		case kDeviceGetNumCrossConverters:				outVal = ::NTV2DeviceGetNumCrossConverters (devID);				break;
 		case kDeviceGetNumCSCs:							outVal = ::NTV2DeviceGetNumCSCs (devID);						break;
+		case kDeviceGetNumDMAEngines:					outVal = ::NTV2DeviceGetNumDMAEngines (devID);					break;
 		case kDeviceGetNumDownConverters:				outVal = ::NTV2DeviceGetNumDownConverters (devID);				break;
 		case kDeviceGetNumEmbeddedAudioInputChannels:	outVal = ::NTV2DeviceGetNumEmbeddedAudioInputChannels (devID);	break;
 		case kDeviceGetNumEmbeddedAudioOutputChannels:	outVal = ::NTV2DeviceGetNumEmbeddedAudioOutputChannels (devID);	break;
@@ -1825,30 +1826,30 @@ bool CNTV2DriverInterface::GetNumericParam (const ULWord inParamID, ULWord & out
 		case kDeviceGetNumHDMIVideoInputs:				outVal = ::NTV2DeviceGetNumHDMIVideoInputs (devID);				break;
 		case kDeviceGetNumHDMIVideoOutputs:				outVal = ::NTV2DeviceGetNumHDMIVideoOutputs (devID);			break;
 		case kDeviceGetNumInputConverters:				outVal = ::NTV2DeviceGetNumInputConverters (devID);				break;
+		case kDeviceGetNumLTCInputs:					outVal = ::NTV2DeviceGetNumLTCInputs (devID);					break;
+		case kDeviceGetNumLTCOutputs:					outVal = ::NTV2DeviceGetNumLTCOutputs (devID);					break;
 		case kDeviceGetNumLUTs:							outVal = ::NTV2DeviceGetNumLUTs (devID);						break;
 		case kDeviceGetNumMixers:						outVal = ::NTV2DeviceGetNumMixers (devID);						break;
 		case kDeviceGetNumOutputConverters:				outVal = ::NTV2DeviceGetNumOutputConverters (devID);			break;
 		case kDeviceGetNumReferenceVideoInputs:			outVal = ::NTV2DeviceGetNumReferenceVideoInputs (devID);		break;
 		case kDeviceGetNumSerialPorts:					outVal = ::NTV2DeviceGetNumSerialPorts (devID);					break;
+		case kDeviceGetNumTSIMuxers:					{	static const NTV2WidgetID s425MuxerIDs[] = {NTV2_Wgt425Mux1, NTV2_Wgt425Mux2,
+																										NTV2_Wgt425Mux3, NTV2_Wgt425Mux4};
+															const ULWordSet wgtIDs(GetSupportedItems(kNTV2EnumsID_WidgetID));
+															for (size_t ndx(0);  ndx < sizeof(s425MuxerIDs)/sizeof(NTV2WidgetID);  ndx++)
+																if (wgtIDs.find(s425MuxerIDs[ndx]) != wgtIDs.end())
+																	outVal++;
+															break;
+														}
 		case kDeviceGetNumUpConverters:					outVal = ::NTV2DeviceGetNumUpConverters (devID);				break;
+		case kDeviceGetNumVideoChannels:				outVal = ::NTV2DeviceGetNumVideoChannels (devID);				break;
 		case kDeviceGetNumVideoInputs:					outVal = ::NTV2DeviceGetNumVideoInputs (devID);					break;
 		case kDeviceGetNumVideoOutputs:					outVal = ::NTV2DeviceGetNumVideoOutputs (devID);				break;
-		case kDeviceGetNum2022ChannelsSFP1:				outVal = ::NTV2DeviceGetNum2022ChannelsSFP1 (devID);			break;
-		case kDeviceGetNum2022ChannelsSFP2:				outVal = ::NTV2DeviceGetNum2022ChannelsSFP2 (devID);			break;
-		case kDeviceGetNumLTCInputs:					outVal = ::NTV2DeviceGetNumLTCInputs (devID);					break;
-		case kDeviceGetNumLTCOutputs:					outVal = ::NTV2DeviceGetNumLTCOutputs (devID);					break;
+		case kDeviceGetPingLED:							outVal = ::NTV2DeviceGetPingLED (devID);						break;
+		case kDeviceGetSPIFlashVersion:					outVal = ::NTV2DeviceGetSPIFlashVersion (devID);				break;
 		case kDeviceGetTotalNumAudioSystems:			outVal = ::NTV2DeviceGetNumAudioSystems(devID)
 																	+ (IsSupported(kDeviceCanDoAudioMixer) ? 2 : 0);	break;
-		case kDeviceGetNumBufferedAudioSystems:			outVal = ::NTV2DeviceGetNumAudioSystems(devID)
-																	+ (IsSupported(kDeviceCanDoAudioMixer) ? 1 : 0);	break;
-		case kDeviceGetNumTSIMuxers:
-		{	static const NTV2WidgetID s425MuxerIDs[] = {NTV2_Wgt425Mux1, NTV2_Wgt425Mux2, NTV2_Wgt425Mux3, NTV2_Wgt425Mux4};
-			const ULWordSet wgtIDs(GetSupportedItems(kNTV2EnumsID_WidgetID));
-			for (size_t ndx(0);  ndx < sizeof(s425MuxerIDs)/sizeof(NTV2WidgetID);  ndx++)
-				if (wgtIDs.find(s425MuxerIDs[ndx]) != wgtIDs.end())
-					outVal++;
-			break;
-		}
+		case kDeviceGetUFCVersion:						outVal = ::NTV2DeviceGetUFCVersion (devID);						break;
 		default:	return false;	//	Bad param
 	}
 	return true;	//	Successfully used old ::NTV2DeviceGetNum function

@@ -77,9 +77,13 @@ bool tx_2110Config::operator != ( const tx_2110Config &other )
 
 bool tx_2110Config::operator == ( const tx_2110Config &other )
 {
-	if ((localPort				== other.localPort)				&&
-		(remotePort				== other.remotePort)			&&
-		(remoteIP				== other.remoteIP)				&&
+		// NOTE(paulh): Consider using std::equal to compare arrays if these sizes ever change (seems unlikely)
+	if ((localPort[0] 			== other.localPort[0]) 			&&
+		(localPort[1] 			== other.localPort[1]) 	 		&&
+		(remotePort[0] 			== other.remotePort[0]) 	 	&&
+		(remotePort[1] 			== other.remotePort[1]) 	 	&&
+		(remoteIP[0] 			== other.remoteIP[0]) 		 	&&
+		(remoteIP[1] 			== other.remoteIP[1]) 		 	&&
 		(videoFormat			== other.videoFormat)			&&
 		(videoSamples			== other.videoSamples)			&&
 		(numAudioChannels		== other.numAudioChannels)		&&

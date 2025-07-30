@@ -4790,6 +4790,8 @@ public:
 
 	AJA_VIRTUAL bool		SetHDMIOutForceConfig (const bool inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 	AJA_VIRTUAL bool		GetHDMIOutForceConfig (bool & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		SetHDMIOutDisable (const bool inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		GetHDMIOutDisable (bool & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
 	/**
 		@brief						Sets if the given HDMI output should prefer 4:2:0 or not.
@@ -5640,7 +5642,7 @@ public:
 					Eventually this function will be removed from the class.
 		@see		::NTV2DeviceCanDoMultiFormat, CNTV2Card::GetMultiFormatMode, \ref vidop-clocking
 	**/
-	AJA_VIRTUAL bool	   SetMultiFormatMode (const bool inEnable);
+	AJA_VIRTUAL NTV2_WILL_BE_DEPRECATED(bool SetMultiFormatMode (const bool inEnable));
 
 	/**
 		@brief		Answers if the device is operating in multiple-format per channel (independent channel) mode or not.
@@ -5653,7 +5655,7 @@ public:
 					Eventually this function will be removed from the class.
 		@see		::NTV2DeviceCanDoMultiFormat, CNTV2Card::SetMultiFormatMode, \ref vidop-clocking
 	**/
-	AJA_VIRTUAL bool		GetMultiFormatMode (bool & outIsEnabled);
+	AJA_VIRTUAL NTV2_WILL_BE_DEPRECATED(bool GetMultiFormatMode (bool & outIsEnabled));
 
 
 public:
