@@ -4565,7 +4565,7 @@ private:
 		{	(void) inRegNum;
 			ostringstream	oss;
 			if (::NTV2DeviceCanDoBreakoutBoard(inDeviceID))
-				oss << "BOB : "							<< ((inRegValue & kRegMaskBOBAbsent) ? "Disconnected" : "Connected")			<< endl
+				oss << "Break Out Board: "				<< ((inRegValue & kRegMaskBOBAbsent) ? "Disconnected" : "Connected")			<< endl
 					<< "ADAV801 Initialization: "		<< ((inRegValue & kRegMaskBOBADAV801UpdateStatus) ? "Complete" : "In Progress") << endl
 					<< "ADAV801 DIR Locked(Debug): "	<< DEC(inRegValue & kRegMaskBOBADAV801DIRLocked);
 			else
