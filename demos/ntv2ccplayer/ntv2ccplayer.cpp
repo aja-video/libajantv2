@@ -1603,11 +1603,13 @@ void NTV2CCPlayer::PlayoutFrames (void)
     ULWord ANCKB (2);	//	2 (default, works),  64 fails, 63 works										//	**MrBill**
 	if (NTV2_IS_VANCMODE_OFF(mConfig.fVancMode))
 	{
-		mDevice.WriteRegister(10006, ANCKB);															//	**MrBill**
+		mDevice.WriteRegister(kVRegCCPlayerBufSizeKB, ANCKB);											//	**MrBill**
 		PLINFO("Anc buffer size is " << DEC(ANCKB) << "K");												//	**MrBill**
 		xferInfo.acANCBuffer.Allocate(ANCKB*1024);
 		if (isInterlaced)
 			xferInfo.acANCField2Buffer.Allocate(ANCKB*1024);
+
+		mDevice.WriteRegister(kVRegCCPlayerCustomPkt, 0);	//	**MrBill**
 	}
 
 	if (!mConfig.fSuppressAudio)
@@ -1748,6 +1750,17 @@ void NTV2CCPlayer::PlayoutFrames (void)
 			}
 		}	//	else HD video
 
+		ULWord val(0);																				//	**MrBill**
+		if (xferInfo.acANCBuffer  &&  mDevice.ReadRegister(kVRegCCPlayerCustomPkt, val)  &&  val)	//	**MrBill**
+		{																							//	**MrBill**
+			AJAAncData pkt;	static const uint8_t sTmp[] = {'T', 'M', 'P', '0'};						//	**MrBill**
+			pkt.SetDataLocation(AJAAncDataLoc (AJAAncDataLink_A, AJAAncDataChannel_Y,				//	**MrBill**
+								AJAAncDataSpace_VANC, uint16_t(val & 0x0000FFFF)));					//	**MrBill**
+			pkt.SetDIDSID(AJAAncDIDSIDPair((val >> 24) & 0xFF, (val >> 16) & 0xFF));				//	**MrBill**
+			pkt.SetPayloadData (sTmp, 4);															//	**MrBill**
+			packetList.AddAncillaryData(pkt);														//	**MrBill**
+		}																							//	**MrBill**
+
 		//	PLDBG("Xmit pkts: " << packetList);	//	DEBUG: Packet list to be transmitted
 		packetList.SetAllowMultiRTPTransmit(mConfig.fForceRTP & BIT(1));
 		if (NTV2_IS_VANCMODE_ON(mConfig.fVancMode))	//	Write FB VANC lines...
@@ -1814,15 +1827,14 @@ void NTV2CCPlayer::PlayoutFrames (void)
 		if (!mDevice.AutoCirculateTransfer (mConfig.fOutputChannel, xferInfo))
 			PLFAIL("AutoCirculateTransfer failed");
 
-		ULWord val(0);																					//	**MrBill**
-		if (xferInfo.acANCBuffer  &&  mDevice.ReadRegister(10006, val)  &&  val  &&  val != ANCKB)		//	**MrBill**
-		{																								//	**MrBill**
-			PLINFO("Anc buffer size changed from " << DEC(ANCKB) << "K to " << DEC(val) << "K");		//	**MrBill**
-			ANCKB = val;																				//	**MrBill**
-			xferInfo.acANCBuffer.Allocate(ANCKB*1024);													//	**MrBill**
-			if (isInterlaced)																			//	**MrBill**
-				xferInfo.acANCField2Buffer.Allocate(ANCKB*1024);										//	**MrBill**
-		}																								//	**MrBill**
+		if (xferInfo.acANCBuffer  &&  mDevice.ReadRegister(kVRegCCPlayerBufSizeKB, val)  &&  val  &&  val != ANCKB)	//	**MrBill**
+		{																											//	**MrBill**
+			PLINFO("Anc buffer size changed from " << DEC(ANCKB) << "K to " << DEC(val) << "K");					//	**MrBill**
+			ANCKB = val;																							//	**MrBill**
+			xferInfo.acANCBuffer.Allocate(ANCKB*1024);																//	**MrBill**
+			if (isInterlaced)																						//	**MrBill**
+				xferInfo.acANCField2Buffer.Allocate(ANCKB*1024);													//	**MrBill**
+		}																											//	**MrBill**
 	}	//	loop til quit signaled
 
 	//	Stop AutoCirculate...

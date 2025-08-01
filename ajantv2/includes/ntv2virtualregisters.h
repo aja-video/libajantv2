@@ -34,7 +34,8 @@ typedef enum
 	kVRegGlobalAudioPlaybackMode			= VIRTUALREG_START+3,		// Shared with Linux, but not Mac
 	kVRegFlashProgramKey					= VIRTUALREG_START+4,
 	kVRegStrictTiming						= VIRTUALREG_START+5,		// Drift Correction requires Strict Frame Timing for Windows Media playback;Required for BackHaul;Correlate Presentation Time Stamp with Graph Clock;Turn off (default) to allow Playback even when Graph Manager gives us a Bogus Clcok!
-
+	kVRegCCPlayerBufSizeKB					= VIRTUALREG_START+6,		// NTV2CCPlayer: custom Anc buffer size (KiloBytes)
+	kVRegCCPlayerCustomPkt					= VIRTUALREG_START+7,		// NTV2CCPlayer: if nonzero, insert custom Anc pkt: DID|SID|lineNum
 	kVRegDriverType							= VIRTUALREG_START+10,		// Driver type (MacOS only:  0 == KEXT, 'DEXT' == DEXT)
 
 	// COMMON_VIRTUAL_REGS_KONA2
