@@ -1662,12 +1662,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	mDevice.AutoCirculateStop (mConfig.fOutputChannel);	//	Maybe some other app left this A/C channel running
 	if (NTV2_IS_SD_VIDEO_FORMAT(mConfig.fVideoFormat)  &&  mConfig.fSuppressLine21  &&  mConfig.fSuppress608)
 		cerr << "## WARNING:  SD video with '--noline21' option and '--no608' option won't produce captions" << endl;
-	if (mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,
-											mConfig.fFrames.count(),	//	numFrames (zero if specifying range)
-											audioSystem,
-											acOptionFlags,
-											1,							//	numChannels to gang
-											mConfig.fFrames.firstFrame(), mConfig.fFrames.lastFrame()))
+	if (mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel, mConfig.fFrames, audioSystem, acOptionFlags))
 		mDevice.AutoCirculateStart (mConfig.fOutputChannel);
 	else
 		{cerr << "## ERROR: AutoCirculateInitForOutput failed" << endl;  mPlayerQuit = true;}

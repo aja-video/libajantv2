@@ -708,13 +708,8 @@ void NTV2CCGrabber::CaptureFrames (void)
 			SetOutputStandards(currentVF);	//	...output standard may need changing
 
 		mDevice.AutoCirculateStop(mConfig.fInputChannel);
-		if (!mDevice.AutoCirculateInitForInput(	mConfig.fInputChannel,		//	primary channel
-												mConfig.fFrames.count(),	//	numFrames (zero if specifying range)
-												mAudioSystem,				//	audio system
-												AUTOCIRCULATE_WITH_RP188
-													| (mDevice.features().CanDoCustomAnc() ? AUTOCIRCULATE_WITH_ANC : 0),	//	flags
-												1,	//	numChannels to gang
-												mConfig.fFrames.firstFrame(), mConfig.fFrames.lastFrame()))
+		if (!mDevice.AutoCirculateInitForInput(	mConfig.fInputChannel, mConfig.fFrames, mAudioSystem, AUTOCIRCULATE_WITH_RP188
+															| (mDevice.features().CanDoCustomAnc() ? AUTOCIRCULATE_WITH_ANC : 0)))
 			{CAPFAIL("Failed to init Ch" << DEC(mConfig.fInputChannel+1) << " for input"); break;}
 
 		//	Start AutoCirculate...

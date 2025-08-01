@@ -391,14 +391,10 @@ void NTV2Capture::CaptureFrames (void)
 		acOptions |= AUTOCIRCULATE_WITH_ANC;
 
 	CAPNOTE("Thread started");
+
 	//	Initialize and start capture AutoCirculate...
 	mDevice.AutoCirculateStop(mConfig.fInputChannel);	//	Just in case
-	if (!mDevice.AutoCirculateInitForInput (mConfig.fInputChannel,		//	primary channel
-											mConfig.fFrames.count(),	//	numFrames (zero if specifying range)
-											mAudioSystem,				//	audio system (if any)
-											acOptions,					//	AutoCirculate options
-											1,							//	numChannels to gang
-											mConfig.fFrames.firstFrame(), mConfig.fFrames.lastFrame()))
+	if (!mDevice.AutoCirculateInitForInput (mConfig.fInputChannel, mConfig.fFrames, mAudioSystem, acOptions))
 		mGlobalQuit = true;
 	if (!mGlobalQuit  &&  !mDevice.AutoCirculateStart(mConfig.fInputChannel))
 		mGlobalQuit = true;

@@ -349,6 +349,17 @@ bool CNTV2Card::AutoCirculateInitForInput ( const NTV2Channel		inChannel,
 
 }	//	AutoCirculateInitForInput
 
+bool CNTV2Card::AutoCirculateInitForInput ( const NTV2Channel			inChannel,
+											const NTV2ACFrameRange &	inFrameRange,
+											const NTV2AudioSystem		inAudioSystem,
+											const ULWord				inOptionFlags,
+											const UByte					inNumChannels)
+{
+	return inFrameRange ? AutoCirculateInitForInput (inChannel, inFrameRange.count(), inAudioSystem, inOptionFlags,
+													inNumChannels, inFrameRange.firstFrame(), inFrameRange.lastFrame())
+						: false;
+}
+
 
 bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 											const UWord				inFrameCount,
@@ -498,6 +509,17 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 	return result;
 
 }	//	AutoCirculateInitForOutput
+
+bool CNTV2Card::AutoCirculateInitForOutput ( const NTV2Channel			inChannel,
+											const NTV2ACFrameRange &	inFrameRange,
+											const NTV2AudioSystem		inAudioSystem,
+											const ULWord				inOptionFlags,
+											const UByte					inNumChannels)
+{
+	return inFrameRange ? AutoCirculateInitForOutput (inChannel, inFrameRange.count(), inAudioSystem, inOptionFlags,
+														inNumChannels, inFrameRange.firstFrame(), inFrameRange.lastFrame())
+						: false;
+}
 
 
 bool CNTV2Card::AutoCirculateStart (const NTV2Channel inChannel, const ULWord64 inStartTime)

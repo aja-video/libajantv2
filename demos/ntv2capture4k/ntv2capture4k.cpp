@@ -409,21 +409,15 @@ void NTV2Capture4K::CaptureFrames (void)
 	//	Have AutoCirculate use 7 device frame buffers...
 	static const UWord startFrame12g[]	= {0, 7, 64, 71};
 	static const UWord startFrame[]		= {0, 7, 14, 21};
-
 	if (mDevice.features().CanDo12gRouting())
 		mConfig.fFrames.setRangeWithCount(7, startFrame12g[mConfig.fInputChannel]);
 	else	//	TSI or Squares
 		mConfig.fFrames.setRangeWithCount(7, startFrame[mConfig.fInputChannel / 2]);
-
 	CAPNOTE("Thread started");
+
 	//	Initialize and start capture AutoCirculate...
 	mDevice.AutoCirculateStop(mActiveFrameStores);	//	Just in case
-	if (!mDevice.AutoCirculateInitForInput (mConfig.fInputChannel,		//	primary channel
-											mConfig.fFrames.count(),	//	numFrames (zero if specifying range)
-											mAudioSystem,				//	audio system (if any)
-											mACOptions,					//	AutoCirculate options
-											1,							//	numChannels to gang
-											mConfig.fFrames.firstFrame(), mConfig.fFrames.lastFrame()))
+	if (!mDevice.AutoCirculateInitForInput (mConfig.fInputChannel, mConfig.fFrames, mAudioSystem, mACOptions))
 		mGlobalQuit = true;
 	if (!mGlobalQuit  &&  !mDevice.AutoCirculateStart(mConfig.fInputChannel))
 		mGlobalQuit = true;
