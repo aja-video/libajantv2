@@ -31,7 +31,6 @@
 #include "ntv2mailbox.h"
 
 //Monitor processes
-#define AJA_DEV_HEARTBEAT
 #define AJA_OUTPUT_SETUP
 #define AJA_HDMI_IN
 #define AJA_HDMI_OUT
