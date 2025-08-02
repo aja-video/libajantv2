@@ -3124,7 +3124,7 @@ public:
 		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateInitForOutput, \ref autocirculatecapture
 	**/
 	AJA_VIRTUAL bool	AutoCirculateInitForInput ( const NTV2Channel			inChannel,
-													const NTV2ACFrameRange &	inFrameRange		= NTV2ACFrameRange(7),
+													const NTV2ACFrameRange &	inFrameRange,
 													const NTV2AudioSystem		inAudioSystem		= NTV2_AUDIOSYSTEM_INVALID,
 													const ULWord				inOptionFlags		= 0,
 													const UByte					inNumChannels		= 1);
@@ -3208,7 +3208,7 @@ public:
 	**/
 
 	AJA_VIRTUAL bool	AutoCirculateInitForOutput (const NTV2Channel			inChannel,
-													const NTV2ACFrameRange &	inFrameCount		= NTV2ACFrameRange(7),
+													const NTV2ACFrameRange &	inFrameRange,
 													const NTV2AudioSystem		inAudioSystem		= NTV2_AUDIOSYSTEM_INVALID,
 													const ULWord				inOptionFlags		= 0,
 													const UByte					inNumChannels		= 1);
