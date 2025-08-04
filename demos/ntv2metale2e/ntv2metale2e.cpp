@@ -96,7 +96,7 @@ AJAStatus NTV2MetalE2E::SetUpGenlock (void)
                     if (readBytes[i] != writeBytes[i])
                     {
                         errorCount++;
-                        ntv2Message("Set: %d, Offset: %04X, size: %d, data: %s", count, gdat->addr, gdat->size, gdat->data);
+                        ntv2Message("Set: %d, Offset: %04X, size: %d, data: %s\n", count, gdat->addr, gdat->size, gdat->data);
                         ntv2Message("Bytes did not match i : %d read : %02X write : %02X\n", i, readBytes[i], writeBytes[i]);
                     }
                     else
@@ -108,7 +108,7 @@ AJAStatus NTV2MetalE2E::SetUpGenlock (void)
         }
         else
         {
-            ntv2Message("Set: %d, Offset: %04X No check", count, gdat->addr);
+            ntv2Message("Set: %d, Offset: %04X No check\n", count, gdat->addr);
         }
         count++;
         gdat++;
