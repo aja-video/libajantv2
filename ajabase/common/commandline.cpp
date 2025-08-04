@@ -305,11 +305,6 @@ bool AJACommandLineParser::AddSubParser(AJACommandLineParser *p)
 
 bool AJACommandLineParser::Parse(const AJAStringList &args)
 {
-    // Must have at least 2 args (args[0] is the binary name, and args[1..N] are the user-specified args).
-    if (args.size() <= 1) {
-        return false;
-    }
-
     AJAStringList::const_iterator iter = args.begin();
     ++iter; //  Skip exe path
 
@@ -442,7 +437,7 @@ bool AJACommandLineParser::Parse(const AJAStringList &args)
 
 bool AJACommandLineParser::Parse(int argc, const char *argv[])
 {
-    if (argc == 0 || argc == 1 || argv == NULL) {
+    if (argc == 0 || argv == NULL) {
         return false;
     }
     AJAStringList argList;
@@ -454,7 +449,7 @@ bool AJACommandLineParser::Parse(int argc, const char *argv[])
 
 bool AJACommandLineParser::Parse(int argc, char *argv[])
 {
-    if (argc == 0 || argc == 1 || argv == NULL) {
+    if (argc == 0 || argv == NULL) {
         return false;
     }
     AJAStringList argList;
