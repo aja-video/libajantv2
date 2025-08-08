@@ -977,11 +977,12 @@ class AJAExport NTV2ACFrameRange
 						{
 							setExactRange (inFirstFrame, inLastFrame);
 						}
-		inline bool		isCountOnly (void) const	{return mIsCountOnly;}		//	@return	True if simply a frame count
-		inline bool		isFrameRange (void) const	{return !isCountOnly();}	//	@return	True if a specific frame range
-		inline UWord	count (void) const			{return isCountOnly() ? mFrameCount : 0;}	//	@return	Frame count (if isCountOnly); otherwise zero
-		inline UWord	firstFrame (void) const		{return mFirstFrame;}		//	@return	
-		inline UWord	lastFrame (void) const		{return mLastFrame;}
+		inline bool		isCountOnly (void) const	{return mIsCountOnly;}		///< @returns	true if I'm a simple frame count
+		inline bool		isFrameRange (void) const	{return !isCountOnly();}	///< @returns	true if I'm a specific frame range
+		inline UWord	count (void) const			{return isCountOnly() ? mFrameCount : 0;}	///< @returns	my frame count (if a simple frame count); otherwise zero
+		inline UWord	firstFrame (void) const		{return mFirstFrame;}		///< @returns	my first frame (if explicit frame range); otherwise zero
+		inline UWord	lastFrame (void) const		{return mLastFrame;}		///< @returns	my last frame (if explicit frame range); otherwise zero
+		inline			operator bool() const		{return valid();}			///< @returns	true if valid; otherwise false
 		inline bool		valid (void) const
 						{
 							if (isCountOnly())
@@ -1027,6 +1028,8 @@ class AJAExport NTV2ACFrameRange
 		UWord	mLastFrame;		///< @brief	Last frame (mIsCountOnly == false).
 
 };	//	NTV2ACFrameRange
+
+inline std::ostream &	operator << (std::ostream & oss, const NTV2ACFrameRange & inObj)	{return oss << inObj.toString();}	///<	@brief	Handy ostream writer for NTV2ACFrameRange.
 
 
 typedef std::vector <NTV2DeviceID>			NTV2DeviceIDList;			///< @brief An ordered list of NTV2DeviceIDs.

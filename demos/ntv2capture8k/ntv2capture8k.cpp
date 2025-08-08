@@ -360,12 +360,7 @@ void NTV2Capture8K::CaptureFrames (void)
 	//	Tell capture AutoCirculate to use frame buffers 0 thru 6 (7 frames) on the device...
 	mConfig.fFrames.setExactRange (0, 6);
 	mDevice.AutoCirculateStop(mActiveFrameStores);	//	Just in case
-	if (!mDevice.AutoCirculateInitForInput (mConfig.fInputChannel,		//	primary channel
-											mConfig.fFrames.count(),	//	numFrames (zero if exact range)
-											mAudioSystem,				//	audio system (if any)
-											AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC,	//	AutoCirculate options
-											1,							//	numChannels to gang
-											mConfig.fFrames.firstFrame(), mConfig.fFrames.lastFrame()))
+	if (!mDevice.AutoCirculateInitForInput (mConfig.fInputChannel, mConfig.fFrames, mAudioSystem, AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC))
 		mGlobalQuit = true;
 	if (!mGlobalQuit  &&  !mDevice.AutoCirculateStart(mConfig.fInputChannel))
 		mGlobalQuit = true;

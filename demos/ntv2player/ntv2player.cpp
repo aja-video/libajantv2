@@ -573,8 +573,7 @@ void NTV2Player::ConsumeFrames (void)
 #endif
 
 	//	Initialize & start AutoCirculate...
-	bool initOK = mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,  mConfig.fFrames.count(),  mAudioSystem,  acOptions,
-														1 /*numChannels*/,  mConfig.fFrames.firstFrame(),  mConfig.fFrames.lastFrame());
+	bool initOK = mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,  mConfig.fFrames,  mAudioSystem,  acOptions);
 	if (!initOK)
 		{PLFAIL("AutoCirculateInitForOutput failed");  mGlobalQuit = true;}
 	else if (!mConfig.WithVideo())
