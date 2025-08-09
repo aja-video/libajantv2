@@ -459,6 +459,62 @@ ostream & NTV2DeviceSpecParser::Print (ostream & oss, const bool inDumpResults) 
 	return oss;
 }
 
+string NTV2DeviceSpecParser::MakeDeviceSpec (const bool urlEncodeQuery) const
+{
+	if (!Successful())
+		return "";
+	ostringstream result;
+	if (IsLocalDevice())
+	{
+		result << "ntv2local://";
+		if (HasResult(kConnectParamDevSerial))
+			result << DeviceSerial();
+		else if (HasResult(kConnectParamDevModel))
+			result << DeviceModel();
+		else if (HasResult(kConnectParamDevID))
+			result << DeviceID();
+		else if (HasResult(kConnectParamDevIndex))
+			result << DeviceIndex();
+		else
+			return "";
+		return result.str();
+	}
+	result << Scheme() << "://";
+	if (HasResult(kConnectParamHost))
+		result << Result(kConnectParamHost);
+	if (HasResult(kConnectParamPort))
+		result << ":" << Result(kConnectParamPort);
+	result << Result(kConnectParamResource);
+	if (HasQueryParams())
+	{
+		string q (MakeQueryString(urlEncodeQuery));
+		if (!q.empty())
+			result << "?" << q;
+	}
+	return result.str();
+}
+
+string NTV2DeviceSpecParser::MakeQueryString (const bool urlEncode) const
+{
+	if (!Successful())
+		return "";
+	if (!HasQueryParams())
+		return "";
+	NTV2StringList parms;
+	const NTV2StringSet ks (mQueryParams.keys());
+	for (NTV2StringSetConstIter it(ks.begin());  it != ks.end();  ++it)
+	{
+		ostringstream oss;
+		string k(*it), v(mQueryParams.valueForKey(k));
+		if (urlEncode)
+			oss << ::PercentEncode(k) << "=" << ::PercentEncode(v);
+		else
+			oss << k << "=" << v;
+		parms.push_back(oss.str());
+	}
+	return aja::join(parms, "&");
+}
+
 string NTV2DeviceSpecParser::InfoString (void) const
 {
 	ostringstream oss;
@@ -1499,6 +1555,7 @@ bool NTV2PluginLoader::ParseQueryParams (const NTV2Dictionary & inParams, NTV2Di
 	if (!queryStr.empty())
 		if (queryStr[0] == '?')
 			queryStr.erase(0,1);	//	Remove leading '?'
+	PLGDBG("Query: '" << queryStr << "'");
 	const NTV2StringList strs(aja::split(queryStr, "&"));
 	for (NTV2StringListConstIter it(strs.begin());  it != strs.end();  ++it)
 	{
@@ -2134,7 +2191,11 @@ NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const string & inURL)	//	CLAS
 {
 	NTV2DeviceSpecParser parser(inURL);
 	if (parser.HasErrors())
+	{
+		NBSFAIL(parser.Error() << " in URL:\n" << inURL);
+		parser.PrintErrors(cerr);
 		return AJA_NULL;
+	}
 	NTV2ConfigParams parms(parser.Results());
 	return CreateServer(parms);
 }
