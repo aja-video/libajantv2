@@ -1753,26 +1753,6 @@ bool CNTV2Card::GetFBSizeAndCountFromHW (ULWord & outSize, ULWord & outCount)
 	return true;
 }
 
-bool CNTV2Card::SetFrameBufferSize (const NTV2Framesize inSize)
-{
-	ULWord reg1Contents;
-
-	if (!::NTV2DeviceSoftwareCanChangeFrameBufferSize(_boardID))
-		return false;
-
-	if (!ReadRegister(kRegCh1Control, reg1Contents))
-		return false;
-
-	reg1Contents |= kRegMaskFrameSizeSetBySW;
-	reg1Contents &= ~kK2RegMaskFrameSize;
-	reg1Contents |= ULWord(inSize) << kK2RegShiftFrameSize;
-
-	if (!WriteRegister(kRegCh1Control, reg1Contents))
-		return false;
-
-	return GetFBSizeAndCountFromHW(_ulFrameBufferSize, _ulNumFrameBuffers);
-}
-
 bool CNTV2Card::GetLargestFrameBufferFormatInUse(NTV2FrameBufferFormat & outFBF)
 {
 	NTV2FrameBufferFormat ch1format;
@@ -2049,6 +2029,25 @@ bool CNTV2Card::GetFrameBufferOrientation (const NTV2Channel inChannel, NTV2FBOr
 	return CNTV2DriverInterface::ReadRegister (gChannelToControlRegNum[inChannel], outValue, kRegMaskFrameOrientation, kRegShiftFrameOrientation);
 }
 
+
+bool CNTV2Card::SetFrameBufferSize (const NTV2Framesize inSize)
+{
+	ULWord swCanChgFBSize(0);
+	if (!GetBoolParam(kDeviceSoftwareCanChangeFrameBufferSize, swCanChgFBSize)  ||  !swCanChgFBSize)
+		return false;
+
+	ULWord reg1Contents(0);
+	if (!ReadRegister(kRegCh1Control, reg1Contents))
+		return false;
+
+	reg1Contents |= kRegMaskFrameSizeSetBySW;
+	reg1Contents &= ~kK2RegMaskFrameSize;
+	reg1Contents |= ULWord(inSize) << kK2RegShiftFrameSize;
+	if (!WriteRegister(kRegCh1Control, reg1Contents))
+		return false;
+
+	return GetFBSizeAndCountFromHW(_ulFrameBufferSize, _ulNumFrameBuffers);
+}
 
 // Method: SetFrameBufferSize
 // Input:  NTV2Channel,	 NTV2K2Framesize
