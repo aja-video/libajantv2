@@ -5052,7 +5052,7 @@ int DoMessageMailBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2MailBuffer* p
             return -EPERM;
         }
     }
-    
+
 	return 0;
 }
 
