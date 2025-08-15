@@ -11,8 +11,8 @@
 # The build number will be set by the TeamCity automated builder
 #
 
-SDKVER_MAJ ?= 17
-SDKVER_MIN ?=  6
+SDKVER_MAJ ?= 18
+SDKVER_MIN ?=  0
 SDKVER_PNT ?=  0
 
 ifeq ($(TC_BUILD_COUNTER),)
