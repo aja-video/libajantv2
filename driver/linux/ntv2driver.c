@@ -1929,7 +1929,6 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					{
 						goto messageError;
 					}
-
 					if(copy_to_user((void*)arg, (const void*)pMessage, sizeof(NTV2MailBuffer)))
 					{
 						returnCode = -EFAULT;
@@ -5044,6 +5043,7 @@ int DoMessageMailBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2MailBuffer* p
 			if (status == NTV2_STATUS_TIMEOUT)
 			{
 				pBuffer->mStatus = NTV2_MAIL_BUFFER_TIMEOUT;
+				return 0;
 			}
 			else
 			{
