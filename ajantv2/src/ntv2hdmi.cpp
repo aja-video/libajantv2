@@ -905,6 +905,7 @@ bool CNTV2Card::SetHDMIHDRMinMasteringLuminance(const uint16_t inMinMasteringLum
 	if (!NTV2_IS_VALID_HDR_MASTERING_LUMINENCE(inMinMasteringLuminance)  ||  !IsSupported(kDeviceCanDoHDMIHDROut))
 		return false;
 	if (inWhichHDMIOut == NTV2_CHANNEL1  &&  !WriteRegister(kVRegHdrMasterLumMinCh1, uint32_t(inMinMasteringLuminance)))
+        return false;
 	if (!GetHDMIOutHDRMasterLuminanceReg(reg, inWhichHDMIOut))
 		return false;
 	return WriteRegister(reg, uint32_t(inMinMasteringLuminance), kRegMaskHDMIHDRMinMasteringLuminance, kRegShiftHDMIHDRMinMasteringLuminance);
