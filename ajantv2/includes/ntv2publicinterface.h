@@ -9152,6 +9152,9 @@ typedef enum
 			typedef std::set <NTV2FrameRate>					NTV2FrameRateSet;					///< @brief A set of distinct NTV2FrameRate values.  New in SDK 17.0.
 			typedef NTV2FrameRateSet::const_iterator			NTV2FrameRateSetConstIter;			///< @brief A handy const iterator for iterating over an NTV2FrameRateSet.
 
+			typedef std::set <NTV2AudioRate>					NTV2AudioRateSet;					///< @brief A set of distinct NTV2AudioRate values.  New in SDK 18.0.
+			typedef NTV2AudioRateSet::const_iterator			NTV2AudioRateSetConstIter;			///< @brief A handy const iterator for iterating over an NTV2AudioRateSet.
+
 			/**
 				@brief		Prints the given ::UWordSequence contents into the given output stream.
 				@param		inOutStream		The stream into which the given ::UWordSequence will be printed.

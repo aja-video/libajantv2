@@ -318,6 +318,17 @@ class AJAExport DeviceCapabilities
 						}
 
 		/**
+			@returns	The set of unique NTV2AudioRate values that are supported by the device.
+		**/
+		inline NTV2AudioRateSet	AudioSampleRates (void)								//	New in SDK 18.0
+						{	NTV2AudioRateSet result;
+							const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_AudioRate));
+							for (ULWordSetConstIter it(itms.begin());  it != itms.end();  ++it)
+								result.insert(NTV2AudioRate(*it));
+							return result;
+						}
+
+		/**
 			@param[in]	inTCNdx		Specifies the NTV2TimecodeIndex of interest.
 			@returns	True if the device can read the given timecode; otherwise false.
 		**/
@@ -333,6 +344,15 @@ class AJAExport DeviceCapabilities
 		inline bool		CanDoOutputTCIndex (const NTV2TCIndex inTCNdx)
 						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_OutputTCIndex));
 							return itms.find(ULWord(inTCNdx)) != itms.end();
+						}
+
+		/**
+			@param[in]	inTCNdx		Specifies the NTV2TimecodeIndex of interest.
+			@returns	True if the device can write the given timecode; otherwise false.
+		**/
+		inline bool		CanDoAudioSampleRate (const NTV2AudioRate inRate)			//	New in SDK 18.0
+						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_AudioRate));
+							return itms.find(ULWord(inRate)) != itms.end();
 						}
 	private:
 		CNTV2DriverInterface &	dev;	///< @brief	My reference to the NTV2 device
