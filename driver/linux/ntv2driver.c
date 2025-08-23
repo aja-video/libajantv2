@@ -2551,7 +2551,7 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 
             // save the interrupt time
             audioClock = GetAudioClock(deviceNumber);
-            WriteRegister(deviceNumber, kVRegTimeStampLastInput1VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
+            WriteRegister(deviceNumber, kVRegTimeStampLastInput1VerticalLo, audioClock & 0xFFFFFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput1VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
 
             if(!autoCirculateLocked)
@@ -2569,7 +2569,7 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 
 			// save the interrupt time
             audioClock = GetAudioClock(deviceNumber);
-            WriteRegister(deviceNumber, kVRegTimeStampLastInput2VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
+            WriteRegister(deviceNumber, kVRegTimeStampLastInput2VerticalLo, audioClock & 0xFFFFFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput2VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
 
 			if(!autoCirculateLocked)
@@ -2587,7 +2587,7 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 
             // save the interrupt time
             audioClock = GetAudioClock(deviceNumber);
-            WriteRegister(deviceNumber, kVRegTimeStampLastInput3VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
+            WriteRegister(deviceNumber, kVRegTimeStampLastInput3VerticalLo, audioClock & 0xFFFFFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput3VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
 
 			if(!autoCirculateLocked)
@@ -2604,7 +2604,7 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 
             // save the interrupt time
             audioClock = GetAudioClock(deviceNumber);
-            WriteRegister(deviceNumber, kVRegTimeStampLastInput4VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
+            WriteRegister(deviceNumber, kVRegTimeStampLastInput4VerticalLo, audioClock & 0xFFFFFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput4VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
 
 			if(!autoCirculateLocked)
@@ -2621,7 +2621,7 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 
             // save the interrupt time
             audioClock = GetAudioClock(deviceNumber);
-            WriteRegister(deviceNumber, kVRegTimeStampLastInput5VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
+            WriteRegister(deviceNumber, kVRegTimeStampLastInput5VerticalLo, audioClock & 0xFFFFFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput5VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
 
 			if(!autoCirculateLocked)
@@ -2638,7 +2638,7 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 
             // save the interrupt time
             audioClock = GetAudioClock(deviceNumber);
-            WriteRegister(deviceNumber, kVRegTimeStampLastInput6VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
+            WriteRegister(deviceNumber, kVRegTimeStampLastInput6VerticalLo, audioClock & 0xFFFFFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput6VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
 
 			if(!autoCirculateLocked)
@@ -2655,7 +2655,7 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 
             // save the interrupt time
             audioClock = GetAudioClock(deviceNumber);
-            WriteRegister(deviceNumber, kVRegTimeStampLastInput7VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
+            WriteRegister(deviceNumber, kVRegTimeStampLastInput7VerticalLo, audioClock & 0xFFFFFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput7VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
 
 			if(!autoCirculateLocked)
@@ -2672,7 +2672,7 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 
             // save the interrupt time
             audioClock = GetAudioClock(deviceNumber);
-            WriteRegister(deviceNumber, kVRegTimeStampLastInput8VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
+            WriteRegister(deviceNumber, kVRegTimeStampLastInput8VerticalLo, audioClock & 0xFFFFFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastInput8VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
 
 			if(!autoCirculateLocked)
@@ -2689,7 +2689,7 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 
             // save the interrupt time
             audioClock = GetAudioClock(deviceNumber);
-            WriteRegister(deviceNumber, kVRegTimeStampLastOutputVerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
+            WriteRegister(deviceNumber, kVRegTimeStampLastOutputVerticalLo, audioClock & 0xFFFFFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutputVerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
 
             // Advance the Output1 frame if auto-circulate is enabled
@@ -2718,7 +2718,7 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 
             // save the interrupt time
             audioClock = GetAudioClock(deviceNumber);
-            WriteRegister(deviceNumber, kVRegTimeStampLastOutput2VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
+            WriteRegister(deviceNumber, kVRegTimeStampLastOutput2VerticalLo, audioClock & 0xFFFFFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput2VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
 
 			if(!autoCirculateLocked)
@@ -2735,7 +2735,7 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 
             // save the interrupt time
             audioClock = GetAudioClock(deviceNumber);
-            WriteRegister(deviceNumber, kVRegTimeStampLastOutput3VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
+            WriteRegister(deviceNumber, kVRegTimeStampLastOutput3VerticalLo, audioClock & 0xFFFFFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput3VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
 
 			if(!autoCirculateLocked)
@@ -2752,7 +2752,7 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 
             // save the interrupt time
             audioClock = GetAudioClock(deviceNumber);
-            WriteRegister(deviceNumber, kVRegTimeStampLastOutput4VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
+            WriteRegister(deviceNumber, kVRegTimeStampLastOutput4VerticalLo, audioClock & 0xFFFFFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput4VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
 
 			if(!autoCirculateLocked)
@@ -2769,7 +2769,7 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 
             // save the interrupt time
             audioClock = GetAudioClock(deviceNumber);
-            WriteRegister(deviceNumber, kVRegTimeStampLastOutput5VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
+            WriteRegister(deviceNumber, kVRegTimeStampLastOutput5VerticalLo, audioClock & 0xFFFFFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput5VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
 
 			if(!autoCirculateLocked)
@@ -2786,7 +2786,7 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 
             // save the interrupt time
             audioClock = GetAudioClock(deviceNumber);
-            WriteRegister(deviceNumber, kVRegTimeStampLastOutput6VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
+            WriteRegister(deviceNumber, kVRegTimeStampLastOutput6VerticalLo, audioClock & 0xFFFFFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput6VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
 
 			if(!autoCirculateLocked)
@@ -2803,7 +2803,7 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 
             // save the interrupt time
             audioClock = GetAudioClock(deviceNumber);
-            WriteRegister(deviceNumber, kVRegTimeStampLastOutput7VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
+            WriteRegister(deviceNumber, kVRegTimeStampLastOutput7VerticalLo, audioClock & 0xFFFFFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput7VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
 
 			if(!autoCirculateLocked)
@@ -2820,7 +2820,7 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 
             // save the interrupt time
             audioClock = GetAudioClock(deviceNumber);
-            WriteRegister(deviceNumber, kVRegTimeStampLastOutput8VerticalLo, audioClock & 0xFFFF, NO_MASK, NO_SHIFT);
+            WriteRegister(deviceNumber, kVRegTimeStampLastOutput8VerticalLo, audioClock & 0xFFFFFFFF, NO_MASK, NO_SHIFT);
             WriteRegister(deviceNumber, kVRegTimeStampLastOutput8VerticalHi, audioClock >> 32, NO_MASK, NO_SHIFT);
 
 			if(!autoCirculateLocked)
