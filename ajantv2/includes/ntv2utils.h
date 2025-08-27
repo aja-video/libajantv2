@@ -394,15 +394,15 @@ AJAExport NTV2_SHOULD_BE_DEPRECATED(bool NTV2DeviceCanDoFormat (const NTV2Device
 	@brief	Returns the number of audio samples for a given video frame rate, audio sample rate, and frame number.
 			This is useful since AJA devices use fixed audio sample rates (typically 48KHz), and some video frame
 			rates will necessarily result in some frames having more audio samples than others.
-	@param[in]	inFrameRate			Specifies the video frame rate.
-	@param[in]	inAudioRate			Specifies the audio sample rate. Must be one of NTV2_AUDIO_48K or NTV2_AUDIO_96K.
+	@param[in]	inFrameRate			Specifies a valid video frame rate.
+	@param[in]	inAudioRate			Specifies a valid audio sample rate.
 	@param[in]	inCadenceFrame		Optionally specifies a frame number for maintaining proper cadence in a frame sequence,
 									for those video frame rates that don't accommodate an even number of audio samples.
 									Defaults to zero.
-	@param[in]	inIsSMPTE372Enabled Specifies that 1080p60, 1080p5994 or 1080p50 is being used. In this mode, the device's
-									framerate might be NTV2_FRAMERATE_3000, but since 2 links are coming out, the video rate
-									is effectively NTV2_FRAMERATE_6000. Defaults to false.
-	@return The number of audio samples.
+	@param[in]	inIsSMPTE372		Optional parameter to support older devices that required two SDI links to output 1080p60,
+									1080p5994 or 1080p50, even though the device video frame rate would be NTV2_FRAMERATE_3000,
+									NTV2_FRAMERATE_2997, or NTV2_FRAMERATE_2500, respectively.  Defaults to false.
+	@returns the number of audio samples, or zero upon failure.
 	@see	See \ref audop-samplecount
 **/
 AJAExport ULWord				GetAudioSamplesPerFrame (const NTV2FrameRate inFrameRate, const NTV2AudioRate inAudioRate, ULWord inCadenceFrame = 0, bool inIsSMPTE372Enabled = false);
