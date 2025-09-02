@@ -86,7 +86,7 @@ const char * NTV2DeviceIDString (const NTV2DeviceID id)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_SOJI_OE7)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_TTAP)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_TTAP_PRO)
-		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_ZEFRAM)
+		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_IP25_R)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_NOTFOUND)
 	}
 	return "";
@@ -167,7 +167,7 @@ const char * NTV2DeviceString (const NTV2DeviceID id)
 		case DEVICE_ID_SOJI_OE7:					return "SOJI_OE7";
 		case DEVICE_ID_TTAP:						return "TTap";
 		case DEVICE_ID_TTAP_PRO:					return "TTapPro";
-		case DEVICE_ID_ZEFRAM:						return "Zefram";
+		case DEVICE_ID_IP25_R:						return "IP25-R";
 		case DEVICE_ID_NOTFOUND:					return "Unknown";
 	}
 

@@ -89,7 +89,8 @@ typedef enum
 	DEVICE_ID_SOJI_OE7					= 0x10922407,
 	DEVICE_ID_TTAP						= 0x10416000,	///< @brief See \ref ttap
 	DEVICE_ID_TTAP_PRO					= 0x10879000,	///< @brief See \ref ttappro
-	DEVICE_ID_ZEFRAM					= 0x11033300,
+	//Devices below this line do not have OEM SDK support
+	DEVICE_ID_IP25_R					= 0x11033300,
 	DEVICE_ID_NOTFOUND					= 0xFFFFFFFF,	///< @brief Invalid or "not found"
 	DEVICE_ID_INVALID					= DEVICE_ID_NOTFOUND
 
