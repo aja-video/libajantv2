@@ -609,6 +609,8 @@ AJAExport ULWord	NTV2FramesizeToByteCount (const NTV2Framesize inFrameSize);
 	@brief		Converts the given NTV2BufferSize value into its exact byte count.
 	@param[in]	inBufferSize	Specifies the NTV2AudioBufferSize to be converted.
 	@return		The equivalent number of bytes.
+	@note		NTV2 audio systems using 4 MB buffers (0x400000 bytes) will only use the first
+				0x3FC000 bytes -- they won't touch the last 16 KB (0x4000 bytes).
 **/
 AJAExport ULWord	NTV2AudioBufferSizeToByteCount (const NTV2AudioBufferSize inBufferSize);
 
