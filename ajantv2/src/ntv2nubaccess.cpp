@@ -659,7 +659,7 @@ bool NTV2DeviceSpecParser::ParseSerialNum (size_t & pos, string & outToken)
 		while (posAlphaNum < SpecLength())
 		{
 			const char ch(CharAt(posAlphaNum));
-			if (!IsUpperLetter(ch) && !IsDecimalDigit(ch) && ch != '-' && ch != ' ')
+			if (!IsUpperLetter(ch) && !IsLowerLetter(ch) && !IsDecimalDigit(ch) && ch != '-' && ch != ' ')
 				break;
 			++posAlphaNum;  tokAlphaNum += ch;
 		}
