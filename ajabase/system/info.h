@@ -48,6 +48,8 @@ enum AJASystemInfoTag
 	AJA_SystemInfoTag_Path_Applications,
 	AJA_SystemInfoTag_Path_Utilities,
 	AJA_SystemInfoTag_Path_Firmware,
+	AJA_SystemInfoTag_Path_NTV2Plugins,				//	New in SDK 18.0
+	AJA_SystemInfoTag_Path_NTV2VirtualDevices,		//	New in SDK 18.0
 
 	AJA_SystemInfoTag_LAST
 };

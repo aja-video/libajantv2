@@ -1443,7 +1443,7 @@ NTV2PluginLoader::NTV2PluginLoader (NTV2Dictionary & params)
 	string pluginBaseName, pluginsFolder;
 	if (getBaseNameFromScheme(pluginBaseName)  &&  getPluginsFolder(pluginsFolder))
 	{
-		const string path (pluginsFolder + PATH_DELIMITER + pluginBaseName);
+		const string path (pluginsFolder + pluginBaseName);
 		const string sigPath (path + SIG_EXTENSION), dllPath (path + DLL_EXTENSION);
 		mDict.insert(kNTV2PluginInfoKey_PluginPath, dllPath);
 		mDict.insert(kNTV2PluginInfoKey_PluginSigPath, sigPath);
@@ -1602,16 +1602,11 @@ bool NTV2PluginLoader::getPluginsFolder (string & outPath) const
 		{outPath = pluginsPath();  return true;}	//	already known, assumed to be good
 
 	//	Plugins are expected to be in the "aja" folder (the parent folder of the "aja/firmware" folder)...
-	outPath = ::NTV2GetFirmwareFolderPath();
+	outPath = ::NTV2GetPluginsFolderPath(true/*include trailing slash*/);
 	if (outPath.empty())
 		return false;
-	PLGDBG("AJA firmware path is '" << outPath << "'");
-	if (outPath.find(FIRMWARE_FOLDER) == string::npos)
-		{P_FAIL("'" << outPath << "' doesn't end with '" << FIRMWARE_FOLDER << "'");  outPath.clear(); return false;}
-	outPath.erase(outPath.find(FIRMWARE_FOLDER), 9);		//	Lop off trailing "Firmware"
+	PLGDBG("AJA plugin path is '" << outPath << "'");
 	mDict.insert(kNTV2PluginInfoKey_PluginsPath, outPath);	//	Store it in 'PluginsPath'
-	if (outPath.back() == PATH_DELIMITER[0])
-		outPath.erase(outPath.length() - 1, 1);	//	Lop off trailing path delimiter
 	return !outPath.empty();	//	Success if not empty
 }
 

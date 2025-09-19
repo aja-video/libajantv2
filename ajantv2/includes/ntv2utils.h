@@ -1099,7 +1099,9 @@ AJAExport std::string NTV2EmbeddedAudioClockToString	(const NTV2EmbeddedAudioClo
 AJAExport std::string NTV2GetBitfileName				(const NTV2DeviceID				inValue);
 AJAExport bool		  NTV2IsCompatibleBitfileName		(const std::string & inBitfileName, const NTV2DeviceID inDeviceID);
 AJAExport NTV2DeviceID NTV2GetDeviceIDFromBitfileName	(const std::string & inBitfileName);
-AJAExport std::string NTV2GetFirmwareFolderPath			(void);
+AJAExport std::string NTV2GetFirmwareFolderPath			(const bool inAddTrailingPathDelim = false);
+AJAExport std::string NTV2GetPluginsFolderPath			(const bool inAddTrailingPathDelim = false);	//	New in SDK 18.0
+AJAExport std::string NTV2GetVDevFolderPath				(const bool inAddTrailingPathDelim = false);	//	New in SDK 18.0
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const RP188_STRUCT & inObj);
 AJAExport std::string NTV2GetVersionString				(const bool inDetailed = false);
 AJAExport std::string NTV2RegisterNumberToString		(const NTV2RegisterNumber		inValue);	//	New in SDK 12.0

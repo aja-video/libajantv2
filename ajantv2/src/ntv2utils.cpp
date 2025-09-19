@@ -16,6 +16,7 @@
 #include "ntv2version.h"
 #include "ntv2devicefeatures.h"	//	Required for NTV2DeviceCanDoVideoFormat
 #include "ajabase/system/lock.h"
+#include "ajabase/system/info.h"
 #include "ajabase/common/common.h"
 #if defined(AJALinux)
 	#include <string.h>	 // For memset
@@ -4518,10 +4519,10 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_CORVID24:				return inForRetailDisplay ? "Corvid 24"					: "Corvid24";
 		case DEVICE_ID_CORVID3G:				return inForRetailDisplay ? "Corvid 3G"					: "Corvid3G";
 		case DEVICE_ID_CORVID44:				return inForRetailDisplay ? "Corvid 44"					: "Corvid44";
-		case DEVICE_ID_CORVID44_2X4K:			return inForRetailDisplay ? "Corvid 44 2x4K"			: "Corvid44-2x4K";
-		case DEVICE_ID_CORVID44_8K:				return inForRetailDisplay ? "Corvid 44 8K"				: "Corvid44-8K";
-		case DEVICE_ID_CORVID44_8KMK:			return inForRetailDisplay ? "Corvid 44 8KMK"			: "Corvid44-8KMK";
-		case DEVICE_ID_CORVID44_PLNR:			return inForRetailDisplay ? "Corvid 44 PLNR"			: "Corvid44-PLNR";
+		case DEVICE_ID_CORVID44_2X4K:			return inForRetailDisplay ? "Corvid 44 12G 2x4K"		: "Corvid44-12G-2x4K";
+		case DEVICE_ID_CORVID44_8K:				return inForRetailDisplay ? "Corvid 44 12G 8K"			: "Corvid44-12G-8K";
+		case DEVICE_ID_CORVID44_8KMK:			return inForRetailDisplay ? "Corvid 44 12G 8KMK"		: "Corvid44-12G-8KMK";
+		case DEVICE_ID_CORVID44_PLNR:			return inForRetailDisplay ? "Corvid 44 12G PLNR"		: "Corvid44-12G-PLNR";
 		case DEVICE_ID_CORVID88:				return inForRetailDisplay ? "Corvid 88"					: "Corvid88";
 		case DEVICE_ID_CORVIDHBR:				return inForRetailDisplay ? "Corvid HB-R"				: "CorvidHBR";
 		case DEVICE_ID_CORVIDHEVC:				return inForRetailDisplay ? "Corvid HEVC"				: "CorvidHEVC";
@@ -7579,26 +7580,40 @@ NTV2DeviceID NTV2GetDeviceIDFromBitfileName (const string & inBitfileName)
 }
 
 
-string NTV2GetFirmwareFolderPath (void)
+string NTV2GetFirmwareFolderPath (const bool inAddTrailingPathDelim)
 {
-	#if defined (AJAMac)
-		return "/Library/Application Support/AJA/Firmware";
-	#elif defined (MSWindows)
-		HKEY	hKey		(AJA_NULL);
-		DWORD	bufferSize	(1024);
-		char *	lpData		(new char [bufferSize]);
+	string fwPath;
+	AJASystemInfo info (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_Path);
+	info.GetValue (AJA_SystemInfoTag_Path_Firmware, fwPath);
+	const char c (fwPath.empty() ? 0 : fwPath.at(fwPath.length()-1));
+	if (!inAddTrailingPathDelim)
+		if (c == '/' || c == '\\')
+			fwPath.erase(fwPath.length()-1, 1);	//	lop off trailing '/'
+	return fwPath;
+}
 
-		if (RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\AJA", NULL, KEY_READ, &hKey) == ERROR_SUCCESS
-			&& RegQueryValueExA (hKey, "firmwarePath", NULL, NULL, (LPBYTE) lpData, &bufferSize) == ERROR_SUCCESS)
-				return string (lpData);
-		RegCloseKey (hKey);
-		// Windows may not get a result if the ntv2 installer has not been executed (use case client side remote plugins)
-		return "C:\\ProgramData\\AJA\\ntv2\\Firmware";    
-	#elif defined (AJALinux)
-		return "/opt/aja/firmware";
-	#else
-		return "";
-	#endif
+string NTV2GetPluginsFolderPath (const bool inAddTrailingPathDelim)
+{
+	string fwPath;
+	AJASystemInfo info (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_Path);
+	info.GetValue (AJA_SystemInfoTag_Path_NTV2Plugins, fwPath);
+	const char c (fwPath.empty() ? 0 : fwPath.at(fwPath.length()-1));
+	if (!inAddTrailingPathDelim)
+		if (c == '/' || c == '\\')
+			fwPath.erase(fwPath.length()-1, 1);	//	lop off trailing '/'
+	return fwPath;
+}
+
+string NTV2GetVDevFolderPath (const bool inAddTrailingPathDelim)
+{
+	string fwPath;
+	AJASystemInfo info (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_Path);
+	info.GetValue (AJA_SystemInfoTag_Path_NTV2VirtualDevices, fwPath);
+	const char c (fwPath.empty() ? 0 : fwPath.at(fwPath.length()-1));
+	if (!inAddTrailingPathDelim)
+		if (c == '/' || c == '\\')
+			fwPath.erase(fwPath.length()-1, 1);	//	lop off trailing '/'
+	return fwPath;
 }
 
 
