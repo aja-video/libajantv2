@@ -653,7 +653,7 @@ bool NTV2DeviceSpecParser::ParseSerialNum (size_t & pos, string & outToken)
 {
 	outToken.clear();
 	string tokAlphaNum, tokHexNum;
-	size_t posAlphaNum(pos), posHexNum(pos);
+	size_t origPos(pos), posAlphaNum(pos), posHexNum(pos);
 	do
 	{
 		while (posAlphaNum < SpecLength())
@@ -672,6 +672,8 @@ bool NTV2DeviceSpecParser::ParseSerialNum (size_t & pos, string & outToken)
 			if (tokHexNum.length() == 18)	//	64-bit value!
 				{pos = posHexNum;  outToken = tokHexNum;}
 	} while (false);
+	if (tokAlphaNum == "ntv2kona1")	//	HACK!	Can't open 'ntv2kona1' plugin without this hack!
+		{outToken.clear();  pos = origPos;  return false;}	//	('ntv2kona1' looks like a serial number!)
 	return !outToken.empty();
 }
 
