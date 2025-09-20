@@ -9,6 +9,7 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
 #include "ajabase/common/common.h"
+#include "ajabase/system/debug.h"
 #include "ajabase/system/lock.h"
 #include <sstream>
 #include "ajabase/system/info.h"
@@ -18,6 +19,13 @@
 
 using namespace std;
 using json = nlohmann::json;
+
+
+#define PLFAIL(__x__)		AJA_sERROR	(AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
+#define PLWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
+#define PLNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
+#define PLINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
+#define PLDBUG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
 
 
 #if defined(NTV2_DEPRECATE_17_1)
@@ -154,7 +162,8 @@ void CNTV2DeviceScanner::ScanHardware (void)
 		tmpDev.Close();
 	}	//	boardNum loop
 
-	GetVirtualDeviceList(sDevInfoList);
+	GetVDevList(sDevInfoList);		//	For VKONA support
+	GetCP2DevList(sDevInfoList);	//	For CP2 support
 }	//	ScanHardware
 
 bool CNTV2DeviceScanner::DeviceIDPresent (const NTV2DeviceID inDeviceID, const bool inRescan)
@@ -824,109 +833,152 @@ void CNTV2DeviceScanner::SetAudioAttributes (NTV2DeviceInfo & info, CNTV2Card & 
 
 }	//	SetAudioAttributes
 
-
-bool CNTV2DeviceScanner::GetVirtualDeviceList (NTV2DeviceInfoList& outVirtualDevList)
+bool CNTV2DeviceScanner::GetVDevList (NTV2DeviceInfoList & outVDevList)
 {
 #if defined(NTV2_PREVENT_PLUGIN_LOAD)
 	return false;	//	Plugin loading disabled, therefore no virtual devices
-#endif
-
-	string vdevPath;
-	{	const AJASystemInfo pathInfo(AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_Path);
-		if (pathInfo.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreUser, vdevPath) != AJA_STATUS_SUCCESS)
-			return false;
-	}
-	vdevPath = vdevPath + "virtualdevices";
-	ULWord vdIndex = ULWord(outVirtualDevList.size());
-	std::vector<std::string> vdevFiles;
+#else	//	else NTV2_PREVENT_PLUGIN_LOAD
+	string vdevPath (::NTV2GetVDevFolderPath());
+	if (vdevPath.empty())
+		return false;
+	ULWord vdIndex (ULWord(outVDevList.size()));
+	NTV2StringList vdevFiles;
 	AJAFileIO::ReadDirectory(vdevPath, "*.vdev", vdevFiles);
-	for (const auto& vdevFile : vdevFiles)
+	for (const auto & vdevFile : vdevFiles)
 	{
-		std::ifstream cfgJsonfile(vdevFile);
 		json vdevJson;
-		if (cfgJsonfile.is_open())
 		{
+			std::ifstream vf(vdevFile);
+			if (!vf.is_open())
+				{PLFAIL("Unable to open '" << vdevFile << "'"); return false;}
 			try
 			{
-				vdevJson = json::parse(cfgJsonfile);
+				vdevJson = json::parse(vf);
 			}
 			catch (const json::parse_error& e)
 			{
-				cerr << "JSON parse error: " << e.what() << endl;
-				cerr << "Exception id: " << e.id << endl;
-				cerr << "Byte position of error: " << e.byte << endl;
+				PLFAIL("Invalid JSON at byte " << e.byte << " in '" << vdevFile << "': " << e.what() << ", exceptionID " << e.id);
 				return false;
 			}
 		}
-		else
-			return false;
-		cfgJsonfile.close();
 
 		NTV2DeviceInfo newVDev;
-		newVDev.isVirtualDevice = true;
-		newVDev.deviceIndex = vdIndex++;
-		newVDev.deviceID = DEVICE_ID_SOFTWARE;
-		newVDev.deviceIdentifier = "";
-		newVDev.vdevName = "";
+		newVDev.isVirtualDevice		= true;
+		newVDev.deviceIndex			= vdIndex++;
+		newVDev.deviceID			= DEVICE_ID_SOFTWARE;
+		newVDev.deviceIdentifier	= "";
+		newVDev.vdevName			= "";
 
-		// There are 3 special keys:
-		// plugin - this is required, specifies the name of plug-in to try loading.
-		// name - optional, specifies a human readable name for the virtual device,
-		//		  defaults to "" if not specified.
-		// host - optional, host to use in the plug-in url, defaults to "localhost"
-		//        if not specified.
+		//	EXPECTED JSON KEYS:
+		//	"name"		[optional]	Specifies a human-readable name for the device.
+		//	"urlspec"	[required]	Specifies entire urlspec to use to load the plugin.
+		//							Cannot be used with "plugin" or "host".
 		string hostName;
-		auto pluginVal = vdevJson["plugin"];
-		auto nameVal = vdevJson["name"];
-		auto hostVal = vdevJson["host"];
-
-		if (pluginVal.is_null())
-		{
-			cerr << "JSON file: '" << vdevFile << "' is missing the required paramater 'plugin'." << endl;
-			continue;
-		}
-		newVDev.vdevUrl = pluginVal.get<std::string>();
+		auto pluginVal (vdevJson["plugin"]), nameVal (vdevJson["name"]), hostVal (vdevJson["host"]), urlspecVal (vdevJson["urlspec"]);
+		if (urlspecVal.is_null())
+			{PLFAIL("File: '" << vdevFile << "' missing required 'urlspec' parameter");  continue;}
+		newVDev.vdevUrl = urlspecVal.get<std::string>();	//	done, we have the vdevUrl
+		if (!pluginVal.is_null())
+			PLWARN("File: '" << vdevFile << "' 'plugin' parameter ignored");
+		if (!hostVal.is_null())
+			PLWARN("File: '" << vdevFile << "' 'host' parameter ignored");
 
 		if (!nameVal.is_null())
 		{
 			ostringstream oss;
 			oss << nameVal.get<std::string>() << " - " << newVDev.deviceIndex;
 			newVDev.deviceIdentifier = oss.str();
+			newVDev.vdevName = nameVal.get<std::string>();
+		}
+		outVDevList.push_back(newVDev);
+	}	//	for each vdev file found
+	return true;
+#endif	//	else NTV2_PREVENT_PLUGIN_LOAD
+}	//	GetVDevList
 
+bool CNTV2DeviceScanner::GetCP2DevList (NTV2DeviceInfoList & outVDevList)
+{
+#if defined(NTV2_PREVENT_PLUGIN_LOAD)
+	return false;	//	Plugin loading disabled, therefore no virtual devices
+#else	//	else NTV2_PREVENT_PLUGIN_LOAD
+	string vdevPath;
+	{	const AJASystemInfo pathInfo(AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_Path);
+		if (pathInfo.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreUser, vdevPath) != AJA_STATUS_SUCCESS)
+			return false;
+	}
+	vdevPath += "virtualdevices";
+	ULWord vdIndex = ULWord(outVDevList.size());
+	NTV2StringList vdevFiles;
+	AJAFileIO::ReadDirectory(vdevPath, "*.vdev", vdevFiles);
+	for (const auto & vdevFile : vdevFiles)
+	{
+		json vdevJson;
+		{
+			std::ifstream vf(vdevFile);
+			if (!vf.is_open())
+				{PLFAIL("Unable to open '" << vdevFile << "'"); return false;}
+			try
+			{
+				vdevJson = json::parse(vf);
+			}
+			catch (const json::parse_error& e)
+			{
+				PLFAIL("Invalid JSON at byte " << e.byte << " in '" << vdevFile << "': " << e.what() << ", exceptionID " << e.id);
+				return false;
+			}
+		}
+
+		NTV2DeviceInfo newVDev;
+		newVDev.isVirtualDevice		= true;
+		newVDev.deviceIndex			= vdIndex++;
+		newVDev.deviceID			= DEVICE_ID_SOFTWARE;
+		newVDev.deviceIdentifier	= "";
+		newVDev.vdevName			= "";
+
+		//	EXPECTED JSON KEYS:
+		//	"plugin"	[required]	Specifies name of plugin to be loaded.
+		//	"name"		[optional]	Specifies a human-readable name for the device.
+		//	"host"		[optional]	Specifies host to use in the plugin URL. Defaults to "localhost".
+		string hostName;
+		auto pluginVal (vdevJson["plugin"]), nameVal (vdevJson["name"]), hostVal (vdevJson["host"]), urlspecVal (vdevJson["urlspec"]);
+		if (pluginVal.is_null())
+			{PLFAIL("File: '" << vdevFile << "' missing required 'plugin' parameter");  continue;}
+		if (!urlspecVal.is_null())
+			PLWARN("File: '" << vdevFile << "' 'urlspec' parameter ignored");
+
+		newVDev.vdevUrl = pluginVal.get<std::string>();
+		if (!nameVal.is_null())
+		{
+			ostringstream oss;
+			oss << nameVal.get<std::string>() << " - " << newVDev.deviceIndex;
+			newVDev.deviceIdentifier = oss.str();
 			newVDev.vdevName = nameVal.get<std::string>();
 		}
 
 		if (!hostVal.is_null())
-		{
 			hostName = hostVal.get<std::string>();
-		}
-
 		if (hostName.empty())
-		{
 			hostName = "localhost";
-		}
-
 		newVDev.vdevUrl += "://" + hostName + "/?";
-		bool isFirstParam = true;
-		for (auto it = vdevJson.begin(); it != vdevJson.end(); ++it)
-		{
-			if (it.key() != "plugin" && it.key() != "name" && it.key() != "host")
+
+		NTV2StringList params;
+		for (auto it (vdevJson.begin());  it != vdevJson.end();  ++it)
+			if (it.key() != "plugin"  &&  it.key() != "name"  &&  it.key() != "host")
 			{
 				auto paramValStr = to_string(it.value());
 				aja::strip(paramValStr, "\"");
-				newVDev.vdevUrl += (isFirstParam ? "" : "&") + it.key() + "=" + PercentEncode(paramValStr);
-				isFirstParam = false;
+				params.push_back(it.key() + "=" + ::PercentEncode(paramValStr));
 			}
-		}
 
 		if (!newVDev.deviceIdentifier.empty())
-		{
-			string displayNameParam = "displayname";
-			newVDev.vdevUrl += (isFirstParam ? "" : "&") + displayNameParam + "=" + PercentEncode(newVDev.deviceIdentifier);
-		}
-
-		outVirtualDevList.push_back(newVDev);
-	}
+			params.push_back("displayname=" + ::PercentEncode(newVDev.deviceIdentifier));
+		const string queryStr(aja::join(params, "&"));
+		if (!queryStr.empty())
+			newVDev.vdevUrl += "?" + queryStr;
+		outVDevList.push_back(newVDev);
+	}	//	for each .vdev file found
 	return true;
-}
+#endif	//	else NTV2_PREVENT_PLUGIN_LOAD
+}	//	GetCP2DeviceList
+
 #endif	//	!defined(NTV2_DEPRECATE_17_1)
