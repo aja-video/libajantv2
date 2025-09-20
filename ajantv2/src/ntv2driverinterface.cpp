@@ -1193,7 +1193,7 @@ string CNTV2DriverInterface::GetDescription (void) const
 			strs.push_back("\"" + parms.valueForKey(kNTV2PluginRegInfoKey_LongName) + "\" plugin");
 		if (parms.hasKey(kNTV2PluginRegInfoKey_Description))
 			strs.push_back(parms.valueForKey(kNTV2PluginRegInfoKey_Description));
-		if (parms.hasKey(kNTV2PluginRegInfoKey_Copyright))
+		else if (parms.hasKey(kNTV2PluginRegInfoKey_Copyright))
 			strs.push_back(parms.valueForKey(kNTV2PluginRegInfoKey_Copyright));
 		else if (parms.hasKey(kNTV2PluginRegInfoKey_Vendor))
 			strs.push_back(parms.valueForKey(kNTV2PluginRegInfoKey_Vendor));
