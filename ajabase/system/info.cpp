@@ -120,27 +120,29 @@ AJAStatus AJASystemInfo::Rescan (AJASystemInfoSections sections)
 	if(mpImpl)
 	{
 		// labels
-		mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_Model)] = "System Model";
-		mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_Bios)] = "System BIOS";
-		mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_Name)] = "System Name";
-		mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_BootTime)] = "System Boot Time";
-		mpImpl->mLabelMap[int(AJA_SystemInfoTag_OS_ProductName)] = "OS Product Name";
-		mpImpl->mLabelMap[int(AJA_SystemInfoTag_OS_Version)] = "OS Version";
-		mpImpl->mLabelMap[int(AJA_SystemInfoTag_OS_VersionBuild)] = "OS Build";
-		mpImpl->mLabelMap[int(AJA_SystemInfoTag_OS_KernelVersion)] = "OS Kernel Version";
-		mpImpl->mLabelMap[int(AJA_SystemInfoTag_CPU_Type)] = "CPU Type";
-		mpImpl->mLabelMap[int(AJA_SystemInfoTag_CPU_NumCores)] = "CPU Num Cores";
-		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Mem_Total)] = "Memory Total";
-		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Mem_Used)] = "Memory Used";
-		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Mem_Free)] = "Memory Free";
-		mpImpl->mLabelMap[int(AJA_SystemInfoTag_GPU_Type)] = "GPU Type";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_Model)]		= "System Model";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_Bios)]		= "System BIOS";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_Name)]		= "System Name";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_BootTime)]	= "System Boot Time";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_OS_ProductName)]	= "OS Product Name";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_OS_Version)]		= "OS Version";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_OS_VersionBuild)]	= "OS Build";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_OS_KernelVersion)]	= "OS Kernel Version";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_CPU_Type)]			= "CPU Type";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_CPU_NumCores)]		= "CPU Num Cores";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Mem_Total)]			= "Memory Total";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Mem_Used)]			= "Memory Used";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Mem_Free)]			= "Memory Free";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_GPU_Type)]			= "GPU Type";
 
-		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_UserHome)] = "User Home Path";
-		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)] = "User Persistence Store Path";
-		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_PersistenceStoreSystem)] = "System Persistence Store Path";
-		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_Applications)] = "AJA Applications Path";
-		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_Utilities)] = "AJA Utilities Path";
-		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_Firmware)] = "AJA Firmware Path";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_UserHome)]					= "User Home Path";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)]		= "User Persistence Store Path";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_PersistenceStoreSystem)]	= "System Persistence Store Path";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_Applications)]				= "AJA Applications Path";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_Utilities)]				= "AJA Utilities Path";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_Firmware)]					= "AJA Firmware Path";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_NTV2Plugins)]				= "AJA Plugins Path";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_NTV2VirtualDevices)]		= "AJA Virtual Devices Path";
 
 		ret = mpImpl->Rescan(sections);
 	}

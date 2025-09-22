@@ -1607,11 +1607,11 @@ public:
 
 	/**
 		@brief		For the given Audio System, answers with the byte offset of the tail end of the last chunk of
-					audio samples read by the device's output audio embedder. This is essentially the position of
+					audio samples read by the given audio system's playback engine. This is essentially the position of
 					the "Play Head" during audio output.
 		@param[out] outValue		Receives the byte offset of the tail end of the last chunk of audio samples read
-									by the device's output audio embedder in its output audio buffer. This offset is
-									measured from the start of the device playback buffer.
+									by the audio system's playback engine. This offset is measured from the start of
+									the device playback buffer.
 		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem of interest.
 		@return		True if successful;	 otherwise false.
 		@see		CNTV2Card::WriteAudioLastOut, \ref audop-playout

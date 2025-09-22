@@ -9091,7 +9091,8 @@ typedef enum
 		#define NTV2_MAIL_BUFFER_SUCCESS				BIT(0)			///< @brief Used in ::NTV2MailBuffer success
 		#define NTV2_MAIL_BUFFER_FAIL					BIT(1)			///< @brief Used in ::NTV2MailBuffer fail
 		#define NTV2_MAIL_BUFFER_OVERFLOW				BIT(2)			///< @brief Used in ::NTV2MailBuffer buffer overflow
-		#define NTV2_MAIL_BUFFER_TIMEOUT				BIT(3)			///< @brief Used in ::NTV2MailBuffer transfer timeout
+		#define NTV2_MAIL_BUFFER_TIMEOUT				BIT(3)			///< @brief Used in ::NTV2MailBuffer transfer timeout (timed out after bytes transferred > 0)
+		#define NTV2_MAIL_BUFFER_TRYAGAIN				BIT(4)			///< @brief Used in ::NTV2MailBuffer transfer try again (timed out before bytes tranferred > 0)
 
         // Mail buffer maximum size
         #define NTV2_MAIL_BUFFER_MAX                    4096        
@@ -9150,6 +9151,9 @@ typedef enum
 
 			typedef std::set <NTV2FrameRate>					NTV2FrameRateSet;					///< @brief A set of distinct NTV2FrameRate values.  New in SDK 17.0.
 			typedef NTV2FrameRateSet::const_iterator			NTV2FrameRateSetConstIter;			///< @brief A handy const iterator for iterating over an NTV2FrameRateSet.
+
+			typedef std::set <NTV2AudioRate>					NTV2AudioRateSet;					///< @brief A set of distinct NTV2AudioRate values.  New in SDK 18.0.
+			typedef NTV2AudioRateSet::const_iterator			NTV2AudioRateSetConstIter;			///< @brief A handy const iterator for iterating over an NTV2AudioRateSet.
 
 			/**
 				@brief		Prints the given ::UWordSequence contents into the given output stream.

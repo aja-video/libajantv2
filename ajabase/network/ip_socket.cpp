@@ -363,6 +363,9 @@ AJAIPSocket::GetHostIPAddresses(
 	{
 		for (pIFAddr = pIFAddrContainer; NULL != pIFAddr; pIFAddr = pIFAddr->ifa_next)
 		{
+      // skip if ifa_addr is null
+      if (pIFAddr->ifa_addr == NULL)
+        continue;
 			// Is this an IP4 address
 			if (AF_INET == pIFAddr->ifa_addr->sa_family)
 			{

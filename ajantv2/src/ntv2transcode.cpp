@@ -792,6 +792,25 @@ void PackRGB10BitFor10BitRGBPacked (RGBAlpha10BitPixel * pBuffer, const ULWord i
 	}
 }
 
+// Pack 10 Bit RGBA to NTV2_FBF_10BIT_ARGB Format for our board
+void PackRGB10BitFor10BitARGBPacked (RGBAlpha10BitPixel * pBuffer, const ULWord inNumPixels)
+{
+    UByte *	pOutputBuffer (reinterpret_cast<UByte*>(pBuffer));
+    ULWord iByte = 0;
+	for (ULWord pixel(0);  pixel < inNumPixels;	 pixel++)
+	{
+		const ULWord Red	(pBuffer[pixel].Red);
+		const ULWord Green	(pBuffer[pixel].Green);
+		const ULWord Blue	(pBuffer[pixel].Blue);
+		const ULWord Alpha	(pBuffer[pixel].Alpha);
+        pOutputBuffer[iByte++] = (Blue & 0xFF);
+        pOutputBuffer[iByte++] = ((Blue >> 8) & 0x03) | ((Green & 0x3F) << 2);
+        pOutputBuffer[iByte++] = ((Green >> 6) & 0x0F) | ((Red & 0x0F) << 4);
+        pOutputBuffer[iByte++] = ((Red >> 4) & 0x3F) | ((Alpha & 0x03) << 6);
+        pOutputBuffer[iByte++] = (Alpha & 0xFF);
+	}
+}
+
 /* KAM
 // ConvertLineto16BitRGB
 // 16 Bit Version

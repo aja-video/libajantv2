@@ -157,7 +157,9 @@ class AJAExport NTV2DeviceSpecParser
 	public:
 										NTV2DeviceSpecParser (const std::string inSpec = "");	///< @brief	My constructor. If given device specification is non-empty, proceeds to Parse it
 		void							Reset (const std::string inSpec = "");	///< @brief	Resets me, then parses the given device specification
-		inline const std::string &		DeviceSpec (void) const						{return mSpec;}		///< @return	The device specification I've parsed
+		inline const std::string &		DeviceSpec (void) const						{return mSpec;}		///< @returns	the original devSpec I parsed
+		std::string						MakeDeviceSpec (const bool urlEncodeQuery) const;	///< @returns	reconstituted device spec
+		std::string						MakeQueryString (const bool urlEncode) const;		///< @returns	reconstituted query string
 		inline bool						HasDeviceSpec (void) const					{return !DeviceSpec().empty();}	///< @return	True if I have a device specification
 		inline bool						Successful (void) const						{return !Failed();}	///< @return	True if successfully parsed
 		inline bool						Failed (void) const							{return DeviceSpec().empty() ? true : HasErrors();}	///< @return	True if empty device spec or parser had errors
@@ -181,6 +183,7 @@ class AJAExport NTV2DeviceSpecParser
 		UWord							DeviceIndex (void) const;
 		inline const NTV2Dictionary &	QueryParams (void) const					{return mQueryParams;}	///< @return	True if ErrorCount is non-zero
 		inline std::string				QueryParam (const std::string & inKey) const	{return mQueryParams.valueForKey(inKey);}	///< @return	Query parameter value for the given query parameter key (empty string if no such key)
+		inline bool						HasQueryParams (void) const					{return !QueryParams().empty();}	///< @returns	true if has any query params
 		#if defined(_DEBUG)
 		static void						test (void);
 		#endif	//	defined(_DEBUG)

@@ -1929,7 +1929,6 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					{
 						goto messageError;
 					}
-
 					if(copy_to_user((void*)arg, (const void*)pMessage, sizeof(NTV2MailBuffer)))
 					{
 						returnCode = -EFAULT;
@@ -4946,6 +4945,7 @@ int DoMessageStreamBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamBuffe
 
 int DoMessageMailBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2MailBuffer* pBuffer)
 {
+	Ntv2Status status = NTV2_STATUS_FAIL;
 	NTV2PrivateParams * pNTV2Params = getNTV2Params(deviceNumber);
     int chn = 0;
     struct ntv2_mailbox* pMail = NULL;
@@ -4988,13 +4988,28 @@ int DoMessageMailBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2MailBuffer* p
 			return ret;
 		}
 
-        pBuffer->mStatus = ntv2_packet_send(pMail,
-                                            pMail->send_data,
-                                            pBuffer->mDataSize,
-                                            &offset,
-                                            pBuffer->mDelay,
-                                            pBuffer->mTimeout);
-    }    
+        status = ntv2_packet_send(pMail,
+								  pMail->send_data,
+								  pBuffer->mDataSize,
+								  &offset,
+								  pBuffer->mDelay,
+								  pBuffer->mTimeout);
+		if (status == NTV2_STATUS_SUCCESS)
+		{
+			pBuffer->mStatus = NTV2_MAIL_BUFFER_SUCCESS;
+		}
+		else
+		{
+			if (status == NTV2_STATUS_TIMEOUT)
+			{
+				pBuffer->mStatus = NTV2_MAIL_BUFFER_TIMEOUT;
+			}
+			else
+			{
+				pBuffer->mStatus = NTV2_MAIL_BUFFER_FAIL;
+			}
+		}
+    }
 	if ((pBuffer->mFlags & NTV2_MAIL_BUFFER_RECEIVE) != 0)
 	{
         if (pBuffer->mBuffer.fByteCount > NTV2_MAIL_BUFFER_MAX)
@@ -5005,14 +5020,15 @@ int DoMessageMailBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2MailBuffer* p
             return -EINVAL;
         }
 
-        pBuffer->mStatus = ntv2_packet_recv(pMail,
-                                            pMail->recv_data,
-                                            pBuffer->mBuffer.fByteCount,
-                                            &offset,
-                                            pBuffer->mDelay,
-                                            pBuffer->mTimeout);
-        if (pBuffer->mStatus == NTV2_STATUS_SUCCESS)
+        status = ntv2_packet_recv(pMail,
+								  pMail->recv_data,
+								  pBuffer->mBuffer.fByteCount,
+								  &offset,
+								  pBuffer->mDelay,
+								  pBuffer->mTimeout);
+        if (status == NTV2_STATUS_SUCCESS)
         {
+			pBuffer->mStatus = NTV2_MAIL_BUFFER_SUCCESS;
             pBuffer->mDataSize = offset;
             ret = copy_to_user((void*)pBuffer->mBuffer.fUserSpacePtr,
                                pMail->recv_data,
@@ -5024,10 +5040,19 @@ int DoMessageMailBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2MailBuffer* p
         }
         else
         {
+			if (status == NTV2_STATUS_TIMEOUT)
+			{
+				pBuffer->mStatus = NTV2_MAIL_BUFFER_TIMEOUT;
+				return 0;
+			}
+			else
+			{
+				pBuffer->mStatus = NTV2_MAIL_BUFFER_FAIL;
+			}
             return -EPERM;
         }
     }
-    
+
 	return 0;
 }
 

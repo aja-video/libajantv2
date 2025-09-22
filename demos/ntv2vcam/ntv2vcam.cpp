@@ -1650,14 +1650,7 @@ int NTV2VCAM::GetFps()
 		case NTV2_FRAMERATE_12000:
 		case NTV2_FRAMERATE_11988:			return 120;
 
-		case NTV2_FRAMERATE_UNKNOWN:	//	All others assume 24fps
-		case NTV2_FRAMERATE_1900:
-		case NTV2_FRAMERATE_1898:
-		case NTV2_FRAMERATE_1800:
-		case NTV2_FRAMERATE_1798:
-		case NTV2_NUM_FRAMERATES:
-		case NTV2_FRAMERATE_2400:
-		case NTV2_FRAMERATE_2398:			break;
+		default:			break;
 	}
 	return 24;
 }

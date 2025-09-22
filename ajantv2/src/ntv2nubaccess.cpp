@@ -459,6 +459,62 @@ ostream & NTV2DeviceSpecParser::Print (ostream & oss, const bool inDumpResults) 
 	return oss;
 }
 
+string NTV2DeviceSpecParser::MakeDeviceSpec (const bool urlEncodeQuery) const
+{
+	if (!Successful())
+		return "";
+	ostringstream result;
+	if (IsLocalDevice())
+	{
+		result << "ntv2local://";
+		if (HasResult(kConnectParamDevSerial))
+			result << DeviceSerial();
+		else if (HasResult(kConnectParamDevModel))
+			result << DeviceModel();
+		else if (HasResult(kConnectParamDevID))
+			result << DeviceID();
+		else if (HasResult(kConnectParamDevIndex))
+			result << DeviceIndex();
+		else
+			return "";
+		return result.str();
+	}
+	result << Scheme() << "://";
+	if (HasResult(kConnectParamHost))
+		result << Result(kConnectParamHost);
+	if (HasResult(kConnectParamPort))
+		result << ":" << Result(kConnectParamPort);
+	result << Result(kConnectParamResource);
+	if (HasQueryParams())
+	{
+		string q (MakeQueryString(urlEncodeQuery));
+		if (!q.empty())
+			result << "?" << q;
+	}
+	return result.str();
+}
+
+string NTV2DeviceSpecParser::MakeQueryString (const bool urlEncode) const
+{
+	if (!Successful())
+		return "";
+	if (!HasQueryParams())
+		return "";
+	NTV2StringList parms;
+	const NTV2StringSet ks (mQueryParams.keys());
+	for (NTV2StringSetConstIter it(ks.begin());  it != ks.end();  ++it)
+	{
+		ostringstream oss;
+		string k(*it), v(mQueryParams.valueForKey(k));
+		if (urlEncode)
+			oss << ::PercentEncode(k) << "=" << ::PercentEncode(v);
+		else
+			oss << k << "=" << v;
+		parms.push_back(oss.str());
+	}
+	return aja::join(parms, "&");
+}
+
 string NTV2DeviceSpecParser::InfoString (void) const
 {
 	ostringstream oss;
@@ -597,13 +653,13 @@ bool NTV2DeviceSpecParser::ParseSerialNum (size_t & pos, string & outToken)
 {
 	outToken.clear();
 	string tokAlphaNum, tokHexNum;
-	size_t posAlphaNum(pos), posHexNum(pos);
+	size_t origPos(pos), posAlphaNum(pos), posHexNum(pos);
 	do
 	{
 		while (posAlphaNum < SpecLength())
 		{
 			const char ch(CharAt(posAlphaNum));
-			if (!IsUpperLetter(ch) && !IsDecimalDigit(ch) && ch != '-' && ch != ' ')
+			if (!IsUpperLetter(ch) && !IsLowerLetter(ch) && !IsDecimalDigit(ch) && ch != '-' && ch != ' ')
 				break;
 			++posAlphaNum;  tokAlphaNum += ch;
 		}
@@ -616,6 +672,8 @@ bool NTV2DeviceSpecParser::ParseSerialNum (size_t & pos, string & outToken)
 			if (tokHexNum.length() == 18)	//	64-bit value!
 				{pos = posHexNum;  outToken = tokHexNum;}
 	} while (false);
+	if (tokAlphaNum == "ntv2kona1")	//	HACK!	Can't open 'ntv2kona1' plugin without this hack!
+		{outToken.clear();  pos = origPos;  return false;}	//	('ntv2kona1' looks like a serial number!)
 	return !outToken.empty();
 }
 
@@ -1387,7 +1445,7 @@ NTV2PluginLoader::NTV2PluginLoader (NTV2Dictionary & params)
 	string pluginBaseName, pluginsFolder;
 	if (getBaseNameFromScheme(pluginBaseName)  &&  getPluginsFolder(pluginsFolder))
 	{
-		const string path (pluginsFolder + PATH_DELIMITER + pluginBaseName);
+		const string path (pluginsFolder + pluginBaseName);
 		const string sigPath (path + SIG_EXTENSION), dllPath (path + DLL_EXTENSION);
 		mDict.insert(kNTV2PluginInfoKey_PluginPath, dllPath);
 		mDict.insert(kNTV2PluginInfoKey_PluginSigPath, sigPath);
@@ -1499,6 +1557,7 @@ bool NTV2PluginLoader::ParseQueryParams (const NTV2Dictionary & inParams, NTV2Di
 	if (!queryStr.empty())
 		if (queryStr[0] == '?')
 			queryStr.erase(0,1);	//	Remove leading '?'
+	PLGDBG("Query: '" << queryStr << "'");
 	const NTV2StringList strs(aja::split(queryStr, "&"));
 	for (NTV2StringListConstIter it(strs.begin());  it != strs.end();  ++it)
 	{
@@ -1545,16 +1604,11 @@ bool NTV2PluginLoader::getPluginsFolder (string & outPath) const
 		{outPath = pluginsPath();  return true;}	//	already known, assumed to be good
 
 	//	Plugins are expected to be in the "aja" folder (the parent folder of the "aja/firmware" folder)...
-	outPath = ::NTV2GetFirmwareFolderPath();
+	outPath = ::NTV2GetPluginsFolderPath(true/*include trailing slash*/);
 	if (outPath.empty())
 		return false;
-	PLGDBG("AJA firmware path is '" << outPath << "'");
-	if (outPath.find(FIRMWARE_FOLDER) == string::npos)
-		{P_FAIL("'" << outPath << "' doesn't end with '" << FIRMWARE_FOLDER << "'");  outPath.clear(); return false;}
-	outPath.erase(outPath.find(FIRMWARE_FOLDER), 9);		//	Lop off trailing "Firmware"
+	PLGDBG("AJA plugin path is '" << outPath << "'");
 	mDict.insert(kNTV2PluginInfoKey_PluginsPath, outPath);	//	Store it in 'PluginsPath'
-	if (outPath.back() == PATH_DELIMITER[0])
-		outPath.erase(outPath.length() - 1, 1);	//	Lop off trailing path delimiter
 	return !outPath.empty();	//	Success if not empty
 }
 
@@ -2134,7 +2188,11 @@ NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const string & inURL)	//	CLAS
 {
 	NTV2DeviceSpecParser parser(inURL);
 	if (parser.HasErrors())
+	{
+		NBSFAIL(parser.Error() << " in URL:\n" << inURL);
+		parser.PrintErrors(cerr);
 		return AJA_NULL;
+	}
 	NTV2ConfigParams parms(parser.Results());
 	return CreateServer(parms);
 }

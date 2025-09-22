@@ -155,7 +155,7 @@ static const struct format_data c_format_data[] =
     { ntv2_pixel_format_prores_dvcpro,           1,  1,  1,  1,  1,  ntv2_color_space_none,     ntv2_color_depth_none,    ntv2_frame_format_raw },
     { ntv2_pixel_format_prores_hdv,              1,  1,  1,  1,  1,  ntv2_color_space_none,     ntv2_color_depth_none,    ntv2_frame_format_raw },
     { ntv2_pixel_format_10bit_rgb_packed,        12, 15, 12, 15, 3,  ntv2_color_space_rgb444,   ntv2_color_depth_10bit,   ntv2_frame_format_packed },
-    { ntv2_pixel_format_10bit_argb,              1,  1,  1,  1,  4,  ntv2_color_space_rgb444,   ntv2_color_depth_10bit,   ntv2_frame_format_packed },
+    { ntv2_pixel_format_10bit_argb,              1,  5,  1,  5,  4,  ntv2_color_space_rgb444,   ntv2_color_depth_10bit,   ntv2_frame_format_packed },
     { ntv2_pixel_format_16bit_argb,              1,  8,  1,  8,  4,  ntv2_color_space_rgb444,   ntv2_color_depth_16bit,   ntv2_frame_format_packed },
     { ntv2_pixel_format_8bit_ycbcr_422pl3,       1,  1,  1,  1,  1,  ntv2_color_space_yuv422,   ntv2_color_depth_12bit,   ntv2_frame_format_3plane },
     { ntv2_pixel_format_10bit_raw_rgb,           1,  1,  1,  1,  1,  ntv2_color_space_rgb444,   ntv2_color_depth_10bit,   ntv2_frame_format_packed },

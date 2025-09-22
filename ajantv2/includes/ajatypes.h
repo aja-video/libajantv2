@@ -35,9 +35,9 @@
 ////////			NTV2_DEPRECATE_15_4		NTV2_DEPRECATE_15_5		NTV2_DEPRECATE_15_6
 ////////
 ////////	WARNING:	Do not sparsely mix-and-match across SDK versions.
-////////				It's best to activate/include symbols/APIs contiguously from the latest SDK
-////////				(starting at the bottom), and continue activating/including to the SDK at which
-////////				symbols/APIs should start to be deactivated/excluded.
+////////				It's best to deactivate/exclude symbols/APIs contiguously from the oldest SDK
+////////				and continue deactivating/excluding to the later SDK at which symbols/APIs should
+////////				be retained/included.
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define NTV2_DEPRECATE			//	Do not undefine -- all symbols/APIs first deprecated in SDK 12.4 or earlier have been removed
@@ -65,6 +65,7 @@
 //#define NTV2_DEPRECATE_17_2		//	If defined, excludes all symbols/APIs first deprecated in SDK 17.2 (never released)
 //#define NTV2_DEPRECATE_17_5		//	If defined, excludes all symbols/APIs first deprecated in SDK 17.5
 //#define NTV2_DEPRECATE_17_6		//	If defined, excludes all symbols/APIs first deprecated in SDK 17.6
+//#define NTV2_DEPRECATE_18_0		//	If defined, excludes all symbols/APIs first deprecated in SDK 18.0
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

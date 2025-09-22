@@ -234,7 +234,7 @@ CNTV2MacDriverInterface::~CNTV2MacDriverInterface (void)
 		}
 
 		//	Good to go...
-		DIDBG("Opened ndx=" << _boardNumber << " con=" << HEX8(GetIOConnect()) << " id=" << ::NTV2DeviceIDToString(_boardID));
+		DIDBG("Opened ndx=" << GetIndexNumber() << " con=" << HEX8(GetIOConnect()) << " id=" << ::NTV2DeviceIDToString(_boardID));
 		return true;
 
 	}	//	OpenLocalPhysical
@@ -243,9 +243,9 @@ CNTV2MacDriverInterface::~CNTV2MacDriverInterface (void)
 	bool CNTV2MacDriverInterface::CloseLocalPhysical (void)
 	{
 		NTV2_ASSERT(!IsRemote());
-		DIDBG("Closed " << (mIsDEXT ? "DEXT" : "KEXT") << " ndx=" << _boardNumber << " con=" << HEX8(GetIOConnect()) << " id=" << ::NTV2DeviceIDToString(_boardID));
+		DIDBG("Closed " << (mIsDEXT ? "DEXT" : "KEXT") << " ndx=" << GetIndexNumber() << " con=" << HEX8(GetIOConnect()) << " id=" << ::NTV2DeviceIDToString(_boardID));
 		_boardOpened = false;
-		_boardNumber = 0;
+//	leave as-is	_boardNumber = 0;
 		if (mConnection)
 			OS_IOServiceClose(mConnection);
 		mConnection = 0;
@@ -414,7 +414,7 @@ bool CNTV2MacDriverInterface::ReadRegister (const ULWord inRegNum, ULWord & outV
 	}
 	if (kernResult != KERN_SUCCESS)
 	{
-		DIFAIL(KR(kernResult) << ": ndx=" << _boardNumber << ", con=" << HEX8(GetIOConnect())
+		DIFAIL(KR(kernResult) << ": ndx=" << GetIndexNumber() << ", con=" << HEX8(GetIOConnect())
 				<< " -- reg=" << DEC(inRegNum) << ", mask=" << HEX8(inMask) << ", shift=" << HEX8(inShift));
 		return false;
 	}
