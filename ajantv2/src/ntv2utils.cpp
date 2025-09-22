@@ -96,14 +96,17 @@ uint32_t CalcRowBytesForFormat (const NTV2FrameBufferFormat inPixelFormat, const
 		rowBytes = inPixelWidth;
 		break;
 		
+	case NTV2_FBF_10BIT_ARGB:
+        rowBytes = inPixelWidth * 5;
+        break;
+        
 	case NTV2_FBF_8BIT_YCBCR_420PL3:
 	case NTV2_FBF_8BIT_HDV:
 	case NTV2_FBF_10BIT_YCBCRA:
 	case NTV2_FBF_PRORES_DVCPRO:
 	case NTV2_FBF_PRORES_HDV:
-	case NTV2_FBF_10BIT_ARGB:
-	case NTV2_FBF_16BIT_ARGB:
-	case NTV2_FBF_8BIT_YCBCR_422PL3:
+    case NTV2_FBF_16BIT_ARGB:
+    case NTV2_FBF_8BIT_YCBCR_422PL3:
 	case NTV2_FBF_10BIT_RAW_RGB:
 	case NTV2_FBF_10BIT_RAW_YCBCR:
 	case NTV2_FBF_NUMFRAMEBUFFERFORMATS:
@@ -296,10 +299,16 @@ void ConvertUnpacked10BitYCbCrToPixelFormat(uint16_t *unPackedBuffer, uint32_t *
 			PackRGB10BitFor10BitRGBPacked(reinterpret_cast<RGBAlpha10BitPixel*>(packedBuffer), numPixels);
 			break;
 			
+        case NTV2_FBF_10BIT_ARGB:
+            ConvertLineto10BitRGB(unPackedBuffer, reinterpret_cast<RGBAlpha10BitPixel*>(packedBuffer), numPixels, bIsSD, bUseSmpteRange);
+            PackRGB10BitFor10BitARGBPacked(reinterpret_cast<RGBAlpha10BitPixel*>(packedBuffer), numPixels);
+            break;
+
 		case NTV2_FBF_12BIT_RGB_PACKED:
 			ConvertLineto16BitRGB(unPackedBuffer, reinterpret_cast<RGBAlpha16BitPixel*>(packedBuffer), numPixels, bIsSD, bUseSmpteRange);
 			Convert16BitARGBTo12BitRGBPacked(reinterpret_cast<RGBAlpha16BitPixel*>(packedBuffer), reinterpret_cast<UByte*>(packedBuffer), numPixels);
 			break;
+            
 	#if defined(_DEBUG)
 		case NTV2_FBF_8BIT_DVCPRO:
 		case NTV2_FBF_8BIT_YCBCR_420PL3:
@@ -307,7 +316,6 @@ void ConvertUnpacked10BitYCbCrToPixelFormat(uint16_t *unPackedBuffer, uint32_t *
 		case NTV2_FBF_10BIT_YCBCRA:
 		case NTV2_FBF_PRORES_DVCPRO:
 		case NTV2_FBF_PRORES_HDV:
-		case NTV2_FBF_10BIT_ARGB:
 		case NTV2_FBF_16BIT_ARGB:
 		case NTV2_FBF_8BIT_YCBCR_422PL3:
 		case NTV2_FBF_10BIT_RAW_RGB:
@@ -1472,6 +1480,62 @@ static bool CopyRaster36BytesPer8Pixels (	UByte *			pDstBuffer,				//	Dest buffe
 }	//	CopyRaster20BytesPer16Pixels
 
 
+//	This function should work on all 5-byte-per-pixel formats
+static bool CopyRaster5BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer to be modified
+										const ULWord	inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
+										const UWord		inDstTotalLines,		//	Dest buffer total raster lines (max height)
+										const UWord		inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
+										const UWord		inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear -- must be evenly divisible by 6
+										const UByte *	pSrcBuffer,				//	Src buffer
+										const ULWord	inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
+										const UWord		inSrcTotalLines,		//	Src buffer total raster lines (max height)
+										const UWord		inSrcVertLineOffset,	//	Src image top edge
+										const UWord		inSrcVertLinesToCopy,	//	Src image height
+										const UWord		inSrcHorzPixelOffset,	//	Src image left edge
+										const UWord		inSrcHorzPixelsToCopy)	//	Src image width
+{
+	const UWord FIVE_BYTES_PER_PIXEL	(5);
+
+	if (inDstBytesPerLine % FIVE_BYTES_PER_PIXEL)	//	dst raster width (in bytes) must be evenly divisible by 4
+		return false;
+	if (inSrcBytesPerLine % FIVE_BYTES_PER_PIXEL)	//	src raster width (in bytes) must be evenly divisible by 4
+		return false;
+
+	const ULWord	dstMaxPixelWidth	(inDstBytesPerLine / FIVE_BYTES_PER_PIXEL);
+	const ULWord	srcMaxPixelWidth	(inSrcBytesPerLine / FIVE_BYTES_PER_PIXEL);
+	ULWord		numHorzPixelsToCopy (inSrcHorzPixelsToCopy);
+	UWord		numVertLinesToCopy	(inSrcVertLinesToCopy);
+
+	if (inDstHorzPixelOffset >= dstMaxPixelWidth)	//	dst past right edge
+		return false;
+	if (inSrcHorzPixelOffset >= srcMaxPixelWidth)	//	src past right edge
+		return false;
+	if (inSrcHorzPixelOffset + inSrcHorzPixelsToCopy > UWord(srcMaxPixelWidth))
+		numHorzPixelsToCopy -= inSrcHorzPixelOffset + inSrcHorzPixelsToCopy - srcMaxPixelWidth; //	Clip to src raster's right edge
+	if (inDstHorzPixelOffset + numHorzPixelsToCopy > dstMaxPixelWidth)
+		numHorzPixelsToCopy = inDstHorzPixelOffset + numHorzPixelsToCopy - dstMaxPixelWidth;
+	if (inSrcVertLineOffset + inSrcVertLinesToCopy > inSrcTotalLines)
+		numVertLinesToCopy -= inSrcVertLineOffset + inSrcVertLinesToCopy - inSrcTotalLines;		//	Clip to src raster's bottom edge
+	if (numVertLinesToCopy + inDstVertLineOffset >= inDstTotalLines)
+	{
+		if (numVertLinesToCopy + inDstVertLineOffset > inDstTotalLines)
+			numVertLinesToCopy -= numVertLinesToCopy + inDstVertLineOffset - inDstTotalLines;
+		else
+			return true;
+	}
+
+	for (UWord lineNdx (0);	 lineNdx < numVertLinesToCopy;	lineNdx++)	//	for each raster line to copy
+	{
+		const UByte *	pSrcLine	(pSrcBuffer	 +	inSrcBytesPerLine * (inSrcVertLineOffset + lineNdx)	 +	inSrcHorzPixelOffset * FIVE_BYTES_PER_PIXEL);
+		UByte *			pDstLine	(pDstBuffer	 +	inDstBytesPerLine * (inDstVertLineOffset + lineNdx)	 +	inDstHorzPixelOffset * FIVE_BYTES_PER_PIXEL);
+        ::memcpy (pDstLine, pSrcLine, numHorzPixelsToCopy * FIVE_BYTES_PER_PIXEL);	//	copy the line
+	}
+
+	return true;
+
+}	//	CopyRaster5BytesPerPixel
+
+
 //	This function should work on all 4-byte-per-pixel formats
 static bool CopyRaster4BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer to be modified
 										const ULWord	inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
@@ -1709,14 +1773,17 @@ bool CopyRaster (const NTV2PixelFormat	inPixelFormat,			//	Pixel format of both 
 																					pSrcBuffer, inSrcBytesPerLine, inSrcTotalLines, inSrcVertLineOffset, inSrcVertLinesToCopy,
 																					inSrcHorzPixelOffset, inSrcHorzPixelsToCopy);
 	
-		case NTV2_FBF_8BIT_DVCPRO:	//	Lossy
+        case NTV2_FBF_10BIT_ARGB:				return CopyRaster5BytesPerPixel (pDstBuffer, inDstBytesPerLine, inDstTotalLines, inDstVertLineOffset, inDstHorzPixelOffset,
+                                                                                 pSrcBuffer, inSrcBytesPerLine, inSrcTotalLines, inSrcVertLineOffset, inSrcVertLinesToCopy,
+                                                                                 inSrcHorzPixelOffset, inSrcHorzPixelsToCopy);
+
+        case NTV2_FBF_8BIT_DVCPRO:	//	Lossy
 		case NTV2_FBF_8BIT_HDV:		//	Lossy
 		case NTV2_FBF_8BIT_YCBCR_420PL3:
 		case NTV2_FBF_10BIT_YCBCRA:
 		case NTV2_FBF_PRORES_DVCPRO:
 		case NTV2_FBF_PRORES_HDV:
 		case NTV2_FBF_10BIT_RGB_PACKED:
-		case NTV2_FBF_10BIT_ARGB:
 		case NTV2_FBF_16BIT_ARGB:
 		case NTV2_FBF_10BIT_RAW_RGB:
 		case NTV2_FBF_8BIT_YCBCR_422PL3:

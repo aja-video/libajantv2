@@ -258,6 +258,10 @@ AJAExport void	PackRGB10BitFor10BitDPX (RGBAlpha10BitPixel *	pBuffer,
 AJAExport void	PackRGB10BitFor10BitRGBPacked (RGBAlpha10BitPixel * pBuffer,
 												const ULWord		inNumPixels);
 
+// Pack 10 Bit RGBA to NTV2_FBF_10BIT_ARGB Format for our board
+AJAExport void	PackRGB10BitFor10BitARGBPacked (RGBAlpha10BitPixel * pBuffer,
+												const ULWord		inNumPixels);
+
 
 inline void SDConvertRGBAlphatoYCbCr(RGBAlphaPixel * pSource, YCbCrPixel * pTarget)
 {
