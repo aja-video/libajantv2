@@ -97,10 +97,10 @@ bool CNTV2LinuxDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 			close(int(_hDevice));
 			return false;
 		}
-		LDIDBG("Retry succeeded: ndx=" << _boardNumber << " hDev=" << _hDevice << " id=" << ::NTV2DeviceIDToString(_boardID));
+		LDIDBG("Retry succeeded: ndx=" << GetIndexNumber() << " hDev=" << _hDevice << " id=" << ::NTV2DeviceIDToString(_boardID));
 	}
 	_boardOpened = true;
-	LDIINFO ("Opened '" << boardStr << "' devID=" << HEX8(_boardID) << " ndx=" << DEC(_boardNumber));
+	LDIINFO ("Opened '" << boardStr << "' devID=" << HEX8(_boardID) << " ndx=" << DEC(GetIndexNumber()));
 	return true;
 }
 
@@ -112,13 +112,13 @@ bool CNTV2LinuxDriverInterface::CloseLocalPhysical (void)
 	UnmapDMADriverBuffer();
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 
-	LDIINFO ("Closed deviceID=" << HEX8(_boardID) << " ndx=" << DEC(_boardNumber) << " hDev=" << _hDevice);
+	LDIINFO ("Closed deviceID=" << HEX8(_boardID) << " ndx=" << DEC(GetIndexNumber()) << " hDev=" << _hDevice);
 	if (_hDevice != INVALID_HANDLE_VALUE)
 		close(int(_hDevice));
 	_hDevice = INVALID_HANDLE_VALUE;
 	_boardOpened = false;
 	_boardID = DEVICE_ID_NOTFOUND;
-	_boardNumber = NTV2_MAXBOARDS;
+//	don't change, breaks vdev opening		_boardNumber = NTV2_MAXBOARDS;
 	return true;
 }
 #endif	//	!defined(NTV2_NULL_DEVICE)

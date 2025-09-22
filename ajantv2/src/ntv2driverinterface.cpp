@@ -130,13 +130,20 @@ CNTV2DriverInterface::CNTV2DriverInterface (const CNTV2DriverInterface & inObjTo
 //	Open local physical device (via ajantv2 driver)
 bool CNTV2DriverInterface::Open (const UWord inDeviceIndex)
 {
-	if (IsOpen()  &&  inDeviceIndex == _boardNumber)
+	if (IsOpen()  &&  inDeviceIndex == GetIndexNumber())
 		return true;	//	Same local device requested, already open
 	Close();
 	if (inDeviceIndex >= MaxNumDevices())
 		{DIFAIL("Requested device index '" << DEC(inDeviceIndex) << "' at/past limit of '" << DEC(MaxNumDevices()) << "'"); return false;}
 	if (!OpenLocalPhysical(inDeviceIndex))
-		return false;
+	{
+		//	Check for virtual device...
+		NTV2DeviceInfo info;
+		if (!CNTV2DeviceScanner::GetDeviceInfo (inDeviceIndex, info))
+			return false;
+		_boardNumber = info.deviceIndex;
+		return Open(info.vdevUrl);
+	}
 
 #if !defined(NTV2_ALLOW_OPEN_UNSUPPORTED)
 	//	Check if device is officially supported...
@@ -733,7 +740,7 @@ bool CNTV2DriverInterface::GetPackageInformation (PACKAGE_INFO_STRUCT & packageI
 
 	if (CNTV2AxiSpiFlash::DeviceSupported(NTV2DeviceID(deviceID)))
 	{
-		CNTV2AxiSpiFlash spiFlash(_boardNumber, false);
+		CNTV2AxiSpiFlash spiFlash(GetIndexNumber(), false);
 
 		uint32_t offset = spiFlash.Offset(SPI_FLASH_SECTION_MCSINFO);
 		vector<uint8_t> mcsInfoData;

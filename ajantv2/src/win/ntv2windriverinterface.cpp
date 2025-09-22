@@ -197,7 +197,7 @@ bool CNTV2WinDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 		return false;
 	spDevIFaceData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
 	myguid = refguid;
-	if (!SetupDiEnumDeviceInterfaces(_hDevInfoSet, NULL, &myguid, _boardNumber, &spDevIFaceData))
+	if (!SetupDiEnumDeviceInterfaces(_hDevInfoSet, NULL, &myguid, GetIndexNumber(), &spDevIFaceData))
 	{
 		SetupDiDestroyDeviceInfoList(_hDevInfoSet);
 		return false;
@@ -253,7 +253,7 @@ bool CNTV2WinDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 	_boardOpened = true;
 	CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID);
 
-	WDIINFO ("Opened '" << boardStr << "' deviceID=" << HEX8(_boardID) << " deviceIndex=" << DEC(_boardNumber));
+	WDIINFO ("Opened '" << boardStr << "' deviceID=" << HEX8(_boardID) << " deviceIndex=" << DEC(GetIndexNumber()));
 	return true;
 }	//	OpenLocalPhysical
 
@@ -282,7 +282,7 @@ bool CNTV2WinDriverInterface::CloseLocalPhysical (void)
 
 	if (_hDevice != INVALID_HANDLE_VALUE)
 		CloseHandle(_hDevice);
-	WDIINFO ("Closed deviceID=" << HEX8(_boardID) << " deviceIndex=" << DEC(_boardNumber));
+	WDIINFO ("Closed deviceID=" << HEX8(_boardID) << " deviceIndex=" << DEC(GetIndexNumber()));
 
 	_hDevice = INVALID_HANDLE_VALUE;
 	_boardOpened = false;
