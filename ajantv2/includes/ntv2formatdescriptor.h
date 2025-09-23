@@ -404,4 +404,15 @@ AJAExport inline std::ostream & operator << (std::ostream & inOutStream, const N
 **/
 AJAExport bool		UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, const NTV2FormatDescriptor & inFormatDesc, UWordSequence & out16BitYUVLine);
 
+/**
+	@brief		Unpacks a line of NTV2_FBF_10BIT_ARGB video into 16-bit-per-component ARGB data.
+	@param[in]	pIn10BitARGBLine		A valid, non-NULL pointer to the start of the line that contains the packed NTV2_FBF_10BIT_ARGB data
+									to be converted.
+	@param[in]	inFormatDesc		Describes the raster.
+	@param[out]	out16BitARGBLine	Receives the unpacked 16-bit-per-component ARGB data. The sequence is cleared before filling.
+									The UWord sequence will be B, G, R, A
+	@return		True if successful;  otherwise false.
+**/
+AJAExport bool		UnpackLine_10BitARGBtoUWordSequence (const void * pIn10BitARGBLine, const NTV2FormatDescriptor & inFormatDesc, UWordSequence & out16BitARGBLine);
+
 #endif	//	NTV2FORMATDESC_H
