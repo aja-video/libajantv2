@@ -814,7 +814,7 @@ void PackRGB10BitFor10BitARGBPacked (RGBAlpha10BitPixel * pBuffer, const ULWord 
         pOutputBuffer[iByte++] = ((Blue >> 8) & 0x03) | ((Green & 0x3F) << 2);
         pOutputBuffer[iByte++] = ((Green >> 6) & 0x0F) | ((Red & 0x0F) << 4);
         pOutputBuffer[iByte++] = ((Red >> 4) & 0x3F) | ((Alpha & 0x03) << 6);
-        pOutputBuffer[iByte++] = (Alpha & 0xFF);
+        pOutputBuffer[iByte++] = ((Alpha >> 2) & 0xFF);
 	}
 }
 
