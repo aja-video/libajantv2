@@ -366,7 +366,7 @@ void ConvertLinetoRGB(UWord * ycbcrBuffer,
 		ycbcrPixel.y = (UWord)Y1; 
 		ycbcrPixel.cr = (UWord)Cr1; 
 		if( fAlphaFromLuma )
-			ycbcrPixel.Alpha = (UWord)Y1/4;
+			ycbcrPixel.Alpha = ycbcrPixel.y/4;
 
 		if(fUseSDMatrix) {
 			if (fUseSMPTERange) {
@@ -383,6 +383,8 @@ void ConvertLinetoRGB(UWord * ycbcrBuffer,
 		}
 		// Read lone midde Y;
 		ycbcrPixel.y = *ycbcrBuffer++;
+		if( fAlphaFromLuma )
+			ycbcrPixel.Alpha = ycbcrPixel.y/4;
 
 		// Read Next full bandwidth sample
 		// unless we are at the end of a line
@@ -476,7 +478,8 @@ void ConvertLineto10BitRGB(UWord * ycbcrBuffer,
 					  RGBAlpha10BitPixel * rgbaBuffer,
 					  ULWord numPixels,
 					  bool fUseSDMatrix,
-					  bool fUseSMPTERange)
+                      bool fUseSMPTERange,
+    				  bool fAlphaFromLuma)
 {
 	YCbCr10BitAlphaPixel ycbcrPixel = {0,0,0,0};
 	UWord Cb1,Y1,Cr1,Cb2,Y2,Cr2;
@@ -491,6 +494,8 @@ void ConvertLineto10BitRGB(UWord * ycbcrBuffer,
 		ycbcrPixel.cb = (UWord)Cb1;
 		ycbcrPixel.y = (UWord)Y1; 
 		ycbcrPixel.cr = (UWord)Cr1;
+		if( fAlphaFromLuma )
+			ycbcrPixel.Alpha = ycbcrPixel.y;
 
 		if(fUseSDMatrix) {
 			if (fUseSMPTERange) {
@@ -507,6 +512,8 @@ void ConvertLineto10BitRGB(UWord * ycbcrBuffer,
 		}
 		// Read lone midde Y;
 		ycbcrPixel.y = *ycbcrBuffer++;
+		if( fAlphaFromLuma )
+			ycbcrPixel.Alpha = ycbcrPixel.y;
 
 		// Read Next full bandwidth sample
 		// unless we are at the end of a line

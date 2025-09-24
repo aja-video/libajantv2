@@ -326,7 +326,7 @@ void ConvertUnpacked10BitYCbCrToPixelFormat(uint16_t *unPackedBuffer, uint32_t *
 			break;
 			
         case NTV2_FBF_10BIT_ARGB:
-            ConvertLineto10BitRGB(unPackedBuffer, reinterpret_cast<RGBAlpha10BitPixel*>(packedBuffer), numPixels, bIsSD, bUseSmpteRange);
+            ConvertLineto10BitRGB(unPackedBuffer, reinterpret_cast<RGBAlpha10BitPixel*>(packedBuffer), numPixels, bIsSD, bUseSmpteRange, bAlphaFromLuma);
             PackRGB10BitFor10BitARGBPacked(reinterpret_cast<RGBAlpha10BitPixel*>(packedBuffer), numPixels);
             break;
 
