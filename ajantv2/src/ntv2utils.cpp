@@ -168,6 +168,32 @@ bool UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, const NTV
 }
 
 
+bool UnpackLine_10BitARGBtoUWordSequence (const void * pIn10BitARGBLine, const NTV2FormatDescriptor & inFormatDesc, UWordSequence & out16BitARGBLine)
+{
+	out16BitARGBLine.clear ();
+	const UByte *	pInputLine	(reinterpret_cast <const UByte *> (pIn10BitARGBLine));
+
+	if (!pInputLine)
+		return false;	//	bad pointer
+	if (!inFormatDesc.IsValid ())
+		return false;	//	bad formatDesc
+	if (inFormatDesc.GetRasterWidth () < 1)
+		return false;	//	bad width
+	if (inFormatDesc.GetPixelFormat() != NTV2_FBF_10BIT_ARGB)
+		return false;	//	wrong FBF
+
+	for (ULWord inputCount (0);	 inputCount < inFormatDesc.linePitch;  inputCount++)
+	{
+        out16BitARGBLine.push_back ((((UWord)pInputLine[1] & 0x03) << 8) | ((UWord)(pInputLine[0] & 0xFF) >> 0));
+        out16BitARGBLine.push_back ((((UWord)pInputLine[2] & 0x0F) << 6) | ((UWord)(pInputLine[1] & 0xFC) >> 2));
+        out16BitARGBLine.push_back ((((UWord)pInputLine[3] & 0x3F) << 4) | ((UWord)(pInputLine[2] & 0xF0) >> 4));
+        out16BitARGBLine.push_back ((((UWord)pInputLine[4] & 0xFF) << 2) | ((UWord)(pInputLine[3] & 0xC0) >> 6));
+        pInputLine += 5;
+	}
+	return true;
+}
+
+
 // UnPack10BitYCbCrBuffer
 // UnPack 10 Bit YCbCr Data to 16 bit Word per component
 void UnPack10BitYCbCrBuffer( uint32_t* packedBuffer, uint16_t* ycbcrBuffer, uint32_t numPixels )
@@ -300,7 +326,7 @@ void ConvertUnpacked10BitYCbCrToPixelFormat(uint16_t *unPackedBuffer, uint32_t *
 			break;
 			
         case NTV2_FBF_10BIT_ARGB:
-            ConvertLineto10BitRGB(unPackedBuffer, reinterpret_cast<RGBAlpha10BitPixel*>(packedBuffer), numPixels, bIsSD, bUseSmpteRange);
+            ConvertLineto10BitRGB(unPackedBuffer, reinterpret_cast<RGBAlpha10BitPixel*>(packedBuffer), numPixels, bIsSD, bUseSmpteRange, bAlphaFromLuma);
             PackRGB10BitFor10BitARGBPacked(reinterpret_cast<RGBAlpha10BitPixel*>(packedBuffer), numPixels);
             break;
 
