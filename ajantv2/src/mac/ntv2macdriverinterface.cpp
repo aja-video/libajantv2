@@ -179,17 +179,29 @@ CNTV2MacDriverInterface::~CNTV2MacDriverInterface (void)
 		io_iterator_t	ioIterator	(0);
 		IOReturn		error		(kIOReturnSuccess);
 		io_object_t		ioObject	(0);
+		#if defined(NTV2_MACOS_SANDBOX)
+		static const string kSvcNames[] = {sNTV2PCIDEXTName, ""};	//	DEXT only, no KEXT
+		static const size_t kNumSvcNames = 1;
+		#else
 		static const string kSvcNames[] = {sNTV2PCIDEXTName, sNTV2PCIKEXTClassName, ""};	//	Try DEXT first, then KEXT
+		static const size_t kNumSvcNames = 2;
+		#endif
 
-		for (size_t svcNdx(0);  svcNdx < 2  &&  !mConnection;  svcNdx++)
+		for (size_t svcNdx(0);  svcNdx < kNumSvcNames  &&  !mConnection;  svcNdx++)
 		{
 			const string &	svcName (kSvcNames[svcNdx]);
 			const char *	pSvcName(svcName.c_str());
+		#if !defined(NTV2_MACOS_SANDBOX)
 			const bool		tryKEXT	(svcName.find("com_aja_iokit") != string::npos);
+		#endif
 
 			//	Create an iterator to search for our driver instances...
 			error = OS_IOServiceGetMatchingServices (kIOMasterPortDefault,
+		#if defined(NTV2_MACOS_SANDBOX)
+													OS_IOServiceNameMatching(pSvcName),
+		#else
 													tryKEXT ? OS_IOServiceMatching(pSvcName) : OS_IOServiceNameMatching(pSvcName),
+		#endif
 													&ioIterator);
 			if (error != kIOReturnSuccess)
 				{DIWARN(KR(error) << ": No '" << svcName << "' driver");  continue;}
@@ -216,7 +228,11 @@ CNTV2MacDriverInterface::~CNTV2MacDriverInterface (void)
 			if (error != kIOReturnSuccess)
 				{DIWARN(KR(error) << ": IOServiceOpen failed for '" << svcName << "' ndx=" << inDeviceIndex);  continue;}
 
+		#if defined(NTV2_MACOS_SANDBOX)
+			mIsDEXT = true;
+		#else
 			mIsDEXT = !tryKEXT;
+		#endif
 		}	//	for each in kServiceNames
 
 		_boardOpened = mConnection != 0;
