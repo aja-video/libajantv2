@@ -81,7 +81,10 @@
 								When defined, all platform-specific implementations of OpenLocalPhysical are
 								omitted from the build, making it impossible to connect to locally-attached
 								physical devices via the NTV2 kernel driver. (Only remote or software/virtual
-								devices will be able to be opened via OpenRemote.)
+								devices will be able to be opened via OpenRemote.) Note that MacOS clients
+								built with this defined can be "sandboxed".
+
+								See also NTV2_MACOS_SANDBOX macro (below).
 
 								Introduced in SDK 12.4.
 **************************************************************************************************************/
@@ -155,6 +158,22 @@
 									Introduced in SDK 17.0.
 **************************************************************************************************************/
 //#define	NTV2_ALLOW_OPEN_UNSUPPORTED
+
+
+/**************************************************************************************************************
+	NTV2_MACOS_SANDBOX			When undefined (the default), the MacOS implementation of OpenLocalPhysical
+								will open connected AJA devices using either AJA's IOKit kernel extension ('KEXT')
+								or AJA's newer DriverKit driver ('DEXT'), whichever is installed.
+
+								When defined, MacDriverInterface::OpenLocalPhysical will open connected AJA
+								devices ONLY using the DriverKit driver ('DEXT'), making it possible to "sandbox"
+								the client executable/application.
+
+								(NOTE:  If NTV2_NULL_DEVICE is defined, this macro is irrelevant.)
+
+								Introduced in SDK 18.0.
+**************************************************************************************************************/
+//#define NTV2_MACOS_SANDBOX	
 
 
 

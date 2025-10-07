@@ -122,7 +122,7 @@ uint32_t CalcRowBytesForFormat (const NTV2FrameBufferFormat inPixelFormat, const
 
 bool UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, UWordSequence & out16BitYUVLine, ULWord inNumPixels)
 {
-	out16BitYUVLine.clear ();
+	out16BitYUVLine.clear();
 	const ULWord *	pInputLine	(reinterpret_cast <const ULWord *> (pIn10BitYUVLine));
 
 	if (!pInputLine)
@@ -132,8 +132,8 @@ bool UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, UWordSequ
 	if (inNumPixels % 6)
 		inNumPixels -= inNumPixels % 6;
 
-	const ULWord	totalULWords	(inNumPixels * 4 / 6);	//	4 ULWords per 6 pixels
-
+	const ULWord totalULWords (inNumPixels * 4 / 6);	//	4 ULWords per 6 pixels
+	out16BitYUVLine.reserve(totalULWords * 3);
 	for (ULWord inputCount (0);	 inputCount < totalULWords;	 inputCount++)
 	{
 		out16BitYUVLine.push_back ((pInputLine [inputCount]		 ) & 0x3FF);
@@ -146,18 +146,19 @@ bool UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, UWordSequ
 
 bool UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, const NTV2FormatDescriptor & inFormatDesc, UWordSequence & out16BitYUVLine)
 {
-	out16BitYUVLine.clear ();
+	out16BitYUVLine.clear();
 	const ULWord *	pInputLine	(reinterpret_cast <const ULWord *> (pIn10BitYUVLine));
 
 	if (!pInputLine)
 		return false;	//	bad pointer
-	if (!inFormatDesc.IsValid ())
+	if (!inFormatDesc.IsValid())
 		return false;	//	bad formatDesc
-	if (inFormatDesc.GetRasterWidth () < 6)
+	if (inFormatDesc.GetRasterWidth() < 6)
 		return false;	//	bad width
 	if (inFormatDesc.GetPixelFormat() != NTV2_FBF_10BIT_YCBCR)
 		return false;	//	wrong FBF
 
+	out16BitYUVLine.reserve(inFormatDesc.linePitch * 3);
 	for (ULWord inputCount (0);	 inputCount < inFormatDesc.linePitch;  inputCount++)
 	{
 		out16BitYUVLine.push_back ((pInputLine [inputCount]		 ) & 0x3FF);
@@ -170,24 +171,25 @@ bool UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, const NTV
 
 bool UnpackLine_10BitARGBtoUWordSequence (const void * pIn10BitARGBLine, const NTV2FormatDescriptor & inFormatDesc, UWordSequence & out16BitARGBLine)
 {
-	out16BitARGBLine.clear ();
+	out16BitARGBLine.clear();
 	const UByte *	pInputLine	(reinterpret_cast <const UByte *> (pIn10BitARGBLine));
 
 	if (!pInputLine)
 		return false;	//	bad pointer
-	if (!inFormatDesc.IsValid ())
+	if (!inFormatDesc.IsValid())
 		return false;	//	bad formatDesc
-	if (inFormatDesc.GetRasterWidth () < 1)
+	if (inFormatDesc.GetRasterWidth() < 1)
 		return false;	//	bad width
 	if (inFormatDesc.GetPixelFormat() != NTV2_FBF_10BIT_ARGB)
 		return false;	//	wrong FBF
 
+	out16BitARGBLine.reserve(inFormatDesc.linePitch * 4);
 	for (ULWord inputCount (0);	 inputCount < inFormatDesc.linePitch;  inputCount++)
 	{
-        out16BitARGBLine.push_back ((((UWord)pInputLine[1] & 0x03) << 8) | ((UWord)(pInputLine[0] & 0xFF) >> 0));
-        out16BitARGBLine.push_back ((((UWord)pInputLine[2] & 0x0F) << 6) | ((UWord)(pInputLine[1] & 0xFC) >> 2));
-        out16BitARGBLine.push_back ((((UWord)pInputLine[3] & 0x3F) << 4) | ((UWord)(pInputLine[2] & 0xF0) >> 4));
-        out16BitARGBLine.push_back ((((UWord)pInputLine[4] & 0xFF) << 2) | ((UWord)(pInputLine[3] & 0xC0) >> 6));
+		out16BitARGBLine.push_back ((UWord(pInputLine[1] & 0x03) << 8) | (UWord(pInputLine[0] & 0xFF) >> 0));	//	B
+		out16BitARGBLine.push_back ((UWord(pInputLine[2] & 0x0F) << 6) | (UWord(pInputLine[1] & 0xFC) >> 2));	//	G
+		out16BitARGBLine.push_back ((UWord(pInputLine[3] & 0x3F) << 4) | (UWord(pInputLine[2] & 0xF0) >> 4));	//	R
+		out16BitARGBLine.push_back ((UWord(pInputLine[4] & 0xFF) << 2) | (UWord(pInputLine[3] & 0xC0) >> 6));	//	A
         pInputLine += 5;
 	}
 	return true;
@@ -196,7 +198,7 @@ bool UnpackLine_10BitARGBtoUWordSequence (const void * pIn10BitARGBLine, const N
 
 // UnPack10BitYCbCrBuffer
 // UnPack 10 Bit YCbCr Data to 16 bit Word per component
-void UnPack10BitYCbCrBuffer( uint32_t* packedBuffer, uint16_t* ycbcrBuffer, uint32_t numPixels )
+void UnPack10BitYCbCrBuffer (uint32_t* packedBuffer, uint16_t* ycbcrBuffer, uint32_t numPixels)
 {
 	for (  uint32_t sampleCount = 0, dataCount = 0; 
 		sampleCount < (numPixels*2) ; 
@@ -657,7 +659,7 @@ bool UnpackLine_10BitYUVtoU16s (vector<uint16_t> & outYCbCrLine, const NTV2Buffe
 		return false;	//	bad width
 
 	const ULWord *	pInputLine	(reinterpret_cast<const ULWord*>(inDescriptor.GetRowAddress(inFrameBuffer.GetHostPointer(), inLineOffset)));
-
+	outYCbCrLine.reserve (inDescriptor.linePitch * 3);
 	for (ULWord inputCount(0);	inputCount < inDescriptor.linePitch;  inputCount++)
 	{
 		outYCbCrLine.push_back((pInputLine[inputCount]		) & 0x3FF);
@@ -1520,17 +1522,17 @@ static bool CopyRaster5BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer t
 										const UWord		inSrcHorzPixelOffset,	//	Src image left edge
 										const UWord		inSrcHorzPixelsToCopy)	//	Src image width
 {
-	const UWord FIVE_BYTES_PER_PIXEL	(5);
+	const UWord FIVE_BYTES_PER_PIXEL (5);
 
-	if (inDstBytesPerLine % FIVE_BYTES_PER_PIXEL)	//	dst raster width (in bytes) must be evenly divisible by 4
+	if (inDstBytesPerLine % FIVE_BYTES_PER_PIXEL)	//	dst raster width (in bytes) must be evenly divisible by 5
 		return false;
-	if (inSrcBytesPerLine % FIVE_BYTES_PER_PIXEL)	//	src raster width (in bytes) must be evenly divisible by 4
+	if (inSrcBytesPerLine % FIVE_BYTES_PER_PIXEL)	//	src raster width (in bytes) must be evenly divisible by 5
 		return false;
 
-	const ULWord	dstMaxPixelWidth	(inDstBytesPerLine / FIVE_BYTES_PER_PIXEL);
-	const ULWord	srcMaxPixelWidth	(inSrcBytesPerLine / FIVE_BYTES_PER_PIXEL);
-	ULWord		numHorzPixelsToCopy (inSrcHorzPixelsToCopy);
-	UWord		numVertLinesToCopy	(inSrcVertLinesToCopy);
+	const ULWord dstMaxPixelWidth (inDstBytesPerLine / FIVE_BYTES_PER_PIXEL);
+	const ULWord srcMaxPixelWidth (inSrcBytesPerLine / FIVE_BYTES_PER_PIXEL);
+	ULWord numHorzPixelsToCopy (inSrcHorzPixelsToCopy);
+	UWord numVertLinesToCopy (inSrcVertLinesToCopy);
 
 	if (inDstHorzPixelOffset >= dstMaxPixelWidth)	//	dst past right edge
 		return false;
