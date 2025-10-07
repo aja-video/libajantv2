@@ -6857,6 +6857,7 @@ private:
 	AJA_VIRTUAL bool	IsMultiFormatActive (void); ///< @return	True if the device supports the multi format feature and it's enabled; otherwise false.
 	AJA_VIRTUAL bool	CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFirst, const NTV2Channel inLast);
 	class DeviceCapabilities	mDevCap;
+	friend class CNTV2DeviceScanner;	//	Device scanner needs access to my private methods & vars
 };	//	CNTV2Card
 
 

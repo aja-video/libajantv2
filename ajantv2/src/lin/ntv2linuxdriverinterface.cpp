@@ -87,7 +87,7 @@ bool CNTV2LinuxDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 	if (_hDevice == INVALID_HANDLE_VALUE)
         {LDIFAIL("Failed to open device index '" << inDeviceIndex << "'");  return false;}
 
-	_boardNumber = inDeviceIndex;
+	setDeviceIndexNumber(inDeviceIndex);
 	if (!CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID))
 	{
 		LDIFAIL ("ReadRegister failed for 'kRegBoardID': ndx=" << inDeviceIndex << " hDev=" << _hDevice << " id=" << HEX8(_boardID));

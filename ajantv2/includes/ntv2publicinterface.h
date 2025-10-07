@@ -7778,6 +7778,12 @@ typedef enum
 				**/
 				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 16.3
 
+				inline ULWord				numRegisters (void) const				{return mInNumRegisters;}	//	New in SDK 18.0
+				inline const NTV2Buffer &	requestedRegisterNumbers (void) const	{return mInRegisters;}		//	New in SDK 18.0
+				inline ULWord &				outNumRegisters (void)					{return mOutNumRegisters;}	//	New in SDK 18.0
+				inline NTV2Buffer &			outGoodRegisterNumbers (void)			{return mOutGoodRegisters;}	//	New in SDK 18.0
+				inline NTV2Buffer &			outRegisterValues (void)				{return mOutValues;}		//	New in SDK 18.0
+
 				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)
 
@@ -7841,6 +7847,10 @@ typedef enum
 					@return A reference to the output stream.
 				**/
 				std::ostream &	Print (std::ostream & inOutStream) const;
+
+				inline const NTV2Buffer &	regInfos (void) const		{return mInRegInfos;}		//	New in SDK 18.0
+				inline ULWord &				outNumFailures (void)		{return mOutNumFailures;}	//	New in SDK 18.0
+				inline NTV2Buffer &			outBadRegIndexes (void)		{return mOutBadRegIndexes;}	//	New in SDK 18.0
 
 				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)

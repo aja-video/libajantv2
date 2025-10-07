@@ -495,7 +495,25 @@
 	#if !defined(NTV2_DEPRECATE_16_3)
 		#define NTV2_DEPRECATE_16_3
 	#endif
-#endif
+	#if !defined(NTV2_DEPRECATE_17_0)
+		#define NTV2_DEPRECATE_17_0
+	#endif
+	#if !defined(NTV2_DEPRECATE_17_1)
+		#define NTV2_DEPRECATE_17_1
+	#endif
+	#if !defined(NTV2_DEPRECATE_17_2)
+		#define NTV2_DEPRECATE_17_2
+	#endif
+	#if !defined(NTV2_DEPRECATE_17_5)
+		#define NTV2_DEPRECATE_17_5
+	#endif
+	#if !defined(NTV2_DEPRECATE_17_6)
+		#define NTV2_DEPRECATE_17_6
+	#endif
+	#if !defined(NTV2_DEPRECATE_18_0)
+		#define NTV2_DEPRECATE_18_0
+	#endif
+#endif	//	defined (NTV2_BUILDING_DRIVER)
 
 
 //////////////////////////////////////////////////////////////////////

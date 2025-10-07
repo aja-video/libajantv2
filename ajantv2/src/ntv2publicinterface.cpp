@@ -386,7 +386,7 @@ ostream & operator << (ostream & inOutStream, const NTV2Buffer & inObj)
 
 ostream & NTV2Buffer::Print (ostream & inOutStream) const
 {
-	inOutStream << (IsAllocatedBySDK() ? "0X" : "0x") << HEX0N(GetRawHostPointer(),16) << "/" << DEC(GetByteCount());
+	inOutStream << (IsAllocatedBySDK() ? "0X" : "0x") << HEX0N(GetRawHostPointer(),16) << "/" << DECN(GetByteCount(),10);
 	return inOutStream;
 }
 

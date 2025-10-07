@@ -241,7 +241,7 @@ CNTV2MacDriverInterface::~CNTV2MacDriverInterface (void)
 		else
 			{DIFAIL(INSTP(this) << ": No connection: ndx=" << inDeviceIndex);  return false;}
 
-		_boardNumber = inDeviceIndex;
+		setDeviceIndexNumber (inDeviceIndex);
 		if (!CNTV2DriverInterface::ReadRegister (kRegBoardID, _boardID))
 		{
 			DIFAIL("ReadRegister(kRegBoardID) failed: ndx=" << inDeviceIndex << " con=" << HEX8(GetIOConnect()) << " boardID=" << HEX8(_boardID));
