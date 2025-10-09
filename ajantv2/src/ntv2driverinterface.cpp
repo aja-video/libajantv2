@@ -141,8 +141,10 @@ bool CNTV2DriverInterface::Open (const UWord inDeviceIndex)
 		NTV2DeviceInfo info;
 		if (!CNTV2DeviceScanner::GetDeviceInfo (inDeviceIndex, info))
 			return false;
-		_boardNumber = info.deviceIndex;
-		return Open(info.vdevUrl);
+		bool ok = Open(info.vdevUrl);
+		if (ok)
+			setDeviceIndexNumber(UWord(info.deviceIndex));	//	Patch _boardNumber
+		return ok;
 	}
 
 #if !defined(NTV2_ALLOW_OPEN_UNSUPPORTED)
@@ -1055,6 +1057,11 @@ bool CNTV2DriverInterface::ReadFlashULWord (const ULWord inAddress, ULWord & out
 	if (!timeoutCount)
 		return false;
 	return ReadRegister(kRegXenaxFlashDOUT, outValue);
+}
+
+void CNTV2DriverInterface::setDeviceIndexNumber (const UWord num)
+{
+	_boardNumber = num;
 }
 
 

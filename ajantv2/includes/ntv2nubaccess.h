@@ -222,6 +222,9 @@ class AJAExport NTV2DeviceSpecParser
 		NTV2ConnectParams	mResult;		///< @brief	Parse results, a key/value dictionary
 		NTV2Dictionary		mQueryParams;	///< @brief	Parse results, query params (key/value dictionary)
 		size_t				mPos;			///< @brief	Last character position
+
+	public:	//	Class Methods
+		static bool		ParseQueryParams (const NTV2Dictionary & inParams, NTV2Dictionary & outQueryParams);
 };	//	NTV2DeviceSpecParser
 
 

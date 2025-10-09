@@ -87,7 +87,7 @@ using namespace std;
 							AJA_sINFO   (AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
 #define	P_DBG(__x__)		if (useStdout()) cout << "## DEBUG: " << AJAFUNC << ": " << __x__ << endl;		\
 							AJA_sDEBUG  (AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
-#define	_DEBUGSTATS_		//	Define this to log above construct/destruct & open/close tallies
+//#define	_DEBUGSTATS_		//	Define this to log above construct/destruct & open/close tallies
 #if defined(_DEBUGSTATS_)
 	#define PDBGX(__x__)	AJA_sDEBUG	(AJA_DebugUnit_Plugins, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 #else
@@ -424,9 +424,15 @@ void NTV2DeviceSpecParser::Parse (void)
 	#if defined(_DEBUG)
 		ostringstream oss;
 		if (Successful())
-			{oss << "NTV2DeviceSpecParser::Parse success: '" << DeviceSpec() << "'  --  "; Print(oss); AJA_sDEBUG(AJA_DebugUnit_Application, oss.str());}
+		{	oss << "NTV2DeviceSpecParser::Parse success: '" << DeviceSpec() << "'  --  ";
+			Print(oss);
+			AJA_sDEBUG(AJA_DebugUnit_Application, oss.str());
+		}
 		else
-			{oss << "NTV2DeviceSpecParser::Parse failed: "; PrintErrors(oss); AJA_sERROR(AJA_DebugUnit_Application, oss.str());}
+		{	oss << "NTV2DeviceSpecParser::Parse failed: ";
+			PrintErrors(oss);
+			AJA_sERROR(AJA_DebugUnit_Application, oss.str());
+		}
 	#endif	//	defined(_DEBUG)
 }	//	Parse
 
@@ -1419,7 +1425,6 @@ class NTV2PluginLoader
 		mutable string		errMsg;
 
 	protected:	//	Class Methods
-		static bool		ParseQueryParams (const NTV2Dictionary & inParams, NTV2Dictionary & outQueryParams);
 		static bool		ExtractCertInfo (NTV2Dictionary & outInfo, const string & inStr);
 		static bool		ExtractIssuerInfo (NTV2Dictionary & outInfo, const string & inStr, const string & inParentKey);
 		static string	mbedErrStr (const int mbedtlsReturnCode);
@@ -1434,7 +1439,7 @@ NTV2PluginLoader::NTV2PluginLoader (NTV2Dictionary & params)
 	PluginRegistry::EnableDebugging(mDict.hasKey(kQParamDebugRegistry) || PluginRegistry::DebuggingEnabled());
 	AJAAtomic::Increment(&gLoaderConstructCount);
 	const NTV2Dictionary originalParams(mDict);
-	if (ParseQueryParams (mDict, mQueryParams)  &&  !mQueryParams.empty())
+	if (NTV2DeviceSpecParser::ParseQueryParams (mDict, mQueryParams)  &&  !mQueryParams.empty())
 		mDict.addFrom(mQueryParams);
 	if (mDict.hasKey(kNTV2PluginInfoKey_Fingerprint))
 		mDict.erase(kNTV2PluginInfoKey_Fingerprint);	//	Be sure caller can't cheat
@@ -1549,7 +1554,7 @@ bool NTV2PluginLoader::ExtractIssuerInfo (NTV2Dictionary & outInfo, const string
 	return true;
 }	//	ExtractIssuerInfo
 
-bool NTV2PluginLoader::ParseQueryParams (const NTV2Dictionary & inParams, NTV2Dictionary & outQueryParams)
+bool NTV2DeviceSpecParser::ParseQueryParams (const NTV2Dictionary & inParams, NTV2Dictionary & outQueryParams)
 {
 	if (!inParams.hasKey(kConnectParamQuery))
 		return false;

@@ -373,22 +373,40 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 		return false;
 	}
 
-	for (NTV2DeviceInfoListConstIter iter(sDevInfoList.begin());  iter != sDevInfoList.end();  ++iter)
+	for (NTV2DeviceInfoListConstIter iter (sDevInfoList.begin());  iter != sDevInfoList.end();  ++iter)
 	{
-		if (to_string(iter->deviceIndex) == inArgument)
-			return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
-		else if (iter->deviceIdentifier == inArgument)
-			return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
-		else if (iter->isVirtualDevice && iter->vdevName == inArgument)
-			return outDevice.Open( iter->vdevUrl );
-		else if (aja::is_legal_decimal_number(inArgument, inArgument.length())
-			&& aja::is_legal_hex_serial_number(inArgument)
-			&& iter->deviceID == NTV2DeviceID(stoi(inArgument)))
-				return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
-		else if (IsLegalSerialNumber(inArgument))
-			return outDevice.Open(inArgument);
-		else if (inArgument.find("://") != string::npos)
-			return outDevice.Open(inArgument);
+		if (iter->isVirtualDevice)
+		{	bool ok (false);
+			if (to_string(iter->deviceIndex) == inArgument
+				||	iter->deviceIdentifier == inArgument
+				||	iter->vdevName == inArgument
+				||	(aja::is_legal_decimal_number(inArgument, inArgument.length())
+					&& aja::is_legal_hex_serial_number(inArgument)
+					&& iter->deviceID == NTV2DeviceID(stoi(inArgument))))
+						{
+							ok = outDevice.Open(iter->vdevUrl);
+							if (ok)
+								outDevice.setDeviceIndexNumber(UWord(iter->deviceIndex));	//	Patch _boardNumber
+							return ok;
+						}
+			else if (IsLegalSerialNumber(inArgument))
+				return outDevice.Open(inArgument);
+			else if (inArgument.find("://") != string::npos)
+				return outDevice.Open(inArgument);
+		}
+		else
+		{
+			if (to_string(iter->deviceIndex) == inArgument)
+				return outDevice.Open(inArgument);
+			else if (iter->deviceIdentifier == inArgument)
+				return outDevice.Open(inArgument);
+			else if (aja::is_legal_decimal_number(inArgument, inArgument.length()) && aja::is_legal_hex_serial_number(inArgument) && iter->deviceID == NTV2DeviceID(stoi(inArgument)))
+				return outDevice.Open(inArgument);
+			else if (IsLegalSerialNumber(inArgument))
+				return outDevice.Open(inArgument);
+			else if (inArgument.find("://") != string::npos)
+				return outDevice.Open(inArgument);
+		}
 	}
 	return outDevice.Open(inArgument);
 }	//	GetFirstDeviceFromArgument

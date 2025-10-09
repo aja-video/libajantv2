@@ -362,7 +362,7 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName, bool glob
 }
 
 
-void 
+bool 
 AJAMemory::FreeShared(void* pMemory)
 {
 	AJAAutoLock lock(&sSharedLock);
@@ -382,19 +382,22 @@ AJAMemory::FreeShared(void* pMemory)
 #elif defined(AJA_BAREMETAL)
 	// TODO
 #else
-				munmap(shareIter->pMemory, shareIter->memorySize);
-				close(shareIter->fileDescriptor);
-				// This is ugly. If we call shm_unlink, then the shared file name will
-				// be removed from /dev/shm, and future calls to shm_open will create a
-				// different memory share.	Will there be a problem with multiple calls
-				// to shm_open with no intervening calls to shm_unlink?	 Time will tell.
-//				shm_unlink(shareIter->shareName.c_str());
-#endif
+				int rc = munmap(shareIter->pMemory, shareIter->memorySize);
+				if (rc)
+					AJA_sREPORT(0, AJA_DebugSeverity_Error, "AJAMemory::FreeShared '" << shareIter->shareName << "': 'munmap' failed, error=" << rc);
+				rc = close(shareIter->fileDescriptor);
+				if (rc)
+					AJA_sREPORT(0, AJA_DebugSeverity_Error, "AJAMemory::FreeShared '" << shareIter->shareName << "': 'close' failed, error=" << rc);
+				//	rc = shm_unlink(shareIter->shareName.c_str());
+				//	The call to "shm_unlink" is disabled on purpose, because active clients using this
+				//	shared memory might still be using it. Therefore, some other entity will have to
+				//	remove the backing file from /dev/shm after all other shared clients have terminated.
 				sSharedList.erase(shareIter);
+#endif	//	else Linux & Mac
 			}
-			return;
+			return true;
 		}
 	}
-
 	AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAMemory::FreeShared  memory not found" /*, pMemory*/);
+	return false;
 }

@@ -71,7 +71,7 @@ bool CNTV2BareMetalDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex
     LDIFAIL("Invalid device index " << inDeviceIndex);
     return false;
   }
-	_boardNumber = inDeviceIndex;
+	setDeviceIndexNumber(inDeviceIndex);
 	const NTV2DeviceIDSet	legalDeviceIDs(::NTV2GetSupportedDevices());
 	if (!CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID))
 	{

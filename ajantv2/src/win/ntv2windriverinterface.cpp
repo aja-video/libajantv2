@@ -184,7 +184,7 @@ bool CNTV2WinDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 	}
 
 	REFGUID refguid = _GUID_PROPSET;
-	_boardNumber = inDeviceIndex;
+	setDeviceIndexNumber(inDeviceIndex);
 
 	DWORD dwShareMode (GetShareMode() ? FILE_SHARE_READ | FILE_SHARE_WRITE : 0);
 	DWORD dwFlagsAndAttributes = FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED;

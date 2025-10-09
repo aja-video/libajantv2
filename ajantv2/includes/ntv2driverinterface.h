@@ -684,6 +684,7 @@ class AJAExport CNTV2DriverInterface
 
 	//	MEMBER DATA
 	protected:
+		void setDeviceIndexNumber (const UWord num);
 		UWord				_boardNumber;			///< @brief	My device index number.
 		NTV2DeviceID		_boardID;				///< @brief	My cached device ID.
 		bool				_boardOpened;			///< @brief	True if I'm open and connected to the device.

@@ -495,7 +495,7 @@
 	#if !defined(NTV2_DEPRECATE_16_3)
 		#define NTV2_DEPRECATE_16_3
 	#endif
-#endif
+#endif	//	defined (NTV2_BUILDING_DRIVER)
 
 
 //////////////////////////////////////////////////////////////////////

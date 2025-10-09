@@ -69,8 +69,9 @@ public:
 	 *	Free memory allocated using AllocateShared().
 	 *
 	 *	@param[in]	pMemory		Address of memory to free.
+	 *	@return					True if successful; otherwise false.
 	 */
-	static void  FreeShared(void* pMemory);
+	static bool  FreeShared(void* pMemory);
 };
 
 #endif	//	AJA_MEMORY_H
