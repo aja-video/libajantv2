@@ -163,7 +163,8 @@ set(AJANTV2_HEADERS
     includes/ntv2videodefines.h
     includes/ntv2virtualregisters.h
     includes/ntv2vpid.h
-    includes/ntv2vpidfromspec.h)
+    includes/ntv2vpidfromspec.h
+    includes/ntv2link.h)
 set(AJANTV2_SOURCES
     src/ntv2anc.cpp
     src/ntv2aux.cpp
@@ -220,7 +221,8 @@ set(AJANTV2_SOURCES
     src/ntv2version.cpp
     src/ntv2verticalfilter.cpp
     src/ntv2vpid.cpp
-    src/ntv2vpidfromspec.cpp)
+    src/ntv2vpidfromspec.cpp
+    src/ntv2link.cpp)
 # ntv2driverinterface/publicinterface
 set(AJANTV2_WIN_HEADERS
     src/win/ntv2windriverinterface.h

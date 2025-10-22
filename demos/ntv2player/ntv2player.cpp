@@ -739,10 +739,10 @@ void NTV2Player::ProduceFrames (void)
 			mToneFrequency = gFrequencies[freqNdx];
 			timeOfLastSwitch = currentTime;
 			if (sTotalAncFileBytes)
-				PLINFO("F" << DEC0N(mCurrentFrame,6) << ": " << tcString << ": tone=" << mToneFrequency << "Hz, pattern='"
+				PLDBG("F" << DEC0N(mCurrentFrame,6) << ": " << tcString << ": tone=" << mToneFrequency << "Hz, pattern='"
 						<< tpNames.at(testPatNdx) << "', anc file " << DEC(sCurrentAncFileBytes * 100ULL / sTotalAncFileBytes) << "%");
 			else
-				PLINFO("F" << DEC0N(mCurrentFrame,6) << ": " << tcString << ": tone=" << mToneFrequency << "Hz, pattern='"
+				PLDBG("F" << DEC0N(mCurrentFrame,6) << ": " << tcString << ": tone=" << mToneFrequency << "Hz, pattern='"
 						<< tpNames.at(testPatNdx) << "'");
 		}	//	if time to switch test pattern & tone frequency
 
