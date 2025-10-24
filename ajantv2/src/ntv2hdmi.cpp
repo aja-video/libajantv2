@@ -294,7 +294,7 @@ static const ULWord gKonaHDMICtrlRegs[] = {0x1d16, 0x2516, 0x2c14, 0x3014}; //	K
 bool CNTV2Card::GetHDMIInAudioChannel34Swap (bool & outIsSwapped, const NTV2Channel inChannel)
 {
 	outIsSwapped = false;
-	if (inChannel >= GetNumSupported(kDeviceGetNumHDMIVideoInputs))
+	if (GetIndexForNTV2Channel(inChannel) >= GetNumSupported(kDeviceGetNumHDMIVideoInputs))
 		return false;	//	No such HDMI input
 	if (_boardID == DEVICE_ID_KONAHDMI)
 		return CNTV2DriverInterface::ReadRegister(gKonaHDMICtrlRegs[inChannel], outIsSwapped, kRegMaskHDMISwapInputAudCh34, kRegShiftHDMISwapInputAudCh34);	//	TBD
@@ -303,7 +303,7 @@ bool CNTV2Card::GetHDMIInAudioChannel34Swap (bool & outIsSwapped, const NTV2Chan
 
 bool CNTV2Card::SetHDMIInAudioChannel34Swap (const bool inIsSwapped, const NTV2Channel inChannel)
 {
-	if (inChannel >= GetNumSupported(kDeviceGetNumHDMIVideoInputs))
+	if (GetIndexForNTV2Channel(inChannel) >= GetNumSupported(kDeviceGetNumHDMIVideoInputs))
 		return false;	//	No such HDMI input
 	if (_boardID == DEVICE_ID_KONAHDMI)
 		return WriteRegister(gKonaHDMICtrlRegs[inChannel], inIsSwapped ? 1 : 0, kRegMaskHDMISwapInputAudCh34, kRegShiftHDMISwapInputAudCh34);	//	TBD
