@@ -700,7 +700,7 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 		args.push_back("-pix-fmt");
 		args.push_back("yuv10");
 		CHECK_EQ(parser.Parse(args), true);
-		CHECK_EQ(parser.UsageText().length(), 226);
+		CHECK_EQ(parser.UsageText().length(), 206);
 	}
 	TEST_CASE("AJACommandLineParser C++98 compliant")
 	{
