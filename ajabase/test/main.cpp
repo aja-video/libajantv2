@@ -435,6 +435,7 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 	}
 	TEST_CASE("AJACommandLineParser::Parse Error-on-unknown-arg")
 	{
+		// 1. Does not error on the unknown arg "whoami"
 		AJACommandLineParser parser;
 		parser.AddOption(AJACommandLineOption(AJAStringList{"d", "device"}, "Device to use"));
 		AJAStringList args;
@@ -442,8 +443,11 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 		args.push_back("--device=kona4");
 		args.push_back("--whoami");
 		CHECK_EQ(parser.Parse(args), true);  // kErrorOnUnknownOption disabled
-		parser = AJACommandLineParser(kErrorOnUnknownArgs);
-		CHECK_EQ(parser.Parse(args), false); // kErrorOnUnknownOption eneabled
+		
+		// 2. Errors on the unknown arg "whomami"
+		AJACommandLineParser parser2(parser);
+		parser2.SetFlags(kErrorOnUnknownArgs);
+		CHECK_EQ(parser2.Parse(args), false); // kErrorOnUnknownOption eneabled
 	}
 	TEST_CASE("AJACommandLineParser::Parse Double-Dash")
 	{

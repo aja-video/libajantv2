@@ -201,6 +201,11 @@ void AJACommandLineParser::init()
     }
 }
 
+void AJACommandLineParser::SetFlags(int flags)
+{
+    _flags = flags;
+}
+
 void AJACommandLineParser::Clear()
 {
     _subParsers.clear();
