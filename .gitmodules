@@ -1,0 +1,3 @@
+[submodule "thirdparty/wutils"]
+	path = thirdparty/wutils
+	url = git@github.com:mccakit/wutils.git

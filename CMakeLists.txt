@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-# For CMAKE_MSVC_RUNTIME_LIBRARY compatability. Per note: This must be before the first project() 
+# For CMAKE_MSVC_RUNTIME_LIBRARY compatability. Per note: This must be before the first project()
 if(POLICY CMP0091)
   cmake_policy(SET CMP0091 NEW)
 endif()
@@ -27,7 +27,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	endif()
 
     if(NOT CMAKE_MSVC_RUNTIME_LIBRARY)
-        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded") 
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
     endif()
 endif()
 
@@ -73,7 +73,7 @@ endif()
 if(DEFINED AJA_DISABLE_PLUGIN_LOAD)
     set(AJANTV2_DISABLE_PLUGIN_LOAD ${AJA_DISABLE_PLUGIN_LOAD})
 endif()
-
+add_subdirectory(thirdparty/wutils)
 add_subdirectory(ajantv2)
 add_subdirectory(demos)
 add_subdirectory(tools)

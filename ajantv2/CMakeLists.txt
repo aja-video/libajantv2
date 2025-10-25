@@ -80,7 +80,7 @@ else()
         GIT_TAG fix-win-dll-cmake
         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${MBEDTLS_INSTALL_DIR}
                     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-                    -DENABLE_TESTING=OFF 
+                    -DENABLE_TESTING=OFF
                     -DENABLE_PROGRAMS=OFF
                     -DCMAKE_C_FLAGS=${MBEDTLS_C_FLAGS}
                     -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}
@@ -671,7 +671,7 @@ if (NOT TARGET ${PROJECT_NAME})
         aja_ntv2_log_build_info()
 
         add_library(${PROJECT_NAME} SHARED ${TARGET_SOURCES})
-        
+
         if (NOT AJANTV2_DISABLE_PLUGIN_LOAD)
             add_dependencies(${PROJECT_NAME} mbedtls)
         endif()
@@ -698,7 +698,7 @@ if (NOT TARGET ${PROJECT_NAME})
             ${TARGET_COMPILE_DEFS_STATIC}
             ${AJANTV2_TARGET_COMPILE_DEFS})
     endif()
-
+    target_link_libraries(${PROJECT_NAME} PRIVATE wutils)
     set(_compiler_id_c_or_cxx_msvc $<OR:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>)
     set(_compiler_is_gnu_or_clang $<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>)
     set(_compile_options_win_debug /Od /RTC1 /W3)
@@ -806,7 +806,7 @@ if (AJA_INSTALL_MISC)
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../legacy/build/targets.mk      DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/legacy/build)
 endif()
 
-install(TARGETS ${PROJECT_NAME}
+install(TARGETS ${PROJECT_NAME} wutils
     EXPORT          ajantv2-targets
     ARCHIVE         DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY         DESTINATION ${CMAKE_INSTALL_LIBDIR}

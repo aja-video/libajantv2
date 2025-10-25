@@ -182,8 +182,10 @@ bool CNTV2EnhancedCSC::SendToHardware (CNTV2Card & inDevice, const NTV2Channel i
 	cscRegs [11] = ConvertCoeffDoubleToULWord (Matrix().GetCoefficient (NTV2CSCCoeffIndex_C2));
 	cscRegs [12] = (ULWord(Matrix().GetOffset (NTV2CSCOffsetIndex_PostB)) << 16) | (ULWord(Matrix().GetOffset (NTV2CSCOffsetIndex_PostA)&0xFFFF));
 	cscRegs [13] = ULWord(Matrix().GetOffset (NTV2CSCOffsetIndex_PostC));
-	cscRegs [14] = ULWord((mKeyOutputRange	& kK2RegMaskEnhancedCSCKeyOutputRange)	<< kK2RegShiftEnhancedCSCKeyOutputRange) |
-				   ULWord((mKeySource		& kK2RegMaskEnhancedCSCKeySource)		<< kK2RegShiftEnhancedCSCKeySource);
+	cscRegs[14] =
+    ULWord((static_cast<uint32_t>(mKeyOutputRange) & static_cast<uint32_t>(kK2RegMaskEnhancedCSCKeyOutputRange)) << kK2RegShiftEnhancedCSCKeyOutputRange) |
+    ULWord((static_cast<uint32_t>(mKeySource) & static_cast<uint32_t>(kK2RegMaskEnhancedCSCKeySource)) << kK2RegShiftEnhancedCSCKeySource);
+
 	cscRegs [15] = (ULWord(mKeyOutputOffset) << 16) | ULWord(mKeyInputOffset);
 	cscRegs [16] = (ULWord(mKeyGain * 4096.0));
 

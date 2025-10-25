@@ -2,7 +2,7 @@
 /**
 	@file		ntv2config2110.cpp
 	@brief		Implements the CNTV2Config2110 class.
-	@copyright	(C) 2014-2022 AJA Video Systems, Inc.	
+	@copyright	(C) 2014-2022 AJA Video Systems, Inc.
 **/
 
 #include "ntv2config2110.h"
@@ -75,25 +75,18 @@ bool tx_2110Config::operator != ( const tx_2110Config &other )
 	return !(*this == other);
 }
 
-bool tx_2110Config::operator == ( const tx_2110Config &other )
+bool tx_2110Config::operator==(const tx_2110Config &other)
 {
-	if ((localPort				== other.localPort)				&&
-		(remotePort				== other.remotePort)			&&
-		(remoteIP				== other.remoteIP)				&&
-		(videoFormat			== other.videoFormat)			&&
-		(videoSamples			== other.videoSamples)			&&
-		(numAudioChannels		== other.numAudioChannels)		&&
-		(firstAudioChannel		== other.firstAudioChannel)		&&
-		(audioPktInterval		== other.audioPktInterval))
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+    return
+        std::memcmp(localPort, other.localPort, sizeof(localPort)) == 0 &&
+        std::memcmp(remotePort, other.remotePort, sizeof(remotePort)) == 0 &&
+        std::memcmp(remoteIP, other.remoteIP, sizeof(remoteIP)) == 0 &&
+        (videoFormat      == other.videoFormat) &&
+        (videoSamples     == other.videoSamples) &&
+        (numAudioChannels == other.numAudioChannels) &&
+        (firstAudioChannel== other.firstAudioChannel) &&
+        (audioPktInterval == other.audioPktInterval);
 }
-
 void rx_2110Config::init()
 {
 	rxMatch				= 0;
@@ -529,14 +522,18 @@ void CNTV2Config2110::SetVideoFormatForRxTx(const NTV2Stream stream, const NTV2V
 
 		uint32_t reg, reg2;
 		if (rx)
-		{
-			reg = stream - NTV2_CHANNEL1 + kRegRxVideoDecode1;
-			reg2 = stream - NTV2_CHANNEL1 + kRegRxNtv2VideoDecode1;
-		}
+{
+    reg = static_cast<RegisterNum>(
+        static_cast<uint32_t>(stream) - static_cast<uint32_t>(NTV2_CHANNEL1) + static_cast<uint32_t>(kRegRxVideoDecode1)
+    );
+    reg2 = static_cast<RegisterNum>(
+        static_cast<uint32_t>(stream) - static_cast<uint32_t>(NTV2_CHANNEL1) + static_cast<uint32_t>(kRegRxNtv2VideoDecode1)
+    );
+}
 		else
 		{
-			reg = stream - NTV2_CHANNEL1 + kRegTxVideoDecode1;
-			reg2 = stream - NTV2_CHANNEL1 + kRegTxNtv2VideoDecode1;
+			reg = static_cast<uint32_t>(stream) - static_cast<uint32_t>(NTV2_CHANNEL1) + static_cast<uint32_t>(kRegTxVideoDecode1);
+			reg2 = static_cast<uint32_t>(stream) - static_cast<uint32_t>(NTV2_CHANNEL1) + static_cast<uint32_t>(kRegTxNtv2VideoDecode1);
 		}
 
 		// Write the format for the firmware and also tuck it away in NTV2 flavor so we can retrieve it easily
@@ -552,13 +549,13 @@ void CNTV2Config2110::GetVideoFormatForRxTx(const NTV2Stream stream, NTV2VideoFo
 		uint32_t reg, reg2, value;
 		if (rx)
 		{
-			reg = stream - NTV2_CHANNEL1 + kRegRxVideoDecode1;
-			reg2 = stream - NTV2_CHANNEL1 + kRegRxNtv2VideoDecode1;
+			reg = static_cast<uint32_t>(stream) - static_cast<uint32_t>(NTV2_CHANNEL1) + static_cast<uint32_t>(kRegRxVideoDecode1);
+			reg2 = static_cast<uint32_t>(stream) - static_cast<uint32_t>(NTV2_CHANNEL1) + static_cast<uint32_t>(kRegRxNtv2VideoDecode1);
 		}
 		else
 		{
-			reg = stream - NTV2_CHANNEL1 + kRegTxVideoDecode1;
-			reg2 = stream - NTV2_CHANNEL1 + kRegTxNtv2VideoDecode1;
+			reg = static_cast<uint32_t>(stream) - static_cast<uint32_t>(NTV2_CHANNEL1) + static_cast<uint32_t>(kRegTxVideoDecode1);
+			reg2 = static_cast<RegisterNum>(static_cast<uint32_t>(stream) - static_cast<uint32_t>(NTV2_CHANNEL1) + static_cast<uint32_t>(kRegTxNtv2VideoDecode1));
 		}
 
 		// Write the format for the firmware and also tuck it away in NTV2 flavor so we can retrieve it easily
@@ -1623,7 +1620,7 @@ uint32_t CNTV2Config2110::GetPacketizerAddress(const NTV2Stream stream, const VP
 		uint32_t index = Get2110TxStreamIndex(stream);
 		mDevice.WriteRegister(kReg3190_pkt_chan_num + basePacketizer, index);
 	}
-	
+
 	return basePacketizer;
 }
 
@@ -1916,7 +1913,7 @@ bool CNTV2Config2110::GenSDP(const bool enableSfp1, const bool enableSfp2,
 	GetPTPStatus(ptpStatus);
 
 	char gmInfo[32];
-	snprintf(gmInfo, sizeof(gmInfo), "%02X-%02X-%02X-%02X-%02X-%02X-%02X-%02X:%d",
+	sprintf(gmInfo, "%02X-%02X-%02X-%02X-%02X-%02X-%02X-%02X:%d",
 			ptpStatus.PTP_gmId[0], ptpStatus.PTP_gmId[1], ptpStatus.PTP_gmId[2], ptpStatus.PTP_gmId[3],
 			ptpStatus.PTP_gmId[4], ptpStatus.PTP_gmId[5], ptpStatus.PTP_gmId[6], ptpStatus.PTP_gmId[7], ptpStatus.PTP_domain);
 
@@ -1937,7 +1934,7 @@ bool CNTV2Config2110::GenSDP(const bool enableSfp1, const bool enableSfp2,
 	{
 		GenAncStreamSDP(sdp, enableSfp1, enableSfp2, stream, &gmInfo[0]);
 	}
-	
+
 	//cout << "SDP --------------- " << stream << endl << sdp.str() << endl;
 
 	bool rv = true;
@@ -3404,4 +3401,3 @@ uint64_t CNTV2Config2110::GetNTPTimestamp()
 {
 	return CNTV2MBController::GetNTPTimestamp();
 }
-
