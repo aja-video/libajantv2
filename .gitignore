@@ -11,3 +11,4 @@
 /driver/linux/ajardma.mod
 /driver/linux/ajardma.mod.c
 .DS_Store
+/.cache
