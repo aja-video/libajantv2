@@ -89,6 +89,8 @@ typedef enum
 	DEVICE_ID_SOJI_OE7					= 0x10922407,
 	DEVICE_ID_TTAP						= 0x10416000,	///< @brief See \ref ttap
 	DEVICE_ID_TTAP_PRO					= 0x10879000,	///< @brief See \ref ttappro
+	DEVICE_ID_CORVID44_GEN3				= 0x11059700,	///< @brief See \ref corvid44
+	DEVICE_ID_CORVID88_GEN3				= 0x11056500,	///< @brief See \ref corvid44
 	//Devices below this line do not have OEM SDK support
 	DEVICE_ID_IP25_R					= 0x11033300,
 	DEVICE_ID_NOTFOUND					= 0xFFFFFFFF,	///< @brief Invalid or "not found"
@@ -3418,6 +3420,8 @@ typedef enum
 	NTV2_BITFILE_KONAX				= 91,
 	NTV2_BITFILE_KONAXM				= 92,
     NTV2_BITFILE_KONAIP_25G			= 93,
+	NTV2_BITFILE_CORVID44_GEN3		= 94,
+	NTV2_BITFILE_CORVID88_GEN3		= 95,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
 

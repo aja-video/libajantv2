@@ -71,6 +71,8 @@ TEST_SUITE("ntv2debug" * doctest::description("ntv2 debug string functions")) {
 		CHECK(std::string(NTV2DeviceIDString(DEVICE_ID_CORVID44_8KMK)) == "DEVICE_ID_CORVID44_8KMK");
 		CHECK(std::string(NTV2DeviceIDString(DEVICE_ID_KONAIP_2110)) == "DEVICE_ID_KONAIP_2110");
 		CHECK(std::string(NTV2DeviceIDString(DEVICE_ID_IOIP_2110)) == "DEVICE_ID_IOIP_2110");
+		CHECK(std::string(NTV2DeviceIDString(DEVICE_ID_CORVID44_GEN3)) == "DEVICE_ID_CORVID44_GEN3");
+		CHECK(std::string(NTV2DeviceIDString(DEVICE_ID_CORVID88_GEN3)) == "DEVICE_ID_CORVID88_GEN3");
 	}
 
 	TEST_CASE("DeviceString")
@@ -87,6 +89,8 @@ TEST_SUITE("ntv2debug" * doctest::description("ntv2 debug string functions")) {
 		CHECK(std::string(NTV2DeviceString(DEVICE_ID_CORVID44_8KMK)) == "Corvid44_8KMK");
 		CHECK(std::string(NTV2DeviceString(DEVICE_ID_KONAIP_2110)) == "KonaIP_2110");
 		CHECK(std::string(NTV2DeviceString(DEVICE_ID_IOIP_2110)) == "DNxIP_2110");
+		CHECK(std::string(NTV2DeviceString(DEVICE_ID_CORVID44_GEN3)) == "Corvid44gen3");
+		CHECK(std::string(NTV2DeviceString(DEVICE_ID_CORVID88_GEN3)) == "Corvid88gen3");
 	}
 
 	TEST_CASE("StandardString")
@@ -1241,6 +1245,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 														DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K,	DEVICE_ID_KONAIP_1RX_1TX_2110,	DEVICE_ID_KONAIP_2022,		DEVICE_ID_KONAIP_2110,
 														DEVICE_ID_KONAIP_2TX_1SFP_J2K,		DEVICE_ID_KONAIP_4CH_2SFP,
 														DEVICE_ID_KONALHEPLUS,				DEVICE_ID_KONALHI,				DEVICE_ID_KONALHIDVI,		DEVICE_ID_TTAP,
+														DEVICE_ID_CORVID44_GEN3,			DEVICE_ID_CORVID88_GEN3,
 														NTV2DeviceID(1234567)	};
 			const std::string			devIDStrs []	= {	"DEVICE_ID_NOTFOUND",
 														"DEVICE_ID_CORVID1",				"DEVICE_ID_CORVID22",			"DEVICE_ID_CORVID24",		"DEVICE_ID_CORVID3G",
@@ -1252,6 +1257,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 														"DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K","DEVICE_ID_KONAIP_1RX_1TX_2110","DEVICE_ID_KONAIP_2022",	"DEVICE_ID_KONAIP_2110",
 														"DEVICE_ID_KONAIP_2TX_1SFP_J2K",	"DEVICE_ID_KONAIP_4CH_2SFP",
 														"DEVICE_ID_KONALHEPLUS",			"DEVICE_ID_KONALHI",			"DEVICE_ID_KONALHIDVI",		"DEVICE_ID_TTAP",
+														"DEVICE_ID_CORVID44_GEN3",			"DEVICE_ID_CORVID88_GEN3",
 														""						};
 			const std::string			deviceStrs []	= {	"Unknown",
 														"Corvid1",							"Corvid22",						"Corvid24",					"Corvid3G",
@@ -1263,6 +1269,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 														"KonaIP_1Rx1Tx1SFPJ2K",				"KonaIP_1Rx1Tx2110",			"KonaIP_2022",				"KonaIP_2110",
 														"KonaIP_2Tx1SFPJ2K",				"KonaIP_4ch2SFP",
 														"KonaLHePlus",						"KonaLHi",						"KonaLHiDVI",				"TTap",
+														"Corvid44gen3",						"corvid88gen3",
 														""						};
 			for (unsigned ndx (0);  ndx < sizeof (deviceIDs) / sizeof (NTV2DeviceID);  ndx++)
 			{

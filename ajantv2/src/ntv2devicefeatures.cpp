@@ -411,6 +411,8 @@
 		    case DEVICE_ID_KONAX:
             case DEVICE_ID_KONAIP_25G:
 			case DEVICE_ID_IP25_R:
+			case DEVICE_ID_CORVID44_GEN3:
+			case DEVICE_ID_CORVID88_GEN3:
 				switch (fg)
 				{
 				case NTV2_FG_4x3840x2160:
@@ -582,6 +584,8 @@
 			case DEVICE_ID_TTAP_PRO:
 			case DEVICE_ID_KONAX:
             case DEVICE_ID_KONAIP_25G:
+			case DEVICE_ID_CORVID44_GEN3:
+			case DEVICE_ID_CORVID88_GEN3:
 			case DEVICE_ID_IP25_R:
 				switch (fg)
 				{
