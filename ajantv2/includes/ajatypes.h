@@ -3,7 +3,7 @@
 	@file		ajatypes.h
 	@brief		Declares the most fundamental data types used by NTV2. Since Windows NT was the first principal
 				development platform, many typedefs are Windows-centric.
-	@copyright	(C) 2004-2022 AJA Video Systems, Inc.  
+	@copyright	(C) 2004-2022 AJA Video Systems, Inc.
 **/
 #ifndef AJATYPES_H
 #define AJATYPES_H
@@ -83,7 +83,7 @@
 
 								Introduced in SDK 12.4.
 **************************************************************************************************************/
-//#define NTV2_NULL_DEVICE	
+//#define NTV2_NULL_DEVICE
 
 
 /**************************************************************************************************************
@@ -107,7 +107,7 @@
 
 								Introduced in SDK 12.4.
 **************************************************************************************************************/
-#define NTV2_NUB_CLIENT_SUPPORT	
+#define NTV2_NUB_CLIENT_SUPPORT
 
 
 /**************************************************************************************************************
@@ -136,7 +136,7 @@
 								Introduced in SDK 16.0.
 **************************************************************************************************************/
 #if !defined(NTV2_USE_CPLUSPLUS11)
-	#define NTV2_USE_CPLUSPLUS11 	
+	#define NTV2_USE_CPLUSPLUS11
 #endif	//	!defined(NTV2_USE_CPLUSPLUS11)
 
 
@@ -278,7 +278,7 @@
 		#define WIN32_LEAN_AND_MEAN
 		#endif
 
-		#include <Windows.h>
+		#include <windows.h>
 
         #if defined(DeviceCapabilities)
         #undef DeviceCapabilities
