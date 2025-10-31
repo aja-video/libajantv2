@@ -284,7 +284,7 @@
         #undef DeviceCapabilities
         #endif
 	#endif
-	#include <Basetsd.h>
+	#include <basetsd.h>
 	typedef unsigned char Boolean;
 	typedef __int64 LWord64;
 	typedef unsigned __int64 ULWord64;
