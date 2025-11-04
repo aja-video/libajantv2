@@ -518,7 +518,7 @@ int CNTV2Card::GetSFPConfigurationURLStrings(std::vector<std::string> & OutSFPUR
 		
 		OutSFPURLStrings.push_back(tempString.str());
 	}
-	return OutSFPURLStrings.size();
+	return int(OutSFPURLStrings.size());
 }
 
 #if !defined(NTV2_DEPRECATE_16_3)

@@ -3179,6 +3179,7 @@ static int __init aja_ntv2_module_init(void)
 	ntv2_driver.remove = remove;
     ntv2_driver.suspend = suspend;
     ntv2_driver.resume = resume;
+    ntv2_driver.shutdown = remove;
 
 	/* register uart driver */
 	MSG("%s: register uart driver %s\n",

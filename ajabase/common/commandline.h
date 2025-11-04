@@ -186,6 +186,11 @@ public:
 	void operator=(const AJACommandLineParser &other);
 
 	/**
+	 * Override internal parser flags.
+	 */
+	void SetFlags(int flags);
+
+	/**
 	 * Delete all sub-parsers and options from this AJACommandLineParser.
 	 */
 	void Clear();

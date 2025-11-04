@@ -308,7 +308,7 @@ AJAStatus NTV2Overlay::SetupOverlayBug (void)
 		return AJA_STATUS_MEMORY;
 
 	//	Draw the rectangles into the mBug buffer...
-	for (size_t n(0);  n < sColors.size();  n++)
+	for (ULWord n(0);  n < ULWord(sColors.size());  n++)
 		DrawBox (mBug, mBugRasterInfo, sColors.at(n), thickness, /*topLeftX*/n*2*thickness, /*topLeftY*/n*2*thickness, wdth-2*n*2*thickness, hght-2*n*2*thickness);
 
 	//	Draw a hatch mark in the middle of it...

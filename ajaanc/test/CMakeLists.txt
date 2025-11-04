@@ -1,7 +1,7 @@
 project(ut_ajaanc)
 
 set(TEST_XML_DIR ${CMAKE_CURRENT_BINARY_DIR})
-set(DOCTEST_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/doctest/doctest)
+set(DOCTEST_INCLUDE_DIR ${LIBAJANTV2_DIR}/thirdparty/doctest/doctest)
 
 set(TARGET_INCLUDE_DIRS
 	${DOCTEST_INCLUDE_DIR}

@@ -471,7 +471,7 @@ bool CNTV2Card::Has12BitLUTSupport(const NTV2Channel inChannel)
     
     if (GetNumSupported(kDeviceGetLUTVersion) == 3)
     {
-        if (inChannel >= GetNumSupported(kDeviceGetNumLUTs))
+        if (GetIndexForNTV2Channel(inChannel) >= GetNumSupported(kDeviceGetNumLUTs))
             return false;
         result = ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3Depth12, shiftCCLUTV3Depth12) && (supported != 0);
     }
@@ -495,7 +495,7 @@ bool CNTV2Card::Set12BitLUTPlaneSelect(NTV2LUTPlaneSelect inLUTPlaneSelect, cons
 
     if (GetNumSupported(kDeviceGetLUTVersion) == 3)
     {
-        if (inChannel < GetNumSupported(kDeviceGetNumLUTs))
+        if (GetIndexForNTV2Channel(inChannel) < GetNumSupported(kDeviceGetNumLUTs))
         {
             if (!ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3HostLoad, shiftCCLUTV3HostLoad) || (supported == 0))
                 return false;
@@ -530,7 +530,7 @@ bool CNTV2Card::Get12BitLUTPlaneSelect(NTV2LUTPlaneSelect & outLUTPlaneSelect, c
 	
     if (GetNumSupported(kDeviceGetLUTVersion) == 3)
     {
-        if (inChannel >= GetNumSupported(kDeviceGetNumLUTs))
+        if (GetIndexForNTV2Channel(inChannel) >= GetNumSupported(kDeviceGetNumLUTs))
             return false;
         
         if (!ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3HostLoad, shiftCCLUTV3HostLoad) || (supported == 0))
@@ -1329,7 +1329,7 @@ bool CNTV2Card::SetLUTEnable (const bool inEnable, const NTV2Channel inLUT)
 		return true;	//	LUT init not needed
     if (GetNumSupported(kDeviceGetLUTVersion) == 3)
     {
-        if (inLUT >= GetNumSupported(kDeviceGetNumLUTs))
+        if (GetIndexForNTV2Channel(inLUT) >= GetNumSupported(kDeviceGetNumLUTs))
             return false;
         if (!ReadRegister(gChannelCapabilities[inLUT], supported, maskCCLUTV3HostLoad, shiftCCLUTV3HostLoad) || (supported == 0))
             return false;
@@ -1642,7 +1642,7 @@ bool CNTV2Card::Set1DLUTTableLocation (const NTV2Channel inChannel, const ULWord
     bool result = false;
     if (GetNumSupported(kDeviceGetLUTVersion) == 3)
     {
-        if (inChannel >= GetNumSupported(kDeviceGetNumLUTs))
+        if (GetIndexForNTV2Channel(inChannel) >= GetNumSupported(kDeviceGetNumLUTs))
             return false;
         if (!ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3DmaLoad, shiftCCLUTV3DmaLoad) || (supported == 0))
             return false;
@@ -1662,7 +1662,7 @@ bool CNTV2Card::Load1DLUTTable (const NTV2Channel inChannel)
     bool result = false;
     if (GetNumSupported(kDeviceGetLUTVersion) == 3)
     {
-        if (inChannel >= GetNumSupported(kDeviceGetNumLUTs))
+        if (GetIndexForNTV2Channel(inChannel) >= GetNumSupported(kDeviceGetNumLUTs))
             return false;
         if (!ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3DmaLoad, shiftCCLUTV3DmaLoad) || (supported == 0))
             return false;
