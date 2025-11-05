@@ -87,6 +87,10 @@
 #include "../ntv2pciconfig.h"
 #include "../ntv2mailbox.h"
 
+#if defined(AJA_NTV42)
+    #include "../ntv42device.h"
+#endif
+
 #if  !defined(x86_64) && !defined(aarch64)
 #error "*** AJA driver must be built 64 bit ***"
 #endif
@@ -2009,6 +2013,56 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 				}
 				break;
 
+			case NTV2_TYPE_MESSAGE_DATA:
+				{
+                    NTV2MessageData *msg = (NTV2MessageData *)pMessage;
+
+                    // Check message buffer
+                    if ((msg->mMessage.fUserSpacePtr == 0) ||
+                        (msg->mMessage.fByteCount == 0) ||
+                        (msg->mMessage.fByteCount > PAGE_SIZE))
+                    {
+                        returnCode = -EINVAL;
+                        msg->mStatus = (ULWord)returnCode;
+                        goto messageError;
+                    }
+
+                    // Get message buffer
+                    if (copy_from_user((void *)pInBuff,
+                                       (const void *)msg->mMessage.fUserSpacePtr,
+                                       msg->mMessage.fByteCount))
+                    {
+                        returnCode = -EFAULT;
+                        msg->mStatus = (ULWord)returnCode;
+                        goto messageError;
+                    }
+#if defined(AJA_NTV42)
+                    // send to ntv42
+                    returnCode = ntv42device_message(pNTV2Params->ntv42_device, pInBuff, msg->mMessage.fByteCount);
+#else                    
+                    returnCode = -EFAULT;
+                    msg->mStatus = (ULWord)returnCode;
+                    goto messageError;
+#endif                        
+                    // Write back message buffer on request
+                    if ((msg->mFlags & NTV2_MESSAGE_DATA_RW) != 0)
+                    {
+						if (copy_to_user((void *)msg->mMessage.fUserSpacePtr,
+                                    (const void*)pInBuff,
+                                    msg->mMessage.fByteCount))
+						{
+							returnCode = -EFAULT;
+                            msg->mStatus = (ULWord)returnCode;
+							goto messageError;
+						}
+                    }
+
+                    msg->mStatus = (ULWord)returnCode;
+                    if (returnCode != 0)
+                        goto messageError;
+				}
+				break;
+
 			default:
 				returnCode = -EPERM;
 				break;
@@ -3154,6 +3208,10 @@ static int __init aja_ntv2_module_init(void)
 	MSG("%s: driver version %s\n",
 		getNTV2ModuleParams()->name, versionString);
 
+#if defined(AJA_NTV42)
+    ntv42device_init();
+#endif    
+
     // determine driver mode
     strncpy(versionString, DriverMode, STRMAX);
     versionString[STRMAX - 1] = '\0';
@@ -3947,6 +4005,21 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
             }
         }
     }
+
+#if defined(AJA_NTV42)
+    {
+        ntv42_device_config_t config;
+        ntv42device_create(&ntv2pp->ntv42_device, ntv2pp);
+
+        memset (&config, 0, sizeof(ntv42_device_config_t));
+        getDeviceVersionString(deviceNumber, config.name, NTV42_DEVICE_NAME_MAX - 1);
+        snprintf(config.desc, NTV42_DEVICE_DESC_MAX, "%s dev %d bus %02x",
+                 config.name, deviceNumber, ntv2pp->systemContext.busNumber);
+        getDeviceSerialNumberString(deviceNumber, config.serial, NTV42_DEVICE_DESC_MAX - 1);
+        ntv42device_config(ntv2pp->ntv42_device, &config);
+        ntv42device_state(ntv2pp->ntv42_device, ntv42device_state_enable);
+    }
+#endif    
     
 #if defined(AJA_CREATE_DEVICE_NODES)
 	// Create the device node
@@ -3996,6 +4069,10 @@ static void remove(struct pci_dev *pdev)
 #endif
 
 	MSG("%s: device remove\n", ntv2pp->name);
+
+#if defined(AJA_NTV42)
+    ntv42device_state(ntv2pp->ntv42_device, ntv42device_state_disable);
+#endif
 
     ntv2pp->ioRemove = true;
 
@@ -4175,6 +4252,11 @@ static void remove(struct pci_dev *pdev)
             pci_disable_msi(ntv2pp->pci_dev);
         }
     }
+
+#if defined(AJA_NTV42)    
+    ntv42device_release(ntv2pp->ntv42_device);
+    ntv2pp->ntv42_device = NULL;
+#endif
     
 	pci_resources_release(ntv2pp);
 
@@ -5694,6 +5776,10 @@ static int suspend(struct pci_dev *pdev, pm_message_t state)
 
 	MSG("%s: device suspend\n", ntv2pp->name);
 
+#if defined(AJA_NTV42)
+    ntv42device_state(ntv2pp->ntv42_device, ntv42device_state_suspend);
+#endif
+
 	// disable hdmi monitor
 	for (j = 0; j < NTV2_MAX_HDMI_MONITOR; j++)
 	{
@@ -5884,6 +5970,10 @@ static int resume(struct pci_dev *pdev)
 
         // enable all dma engines
         dmaEnable(deviceNumber);
+
+#if defined(AJA_NTV42)
+        ntv42device_state(ntv2pp->ntv42_device, ntv42device_state_resume);
+#endif        
     }
 
     return 0;

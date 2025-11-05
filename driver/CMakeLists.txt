@@ -37,7 +37,8 @@ set(AJADRIVER_COMMON_HEADERS
 	ntv2videorasterreg.h
 	ntv2vpid.h
 	ntv2xpt.h
-	ntv2xptlookup.h)
+	ntv2xptlookup.h
+    ntv42device.h)
 set(AJADRIVER_COMMON_SOURCES
 	ntv2anc.c
 	ntv2audio.c
@@ -62,7 +63,8 @@ set(AJADRIVER_COMMON_SOURCES
 	ntv2video.c
 	ntv2videoraster.c
 	ntv2vpid.c
-	ntv2xpt.c)
+	ntv2xpt.c
+    ntv42device.c)
 
 # ajadriver target sources
 set(AJADRIVER_TARGET_SOURCES
@@ -147,6 +149,7 @@ set(NEEDED_NTV2_INCLUDES
     ${AJANTV2_ROOT}/includes/ntv2videodefines.h
     ${AJANTV2_ROOT}/includes/ntv2virtualregisters.h
     ${AJANTV2_ROOT}/includes/ntv2vpidfromspec.h
+    ${AJANTV2_ROOT}/includes/ntv42message.h
     )
 set(NEEDED_NTV2_LIN_INCLUDES
     ${AJANTV2_ROOT}/src/lin/ntv2linuxpublicinterface.h
@@ -176,7 +179,7 @@ if (NOT AJANTV2_DISABLE_DRIVER)
             set(BIN_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin")
                 add_custom_target(driver_linux ALL
                     COMMENT "Building Linux driver"
-                    COMMAND make -C linux
+                    COMMAND make -C linux AJA_NTV42=1
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                     SOURCES ${AJADRIVER_TARGET_SOURCES}
                     BYPRODUCTS ${BIN_PATH}/ajantv2.ko
@@ -184,13 +187,13 @@ if (NOT AJANTV2_DISABLE_DRIVER)
 
                 add_custom_target(driver_linux_dkms_install
                     COMMENT "Installing Linux DKMS driver"
-                    COMMAND make -C linux dkms-install
+                    COMMAND make -C linux dkms-install AJA_NTV42=1
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                     )
 
                 add_custom_target(driver_linux_dkms_uninstall
                     COMMENT "Uninstalling Linux DKMS driver"
-                    COMMAND make -C linux dkms-uninstall
+                    COMMAND make -C linux dkms-uninstall AJA_NTV42=1
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                     )
 

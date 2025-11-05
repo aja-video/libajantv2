@@ -27,6 +27,10 @@ DISTRO_INFO  = -DDISTRO_TYPE=$(DISTRO_TYPE) -DDISTRO_IS_RHEL_LIKE=$(DISTRO_IS_RH
 			   -DDISTRO_KERNEL_PKG_MAJ=$(DISTRO_KERNEL_PKG_MAJ) -DDISTRO_KERNEL_PKG_MIN=$(DISTRO_KERNEL_PKG_MIN) -DDISTRO_KERNEL_PKG_PNT=$(DISTRO_KERNEL_PKG_PNT)
 ccflags-y += -DAJALinux -DXENA2 $(DBG) -D$(NTV2TARGET) -D$(A_ARCH) $(EXTRA_DEPS) $(VERSIONING) $(DISTRO_INFO) $(INCLUDES) -Wall -Wno-implicit-fallthrough
 
+ifdef AJA_NTV42
+	ccflags-y += -DAJA_NTV42=$(AJA_NTV42)
+endif
+
 ifdef AJA_HEVC
 	ccflags-y += -DAJA_HEVC=$(AJA_HEVC)
 endif
@@ -117,7 +121,8 @@ AJANTV2INCS = $(A_LIB_NTV2_INC)/ajaexport.h \
 			$(A_LIB_NTV2_INC)/ntv2version.h \
 			$(A_LIB_NTV2_INC)/ntv2videodefines.h \
 			$(A_LIB_NTV2_INC)/ntv2virtualregisters.h \
-			$(A_LIB_NTV2_INC)/ntv2vpidfromspec.h
+			$(A_LIB_NTV2_INC)/ntv2vpidfromspec.h \
+			$(A_LIB_NTV2_INC)/ntv42message.h
 
 AJANTV2SRCLIN = $(A_LIB_NTV2_SRC)/lin/ntv2linuxpublicinterface.h
 
@@ -237,6 +242,14 @@ HEVCSRCS =
 HEVCINCS =
 endif
 
+ifdef AJA_NTV42
+NTV42INCS = ../ntv42device.h
+NTV42SRCS = ../ntv42device.c
+else
+NTV42INCS =
+NTV42SRCS =
+endif
+
 ifdef NVIDIA_RDMA
 RDMASRCS = ntv2rdma.c
 RDMAINCS = $(NVIDIA_SRC_DIR)/nv-p2p.h
@@ -245,8 +258,8 @@ RDMASRCS = ntv2rdma.c
 RDMAINCS =
 endif
 
-ALLDRIVERINCS =$(AJANTV2_INCS) $(AJANTV2SRCLIN) $(DRIVERINCS) $(DRIVERLININCS) $(HEVCSINCS) $(RDMAINCS)
-ALLDRIVERSRCS =$(DRIVERSRCS) $(DRIVERLINSRCS) $(HEVCSRCS) ntv2devicefeatures.c ntv2driverprocamp.c ntv2vpidfromspec.c
+ALLDRIVERINCS =$(AJANTV2_INCS) $(AJANTV2SRCLIN) $(DRIVERINCS) $(DRIVERLININCS) $(HEVCSINCS) $(RDMAINCS) $(NTV42INCS)
+ALLDRIVERSRCS =$(DRIVERSRCS) $(DRIVERLINSRCS) $(HEVCSRCS) $(NTV42SRCS) ntv2devicefeatures.c ntv2driverprocamp.c ntv2vpidfromspec.c
 ALLDRIVEROBJS =$(patsubst %.c,%.o,$(ALLDRIVERSRCS))
 RDMADRIVEROBJS =$(patsubst %.c,%.o,$(RDMASRCS))
 
@@ -368,6 +381,12 @@ dkms-pkg:
 	done
 	@for i in "$(RDMASRCS)" ; do \
 		cp $$i tmp/$(DKMSDIR)/libajantv2/driver/linux ; \
+	done
+	@for i in "$(NTV42INCS)" ; do \
+		cp $$i tmp/$(DKMSDIR)/libajantv2/driver ; \
+	done
+	@for i in "$(NTV42SRCS)" ; do \
+		cp $$i tmp/$(DKMSDIR)/libajantv2/driver ; \
 	done
 	@awk '\
 		sub("@AJA_DKMS_PKG_VERSION@", "$(DKMSVER)") {print;next} \
