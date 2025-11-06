@@ -27,6 +27,9 @@ endif()
 if (EXISTS ${AJANTV2_VERSION_FILENAME})
     message(STATUS "Found libajantv2 version file: ${AJANTV2_VERSION_FILENAME}")
     file(READ ${AJANTV2_VERSION_FILENAME} NTV2_VERSION_STRING)
+    string(STRIP "${NTV2_VERSION_STRING}" NTV2_VERSION_STRING)
+    string(REPLACE "\n" "" NTV2_VERSION_STRING "${NTV2_VERSION_STRING}")
+    string(REPLACE "\r" "" NTV2_VERSION_STRING "${NTV2_VERSION_STRING}")
     message(STATUS "File version string: ${NTV2_VERSION_STRING}")
 endif()
 
@@ -105,7 +108,7 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/.git/HEAD")
     configure_file("${CMAKE_SOURCE_DIR}/.git/HEAD" "${CMAKE_BINARY_DIR}/git_HEAD" COPYONLY)
 
     # in addition, if HEAD is a ref, do the same on the file it's pointing to (since HEAD won't change for commits to the current branch)
-    # if we change branch then this will correspondingly 
+    # if we change branch then this will correspondingly
     file(READ ${CMAKE_SOURCE_DIR}/.git/HEAD HEAD_CONTENTS)
     string(STRIP "${HEAD_CONTENTS}" HEAD_CONTENTS)
 

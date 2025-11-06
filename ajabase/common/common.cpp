@@ -14,7 +14,7 @@
 
 #include <stdlib.h>
 #include <wchar.h>
-
+#include "wutils.hpp"
 // check for C++11 compatibility
 #if defined(_MSC_VER) && _MSC_VER >= 1800
 	// Visual Studio 2013 (_MSC_VER 1800) has the C++11 support we
@@ -249,8 +249,7 @@ bool string_to_wstring (const std::string & str, std::wstring & wstr)
 {
 // use C++11 functionality if available
 #if defined(AJA_BASE_USECPP_11)
-	std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converterX;
-	wstr = converterX.from_bytes(str);
+    wstr = wutils::ws(str).value;
 	return true;
 #else
 	#if defined(AJA_WINDOWS)
@@ -286,8 +285,7 @@ bool wstring_to_string (const std::wstring & wstr, std::string & str)
 {
 // use C++11 functionality if available
 #if defined(AJA_BASE_USECPP_11)
-	std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converterX;
-	str = converterX.to_bytes(wstr);
+    str = wutils::s(wstr).value;
 	return true;
 #else
 	#if defined(AJA_WINDOWS)

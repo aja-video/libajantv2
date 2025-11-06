@@ -205,7 +205,7 @@ function(aja_versionize_linux target product_name product_desc icon_file)
 	endif()
 endfunction(aja_versionize_linux)
 
-# Accepts an optional param for ${icon_file} 
+# Accepts an optional param for ${icon_file}
 # We don't always have an icon file per plugin, all mac targets need versioning
 function(aja_versionize_mac target product_name bundle_id bundle_sig bundle_package_type bundle_name)
     set (var_args "${ARGN}")
@@ -214,7 +214,7 @@ function(aja_versionize_mac target product_name bundle_id bundle_sig bundle_pack
     if(${var_count} GREATER 0)
         list(GET var_args 0 icon_file)
         # message(STATUS "!!! ${ARGN} ${var_count} ${icon_file}")
-        
+
         get_filename_component(icon_filename ${icon_file} NAME)
 	    set(AJA_APP_ICON ${icon_filename})
         set_source_files_properties(${icon_file} PROPERTIES
