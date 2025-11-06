@@ -715,6 +715,7 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 		case DEVICE_ID_KONAXM:						bitFileInfo.bitFileType = NTV2_BITFILE_KONAXM;						break;
         case DEVICE_ID_KONAIP_25G:					bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_25G;					break;
 		case DEVICE_ID_IP25_R:						bitFileInfo.bitFileType = NTV2_BITFILE_TYPE_INVALID;				break;
+		case DEVICE_ID_VKONA:						bitFileInfo.bitFileType = NTV2_BITFILE_NO_CHANGE;					break;
 		case DEVICE_ID_SOFTWARE:
 		case DEVICE_ID_NOTFOUND:					bitFileInfo.bitFileType = NTV2_BITFILE_TYPE_INVALID;				break;
 	#if !defined (_DEBUG)

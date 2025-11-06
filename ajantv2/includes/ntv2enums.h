@@ -77,7 +77,7 @@ typedef enum
 	DEVICE_ID_KONALHIDVI				= 0x10266401,	///< @brief See \ref konalhi
 	DEVICE_ID_KONAX						= 0X10958501,	///< @brief See \ref konax
 	DEVICE_ID_KONAXM					= 0X10958500,	///< @brief See \ref konaxm
-	DEVICE_ID_SOFTWARE					= 0x534F4654,	///< @brief Software device that doesn't emulate one of the above devices
+	DEVICE_ID_SOFTWARE					= 0x534F4654,	///< @brief 'SOFT' Software device that doesn't emulate one of the above devices
 	DEVICE_ID_SOJI_3DLUT				= 0x10922400,
     DEVICE_ID_SOJI_DIAGS                = 0x10922499,
 	DEVICE_ID_SOJI_OE1					= 0x10922401,
@@ -89,6 +89,7 @@ typedef enum
 	DEVICE_ID_SOJI_OE7					= 0x10922407,
 	DEVICE_ID_TTAP						= 0x10416000,	///< @brief See \ref ttap
 	DEVICE_ID_TTAP_PRO					= 0x10879000,	///< @brief See \ref ttappro
+	DEVICE_ID_VKONA						= 0x564B4F4E,	//	'VKON'
 	//Devices below this line do not have OEM SDK support
 	DEVICE_ID_IP25_R					= 0x11033300,
 	DEVICE_ID_NOTFOUND					= 0xFFFFFFFF,	///< @brief Invalid or "not found"
