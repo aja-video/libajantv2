@@ -603,8 +603,7 @@ void NTV2Burn4KQuadrant::PlayFrames (void)
 	BURNNOTE("Thread started");
 
 	//	Initialize AutoCirculate...
-	if (!mOutputDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel, mConfig.fOutputFrames.count(), mOutputAudioSystem, acOptions,
-													1 /*numChannels*/,  mConfig.fOutputFrames.firstFrame(),  mConfig.fOutputFrames.lastFrame()))
+	if (!mOutputDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel, mConfig.fOutputFrames, mOutputAudioSystem, acOptions))
 		{BURNFAIL("AutoCirculateInitForOutput failed");  mGlobalQuit = true;}
 
 	while (!mGlobalQuit)
@@ -709,11 +708,9 @@ void NTV2Burn4KQuadrant::CaptureFrames (void)
 
 	//	Initialize AutoCirculate...
 	if (!mInputDevice.AutoCirculateInitForInput (mConfig.fInputChannel,		//	channel
-											mConfig.fInputFrames.count(),	//	numFrames (zero if specifying range)
+											mConfig.fInputFrames,			//	frame range
 											mInputAudioSystem,				//	audio system
-											AUTOCIRCULATE_WITH_RP188,		//	flags
-											1,								//	frameStores to gang
-											mConfig.fInputFrames.firstFrame(), mConfig.fInputFrames.lastFrame()))
+											AUTOCIRCULATE_WITH_RP188))		//	flags
 		{BURNFAIL("AutoCirculateInitForInput failed");  mGlobalQuit = true;}
 	else
 		//	Start AutoCirculate running...
