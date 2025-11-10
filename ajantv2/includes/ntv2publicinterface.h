@@ -10340,4 +10340,10 @@ typedef struct HDRDriverValues{
 #define NTV2_IS_VALID_HDR_MASTERING_LUMINENCE(__val__)	(true)
 #define NTV2_IS_VALID_HDR_LIGHT_LEVEL(__val__)			(true)
 
+#if 0  &&  defined(_DEBUG)
+	//	One-stop-shop for pretend/fake device swap (AJA internal use only)
+	#define NTV2_PRETEND_DEVICE
+	#define NTV2_PRETEND_DEVICE_FROM	DEVICE_ID_IOX3
+	#define NTV2_PRETEND_DEVICE_TO		DEVICE_ID_KONAHDMI
+#endif	//	 _DEBUG
 #endif	//	NTV2PUBLICINTERFACE_H

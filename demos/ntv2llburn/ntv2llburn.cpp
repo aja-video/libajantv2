@@ -206,12 +206,10 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 	// Check to see if desired input/output channels are in use by Auto-Circulate, i.e. another Auto-Circulate-based ntv2 demo is running.
 	AUTOCIRCULATE_STATUS acStatus;
 	if (!mDevice.AutoCirculateInitForInput( mConfig.fInputChannel,
-										    kNumFrameBuffers,
+										    NTV2ACFrameRange(kNumFrameBuffers),
 											NTV2_AUDIOSYSTEM_INVALID,
 											AUTOCIRCULATE_WITH_RP188
-												| (mDevice.features().CanDoCustomAnc() ? AUTOCIRCULATE_WITH_ANC : 0),
-											1,	//	numChannels to gang
-											0, 0))
+												| (mDevice.features().CanDoCustomAnc() ? AUTOCIRCULATE_WITH_ANC : 0)))
 	{
 		cerr << "Failed to init " << NTV2ChannelToString(mConfig.fInputChannel) << " for input. Is channel in-use by Auto-Circulate?" << endl;
 		return AJA_STATUS_FAIL;
@@ -225,12 +223,9 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 	mInputEndFrame = acStatus.acEndFrame;
 
 	if (!mDevice.AutoCirculateInitForOutput( mConfig.fOutputChannel,
-											 kNumFrameBuffers,
+											 NTV2ACFrameRange(kNumFrameBuffers),
 											 NTV2_AUDIOSYSTEM_INVALID,
-											 AUTOCIRCULATE_WITH_RP188
-												| (mDevice.features().CanDoCustomAnc() ? AUTOCIRCULATE_WITH_ANC : 0),
-											 1,	//	numChannels to gang
-											 0, 0))
+											 AUTOCIRCULATE_WITH_RP188  | (mDevice.features().CanDoCustomAnc() ? AUTOCIRCULATE_WITH_ANC : 0)))
 	{
 		cerr << "Failed to init " << NTV2ChannelToString(mConfig.fOutputChannel) << " for output. Is channel in-use by Auto-Circulate?" << endl;
 		return AJA_STATUS_FAIL;

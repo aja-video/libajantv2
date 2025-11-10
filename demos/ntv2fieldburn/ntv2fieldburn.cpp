@@ -510,8 +510,7 @@ void NTV2FieldBurn::PlayFrames (void)
 	}
 
 	//	Initialize AutoCirculate...
-	if (!mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel, mConfig.fOutputFrames.count(), mAudioSystem, acOptions,
-											1 /*numChannels*/,  mConfig.fOutputFrames.firstFrame(),  mConfig.fOutputFrames.lastFrame()))
+	if (!mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel, mConfig.fOutputFrames, mAudioSystem, acOptions))
 		{PLFAIL("AutoCirculateInitForOutput failed");  mGlobalQuit = true;}
 
 	while (!mGlobalQuit)
@@ -655,12 +654,10 @@ void NTV2FieldBurn::CaptureFrames (void)
 	mDevice.AutoCirculateStop (mConfig.fInputChannel);
 
 	//	Initialize AutoCirculate...
-	if (!mDevice.AutoCirculateInitForInput (mConfig.fInputChannel,			//	channel
-											mConfig.fInputFrames.count(),	//	numFrames (zero if specifying range)
-											mAudioSystem,					//	audio system
-											acOptions,						//	flags
-											1,								//	frameStores to gang
-											mConfig.fInputFrames.firstFrame(), mConfig.fInputFrames.lastFrame()))
+	if (!mDevice.AutoCirculateInitForInput (mConfig.fInputChannel,	//	channel
+											mConfig.fInputFrames,	//	frame count/range
+											mAudioSystem,			//	audio system
+											acOptions))				//	flags
 		{BURNFAIL("AutoCirculateInitForInput failed");  mGlobalQuit = true;}
 	else
 		//	Start AutoCirculate running...
