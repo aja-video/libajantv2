@@ -38,6 +38,12 @@ typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter
 #define	kQParamShowParams		"showparams"	///< @brief	Query parameter option that dumps parameters into message log
 #define	kQParamDebugRegistry	"debugregistry"	///< @brief	Query parameter option that enables debugging of PluginRegistry
 
+//	AJA VDEV params:
+#define	kQParamVDevFolderPath	"vdevfpath"		///< @brief	Path to folder containing .vdev files
+#define	kQParamVDevName			"vdevname"		///< @brief	Device name, if not specified in .vdev file, then base name of .vdev file
+#define	kQParamVDevFileName		"vdevfname"		///< @brief	.vdev file name (with extension)
+#define	kQParamVDevIndex		"vdevindex"		///< @brief	Device index number for .vdev virtual device
+
 //	Local URL schemes:
 #define	kLegalSchemeNTV2		"ntv2"
 #define	kLegalSchemeNTV2Local	"ntv2local"
@@ -192,6 +198,7 @@ class AJAExport NTV2DeviceSpecParser
 		void			Parse (void);
 		bool			ParseHexNumber (size_t & pos, std::string & outToken);
 		bool			ParseDecNumber (size_t & pos, std::string & outToken);
+		bool			ParseAlphaNum (size_t & pos, std::string & outToken, const std::string & inOtherChars = "");	//	Starts with letter followed by run of letters and/or digits and/or other chars
 		bool			ParseAlphaNumeric (size_t & pos, std::string & outToken, const std::string & inOtherChars = "");	//	A run of letters and/or decimal digits and/or other chars
 		bool			ParseScheme (size_t & pos, std::string & outToken);	//	An alphanumeric name followed by "://"
 		bool			ParseSerialNum (size_t & pos, std::string & outToken);	//	An 8 or 9 character alphanumeric name or a 64-bit hex number

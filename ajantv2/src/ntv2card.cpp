@@ -12,7 +12,7 @@
 #include "ntv2utils.h"
 #include <sstream>
 #include "ajabase/common/common.h"
-//#include "ajabase/system/info.h"	//	for AJASystemInfo
+#include "ajabase/system/info.h"	//	for AJASystemInfo
 
 using namespace std;
 
@@ -88,24 +88,18 @@ string CNTV2Card::GetDisplayName (void)
 	ostringstream oss;
 	if (IsRemote())
 	{
-		auto params = CNTV2DriverInterface::ConnectParams();
-		if (params.hasKey("displayname"))
-		{
-			oss << params.valueForKey("displayname");
-		}
-		else if (params.hasKey(kNTV2PluginRegInfoKey_LongName))
-		{
-			oss << params.valueForKey(kNTV2PluginRegInfoKey_LongName);
-		}
-		else if (params.hasKey(kNTV2PluginRegInfoKey_ShortName))
-		{
-			oss << params.valueForKey(kNTV2PluginRegInfoKey_ShortName);
-		}
+		const NTV2Dictionary params (ConnectParams());
+		string fName (params.valueForKey(kQParamVDevName)),
+				devNdx (params.valueForKey(kQParamVDevIndex)),
+				model (GetModelName());
+		if (model == "Software" || model == "AJA Device" || model == "(Not Found)" || model == "Unknown" || model == "???")
+			model = fName.empty() ? params.valueForKey(kNTV2PluginRegInfoKey_ShortName) : fName;
+		if (devNdx.empty())
+			{ostringstream tmp;  tmp << GetIndexNumber();  devNdx = tmp.str();}
+		oss << model << " - " << devNdx;
 	}
 	else
-	{
 		oss << GetModelName() << " - " << GetIndexNumber();
-	}
 	return oss.str();
 }
 
@@ -150,8 +144,8 @@ string CNTV2Card::GetDescription (void) const
 	CNTV2Card * pCard = (CNTV2Card*)(this);	//	Ugly: *sigh* If only most CNTV2Card member functions were 'const'
 	ostringstream oss;
 	string hostName("localhost"), snStr;
-//	AJASystemInfo sysInfo (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_System);
-//	sysInfo.GetValue(AJA_SystemInfoTag_System_Name, hostName);
+	AJASystemInfo sysInfo (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_System);
+	sysInfo.GetValue(AJA_SystemInfoTag_System_Name, hostName);
 	oss << pCard->GetModelName();
 	if (!pCard->GetSerialNumberString(snStr))
 		snStr.clear();
