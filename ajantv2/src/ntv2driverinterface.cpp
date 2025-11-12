@@ -422,10 +422,6 @@ NTV2DeviceID CNTV2DriverInterface::GetDeviceID (void)
 	ULWord value(0);
 	if (IsOpen()  &&  ReadRegister(kRegBoardID, value))
 	{
-#if 0	//	Fake out:
-	if (value == ULWord(DEVICE_ID_CORVID88))	//	Pretend a Corvid88 is a TTapPro
-		value = ULWord(DEVICE_ID_TTAP_PRO);
-#endif
 		const NTV2DeviceID currentValue(NTV2DeviceID(value+0));
 		if (currentValue != _boardID)
 			DIWARN(xHEX0N(this,16) << ":  NTV2DeviceID " << xHEX0N(value,8) << " (" << ::NTV2DeviceIDToString(currentValue)
@@ -1199,14 +1195,16 @@ bool CNTV2DriverInterface::GetStreamingApplication (ULWord & outAppType, int32_t
 string CNTV2DriverInterface::GetDescription (void) const
 {
 	if (!IsRemote())
-		return "";
+		return "";	//	This implementation is intended for remote/plugin devices
 	string desc(_pRPCAPI->Description());
-	const NTV2Dictionary parms(ConnectParams());
-	if (desc.empty()  &&  !parms.empty())
-	{
+	if (desc.empty())
+	{	//	Plugin/remote device didn't provide description
+		const NTV2Dictionary parms(ConnectParams());
 		NTV2StringList strs;
 		if (parms.hasKey(kNTV2PluginRegInfoKey_LongName))
-			strs.push_back("\"" + parms.valueForKey(kNTV2PluginRegInfoKey_LongName) + "\" plugin");
+			strs.push_back("\"" + parms.valueForKey(kNTV2PluginRegInfoKey_LongName) + "\"");
+		else if (parms.hasKey(kNTV2PluginRegInfoKey_ShortName))
+			strs.push_back(parms.valueForKey(kNTV2PluginRegInfoKey_ShortName));
 		if (parms.hasKey(kNTV2PluginRegInfoKey_Description))
 			strs.push_back(parms.valueForKey(kNTV2PluginRegInfoKey_Description));
 		else if (parms.hasKey(kNTV2PluginRegInfoKey_Copyright))

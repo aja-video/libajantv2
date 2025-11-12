@@ -415,8 +415,8 @@ void NTV2FrameGrabber::run (void)
 						StopAutoCirculate();
 						ULWord numFrameBuffersAvailable = (mNTV2Card.DeviceGetNumberFrameBuffers() - mNTV2Card.features().GetNumAudioSystems());
 						ULWord startFrameBuffer = (numFrameBuffersAvailable / mNTV2Card.features().GetNumFrameStores()) * ULWord(mChannel);
-						mNTV2Card.AutoCirculateInitForInput (mChannel, 0, ::NTV2ChannelToAudioSystem(mChannel),
-															acOptions, 1, startFrameBuffer, startFrameBuffer+7);
+						mNTV2Card.AutoCirculateInitForInput (mChannel, NTV2ACFrameRange(startFrameBuffer, startFrameBuffer+7),
+															::NTV2ChannelToAudioSystem(mChannel), acOptions);
 					gMutex.unlock();
 					SetupAudio();
 					if (mAudioOutput)

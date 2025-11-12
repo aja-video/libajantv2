@@ -426,8 +426,9 @@ void NTV2Overlay::OutputThread (void)
 		{cerr << "## ERROR:  Failed to allocate " << rasterInfo.GetTotalRasterBytes() << "-byte vid buffer" << endl;	return;}
 
 	mDevice.AutoCirculateStop(mConfig.fOutputChannel);
-	if (mDevice.AutoCirculateInitForOutput(mConfig.fOutputChannel, 2) && mDevice.AutoCirculateGetStatus(mConfig.fOutputChannel, acStatus))	//	Find out which buffers we got
-		fbNum = ULWord(acStatus.acStartFrame);	//	Use them
+	if (mDevice.AutoCirculateInitForOutput(mConfig.fOutputChannel, NTV2ACFrameRange(2))
+		&& mDevice.AutoCirculateGetStatus(mConfig.fOutputChannel, acStatus))	//	Find out which buffers we got
+			fbNum = ULWord(acStatus.acStartFrame);	//	Use them
 	else
 		{cerr << "## NOTE:  Allocate 2-frame AC" << DEC(mConfig.fOutputChannel+1) << " range failed" << endl;	return;}
 
@@ -563,7 +564,7 @@ void NTV2Overlay::InputThread (void)
 		}
 
 		AUTOCIRCULATE_STATUS acStatus;
-		if (!mDevice.AutoCirculateInitForInput(mConfig.fInputChannel, 7))
+		if (!mDevice.AutoCirculateInitForInput(mConfig.fInputChannel, NTV2ACFrameRange(7)))
 		{	cerr << "## NOTE:  Input A/C allocate device frame buffer range failed" << endl;
 			mGlobalQuit = true;
 			continue;

@@ -13,6 +13,7 @@
 #include "ajabase/common/common.h"
 #include "ajabase/system/systemtime.h"
 #include "ajabase/system/atomic.h"
+#include "ajabase/system/info.h"	//	for AJASystemInfo
 #include <iomanip>
 #if !defined(NTV2_PREVENT_PLUGIN_LOAD)
 	#include "ajabase/common/ajarefptr.h"
@@ -308,11 +309,12 @@ void NTV2DeviceSpecParser::Parse (void)
 	//		-	maybe a hexadecimal 64-bit value -- a local device serial number
 	//	A run of 8 or 9 alphanumeric chars -- probably a local device serial number
 	ostringstream err;
-	string	tokDevID, tokIndexNum, tokScheme, tokSerial, tokModelName;
-	size_t	posDevID(0), posIndexNum(0), posScheme(0), posSerial(0), posModelName(0);
+	string	tokDevID, tokIndexNum, tokScheme, tokSerial, tokModelName, tokIPV4, tokPortNum;
+	size_t	posDevID(0), posIndexNum(0), posScheme(0), posSerial(0), posModelName(0), posNetAddr(0);
 	bool	isSerial(ParseSerialNum(posSerial, tokSerial)), isScheme(ParseScheme(posScheme, tokScheme));
 	bool	isIndexNum(ParseDecNumber(posIndexNum, tokIndexNum)), isDeviceID(ParseDeviceID(posDevID, tokDevID));
 	bool	isModelName(ParseModelName(posModelName, tokModelName));
+	bool	isIPV4Port(ParseHostAddressAndPortNumber(posNetAddr, tokIPV4, tokPortNum));
 	if (isScheme  &&  tokScheme == kLegalSchemeNTV2Local)
 	{	//	Re-parse serial#, index#, deviceID, modelName from just past "://"...
 		posDevID = posIndexNum = posSerial = posModelName  = posScheme;
@@ -374,6 +376,21 @@ void NTV2DeviceSpecParser::Parse (void)
 		}
 		if (isIndexNum)
 		{
+			if (posIndexNum < SpecLength())
+			{	//	Check if extra chars past index num is dotted quad:
+				if (isIPV4Port && !tokIPV4.empty())
+				{
+					mPos = posNetAddr;
+					mResult.insert(kConnectParamScheme, "ntv2nubrpclib");
+					mResult.insert(kConnectParamHost, tokIPV4);
+					if (!tokPortNum.empty())
+						mResult.insert(kConnectParamPort, tokPortNum);
+					break;
+				}
+				err << "Extra characters past index number";
+				AddError(err.str());
+				break;
+			}
 			mPos = posIndexNum;
 			mResult.insert(kConnectParamDevIndex, tokIndexNum);
 			mResult.insert(kConnectParamScheme, kLegalSchemeNTV2Local);
@@ -417,10 +434,10 @@ void NTV2DeviceSpecParser::Parse (void)
 				mQueryParams = params;
 				mPos = posQuery;
 			}
-			if (mPos < SpecLength())
-				{err << "Extra character(s) at " << DEC(mPos);  AddError(err.str());  break;}
 		}
-	} while (false);
+	} while (false);	//	Once thru
+	if (mPos < SpecLength())
+		{err << "Parser failed at character position " << DEC(mPos);  AddError(err.str());}
 	#if defined(_DEBUG)
 		ostringstream oss;
 		if (Successful())
@@ -611,14 +628,32 @@ bool NTV2DeviceSpecParser::ParseDecNumber (size_t & pos, string & outToken)
 	return !outToken.empty();
 }
 
-bool NTV2DeviceSpecParser::ParseAlphaNumeric (size_t & pos, string & outToken, const std::string & inOtherChars)
-{
+bool NTV2DeviceSpecParser::ParseAlphaNum (size_t & pos, string & outToken, const std::string & inOtherChars)
+{	//	Run of letters and/or digits, but must start with letter
 	outToken.clear();
 	string tokAlphaNum;
 	while (pos < SpecLength())
 	{
 		const char ch(CharAt(pos));
-		if (!IsLetter(ch) && !IsDecimalDigit(ch) && inOtherChars.find(ch) == string::npos)
+		if (!IsLetter(ch)  &&  !IsDecimalDigit(ch)  &&  inOtherChars.find(ch) == string::npos)
+			break;	//	Break if not letter/digit
+		if (tokAlphaNum.empty() && !IsLetter(ch))
+			break;	//	Didn't start with letter!
+		++pos;  tokAlphaNum += ch;
+	}
+	if (tokAlphaNum.length() > 0)
+		outToken = tokAlphaNum;
+	return !outToken.empty();
+}
+
+bool NTV2DeviceSpecParser::ParseAlphaNumeric (size_t & pos, string & outToken, const std::string & inOtherChars)
+{	//	Run of letters and/or digits (and can start with either)
+	outToken.clear();
+	string tokAlphaNum;
+	while (pos < SpecLength())
+	{
+		const char ch(CharAt(pos));
+		if (!IsLetter(ch)  &&  !IsDecimalDigit(ch)  &&  inOtherChars.find(ch) == string::npos)
 			break;
 		++pos;  tokAlphaNum += ch;
 	}
@@ -631,7 +666,7 @@ bool NTV2DeviceSpecParser::ParseScheme (size_t & pos, string & outToken)
 {
 	outToken.clear();
 	string rawScheme, tokScheme;
-	while (ParseAlphaNumeric(pos, rawScheme))
+	while (ParseAlphaNum(pos, rawScheme))
 	{
 		tokScheme = rawScheme;
 		char ch(CharAt(pos));
@@ -712,7 +747,7 @@ bool NTV2DeviceSpecParser::ParseModelName (size_t & pos, string & outToken)
 {
 	outToken.clear();
 	string tokName;
-	if (!ParseAlphaNumeric(pos, tokName, " "))
+	if (!ParseAlphaNum(pos, tokName, " "))
 		return false;
 	aja::lower(tokName);	//	Fold to lower case
 
@@ -736,7 +771,7 @@ bool NTV2DeviceSpecParser::ParseDNSName (size_t & pos, string & outDNSName)
 	string dnsName, name;
 	size_t dnsPos(pos);
 	char ch(0);
-	while (ParseAlphaNumeric(dnsPos, name, "_-"))	//	also allow '_' and '-'
+	while (ParseAlphaNum(dnsPos, name, "_-"))	//	also allow '_' and '-'
 	{
 		if (!dnsName.empty())
 			dnsName += '.';
@@ -755,23 +790,22 @@ bool NTV2DeviceSpecParser::ParseDNSName (size_t & pos, string & outDNSName)
 bool NTV2DeviceSpecParser::ParseIPv4Address (size_t & pos, string & outIPv4)
 {
 	outIPv4.clear();
-	string ipv4Name, num;
+	NTV2StringList ipv4Name;
+	string num;
 	size_t ipv4Pos(pos);
 	char ch(0);
 	while (ParseDecNumber(ipv4Pos, num))
 	{
-		if (!ipv4Name.empty())
-			ipv4Name += '.';
-		ipv4Name += num;
+		ipv4Name.push_back(num);
 		ch = CharAt(ipv4Pos);
 		if (ch != '.')
 			break;
 		++ipv4Pos;
 	}
-	if (!ipv4Name.empty())
+	if (ipv4Name.size() == 4)
 		pos = ipv4Pos;
-	outIPv4 = ipv4Name;
-	return !outIPv4.empty();
+	outIPv4 = aja::join(ipv4Name, ".");
+	return ipv4Name.size() == 4;
 }
 
 bool NTV2DeviceSpecParser::ParseHostAddressAndPortNumber (size_t & pos, string & outAddr, string & outPort)
@@ -1360,6 +1394,8 @@ ULWord PluginRegistry::countForPath (const string & path)
 void PluginRegistry::monitor (void)
 {
 	P_NOTE("PluginRegistry " << INSTP(this) << " monitor started");
+	ostringstream oss; oss << "PluginReg" << HEX0N(uint32_t(uint64_t(this)),8);
+	mMonitor.SetThreadName(oss.str().c_str());
 	while (!mQuitMonitor)
 	{
 		{
@@ -2027,7 +2063,15 @@ ostream & NTV2RPCClientAPI::Print (ostream & oss) const
 
 string NTV2RPCClientAPI::Description (void) const
 {
-	return "";
+	NTV2StringList strs;
+	string fName(ConnectParam(kQParamVDevFileName)), hostName;
+	if (!fName.empty())
+		strs.push_back(string("from '") + fName + "'");
+	AJASystemInfo sysInfo (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_System);
+	sysInfo.GetValue(AJA_SystemInfoTag_System_Name, hostName);
+	if (!hostName.empty())
+		{strs.push_back("on");  strs.push_back(string("'") + hostName + "'");}
+	return aja::join(strs, " ");
 }
 
 bool NTV2RPCClientAPI::NTV2Connect (void)

@@ -888,26 +888,36 @@ bool CNTV2DeviceScanner::GetVDevList (NTV2DeviceInfoList & outVDevList)
 		newVDev.vdevName			= "";
 
 		//	EXPECTED JSON KEYS:
+		//	"urlspec"	[required]	Specifies urlspec used to load the plugin. NOTE: It must have at least one query param in the URL.
 		//	"name"		[optional]	Specifies a human-readable name for the device.
-		//	"urlspec"	[required]	Specifies entire urlspec to use to load the plugin.
-		//							Cannot be used with "plugin" or "host".
-		string hostName;
+		//							If not specified, the .vdev file's base name is used instead.
 		auto pluginVal (vdevJson["plugin"]), nameVal (vdevJson["name"]), hostVal (vdevJson["host"]), urlspecVal (vdevJson["urlspec"]);
 		if (urlspecVal.is_null())
-			{PLFAIL("File: '" << vdevFile << "' missing required 'urlspec' parameter");  continue;}
+			{PLFAIL("File '" << vdevFile << "': missing required 'urlspec' parameter");  continue;}
 		newVDev.vdevUrl = urlspecVal.get<std::string>();	//	done, we have the vdevUrl
 		if (!pluginVal.is_null())
-			PLWARN("File: '" << vdevFile << "' 'plugin' parameter ignored");
+			PLWARN("File '" << vdevFile << "': 'plugin' parameter ignored");
 		if (!hostVal.is_null())
-			PLWARN("File: '" << vdevFile << "' 'host' parameter ignored");
-
+			PLWARN("File '" << vdevFile << "': 'host' parameter ignored");
 		if (!nameVal.is_null())
-		{
-			ostringstream oss;
-			oss << nameVal.get<std::string>() << " - " << newVDev.deviceIndex;
-			newVDev.deviceIdentifier = oss.str();
-			newVDev.vdevName = nameVal.get<std::string>();
+			newVDev.vdevName = nameVal.get<std::string>();	//	Name specified in JSON file
+		{	//	URLencode & append these URL params:  &vdevfname=   &vdevfpath=    &vdevname=   &vdevbasename=
+			newVDev.vdevUrl += "&" kQParamVDevFolderPath "=" + ::PercentEncode(vdevPath);
+			string fName (vdevFile);
+			fName.erase(fName.find(vdevPath), vdevPath.length()+1);		//	Remove everything up to file name
+			newVDev.vdevUrl += "&" kQParamVDevFileName "=" + ::PercentEncode(fName);	//	Remember file name
+			fName.erase(fName.length()-5, 5);							//	Lop off file name extension
+			if (newVDev.vdevName.empty())
+				newVDev.vdevName = fName;	//	Use file base name if no name specified in JSON file
+			newVDev.vdevUrl += "&" kQParamVDevName "=" + ::PercentEncode(newVDev.vdevName);	//	Remember name
+			ostringstream oss; oss << DEC(newVDev.deviceIndex);
+			newVDev.vdevUrl += "&" kQParamVDevIndex "=" + oss.str();	//	Remember index number
 		}
+		if (!newVDev.vdevName.empty())
+		{	ostringstream oss;  oss << newVDev.vdevName << " - " << newVDev.deviceIndex;
+			newVDev.deviceIdentifier = oss.str();
+		}
+
 		outVDevList.push_back(newVDev);
 	}	//	for each vdev file found
 	return true;

@@ -3103,7 +3103,7 @@ public:
 		@return		\c true if successful; otherwise \c false.
 		@param[in]	inChannel			Specifies the ::NTV2Channel to use. Call ::NTV2DeviceGetNumFrameStores to discover how many
 										FrameStores (and therefore channels) are available on the device.
-		@param[in]	inFrameRange		Optionally specifies the device SDRAM frame range to use. Defaults to the first free 7 frames.
+		@param[in]	inFrameRange		Specifies the device SDRAM frame range to use.
 		@param[in]	inAudioSystem		Specifies the Audio System to use, if any. Defaults to ::NTV2_AUDIOSYSTEM_INVALID (no audio).
 		@param[in]	inOptionFlags		A bit mask that specifies additional AutoCirculate options (e.g., ::AUTOCIRCULATE_WITH_RP188,
 										::AUTOCIRCULATE_WITH_LTC, ::AUTOCIRCULATE_WITH_ANC, etc.). Defaults to zero (no options).
@@ -3170,7 +3170,6 @@ public:
 					::NTV2VideoFormat, etc.) before calling this function.
 		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateInitForInput, \ref autocirculateplayout
 	**/
-
 	AJA_VIRTUAL bool	AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 													const UWord				inFrameCount		= 7,
 													const NTV2AudioSystem	inAudioSystem		= NTV2_AUDIOSYSTEM_INVALID,
@@ -3187,7 +3186,7 @@ public:
 		@return		\c true if successful; otherwise \c false.
 		@param[in]	inChannel			Specifies the ::NTV2Channel to use. Call ::NTV2DeviceGetNumFrameStores to discover how many
 										FrameStores (and therefore channels) are available on the device.
-		@param[in]	inFrameRange		Optionally specifies the device SDRAM frame range to use. Defaults to the first free 7 frames.
+		@param[in]	inFrameRange		Specifies the device SDRAM frame range to use.
 		@param[in]	inAudioSystem		Specifies the Audio System to use, if any. Defaults to ::NTV2_AUDIOSYSTEM_INVALID (no audio).
 		@param[in]	inOptionFlags		A bit mask that specifies additional AutoCirculate options (e.g., ::AUTOCIRCULATE_WITH_RP188,
 										::AUTOCIRCULATE_WITH_LTC, ::AUTOCIRCULATE_WITH_ANC, etc.). Defaults to zero (no options).

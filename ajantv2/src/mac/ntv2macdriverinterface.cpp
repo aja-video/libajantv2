@@ -435,12 +435,12 @@ bool CNTV2MacDriverInterface::ReadRegister (const ULWord inRegNum, ULWord & outV
 		return false;
 	}
 	outValue = uint32_t(scalarO_64);
-#if 0	//	Fake KONAIP25G from C4412G (see also NTV2GetRegisters::GetRegisterValues):
-	if (inRegNum == kRegBoardID  &&  outValue == DEVICE_ID_CORVID44_8K)
-		outValue = DEVICE_ID_KONAIP_25G;
-	else if (inRegNum == kRegReserved83  ||  inRegNum == kRegLPRJ45IP)
-		outValue = 0x0A03FAD9;	//	Local IPv4    10.3.250.217
-#endif	//	0
+#if defined(NTV2_PRETEND_DEVICE)
+	if (inRegNum == kRegBoardID  &&  outValue == NTV2_PRETEND_DEVICE_FROM)
+		outValue = ULWord(NTV2_PRETEND_DEVICE_TO);
+//	else if (inRegNum == kRegReserved83  ||  inRegNum == kRegLPRJ45IP)
+//		outValue = 0x0A03FAD9;	//	Local IPv4    10.3.250.217
+#endif	//	NTV2_PRETEND_DEVICE
 	return true;
 }
 
