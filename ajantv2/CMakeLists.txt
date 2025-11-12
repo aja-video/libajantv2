@@ -638,7 +638,7 @@ if (NOT TARGET ${PROJECT_NAME})
         aja_ntv2_log_build_info()
 
         add_library(${PROJECT_NAME} SHARED ${TARGET_SOURCES})
-        
+
         if (NOT AJANTV2_DISABLE_PLUGIN_LOAD)
             add_dependencies(${PROJECT_NAME} mbedtls)
         endif()
@@ -648,7 +648,6 @@ if (NOT TARGET ${PROJECT_NAME})
             ${AJANTV2_TARGET_COMPILE_DEFS})
 
         set_target_properties(${PROJECT_NAME} PROPERTIES VERSION "${AJA_NTV2_VER_STR}")
-
         if (AJA_CODE_SIGN)
             aja_code_sign(${PROJECT_NAME})
         endif()
