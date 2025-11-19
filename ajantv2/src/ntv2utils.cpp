@@ -4679,6 +4679,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_TTAP:					return inForRetailDisplay ? "T-TAP"						: "TTap";
 		case DEVICE_ID_TTAP_PRO:				return inForRetailDisplay ? "T-TAP Pro"					: "TTapPro";
 		case DEVICE_ID_IP25_R:					return "IP25-R";
+		case DEVICE_ID_IP25_T:					return "IP25-T";
 		case DEVICE_ID_SOFTWARE:				return inForRetailDisplay ? "Software"					: "Software";
 		case DEVICE_ID_NOTFOUND:				return inForRetailDisplay ? "AJA Device"				: "(Not Found)";
 #if defined(_DEBUG)
@@ -7785,6 +7786,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_TTAP,
 														DEVICE_ID_TTAP_PRO,
 														DEVICE_ID_IP25_R,
+														DEVICE_ID_IP25_T,
 														DEVICE_ID_NOTFOUND	};
 	if (inKinds == NTV2_DEVICEKIND_NONE)
 		return NTV2DeviceIDSet();

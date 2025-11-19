@@ -91,6 +91,7 @@ typedef enum
 	DEVICE_ID_TTAP_PRO					= 0x10879000,	///< @brief See \ref ttappro
 	//Devices below this line do not have OEM SDK support
 	DEVICE_ID_IP25_R					= 0x11033300,
+	DEVICE_ID_IP25_T					= 0x11033310,
 	DEVICE_ID_NOTFOUND					= 0xFFFFFFFF,	///< @brief Invalid or "not found"
 	DEVICE_ID_INVALID					= DEVICE_ID_NOTFOUND
 
@@ -147,7 +148,8 @@ typedef enum
 													||	(__d__) == DEVICE_ID_IOIP_2110				\
 													||	(__d__) == DEVICE_ID_IOIP_2110_RGB12		\
 													||	(__d__) == DEVICE_ID_KONAIP_25G				\
-													||	(__d__) == DEVICE_ID_ZEFRAM	)
+													||	(__d__) == DEVICE_ID_IP25_R           \
+                          ||  (__d__) == DEVICE_ID_IP25_T  )
 
 #define NTV2_DEVICE_SUPPORTS_SMPTE2022(__d__)	(		(__d__) == DEVICE_ID_KONAIP_2022			\
 													||	(__d__) == DEVICE_ID_IOIP_2022	)
