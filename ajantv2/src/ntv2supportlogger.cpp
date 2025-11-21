@@ -655,13 +655,13 @@ void CNTV2SupportLogger::FetchAutoCirculateLog (ostringstream & oss) const
 	int32_t					appPID			(0);
 	ChannelToACStatus		perChannelStatus;	//	Per-channel AUTOCIRCULATE_STATUS
 	ChannelToPerFrameTCList perChannelTCs;		//	Per-channel collection of per-frame TCs
-	NTV2EveryFrameTaskMode	taskMode	(NTV2_DISABLE_TASKS);
+	NTV2TaskMode			taskMode	(NTV2_DISABLE_TASKS);
 	const NTV2DeviceID		deviceID	(mDevice.GetDeviceID());
 	const ULWord			numChannels (::NTV2DeviceGetNumVideoChannels(deviceID));
 	static const string		dashes		(25, '-');
 
 	//	This code block takes a snapshot of the current AutoCirculate state of the device...
-	mDevice.GetEveryFrameServices(taskMode);
+	mDevice.GetTaskMode(taskMode);
 	mDevice.GetStreamingApplication(appSignature, appPID);
 
 	//	Grab A/C status for each channel...

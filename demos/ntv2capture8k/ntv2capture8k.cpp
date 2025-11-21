@@ -60,7 +60,7 @@ void NTV2Capture8K::Quit (void)
 	if (!mConfig.fDoMultiFormat)
 	{
 		mDevice.ReleaseStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid()));
-		mDevice.SetEveryFrameServices(mSavedTaskMode);		//	Restore prior task mode
+		mDevice.SetTaskMode(mSavedTaskMode);		//	Restore prior task mode
 	}
 
 }	//	Quit
@@ -93,7 +93,7 @@ AJAStatus NTV2Capture8K::Init (void)
 	ULWord	appSignature	(0);
 	int32_t	appPID			(0);
 	mDevice.GetStreamingApplication (appSignature, appPID);	//	Who currently "owns" the device?
-	mDevice.GetEveryFrameServices(mSavedTaskMode);			//	Save the current device state
+	mDevice.GetTaskMode(mSavedTaskMode);	//	Save the current task mode
 	if (!mConfig.fDoMultiFormat)
 	{
 		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid())))
@@ -101,9 +101,8 @@ AJAStatus NTV2Capture8K::Init (void)
 			cerr << "## ERROR:  Unable to acquire '" << mDevice.GetDisplayName() << "' because another app (pid " << appPID << ") owns it" << endl;
 			return AJA_STATUS_BUSY;		//	Another app is using the device
 		}
-		mDevice.GetEveryFrameServices(mSavedTaskMode);		//	Save the current state before we change it
 	}
-	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Prevent interference from AJA retail services
+	mDevice.SetTaskMode(NTV2_OEM_TASKS);			//	Prevent interference from AJA retail services
 
 	if (mDevice.features().CanDoMultiFormat())
 		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);

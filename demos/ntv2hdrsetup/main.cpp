@@ -75,15 +75,15 @@ int main (int argc, const char ** argv)
 	//	Acquire the device...
 	ULWord  appSignature (0);
 	int32_t appPID       (0);
-	NTV2EveryFrameTaskMode savedTaskMode(NTV2_TASK_MODE_INVALID);
-	device.GetEveryFrameServices(savedTaskMode);			//	Save the current device state
+	NTV2TaskMode savedTaskMode(NTV2_TASK_MODE_INVALID);
+	device.GetTaskMode(savedTaskMode);			//	Save the current device state
 	device.GetStreamingApplication(appSignature, appPID);	//	Who currently "owns" the device?
 	if (!device.AcquireStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid())))
 	{
 		cerr << "## ERROR:  Unable to acquire device because another app (pid " << appPID << ") owns it" << endl;
 		return 6;	//	Device reserved by other app
 	}
-	device.SetEveryFrameServices(NTV2_OEM_TASKS);	//	Set the OEM service level
+	device.SetTaskMode(NTV2_OEM_TASKS);	//	Set the OEM service level
 
 	if (verbose)
 	{
@@ -114,7 +114,7 @@ int main (int argc, const char ** argv)
 	//	Loop until a key is pressed, that way user can inspect the changes with watcher
 	CNTV2DemoCommon::WaitForEnterKeyPress();
 
-	device.SetEveryFrameServices(savedTaskMode);	//	Restore prior tasks mode
+	device.SetTaskMode(savedTaskMode);	//	Restore prior tasks mode
 	device.ReleaseStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid()));	//	Release the device
 
 	return 0;	//	Success!

@@ -6339,7 +6339,7 @@ string NTV2WidgetTypeToString (const NTV2WidgetType inValue, const bool inCompac
 	return "";
 }
 
-string NTV2TaskModeToString (const NTV2EveryFrameTaskMode inValue, const bool inCompactDisplay)
+string NTV2TaskModeToString (const NTV2TaskMode inValue, const bool inCompactDisplay)
 {
 	switch (inValue)
 	{
