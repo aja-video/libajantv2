@@ -43,12 +43,12 @@ NTV2Burn4KQuadrant::~NTV2Burn4KQuadrant ()
 	mInputDevice.UnsubscribeInputVerticalEvent (mConfig.fInputChannel);
 	mOutputDevice.UnsubscribeOutputVerticalEvent (mConfig.fOutputChannel);
 
-	mInputDevice.SetEveryFrameServices (mInputSavedTaskMode);										//	Restore prior service level
+	mInputDevice.SetTaskMode (mInputSavedTaskMode);										//	Restore prior service level
 	mInputDevice.ReleaseStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid()));	//	Release the device
 
 	if (!mSingleDevice)
 	{
-		mOutputDevice.SetEveryFrameServices (mOutputSavedTaskMode);										//	Restore prior service level
+		mOutputDevice.SetTaskMode (mOutputSavedTaskMode);										//	Restore prior service level
 		mOutputDevice.ReleaseStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid()));	//	Release the device
 	}
 
@@ -107,16 +107,16 @@ AJAStatus NTV2Burn4KQuadrant::Init (void)
 
 	if (!mInputDevice.AcquireStreamForApplication (kDemoAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
 		{cerr << "## ERROR:  Input device '" << mConfig.fDeviceSpec << "' is in use by another application" << endl;  return AJA_STATUS_BUSY;}
-	mInputDevice.GetEveryFrameServices (mInputSavedTaskMode);	//	Save the current state before changing it
-	mInputDevice.SetEveryFrameServices (NTV2_OEM_TASKS);		//	Since this is an OEM demo, use the OEM service level
+	mInputDevice.GetTaskMode (mInputSavedTaskMode);	//	Save the current state before changing it
+	mInputDevice.SetTaskMode (NTV2_OEM_TASKS);		//	Since this is an OEM demo, use the OEM service level
 
 	if (!mSingleDevice)
 	{
 		if (!mOutputDevice.AcquireStreamForApplication (kDemoAppSignature, static_cast <int32_t>(AJAProcess::GetPid())))
 			{cerr << "## ERROR:  Output device '" << mConfig.fDeviceSpec2 << "' is in use by another application" << endl;  return AJA_STATUS_BUSY;}
 
-		mOutputDevice.GetEveryFrameServices (mOutputSavedTaskMode);		//	Save the current state before changing it
-		mOutputDevice.SetEveryFrameServices (NTV2_OEM_TASKS);			//	Since this is an OEM demo, use the OEM service level
+		mOutputDevice.GetTaskMode (mOutputSavedTaskMode);	//	Save the current state before changing it
+		mOutputDevice.SetTaskMode (NTV2_OEM_TASKS);			//	Since this is an OEM demo, use the OEM service level
 	}
 
 	if (mInputDevice.features().CanDoMultiFormat())

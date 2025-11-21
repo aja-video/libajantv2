@@ -722,13 +722,13 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 		NTV2_ASSERT (inOutXferInfo.NTV2_IS_STRUCT_VALID ());
 	#endif
 
-	NTV2Crosspoint			crosspoint	(NTV2CROSSPOINT_INVALID);
-	NTV2EveryFrameTaskMode	taskMode	(NTV2_OEM_TASKS);
+	NTV2Crosspoint	crosspoint	(NTV2CROSSPOINT_INVALID);
+	NTV2TaskMode	taskMode	(NTV2_OEM_TASKS);
 	if (!GetCurrentACChannelCrosspoint (*this, inChannel, crosspoint))
 		return false;
 	if (!NTV2_IS_VALID_NTV2CROSSPOINT(crosspoint))
 		return false;
-	GetEveryFrameServices(taskMode);
+	GetTaskMode(taskMode);
 
 	if (NTV2_IS_INPUT_CROSSPOINT(crosspoint))
 		inOutXferInfo.acTransferStatus.acFrameStamp.acTimeCodes.Fill(ULWord(0xFFFFFFFF));	//	Invalidate old timecodes
@@ -1178,7 +1178,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 	NTV2TaskMode		taskMode		(NTV2_OEM_TASKS);
 	ULWord				vpidA(0), vpidB(0);
 	AJAAncillaryList	packetList;
-	const NTV2Channel	SDISpigotChannel(GetEveryFrameServices(taskMode) && NTV2_IS_STANDARD_TASKS(taskMode)  ?	 NTV2_CHANNEL3	:  inChannel);
+	const NTV2Channel	SDISpigotChannel(GetTaskMode(taskMode) && NTV2_IS_STANDARD_TASKS(taskMode)  ?	 NTV2_CHANNEL3	:  inChannel);
 	ULWord				F1OffsetFromBottom(0),	F2OffsetFromBottom(0),	F1MonOffsetFromBottom(0),  F2MonOffsetFromBottom(0);
 	if (!result)
 		return false;	//	Can't get frame rate

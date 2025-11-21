@@ -468,13 +468,274 @@ This means that if the `NTV2_DEPRECATE` macro is undefined, then existing code t
   - Deprecated `NTV2AnalogAudioIO` and `NTV2AudioMonitorSelect` enum types.
   - Deprecated `NTV2_AudioMonitor1_2` thru `NTV2_AudioMonitor15_16` in favor of `NTV2_AudioChannel1_2` thru `NTV2_AudioChannel17_18`.
   - Deprecated **NTV2AudioMonitorSelectToString** utility.
-- **SDK 16.2:** Defined macro `NTV2_DEPRECATE_16_2` in `ajatypes.h`. Here are the functions that have newly been marked for deprecation in SDK 16.2:
+  - What’s new:
+    - New in **CNTV2Card**:
+      - **GetAnalogAudioTransmitEnable** and **SetAnalogAudioTransmitEnable** functions.
+      - **GetRunningFirmwareUserID** function.
+      - **GetHDMIOutStatus** function.
+      - **HasMultiRasterWidget**, **SetMultiRasterBypassEnable**, **GetMultiRasterBypassEnable** functions.
+      - `inChannel` parameter of **CNTV2Card::DMAClearAncRegion** now defaults to `NTV2_CHANNEL1`.
+    - New widget interrogation functions in **CNTV2SignalRouter**:
+      - **WidgetIDToChannel**, **WidgetIDFromTypeAndChannel**, **WidgetIDToType**
+      - **IsSDIWidgetType**, **IsSDIInputWidgetType**, **IsSDIOutputWidgetType**, **Is3GSDIWidgetType**, **Is12GSDIWidgetType**
+      - **IsDualLinkWidgetType**, **IsDualLinkInWidgetType**, **IsDualLinkOutWidgetType**
+      - **IsHDMIWidgetType**, **IsHDMIInWidgetType**, **IsHDMIOutWidgetType**
+    - New utilities in `ntv2utils.h`:
+      - **NTV2GetSDKVersionComponent**
+      - **NTV2UpConvertModeToString**, **NTV2DownConvertModeToString**, **NTV2IsoConvertModeToString**
+      - **NTV2HDMIBitDepthToString**, **NTV2HDMIAudioChannelsToString**, **NTV2HDMIProtocolToString**, **NTV2HDMIRangeToString**, **NTV2HDMIColorSpaceToString**, **NTV2AudioFormatToString**
+- **SDK 16.2:** Defined macro `NTV2_DEPRECATE_16_2` in `ajatypes.h`.
   - In **CNTV2Card**:
     - Deprecated obsolete functions **CNTV2Card::GetActiveFrameDimensions** and **CNTV2Card::GetNumberActiveLines**.
     - Deprecated obsolete functions **CNTV2Card::SetPCIAccessFrame**, **CNTV2Card::GetPCIAccessFrame** and **CNTV2Card::FlipFlopPage**.
     - Member functions **CNTV2Card::GetBaseAddress**, **CNTV2Card::GetRegisterBaseAddress** and **CNTV2Card::GetXena2FlashBaseAddress** first deprecated in SDK 16.0 now produce compile-time warnings when used.
     - Two overloaded member functions **NTV2TestPatternGen::DrawTestPattern** first deprecated in SDK 16.0 now produce compile-time warnings when used.
   - In **libajacc** Closed-Caption Library, the deprecated **CNTV2CaptionRenderer** member functions (**GetRenderer**, **BurnChar**, **BurnString**, **BurnStringAtXY**) first deprecated in SDK 16.0 now produce compile-time warnings when used.
+  - What’s new:
+    - New in **CNTV2Card**:
+      - A new overload of **GetDeviceFrameInfo** that returns more information.
+      - A new multiple-channel version of **SetVANCShiftMode**.
+      - New **SetNumberAudioChannels**, **SetAudioBufferSize** and **SetAudioLoopBack** functions that operate on multiple audio systems.
+      - **GetMultiLinkAudioMode** and **SetMultiLinkAudioMode** functions for multilink audio support.
+      - **SetSDIOutputAudioSystem** that operates on multiple SDI outputs.
+      - New **IsMultiRasterWidgetChannel** and **IS_CHANNEL_VALID** functions.
+    - New `NTV2AudioSystemSet` & `NTV2AudioSystemSetConstIter` STL derivatives.
+    - New **NTV2PrintAudioSystemSet**, **NTV2AudioSystemSetToStr**, **NTV2MakeAudioSystemSet** functions.
+    - New **GetAudioSamplesPerSecond** and **NTV2BitfileTypeToString** utility functions.
+    - New **NTV2FormatDesc::GetVideoWriteSize** function.
+    - **AJAFileIO::GetExecutablePath** functions (for normal and wide strings).
+- **SDK 16.3:** Defined macro `NTV2_DEPRECATE_16_3` in `ajatypes.h`. This SDK was never released. All of its changes appeared in SDK 17.0.
+  - Deprecated the obsolete `NTV2NubProtocolVersion` type.
+  - Deprecated these **NTV2IOKind** enums:
+    - `NTV2_INPUTSOURCES_ALL` — use `NTV2_IOKINDS_ALL` instead.
+    - `NTV2_INPUTSOURCES_SDI` — use `NTV2_IOKINDS_SDI` instead.
+    - `NTV2_INPUTSOURCES_HDMI` — use `NTV2_IOKINDS_HDMI` instead.
+    - `NTV2_INPUTSOURCES_ANALOG` — use `NTV2_IOKINDS_ANALOG` instead.
+    - `NTV2_INPUTSOURCES_NONE` — use `NTV2_IOKINDS_NONE` instead.
+  - In the `ntv2publicinterface.h` header, deprecated these message-type macros:
+    - `AUTOCIRCULATE_TYPE_STATUS` — use `NTV2_TYPE_ACSTATUS` instead.
+    - `AUTOCIRCULATE_TYPE_XFER` — use `NTV2_TYPE_ACXFER` instead.
+    - `AUTOCIRCULATE_TYPE_XFERSTATUS` — use `NTV2_TYPE_ACXFERSTATUS` instead.
+    - `AUTOCIRCULATE_TYPE_TASK` — use `NTV2_TYPE_ACTASK` instead.
+    - `AUTOCIRCULATE_TYPE_FRAMESTAMP` — use `NTV2_TYPE_ACFRAMESTAMP` instead.
+    - `AUTOCIRCULATE_TYPE_GETREGS` — use `NTV2_TYPE_GETREGS` instead.
+    - `AUTOCIRCULATE_TYPE_SETREGS` — use `NTV2_TYPE_SETREGS` instead.
+    - `AUTOCIRCULATE_TYPE_SDISTATS` — use `NTV2_TYPE_SDISTATS` instead.
+  - In **CNTV2Card**, these obsolete functions were deprecated:
+    - `DeviceCanDoFormat(const NTV2FrameRate inFR, const NTV2FrameGeometry inFG, const NTV2Standard inStd)`
+    - **DeviceGetFrameBufferSize**, **DeviceGetAudioFrameBuffer**, **DeviceGetAudioFrameBuffer2**
+    - **GetDefaultVideoOutMode**, **SetDefaultVideoOutMode**, **WriteAudioLastOut**
+    - **ReadGlobalControl**, **WriteGlobalControl**, **GetLTCEmbeddedOutEnable**
+    - `DeviceGetFrameBufferSize(const NTV2FrameGeometry fg, const NTV2FrameBufferFormat pf)`
+    - `DeviceGetNumberFrameBuffers(const NTV2FrameGeometry fg, const NTV2FrameBufferFormat pf)`
+    - `DeviceGetAudioFrameBuffer(const NTV2FrameGeometry fg, const NTV2FrameBufferFormat pf)`
+    - `DeviceGetAudioFrameBuffer2(const NTV2FrameGeometry fg, const NTV2FrameBufferFormat pf)`
+  - In **CNTV2Card**, these functions were deprecated:
+    - **DeviceCanDoDSKMode** — call **DeviceCapabilities::CanDoDSKMode** instead.
+    - **DeviceCanDoVideoFormat** — call **DeviceCapabilities::CanDoVideoFormat** instead.
+    - **DeviceCanDoFrameBufferFormat** — call **DeviceCapabilities::CanDoFrameBufferFormat** instead.
+    - **DeviceCanDoWidget** — call **DeviceCapabilities::CanDoWidget** instead.
+    - **DeviceCanDoConversionMode** — call **DeviceCapabilities::CanDoConversionMode** instead.
+    - **DeviceCanDoInputSource** — call **DeviceCapabilities::CanDoInputSource** instead.
+    - **DeviceCanDoAudioMixer** — call **DeviceCapabilities::CanDoAudioMixer** instead.
+    - **DeviceIsDNxIV** — call **DeviceCapabilities::IsDNxIV** instead.
+    - **DeviceHasMicInput** — call **DeviceCapabilities::HasMicInput** instead.
+    - **SetLTCOnReference** — call **SetLTCInputEnable** instead.
+    - **GetLTCOnReference** — call **GetLTCInputEnable** instead.
+    - **SetLTCEmbeddedOutEnable** — call **GetLTCInputEnable** instead.
+  - In **CNTV2DriverInterface**, these functions were deprecated:
+    - **GetNubProtocolVersion**, **SetDefaultDeviceForPID**, and **IsDefaultDeviceForPID**
+  - Deprecated **CNTV2DeviceScanner**’s constructor that accepts a device mask.
+  - Deprecated obsolete member function **NTV2FormatDescriptor::IsSDFormat**.
+  - Deprecated these obsolete **NTV2RPCClientAPI** member functions:
+    - **NTV2DriverGetBitFileInformationRemote**, **NTV2DriverGetBuildInformationRemote**, **NTV2DownloadTestPatternRemote**, **NTV2ReadRegisterMultiRemote**, **NTV2GetDriverVersionRemote**
+  - Deprecated the obsolete **fpCreateNTV2SoftwareDevice** function pointer definition.
+  - What’s New:
+    - **ajaanc**
+      - New **AJAAncillaryList::CompareWithInfo** overload that returns a list of strings that describe each difference.
+    - **ajabase**
+      - **AJADebug::StatGetKeys** and **AJADebug::StatGetSequenceNum**
+    - **ajantv2**
+      - New in **CNTV2Card**
+        - **GetEnabledChannels**, **GetDisabledChannels** — return an `NTV2ChannelSet` of all enabled or disabled FrameStores.
+        - New **NTV2Dictionary** class.
+        - New **NTV2DeviceSpecParser** class.
+      - New in **NTV2Buffer** class:
+        - **FindAll** instance method
+        - **HostPageSize** class method
+      - New in **NTV2_HEADER**
+        - New accessor functions **GetTag**, **GetType**, **GetHeaderVersion**, **GetVersion**, **GetPointerSize**, **GetConnectionID**, **SetConnectionID**
+        - New `NTV2_HEADER*` cast operator
+      - New in **NTV2GetRegisters**
+        - **GetRequestedRegisterNumbers**, **GetBadRegisters** functions.
+        - New `NTV2_HEADER*` cast operator
+      - New in **NTV2SetRegisters**
+        - **GetRequestedRegisterCount**, **GetRequestedRegisterWrites**, **GetNumFailedWrites** functions.
+        - New `NTV2_HEADER*` cast operator
+      - New `NTV2_HEADER*` cast operators for **NTV2BackSelGetSetRegs**, **NTV2VirtualData**, **FRAME_STAMP**, **AUTOCIRCULATE_TRANSFER**,
+        **NTV2Bitstream**, **NTV2StreamChannel**, **NTV2StreamBuffer**, **NTV2MailBuffer**
+      - New **NTV2DeviceGetSupportedInputSources**, **NTV2DeviceGetSupportedOutputDests** functions
+      - New utility functions **StringToSerialNum64**, **SerialNum64ToString**
+- **SDK 17.0:** Defined macro `NTV2_DEPRECATE_17_0` in `ajatypes.h`.
+  - Deprecated all basic functionality test (BFT) macros in `ntv2bft`. The `ntv2bft.h` header file will be removed in a future SDK.
+  - Deprecated these **CNTV2Card** functions:
+    - **CanDoAudioWaitForVBI** — replaced by calling `IsSupported` with `kDeviceAudioCanWaitForVBI`.
+    - **HasCanConnectROM** — replaced by calling `IsSupported` with `kDeviceHasXptConnectROM`.
+    - Obsolete functions **ReadXXXXXStatusRegister** and **ReadXXXXXStatus2Register**, where XXXXX is “Input”, “Input56”, “Input78”, “3GInput”, “3GInput5678”, etc.
+  - Deprecated these **Device Features** functions:
+    - **NTV2DeviceHasSPIvXXX** where XXX is 2, 3, 4 or 5 — all replaced by **NTV2DeviceGetSPIFlashVersion**.
+    - **NTV2DeviceHasGenlockvXXX** where XXX is 2 or 3 — all replaced by **NTV2DeviceGetGenlockVersion**.
+    - **NTV2DeviceHasColorSpaceConverterOnChannel2** — call **NTV2DeviceCanDoWidget** with `NTV2_WgtCSC2` instead.
+    - **NTV2DeviceCanDoAudioXXXChannels** where XXX is 2, 6 or 8 — all replaced by **NTV2DeviceGetMaxAudioChannels**.
+    - These functions were already deprecated, but now they emit compile-time warnings: **NTV2DeviceGetNumAudioStreams**, **NTV2DeviceCanDoAudioN**, **NTV2DeviceCanDoLTCOutN**, **NTV2DeviceCanDoLTCInN**, **NTV2DeviceCanDoRS422N**
+  - Deprecated these **NTV2ReferenceSource** enums: `NTV2_REFERENCE_HDMI_INPUT`, `NTV2_REFERENCE_ANALOG_INPUT` — use `NTV2_REFERENCE_HDMI_INPUT1` or `NTV2_REFERENCE_ANALOG_INPUT1`, respectively
+  - Deprecated these macros:
+    - `NTV2_POINTER_ALLOCATED`, replaced with `NTV2Buffer_ALLOCATED`
+    - `NTV2_POINTER_PAGE_ALIGNED`, replaced with `NTV2Buffer_PAGE_ALIGNED`
+    - `NTV2_POINTER_TO_ULWORD64`, replaced with `NTV2Buffer_TO_ULWORD64`
+  - Deprecated **NTV2_POINTER** — this class was renamed **NTV2Buffer**
+  - What’s New:
+    - New in `ntv2devicefeatures.h`
+      - Added support for KONA-X and KONA-XM: `kDeviceCanDoBreakoutBoard`, `kDeviceHasBreakoutBoard`
+      - Other “Can Do” enums: `kDeviceAudioCanWaitForVBI`, `kDeviceHasNTV4FrameStores`, `kDeviceHasXptConnectROM`
+      - Other new “Get Num” enums: `kDeviceGetNumLUTBanks`, `kDeviceGetTotalNumAudioSystems`, `kDeviceGetNumBufferedAudioSystems`, `kDeviceGetNumTSIMuxers`
+    - New in **CNTV2DriverInterface**
+      - **IsSupported** for device-specific “can do” or “has” inquiry
+      - **GetNumSupported** for device-specific “how many” inquiry
+      - **GetSupportedItems** for device-specific “get all supported items of this kind” inquiry
+      - **GetDescription** for a string containing a human-readable description of the device.
+      - Protected implementations **GetBoolParam** and **GetNumericParam**
+    - New in **CNTV2Card**
+      - New **features** accessor to obtain **DeviceCapabilities** information.
+      - New **EnableBOBAnalogAudioIn** function (for KONA-X).
+      - New **GetTransmitSDIs** function, to obtain an `NTV2ChannelSet` of all bi-directional SDIs that are configured for transmit/output.
+    - New **CNTV2MacDriverInterface::GetConnectionType** function to inquire if using new `DEXT` or old `KEXT` driver.
+    - New in **NTV2FormatDescriptor**
+      - New **GetNumBitsLuma**, **GetNumBitsChroma**, **GetNumBitsAlpha**, **HasAlpha**, **IsRGB** inquiry functions
+    - New in **NTV2RPCClientAPI**
+      - New client API calls for plugins: **NTV2GetBoolParamRemote**, **NTV2GetNumericParamRemote**, **NTV2GetSupportedRemote**
+    - New **NTV2Buffer::IsPageAligned** function.
+    - New **NTV2GetRegisters::PatchRegister** function.
+    - New **NTV2PixelFormats** typedef, a `std::set` of `NTV2PixelFormat` values, plus ostream `operator <<`.
+    - New **NTV2FrameRateSet** typedef, a `std::set` of `NTV2FrameRate` values, plus ostream `operator <<`, and FrameRateSet `operator +=`.
+    - New **NTV2GetSupportedPixelFormats**, **NTV2GetUnsupportedPixelFormats**, **NTV2GetSupportedStandards**, **NTV2GetUnsupportedStandards**, **NTV2DeviceGetSupportedFrameRates** functions.
+- **SDK 17.1:** Defined macro `NTV2_DEPRECATE_17_1` in `ajatypes.h`.
+  - Deprecated the parsing utilities in the `ntv2devicescanner.h` header file. These functions will be removed in a future SDK:
+    - **IsLegalDecimalNumber** — use **aja::is_legal_decimal_number** instead
+    - **IsLegalHexSerialNumber** — use **aja::is_legal_hex_serial_number** instead
+    - **IsHexDigit** — use **aja::is_hex_digit** instead
+    - **IsDecimalDigit** — use **aja::is_decimal_digit** instead
+    - **IsAlphaNumeric** — use **aja::is_alpha_numeric** instead
+    - **IsAlphaNumeric** — use **aja::is_alpha_numeric** instead
+  - Deprecated these **NTV2Dictionary** member functions:
+    - **UpdateFrom** — use **updateFrom** instead
+    - **AddFrom** — use **addFrom** instead
+  - There were substantial changes introduced in the **CNTV2DeviceScanner** class that have proved to be problematic,
+    and will likely need to be reverted in a future SDK.
+  - What’s New:
+    - New in `ntv2devicefeatures.h`:
+      - New “Can Do” enums: `kDeviceCanDoAudioInput`, `kDeviceCanDoAudioOutput`, `kDeviceCanDoAESAudioOut`, `kDeviceCanDoHDMIQuadRasterConversion`,
+        `kDeviceCanDoCustomHancInsertion`, `kDeviceCanDoStreamingDMA`, `kDeviceROMHasBankSelect`, `kDeviceHasIDSwitch`, `kDeviceHasPWMFanControl`
+      - New “Get Num” enum: `kDeviceGetSPIFlashVersion`
+      - New **NTV2DeviceCanDoOutputTCIndex** function
+    - **ajaanc**
+      - **AJAAncillaryList::AddReceivedAncillaryData** and **AJAAncillaryList::AddReceivedAuxiliaryData**
+    - **ajabase**
+      - New functions in `ajabase/common/common.h`: **aja::is_hex_digit**, **aja::is_decimal_digit**, **aja::is_alpha_numeric**, **aja::is_legal_decimal_number**, **aja::is_legal_hex_serial_number**
+    - **ajantv2**
+      - New in **CNTV2Card**
+        - New APIs to support HDMI Auxiliary Data extraction (new KONA HDMI firmware):
+          - **AncExtractIsProgressive**, **AuxExtractSetEnable**, **AuxExtractIsEnabled**, **AuxExtractGetField1Size**, **AuxExtractGetField2Size**,
+            **AuxExtractGetPacketFilters**, **AuxExtractSetPacketFilters**, **AuxExtractSetFilterInclusionMode**, **AuxExtractGetFilterInclusionMode**,
+            **AuxExtractGetBufferOverrun**, **AuxExtractIsProgressive**, **AuxExtractGetMaxNumPacketFilters**, **AuxExtractGetDefaultPacketFilters**,
+            **AuxSetFrameBufferSize**, **AuxInsertSetEnable**, **AuxInsertIsEnabled**, **AuxInsertGetReadInfo**
+        - Handy new **driverInterface** convenience function that returns a reference to the **CNTV2DriverInterface**.
+      - Handy new **CNTV2DriverInterface::ConnectParams** accessor.
+- **SDK 17.2:** Defined macro `NTV2_DEPRECATE_17_2` in `ajatypes.h`. This SDK was never released. All of its changes appeared in SDK 17.5.
+  - Deprecated these **Device Features** functions:
+    - **NTV2DeviceCanDoAudioOut** — call **DeviceCapabilities::CanDoAudioOutput** instead
+    - **NTV2DeviceCanDoAudioIn** — call **DeviceCapabilities::CanDoAudioInput instead
+    - **NTV2DeviceCanDo292Out** — call **DeviceCapabilities::CanDoWidget(NTV2WidgetType_SDIOut, ndx) instead
+    - **NTV2DeviceCanDo3GOut** — call **DeviceCapabilities::CanDoWidget(NTV2WidgetType_SDIOut3G, ndx) instead
+    - **NTV2DeviceCanDo12GOut** — call **DeviceCapabilities::CanDoWidget(NTV2WidgetType_SDIOut12G, ndx) instead
+    - **NTV2DeviceCanDo292In** — call **DeviceCapabilities::CanDoWidget(NTV2WidgetType_SDIIn, ndx) instead
+    - **NTV2DeviceCanDo3GIn** — call **DeviceCapabilities::CanDoWidget(NTV2WidgetType_SDIIn3G, ndx) instead
+    - **NTV2DeviceCanDo12GIn** — call **DeviceCapabilities::CanDoWidget(NTV2WidgetType_SDIIn12G, ndx) instead
+    - **NTV2DeviceCanDoLTCEmbeddedN**
+    - **NTV2DeviceCanDoOutputDestination**
+    - **NTV2DeviceCanDoColorCorrection**
+    - **NTV2DeviceCanDoProgrammableCSC**
+    - **Get8MBFrameSizeFactor**
+- **SDK 17.5:** Defined macro `NTV2_DEPRECATE_17_5` in `ajatypes.h`.
+  - Deprecated these **AJATimeCode** member functions:
+    - **QueryString** — There’s a new overload of this that works better with high frame-rates.
+    - **QueryRP188** — There’s a new overload of this that works better with high frame-rates.
+  - Deprecated these **CNTV2Card** functions:
+    - **GetAudioOutputEmbedderState** — use **GetSDIOutputAudioEnabled** instead.
+    - **SetAudioOutputEmbedderState** — use **SetSDIOutputAudioEnabled** instead.
+    - **IsBreakoutBoardConnected** — call **IsSupported** with `kDeviceHasBreakoutBoard` instead
+  - Deprecated **CNTV2DeviceScanner::GetDeviceWithSerial** — use the overload that accepts a `std::string` instead of a `uint64_t`.
+  - Deprecated these **NTV2OutputDestination** enums: `NTV2_OUTPUTDESTINATION_ANALOG`, `NTV2_OUTPUTDESTINATION_HDMI` — use `NTV2_OUTPUTDESTINATION_ANALOG1` or `NTV2_OUTPUTDESTINATION_HDMI1`, respectively
+  - Deprecated these **NTV2FrameDimensions** member functions, replaced by their equivalents that start with a lower-case letter:
+    - **GetWidth**, **GetHeight**, **Width**, **Height**, **IsValid**, **SetWidth**, **SetHeight**, **Set**, **Reset**
+    - The older class name **NTV2FrameSize** is now deprecated.
+  - Deprecated these functions that are declared in `ntv2signalrouter.h`:
+    - **GetFrameBufferOutputXptFromChannel** — use **GetFrameStoreOutputXptFromChannel** instead.
+    - **GetFrameBufferInputXptFromChannel** — use **GetFrameStoreInputXptFromChannel** instead.
+  - In the `ntv2democommon.h` header, deprecated these **NTV2VideoFormatKind** enums:
+    - `VIDEO_FORMATS_NON_4KUHD` — use `VIDEO_FORMATS_SDHD` instead.
+    - `VIDEO_FORMATS_UHD2` — use `VIDEO_FORMATS_8KUHD2` instead.
+    - `BOTH_VIDEO_FORMATS` — use `VIDEO_FORMATS_ALL` instead.
+    - `NON_UHD_VIDEO_FORMATS` — use `VIDEO_FORMATS_SDHD` instead.
+    - `UHD_VIDEO_FORMATS` — use `VIDEO_FORMATS_4KUHD` instead.
+  - What’s New:
+    - **ajaanc**
+      - New C++11 move-assignment constructor and `operator =` for **AJAAncillaryList**
+    - **ajantv2**
+      - New accessor methods in **NTV2RegInfo**
+        - Getters: **regNum**, **value**, **mask**, **shift**
+        - Setters: **setRegNum**, **setValue**, **setMask**, **setShift**
+      - New in **CNTV2Card**
+        - New **GetSDIOutputAudioEnabled** and **SetSDIOutputAudioEnabled** functions, for enabling or disabling audio HANC insertion (per SDI-output connector).
+      - New CNTV2DeviceScanner::GetDeviceWithSerial class method.
+      - In **NTV2_HEADER** class, new **GetResultStatus** and **ClearResultStatus** methods.
+      - In **CNTV2SignalRouter** class, new **GetAllWidgetOutputs** class method.
+      - In `ntv2utils.h`, new **NTV2ScanMethodToString** utility function.
+- **SDK 17.6:** Defined macro `NTV2_DEPRECATE_17_6` in `ajatypes.h`.
+  - In this SDK, some of the APIs that uniquely supported the now-very-obsolete Corvid HEVC and KONA-IP (10G) were removed.
+  - Deprecated all **CNTV2Card** and **CNTV2DriverInterface** functions that start with “Hevc” (e.g. **HevcGetDeviceInfo**, etc.)
+  - Conditionally removed all of the “M31” enums defined in `ntv2m31enums.h`. This header file will be removed in a future SDK.
+  - Conditionally removed all enums and macros defined in `ntv2m31publicinterface.h`. This header file will be removed in a future SDK.
+  - Conditionally removed all HEVC-related enums, macros and structs defined in `ntv2publicinterface.h`.
+  - In `ntv2utils.h`:
+    - Deprecated **NTV2M31VideoPresetToString**.
+    - Deprecated these HDR-related functions: **convertHDRFloatToRegisterValues**, **convertHDRRegisterToFloatValues**, **setHDRDefaultsForBT2020** and **setHDRDefaultsForDCIP3**
+  - What’s New:
+    - In `ntv2devicefeatures.h`, new “Get Num” enum: `kDeviceGetGenlockVersion`
+    - In `ntv2utils.h`, new **NTV2DieTempScaleToString** utility function.
+    - In **CNTV2Card**, new member functions **GetAllWidgetInputs** and **GetAllWidgetOutputs**.
+- **SDK 18.0:** Defined macro `NTV2_DEPRECATE_18_0` in `ajatypes.h`.
+  - Deprecated the **NTV2EveryFrameTaskMode** enum type in favor of its replacement **NTV2TaskMode**.
+  - Deprecated the **NTV2InputSourceKind** and **NTV2OutputDestKind** enum types in favor of **NTV2IOKind**.
+  - Deprecated these **CNTV2Card** functions:
+    - **GetEveryFrameServices** & **SetEveryFrameServices** — call **GetTaskMode** & **SetTaskMode** instead, respectively.
+  - What’s New:
+    - **ajabase**
+      - New `AJASystemInfoTag` enums `AJA_SystemInfoTag_Path_NTV2Plugins` and `AJA_SystemInfoTag_Path_NTV2VirtualDevices` for use in **AJASystemInfo**.
+    - **ajantv2**
+      - **DeviceCapabilities** class:
+        - New **AudioSampleRates** method, to discover all available audio sample rates supported by the device.
+        - New **CanDoAudioSampleRate** method, to test if audio sample rate is supported by the device.
+      - **NTV2GetRegisters** class:
+        - New const accessor methods: **numRegisters**, **requestedRegisterNumbers**
+        - New non-const accessors: **outNumRegisters**, **outGoodRegisterNumbers** and **outRegisterValues**
+      - **NTV2SetRegisters** class:
+        - New const accessor: **regInfos**
+        - New non-const accessors: **outNumFailures**, **outBadRegIndexes**
+      - New **NTV2AudioRateSet** typedef, an STL `std::set` of `NTV2AudioRate` values.
+      - New in **CNTV2Card**
+        - New **GetTaskMode** and **SetTaskMode** member functions to replace their deprecated “EveryFrameServices” equivalents.
+      - In `ntv2utils.h`, new **NTV2GetPluginsFolderPath** and **NTV2GetVDevFolderPath** utility functions.
 
 </details>
 

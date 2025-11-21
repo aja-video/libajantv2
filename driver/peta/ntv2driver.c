@@ -3094,7 +3094,7 @@ static int platform_probe(struct platform_device *pd)
             }
 	    }
 	
-        if (ntv2pp->_DeviceID == DEVICE_ID_ZEFRAM)
+        if (ntv2pp->_DeviceID == DEVICE_ID_IP25_R || ntv2pp->_DeviceID == DEVICE_ID_IP25_T)
         {
             ntv2pp->m_pRasterMonitor = ntv2_videoraster_open(&ntv2pp->systemContext, "ntv2videoraster", 0);
             if (ntv2pp->m_pRasterMonitor != NULL)

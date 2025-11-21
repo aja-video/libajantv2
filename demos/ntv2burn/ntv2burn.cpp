@@ -64,7 +64,7 @@ void NTV2Burn::Quit (void)
 	{	//	Release the device...
 		mDevice.ReleaseStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid()));
 		if (NTV2_IS_VALID_TASK_MODE(mSavedTaskMode))
-			mDevice.SetEveryFrameServices(mSavedTaskMode);	//	Restore prior task mode
+			mDevice.SetTaskMode(mSavedTaskMode);	//	Restore prior task mode
 	}
 }	//	Quit
 
@@ -89,17 +89,17 @@ AJAStatus NTV2Burn::Init (void)
 	ULWord	appSignature	(0);
 	int32_t	appPID			(0);
 	mDevice.GetStreamingApplication (appSignature, appPID);	//	Who currently "owns" the device?
-	mDevice.GetEveryFrameServices(mSavedTaskMode);			//	Save the current device state
+	mDevice.GetTaskMode(mSavedTaskMode);	//	Save the current device state
 	if (!mConfig.fDoMultiFormat)
 	{
 		if (!mDevice.AcquireStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid())))
 		{
 			cerr << "## ERROR:  Unable to acquire device because another app (pid " << appPID << ") owns it" << endl;
-			return AJA_STATUS_BUSY;		//	Some other app is using the device
+			return AJA_STATUS_BUSY;	//	Some other app is using the device
 		}
-		mDevice.ClearRouting();									//	Clear the current device routing (since I "own" the device)
+		mDevice.ClearRouting();				//	Clear the current device routing (since I "own" the device)
 	}
-	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Force OEM tasks
+	mDevice.SetTaskMode(NTV2_OEM_TASKS);	//	Force OEM tasks
 
 	//	Configure the SDI relays if present
 	if (mDevice.features().HasSDIRelays())

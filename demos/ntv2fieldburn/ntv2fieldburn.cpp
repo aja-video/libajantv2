@@ -58,7 +58,7 @@ void NTV2FieldBurn::Quit (void)
 	{	//	Release the device...
 		mDevice.ReleaseStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid()));
 		if (NTV2_IS_VALID_TASK_MODE(mSavedTaskMode))
-			mDevice.SetEveryFrameServices(mSavedTaskMode);	//	Restore prior task mode
+			mDevice.SetTaskMode(mSavedTaskMode);	//	Restore prior task mode
 	}
 }	//	Quit
 
@@ -83,7 +83,7 @@ AJAStatus NTV2FieldBurn::Init (void)
 	ULWord	appSignature	(0);
 	int32_t	appPID			(0);
 	mDevice.GetStreamingApplication (appSignature, appPID);	//	Who currently "owns" the device?
-	mDevice.GetEveryFrameServices(mSavedTaskMode);			//	Save the current device state
+	mDevice.GetTaskMode(mSavedTaskMode);			//	Save the current device state
 	if (!mConfig.fDoMultiFormat)
 	{
 		if (!mDevice.AcquireStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid())))
@@ -93,7 +93,7 @@ AJAStatus NTV2FieldBurn::Init (void)
 		}
 		mDevice.ClearRouting();	//	Clear the current device routing (since I "own" the device)
 	}
-	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);	//	Force OEM tasks
+	mDevice.SetTaskMode(NTV2_OEM_TASKS);	//	Force OEM tasks
 
 	//	Set up the video and audio...
 	status = SetupVideo();

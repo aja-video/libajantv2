@@ -883,7 +883,7 @@ NTV2CCPlayer::~NTV2CCPlayer (void)
 	mDevice.UnsubscribeOutputVerticalEvent(mActiveFrameStores);
 	if (!mConfig.fDoMultiFormat)
 	{
-		mDevice.SetEveryFrameServices(mSavedTaskMode);										//	Restore prior service level
+		mDevice.SetTaskMode(mSavedTaskMode);	//	Restore prior service level
 		mDevice.ReleaseStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid()));	//	Release the device
 	}
 
@@ -961,11 +961,11 @@ AJAStatus NTV2CCPlayer::Init (void)
 		if (!mDevice.AcquireStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid())))
 		{
 			cerr << "## ERROR:  Cannot acquire '" << mDevice.GetDisplayName() << "' because another app owns it" << endl;
-			return AJA_STATUS_BUSY;		//	Some other app owns the device
+			return AJA_STATUS_BUSY;	//	Some other app owns the device
 		}
-		mDevice.GetEveryFrameServices(mSavedTaskMode);	//	Save the current task mode
+		mDevice.GetTaskMode(mSavedTaskMode);	//	Save the current task mode
 	}
-	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);		//	Set OEM service level
+	mDevice.SetTaskMode(NTV2_OEM_TASKS);		//	Set OEM service level
 
 #if defined(_DEBUG)
 	if (mConfig.fForceRTP & BIT(2))

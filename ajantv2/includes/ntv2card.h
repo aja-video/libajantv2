@@ -527,7 +527,7 @@ public:
 	AJA_VIRTUAL bool	DMAClearAncRegion ( const UWord inStartFrameNumber,
 											const UWord inEndFrameNumber,
 											const NTV2AncillaryDataRegion inAncRegion = NTV2_AncRgn_All,
-											const NTV2Channel = NTV2_CHANNEL1);
+											const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
 		@brief		Answers with the address and size of the given frame.
@@ -732,23 +732,23 @@ public:
 	AJA_VIRTUAL bool		GetFramePulseReference (NTV2ReferenceSource & outRefSource);	//	New in SDK 15.5
 
 	/**
-		@brief		Retrieves the device's current "retail service" task mode.
-		@param[out] outMode		Receives the device's current "every frame task mode" setting. If successful, the
-								variable will contain ::NTV2_DISABLE_TASKS, ::NTV2_STANDARD_TASKS, or ::NTV2_OEM_TASKS.
+		@brief		Retrieves the device's current task mode.
+		@param[out] outMode		Receives the device's current task mode setting.
 		@return		True if successful; otherwise false.
 		@see		CNTV2DriverInterface::GetStreamingApplication, \ref devicesharing
 	**/
-	AJA_VIRTUAL bool		GetEveryFrameServices (NTV2EveryFrameTaskMode & outMode);
+	AJA_VIRTUAL bool		GetTaskMode (NTV2TaskMode & outMode);	//	New in SDK 18.0
 
 	/**
 		@brief		Sets the device's task mode.
 		@return		True if successful; otherwise false.
-		@param[in]	inMode		Specifies the task mode the device is to assume, and must be one of the following values:
-								::NTV2_DISABLE_TASKS, ::NTV2_STANDARD_TASKS, or ::NTV2_OEM_TASKS.
-		@warning	Do not use task mode ::NTV2_STANDARD_TASKS for OEM applications.
+		@param[in]	inMode		Specifies the new task mode for the device.
+		@warning	Do not use ::NTV2_STANDARD_TASKS for OEM applications.
+		@warning	Using ::NTV2_DISABLE_TASKS for OEM applications will disable the driver's automatic configuration of
+					SDI outputs, including automatically setting output VPID.
 		@see		CNTV2DriverInterface::GetStreamingApplication, \ref devicesharing
 	**/
-	AJA_VIRTUAL bool		SetEveryFrameServices (const NTV2EveryFrameTaskMode inMode);
+	AJA_VIRTUAL bool		SetTaskMode (const NTV2TaskMode inMode);	//	New in SDK 18.0
 
 	/**
 		@brief		Determines if a given FrameStore on the AJA device will be used to capture or playout video.
@@ -1192,6 +1192,10 @@ public:
 	**/
 	AJA_VIRTUAL bool		ReadLineCount (ULWord & outValue);
 
+#if !defined(NTV2_DEPRECATE_18_0)
+	AJA_VIRTUAL inline bool		GetEveryFrameServices (NTV2TaskMode & outMode)		{return GetTaskMode(outMode);}	///< @deprecated	Use GetTaskMode instead; deprecated in SDK 18.0
+	AJA_VIRTUAL inline bool		SetEveryFrameServices (const NTV2TaskMode inMode)	{return SetTaskMode(inMode);}	///< @deprecated	Use SetTaskMode instead; deprecated in SDK 18.0
+#endif	//	defined(NTV2_DEPRECATE_18_0)
 #if !defined(NTV2_DEPRECATE_16_3)
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetDefaultVideoOutMode(ULWord mode)); ///< @deprecated	Obsolete starting in SDK 16.3.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetDefaultVideoOutMode(ULWord & outMode)); ///< @deprecated	Obsolete starting in SDK 16.3.
@@ -3081,7 +3085,7 @@ public:
 		@details	If this function succeeds, the driver will have designated a contiguous set of device frame buffers to be written by
 					the FrameStore, and placed the channel into the ::NTV2_AUTOCIRCULATE_INIT state. The channel will then be ready for
 					a subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
-					If the device's ::NTV2EveryFrameTaskMode (see CNTV2Card::GetEveryFrameServices ) is ::NTV2_OEM_TASKS, the driver
+					If the device's ::NTV2TaskMode (see CNTV2Card::GetEveryFrameServices ) is ::NTV2_OEM_TASKS, the driver
 					will perform most of the device setup, including configuring the FrameStore, etc.;
 					otherwise (if ::NTV2_DISABLE_TASKS ), the caller must manage <i>all</i> aspects of the FrameStore ( ::NTV2Mode,
 					::NTV2VideoFormat, etc.) before calling this function.
@@ -3117,7 +3121,7 @@ public:
 		@details	If this function succeeds, the driver will have designated a contiguous set of device frame buffers to be written by
 					the FrameStore, and placed the channel into the ::NTV2_AUTOCIRCULATE_INIT state. The channel will then be ready for
 					a subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
-					If the device's ::NTV2EveryFrameTaskMode (see CNTV2Card::GetEveryFrameServices ) is ::NTV2_OEM_TASKS, the driver
+					If the device's ::NTV2TaskMode (see CNTV2Card::GetEveryFrameServices ) is ::NTV2_OEM_TASKS, the driver
 					will perform most of the device setup, including configuring the FrameStore, etc.;
 					otherwise (if ::NTV2_DISABLE_TASKS ), the caller must manage <i>all</i> aspects of the FrameStore ( ::NTV2Mode,
 					::NTV2VideoFormat, etc.) before calling this function.
@@ -3164,7 +3168,7 @@ public:
 		@details	If this function succeeds, the driver will have designated a contiguous set of device frame buffers to be read by
 					the FrameStore, and placed the channel into the ::NTV2_AUTOCIRCULATE_INIT state. The channel will then be ready for
 					a subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
-					If the device's ::NTV2EveryFrameTaskMode (see CNTV2Card::GetEveryFrameServices ) is ::NTV2_OEM_TASKS, the driver
+					If the device's ::NTV2TaskMode (see CNTV2Card::GetEveryFrameServices ) is ::NTV2_OEM_TASKS, the driver
 					will perform most of the device setup, including configuring the FrameStore, setting the output standard, etc.;
 					otherwise (if ::NTV2_DISABLE_TASKS ), the caller must manage <i>all</i> aspects of the FrameStore ( ::NTV2Mode,
 					::NTV2VideoFormat, etc.) before calling this function.
@@ -3199,7 +3203,7 @@ public:
 		@details	If this function succeeds, the driver will have designated a contiguous set of device frame buffers to be read by
 					the FrameStore, and placed the channel into the ::NTV2_AUTOCIRCULATE_INIT state. The channel will then be ready for
 					a subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
-					If the device's ::NTV2EveryFrameTaskMode (see CNTV2Card::GetEveryFrameServices ) is ::NTV2_OEM_TASKS, the driver
+					If the device's ::NTV2TaskMode (see CNTV2Card::GetEveryFrameServices ) is ::NTV2_OEM_TASKS, the driver
 					will perform most of the device setup, including configuring the FrameStore, setting the output standard, etc.;
 					otherwise (if ::NTV2_DISABLE_TASKS ), the caller must manage <i>all</i> aspects of the FrameStore ( ::NTV2Mode,
 					::NTV2VideoFormat, etc.) before calling this function.
@@ -5240,7 +5244,7 @@ public:
 #if !defined(NTV2_DEPRECATE_16_3)
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetLTCOnReference(bool val))		{return SetLTCInputEnable(val);}	///< @deprecated	Use SetLTCInputEnable instead. First deprecated in SDK 16.3.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetLTCOnReference(bool & outVal))	{return GetLTCInputEnable(outVal);}	///< @deprecated	Use GetLTCInputEnable instead. First deprecated in SDK 16.3.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetLTCEmbeddedOutEnable (const bool inNewValue));	///< @deprecated	Use GetLTCInputEnable instead. First deprecated in SDK 16.3.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetLTCEmbeddedOutEnable (const bool inNewValue));	///< @deprecated	Obsolete, do not use. First deprecated in SDK 16.3.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetLTCEmbeddedOutEnable (bool & outValue));			///< @deprecated	Obsolete, do not use. First deprecated in SDK 16.3.
 #endif	//	!defined(NTV2_DEPRECATE_16_3)
 	///@}

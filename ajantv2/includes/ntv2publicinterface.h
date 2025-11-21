@@ -4465,7 +4465,11 @@ typedef enum
 	NTV2_STANDARD_TASKS,	///< @brief 1: Standard/Retail: device configured by AJA ControlPanel, service/daemon, and driver.
 	NTV2_OEM_TASKS,			///< @brief 2: OEM (recommended): device configured by client application(s) with some driver involvement.
 	NTV2_TASK_MODE_INVALID	= 0xFF
-} NTV2EveryFrameTaskMode, NTV2TaskMode;
+} NTV2TaskMode;
+
+#if !defined(NTV2_DEPRECATE_18_0)
+	typedef NTV2TaskMode	NTV2EveryFrameTaskMode;	///< @deprecated    Use NTV2TaskMode instead.
+#endif	//	!defined(NTV2_DEPRECATE_18_0)
 
 #define NTV2_IS_VALID_TASK_MODE(__m__)		((__m__) == NTV2_DISABLE_TASKS	||	(__m__) == NTV2_STANDARD_TASKS	||	(__m__) == NTV2_OEM_TASKS)
 #define NTV2_IS_STANDARD_TASKS(__m__)		((__m__) == NTV2_STANDARD_TASKS)

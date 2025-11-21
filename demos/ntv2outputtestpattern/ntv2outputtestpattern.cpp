@@ -49,7 +49,7 @@ NTV2OutputTestPattern::~NTV2OutputTestPattern ()
 		mDevice.ApplySignalRoute(mSavedConnections, /*replace?*/true);	//	Restore prior widget routing
 
 	//	Restore the prior service level, and release the device...
-	mDevice.SetEveryFrameServices(mSavedTaskMode);
+	mDevice.SetTaskMode(mSavedTaskMode);
 	mDevice.ReleaseStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));
 
 }	//	destructor
@@ -81,14 +81,14 @@ AJAStatus NTV2OutputTestPattern::Init (void)
 		return AJA_STATUS_UNSUPPORTED;
 	}
 
-	mDevice.GetEveryFrameServices(mSavedTaskMode);		//	Save current task mode
+	mDevice.GetTaskMode(mSavedTaskMode);		//	Save current task mode
 	if (!mConfig.fDoMultiFormat)
 	{
 		mDevice.GetConnections(mSavedConnections);		//	Save current routing, so it can be restored later
 		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid())))
 			return AJA_STATUS_BUSY;		//	Device is in use by another app -- fail
 	}
-	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);		//	Set OEM service level
+	mDevice.SetTaskMode(NTV2_OEM_TASKS);		//	Set OEM service level
 
 	if (mDevice.features().CanDoMultiFormat())
 		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);

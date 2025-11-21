@@ -514,7 +514,7 @@ class AJAExport CNTV2DriverInterface
 			@details	This method reserves exclusive use of the AJA device by the given running host process.
 						The AJA device records both the "process ID" and "four CC". If another host process has already
 						reserved the device, this function will fail.
-			@note		AJA recommends saving the device's ::NTV2EveryFrameTaskMode when this function is called, and
+			@note		AJA recommends saving the device's ::NTV2TaskMode when this function is called, and
 						restoring it after CNTV2DriverInterface::ReleaseStreamForApplication is called.
 			@note		A call to CNTV2DriverInterface::AcquireStreamForApplication should always be balanced by a call to
 						CNTV2DriverInterface::ReleaseStreamForApplication.
@@ -533,7 +533,7 @@ class AJAExport CNTV2DriverInterface
 										(see AJAProcess::GetPid).
 			@details	This method will fail if the specified application type or process ID values don't match those used
 						in the previous call to CNTV2DriverInterface::AcquireStreamForApplication.
-			@note		AJA recommends saving the device's ::NTV2EveryFrameTaskMode at the time
+			@note		AJA recommends saving the device's ::NTV2TaskMode at the time
 						CNTV2DriverInterface::AcquireStreamForApplication is called, and restoring it after releasing
 						the device.
 			@see		CNTV2DriverInterface::AcquireStreamForApplication, \ref devicesharing

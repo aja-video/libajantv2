@@ -1111,7 +1111,7 @@ AJAExport std::string NTV2InputCrosspointIDToString		(const NTV2InputCrosspointI
 AJAExport std::string NTV2OutputCrosspointIDToString	(const NTV2OutputCrosspointID	inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
 AJAExport std::string NTV2WidgetIDToString				(const NTV2WidgetID				inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
 AJAExport std::string NTV2WidgetTypeToString			(const NTV2WidgetType			inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
-AJAExport std::string NTV2TaskModeToString				(const NTV2EveryFrameTaskMode	inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2TaskModeToString				(const NTV2TaskMode				inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
 AJAExport std::string NTV2RegNumSetToString				(const NTV2RegisterNumberSet &	inValue);	//	New in SDK 12.0
 AJAExport std::string NTV2TCIndexToString				(const NTV2TCIndex				inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
 AJAExport std::string NTV2AudioChannelPairToString		(const NTV2AudioChannelPair		inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0

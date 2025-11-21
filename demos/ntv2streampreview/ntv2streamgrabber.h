@@ -102,25 +102,24 @@ class NTV2StreamGrabber : public QThread
 
 	//	Instance Data
 	private:
-		bool						mRestart;				///< @brief	Set true to reconfigure me and restart AutoCirculate
-		bool						mAbort;					///< @brief	Used in my destructor to immediately cause me to exit
-        bool                        mbFixedReference;
-
-		CNTV2Card					mNTV2Card;				///< @brief	Used to talk to monitor & control the device
-		UWord						mBoardNumber;			///< @brief	Index number of the device I'm using
-		NTV2DeviceID				mDeviceID;				///< @brief	Device ID of the device I'm using
-        NTV2Channel					mChannel;				///< @brief	Video channel
-        NTV2Channel					mStream;				///< @brief	Stream channel
-		NTV2VideoFormat				mCurrentVideoFormat;	///< @brief	Current video format seen on selected device input
-        NTV2LHIHDMIColorSpace       mCurrentColorSpace;     ///< @brief Current color space seen on selected device input
-		NTV2VideoFormat				mLastVideoFormat;		///< @brief	Used to detect input video format changes
-		ULWord						mDebounceCounter;		///< @brief	Used for detecting stable input video
-		bool						mFormatIsProgressive;	///< @brief	True if input video format is progressive (not interlaced)
-		NTV2InputSource				mInputSource;			///< @brief	User-selected input source
-		NTV2FrameDimensions			mFrameDimensions;		///< @brief	Frame dimensions, pixels X lines
-		NTV2FrameBufferFormat		mFrameBufferFormat;		///< @brief	My frame buffer format
-		NTV2EveryFrameTaskMode		mSavedTaskMode;			///< @brief	Used to restore the previous task mode
-		bool						mDoMultiChannel;		///< @brief	Demonstrates how to configure the board for multi-format
+		bool					mRestart;				///< @brief	Set true to reconfigure me and restart AutoCirculate
+		bool					mAbort;					///< @brief	Used in my destructor to immediately cause me to exit
+        bool					mbFixedReference;
+		CNTV2Card				mNTV2Card;				///< @brief	Used to talk to monitor & control the device
+		UWord					mBoardNumber;			///< @brief	Index number of the device I'm using
+		NTV2DeviceID			mDeviceID;				///< @brief	Device ID of the device I'm using
+        NTV2Channel				mChannel;				///< @brief	Video channel
+        NTV2Channel				mStream;				///< @brief	Stream channel
+		NTV2VideoFormat			mCurrentVideoFormat;	///< @brief	Current video format seen on selected device input
+        NTV2LHIHDMIColorSpace	mCurrentColorSpace;		///< @brief Current color space seen on selected device input
+		NTV2VideoFormat			mLastVideoFormat;		///< @brief	Used to detect input video format changes
+		ULWord					mDebounceCounter;		///< @brief	Used for detecting stable input video
+		bool					mFormatIsProgressive;	///< @brief	True if input video format is progressive (not interlaced)
+		NTV2InputSource			mInputSource;			///< @brief	User-selected input source
+		NTV2FrameDimensions		mFrameDimensions;		///< @brief	Frame dimensions, pixels X lines
+		NTV2FrameBufferFormat	mFrameBufferFormat;		///< @brief	My frame buffer format
+		NTV2TaskMode			mSavedTaskMode;			///< @brief	Used to restore the previous task mode
+		bool					mDoMultiChannel;		///< @brief	Share the board with other processes?
 
 };	//	class NTV2StreamGrabber
 
