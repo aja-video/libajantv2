@@ -4630,6 +4630,8 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_IOIP_2110_RGB12:			return inForRetailDisplay ? "Avid DNxIP s2110_RGB12"	: "IoIP-s2110_RGB12";
 		case DEVICE_ID_IOX3:					return "IoX3";
 		case DEVICE_ID_IOXT:					return "IoXT";
+		case DEVICE_ID_IP25_R:					return "IP25-R";
+		case DEVICE_ID_IP25_T:					return "IP25-T";
 		case DEVICE_ID_KONA1:					return inForRetailDisplay ? "Kona 1"					: "Kona1";
 		case DEVICE_ID_KONA3G:					return inForRetailDisplay ? "KONA 3G"					: "Kona3G";
 		case DEVICE_ID_KONA3GQUAD:				return inForRetailDisplay ? "KONA 3G QUAD"				: "Kona3GQuad"; //	Used to be "KONA 3G" for retail display
@@ -4678,8 +4680,6 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_SOJI_OE7:				return "SOJI-OE7";
 		case DEVICE_ID_TTAP:					return inForRetailDisplay ? "T-TAP"						: "TTap";
 		case DEVICE_ID_TTAP_PRO:				return inForRetailDisplay ? "T-TAP Pro"					: "TTapPro";
-		case DEVICE_ID_IP25_R:					return "IP25-R";
-		case DEVICE_ID_IP25_T:					return "IP25-T";
 		case DEVICE_ID_SOFTWARE:				return inForRetailDisplay ? "Software"					: "Software";
 		case DEVICE_ID_NOTFOUND:				return inForRetailDisplay ? "AJA Device"				: "(Not Found)";
 #if defined(_DEBUG)
