@@ -55,7 +55,7 @@ NTV2LLBurn::~NTV2LLBurn ()
 
 	if (!mConfig.fDoMultiFormat)
 	{
-		mDevice.SetEveryFrameServices (mSavedTaskMode);										//	Restore prior service level
+		mDevice.SetTaskMode (mSavedTaskMode);										//	Restore prior service level
 		mDevice.ReleaseStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));	//	Release the device
 	}
 
@@ -96,7 +96,7 @@ AJAStatus NTV2LLBurn::Init (void)
 
 	ULWord	appSignature	(0);
 	int32_t	appPID			(0);
-	mDevice.GetEveryFrameServices (mSavedTaskMode);				//	Save the current device state
+	mDevice.GetTaskMode (mSavedTaskMode);		//	Save the current device state
 	mDevice.GetStreamingApplication (appSignature, appPID);		//	Who currently "owns" the device?
 	if (!mConfig.fDoMultiFormat)
 	{
@@ -105,11 +105,9 @@ AJAStatus NTV2LLBurn::Init (void)
 			cerr << "## ERROR:  Unable to acquire device because another app (pid " << appPID << ") owns it" << endl;
 			return AJA_STATUS_BUSY;		//	Some other app is using the device
 		}
-		mDevice.SetEveryFrameServices (NTV2_OEM_TASKS);			//	Set the OEM service level
-		mDevice.ClearRouting ();								//	Clear the current device routing (since I "own" the device)
+		mDevice.ClearRouting ();	//	Clear the current device routing (since I "own" the device)
 	}
-	else
-		mDevice.SetEveryFrameServices (NTV2_OEM_TASKS);			//	Force OEM tasks
+	mDevice.SetTaskMode (NTV2_OEM_TASKS);	//	Set the OEM service level
 
 	//	Configure the SDI relays if present
 	if (mDevice.features().HasSDIRelays())

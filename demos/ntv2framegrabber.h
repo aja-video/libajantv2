@@ -179,7 +179,7 @@ class NTV2FrameGrabber : public QThread
 		NTV2FrameDimensions			mFrameDimensions;		///< @brief	Frame dimensions, pixels X lines
 		NTV2FrameBufferFormat		mFrameBufferFormat;		///< @brief	My frame buffer format
 		AUTOCIRCULATE_TRANSFER		mTransferStruct;		///< @brief	AutoCirculate transfer object
-		NTV2EveryFrameTaskMode		mSavedTaskMode;			///< @brief	Used to restore the previous task mode
+		NTV2TaskMode				mSavedTaskMode;			///< @brief	Used to restore the previous task mode
 		bool						mDoMultiChannel;		///< @brief	Demonstrates how to configure the board for multi-format
 
         bool						mbWithAudio;			///< @brief	Capture audio?

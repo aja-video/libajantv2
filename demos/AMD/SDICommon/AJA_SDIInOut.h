@@ -120,7 +120,7 @@ private:
   
     CNTV2DeviceScanner          m_ntv2BoardScan;
     CNTV2Card                   m_ntv2Card;
-	NTV2EveryFrameTaskMode		m_savedTaskMode;
+	NTV2TaskMode				m_savedTaskMode;
     UWord                       m_uwBoardNumber;
     NTV2DeviceID                m_DeviceID;
     NTV2ReferenceSource         m_ReferenceSource;

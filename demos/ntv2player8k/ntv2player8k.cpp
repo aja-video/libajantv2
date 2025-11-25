@@ -93,7 +93,7 @@ void NTV2Player8K::Quit (void)
 	{
 		mDevice.ReleaseStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid()));
 		if (NTV2_IS_VALID_TASK_MODE(mSavedTaskMode))
-			mDevice.SetEveryFrameServices(mSavedTaskMode);		//	Restore prior task mode
+			mDevice.SetTaskMode(mSavedTaskMode);	//	Restore prior task mode
 	}
 }	//	Quit
 
@@ -133,11 +133,11 @@ AJAStatus NTV2Player8K::Init (void)
 
 	if (!mConfig.fDoMultiFormat)
 	{
-		mDevice.GetEveryFrameServices(mSavedTaskMode);		//	Save the current task mode
+		mDevice.GetTaskMode(mSavedTaskMode);	//	Save the current task mode
 		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid())))
-			return AJA_STATUS_BUSY;		//	Device is in use by another app -- fail
+			return AJA_STATUS_BUSY;	//	Device is in use by another app -- fail
 	}
-	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Set OEM service level
+	mDevice.SetTaskMode(NTV2_OEM_TASKS);	//	Set OEM service level
 
 	if (mDevice.features().CanDoMultiFormat())
 		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);

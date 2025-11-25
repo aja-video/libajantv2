@@ -115,8 +115,8 @@ void NTV2StreamGrabber::run (void)
 		}
 		else
 		{
-			mNTV2Card.GetEveryFrameServices (mSavedTaskMode);	//	Save the current state before we change it
-			mNTV2Card.SetEveryFrameServices (NTV2_OEM_TASKS);	//	Since this is an OEM demo we will set the OEM service level
+			mNTV2Card.GetTaskMode (mSavedTaskMode);	//	Save the current state before we change it
+			mNTV2Card.SetTaskMode (NTV2_OEM_TASKS);	//	Since this is an OEM demo we will set the OEM service level
 		}
 	}
 
@@ -163,7 +163,7 @@ void NTV2StreamGrabber::run (void)
 				if (!mDoMultiChannel)
 				{
 					mNTV2Card.ReleaseStreamForApplicationWithReference (kDemoAppSignature, AJAProcess::GetPid ());
-					mNTV2Card.SetEveryFrameServices (mSavedTaskMode);
+					mNTV2Card.SetTaskMode (mSavedTaskMode);
 				}
 				mNTV2Card.Close ();
 				mDeviceID = DEVICE_ID_NOTFOUND;
@@ -182,8 +182,8 @@ void NTV2StreamGrabber::run (void)
 					continue;
 				}
 
-				mNTV2Card.GetEveryFrameServices (mSavedTaskMode);	//	Save the current state before we change it
-				mNTV2Card.SetEveryFrameServices (NTV2_OEM_TASKS);	//	Since this is an OEM demo we will set the OEM service level
+				mNTV2Card.GetTaskMode (mSavedTaskMode);	//	Save the current state before we change it
+				mNTV2Card.SetTaskMode (NTV2_OEM_TASKS);	//	Since this is an OEM demo we will set the OEM service level
 
 				mDeviceID = mNTV2Card.GetDeviceID ();
 				if (::NTV2DeviceCanDoMultiFormat (mDeviceID))
@@ -334,7 +334,7 @@ void NTV2StreamGrabber::run (void)
 		if (!mDoMultiChannel)
 		{
 			mNTV2Card.ReleaseStreamForApplicationWithReference (kDemoAppSignature, int32_t(AJAProcess::GetPid()));	//	Release the device
-			mNTV2Card.SetEveryFrameServices (mSavedTaskMode);	//	Restore prior task mode
+			mNTV2Card.SetTaskMode (mSavedTaskMode);	//	Restore prior task mode
 		}
 		mNTV2Card.Close ();
 		mDeviceID = DEVICE_ID_NOTFOUND;
