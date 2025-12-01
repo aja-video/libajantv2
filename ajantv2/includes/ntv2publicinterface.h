@@ -94,21 +94,23 @@
 	#define	NTV2_RPC_DECODESERVER_DECL	bool RPCDecodeServer (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex);
 	#define	NTV2_RPC_ENCODESERVER_DECL	bool RPCEncodeServer (NTV2_RPC_BLOB_TYPE & inBlob);
 
-	#define NTV2_RPC_CODEC_DECLS	NTV2_RPC_ENCODE_DECL	\
-									NTV2_RPC_DECODE_DECL	\
-									NTV2_RPC_DECODECLIENT_DECL	\
-									NTV2_RPC_ENCODECLIENT_DECL	\
-									NTV2_RPC_DECODESERVER_DECL	\
-									NTV2_RPC_ENCODESERVER_DECL	
+	#define NTV2_RPC_CODEC_DECLS		public:						\
+										NTV2_RPC_ENCODE_DECL		\
+										NTV2_RPC_DECODE_DECL		\
+										NTV2_RPC_DECODECLIENT_DECL	\
+										NTV2_RPC_ENCODECLIENT_DECL	\
+										NTV2_RPC_DECODESERVER_DECL	\
+										NTV2_RPC_ENCODESERVER_DECL	
 
-	// NTV2Buffer has it's own RPC encode / decode methods
+	//	NTV2Buffer has its own RPC encode/decode methods
 	#define	NTV2_RPC_BUFFER_ENCODE_DECL		bool RPCEncode (NTV2_RPC_BLOB_TYPE & outBlob, bool fillBuffer=true);
 	#define	NTV2_RPC_BUFFER_DECODE_DECL		bool RPCDecode (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex, bool fillBuffer=true);
 	#define	NTV2_RPC_BUFFER_DECODE2_DECL	bool RPCDecodeNoAllocate (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex);
-	#define NTV2_RPC_BUFFER_CODEC_DECLS		NTV2_RPC_BUFFER_ENCODE_DECL		\
+
+	#define NTV2_RPC_BUFFER_CODEC_DECLS		public:							\
+											NTV2_RPC_BUFFER_ENCODE_DECL		\
 											NTV2_RPC_BUFFER_DECODE_DECL		\
 											NTV2_RPC_BUFFER_DECODE2_DECL
-									
 #else
 	#define NTV2_RPC_CODEC_DECLS
 	#define NTV2_RPC_BUFFER_CODEC_DECLS
@@ -4211,10 +4213,8 @@ typedef struct RP188_STRUCT {
 	ULWord	DBB;
 	ULWord	Low;		//	|  BG 4	 | Secs10 |	 BG 3  | Secs 1 |  BG 2	 | Frms10 |	 BG 1  | Frms 1 |
 	ULWord	High;		//	|  BG 8	 | Hrs 10 |	 BG 7  | Hrs  1 |  BG 6	 | Mins10 |	 BG 5  | Mins 1 |
-	#if !defined(NTV2_BUILDING_DRIVER)
-		public:
-			NTV2_RPC_CODEC_DECLS
-	#endif	//	user-space clients only
+
+	NTV2_RPC_CODEC_DECLS
 } RP188_STRUCT;
 
 
@@ -4509,9 +4509,8 @@ typedef struct AUTOCIRCULATE_STATUS_STRUCT
 	BOOL_					bWithColorCorrection;
 	BOOL_					bWithVidProc;
 	BOOL_					bWithCustomAncData;
-	#if !defined (NTV2_BUILDING_DRIVER)
-		NTV2_RPC_CODEC_DECLS
-	#endif	//	!defined (NTV2_BUILDING_DRIVER)
+
+	NTV2_RPC_CODEC_DECLS
 } AUTOCIRCULATE_STATUS_STRUCT;
 
 
@@ -4691,10 +4690,8 @@ typedef struct FRAME_STAMP_STRUCT
 	ULWord				currentLineCount;			//! At Call Line# _currently_ being OUTPUT (at the time of the IOCTL_NTV2_GET_FRAMESTAMP)
 	ULWord				currentReps;				//! Contains validCount (Play - reps remaining, Record - drops on frame)
 	ULWord				currenthUser;				//! User cookie at last vblank
-	#if !defined (NTV2_BUILDING_DRIVER)
-		public:
-			NTV2_RPC_CODEC_DECLS
-	#endif	//	user-space clients only
+
+	NTV2_RPC_CODEC_DECLS
 } FRAME_STAMP_STRUCT;
 
 
@@ -4784,10 +4781,7 @@ typedef struct AUTOCIRCULATE_TRANSFER_STRUCT
 	ULWord							videoSegmentCardPitch;	//	Offset (in bytes) between the beginning of one board segment and the beginning of the next board segment (i.e. board memory rowBytes)
 	NTV2QuarterSizeExpandMode		videoQuarterSizeExpand; //	Turns on the "quarter-size expand" (2x H + 2x V) hardware
 
-	#if !defined (NTV2_BUILDING_DRIVER)
-		public:
-			NTV2_RPC_CODEC_DECLS
-	#endif	//	user-space clients only
+	NTV2_RPC_CODEC_DECLS
 } AUTOCIRCULATE_TRANSFER_STRUCT, *PAUTOCIRCULATE_TRANSFER_STRUCT;
 
 
@@ -4942,10 +4936,8 @@ typedef struct AUTOCIRCULATE_TASK_STRUCT
 	ULWord reserved1;
 	ULWord reserved2;
 	ULWord reserved3;
-	#if !defined (NTV2_BUILDING_DRIVER)
-		public:
-			NTV2_RPC_CODEC_DECLS
-	#endif	//	user-space clients only
+
+	NTV2_RPC_CODEC_DECLS
 } AUTOCIRCULATE_TASK_STRUCT, *PAUTOCIRCULATE_TASK_STRUCT;
 
 typedef struct
