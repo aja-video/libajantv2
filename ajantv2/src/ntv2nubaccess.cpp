@@ -2249,6 +2249,7 @@ NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const string & inURL)	//	CLAS
 NTV2RPCServerAPI::NTV2RPCServerAPI (NTV2ConnectParams inParams, void * pRefCon)
 	:	NTV2RPCBase(inParams, reinterpret_cast<ULWord*>(pRefCon))
 {
+	mRunning = mTerminate = false;
 	NTV2Buffer spare(&mSpare, sizeof(mSpare));  spare.Fill(0ULL);
 	AJADebug::Open();
 	AJAAtomic::Increment(&gServerConstructCount);
