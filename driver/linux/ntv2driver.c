@@ -4570,11 +4570,7 @@ static bool IsKonaIPDevice(ULWord deviceNumber, NTV2DeviceID deviceID)
 
 int ValidateAjaNTV2Message(NTV2_HEADER * pHeaderIn)
 {
-//#define LOG_VALIDATE_ERRORS
-
-#ifdef LOG_VALIDATE_ERRORS
-	NTV2_TRAILER * pTrailerIn = NULL;
-#endif
+#define LOG_VALIDATE_ERRORS
 
 	//	Validation & sanity checks...
 	if (!NTV2_IS_VALID_HEADER_TAG(pHeaderIn->fHeaderTag))
@@ -4621,6 +4617,7 @@ int ValidateAjaNTV2Message(NTV2_HEADER * pHeaderIn)
 	}
 
 #if 0
+	NTV2_TRAILER * pTrailerIn = NULL;
 	//	Calculate where the NTV2_TRAILER should be, and verify it's there...
 	pTrailerIn = (NTV2_TRAILER *)((UByte *)pHeaderIn + pHeaderIn->fSizeInBytes - sizeof(NTV2_TRAILER));
 	if (!NTV2_IS_VALID_TRAILER_TAG(pTrailerIn->fTrailerTag))
@@ -4631,11 +4628,6 @@ int ValidateAjaNTV2Message(NTV2_HEADER * pHeaderIn)
 		return -EINVAL;
 	}
 #endif
-
-#ifdef LOG_VALIDATE_ERRORS
-		MSG("Validate ok\n");
-#endif
-
 	return 0;
 }
 
