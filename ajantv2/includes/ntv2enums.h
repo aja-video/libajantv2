@@ -93,6 +93,7 @@ typedef enum
 	DEVICE_ID_CORVID88_GEN3				= 0x11056500,	///< @brief See \ref corvid44
 	//Devices below this line do not have OEM SDK support
 	DEVICE_ID_IP25_R					= 0x11033300,
+	DEVICE_ID_IP25_T					= 0x11033310,
 	DEVICE_ID_NOTFOUND					= 0xFFFFFFFF,	///< @brief Invalid or "not found"
 	DEVICE_ID_INVALID					= DEVICE_ID_NOTFOUND
 
@@ -149,7 +150,8 @@ typedef enum
 													||	(__d__) == DEVICE_ID_IOIP_2110				\
 													||	(__d__) == DEVICE_ID_IOIP_2110_RGB12		\
 													||	(__d__) == DEVICE_ID_KONAIP_25G				\
-													||	(__d__) == DEVICE_ID_ZEFRAM	)
+													||	(__d__) == DEVICE_ID_IP25_R           \
+                          ||  (__d__) == DEVICE_ID_IP25_T  )
 
 #define NTV2_DEVICE_SUPPORTS_SMPTE2022(__d__)	(		(__d__) == DEVICE_ID_KONAIP_2022			\
 													||	(__d__) == DEVICE_ID_IOIP_2022	)
@@ -1296,7 +1298,12 @@ typedef enum
 		NTV2_INPUTSOURCES_ANALOG	= NTV2_IOKINDS_ANALOG,
 		NTV2_INPUTSOURCES_NONE		= NTV2_IOKINDS_NONE
 	#endif	//	!defined(NTV2_DEPRECATE_16_3)
-} NTV2InputSourceKind, NTV2OutputDestKind, NTV2IOKind;
+} NTV2IOKind;
+
+#if !defined(NTV2_DEPRECATE_18_0)
+	typedef NTV2IOKind	NTV2InputSourceKind;	///< @deprecated	Use NTV2IOKind instead.
+	typedef NTV2IOKind	NTV2OutputDestKind;		///< @deprecated	Use NTV2IOKind instead.
+#endif	//	!defined(NTV2_DEPRECATE_18_0)
 
 typedef ULWord NTV2InputSourceKinds, NTV2OutputDestKinds, NTV2IOKinds;
 

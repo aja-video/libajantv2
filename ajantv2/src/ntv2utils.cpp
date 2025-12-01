@@ -4630,6 +4630,8 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_IOIP_2110_RGB12:			return inForRetailDisplay ? "Avid DNxIP s2110_RGB12"	: "IoIP-s2110_RGB12";
 		case DEVICE_ID_IOX3:					return "IoX3";
 		case DEVICE_ID_IOXT:					return "IoXT";
+		case DEVICE_ID_IP25_R:					return "IP25-R";
+		case DEVICE_ID_IP25_T:					return "IP25-T";
 		case DEVICE_ID_KONA1:					return inForRetailDisplay ? "Kona 1"					: "Kona1";
 		case DEVICE_ID_KONA3G:					return inForRetailDisplay ? "KONA 3G"					: "Kona3G";
 		case DEVICE_ID_KONA3GQUAD:				return inForRetailDisplay ? "KONA 3G QUAD"				: "Kona3GQuad"; //	Used to be "KONA 3G" for retail display
@@ -4678,7 +4680,6 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_SOJI_OE7:				return "SOJI-OE7";
 		case DEVICE_ID_TTAP:					return inForRetailDisplay ? "T-TAP"						: "TTap";
 		case DEVICE_ID_TTAP_PRO:				return inForRetailDisplay ? "T-TAP Pro"					: "TTapPro";
-		case DEVICE_ID_IP25_R:					return "IP25-R";
 		case DEVICE_ID_CORVID44_GEN3:			return "Corvid 44 Gen3";
 		case DEVICE_ID_CORVID88_GEN3:			return "Corvid 88 Gen3";
 		case DEVICE_ID_SOFTWARE:				return inForRetailDisplay ? "Software"					: "Software";
@@ -6340,7 +6341,7 @@ string NTV2WidgetTypeToString (const NTV2WidgetType inValue, const bool inCompac
 	return "";
 }
 
-string NTV2TaskModeToString (const NTV2EveryFrameTaskMode inValue, const bool inCompactDisplay)
+string NTV2TaskModeToString (const NTV2TaskMode inValue, const bool inCompactDisplay)
 {
 	switch (inValue)
 	{
@@ -7789,6 +7790,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_TTAP,
 														DEVICE_ID_TTAP_PRO,
 														DEVICE_ID_IP25_R,
+														DEVICE_ID_IP25_T,
 														DEVICE_ID_CORVID44_GEN3,
 														DEVICE_ID_CORVID88_GEN3,
 														DEVICE_ID_NOTFOUND	};

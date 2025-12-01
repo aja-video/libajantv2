@@ -60,7 +60,7 @@ void NTV2Overlay::Quit (void)
 	{	//	Release the device...
 		mDevice.ReleaseStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid()));
 		if (NTV2_IS_VALID_TASK_MODE(mSavedTaskMode))
-			mDevice.SetEveryFrameServices(mSavedTaskMode);	//	Restore prior task mode
+			mDevice.SetTaskMode(mSavedTaskMode);	//	Restore prior task mode
 	}
 }	//	Quit
 
@@ -80,7 +80,7 @@ AJAStatus NTV2Overlay::Init (void)
 	ULWord	appSig(0);
 	int32_t	appPID(0);
 	mDevice.GetStreamingApplication (appSig, appPID);	//	Who currently "owns" the device?
-	mDevice.GetEveryFrameServices(mSavedTaskMode);		//	Save the current device state
+	mDevice.GetTaskMode(mSavedTaskMode);		//	Save the current device state
 
 	if (!mDevice.AcquireStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid())))
 	{
@@ -88,7 +88,7 @@ AJAStatus NTV2Overlay::Init (void)
 		return AJA_STATUS_BUSY;		//	Some other app is using the device
 	}
 	
-	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);	//	Force OEM tasks
+	mDevice.SetTaskMode(NTV2_OEM_TASKS);	//	Force OEM tasks
 	
 	mDevice.EnableChannel(NTV2_CHANNEL1);
 	mDevice.EnableChannel(NTV2_CHANNEL2);

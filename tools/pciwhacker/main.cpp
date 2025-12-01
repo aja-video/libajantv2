@@ -97,13 +97,13 @@ int main (int argc, const char ** argv)
 			return 2;
 		}
 
-	ULWord					appSignature	(0);
-	int32_t					appPID			(0);
-	NTV2EveryFrameTaskMode	savedTaskMode	(NTV2_TASK_MODE_INVALID);
+	ULWord			appSignature	(0);
+	int32_t			appPID			(0);
+	NTV2TaskMode	savedTaskMode	(NTV2_TASK_MODE_INVALID);
 
 	// Save the current device state
 	// Who currently "owns" the device?
-	device.GetEveryFrameServices(savedTaskMode);
+	device.GetTaskMode(savedTaskMode);
 	if (savedTaskMode == NTV2_STANDARD_TASKS  ||  !doShareDevice)
 	{
 		device.GetStreamingApplication(appSignature, appPID);
@@ -114,7 +114,7 @@ int main (int argc, const char ** argv)
 		}
 
 		//	Set the OEM service level...
-		device.SetEveryFrameServices(NTV2_OEM_TASKS);
+		device.SetTaskMode(NTV2_OEM_TASKS);
 		device.SetSuspendHostAudio(true);
 	}
 	::signal(SIGINT, SignalHandler);
@@ -188,7 +188,7 @@ int main (int argc, const char ** argv)
 	if (savedTaskMode == NTV2_STANDARD_TASKS  ||  !doShareDevice)
 	{
 		device.SetSuspendHostAudio(false);
-		device.SetEveryFrameServices(savedTaskMode);
+		device.SetTaskMode(savedTaskMode);
 		device.ReleaseStreamForApplication(kAppSignature, int32_t(AJAProcess::GetPid()));
 	}
     return 0;

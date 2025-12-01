@@ -174,16 +174,16 @@ static const ULWord gChannelToSDIInputProgressiveShift []	= { kRegShiftInput1Pro
 
 
 // Method: SetEveryFrameServices
-// Input:  NTV2EveryFrameTaskMode
+// Input:  NTV2TaskMode
 // Output: NONE
-bool CNTV2Card::SetEveryFrameServices (NTV2EveryFrameTaskMode mode)
+bool CNTV2Card::SetTaskMode (const NTV2TaskMode inMode)
 {
-	return WriteRegister(kVRegEveryFrameTaskFilter, ULWord(mode));
+	return NTV2_IS_VALID_TASK_MODE(inMode) && WriteRegister(kVRegEveryFrameTaskFilter, ULWord(inMode));
 }
 
-bool CNTV2Card::GetEveryFrameServices (NTV2EveryFrameTaskMode & outMode)
+bool CNTV2Card::GetTaskMode (NTV2TaskMode & outMode)
 {
-	return CNTV2DriverInterface::ReadRegister(kVRegEveryFrameTaskFilter, outMode);
+	return driverInterface().ReadRegister(kVRegEveryFrameTaskFilter, outMode);
 }
 
 #if !defined(NTV2_DEPRECATE_16_3)
@@ -205,8 +205,8 @@ bool CNTV2Card::SetVideoFormat (const NTV2VideoFormat value, const bool inIsReta
 {	AJA_UNUSED(keepVancSettings)
 	bool ajaRetail(inIsRetail);
 #ifdef	MSWindows
-	NTV2EveryFrameTaskMode mode;
-	GetEveryFrameServices(mode);
+	NTV2TaskMode mode;
+	GetTaskMode(mode);
 	if(mode == NTV2_STANDARD_TASKS)
 		ajaRetail = true;
 #endif
@@ -897,8 +897,8 @@ bool CNTV2Card::IsSDStandard (bool & outIsStandardDef, NTV2Channel inChannel)
 bool CNTV2Card::SetFrameGeometry (NTV2FrameGeometry value, bool ajaRetail, NTV2Channel channel)
 {
 #ifdef	MSWindows
-	NTV2EveryFrameTaskMode mode;
-	GetEveryFrameServices(mode);
+	NTV2TaskMode mode;
+	GetTaskMode(mode);
 	if(mode == NTV2_STANDARD_TASKS)
 		ajaRetail = true;
 #else

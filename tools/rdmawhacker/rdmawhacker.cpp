@@ -94,9 +94,9 @@ int main(int argc, const char ** argv)
 			return 2;
 		}
 
-	ULWord					appSignature	(0);
-	int32_t					appPID			(0);
-	NTV2EveryFrameTaskMode	savedTaskMode	(NTV2_TASK_MODE_INVALID);
+	ULWord			appSignature	(0);
+	int32_t			appPID			(0);
+	NTV2TaskMode	savedTaskMode	(NTV2_TASK_MODE_INVALID);
 
 	// Save the current device state
 	// Who currently "owns" the device?
