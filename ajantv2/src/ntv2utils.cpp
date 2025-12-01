@@ -4614,11 +4614,13 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_CORVID24:				return inForRetailDisplay ? "Corvid 24"					: "Corvid24";
 		case DEVICE_ID_CORVID3G:				return inForRetailDisplay ? "Corvid 3G"					: "Corvid3G";
 		case DEVICE_ID_CORVID44:				return inForRetailDisplay ? "Corvid 44"					: "Corvid44";
+		case DEVICE_ID_CORVID44_GEN3:			return inForRetailDisplay ? "Corvid 44 Gen3"			: "Corvid-44-Gen3";
 		case DEVICE_ID_CORVID44_2X4K:			return inForRetailDisplay ? "Corvid 44 12G 2x4K"		: "Corvid44-12G-2x4K";
 		case DEVICE_ID_CORVID44_8K:				return inForRetailDisplay ? "Corvid 44 12G 8K"			: "Corvid44-12G-8K";
 		case DEVICE_ID_CORVID44_8KMK:			return inForRetailDisplay ? "Corvid 44 12G 8KMK"		: "Corvid44-12G-8KMK";
 		case DEVICE_ID_CORVID44_PLNR:			return inForRetailDisplay ? "Corvid 44 12G PLNR"		: "Corvid44-12G-PLNR";
 		case DEVICE_ID_CORVID88:				return inForRetailDisplay ? "Corvid 88"					: "Corvid88";
+		case DEVICE_ID_CORVID88_GEN3:			return inForRetailDisplay ? "Corvid 88 Gen3"			: "Corvid-88-Gen3";
 		case DEVICE_ID_CORVIDHBR:				return inForRetailDisplay ? "Corvid HB-R"				: "CorvidHBR";
 		case DEVICE_ID_CORVIDHEVC:				return inForRetailDisplay ? "Corvid HEVC"				: "CorvidHEVC";
 		case DEVICE_ID_IO4K:					return "Io4K";
@@ -4680,8 +4682,6 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_SOJI_OE7:				return "SOJI-OE7";
 		case DEVICE_ID_TTAP:					return inForRetailDisplay ? "T-TAP"						: "TTap";
 		case DEVICE_ID_TTAP_PRO:				return inForRetailDisplay ? "T-TAP Pro"					: "TTapPro";
-		case DEVICE_ID_CORVID44_GEN3:			return "Corvid 44 Gen3";
-		case DEVICE_ID_CORVID88_GEN3:			return "Corvid 88 Gen3";
 		case DEVICE_ID_SOFTWARE:				return inForRetailDisplay ? "Software"					: "Software";
 		case DEVICE_ID_NOTFOUND:				return inForRetailDisplay ? "AJA Device"				: "(Not Found)";
 #if defined(_DEBUG)
@@ -7728,7 +7728,9 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_CORVID44_8KMK,
 														DEVICE_ID_CORVID44_PLNR,
 														DEVICE_ID_CORVID44,
+														DEVICE_ID_CORVID44_GEN3,
 														DEVICE_ID_CORVID88,
+														DEVICE_ID_CORVID88_GEN3,
 														DEVICE_ID_CORVIDHBR,
 														DEVICE_ID_CORVIDHEVC,
 														DEVICE_ID_IO4K,
@@ -7791,8 +7793,6 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_TTAP_PRO,
 														DEVICE_ID_IP25_R,
 														DEVICE_ID_IP25_T,
-														DEVICE_ID_CORVID44_GEN3,
-														DEVICE_ID_CORVID88_GEN3,
 														DEVICE_ID_NOTFOUND	};
 	if (inKinds == NTV2_DEVICEKIND_NONE)
 		return NTV2DeviceIDSet();
