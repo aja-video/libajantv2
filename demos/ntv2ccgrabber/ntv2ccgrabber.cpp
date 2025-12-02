@@ -383,7 +383,7 @@ static const NTV2WidgetID	g3GSDIOutputs[]	= {	NTV2_Wgt3GSDIOut1,	NTV2_Wgt3GSDIOu
 												NTV2_Wgt3GSDIOut5,	NTV2_Wgt3GSDIOut6,	NTV2_Wgt3GSDIOut7,	NTV2_Wgt3GSDIOut8	};
 
 static const NTV2WidgetID	g12GSDIOutputs[]= {	NTV2_Wgt12GSDIOut1,	NTV2_Wgt12GSDIOut2,	NTV2_Wgt12GSDIOut3,	NTV2_Wgt12GSDIOut4,
-												NTV2_WIDGET_INVALID, NTV2_WIDGET_INVALID, NTV2_WIDGET_INVALID, NTV2_WIDGET_INVALID	};
+												NTV2_Wgt12GSDIOut5, NTV2_Wgt12GSDIOut6, NTV2_Wgt12GSDIOut7, NTV2_Wgt12GSDIOut8	};
 
 
 bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
