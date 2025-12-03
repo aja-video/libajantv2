@@ -210,7 +210,7 @@ typedef enum
 
 
 /**
-	@brief	Identifies a particular video frame buffer format. See \ref devicefbformats for details.
+	@brief	Identifies a particular video frame buffer pixel format. See \ref devicefbformats for details.
 **/
 typedef enum
 {
@@ -253,7 +253,7 @@ typedef enum
 	,NTV2_FBF_INVALID				= NTV2_FBF_NUMFRAMEBUFFERFORMATS
 } NTV2FrameBufferFormat;
 
-typedef NTV2FrameBufferFormat	NTV2PixelFormat;	///< @brief An alias for NTV2FrameBufferFormat.
+typedef NTV2FrameBufferFormat	NTV2PixelFormat;	///< @brief An alias for ::NTV2FrameBufferFormat.
 
 
 #define NTV2_IS_VALID_FRAME_BUFFER_FORMAT(__s__)	((__s__) >= NTV2_FBF_10BIT_YCBCR  &&  (__s__) < NTV2_FBF_NUMFRAMEBUFFERFORMATS)

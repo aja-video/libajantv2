@@ -72,7 +72,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoPCMControl,						///< @brief True if device can mark specific audio channel pairs as not carrying PCM (Pulse Code Modulation) audio.
 	kDeviceCanDoPCMDetection,					///< @brief True if device can detect which audio channel pairs are not carrying PCM (Pulse Code Modulation) audio.
 	kDeviceCanDoPIO,							///< @brief True if device supports Programmed I/O.
-	kDeviceCanDoPlayback,						///< @note Calculate based on kDeviceGetNumVideoOutputs and kDeviceGetNumHDMIVideoOutputs and kDeviceGetNumAnalogVideoOutputs
+	kDeviceCanDoPlayback,						///< @brief True if device has any SDI, HDMI or analog video outputs.
 	kDeviceCanDoProgrammableCSC,				///< @brief True if device has at least one programmable color space converter widget.
 	kDeviceCanDoProgrammableRS422,				///< @brief True if device has at least one RS-422 serial port, and it (they) can be programmed (for baud rate, parity, etc.).
 	kDeviceCanDoProRes,							///< @brief True if device can can accommodate Apple ProRes-compressed video in its frame buffers.
