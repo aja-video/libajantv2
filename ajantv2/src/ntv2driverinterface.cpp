@@ -1685,6 +1685,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanDoDVCProHD:					outValue = ::NTV2DeviceCanDoDVCProHD(devID);						break;	//	Deprecate?
 		case kDeviceCanDoEnhancedCSC:				outValue = ::NTV2DeviceCanDoEnhancedCSC(devID);						break;	//	Deprecate?
 		case kDeviceCanDoFrameStore1Display:		outValue = ::NTV2DeviceCanDoFrameStore1Display(devID);				break;	//	Deprecate?
+		case kDeviceCanDoGPIO:						outValue = ::NTV2DeviceCanDoGPIO(devID);							break;
 		case kDeviceCanDoHDMIOutStereo:				outValue = ::NTV2DeviceCanDoHDMIOutStereo(devID);					break;	//	Deprecate?
 		case kDeviceCanDoHDV:						outValue = ::NTV2DeviceCanDoHDV(devID);								break;	//	Deprecate?
 		case kDeviceCanDoHDVideo:					outValue = ::NTV2DeviceCanDoHDVideo(devID);							break;	//	Deprecate?
@@ -1717,6 +1718,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanMeasureTemperature:			outValue = ::NTV2DeviceCanMeasureTemperature(devID);				break;
 		case kDeviceCanReportFrameSize:				outValue = ::NTV2DeviceCanReportFrameSize(devID);					break;
 		case kDeviceHasBiDirectionalSDI:			outValue = ::NTV2DeviceHasBiDirectionalSDI(devID);					break;
+		case kDeviceHasBracketLED:					outValue = ::NTV2DeviceHasBracketLED(devID);						break;
 		case kDeviceHasColorSpaceConverterOnChannel2:	outValue = ::NTV2DeviceCanDoWidget(devID, NTV2_WgtCSC2);		break;	//	Deprecate?
 		case kDeviceHasIDSwitch:					outValue = ::NTV2DeviceCanDoIDSwitch(devID);						break;
         case kDeviceHasNTV4FrameStores:				outValue = ::NTV2DeviceHasNTV4FrameStores(devID);                   break;

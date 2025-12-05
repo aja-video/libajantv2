@@ -60,6 +60,7 @@ class AJAExport DeviceCapabilities
 		inline bool		CanDoEnhancedCSC (void)					{return dev.IsSupported(kDeviceCanDoEnhancedCSC);}								///< @returns	True if device has enhanced CSCs
 		inline bool		CanDoFramePulseSelect (void)			{return dev.IsSupported(kDeviceCanDoFramePulseSelect);}							///< @returns	True if device supports frame pulse source independent of reference source
 		inline bool		CanDoFrameStore1Display (void)			{return dev.IsSupported(kDeviceCanDoFrameStore1Display);}						///< @returns	True if device can display/output video from FrameStore 1
+		inline bool		CanDoGPIO (void)						{return dev.IsSupported(kDeviceCanDoGPIO);}										///< @returns	True if device has GPIO interface
 		inline bool		CanDoHDMIAuxCapture (void)				{return dev.IsSupported(kDeviceCanDoHDMIAuxCapture);}							///< @returns	True if device has HDMI AUX data extractor(s)
 		inline bool		CanDoHDMIAuxPlayback (void)				{return dev.IsSupported(kDeviceCanDoHDMIAuxPlayback);}							///< @returns	True if device has HDMI AUX data inserter(s)
 		inline bool		CanDoHDMIHDROut (void)					{return dev.IsSupported(kDeviceCanDoHDMIHDROut);}								///< @returns	True if device supports HDMI HDR output
@@ -107,6 +108,7 @@ class AJAExport DeviceCapabilities
 		inline bool		HasAudioMonitorRCAJacks (void)			{return dev.IsSupported(kDeviceHasAudioMonitorRCAJacks);}						///< @returns	True if device has a pair of unbalanced RCA audio monitor output connectors
 		inline bool		HasBiDirectionalAnalogAudio (void)		{return dev.IsSupported(kDeviceHasBiDirectionalAnalogAudio);}					///< @returns	True if device has a bi-directional analog audio connector
 		inline bool		HasBiDirectionalSDI (void)				{return dev.IsSupported(kDeviceHasBiDirectionalSDI);}							///< @returns	True if device has bi-directional SDI connectors
+		inline bool		HasBracketLED (void)					{return dev.IsSupported(kDeviceHasBracketLED);}									///< @returns	True if device has LED(s) on the card bracket
 		inline bool		HasBreakoutBoard (void)					{return dev.IsSupported(kDeviceHasBreakoutBoard);}								///< @returns	True if device has attached/connected breakout board
 		inline bool		HasColorSpaceConverterOnChannel2 (void)	{return dev.IsSupported(kDeviceHasColorSpaceConverterOnChannel2);}				///< @returns	True if device has a second colorspace converter widget (NTV2_WgtCSC2)
 		inline bool		HasCrosspointConnectROM (void)			{return dev.IsSupported(kDeviceHasXptConnectROM);}								///< @returns	True if device has a crosspoint connection ROM

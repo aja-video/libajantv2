@@ -61,6 +61,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoEnhancedCSC,					///< @brief True if device has enhanced CSCs.
 	kDeviceCanDoFrameStore1Display,				///< @brief True if device can display/output video from FrameStore 1.
 	kDeviceCanDoFreezeOutput,					///< @brief True if device can freeze output video.
+	kDeviceCanDoGPIO,							///< @brief	True if device has GPIO interface.	(New in SDK 18.0)
 	kDeviceCanDoHDMIOutStereo,					///< @brief True if device supports 3D/stereo HDMI video output.
 	kDeviceCanDoHDV,							///< @brief True if device can squeeze/stretch between 1920x1080 and 1440x1080.
 	kDeviceCanDoHDVideo,						///< @brief True if device can handle HD (High Definition) video.
@@ -91,6 +92,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanMeasureTemperature,				///< @brief True if device can measure its FPGA die temperature.
 	kDeviceCanReportFrameSize,					///< @brief True if device can report its frame size.
 	kDeviceHasBiDirectionalSDI,					///< @brief True if device SDI connectors are bi-directional.
+	kDeviceHasBracketLED,						///< @brief True if device has LED(s) on the card bracket. (New in SDK 18.0)
 	kDeviceHasColorSpaceConverterOnChannel2,	///< @brief Calculate based on if NTV2_WgtCSC2 is present.
 	kDeviceHasNWL,								///< @brief True if device has NorthWest Logic DMA hardware.
 	kDeviceHasPCIeGen2,							///< @brief True if device supports 2nd-generation PCIe.
