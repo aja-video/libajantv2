@@ -28,18 +28,7 @@ using json = nlohmann::json;
 #define PLDBUG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
 
 
-#if defined(NTV2_DEPRECATE_17_1)
-	//	Abbreviated device info struct
-	typedef struct NTV2DeviceInfo
-	{
-		NTV2DeviceID	deviceID;
-		string			serialNumber;
-		string			deviceIdentifier;
-	} NTV2DeviceInfo;
-
-	typedef vector <NTV2DeviceInfo>		NTV2DeviceInfoList;
-	typedef NTV2DeviceInfoList::const_iterator	NTV2DeviceInfoListConstIter;
-#else
+#if !defined(NTV2_DEPRECATE_17_1)
 	bool CNTV2DeviceScanner::IsHexDigit (const char inChr)
 	{	static const string sHexDigits("0123456789ABCDEFabcdef");
 		return sHexDigits.find(inChr) != string::npos;
@@ -90,26 +79,6 @@ size_t CNTV2DeviceScanner::GetNumDevices (void)
 	return sDevInfoList.size();
 }
 
-#if defined(NTV2_DEPRECATE_17_1)
-	void ScanHardware (void)
-	{
-		AJAAutoLock tmpLock(&sDevInfoListLock);
-		sDevInfoList.clear();
-		UWord ndx(0);
-		do
-		{
-			CNTV2Card tmpDev(ndx);
-			if (!tmpDev.IsOpen())
-				break;
-			NTV2DeviceInfo info;
-			info.deviceID = tmpDev.GetDeviceID();
-			tmpDev.GetSerialNumberString(info.serialNumber);
-			info.deviceIdentifier = tmpDev.GetDisplayName();
-			sDevInfoList.push_back(info);
-			ndx++;
-		} while (ndx < 16);
-	}
-#else	//	!defined(NTV2_DEPRECATE_17_1)
 CNTV2DeviceScanner::CNTV2DeviceScanner (const bool inScanNow)
 {
 	if (inScanNow)
@@ -195,7 +164,6 @@ bool CNTV2DeviceScanner::GetDeviceInfo (const ULWord inDeviceIndexNumber, NTV2De
 	return false;	//	No devices with this index number
 
 }	//	GetDeviceInfo
-#endif	//	!defined(NTV2_DEPRECATE_17_1)
 
 bool CNTV2DeviceScanner::GetDeviceAtIndex (const ULWord inDeviceIndexNumber, CNTV2Card & outDevice)
 {
@@ -436,7 +404,6 @@ string CNTV2DeviceScanner::GetDeviceRefName (CNTV2Card & inDevice)
 }
 
 
-#if !defined(NTV2_DEPRECATE_17_1)
 ostream &	operator << (ostream & inOutStr, const NTV2DeviceInfoList & inList)
 {
 	for (NTV2DeviceInfoListConstIter iter(inList.begin());  iter != inList.end();  ++iter)
@@ -864,6 +831,7 @@ bool CNTV2DeviceScanner::GetVDevList (NTV2DeviceInfoList & outVDevList)
 	AJAFileIO::ReadDirectory(vdevPath, "*.vdev", vdevFiles);
 	for (const auto & vdevFile : vdevFiles)
 	{
+		PLFAIL(vdevFile);
 		json vdevJson;
 		{
 			std::ifstream vf(vdevFile);
@@ -1008,5 +976,3 @@ bool CNTV2DeviceScanner::GetCP2DevList (NTV2DeviceInfoList & outVDevList)
 	return true;
 #endif	//	else NTV2_PREVENT_PLUGIN_LOAD
 }	//	GetCP2DeviceList
-
-#endif	//	!defined(NTV2_DEPRECATE_17_1)
