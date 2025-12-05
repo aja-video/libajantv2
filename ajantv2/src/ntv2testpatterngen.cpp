@@ -2553,6 +2553,14 @@ NTV2TestPatternNames NTV2TestPatternGen::getTestPatternNames (void)
 	return result;
 }	//	getTestPatternNames
 
+std::string NTV2TestPatternGen::findTestPatternName (const NTV2TestPatternSelect inPattern)
+{
+	TPStringMap TPNames;
+	::CreateTPStringMap(TPNames);
+	TPStringMapConstIter iter(TPNames.find(inPattern));
+	return iter != TPNames.end() ? iter->second : "";
+}
+
 NTV2StringList NTV2TestPatternGen::getColorNames (void)
 {
 	NTV2StringList result;

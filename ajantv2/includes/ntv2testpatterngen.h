@@ -91,6 +91,12 @@ class AJAExport NTV2TestPatternGen
 		static NTV2TestPatternNames		getTestPatternNames (void);
 
 		/**
+		    @return		The test pattern name that corresponds to the given pattern.
+			@param[in]	inPattern Specifies the test pattern.
+		 **/
+		static std::string				findTestPatternName (const NTV2TestPatternSelect inPattern);
+
+		/**
 			@return		An ordered collection of strings containing the names of all available flat-field "web colors".
 		**/
 		static NTV2StringList			getColorNames (void);	//	New in SDK 16.0
