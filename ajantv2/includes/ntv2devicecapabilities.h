@@ -47,6 +47,7 @@ class AJAExport DeviceCapabilities
 		inline bool		CanDoAudioInput (void)					{return dev.IsSupported(kDeviceCanDoAudioInput);}								///< @returns	True if device has any audio input capability (SDI, HDMI, AES or analog)
 		inline bool		CanDoAudioMixer (void)					{return dev.IsSupported(kDeviceCanDoAudioMixer);}								///< @returns	True if device has an audio mixer
 		inline bool		CanDoAudioOutput (void)					{return dev.IsSupported(kDeviceCanDoAudioOutput);}								///< @returns	True if device has any audio output capability (SDI, HDMI, AES or analog)
+		inline bool		CanDoAudioWaitForVBI (void)				{return dev.IsSupported(kDeviceAudioCanWaitForVBI);}							///< @returns	True if device audio systems support delaying start until VBI
 		inline bool		CanDoBreakoutBoard (void)				{return dev.IsSupported(kDeviceCanDoBreakoutBoard);}							///< @returns	True if device supports an AJA breakout board
 		inline bool		CanDoBreakoutBox (void)					{return dev.IsSupported(kDeviceCanDoBreakoutBox);}								///< @returns	True if device supports an AJA breakout box
 		inline bool		CanDoCapture (void)						{return dev.IsSupported(kDeviceCanDoCapture);}									///< @returns	True if device has any SDI, HDMI or analog video inputs
