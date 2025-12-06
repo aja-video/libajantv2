@@ -362,7 +362,7 @@ AJAStatus NTV2FieldBurn::SetupHostBuffers (void)
 void NTV2FieldBurn::RouteInputSignal (void)
 {
 	const NTV2OutputCrosspointID	inputOutputXpt	(::GetInputSourceOutputXpt (mConfig.fInputSource));
-	const NTV2InputCrosspointID		fbInputXpt		(::GetFrameBufferInputXptFromChannel (mConfig.fInputChannel));
+	const NTV2InputCrosspointID		fbInputXpt		(::GetFrameStoreInputXptFromChannel (mConfig.fInputChannel));
 	const bool						isRGB			(::IsRGBFormat(mConfig.fPixelFormat));
 
 	if (isRGB)
@@ -385,7 +385,7 @@ void NTV2FieldBurn::RouteInputSignal (void)
 void NTV2FieldBurn::RouteOutputSignal (void)
 {
 	const NTV2InputCrosspointID		outputInputXpt	(::GetOutputDestInputXpt (mOutputDest));
-	const NTV2OutputCrosspointID	fbOutputXpt		(::GetFrameBufferOutputXptFromChannel (mConfig.fOutputChannel, ::IsRGBFormat (mConfig.fPixelFormat)));
+	const NTV2OutputCrosspointID	fbOutputXpt		(::GetFrameStoreOutputXptFromChannel (mConfig.fOutputChannel, ::IsRGBFormat (mConfig.fPixelFormat)));
 	const bool						isRGB			(::IsRGBFormat(mConfig.fPixelFormat));
 	NTV2OutputCrosspointID			outputXpt		(fbOutputXpt);
 

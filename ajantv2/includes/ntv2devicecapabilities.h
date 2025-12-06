@@ -15,7 +15,7 @@
 			Instead of calling the old global ::NTV2DeviceCanDoXXX(mDeviceID) functions,
 			call mCard.features().CanDoXXX().
 			Instead of calling ::NTV2DeviceGetNumYYY(mDeviceID), call mCard.features().GetNumYYY().
-	@see	vidop-features
+	@see	\ref vidop-features
 **/
 class AJAExport DeviceCapabilities
 {
@@ -47,6 +47,7 @@ class AJAExport DeviceCapabilities
 		inline bool		CanDoAudioInput (void)					{return dev.IsSupported(kDeviceCanDoAudioInput);}								///< @returns	True if device has any audio input capability (SDI, HDMI, AES or analog)
 		inline bool		CanDoAudioMixer (void)					{return dev.IsSupported(kDeviceCanDoAudioMixer);}								///< @returns	True if device has an audio mixer
 		inline bool		CanDoAudioOutput (void)					{return dev.IsSupported(kDeviceCanDoAudioOutput);}								///< @returns	True if device has any audio output capability (SDI, HDMI, AES or analog)
+		inline bool		CanDoAudioWaitForVBI (void)				{return dev.IsSupported(kDeviceAudioCanWaitForVBI);}							///< @returns	True if device audio systems support delaying start until VBI
 		inline bool		CanDoBreakoutBoard (void)				{return dev.IsSupported(kDeviceCanDoBreakoutBoard);}							///< @returns	True if device supports an AJA breakout board
 		inline bool		CanDoBreakoutBox (void)					{return dev.IsSupported(kDeviceCanDoBreakoutBox);}								///< @returns	True if device supports an AJA breakout box
 		inline bool		CanDoCapture (void)						{return dev.IsSupported(kDeviceCanDoCapture);}									///< @returns	True if device has any SDI, HDMI or analog video inputs
@@ -59,6 +60,7 @@ class AJAExport DeviceCapabilities
 		inline bool		CanDoEnhancedCSC (void)					{return dev.IsSupported(kDeviceCanDoEnhancedCSC);}								///< @returns	True if device has enhanced CSCs
 		inline bool		CanDoFramePulseSelect (void)			{return dev.IsSupported(kDeviceCanDoFramePulseSelect);}							///< @returns	True if device supports frame pulse source independent of reference source
 		inline bool		CanDoFrameStore1Display (void)			{return dev.IsSupported(kDeviceCanDoFrameStore1Display);}						///< @returns	True if device can display/output video from FrameStore 1
+		inline bool		CanDoGPIO (void)						{return dev.IsSupported(kDeviceCanDoGPIO);}										///< @returns	True if device has GPIO interface
 		inline bool		CanDoHDMIAuxCapture (void)				{return dev.IsSupported(kDeviceCanDoHDMIAuxCapture);}							///< @returns	True if device has HDMI AUX data extractor(s)
 		inline bool		CanDoHDMIAuxPlayback (void)				{return dev.IsSupported(kDeviceCanDoHDMIAuxPlayback);}							///< @returns	True if device has HDMI AUX data inserter(s)
 		inline bool		CanDoHDMIHDROut (void)					{return dev.IsSupported(kDeviceCanDoHDMIHDROut);}								///< @returns	True if device supports HDMI HDR output
@@ -106,6 +108,7 @@ class AJAExport DeviceCapabilities
 		inline bool		HasAudioMonitorRCAJacks (void)			{return dev.IsSupported(kDeviceHasAudioMonitorRCAJacks);}						///< @returns	True if device has a pair of unbalanced RCA audio monitor output connectors
 		inline bool		HasBiDirectionalAnalogAudio (void)		{return dev.IsSupported(kDeviceHasBiDirectionalAnalogAudio);}					///< @returns	True if device has a bi-directional analog audio connector
 		inline bool		HasBiDirectionalSDI (void)				{return dev.IsSupported(kDeviceHasBiDirectionalSDI);}							///< @returns	True if device has bi-directional SDI connectors
+		inline bool		HasBracketLED (void)					{return dev.IsSupported(kDeviceHasBracketLED);}									///< @returns	True if device has LED(s) on the card bracket
 		inline bool		HasBreakoutBoard (void)					{return dev.IsSupported(kDeviceHasBreakoutBoard);}								///< @returns	True if device has attached/connected breakout board
 		inline bool		HasColorSpaceConverterOnChannel2 (void)	{return dev.IsSupported(kDeviceHasColorSpaceConverterOnChannel2);}				///< @returns	True if device has a second colorspace converter widget (NTV2_WgtCSC2)
 		inline bool		HasCrosspointConnectROM (void)			{return dev.IsSupported(kDeviceHasXptConnectROM);}								///< @returns	True if device has a crosspoint connection ROM
@@ -194,7 +197,7 @@ class AJAExport DeviceCapabilities
 		inline ULWord	GetUFCVersion (void)					{return dev.GetNumSupported(kDeviceGetUFCVersion);}								///< @returns	The version number of the UFC on the device
 
 		/**
-			@param[in]	inChannel	Specifies the channel or FrameStore of interest.
+			@param[in]	inChannel	Specifies the ::NTV2Channel or FrameStore of interest.
 			@returns	True if the device has the given FrameStore; otherwise false.
 		**/
 		inline bool		CanDoChannel (const NTV2Channel inChannel)
@@ -203,7 +206,7 @@ class AJAExport DeviceCapabilities
 						}
 
 		/**
-			@param[in]	inMode		Specifies the NTV2ConversionMode of interest.
+			@param[in]	inMode		Specifies the ::NTV2ConversionMode of interest.
 			@returns	True if the device can perform the requested conversion; otherwise false.
 		**/
 		inline bool		CanDoConversionMode (const NTV2ConversionMode inMode)
@@ -212,7 +215,7 @@ class AJAExport DeviceCapabilities
 						}
 
 		/**
-			@param[in]	inMode		Specifies the NTV2DSKMode of interest.
+			@param[in]	inMode		Specifies the ::NTV2DSKMode of interest.
 			@returns	True if the device's Mixer/Keyer widget(s) can accommodate the requested downstream keyer mode; otherwise false.
 		**/
 		inline bool		CanDoDSKMode (const NTV2DSKMode inMode)
@@ -221,17 +224,17 @@ class AJAExport DeviceCapabilities
 						}
 
 		/**
-			@param[in]	inPF		Specifies the NTV2PixelFormat of interest.
+			@param[in]	inPF		Specifies the ::NTV2PixelFormat of interest.
 			@returns	True if the device's FrameStore widget(s) can read or write the requested pixel format; otherwise false.
 		**/
 		inline bool		CanDoFrameBufferFormat (const NTV2PixelFormat inPF)
 						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_PixelFormat));
 							return itms.find(ULWord(inPF)) != itms.end();
 						}
-		inline bool		CanDoPixelFormat (const NTV2PixelFormat inPF)		{return CanDoFrameBufferFormat(inPF);}
+		inline bool		CanDoPixelFormat (const NTV2PixelFormat inPF)		{return CanDoFrameBufferFormat(inPF);}	///< @brief	Same as DeviceCapabilities::CanDoFrameBufferFormat.
 
 		/**
-			@param[in]	inSrc		Specifies the NTV2InputSource of interest.
+			@param[in]	inSrc		Specifies the ::NTV2InputSource of interest.
 			@returns	True if the device has the requested input source; otherwise false.
 		**/
 		inline bool		CanDoInputSource (const NTV2InputSource inSrc)
@@ -240,7 +243,7 @@ class AJAExport DeviceCapabilities
 						}
 
 		/**
-			@param[in]	inDest		Specifies the NTV2OutputDestination of interest.
+			@param[in]	inDest		Specifies the ::NTV2OutputDestination of interest.
 			@returns	True if the device has the requested output destination connector; otherwise false.
 		**/
 		inline bool		CanDoOutputDestination (const NTV2OutputDestination inDest)
@@ -249,7 +252,7 @@ class AJAExport DeviceCapabilities
 						}
 
 		/**
-			@param[in]	inVF		Specifies the NTV2VideoFormat of interest.
+			@param[in]	inVF		Specifies the ::NTV2VideoFormat of interest.
 			@returns	True if the device's FrameStore(s) can handle the given video format; otherwise false.
 		**/
 		inline bool		CanDoVideoFormat (const NTV2VideoFormat inVF)
@@ -258,7 +261,7 @@ class AJAExport DeviceCapabilities
 						}
 
 		/**
-			@param[in]	inWgtID		Specifies the NTV2WidgetID of interest.
+			@param[in]	inWgtID		Specifies the ::NTV2WidgetID of interest.
 			@returns	True if the device firmware implements the given widget; otherwise false.
 		**/
 		inline bool		CanDoWidget (const NTV2WidgetID inWgtID)
@@ -267,14 +270,14 @@ class AJAExport DeviceCapabilities
 						}
 
 		/**
-			@param[in]	inWgtType	Specifies the NTV2WidgetType.
+			@param[in]	inWgtType	Specifies the ::NTV2WidgetType.
 			@param[in]	index0		Specifies the widget of interest as a zero-based index.
 			@returns	True if the device firmware implements the given widget; otherwise false.
 		**/
 		bool			CanDoWidget (const NTV2WidgetType inWgtType, const UWord index0);
 
 		/**
-			@returns	The set of unique NTV2PixelFormat values supported by the device's FrameStore(s).
+			@returns	The set of unique ::NTV2PixelFormat values supported by the device's FrameStore(s).
 		**/
 		inline NTV2PixelFormats	PixelFormats (void)
 						{	NTV2PixelFormats result;
@@ -285,7 +288,7 @@ class AJAExport DeviceCapabilities
 						}
 
 		/**
-			@returns	The set of unique NTV2VideoFormat values supported by the device's FrameStore(s).
+			@returns	The set of unique ::NTV2VideoFormat values supported by the device's FrameStore(s).
 		**/
 		inline NTV2VideoFormatSet	VideoFormats (void)
 						{	NTV2VideoFormatSet result;
@@ -296,7 +299,7 @@ class AJAExport DeviceCapabilities
 						}
 
 		/**
-			@returns	The set of unique NTV2TimecodeIndex values that can be ingested and captured by the device.
+			@returns	The set of unique ::NTV2TimecodeIndex values that can be ingested and captured by the device.
 		**/
 		inline NTV2TCIndexes	InputTCIndexes (void)
 						{	NTV2TCIndexes result;
@@ -307,7 +310,7 @@ class AJAExport DeviceCapabilities
 						}
 
 		/**
-			@returns	The set of unique NTV2TimecodeIndex values that can be output by the device.
+			@returns	The set of unique ::NTV2TimecodeIndex values that can be output by the device.
 		**/
 		inline NTV2TCIndexes	OutputTCIndexes (void)
 						{	NTV2TCIndexes result;
@@ -318,7 +321,7 @@ class AJAExport DeviceCapabilities
 						}
 
 		/**
-			@returns	The set of unique NTV2AudioRate values that are supported by the device.
+			@returns	The set of unique ::NTV2AudioRate values that are supported by the device.
 		**/
 		inline NTV2AudioRateSet	AudioSampleRates (void)								//	New in SDK 18.0
 						{	NTV2AudioRateSet result;
@@ -329,7 +332,7 @@ class AJAExport DeviceCapabilities
 						}
 
 		/**
-			@param[in]	inTCNdx		Specifies the NTV2TimecodeIndex of interest.
+			@param[in]	inTCNdx		Specifies the ::NTV2TimecodeIndex of interest.
 			@returns	True if the device can read the given timecode; otherwise false.
 		**/
 		inline bool		CanDoInputTCIndex (const NTV2TCIndex inTCNdx)
@@ -338,7 +341,7 @@ class AJAExport DeviceCapabilities
 						}
 
 		/**
-			@param[in]	inTCNdx		Specifies the NTV2TimecodeIndex of interest.
+			@param[in]	inTCNdx		Specifies the ::NTV2TimecodeIndex of interest.
 			@returns	True if the device can write the given timecode; otherwise false.
 		**/
 		inline bool		CanDoOutputTCIndex (const NTV2TCIndex inTCNdx)
@@ -347,7 +350,7 @@ class AJAExport DeviceCapabilities
 						}
 
 		/**
-			@param[in]	inTCNdx		Specifies the NTV2TimecodeIndex of interest.
+			@param[in]	inTCNdx		Specifies the ::NTV2TimecodeIndex of interest.
 			@returns	True if the device can write the given timecode; otherwise false.
 		**/
 		inline bool		CanDoAudioSampleRate (const NTV2AudioRate inRate)			//	New in SDK 18.0

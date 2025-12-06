@@ -446,11 +446,11 @@ AJAExport NTV2FrameGeometry		GetNormalizedFrameGeometry (const NTV2FrameGeometry
 AJAExport NTV2FrameGeometry		GetVANCFrameGeometry (const NTV2FrameGeometry inFrameGeometry, const NTV2VANCMode inVancMode);
 
 /**
-	@return		The first matching ::NTV2FrameGeometry that matches the given ::NTV2FrameDimensions,
+	@return		The first matching ::NTV2FrameGeometry that matches the given ::NTV2FrameSize,
 				or ::NTV2_FG_INVALID if none match.
-	@param[in]	inFD	Specifies the ::NTV2FrameDimensions of interest.
+	@param[in]	inFD	Specifies the ::NTV2FrameSize of interest.
 **/
-AJAExport NTV2FrameGeometry		GetGeometryFromFrameDimensions (const NTV2FrameDimensions & inFD);	//	New in SDK 16.0
+AJAExport NTV2FrameGeometry		GetGeometryFromFrameDimensions (const NTV2FrameSize & inFD);	//	New in SDK 16.0
 
 /**
 	@return		True if the given ::NTV2FrameGeometry has tall or taller geometries associated with it;
@@ -864,12 +864,12 @@ AJAExport ULWord	AddAudioTestPattern (ULWord *		pAudioBuffer,
 										 const ULWord	inNumChannels);
 
 /**
-	@brief		Writes the given NTV2FrameDimensions to the specified output stream.
-	@param		inOutStream			Specifies the output stream to receive the human-readable representation of the NTV2FrameDimensions.
-	@param[in]	inFrameDimensions	Specifies the NTV2FrameDimensions to print to the output stream.
+	@brief		Writes the given ::NTV2FrameSize to the specified output stream.
+	@param		inOutStream			Specifies the output stream to receive the human-readable representation of the ::NTV2FrameSize.
+	@param[in]	inFrameDimensions	Specifies the ::NTV2FrameSize to print to the output stream.
 	@return A non-constant reference to the specified output stream.
 **/
-AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2FrameDimensions inFrameDimensions);
+AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2FrameSize & inFrameDimensions);
 
 
 /**

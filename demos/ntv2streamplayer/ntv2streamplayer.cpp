@@ -283,7 +283,7 @@ bool NTV2StreamPlayer::RouteOutputSignal (void)
 	UWord				connectFailures	(0);
 
 	const NTV2OutputXptID	cscVidOutXpt(::GetCSCOutputXptFromChannel(mConfig.fOutputChannel,  false/*isKey*/,  !isRGB/*isRGB*/));
-	const NTV2OutputXptID	fsVidOutXpt (::GetFrameBufferOutputXptFromChannel(mConfig.fOutputChannel,  isRGB/*isRGB*/,  false/*is425*/));
+	const NTV2OutputXptID	fsVidOutXpt (::GetFrameStoreOutputXptFromChannel(mConfig.fOutputChannel,  isRGB/*isRGB*/,  false/*is425*/));
 	const NTV2InputXptID	cscInputXpt (isRGB ? ::GetCSCInputXptFromChannel(mConfig.fOutputChannel, false/*isKeyInput*/) : NTV2_INPUT_CROSSPOINT_INVALID);
 	if (isRGB)
 		if (!mDevice.Connect (cscInputXpt,  fsVidOutXpt,  canVerify))

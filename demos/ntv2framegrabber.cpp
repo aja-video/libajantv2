@@ -413,10 +413,7 @@ void NTV2FrameGrabber::run (void)
 					const ULWord acOptions(AUTOCIRCULATE_WITH_RP188  |  (mTransferStruct.acANCBuffer.IsNULL() && mTransferStruct.acANCField2Buffer.IsNULL() ? 0 : AUTOCIRCULATE_WITH_ANC));
 					gMutex.lock();
 						StopAutoCirculate();
-						ULWord numFrameBuffersAvailable = (mNTV2Card.DeviceGetNumberFrameBuffers() - mNTV2Card.features().GetNumAudioSystems());
-						ULWord startFrameBuffer = (numFrameBuffersAvailable / mNTV2Card.features().GetNumFrameStores()) * ULWord(mChannel);
-						mNTV2Card.AutoCirculateInitForInput (mChannel, NTV2ACFrameRange(startFrameBuffer, startFrameBuffer+7),
-															::NTV2ChannelToAudioSystem(mChannel), acOptions);
+						mNTV2Card.AutoCirculateInitForInput (mChannel, NTV2ACFrameRange(7), ::NTV2ChannelToAudioSystem(mChannel), acOptions);
 					gMutex.unlock();
 					SetupAudio();
 					if (mAudioOutput)
@@ -430,7 +427,7 @@ void NTV2FrameGrabber::run (void)
 					for (int i(0);  i < NTV2_NUM_IMAGES;  i++)
 					{
 						delete images[i];
-						images[i] = new QImage (mFrameDimensions.Width(), mFrameDimensions.Height(), QImage::Format_RGB32);
+						images[i] = new QImage (mFrameDimensions.width(), mFrameDimensions.height(), QImage::Format_RGB32);
 					}
 
 					framesCaptured = 0;
@@ -477,9 +474,9 @@ void NTV2FrameGrabber::run (void)
 			{
 				//	Eliminate field flicker by copying even lines to odd lines...
 				//	(a very lame de-interlace technique)
-				if (currentImage->height() == int(mFrameDimensions.Height())  &&  currentImage->width() == int(mFrameDimensions.Width()))
-					for (ULWord line (0);  line < mFrameDimensions.Height();  line += 2)
-						::memcpy (currentImage->scanLine (int(line) + 1),  currentImage->scanLine(int(line)),  mFrameDimensions.Width() * 4);
+				if (currentImage->height() == int(mFrameDimensions.height())  &&  currentImage->width() == int(mFrameDimensions.width()))
+					for (ULWord line (0);  line < mFrameDimensions.height();  line += 2)
+						::memcpy (currentImage->scanLine (int(line) + 1),  currentImage->scanLine(int(line)),  mFrameDimensions.width() * 4);
 			}
 			GrabCaptions();
 			mTimeCode.clear ();
@@ -565,7 +562,7 @@ bool NTV2FrameGrabber::SetupInput (void)
 
 	mCurrentVideoFormat = GetVideoFormatFromInputSource();
 	mCurrentColorSpace = GetColorSpaceFromInputSource();
-	mFrameDimensions.Set (QTPREVIEW_WIDGET_X, QTPREVIEW_WIDGET_Y);
+	mFrameDimensions.set (QTPREVIEW_WIDGET_X, QTPREVIEW_WIDGET_Y);
 	if (!NTV2_IS_VALID_VIDEO_FORMAT(mCurrentVideoFormat))
 		return false;	//	No video!
 
@@ -573,10 +570,10 @@ bool NTV2FrameGrabber::SetupInput (void)
 	NTV2VANCMode vm(NTV2_VANCMODE_INVALID);
 	mNTV2Card.GetVANCMode (vm, mChannel);
 	const NTV2FormatDescriptor fd (mCurrentVideoFormat, mFrameBufferFormat, vm);
-	mFrameDimensions.Set (fd.GetRasterWidth(), fd.GetRasterHeight());
+	mFrameDimensions.set (fd.GetRasterWidth(), fd.GetRasterHeight());
 	const QString vfString (::NTV2VideoFormatToString(mCurrentVideoFormat).c_str());
 	FGDBG("mInputSource=" << mChannel << " mCurrentVideoFormat=" << vfString.toStdString()
-			<< " wdth=" << mFrameDimensions.Width() << " hght=" << mFrameDimensions.Height());
+			<< " wdth=" << mFrameDimensions.width() << " hght=" << mFrameDimensions.height());
 
 	mFormatIsProgressive = IsProgressivePicture(mCurrentVideoFormat);
 	if (!mbFixedReference)
@@ -594,7 +591,7 @@ bool NTV2FrameGrabber::SetupInput (void)
 		if (mNTV2Card.features().CanDo12gRouting() && (is6g || is12g))
 		{
 			mNTV2Card.Connect (::GetCSCInputXptFromChannel(mChannel), ::GetSDIInputOutputXptFromChannel(mChannel));
-			mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel(mChannel), ::GetCSCOutputXptFromChannel (mChannel, false/*isKey*/, true/*isRGB*/));
+			mNTV2Card.Connect (::GetFrameStoreInputXptFromChannel(mChannel), ::GetCSCOutputXptFromChannel (mChannel, false/*isKey*/, true/*isRGB*/));
 			mNTV2Card.SetFrameBufferFormat (mChannel, mFrameBufferFormat);
 			mNTV2Card.EnableChannel(mChannel);
 			mNTV2Card.SetSDIInLevelBtoLevelAConversion (mChannel, IsInput3Gb(mInputSource) ? true : false);
@@ -603,7 +600,7 @@ bool NTV2FrameGrabber::SetupInput (void)
 		{
 			mNumChannels++;
 			mNTV2Card.Connect (::GetCSCInputXptFromChannel (NTV2Channel(mChannel + offset)), ::GetSDIInputOutputXptFromChannel(NTV2Channel(mChannel + offset)));
-			mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (NTV2Channel(mChannel + offset)), ::GetCSCOutputXptFromChannel(NTV2Channel(mChannel + offset), false/*isKey*/, true/*isRGB*/));
+			mNTV2Card.Connect (::GetFrameStoreInputXptFromChannel (NTV2Channel(mChannel + offset)), ::GetCSCOutputXptFromChannel(NTV2Channel(mChannel + offset), false/*isKey*/, true/*isRGB*/));
 			mNTV2Card.SetFrameBufferFormat (NTV2Channel(mChannel + offset), mFrameBufferFormat);
 			mNTV2Card.EnableChannel (NTV2Channel(mChannel + offset));
 			mNTV2Card.SetSDIInLevelBtoLevelAConversion (mChannel + offset, IsInput3Gb(mInputSource) ? true : false);
@@ -619,7 +616,7 @@ bool NTV2FrameGrabber::SetupInput (void)
 			//mNTV2Card.SetTsiFrameEnable(false, NTV2_CHANNEL1);
 
 			mNTV2Card.Connect (::GetCSCInputXptFromChannel(NTV2_CHANNEL1), NTV2_XptAnalogIn);
-			mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel(NTV2_CHANNEL1), ::GetCSCOutputXptFromChannel(NTV2_CHANNEL1, false/*isKey*/, true/*isRGB*/));
+			mNTV2Card.Connect (::GetFrameStoreInputXptFromChannel(NTV2_CHANNEL1), ::GetCSCOutputXptFromChannel(NTV2_CHANNEL1, false/*isKey*/, true/*isRGB*/));
 			mNTV2Card.SetFrameBufferFormat(NTV2_CHANNEL1, mFrameBufferFormat);
 			if (!mbFixedReference)
 				mNTV2Card.SetReference(NTV2_REFERENCE_ANALOG_INPUT1);
@@ -645,11 +642,11 @@ bool NTV2FrameGrabber::SetupInput (void)
 				{
 					mNTV2Card.Connect (::GetCSCInputXptFromChannel(mChannel),
 										::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, false/*isHDMI_RGB*/, 0/*hdmiQuadrant*/));
-					mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel(mChannel),
+					mNTV2Card.Connect (::GetFrameStoreInputXptFromChannel(mChannel),
 										::GetCSCOutputXptFromChannel (mChannel, false/*isKey*/, true/*isRGB*/));
 				}
 				else
-					mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel(mChannel),
+					mNTV2Card.Connect (::GetFrameStoreInputXptFromChannel(mChannel),
 										::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, true/*isHDMI_RGB*/, 0/*hdmiQuadrant*/));
 			}
 			else if (NTV2_IS_4K_VIDEO_FORMAT(mCurrentVideoFormat) && !mNTV2Card.features().CanDoHDMIQuadRasterConversion())
@@ -711,11 +708,11 @@ bool NTV2FrameGrabber::SetupInput (void)
 					{
 						mNTV2Card.Connect (::GetCSCInputXptFromChannel(channel),
 											::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, false/*isHDMI_RGB*/, channel/*hdmiQuadrant*/));
-						mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel(channel),
+						mNTV2Card.Connect (::GetFrameStoreInputXptFromChannel(channel),
 											::GetCSCOutputXptFromChannel (channel, false/*isKey*/, true/*isRGB*/));
 					}
 					else
-						mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel(channel),
+						mNTV2Card.Connect (::GetFrameStoreInputXptFromChannel(channel),
 											::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, true/*isHDMI_RGB*/, channel/*hdmiQuadrant*/));
 				}	//	loop once for each channel (4 times for 4K/UHD)
 			}	//	else if 4K and can do HDMI quad raster conversion
@@ -729,11 +726,11 @@ bool NTV2FrameGrabber::SetupInput (void)
 				{
 					mNTV2Card.Connect (::GetCSCInputXptFromChannel(mChannel),
 										::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, false/*isHDMI_RGB*/, 0/*hdmiQuadrant*/));
-					mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel(mChannel),
+					mNTV2Card.Connect (::GetFrameStoreInputXptFromChannel(mChannel),
 										::GetCSCOutputXptFromChannel (mChannel, false/*isKey*/, true/*isRGB*/));
 				}
 				else
-					mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel(mChannel),
+					mNTV2Card.Connect (::GetFrameStoreInputXptFromChannel(mChannel),
 										::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, true/*isHDMI_RGB*/, 0/*hdmiQuadrant*/));
 			}	//	else not 4K
 

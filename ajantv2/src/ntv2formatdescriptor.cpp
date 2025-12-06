@@ -1350,14 +1350,14 @@ ostream & NTV2FormatDescriptor::PrintSMPTELineNumber (ostream & inOutStream, con
 	return inOutStream;
 }
 
-NTV2FrameDimensions NTV2FormatDescriptor::GetFullRasterDimensions (void) const
+NTV2FrameSize NTV2FormatDescriptor::GetFullRasterDimensions (void) const
 {
-	return NTV2FrameDimensions (GetRasterWidth(), GetRasterHeight(false));
+	return NTV2FrameSize (GetRasterWidth(), GetRasterHeight(false));
 }
 
-NTV2FrameDimensions NTV2FormatDescriptor::GetVisibleRasterDimensions (void) const
+NTV2FrameSize NTV2FormatDescriptor::GetVisibleRasterDimensions (void) const
 {
-	return NTV2FrameDimensions (GetRasterWidth(), GetRasterHeight(true));
+	return NTV2FrameSize (GetRasterWidth(), GetRasterHeight(true));
 }
 
 

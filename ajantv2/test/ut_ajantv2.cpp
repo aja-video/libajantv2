@@ -2715,42 +2715,42 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 
 	TEST_CASE("NTV2SignalRouterBFT")
 	{
-		SUBCASE("GetFrameBufferOutputXptFromChannel")
+		SUBCASE("GetFrameStoreOutputXptFromChannel")
 		{
 	 		const bool kIsNotRGB(false), kIsRGB(true), kIsNot425(false), kIs425(true);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL1, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer1YUV);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL2, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer2YUV);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL3, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer3YUV);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL4, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer4YUV);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL5, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer5YUV);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL6, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer6YUV);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL7, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer7YUV);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL8, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer8YUV);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL1, kIsNotRGB, kIs425), NTV2_XptFrameBuffer1_DS2YUV);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL2, kIsNotRGB, kIs425), NTV2_XptFrameBuffer2_DS2YUV);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL3, kIsNotRGB, kIs425), NTV2_XptFrameBuffer3_DS2YUV);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL4, kIsNotRGB, kIs425), NTV2_XptFrameBuffer4_DS2YUV);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL5, kIsNotRGB, kIs425), NTV2_XptFrameBuffer5_DS2YUV);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL6, kIsNotRGB, kIs425), NTV2_XptFrameBuffer6_DS2YUV);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL7, kIsNotRGB, kIs425), NTV2_XptFrameBuffer7_DS2YUV);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL8, kIsNotRGB, kIs425), NTV2_XptFrameBuffer8_DS2YUV);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL1, kIsRGB, kIsNot425), NTV2_XptFrameBuffer1RGB);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL2, kIsRGB, kIsNot425), NTV2_XptFrameBuffer2RGB);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL3, kIsRGB, kIsNot425), NTV2_XptFrameBuffer3RGB);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL4, kIsRGB, kIsNot425), NTV2_XptFrameBuffer4RGB);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL5, kIsRGB, kIsNot425), NTV2_XptFrameBuffer5RGB);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL6, kIsRGB, kIsNot425), NTV2_XptFrameBuffer6RGB);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL7, kIsRGB, kIsNot425), NTV2_XptFrameBuffer7RGB);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL8, kIsRGB, kIsNot425), NTV2_XptFrameBuffer8RGB);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL1, kIsRGB, kIs425), NTV2_XptFrameBuffer1_DS2RGB);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL2, kIsRGB, kIs425), NTV2_XptFrameBuffer2_DS2RGB);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL3, kIsRGB, kIs425), NTV2_XptFrameBuffer3_DS2RGB);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL4, kIsRGB, kIs425), NTV2_XptFrameBuffer4_DS2RGB);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL5, kIsRGB, kIs425), NTV2_XptFrameBuffer5_DS2RGB);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL6, kIsRGB, kIs425), NTV2_XptFrameBuffer6_DS2RGB);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL7, kIsRGB, kIs425), NTV2_XptFrameBuffer7_DS2RGB);
-	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL8, kIsRGB, kIs425), NTV2_XptFrameBuffer8_DS2RGB);
-		}	//	SUBCASE("GetFrameBufferOutputXptFromChannel")
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL1, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer1YUV);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL2, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer2YUV);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL3, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer3YUV);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL4, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer4YUV);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL5, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer5YUV);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL6, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer6YUV);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL7, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer7YUV);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL8, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer8YUV);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL1, kIsNotRGB, kIs425), NTV2_XptFrameBuffer1_DS2YUV);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL2, kIsNotRGB, kIs425), NTV2_XptFrameBuffer2_DS2YUV);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL3, kIsNotRGB, kIs425), NTV2_XptFrameBuffer3_DS2YUV);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL4, kIsNotRGB, kIs425), NTV2_XptFrameBuffer4_DS2YUV);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL5, kIsNotRGB, kIs425), NTV2_XptFrameBuffer5_DS2YUV);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL6, kIsNotRGB, kIs425), NTV2_XptFrameBuffer6_DS2YUV);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL7, kIsNotRGB, kIs425), NTV2_XptFrameBuffer7_DS2YUV);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL8, kIsNotRGB, kIs425), NTV2_XptFrameBuffer8_DS2YUV);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL1, kIsRGB, kIsNot425), NTV2_XptFrameBuffer1RGB);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL2, kIsRGB, kIsNot425), NTV2_XptFrameBuffer2RGB);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL3, kIsRGB, kIsNot425), NTV2_XptFrameBuffer3RGB);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL4, kIsRGB, kIsNot425), NTV2_XptFrameBuffer4RGB);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL5, kIsRGB, kIsNot425), NTV2_XptFrameBuffer5RGB);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL6, kIsRGB, kIsNot425), NTV2_XptFrameBuffer6RGB);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL7, kIsRGB, kIsNot425), NTV2_XptFrameBuffer7RGB);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL8, kIsRGB, kIsNot425), NTV2_XptFrameBuffer8RGB);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL1, kIsRGB, kIs425), NTV2_XptFrameBuffer1_DS2RGB);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL2, kIsRGB, kIs425), NTV2_XptFrameBuffer2_DS2RGB);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL3, kIsRGB, kIs425), NTV2_XptFrameBuffer3_DS2RGB);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL4, kIsRGB, kIs425), NTV2_XptFrameBuffer4_DS2RGB);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL5, kIsRGB, kIs425), NTV2_XptFrameBuffer5_DS2RGB);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL6, kIsRGB, kIs425), NTV2_XptFrameBuffer6_DS2RGB);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL7, kIsRGB, kIs425), NTV2_XptFrameBuffer7_DS2RGB);
+	 		CHECK_EQ(::GetFrameStoreOutputXptFromChannel(NTV2_CHANNEL8, kIsRGB, kIs425), NTV2_XptFrameBuffer8_DS2RGB);
+		}	//	SUBCASE("GetFrameStoreOutputXptFromChannel")
 
 		SUBCASE("GetFrameBufferOutputXptFromChannel")
 		{	//	This generates the NTV2OutputCrosspointID enum declarations -- they should compare:

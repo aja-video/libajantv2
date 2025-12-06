@@ -704,9 +704,9 @@ bool NTV2DeviceSpecParser::ParseSerialNum (size_t & pos, string & outToken)
 				break;
 			++posAlphaNum;  tokAlphaNum += ch;
 		}
-		if (tokAlphaNum.length() < 2)	//	At least 2 upper-case chars
-			tokAlphaNum.clear();
-		else if (tokAlphaNum.length() == 8  ||  tokAlphaNum.length() == 9)
+		if (tokAlphaNum.length() < 2)	//	At least 2 alphanum chars
+			{tokAlphaNum.clear(); break;}
+		if (tokAlphaNum.length() == 8  ||  tokAlphaNum.length() == 9)
 			{pos = posAlphaNum;   outToken = tokAlphaNum;  break;}
 
 		if (ParseHexNumber(posHexNum, tokHexNum))
@@ -1892,12 +1892,13 @@ bool NTV2PluginLoader::validate (void)
 				<< "\" doesn't match client SDK version '" << myVers << "'");
 		return fail();
 	}
+#if 1    
 	if (fingerprint != ajaFingerprint)
 	{	P_FAIL("'" << pluginPath() << "':|Plugin not authorized/signed by AJA:|"
 				<< "Issuer serial: " << fingerprint << "|AJA serial: " << ajaFingerprint);
 		return fail();	//	fail
 	}
-
+#endif
 	//	Green light
 	mValidated = true;
 	return true;

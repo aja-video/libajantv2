@@ -425,7 +425,7 @@ AJAStatus NTV2LLBurn::SetupHostBuffers (void)
 void NTV2LLBurn::RouteInputSignal (void)
 {
 	const NTV2OutputCrosspointID	inputOutputXpt	(::GetInputSourceOutputXpt (mConfig.fInputSource));
-	const NTV2InputCrosspointID		fbInputXpt		(::GetFrameBufferInputXptFromChannel (mConfig.fInputChannel));
+	const NTV2InputCrosspointID		fbInputXpt		(::GetFrameStoreInputXptFromChannel (mConfig.fInputChannel));
 
 	if (::IsRGBFormat (mConfig.fPixelFormat))
 	{
@@ -447,7 +447,7 @@ void NTV2LLBurn::RouteInputSignal (void)
 void NTV2LLBurn::RouteOutputSignal (void)
 {
 	const NTV2InputCrosspointID		outputInputXpt	(::GetOutputDestInputXpt (mOutputDest));
-	const NTV2OutputCrosspointID	fbOutputXpt		(::GetFrameBufferOutputXptFromChannel (mConfig.fOutputChannel, ::IsRGBFormat (mConfig.fPixelFormat)));
+	const NTV2OutputCrosspointID	fbOutputXpt		(::GetFrameStoreOutputXptFromChannel (mConfig.fOutputChannel, ::IsRGBFormat (mConfig.fPixelFormat)));
 	NTV2OutputCrosspointID			outputXpt		(fbOutputXpt);
 
 	mRP188Outputs.clear();

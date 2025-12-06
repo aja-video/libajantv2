@@ -215,7 +215,7 @@ void NTV2StreamGrabber::run (void)
 					for (ULWord i = 0; i < NTV2_NUM_IMAGES; i++)
 					{
 						//	Create a new buffer of the correct size
-						buffers[i].Allocate (mFrameDimensions.Width () * mFrameDimensions.Height () * 4, true);
+						buffers[i].Allocate (mFrameDimensions.width () * mFrameDimensions.height () * 4, true);
 
 						//	Prelock and map the buffer
 						if (!mNTV2Card.DMABufferLock(reinterpret_cast<PULWord>(buffers[i].GetHostAddress (0)), 
@@ -264,8 +264,8 @@ void NTV2StreamGrabber::run (void)
 
 		if (CheckForValidInput () == false && NTV2_IS_VALID_INPUT_SOURCE (mInputSource))
 		{
-			QImage	currentImage	(mFrameDimensions.Width (), 
-										mFrameDimensions.Height (), 
+			QImage	currentImage	(mFrameDimensions.width (), 
+										mFrameDimensions.height (), 
 										QImage::Format_RGB32);
 			currentImage.fill (qRgba (40, 40, 40, 255));
 
@@ -296,8 +296,8 @@ void NTV2StreamGrabber::run (void)
 
 				//	Output the new video
 				QImage img = QImage((uchar*)(buffers[index].GetHostAddress (0)), 
-													mFrameDimensions.Width (), 
-													mFrameDimensions.Height (), 
+													mFrameDimensions.width (), 
+													mFrameDimensions.height (), 
 													QImage::Format_RGB32);
 
 				emit newFrame (img, false);
@@ -364,7 +364,7 @@ bool NTV2StreamGrabber::SetupInput (void)
 
 	mCurrentVideoFormat = GetVideoFormatFromInputSource ();
     mCurrentColorSpace = GetColorSpaceFromInputSource ();
-    mFrameDimensions.Set (STREAMPREVIEW_WIDGET_X, STREAMPREVIEW_WIDGET_Y);
+    mFrameDimensions.set (STREAMPREVIEW_WIDGET_X, STREAMPREVIEW_WIDGET_Y);
 
 	if (NTV2_IS_VALID_VIDEO_FORMAT (mCurrentVideoFormat))
 	{
@@ -387,7 +387,7 @@ bool NTV2StreamGrabber::SetupInput (void)
 		NTV2VANCMode vm(NTV2_VANCMODE_INVALID);
 		mNTV2Card.GetVANCMode(vm, mChannel);
 		const NTV2FormatDescriptor fd(mCurrentVideoFormat, mFrameBufferFormat, vm);
-		mFrameDimensions.Set (fd.GetRasterWidth(), fd.GetRasterHeight());
+		mFrameDimensions.set (fd.GetRasterWidth(), fd.GetRasterHeight());
 		const QString vfString (::NTV2VideoFormatToString (mCurrentVideoFormat).c_str ());
 		qDebug() << "## DEBUG:  mInputSource=" << mChannel << ", mCurrentVideoFormat=" << vfString << ", width=" << mFrameDimensions.Width() << ", height=" << mFrameDimensions.Height();
 
@@ -400,12 +400,12 @@ bool NTV2StreamGrabber::SetupInput (void)
 			if (::NTV2DeviceGetNumCSCs (mDeviceID) > (UWord)mChannel)
 			{
 				mNTV2Card.Connect (::GetCSCInputXptFromChannel (inputChannel), ::GetSDIInputOutputXptFromChannel (inputChannel));
-				mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (mChannel), ::GetCSCOutputXptFromChannel ((inputChannel), false/*isKey*/, true/*isRGB*/));
+				mNTV2Card.Connect (::GetFrameStoreInputXptFromChannel (mChannel), ::GetCSCOutputXptFromChannel ((inputChannel), false/*isKey*/, true/*isRGB*/));
 				mNTV2Card.SetFrameBufferFormat (mChannel, mFrameBufferFormat);
 			}
 			else
 			{
-				mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (mChannel), ::GetSDIInputOutputXptFromChannel (inputChannel));
+				mNTV2Card.Connect (::GetFrameStoreInputXptFromChannel (mChannel), ::GetSDIInputOutputXptFromChannel (inputChannel));
 				mNTV2Card.SetFrameBufferFormat (mChannel, NTV2_FBF_8BIT_YCBCR);
 			}
 			mNTV2Card.EnableChannel (mChannel);
@@ -425,12 +425,12 @@ bool NTV2StreamGrabber::SetupInput (void)
 				{
 					mNTV2Card.Connect (::GetCSCInputXptFromChannel (mChannel),
 										::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, false/*isHDMI_RGB*/, 0/*hdmiQuadrant*/));
-					mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (mChannel),
+					mNTV2Card.Connect (::GetFrameStoreInputXptFromChannel (mChannel),
 										::GetCSCOutputXptFromChannel (mChannel, false/*isKey*/, true/*isRGB*/));
 				}
 				else
 				{
-					mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (mChannel),
+					mNTV2Card.Connect (::GetFrameStoreInputXptFromChannel (mChannel),
 										::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, true/*isHDMI_RGB*/, 0/*hdmiQuadrant*/));
 				}
 			}
