@@ -831,7 +831,7 @@ bool CNTV2DeviceScanner::GetVDevList (NTV2DeviceInfoList & outVDevList)
 	AJAFileIO::ReadDirectory(vdevPath, "*.vdev", vdevFiles);
 	for (const auto & vdevFile : vdevFiles)
 	{
-		PLFAIL(vdevFile);
+		PLDBUG(vdevFile);
 		json vdevJson;
 		{
 			std::ifstream vf(vdevFile);

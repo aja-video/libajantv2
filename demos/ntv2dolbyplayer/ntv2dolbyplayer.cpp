@@ -405,7 +405,7 @@ AJAStatus NTV2DolbyPlayer::SetUpTestPatternBuffers (void)
 bool NTV2DolbyPlayer::RouteOutputSignal (void)
 {
 	const bool isRGB (::IsRGBFormat(mConfig.fPixelFormat));
-	const NTV2OutputXptID fsVidOutXpt (::GetFrameBufferOutputXptFromChannel (mConfig.fOutputChannel, isRGB, false/*is425*/));
+	const NTV2OutputXptID fsVidOutXpt (::GetFrameStoreOutputXptFromChannel (mConfig.fOutputChannel, isRGB, false/*is425*/));
 
 	mDevice.ClearRouting();		//	Start with clean slate
 

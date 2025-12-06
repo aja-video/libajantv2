@@ -412,7 +412,7 @@ bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 															::GetSDIInputOutputXptFromChannel(sdiIn, /*DS2?*/false)));
 				mInputConnections.insert(NTV2XptConnection(::GetDLInInputXptFromChannel(sdiIn, /*linkB?*/true),
 															::GetSDIInputOutputXptFromChannel(sdiIn, /*DS2?*/true)));
-				mInputConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(sdiIn),
+				mInputConnections.insert(NTV2XptConnection(::GetFrameStoreInputXptFromChannel(sdiIn),
 															::GetDLInOutputXptFromChannel(frmSt)));
 				if (ShowRoutingProgress) mDevice.ApplySignalRoute(mInputConnections);
 			}
@@ -432,9 +432,9 @@ bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 															::GetSDIInputOutputXptFromChannel(sdiIn, /*DS2?*/true)));
 				mInputConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(tsiMux, /*lnkB?*/ndx & 1),
 															::GetDLInOutputXptFromChannel(sdiIn)));
-				mInputConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(frmSt, /*lnkB?*/false),
+				mInputConnections.insert(NTV2XptConnection(::GetFrameStoreInputXptFromChannel(frmSt, /*lnkB?*/false),
 															::GetTSIMuxOutputXptFromChannel(tsiMux,/*lnkB?*/false, /*rgb?*/true)));
-				mInputConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(frmSt, /*lnkB?*/true),
+				mInputConnections.insert(NTV2XptConnection(::GetFrameStoreInputXptFromChannel(frmSt, /*lnkB?*/true),
 															::GetTSIMuxOutputXptFromChannel(tsiMux,/*lnkB?*/true, /*rgb?*/true)));
 				if (ShowRoutingProgress) mDevice.ApplySignalRoute(mInputConnections);
 			}
@@ -445,7 +445,7 @@ bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 		if (isSquares)	//	SDIIn ==> CSC ==> RGBFrameStore
 			for (size_t ndx(0);  ndx < sdiInputs.size();  ndx++)
 			{	NTV2Channel frmSt(frameStores.at(ndx)), sdiIn(sdiInputs.at(ndx));
-				mInputConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(frmSt),
+				mInputConnections.insert(NTV2XptConnection(::GetFrameStoreInputXptFromChannel(frmSt),
 															::GetCSCOutputXptFromChannel(frmSt, /*key?*/false, /*RGB?*/true)));
 				mInputConnections.insert(NTV2XptConnection(::GetCSCInputXptFromChannel(frmSt),
 															::GetSDIInputOutputXptFromChannel(sdiIn)));
@@ -465,7 +465,7 @@ bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 			for (size_t ndx(0);  ndx < cscs.size();  ndx++)
 			{	NTV2Channel frmSt(frameStores.at(ndx/2)), sdiIn(sdiInputs.at(ndx/2)), tsiMux(tsiMuxes.at(ndx/2)),
 							csc(cscs.at(ndx));
-				mInputConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(frmSt, /*inputB?*/ndx & 1),
+				mInputConnections.insert(NTV2XptConnection(::GetFrameStoreInputXptFromChannel(frmSt, /*inputB?*/ndx & 1),
 															::GetTSIMuxOutputXptFromChannel(tsiMux,/*linkB?*/ndx & 1,/*rgb?*/true)));
 				mInputConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(tsiMux, /*linkB?*/ndx & 1),
 															::GetCSCOutputXptFromChannel(csc, /*key?*/false, /*rgb?*/true)));
@@ -481,7 +481,7 @@ bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 		{
 			for (size_t ndx(0);  ndx < sdiInputs.size();  ndx++)
 			{	NTV2Channel frmSt(frameStores.at(ndx)), csc(activeCSCs.at(ndx)), sdi(sdiInputs.at(ndx));
-				mInputConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(frmSt, /*BInput?*/false),
+				mInputConnections.insert(NTV2XptConnection(::GetFrameStoreInputXptFromChannel(frmSt, /*BInput?*/false),
 															::GetCSCOutputXptFromChannel(csc)));
 				mInputConnections.insert(NTV2XptConnection(::GetCSCInputXptFromChannel(csc),
 															::GetDLInOutputXptFromChannel(sdi)));
@@ -503,7 +503,7 @@ bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 		{
 			for (size_t ndx(0);  ndx < sdiInputs.size();  ndx++)
 			{	NTV2Channel frmSt(frameStores.at(ndx)), sdiIn(sdiInputs.at(ndx));
-				mInputConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(frmSt),
+				mInputConnections.insert(NTV2XptConnection(::GetFrameStoreInputXptFromChannel(frmSt),
 															::GetSDIInputOutputXptFromChannel(sdiIn)));
 				if (ShowRoutingProgress) mDevice.ApplySignalRoute(mInputConnections);
 			}
@@ -525,10 +525,10 @@ bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 				if (!is4KHFR)
 					mConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(tsiMux, /*linkB?*/true),
 										::GetSDIInputOutputXptFromChannel(sdiIn, /*DS2?*/true)));
-				mConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(frmSt, /*inputB?*/is4KHFR && (ndx & 1)),
+				mConnections.insert(NTV2XptConnection(::GetFrameStoreInputXptFromChannel(frmSt, /*inputB?*/is4KHFR && (ndx & 1)),
 									::GetTSIMuxOutputXptFromChannel(tsiMux,/*linkB?*/is4KHFR && (ndx & 1))));
 				if (!is4KHFR)
-					mConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(frmSt, /*inputB?*/true),
+					mConnections.insert(NTV2XptConnection(::GetFrameStoreInputXptFromChannel(frmSt, /*inputB?*/true),
 										::GetTSIMuxOutputXptFromChannel(tsiMux,/*linkB?*/true)));
 				if (ShowRoutingProgress) mDevice.ApplySignalRoute(mInputConnections);
 			}
@@ -1309,7 +1309,7 @@ AJAStatus NTV2CCGrabber::SetupOutputVideo (const NTV2VideoFormat inVideoFormat)
 bool NTV2CCGrabber::RouteOutputSignal (const NTV2VideoFormat inVideoFormat)
 {
 	NTV2_ASSERT (mConfig.fBurnCaptions);	//	Must be burning captions
-	const NTV2OutputCrosspointID	frameStoreOutputRGB	(::GetFrameBufferOutputXptFromChannel (mOutputChannel, true));	//	true=RGB
+	const NTV2OutputCrosspointID	frameStoreOutputRGB	(::GetFrameStoreOutputXptFromChannel (mOutputChannel, true));	//	true=RGB
 	const NTV2OutputCrosspointID	cscOutputYUV		(::GetCSCOutputXptFromChannel (mOutputChannel));
 	const NTV2OutputCrosspointID	cscOutputKey		(::GetCSCOutputXptFromChannel (mOutputChannel, true));	//	true=key
 	const NTV2OutputCrosspointID	mixerOutputYUV		(::GetMixerOutputXptFromChannel (mOutputChannel));

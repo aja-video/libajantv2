@@ -3954,11 +3954,11 @@ NTV2FrameGeometry GetVANCFrameGeometry (const NTV2FrameGeometry inFrameGeometry,
 	return NTV2_FG_INVALID; //	fail
 }
 
-NTV2FrameGeometry GetGeometryFromFrameDimensions (const NTV2FrameDimensions & inFD)
+NTV2FrameGeometry GetGeometryFromFrameDimensions (const NTV2FrameSize & inFD)
 {
 	for (NTV2FrameGeometry fg(NTV2_FG_FIRST);  fg < NTV2_FG_NUMFRAMEGEOMETRIES;	 fg = NTV2FrameGeometry(fg+1))
-		if (::GetNTV2FrameGeometryWidth(fg) == inFD.GetWidth())
-			if (::GetNTV2FrameGeometryHeight(fg) == inFD.GetHeight())
+		if (::GetNTV2FrameGeometryWidth(fg) == inFD.width())
+			if (::GetNTV2FrameGeometryHeight(fg) == inFD.height())
 				return fg;
 	return NTV2_FG_INVALID;
 }
@@ -5709,9 +5709,9 @@ NTV2VideoFormat GetOutputForConversionMode (const NTV2ConversionMode conversionM
 }
 
 
-ostream & operator << (ostream & inOutStream, const NTV2FrameDimensions inFrameDimensions)
+ostream & operator << (ostream & inOutStream, const NTV2FrameSize & inFrameDimensions)
 {
-	return inOutStream	<< inFrameDimensions.Width() << "Wx" << inFrameDimensions.Height() << "H";
+	return inOutStream	<< inFrameDimensions.width() << "Wx" << inFrameDimensions.height() << "H";
 }
 
 
