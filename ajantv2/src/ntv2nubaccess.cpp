@@ -704,9 +704,9 @@ bool NTV2DeviceSpecParser::ParseSerialNum (size_t & pos, string & outToken)
 				break;
 			++posAlphaNum;  tokAlphaNum += ch;
 		}
-		if (tokAlphaNum.length() < 2)	//	At least 2 upper-case chars
-			tokAlphaNum.clear();
-		else if (tokAlphaNum.length() == 8  ||  tokAlphaNum.length() == 9)
+		if (tokAlphaNum.length() < 2)	//	At least 2 alphanum chars
+			{tokAlphaNum.clear(); break;}
+		if (tokAlphaNum.length() == 8  ||  tokAlphaNum.length() == 9)
 			{pos = posAlphaNum;   outToken = tokAlphaNum;  break;}
 
 		if (ParseHexNumber(posHexNum, tokHexNum))
