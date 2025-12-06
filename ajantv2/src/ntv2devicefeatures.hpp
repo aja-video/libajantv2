@@ -19868,7 +19868,6 @@ bool NTV2DeviceCanDoInputSource (const NTV2DeviceID inDeviceID, const NTV2InputS
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_TTAP_PRO:
 				case DEVICE_ID_VKONA:
-				case DEVICE_ID_IP25_R:
 				case DEVICE_ID_IP25_T:
 				case DEVICE_ID_NOTFOUND:
 			#else
@@ -19955,7 +19954,6 @@ bool NTV2DeviceCanDoInputSource (const NTV2DeviceID inDeviceID, const NTV2InputS
 				case DEVICE_ID_TTAP:
 				case DEVICE_ID_TTAP_PRO:
 				case DEVICE_ID_VKONA:
-				case DEVICE_ID_IP25_R:
 				case DEVICE_ID_IP25_T:
 				case DEVICE_ID_NOTFOUND:
 			#else
@@ -43330,9 +43328,17 @@ bool NTV2DeviceCanDoWidget (const NTV2DeviceID inDeviceID, const NTV2WidgetID in
 				case NTV2_Wgt12GSDIIn2:
 				case NTV2_Wgt12GSDIIn3:
 				case NTV2_Wgt12GSDIIn4:
+				case NTV2_Wgt12GSDIIn5:
+				case NTV2_Wgt12GSDIIn6:
+				case NTV2_Wgt12GSDIIn7:
+				case NTV2_Wgt12GSDIIn8:
 				case NTV2_Wgt12GSDIOut2:
 				case NTV2_Wgt12GSDIOut3:
 				case NTV2_Wgt12GSDIOut4:
+				case NTV2_Wgt12GSDIOut5:
+				case NTV2_Wgt12GSDIOut6:
+				case NTV2_Wgt12GSDIOut7:
+				case NTV2_Wgt12GSDIOut8:
 				case NTV2_Wgt3DLUT1:
 				case NTV2_Wgt3GSDIIn1:
 				case NTV2_Wgt3GSDIIn2:
