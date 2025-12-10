@@ -2214,7 +2214,7 @@ void AutoCircTransferFields(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto,
 	pTransfer->acInSegmentedDMAInfo.acNumSegments = lines / 2;
 }
 
-bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t isrTimeStamp)
+bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, uint64_t isrTimeStamp)
 {
 	NTV2DeviceID deviceID = pAutoCirc->deviceID;
 	Ntv2SystemContext* pSysCon = pAutoCirc->pSysCon;

@@ -101,7 +101,7 @@ typedef struct {
 	bool					circulateWithCustomAncData;
 	bool					enableFbfChange;
 	bool					enableFboChange;
-	int64_t					startTimeStamp;  
+    uint64_t				startTimeStamp;
 	uint64_t				startAudioClockTimeStamp;
 	uint32_t				framesProcessed;
 	uint32_t				droppedFrames;
@@ -111,18 +111,18 @@ typedef struct {
 	uint32_t				audioStartSample;
 	uint32_t				audioDropsRequired;
 	uint32_t				audioDropsCompleted;
-	int64_t					lastInterruptTime;
-	int64_t					prevInterruptTime;
+    uint64_t				lastInterruptTime;
+    uint64_t				prevInterruptTime;
 	uint64_t				lastAudioClockTimeStamp;
-	int64_t					startTime;
+    uint64_t				startTime;
 	bool					circulateWithLTC;
 	NTV2AudioSystem			audioSystem;
 	int32_t					channelCount;
 	bool					videoTransferPending;
 	bool					startAudioNextFrame;
 	bool					stopAudioNextFrame;
-	int64_t					VBIRDTSC;
-	int64_t					VBILastRDTSC;
+    uint64_t				VBIRDTSC;
+    uint64_t				VBILastRDTSC;
 	uint32_t				VBIAudioOut;
 	uint32_t				transferFrame;
 	uint32_t				audioTransferOffset;
@@ -187,7 +187,7 @@ void AutoCircTransferFields(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto,
 							 AUTOCIRCULATE_TRANSFER* pTransfer,
 							 uint32_t frameNumber, bool drop);
 
-bool AutoCirculate(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t isrTimeStamp);
+bool AutoCirculate(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, uint64_t isrTimeStamp);
 bool IsAutoCircInterrupt(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec);
 int32_t KAUTO_NEXTFRAME(int32_t __dwCurFrame_, INTERNAL_AUTOCIRCULATE_STRUCT* __pAuto_);
 int32_t KAUTO_PREVFRAME(int32_t __dwCurFrame_, INTERNAL_AUTOCIRCULATE_STRUCT* __pAuto_);
