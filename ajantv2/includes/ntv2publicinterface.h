@@ -5822,7 +5822,7 @@ typedef enum
 					@param[in]	inWidth		Optionally specifies my initial width dimension, in pixels. Defaults to zero.
 					@param[in]	inHeight	Optionally specifies my initial height dimension, in lines. Defaults to zero.
 				**/
-				explicit inline NTV2FrameSize (const ULWord inWidth = 0, const ULWord inHeight = 0)	{Set (inWidth, inHeight);}
+				explicit inline NTV2FrameSize (const ULWord inWidth = 0, const ULWord inHeight = 0)	{set (inWidth, inHeight);}
 				explicit inline	NTV2FrameSize (const NTV2FrameGeometry inFG)	{set(FGWidth(inFG), FGHeight(inFG));}
 				inline ULWord	width (void) const		{return mWidth;}	///< @return	My width, in pixels.
 				inline ULWord	height (void) const		{return mHeight;}	///< @return	My height, in lines/rows.
@@ -5901,7 +5901,7 @@ typedef enum
 			NTV2_END_PRIVATE
 		NTV2_STRUCT_END(NTV2FrameSize)
 		#if !defined(NTV2_DEPRECATE_17_5)
-			typedef NTV2FrameSize	NTV2FrameDimensions;
+			typedef NTV2FrameSize	NTV2FrameDimensions;	///< @deprecated Use NTV2FrameSize instead.
 		#endif	//	!defined(NTV2_DEPRECATE_17_5)
 
 		/**
@@ -5913,8 +5913,10 @@ typedef enum
 						-	A source and destination pitch (span between segments, in elements);
 						-	A segment length, in elements;
 						-	A segment count.
+
 						The element size defaults to 1 byte per element, must be a power-of-2, and cannot be
 						larger than 8 bytes.
+
 						There are also some optional attributes:
 						-	Optional "source vertical flip" flag that if set indicates that during the transfer,
 							the source is read bottom-to-top. Defaults to normal "top-to-bottom" operation.
@@ -6167,7 +6169,7 @@ typedef enum
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
 
 			NTV2_BEGIN_PRIVATE
-				ULWord	mFlags;					///< @brief Lowest 2 bits determines element size, direction bits 8 & 9 (src & dst)
+				ULWord	mFlags;					///< @brief Bits [0:1] determine element size (0=1, 1=2, 2=4, 3=8), reverse direction BIT(8) src, BIT(9) dst
 				ULWord	mNumSegments;			///< @brief Number of segments to transfer (i.e. row count).
 				ULWord	mElementsPerSegment;	///< @brief Size of each segment, in elements.
 				ULWord	mInitialSrcOffset;		///< @brief Initial source offset, in elements.

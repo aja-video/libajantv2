@@ -3954,11 +3954,11 @@ NTV2FrameGeometry GetVANCFrameGeometry (const NTV2FrameGeometry inFrameGeometry,
 	return NTV2_FG_INVALID; //	fail
 }
 
-NTV2FrameGeometry GetGeometryFromFrameDimensions (const NTV2FrameDimensions & inFD)
+NTV2FrameGeometry GetGeometryFromFrameDimensions (const NTV2FrameSize & inFD)
 {
 	for (NTV2FrameGeometry fg(NTV2_FG_FIRST);  fg < NTV2_FG_NUMFRAMEGEOMETRIES;	 fg = NTV2FrameGeometry(fg+1))
-		if (::GetNTV2FrameGeometryWidth(fg) == inFD.GetWidth())
-			if (::GetNTV2FrameGeometryHeight(fg) == inFD.GetHeight())
+		if (::GetNTV2FrameGeometryWidth(fg) == inFD.width())
+			if (::GetNTV2FrameGeometryHeight(fg) == inFD.height())
 				return fg;
 	return NTV2_FG_INVALID;
 }
@@ -5709,9 +5709,9 @@ NTV2VideoFormat GetOutputForConversionMode (const NTV2ConversionMode conversionM
 }
 
 
-ostream & operator << (ostream & inOutStream, const NTV2FrameDimensions inFrameDimensions)
+ostream & operator << (ostream & inOutStream, const NTV2FrameSize & inFrameDimensions)
 {
-	return inOutStream	<< inFrameDimensions.Width() << "Wx" << inFrameDimensions.Height() << "H";
+	return inOutStream	<< inFrameDimensions.width() << "Wx" << inFrameDimensions.height() << "H";
 }
 
 
@@ -6262,10 +6262,18 @@ string NTV2WidgetIDToString (const NTV2WidgetID inValue, const bool inCompactDis
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIIn2", NTV2_Wgt12GSDIIn2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIIn3", NTV2_Wgt12GSDIIn3);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIIn4", NTV2_Wgt12GSDIIn4);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIIn5", NTV2_Wgt12GSDIIn5);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIIn6", NTV2_Wgt12GSDIIn6);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIIn7", NTV2_Wgt12GSDIIn7);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIIn8", NTV2_Wgt12GSDIIn8);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIOut1", NTV2_Wgt12GSDIOut1);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIOut2", NTV2_Wgt12GSDIOut2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIOut3", NTV2_Wgt12GSDIOut3);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIOut4", NTV2_Wgt12GSDIOut4);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIOut5", NTV2_Wgt12GSDIOut5);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIOut6", NTV2_Wgt12GSDIOut6);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIOut7", NTV2_Wgt12GSDIOut7);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIOut8", NTV2_Wgt12GSDIOut8);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv4In1", NTV2_WgtHDMIIn1v4);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv4In2", NTV2_WgtHDMIIn2v4);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv4In3", NTV2_WgtHDMIIn3v4);

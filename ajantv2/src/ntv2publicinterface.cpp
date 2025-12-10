@@ -1416,14 +1416,16 @@ bool NTV2DeviceGetSupportedOutputDests (const NTV2DeviceID inDeviceID, NTV2Outpu
 	outOutputDests.clear();
 	if (!NTV2_IS_VALID_IOKINDS(inKinds))
 		return false;
+	const UWord numSDI(inDeviceID == DEVICE_ID_INVALID ? 8 : ::NTV2DeviceGetNumVideoOutputs(inDeviceID)),
+				numAnl(inDeviceID == DEVICE_ID_INVALID ? 1 : ::NTV2DeviceGetNumAnalogVideoOutputs(inDeviceID)),
+				numHDM(inDeviceID == DEVICE_ID_INVALID ? 1 : ::NTV2DeviceGetNumHDMIVideoOutputs(inDeviceID));
 	for (size_t ndx(0);  ndx < 10;  ndx++)
-	{	const NTV2OutputDest dst(sDsts[ndx]);
-		const bool ok (inDeviceID == DEVICE_ID_INVALID  ?  true  :  ::NTV2DeviceCanDoOutputDestination(inDeviceID, dst));
-		if (ok)
-			if (	(NTV2_OUTPUT_DEST_IS_SDI(dst)		&&  (inKinds & NTV2_IOKINDS_SDI))
-				||	(NTV2_OUTPUT_DEST_IS_HDMI(dst)		&&  (inKinds & NTV2_IOKINDS_HDMI))
-				||	(NTV2_OUTPUT_DEST_IS_ANALOG(dst)	&&  (inKinds & NTV2_IOKINDS_ANALOG))	)
-					outOutputDests.insert(dst);
+	{
+		const NTV2OutputDest dst(sDsts[ndx]);
+		if (   (NTV2_OUTPUT_DEST_IS_SDI(dst)    && (inKinds & NTV2_IOKINDS_SDI)    && (numSDI > ::NTV2OutputDestinationToChannel(dst)))
+			|| (NTV2_OUTPUT_DEST_IS_HDMI(dst)   && (inKinds & NTV2_IOKINDS_HDMI)   && (numHDM)                                        )
+			|| (NTV2_OUTPUT_DEST_IS_ANALOG(dst) && (inKinds & NTV2_IOKINDS_ANALOG) && (numAnl)                                        ) )
+				outOutputDests.insert(dst);
 	}
 	return true;
 }

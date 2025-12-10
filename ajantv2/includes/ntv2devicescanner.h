@@ -9,13 +9,10 @@
 #define NTV2DEVICESCANNER_H
 
 #include "ajatypes.h"
-#if !defined(NTV2_DEPRECATE_17_1)
-	#include "ntv2audiodefines.h"
-#endif	//	!defined(NTV2_DEPRECATE_17_1)
+#include "ntv2audiodefines.h"
 #include "ntv2card.h"
 #include <vector>
 
-#if !defined(NTV2_DEPRECATE_17_1)
 typedef std::vector <AudioSampleRateEnum>				NTV2AudioSampleRateList;
 typedef NTV2AudioSampleRateList::const_iterator			NTV2AudioSampleRateListConstIter;
 typedef NTV2AudioSampleRateList::iterator				NTV2AudioSampleRateListIter;
@@ -172,13 +169,14 @@ typedef NTV2DeviceInfoList::iterator		NTV2DeviceInfoListIter;			//	Iterator shor
 AJAExport	std::ostream &	operator << (std::ostream & inOutStr, const NTV2DeviceInfoList & inList);
 
 
-typedef struct {
-	ULWord							boardNumber;
-	AudioSampleRateEnum				sampleRate;
-	AudioChannelsPerFrameEnum		numChannels;
-	AudioBitsPerSampleEnum			bitsPerSample;
-	AudioSourceEnum					sourceIn;
-	AudioSourceEnum					sourceOut;
+typedef struct
+{
+	ULWord						boardNumber;
+	AudioSampleRateEnum			sampleRate;
+	AudioChannelsPerFrameEnum	numChannels;
+	AudioBitsPerSampleEnum		bitsPerSample;
+	AudioSourceEnum				sourceIn;
+	AudioSourceEnum				sourceOut;
 } NTV2AudioPhysicalFormat;
 
 
@@ -206,8 +204,6 @@ typedef NTV2AudioPhysicalFormatList::iterator			NTV2AudioPhysicalFormatListIter;
 	@return		The output stream.
 **/
 AJAExport	std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioPhysicalFormatList & inList);
-
-#endif	//	!defined(NTV2_DEPRECATE_17_1)
 
 
 /**
@@ -310,33 +306,31 @@ public:
 	static NTV2_DEPRECATED_f(bool GetDeviceWithSerial (const uint64_t sn, CNTV2Card & dev)); ///< @deprecated	Use the string version of this function instead
 #endif	//	!defined(NTV2_DEPRECATE_17_5)
 
-#if !defined(NTV2_DEPRECATE_17_1)
-//	Instance Methods
-public:
-	explicit			CNTV2DeviceScanner (const bool inScanNow = true);
+	//	Instance Methods
+	public:
+		explicit			CNTV2DeviceScanner (const bool inScanNow = true);
 #if !defined(NTV2_DEPRECATE_16_3)
-	explicit			CNTV2DeviceScanner (bool inScanNow, UWord inDeviceMask);
+		explicit			CNTV2DeviceScanner (bool inScanNow, UWord inDeviceMask);
 #endif	//	!defined(NTV2_DEPRECATE_16_3)
 
 
-	static void			ScanHardware (void);	///< @deprecated	Do not use
+		static void			ScanHardware (void);	///< @deprecated	Do not use
 #if !defined(NTV2_DEPRECATE_17_1)
-	static NTV2_DEPRECATED_f(void ScanHardware (const UWord inMask))	{(void)inMask;  ScanHardware();}	///< @deprecated	Do not use
+		static NTV2_DEPRECATED_f(void ScanHardware (const UWord inMask))	{(void)inMask;  ScanHardware();}	///< @deprecated	Do not use
 #endif	//	!defined(NTV2_DEPRECATE_17_1)
-	static bool		DeviceIDPresent (const NTV2DeviceID inDeviceID, const bool inRescan = false);	///< @deprecated	Do not use
-	static bool		GetDeviceInfo (const ULWord inDeviceIndexNumber, NTV2DeviceInfo & outDeviceInfo, const bool inRescan = false);	///< @deprecated	Do not use
-	static NTV2DeviceInfoList	GetDeviceInfoList (void);	///< @deprecated	Do not use
-	static void		SortDeviceInfoList (void)	{}	///< @deprecated	Obsolete
-	static bool		CompareDeviceInfoLists (const NTV2DeviceInfoList & inOldList,
-											const NTV2DeviceInfoList & inNewList,
-											NTV2DeviceInfoList & outDevicesAdded,
-											NTV2DeviceInfoList & outDevicesRemoved);
-private:
-	static void		SetDeviceAttributes (NTV2DeviceInfo & inDeviceInfo, CNTV2Card & inDevice);
-	static void		SetAudioAttributes (NTV2DeviceInfo & inDeviceInfo, CNTV2Card & inDevice);
-	static bool		GetCP2DevList (NTV2DeviceInfoList& outVDevList);
-	static bool		GetVDevList (NTV2DeviceInfoList& outVDevList);
-#endif	//	!defined(NTV2_DEPRECATE_17_1)
+		static bool		DeviceIDPresent (const NTV2DeviceID inDeviceID, const bool inRescan = false);	///< @deprecated	Do not use
+		static bool		GetDeviceInfo (const ULWord inDeviceIndexNumber, NTV2DeviceInfo & outDeviceInfo, const bool inRescan = false);	///< @deprecated	Do not use
+		static NTV2DeviceInfoList	GetDeviceInfoList (void);	///< @deprecated	Do not use
+		static void		SortDeviceInfoList (void)	{}	///< @deprecated	Obsolete
+		static bool		CompareDeviceInfoLists (const NTV2DeviceInfoList & inOldList,
+												const NTV2DeviceInfoList & inNewList,
+												NTV2DeviceInfoList & outDevicesAdded,
+												NTV2DeviceInfoList & outDevicesRemoved);
+	private:
+		static void		SetDeviceAttributes (NTV2DeviceInfo & inDeviceInfo, CNTV2Card & inDevice);
+		static void		SetAudioAttributes (NTV2DeviceInfo & inDeviceInfo, CNTV2Card & inDevice);
+		static bool		GetCP2DevList (NTV2DeviceInfoList& outVDevList);
+		static bool		GetVDevList (NTV2DeviceInfoList& outVDevList);
 };	//	CNTV2DeviceScanner
 
 #endif	//	NTV2DEVICESCANNER_H

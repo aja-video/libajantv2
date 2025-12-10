@@ -210,7 +210,7 @@ typedef enum
 
 
 /**
-	@brief	Identifies a particular video frame buffer format. See \ref devicefbformats for details.
+	@brief	Identifies a particular video frame buffer pixel format. See \ref devicefbformats for details.
 **/
 typedef enum
 {
@@ -253,7 +253,7 @@ typedef enum
 	,NTV2_FBF_INVALID				= NTV2_FBF_NUMFRAMEBUFFERFORMATS
 } NTV2FrameBufferFormat;
 
-typedef NTV2FrameBufferFormat	NTV2PixelFormat;	///< @brief An alias for NTV2FrameBufferFormat.
+typedef NTV2FrameBufferFormat	NTV2PixelFormat;	///< @brief An alias for ::NTV2FrameBufferFormat.
 
 
 #define NTV2_IS_VALID_FRAME_BUFFER_FORMAT(__s__)	((__s__) >= NTV2_FBF_10BIT_YCBCR  &&  (__s__) < NTV2_FBF_NUMFRAMEBUFFERFORMATS)
@@ -3006,10 +3006,18 @@ typedef enum
 	,NTV2_Wgt12GSDIIn2
 	,NTV2_Wgt12GSDIIn3
 	,NTV2_Wgt12GSDIIn4
+	,NTV2_Wgt12GSDIIn5
+	,NTV2_Wgt12GSDIIn6
+	,NTV2_Wgt12GSDIIn7
+	,NTV2_Wgt12GSDIIn8
 	,NTV2_Wgt12GSDIOut1
 	,NTV2_Wgt12GSDIOut2
 	,NTV2_Wgt12GSDIOut3
 	,NTV2_Wgt12GSDIOut4
+	,NTV2_Wgt12GSDIOut5
+	,NTV2_Wgt12GSDIOut6
+	,NTV2_Wgt12GSDIOut7
+	,NTV2_Wgt12GSDIOut8
 	,NTV2_WgtHDMIIn1v4
 	,NTV2_WgtHDMIIn2v4
 	,NTV2_WgtHDMIIn3v4

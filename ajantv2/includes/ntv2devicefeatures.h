@@ -61,6 +61,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoEnhancedCSC,					///< @brief True if device has enhanced CSCs.
 	kDeviceCanDoFrameStore1Display,				///< @brief True if device can display/output video from FrameStore 1.
 	kDeviceCanDoFreezeOutput,					///< @brief True if device can freeze output video.
+	kDeviceCanDoGPIO,							///< @brief	True if device has GPIO interface.	(New in SDK 18.0)
 	kDeviceCanDoHDMIOutStereo,					///< @brief True if device supports 3D/stereo HDMI video output.
 	kDeviceCanDoHDV,							///< @brief True if device can squeeze/stretch between 1920x1080 and 1440x1080.
 	kDeviceCanDoHDVideo,						///< @brief True if device can handle HD (High Definition) video.
@@ -72,7 +73,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoPCMControl,						///< @brief True if device can mark specific audio channel pairs as not carrying PCM (Pulse Code Modulation) audio.
 	kDeviceCanDoPCMDetection,					///< @brief True if device can detect which audio channel pairs are not carrying PCM (Pulse Code Modulation) audio.
 	kDeviceCanDoPIO,							///< @brief True if device supports Programmed I/O.
-	kDeviceCanDoPlayback,						///< @note Calculate based on kDeviceGetNumVideoOutputs and kDeviceGetNumHDMIVideoOutputs and kDeviceGetNumAnalogVideoOutputs
+	kDeviceCanDoPlayback,						///< @brief True if device has any SDI, HDMI or analog video outputs.
 	kDeviceCanDoProgrammableCSC,				///< @brief True if device has at least one programmable color space converter widget.
 	kDeviceCanDoProgrammableRS422,				///< @brief True if device has at least one RS-422 serial port, and it (they) can be programmed (for baud rate, parity, etc.).
 	kDeviceCanDoProRes,							///< @brief True if device can can accommodate Apple ProRes-compressed video in its frame buffers.
@@ -91,6 +92,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanMeasureTemperature,				///< @brief True if device can measure its FPGA die temperature.
 	kDeviceCanReportFrameSize,					///< @brief True if device can report its frame size.
 	kDeviceHasBiDirectionalSDI,					///< @brief True if device SDI connectors are bi-directional.
+	kDeviceHasBracketLED,						///< @brief True if device has LED(s) on the card bracket. (New in SDK 18.0)
 	kDeviceHasColorSpaceConverterOnChannel2,	///< @brief Calculate based on if NTV2_WgtCSC2 is present.
 	kDeviceHasNWL,								///< @brief True if device has NorthWest Logic DMA hardware.
 	kDeviceHasPCIeGen2,							///< @brief True if device supports 2nd-generation PCIe.
@@ -329,29 +331,29 @@ AJAExport bool NTV2DeviceGetVideoFormatFromState_Ex2 (	NTV2VideoFormat *		pOutVa
 														const bool				inIsSquareDivision);
 #if !defined(NTV2_DEPRECATE_17_0)
 	//	In SDK 17.0, these were all replaced by NTV2DeviceGetSPIFlashVersion:
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv2(const NTV2DeviceID inDeviceID);) ///< @deprecated	Call NTV2DeviceGetSPIFlashVersion instead.
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv3(const NTV2DeviceID inDeviceID);) ///< @deprecated	Call NTV2DeviceGetSPIFlashVersion instead.
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv4(const NTV2DeviceID inDeviceID);) ///< @deprecated	Call NTV2DeviceGetSPIFlashVersion instead.
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv5(const NTV2DeviceID inDeviceID);) ///< @deprecated	Call NTV2DeviceGetSPIFlashVersion instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv2(const NTV2DeviceID inDeviceID);) ///< @deprecated	Use CNTV2Card::features().GetSPIFlashVersion() or NTV2DeviceGetSPIFlashVersion instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv3(const NTV2DeviceID inDeviceID);) ///< @deprecated	Use CNTV2Card::features().GetSPIFlashVersion() or NTV2DeviceGetSPIFlashVersion instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv4(const NTV2DeviceID inDeviceID);) ///< @deprecated	Use CNTV2Card::features().GetSPIFlashVersion() or NTV2DeviceGetSPIFlashVersion instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv5(const NTV2DeviceID inDeviceID);) ///< @deprecated	Use CNTV2Card::features().GetSPIFlashVersion() or NTV2DeviceGetSPIFlashVersion instead
 
 	//	In SDK 17.0, these were replaced by NTV2DeviceGetGenlockVersion...
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasGenlockv2(const NTV2DeviceID devID);)	///< @deprecated	Use NTV2DeviceGetGenlockVersion instead.
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasGenlockv3(const NTV2DeviceID devID);)	///< @deprecated	Use NTV2DeviceGetGenlockVersion instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasGenlockv2(const NTV2DeviceID devID);)	///< @deprecated	Use CNTV2Card::features().GetGenlockVersion() or NTV2DeviceGetGenlockVersion instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasGenlockv3(const NTV2DeviceID devID);)	///< @deprecated	Use CNTV2Card::features().GetGenlockVersion() or NTV2DeviceGetGenlockVersion instead
 
 	//	In SDK 17.0, this was replaced by NTV2DeviceCanDoWidget(NTV2_WgtCSC2)...
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasColorSpaceConverterOnChannel2(const NTV2DeviceID devID);)	///< @deprecated	Call NTV2DeviceCanDoWidget with NTV2_WgtCSC2 instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasColorSpaceConverterOnChannel2(const NTV2DeviceID devID);)	///< @deprecated	Call CNTV2Card::features().CanDoWidget(NTV2_WgtCSC2) or NTV2DeviceCanDoWidget instead
 
 	//	In SDK 17.0, these were replaced by NTV2GetMaxNumAudioChannels:
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudio2Channels(const NTV2DeviceID devID);)	///< @deprecated	Use NTV2DeviceGetMaxAudioChannels instead.
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudio6Channels(const NTV2DeviceID devID);)	///< @deprecated	Use NTV2DeviceGetMaxAudioChannels instead.
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudio8Channels(const NTV2DeviceID devID);)	///< @deprecated	Use NTV2DeviceGetMaxAudioChannels instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudio2Channels(const NTV2DeviceID devID);)	///< @deprecated	Use CNTV2Card::features().GetMaxAudioChannels() or NTV2DeviceGetMaxAudioChannels instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudio6Channels(const NTV2DeviceID devID);)	///< @deprecated	Use CNTV2Card::features().GetMaxAudioChannels() or NTV2DeviceGetMaxAudioChannels instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudio8Channels(const NTV2DeviceID devID);)	///< @deprecated	Use CNTV2Card::features().GetMaxAudioChannels() or NTV2DeviceGetMaxAudioChannels instead
 
 	//	These have been marked deprecated for some time. In SDK 17.0, it's official.
-	AJAExport NTV2_DEPRECATED_f(UWord NTV2DeviceGetNumAudioStreams(const NTV2DeviceID devID);)	///< @deprecated	Use NTV2DeviceGetNumAudioSystems instead.
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudioN(const NTV2DeviceID devID, UWord index0);)	///< @deprecated	Use NTV2DeviceGetNumAudioSystems instead.
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoLTCOutN(const NTV2DeviceID devID, UWord index0);)	///< @deprecated	Use NTV2DeviceGetNumLTCOutputs instead.
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoLTCInN(const NTV2DeviceID devID, UWord index0);)	///< @deprecated	Use NTV2DeviceGetNumLTCInputs instead.
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoRS422N(const NTV2DeviceID devID, const NTV2Channel ch);)	///< @deprecated	Use NTV2DeviceGetNumSerialPorts instead.
+	AJAExport NTV2_DEPRECATED_f(UWord NTV2DeviceGetNumAudioStreams(const NTV2DeviceID devID);)	///< @deprecated	Use CNTV2Card::features().GetNumAudioSystems() or NTV2DeviceGetNumAudioSystems instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudioN(const NTV2DeviceID devID, UWord index0);)	///< @deprecated	Use CNTV2Card::features().GetNumAudioSystems() or NTV2DeviceGetNumAudioSystems instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoLTCOutN(const NTV2DeviceID devID, UWord index0);)	///< @deprecated	Use CNTV2Card::features().GetNumLTCOutputs() or NTV2DeviceGetNumLTCOutputs instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoLTCInN(const NTV2DeviceID devID, UWord index0);)	///< @deprecated	Use CNTV2Card::features().GetNumLTCInputs() or NTV2DeviceGetNumLTCInputs instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoRS422N(const NTV2DeviceID devID, const NTV2Channel ch);)	///< @deprecated	Use CNTV2Card::features().GetNumSerialPorts() or NTV2DeviceGetNumSerialPorts instead
 #endif	//	NTV2_DEPRECATE_17_0
 
 bool work_around_erroneous_compiler_warning (void);	//	This declaration stops erroneous deprecation warnings for NTV2DeviceCanDoTCIndex (immediately below)

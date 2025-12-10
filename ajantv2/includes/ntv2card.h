@@ -2209,7 +2209,7 @@ public:
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool WriteAudioLastOut (const ULWord inValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1)) {(void)inValue;(void)inAudioSystem; return false;}	///< @deprecated	This function is obsolete.
 #endif	//	!defined(NTV2_DEPRECATE_16_1)
 #if !defined(NTV2_DEPRECATE_17_0)
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool CanDoAudioWaitForVBI(void)) {return IsSupported(kDeviceAudioCanWaitForVBI);}	///< @deprecated	Use CNTV2DriverInterface::IsSupported instead. (Was new in SDK 16.0)
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool CanDoAudioWaitForVBI(void)) {return IsSupported(kDeviceAudioCanWaitForVBI);}	///< @deprecated	Use CNTV2Card::features().CanDoAudioWaitForVBI() or CNTV2DriverInterface::IsSupported instead (was new in SDK 16.0)
 #endif	//	!defined(NTV2_DEPRECATE_17_0)
 #if !defined(NTV2_DEPRECATE_17_5)
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetAudioOutputEmbedderState (const NTV2Channel sdi, bool & enb)) {return GetSDIOutputAudioEnabled(sdi,enb);} ///< @deprecated	Introduced in SDK 13.0, replaced in SDK 17.5 with CNTV2Card::GetSDIOutputAudioEnabled
@@ -2500,23 +2500,23 @@ public:
 
 #if !defined(NTV2_DEPRECATE_16_0)
 	//	OEM Mapping to Userspace Functions
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetBaseAddress(NTV2Channel channel, ULWord **pBaseAddress));	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetBaseAddress(ULWord **pBaseAddress));	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetRegisterBaseAddress(ULWord regNumber, ULWord ** pRegAddress));	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetXena2FlashBaseAddress(ULWord ** pXena2FlashAddress));	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetBaseAddress(NTV2Channel channel, ULWord **pBaseAddress));	///< @deprecated	Obsolete starting in SDK 16.0, do not use
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetBaseAddress(ULWord **pBaseAddress));	///< @deprecated	Obsolete starting in SDK 16.0, do not use
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetRegisterBaseAddress(ULWord regNumber, ULWord ** pRegAddress));	///< @deprecated	Obsolete starting in SDK 16.0, do not use
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetXena2FlashBaseAddress(ULWord ** pXena2FlashAddress));	///< @deprecated	Obsolete starting in SDK 16.0, do not use
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 
 #if !defined(NTV2_DEPRECATE_17_0)
 	//	Read-Only Status Registers
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadStatusRegister (ULWord *pVal))			{return pVal ? ReadRegister(kRegStatus, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadStatus2Register (ULWord *pVal))			{return pVal ? ReadRegister(kRegStatus2, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadInputStatusRegister (ULWord *pVal))		{return pVal ? ReadRegister(kRegInputStatus, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadInputStatus2Register (ULWord *pVal))		{return pVal ? ReadRegister(kRegInputStatus2, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadInput56StatusRegister (ULWord *pVal))		{return pVal ? ReadRegister(kRegInput56Status, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadInput78StatusRegister (ULWord *pVal))		{return pVal ? ReadRegister(kRegInput78Status, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool Read3GInputStatusRegister(ULWord *pVal))		{return pVal ? ReadRegister(kRegSDIInput3GStatus, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool Read3GInputStatus2Register(ULWord *pVal))		{return pVal ? ReadRegister(kRegSDIInput3GStatus2, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool Read3GInput5678StatusRegister(ULWord *pVal))	{return pVal ? ReadRegister(kRegSDI5678Input3GStatus, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadStatusRegister (ULWord *pVal))			{return pVal ? ReadRegister(kRegStatus, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadStatus2Register (ULWord *pVal))			{return pVal ? ReadRegister(kRegStatus2, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadInputStatusRegister (ULWord *pVal))		{return pVal ? ReadRegister(kRegInputStatus, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadInputStatus2Register (ULWord *pVal))		{return pVal ? ReadRegister(kRegInputStatus2, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadInput56StatusRegister (ULWord *pVal))		{return pVal ? ReadRegister(kRegInput56Status, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadInput78StatusRegister (ULWord *pVal))		{return pVal ? ReadRegister(kRegInput78Status, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool Read3GInputStatusRegister(ULWord *pVal))		{return pVal ? ReadRegister(kRegSDIInput3GStatus, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool Read3GInputStatus2Register(ULWord *pVal))		{return pVal ? ReadRegister(kRegSDIInput3GStatus2, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool Read3GInput5678StatusRegister(ULWord *pVal))	{return pVal ? ReadRegister(kRegSDI5678Input3GStatus, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
 #endif	//	!defined(NTV2_DEPRECATE_17_0)
 
 	AJA_VIRTUAL bool	SupportsP2PTransfer (void); ///< @return	True if this device can directly transmit data to another PCIe device via DMA;	otherwise false.
@@ -4485,7 +4485,7 @@ public:
 	AJA_VIRTUAL bool	GetRoutingForChannel (const NTV2Channel inChannel, CNTV2SignalRouter & outRouting);
 
 #if !defined(NTV2_DEPRECATE_17_0)
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool HasCanConnectROM(void)) {return IsSupported(kDeviceHasXptConnectROM);}	///< @deprecated	Call IsSupported(kDeviceHasXptConnectROM) or features().HasCrosspointConnectROM() instead
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool HasCanConnectROM(void)) {return IsSupported(kDeviceHasXptConnectROM);}	///< @deprecated	Use CNTV2Card::features().HasCrosspointConnectROM() or IsSupported(kDeviceHasXptConnectROM) instead
 #endif	//	!defined(NTV2_DEPRECATE_17_0)
 	/**
 		@brief		Answers with the implemented crosspoint connections (if known).
