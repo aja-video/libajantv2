@@ -273,12 +273,12 @@ public:
 	/**
 		@return		The full-raster NTV2FrameDimensions (including VANC lines, if any).
 	**/
-	NTV2FrameDimensions				GetFullRasterDimensions (void) const;
+	NTV2FrameSize					GetFullRasterDimensions (void) const;
 
 	/**
 		@return		The visible NTV2FrameDimensions (excluding VANC lines, if any).
 	**/
-	NTV2FrameDimensions				GetVisibleRasterDimensions (void) const;
+	NTV2FrameSize					GetVisibleRasterDimensions (void) const;
 
 	/**
 		@brief		Answers with the equivalent SMPTE line number for the given line offset into the frame buffer I describe.

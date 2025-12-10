@@ -1561,12 +1561,12 @@ void  CRP188::RP188ToUserBits (void)
 
 
 
-bool CRP188::InitBurnIn (NTV2FrameBufferFormat frameBufferFormat, NTV2FrameDimensions frameDimensions, LWord percentY)
+bool CRP188::InitBurnIn (NTV2FrameBufferFormat frameBufferFormat, NTV2FrameSize frameDimensions, LWord percentY)
 {
 	bool bResult = true;
 
 		// see if we've already rendered this format/size
-	if (_bRendered && _pCharRenderMap != NULL && frameBufferFormat == _charRenderFBF && frameDimensions.Height() == _charRenderHeight && frameDimensions.Width() == _charRenderWidth)
+	if (_bRendered && _pCharRenderMap != NULL && frameBufferFormat == _charRenderFBF && frameDimensions.height() == _charRenderHeight && frameDimensions.width() == _charRenderWidth)
 	{
 		return bResult;			// already rendered...
 	}
@@ -1606,16 +1606,16 @@ bool CRP188::InitBurnIn (NTV2FrameBufferFormat frameBufferFormat, NTV2FrameDimen
 		{
 				// scale the characters based on the frame size they'll be used in
 			int dotScale = 1;					// SD scale
-			if (frameDimensions.Height() > 900)
+			if (frameDimensions.height() > 900)
 				dotScale = 3;					// HD 1080
-			else if (frameDimensions.Height() > 650)
+			else if (frameDimensions.height() > 650)
 				dotScale = 2;					// HD 720
 
 			int dotWidth  = 1 * dotScale;		// pixels per "dot"
 			int dotHeight = 2 * dotScale;		// frame lines per "dot"
 
 				// exceptions: if this is DVCProHD or HDV, we're working with horizontally-scaled pixels. Tweak the dotWidth to compensate.
-			if (frameDimensions.Height() > 900 && frameDimensions.Width() <= 1440)
+			if (frameDimensions.height() > 900 && frameDimensions.width() <= 1440)
 				dotWidth = 2;			// 1280x1080 or 1440x1080
 
 //			else if (frameDimensions.Height() > 650 && frameDimensions.Width() < 1100)
@@ -1760,26 +1760,26 @@ bool CRP188::InitBurnIn (NTV2FrameBufferFormat frameBufferFormat, NTV2FrameDimen
 
 				_bRendered = true;
 				_charRenderFBF	  = frameBufferFormat;
-				_charRenderHeight = frameDimensions.Height();
-				_charRenderWidth  = frameDimensions.Width();
+				_charRenderHeight = frameDimensions.height();
+				_charRenderWidth  = frameDimensions.width();
 
 					// character sizes
 				_charWidthBytes	  = charWidthBytes;
 				_charHeightLines  = charHeightLines;
 
 					// burn-in offset
-				int byteWidth = (frameDimensions.Width() * bytesPerPixel);
+				int byteWidth = (frameDimensions.width() * bytesPerPixel);
 				if (frameBufferFormat == NTV2_FBF_10BIT_YCBCR)
-					byteWidth  = (frameDimensions.Width() * 16) / 6;		// in 10-bit YUV, 6 pixels = 16 bytes
+					byteWidth  = (frameDimensions.width() * 16) / 6;		// in 10-bit YUV, 6 pixels = 16 bytes
 
 				_charPositionX = (byteWidth - (kNumBurnInChars * charWidthBytes)) / 2;		// assume centered
 				if(percentY == 0)
 				{
-					_charPositionY = (frameDimensions.Height() * 8) / 10;								// assume 80% of the way down the screen
+					_charPositionY = (frameDimensions.height() * 8) / 10;								// assume 80% of the way down the screen
 				}
 				else
 				{
-					_charPositionY = (frameDimensions.Height() * percentY) / 100;
+					_charPositionY = (frameDimensions.height() * percentY) / 100;
 				}
 
 					// 10-bit YUV has to start on a 16-byte boundary in order to match the "cadence"

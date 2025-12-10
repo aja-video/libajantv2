@@ -70,31 +70,31 @@ bool CNTV2DriverInterface::GetOverlappedMode (void) {return gOverlappedMode;}
 /////////////// INSTANCE METHODS
 
 CNTV2DriverInterface::CNTV2DriverInterface ()
-	:	_boardNumber					(0),
-		_boardID						(DEVICE_ID_NOTFOUND),
-		_boardOpened					(false),
+	:	_boardNumber					(0)
+		,_boardID						(DEVICE_ID_NOTFOUND)
+		,_boardOpened					(false)
 #if defined(NTV2_WRITEREG_PROFILING)
-		mRecordRegWrites				(false),
-		mSkipRegWrites					(false),
+		,mRecordRegWrites				(false)
+		,mSkipRegWrites					(false)
 #endif
-		_programStatus					(0),
-		_pRPCAPI						(AJA_NULL),
-		mInterruptEventHandles			(),
-		mEventCounts					(),
+		,_programStatus					(0)
+		,_pRPCAPI						(AJA_NULL)
+		,mInterruptEventHandles			()
+		,mEventCounts					()
 #if defined(NTV2_WRITEREG_PROFILING)
-		mRegWrites						(),
-		mRegWritesLock					(),
+		,mRegWrites						()
+		,mRegWritesLock					()
 #endif	//	NTV2_WRITEREG_PROFILING
 #if !defined(NTV2_DEPRECATE_16_0)
-		_pFrameBaseAddress				(AJA_NULL),
-		_pRegisterBaseAddress			(AJA_NULL),
-		_pRegisterBaseAddressLength		(0),
-		_pXena2FlashBaseAddress			(AJA_NULL),
-		_pCh1FrameBaseAddress			(AJA_NULL),
-		_pCh2FrameBaseAddress			(AJA_NULL),
+		,_pFrameBaseAddress				(AJA_NULL)
+		,_pRegisterBaseAddress			(AJA_NULL)
+		,_pRegisterBaseAddressLength	(0)
+		,_pXena2FlashBaseAddress		(AJA_NULL)
+		,_pCh1FrameBaseAddress			(AJA_NULL)
+		,_pCh2FrameBaseAddress			(AJA_NULL)
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
-		_ulNumFrameBuffers				(0),
-		_ulFrameBufferSize				(0)
+		,_ulNumFrameBuffers				(0)
+		,_ulFrameBufferSize				(0)
 #if !defined(NTV2_DEPRECATE_16_0)
 		,_pciSlot						(0)			//	DEPRECATE!
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
@@ -141,11 +141,11 @@ bool CNTV2DriverInterface::Open (const UWord inDeviceIndex)
 		NTV2DeviceInfo info;
 		if (!CNTV2DeviceScanner::GetDeviceInfo (inDeviceIndex, info))
 			return false;
-		bool ok = Open(info.vdevUrl);
-		if (ok)
-			setDeviceIndexNumber(UWord(info.deviceIndex));	//	Patch _boardNumber
-		return ok;
-	}
+		if (!Open(info.vdevUrl))
+			return false;	//	Open vdev urlSpec failed
+		setDeviceIndexNumber(UWord(info.deviceIndex));	//	Patch _boardNumber
+		return true;
+	}	//	if OpenLocalPhysical failed
 
 #if !defined(NTV2_ALLOW_OPEN_UNSUPPORTED)
 	//	Check if device is officially supported...
@@ -1687,6 +1687,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanDoDVCProHD:					outValue = ::NTV2DeviceCanDoDVCProHD(devID);						break;	//	Deprecate?
 		case kDeviceCanDoEnhancedCSC:				outValue = ::NTV2DeviceCanDoEnhancedCSC(devID);						break;	//	Deprecate?
 		case kDeviceCanDoFrameStore1Display:		outValue = ::NTV2DeviceCanDoFrameStore1Display(devID);				break;	//	Deprecate?
+		case kDeviceCanDoGPIO:						outValue = ::NTV2DeviceCanDoGPIO(devID);							break;
 		case kDeviceCanDoHDMIOutStereo:				outValue = ::NTV2DeviceCanDoHDMIOutStereo(devID);					break;	//	Deprecate?
 		case kDeviceCanDoHDV:						outValue = ::NTV2DeviceCanDoHDV(devID);								break;	//	Deprecate?
 		case kDeviceCanDoHDVideo:					outValue = ::NTV2DeviceCanDoHDVideo(devID);							break;	//	Deprecate?
@@ -1719,6 +1720,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanMeasureTemperature:			outValue = ::NTV2DeviceCanMeasureTemperature(devID);				break;
 		case kDeviceCanReportFrameSize:				outValue = ::NTV2DeviceCanReportFrameSize(devID);					break;
 		case kDeviceHasBiDirectionalSDI:			outValue = ::NTV2DeviceHasBiDirectionalSDI(devID);					break;
+		case kDeviceHasBracketLED:					outValue = ::NTV2DeviceHasBracketLED(devID);						break;
 		case kDeviceHasColorSpaceConverterOnChannel2:	outValue = ::NTV2DeviceCanDoWidget(devID, NTV2_WgtCSC2);		break;	//	Deprecate?
 		case kDeviceHasIDSwitch:					outValue = ::NTV2DeviceCanDoIDSwitch(devID);						break;
         case kDeviceHasNTV4FrameStores:				outValue = ::NTV2DeviceHasNTV4FrameStores(devID);                   break;

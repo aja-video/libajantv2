@@ -675,7 +675,7 @@ bool NTV2Player4K::RouteHDMIOutput (void)
 	{
 		if (mDevice.features().CanDo12gRouting())
 		{
-			if (!mDevice.Connect (NTV2_XptHDMIOutInput, ::GetFrameBufferOutputXptFromChannel (mConfig.fOutputChannel,  isRGB,  false/*is425*/), canVerify))
+			if (!mDevice.Connect (NTV2_XptHDMIOutInput, ::GetFrameStoreOutputXptFromChannel (mConfig.fOutputChannel,  isRGB,  false/*is425*/), canVerify))
 				connectFailures++;
 		}
 		else if(mConfig.fDoTsiRouting)
@@ -854,7 +854,7 @@ bool NTV2Player4K::RouteFsToSDIOut (void)
 	if (mDevice.features().CanDo12gRouting())
 	{
 		if (!mDevice.Connect (	::GetSDIOutputInputXpt (mConfig.fOutputChannel, false/*isDS2*/),
-								::GetFrameBufferOutputXptFromChannel (mConfig.fOutputChannel,  false/*isRGB*/,  false/*is425*/),
+								::GetFrameStoreOutputXptFromChannel (mConfig.fOutputChannel,  false/*isRGB*/,  false/*is425*/),
 								canVerify))
 			connectFailures++;
 	}

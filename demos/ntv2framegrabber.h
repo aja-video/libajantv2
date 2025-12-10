@@ -176,8 +176,8 @@ class NTV2FrameGrabber : public QThread
 		ULWord						mDebounceCounter;		///< @brief	Used for detecting stable input video
 		bool						mFormatIsProgressive;	///< @brief	True if input video format is progressive (not interlaced)
 		NTV2InputSource				mInputSource;			///< @brief	User-selected input source
-		NTV2FrameDimensions			mFrameDimensions;		///< @brief	Frame dimensions, pixels X lines
-		NTV2FrameBufferFormat		mFrameBufferFormat;		///< @brief	My frame buffer format
+		NTV2FrameSize				mFrameDimensions;		///< @brief	Frame dimensions, pixels X lines
+		NTV2PixelFormat				mFrameBufferFormat;		///< @brief	My frame buffer format
 		AUTOCIRCULATE_TRANSFER		mTransferStruct;		///< @brief	AutoCirculate transfer object
 		NTV2TaskMode				mSavedTaskMode;			///< @brief	Used to restore the previous task mode
 		bool						mDoMultiChannel;		///< @brief	Demonstrates how to configure the board for multi-format
