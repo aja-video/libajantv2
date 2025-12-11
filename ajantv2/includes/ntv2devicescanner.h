@@ -295,15 +295,15 @@ public:
 	static bool			IsLegalSerialNumber (const std::string & inStr);	//	New in SDK 16.0
 
 #if !defined(NTV2_DEPRECATE_17_1)
-	static NTV2_DEPRECATED_f(bool IsLegalDecimalNumber (const std::string & inStr, const size_t maxLen = 2)); ///< @deprecated	Use aja::is_legal_decimal_number instead
-	static NTV2_DEPRECATED_f(uint64_t IsLegalHexSerialNumber (const std::string & inStr)); ///< @deprecated	Use aja::is_legal_hex_serial_number instead
-	static NTV2_DEPRECATED_f(bool IsHexDigit (const char inChr));	///< @deprecated	Use aja::is_hex_digit instead
-	static NTV2_DEPRECATED_f(bool IsDecimalDigit (const char inChr));	///< @deprecated	Use aja::is_decimal_digit instead
-	static NTV2_DEPRECATED_f(bool IsAlphaNumeric (const char inStr));	///< @deprecated	Use aja::is_alpha_numeric instead
-	static NTV2_DEPRECATED_f(bool IsAlphaNumeric (const std::string & inStr)); ///< @deprecated	Use aja::is_alpha_numeric instead
+	static NTV2_DEPRECATED_17_1(bool IsLegalDecimalNumber (const std::string & inStr, const size_t maxLen = 2)); ///< @deprecated	Use aja::is_legal_decimal_number instead
+	static NTV2_DEPRECATED_17_1(uint64_t IsLegalHexSerialNumber (const std::string & inStr)); ///< @deprecated	Use aja::is_legal_hex_serial_number instead
+	static NTV2_DEPRECATED_17_1(bool IsHexDigit (const char inChr));	///< @deprecated	Use aja::is_hex_digit instead
+	static NTV2_DEPRECATED_17_1(bool IsDecimalDigit (const char inChr));	///< @deprecated	Use aja::is_decimal_digit instead
+	static NTV2_DEPRECATED_17_1(bool IsAlphaNumeric (const char inStr));	///< @deprecated	Use aja::is_alpha_numeric instead
+	static NTV2_DEPRECATED_17_1(bool IsAlphaNumeric (const std::string & inStr)); ///< @deprecated	Use aja::is_alpha_numeric instead
 #endif	//	!defined(NTV2_DEPRECATE_17_1)
 #if !defined(NTV2_DEPRECATE_17_5)
-	static NTV2_DEPRECATED_f(bool GetDeviceWithSerial (const uint64_t sn, CNTV2Card & dev)); ///< @deprecated	Use the string version of this function instead
+	static NTV2_DEPRECATED_17_5(bool GetDeviceWithSerial (const uint64_t sn, CNTV2Card & dev)); ///< @deprecated	Use the string version of this function instead
 #endif	//	!defined(NTV2_DEPRECATE_17_5)
 
 	//	Instance Methods
@@ -316,7 +316,7 @@ public:
 
 		static void			ScanHardware (void);	///< @deprecated	Do not use
 #if !defined(NTV2_DEPRECATE_17_1)
-		static NTV2_DEPRECATED_f(void ScanHardware (const UWord inMask))	{(void)inMask;  ScanHardware();}	///< @deprecated	Do not use
+		static NTV2_DEPRECATED_17_1(void ScanHardware (const UWord inMask))	{(void)inMask;  ScanHardware();}	///< @deprecated	Do not use
 #endif	//	!defined(NTV2_DEPRECATE_17_1)
 		static bool		DeviceIDPresent (const NTV2DeviceID inDeviceID, const bool inRescan = false);	///< @deprecated	Do not use
 		static bool		GetDeviceInfo (const ULWord inDeviceIndexNumber, NTV2DeviceInfo & outDeviceInfo, const bool inRescan = false);	///< @deprecated	Do not use

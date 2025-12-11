@@ -5874,15 +5874,15 @@ typedef enum
 				inline NTV2FrameSize &	swap (void)				{return set (height(), width());}
 
 				#if !defined(NTV2_DEPRECATE_17_5)
-					inline ULWord GetWidth (void) const  {return width();}	///< @deprecated	Use width() instead
-					inline ULWord GetHeight (void) const  {return height();}///< @deprecated	Use height() instead
-					inline ULWord Width (void) const  {return width();}		///< @deprecated	Use width() instead
-					inline ULWord Height (void) const  {return height();}	///< @deprecated	Use height() instead
-					inline bool IsValid (void) const  {return isValid();}	///< @deprecated	Use isValid() instead
-					inline NTV2FrameSize & SetWidth (const ULWord v)	{return setWidth(v);}	///< @deprecated	Use setWidth() instead
-					inline NTV2FrameSize & SetHeight (const ULWord v)	{return setHeight(v);}	///< @deprecated	Use setHeight() instead
-					inline NTV2FrameSize & Set (const ULWord w, const ULWord h)	{return set(w,h);}	///< @deprecated	Use set() instead
-					inline NTV2FrameSize & Reset (void)	{return reset();}	///< @deprecated	Use reset() instead
+					inline ULWord NTV2_DEPRECATED_17_5(GetWidth (void) const)  {return width();}	///< @deprecated	Use width() instead
+					inline ULWord NTV2_DEPRECATED_17_5(GetHeight (void) const)  {return height();}///< @deprecated	Use height() instead
+					inline ULWord NTV2_DEPRECATED_17_5(Width (void) const)  {return width();}		///< @deprecated	Use width() instead
+					inline ULWord NTV2_DEPRECATED_17_5(Height (void) const)  {return height();}	///< @deprecated	Use height() instead
+					inline bool NTV2_DEPRECATED_17_5(IsValid (void) const)  {return isValid();}	///< @deprecated	Use isValid() instead
+					inline NTV2FrameSize & NTV2_DEPRECATED_17_5(SetWidth (const ULWord v))	{return setWidth(v);}	///< @deprecated	Use setWidth() instead
+					inline NTV2FrameSize & NTV2_DEPRECATED_17_5(SetHeight (const ULWord v))	{return setHeight(v);}	///< @deprecated	Use setHeight() instead
+					inline NTV2FrameSize & NTV2_DEPRECATED_17_5(Set (const ULWord w, const ULWord h))	{return set(w,h);}	///< @deprecated	Use set() instead
+					inline NTV2FrameSize & NTV2_DEPRECATED_17_5(Reset (void))	{return reset();}	///< @deprecated	Use reset() instead
 				#endif	//	!defined(NTV2_DEPRECATE_17_5)
 
 				static ULWord	FGWidth (const NTV2FrameGeometry fg);

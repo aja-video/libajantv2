@@ -74,7 +74,7 @@ class CNTV2LinuxDriverInterface : public CNTV2DriverInterface
 	AJA_VIRTUAL bool ControlDriverDebugMessages(NTV2_DriverDebugMessageSet msgSet,
 									bool enable);
 #if !defined(NTV2_DEPRECATE_17_6)
-	AJA_VIRTUAL inline bool	NTV2_DEPRECATED_f(HevcSendMessage(HevcMessageHeader* pMsg))	{(void)pMsg; return false;}	///< @deprecated	Corvid HEVC support dropped in SDK 17.6
+	AJA_VIRTUAL inline bool	NTV2_DEPRECATED_17_6(HevcSendMessage(HevcMessageHeader* pMsg))	{(void)pMsg; return false;}	///< @deprecated	Corvid HEVC support dropped in SDK 17.6
 #endif//!defined(NTV2_DEPRECATE_17_6)
 
 	AJA_VIRTUAL bool SetupBoard(void);
@@ -87,38 +87,38 @@ class CNTV2LinuxDriverInterface : public CNTV2DriverInterface
 
 public:
 #if !defined(NTV2_DEPRECATE_16_0)
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetStreamingApplication(ULWord & outAppType, int32_t & outPID))	{return CNTV2DriverInterface::GetStreamingApplication(outAppType,outPID);}	///< @deprecated	Deprecated starting in SDK 16.0.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetStreamingApplication(ULWord * pAppType, int32_t * pPID))		{return pAppType && pPID ? CNTV2DriverInterface::GetStreamingApplication(*pAppType,*pPID) : false;} ///< @deprecated	Deprecated starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool MapFrameBuffers(void));		///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool UnmapFrameBuffers(void));	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool MapRegisters(void));			///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool UnmapRegisters(void));		///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool GetBA0MemorySize(ULWord* memSize));	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool GetBA1MemorySize(ULWord* memSize));	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool GetBA2MemorySize(ULWord* memSize));	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool GetBA4MemorySize(ULWord* memSize));	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool MapXena2Flash(void));	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool UnmapXena2Flash(void));	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool MapDNXRegisters(void));	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool UnmapDNXRegisters(void));///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool GetStreamingApplication(ULWord & outAppType, int32_t & outPID))	{return CNTV2DriverInterface::GetStreamingApplication(outAppType,outPID);}	///< @deprecated	Deprecated starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool GetStreamingApplication(ULWord * pAppType, int32_t * pPID))		{return pAppType && pPID ? CNTV2DriverInterface::GetStreamingApplication(*pAppType,*pPID) : false;} ///< @deprecated	Deprecated starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool MapFrameBuffers(void));		///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool UnmapFrameBuffers(void));	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool MapRegisters(void));			///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool UnmapRegisters(void));		///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool GetBA0MemorySize(ULWord* memSize));	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool GetBA1MemorySize(ULWord* memSize));	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool GetBA2MemorySize(ULWord* memSize));	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool GetBA4MemorySize(ULWord* memSize));	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool MapXena2Flash(void));	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool UnmapXena2Flash(void));	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool MapDNXRegisters(void));	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool UnmapDNXRegisters(void));///< @deprecated	Obsolete starting in SDK 16.0.
 	// Driver allocated buffer (DMA performance enhancement, requires bigphysarea patch to kernel)
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool MapDMADriverBuffer());
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool UnmapDMADriverBuffer());
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool MapDMADriverBuffer());
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool UnmapDMADriverBuffer());
 
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool DmaReadFrameDriverBuffer (NTV2DMAEngine DMAEngine, ULWord frameNumber, unsigned long dmaBufferFrame,
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool DmaReadFrameDriverBuffer (NTV2DMAEngine DMAEngine, ULWord frameNumber, unsigned long dmaBufferFrame,
 																			ULWord bytes, ULWord downSample, ULWord linePitch, ULWord poll));
 
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool DmaReadFrameDriverBuffer (NTV2DMAEngine DMAEngine, ULWord frameNumber, unsigned long dmaBufferFrame,
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool DmaReadFrameDriverBuffer (NTV2DMAEngine DMAEngine, ULWord frameNumber, unsigned long dmaBufferFrame,
 																			ULWord offsetSrc, ULWord offsetDest, ULWord bytes,
 																			ULWord downSample, ULWord linePitch, ULWord poll));
 
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool DmaWriteFrameDriverBuffer (NTV2DMAEngine DMAEngine, ULWord frameNumber, unsigned long dmaBufferFrame,
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool DmaWriteFrameDriverBuffer (NTV2DMAEngine DMAEngine, ULWord frameNumber, unsigned long dmaBufferFrame,
 																		ULWord bytes, ULWord poll));
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool DmaWriteFrameDriverBuffer (NTV2DMAEngine DMAEngine, ULWord frameNumber, unsigned long dmaBufferFrame,
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool DmaWriteFrameDriverBuffer (NTV2DMAEngine DMAEngine, ULWord frameNumber, unsigned long dmaBufferFrame,
 																		ULWord offsetSrc, ULWord offsetDest, ULWord bytes, ULWord poll));
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool GetDMADriverBufferPhysicalAddress(ULWord* physAddr));///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool GetDMADriverBufferAddress(ULWord** pDMADriverBuffer));///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool GetDMANumDriverBuffers(ULWord* pNumDmaDriverBuffers));///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool GetDMADriverBufferPhysicalAddress(ULWord* physAddr));///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool GetDMADriverBufferAddress(ULWord** pDMADriverBuffer));///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool GetDMANumDriverBuffers(ULWord* pNumDmaDriverBuffers));///< @deprecated	Obsolete starting in SDK 16.0.
 #endif	//	defined(NTV2_DRIVER_ALLOCATED_BUFFERS)
 	AJA_VIRTUAL bool SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mode); // Supported!
 	AJA_VIRTUAL bool GetAudioOutputMode(NTV2_GlobalAudioPlaybackMode* mode);// Supported!

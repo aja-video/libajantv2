@@ -84,17 +84,17 @@ class CNTV2MacDriverInterface : public CNTV2DriverInterface
 	///@}
 
 #if !defined(NTV2_DEPRECATE_16_0)
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetStreamingApplication(ULWord * pAppType, int32_t * pPID))	{return pAppType && pPID ? GetStreamingApplication(*pAppType,*pPID) : false;}	///< @deprecated	Deprecated starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SystemControl(void* dataPtr, SystemControlCode systemControlCode));		///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(void Sleep(int))		 	{}			///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool MapFrameBuffers(void));			///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool UnmapFrameBuffers(void));		///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool MapRegisters(void));				///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool UnmapRegisters(void));			///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool MapXena2Flash(void));			///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool UnmapXena2Flash(void));			///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(ULWord GetPCISlotNumber(void) const);	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool MapMemory(const MemoryType memType, void **memPtr));	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool GetStreamingApplication(ULWord * pAppType, int32_t * pPID))	{return pAppType && pPID ? GetStreamingApplication(*pAppType,*pPID) : false;}	///< @deprecated	Deprecated starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool SystemControl(void* dataPtr, SystemControlCode systemControlCode));		///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(void Sleep(int))		 	{}		///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool MapFrameBuffers(void));		///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool UnmapFrameBuffers(void));		///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool MapRegisters(void));			///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool UnmapRegisters(void));		///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool MapXena2Flash(void));			///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool UnmapXena2Flash(void));		///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(ULWord GetPCISlotNumber(void) const);	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool MapMemory(const MemoryType memType, void **memPtr));	///< @deprecated	Obsolete starting in SDK 16.0.
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 
 	AJA_VIRTUAL bool	SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mode);

@@ -1142,14 +1142,14 @@ AJAExport std::string NTV2AudioFormatToString			(const NTV2AudioFormat			inValue
 AJAExport std::string NTV2BitfileTypeToString			(const NTV2BitfileType			inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.2
 AJAExport std::string NTV2DieTempScaleToString			(const NTV2DieTempScale			inValue,	const bool inUseUTF8 = false);			//	New in SDK 17.6
 #if !defined(NTV2_DEPRECATE_17_6)
-	AJAExport NTV2_DEPRECATED_f(std::string NTV2M31VideoPresetToString (const M31VideoPreset val, const bool retailDisplay = false));	///< @deprecated	New in SDK 12.0, removed in SDK 17.6
-	AJAExport NTV2_DEPRECATED_f(bool convertHDRFloatToRegisterValues (const HDRFloatValues & inFVals, HDRRegValues & outRegVals));		///< @deprecated	Use HDRFloatValues::toRegValues instead
-	AJAExport NTV2_DEPRECATED_f(bool convertHDRRegisterToFloatValues (const HDRRegValues & inRegVals, HDRFloatValues & outFloatVals));	///< @deprecated	Use HDRFloatValues::setFromRegValues instead
-	AJAExport NTV2_DEPRECATED_f(void setHDRDefaultsForBT2020 (HDRRegValues & outRegVals));	///< @deprecated	Use HDRRegValues::setBT2020 instead
-	AJAExport NTV2_DEPRECATED_f(void setHDRDefaultsForDCIP3 (HDRRegValues & outRegVals));	///< @deprecated	Use HDRRegValues::setDCIP3 instead
+	AJAExport NTV2_DEPRECATED_17_6(std::string NTV2M31VideoPresetToString (const M31VideoPreset val, const bool retailDisplay = false));	///< @deprecated	New in SDK 12.0, removed in SDK 17.6
+	AJAExport NTV2_DEPRECATED_17_6(bool convertHDRFloatToRegisterValues (const HDRFloatValues & inFVals, HDRRegValues & outRegVals));		///< @deprecated	Use HDRFloatValues::toRegValues instead
+	AJAExport NTV2_DEPRECATED_17_6(bool convertHDRRegisterToFloatValues (const HDRRegValues & inRegVals, HDRFloatValues & outFloatVals));	///< @deprecated	Use HDRFloatValues::setFromRegValues instead
+	AJAExport NTV2_DEPRECATED_17_6(void setHDRDefaultsForBT2020 (HDRRegValues & outRegVals));	///< @deprecated	Use HDRRegValues::setBT2020 instead
+	AJAExport NTV2_DEPRECATED_17_6(void setHDRDefaultsForDCIP3 (HDRRegValues & outRegVals));	///< @deprecated	Use HDRRegValues::setDCIP3 instead
 #endif	//	!defined(NTV2_DEPRECATE_17_6)
 #if !defined(NTV2_DEPRECATE_16_1)
-	inline std::string NTV2AudioMonitorSelectToString (const NTV2AudioMonitorSelect inValue, const bool inForRetailDisplay = false) {return NTV2AudioChannelPairToString(inValue, inForRetailDisplay);} ///< @deprecated	Use ::NTV2AudioChannelPairToString instead.
+	inline NTV2_DEPRECATED_16_1(std::string NTV2AudioMonitorSelectToString (const NTV2AudioMonitorSelect v, const bool b = false)) {return NTV2AudioChannelPairToString(v, b);} ///< @deprecated	Use ::NTV2AudioChannelPairToString instead.
 #endif	//	!defined(NTV2_DEPRECATE_16_1)
 
 typedef std::vector <std::string>		NTV2StringList;			//	New in SDK 12.5

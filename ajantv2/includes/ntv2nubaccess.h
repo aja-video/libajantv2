@@ -356,12 +356,11 @@ class AJAExport NTV2RPCClientAPI : public NTV2RPCBase
 		}
 
 		#if !defined(NTV2_DEPRECATE_16_3)	//	These functions are going away
-		virtual bool	NTV2DriverGetBitFileInformationRemote	(BITFILE_INFO_STRUCT & bitFileInfo, const NTV2BitFileType bitFileType);
-		virtual bool	NTV2DriverGetBuildInformationRemote	(BUILD_INFO_STRUCT & buildInfo);
-		virtual bool	NTV2DownloadTestPatternRemote	(const NTV2Channel channel, const NTV2PixelFormat testPatternFBF,
-														const UWord signalMask, const bool testPatDMAEnb, const ULWord testPatNum);
-		virtual bool	NTV2ReadRegisterMultiRemote	(const ULWord numRegs, ULWord & outFailedRegNum, NTV2RegInfo outRegs[]);
-		virtual bool	NTV2GetDriverVersionRemote	(ULWord & outDriverVersion);
+		virtual NTV2_DEPRECATED_16_3(bool NTV2DriverGetBitFileInformationRemote(BITFILE_INFO_STRUCT & nfo, const NTV2BitFileType typ));
+		virtual NTV2_DEPRECATED_16_3(bool NTV2DriverGetBuildInformationRemote(BUILD_INFO_STRUCT & buildInfo));
+		virtual NTV2_DEPRECATED_16_3(bool NTV2DownloadTestPatternRemote(const NTV2Channel ch, const NTV2PixelFormat pf, const UWord msk, const bool dma, const ULWord tpNum));
+		virtual NTV2_DEPRECATED_16_3(bool NTV2ReadRegisterMultiRemote(const ULWord numRegs, ULWord & outFailedRegNum, NTV2RegInfo outRegs[]));
+		virtual NTV2_DEPRECATED_16_3(bool NTV2GetDriverVersionRemote(ULWord & vers));
 		#endif	//	!defined(NTV2_DEPRECATE_16_3)
 
 		virtual			~NTV2RPCClientAPI();	///< @brief	My destructor, automatically calls NTV2Disconnect.
