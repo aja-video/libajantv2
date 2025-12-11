@@ -351,8 +351,8 @@ public:
 	bool							Is2KFormat (void) const;		///< @return	True if I was created with a 2Kx1080 video format.
 	///@}
 #if !defined(NTV2_DEPRECATE_16_3)
-	inline bool						IsSDFormat (void) const			{return NTV2_IS_SD_VIDEO_FORMAT(GetVideoFormat()) || NTV2_IS_SD_STANDARD(GetVideoStandard());} ///< @deprecated	Obsolete starting in SDK 16.3.
-#endif
+	inline NTV2_DEPRECATED_16_3(bool IsSDFormat(void) const) {return NTV2_IS_SD_VIDEO_FORMAT(GetVideoFormat()) || NTV2_IS_SD_STANDARD(GetVideoStandard());} ///< @deprecated	Obsolete starting in SDK 16.3.
+#endif//!defined(NTV2_DEPRECATE_16_3)
 	void							MakeInvalid (void);				///< @brief	Resets me into an invalid (NULL) state.
 
 	private:

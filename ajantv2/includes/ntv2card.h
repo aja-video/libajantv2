@@ -147,25 +147,23 @@ public:
 	**/
 	AJA_VIRTUAL inline class DeviceCapabilities & features (void)	{return mDevCap;}	//	New in SDK 17.0
 #if !defined(NTV2_DEPRECATE_16_3)
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoFormat (const NTV2FrameRate inFR,
-														const NTV2FrameGeometry	inFG, 
-														const NTV2Standard inStd));	///< @deprecated	This function is obsolete. Do not use it.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetFrameBufferSize(void));	///< @deprecated	This function is obsolete. Do not use it.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetAudioFrameBuffer(void));	///< @deprecated	This function is obsolete. Do not use it.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetAudioFrameBuffer2(void));	///< @deprecated	This function is obsolete. Do not use it.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetFrameBufferSize (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat));	///< @deprecated	This function is obsolete. Do not use it.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetNumberFrameBuffers (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat));	///< @deprecated	This function is obsolete. Do not use it.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetAudioFrameBuffer (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat));	///< @deprecated	This function is obsolete. Do not use it.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetAudioFrameBuffer2 (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat));	///< @deprecated	This function is obsolete. Do not use it.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoVideoFormat (const NTV2VideoFormat inVF));	///< @deprecated	Use DeviceCapabilities::CanDoVideoFormat instead.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoFrameBufferFormat (const NTV2PixelFormat inPF));	///< @deprecated	Use DeviceCapabilities::CanDoFrameBufferFormat instead.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoWidget (const NTV2WidgetID inWgtID));	///< @deprecated	Use DeviceCapabilities::CanDoWidget instead.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoConversionMode (const NTV2ConversionMode inCM));	///< @deprecated	Use DeviceCapabilities::CanDoConversionMode instead.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoDSKMode (const NTV2DSKMode inDSKM));	///< @deprecated	This function is obsolete. Do not use it.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoInputSource (const NTV2InputSource inSrc));	///< @deprecated	Use DeviceCapabilities::CanDoInputSource instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool DeviceCanDoAudioMixer(void)) {return IsSupported(kDeviceCanDoAudioMixer);}	///< @deprecated	Use CNTV2DriverInterface::IsSupported with kDeviceCanDoAudioMixer instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool DeviceIsDNxIV(void)) {return IsSupported(kDeviceHasMicrophoneInput);}	///< @deprecated	Use DeviceCapabilities::IsDNxIV instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool DeviceHasMicInput(void)) {return IsSupported(kDeviceHasMicrophoneInput);}	///< @deprecated	Call DeviceCapabilities::HasMicInput via CNTV2Card::features or call CNTV2DriverInterface::IsSupported using ::kDeviceHasMicrophoneInput
+	AJA_VIRTUAL NTV2_DEPRECATED_16_3(bool DeviceCanDoFormat (const NTV2FrameRate inFR, const NTV2FrameGeometry inFG, const NTV2Standard inStd));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_3(ULWord DeviceGetFrameBufferSize(void));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_3(ULWord DeviceGetAudioFrameBuffer(void));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_3(ULWord DeviceGetAudioFrameBuffer2(void));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_3(ULWord DeviceGetFrameBufferSize (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_3(ULWord DeviceGetNumberFrameBuffers (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_3(ULWord DeviceGetAudioFrameBuffer (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_3(ULWord DeviceGetAudioFrameBuffer2 (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_3(bool DeviceCanDoVideoFormat (const NTV2VideoFormat inVF));	///< @deprecated	Use DeviceCapabilities::CanDoVideoFormat instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_3(bool DeviceCanDoFrameBufferFormat (const NTV2PixelFormat inPF));	///< @deprecated	Use DeviceCapabilities::CanDoFrameBufferFormat instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_3(bool DeviceCanDoWidget (const NTV2WidgetID inWgtID));	///< @deprecated	Use DeviceCapabilities::CanDoWidget instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_3(bool DeviceCanDoConversionMode (const NTV2ConversionMode inCM));	///< @deprecated	Use DeviceCapabilities::CanDoConversionMode instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_3(bool DeviceCanDoDSKMode (const NTV2DSKMode inDSKM));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_3(bool DeviceCanDoInputSource (const NTV2InputSource inSrc));	///< @deprecated	Use DeviceCapabilities::CanDoInputSource instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_3(bool DeviceCanDoAudioMixer(void)) {return IsSupported(kDeviceCanDoAudioMixer);}	///< @deprecated	Use CNTV2DriverInterface::IsSupported with kDeviceCanDoAudioMixer instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_3(bool DeviceIsDNxIV(void)) {return IsSupported(kDeviceHasMicrophoneInput);}	///< @deprecated	Use DeviceCapabilities::IsDNxIV instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_3(bool DeviceHasMicInput(void)) {return IsSupported(kDeviceHasMicrophoneInput);}	///< @deprecated	Call DeviceCapabilities::HasMicInput via CNTV2Card::features or call CNTV2DriverInterface::IsSupported using ::kDeviceHasMicrophoneInput
 #endif	//	defined(NTV2_DEPRECATE_16_3)
 	AJA_VIRTUAL ULWord DeviceGetNumberFrameBuffers(void);
 	///@}
@@ -1193,25 +1191,25 @@ public:
 	AJA_VIRTUAL bool		ReadLineCount (ULWord & outValue);
 
 #if !defined(NTV2_DEPRECATE_18_0)
-	AJA_VIRTUAL inline bool		GetEveryFrameServices (NTV2TaskMode & outMode)		{return GetTaskMode(outMode);}	///< @deprecated	Use GetTaskMode instead; deprecated in SDK 18.0
-	AJA_VIRTUAL inline bool		SetEveryFrameServices (const NTV2TaskMode inMode)	{return SetTaskMode(inMode);}	///< @deprecated	Use SetTaskMode instead; deprecated in SDK 18.0
+	AJA_VIRTUAL inline NTV2_DEPRECATED_18_0(bool GetEveryFrameServices(NTV2TaskMode & m)) {return GetTaskMode(m);}	///< @deprecated	Use GetTaskMode instead; deprecated in SDK 18.0
+	AJA_VIRTUAL inline NTV2_DEPRECATED_18_0(bool SetEveryFrameServices(const NTV2TaskMode m)) {return SetTaskMode(m);}	///< @deprecated	Use SetTaskMode instead; deprecated in SDK 18.0
 #endif	//	defined(NTV2_DEPRECATE_18_0)
 #if !defined(NTV2_DEPRECATE_16_3)
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetDefaultVideoOutMode(ULWord mode)); ///< @deprecated	Obsolete starting in SDK 16.3.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetDefaultVideoOutMode(ULWord & outMode)); ///< @deprecated	Obsolete starting in SDK 16.3.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_3(bool SetDefaultVideoOutMode(ULWord mode)); ///< @deprecated	Obsolete starting in SDK 16.3.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_3(bool GetDefaultVideoOutMode(ULWord & outMode)); ///< @deprecated	Obsolete starting in SDK 16.3.
 #endif	//	defined(NTV2_DEPRECATE_16_3)
 #if !defined(NTV2_DEPRECATE_16_2)
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetActiveFrameDimensions (NTV2FrameDimensions & outFrameDimensions, const NTV2Channel inChannel = NTV2_CHANNEL1)); ///< @deprecated	Obsolete starting in SDK 16.2.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(NTV2FrameDimensions GetActiveFrameDimensions (const NTV2Channel inChannel = NTV2_CHANNEL1)); ///< @deprecated	Obsolete starting in SDK 16.2.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetNumberActiveLines (ULWord & outNumActiveLines)); ///< @deprecated	Obsolete starting in SDK 16.2.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool FlipFlopPage (const NTV2Channel inChannel)); ///< @deprecated	Declared obsolete starting in SDK 16.2. Swapped the PCI access frame and output frame registers at the next output VBI.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetPCIAccessFrame (const NTV2Channel inChannel, const ULWord inValue, const bool inWaitForVBI = true)); ///< @deprecated	Declared obsolete starting in SDK 16.2. The "PCI Access Frame" register had no effect on the hardware, but was used to store the next/pending output frame.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetPCIAccessFrame (const NTV2Channel inChannel, ULWord & outValue)); ///< @deprecated	Declared obsolete starting in SDK 16.2. The "PCI Access Frame" register had no effect on the hardware, but was used to store the next/pending output frame.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_2(bool GetActiveFrameDimensions (NTV2FrameDimensions & outFrameDimensions, const NTV2Channel inChannel = NTV2_CHANNEL1)); ///< @deprecated	Obsolete starting in SDK 16.2.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_2(NTV2FrameDimensions GetActiveFrameDimensions (const NTV2Channel inChannel = NTV2_CHANNEL1)); ///< @deprecated	Obsolete starting in SDK 16.2.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_2(bool GetNumberActiveLines (ULWord & outNumActiveLines)); ///< @deprecated	Obsolete starting in SDK 16.2.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_2(bool FlipFlopPage (const NTV2Channel inChannel)); ///< @deprecated	Declared obsolete starting in SDK 16.2. Swapped the PCI access frame and output frame registers at the next output VBI.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_2(bool SetPCIAccessFrame (const NTV2Channel inChannel, const ULWord inValue, const bool inWaitForVBI = true)); ///< @deprecated	Declared obsolete starting in SDK 16.2. The "PCI Access Frame" register had no effect on the hardware, but was used to store the next/pending output frame.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_2(bool GetPCIAccessFrame (const NTV2Channel inChannel, ULWord & outValue)); ///< @deprecated	Declared obsolete starting in SDK 16.2. The "PCI Access Frame" register had no effect on the hardware, but was used to store the next/pending output frame.
 #endif	//	!defined(NTV2_DEPRECATE_16_2)
 #if !defined(NTV2_DEPRECATE_16_0)
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetEnableVANCData (const NTV2ChannelSet & inChannels, const bool inVANCenable, const bool inTallerVANC = false))	{return SetVANCMode(inChannels, NTV2VANCModeFromBools(inVANCenable, inTallerVANC));}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Standard st, const NTV2FrameGeometry fg,
-																	const NTV2Channel inChannel = NTV2_CHANNEL1))	{(void) st; (void) fg; return SetVANCMode(inVancMode, inChannel);}
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool SetEnableVANCData (const NTV2ChannelSet & inChannels, const bool inVANCenable, const bool inTallerVANC = false))	{return SetVANCMode(inChannels, NTV2VANCModeFromBools(inVANCenable, inTallerVANC));}
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool SetVANCMode (const NTV2VANCMode m, const NTV2Standard st, const NTV2FrameGeometry fg,
+																const NTV2Channel ch = NTV2_CHANNEL1))	{(void) st; (void) fg; return SetVANCMode(m, ch);}
 	#define Set425FrameEnable	SetTsiFrameEnable	//	Replace calls to Set425FrameEnable with calls to SetTsiFrameEnable instead
 	#define Get425FrameEnable	GetTsiFrameEnable	//	Replace calls to Get425FrameEnable with calls to GetTsiFrameEnable instead
 #endif	//	NTV2_DEPRECATE_16_0
@@ -2191,29 +2189,29 @@ public:
 	AJA_VIRTUAL bool		GetMultiLinkAudioMode (const NTV2AudioSystem inAudioSystem, bool & outEnabled);	//	New in SDK 16.2
 
 #if !defined(NTV2_DEPRECATE_16_0)
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool WriteAudioSource (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1));	///< @deprecated	This function is obsolete.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool ReadAudioSource (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1));	///< @deprecated	This function is obsolete.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioOutputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioOutput(inAudioSystem) : StartAudioOutput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioOutput or CNTV2Card::StopAudioOutput instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetAudioOutputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset)) {if(!IsAudioOutputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; }	///< @deprecated	Call CNTV2Card::IsAudioOutputRunning instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioInputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioInput(inAudioSystem) : StartAudioInput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioInput or CNTV2Card::StopAudioInput instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetAudioInputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset))	{if(!IsAudioInputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; } ///< @deprecated	Call CNTV2Card::IsAudioInputRunning instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool WriteAudioSource (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1));	///< @deprecated	This function is obsolete.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool ReadAudioSource (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1));	///< @deprecated	This function is obsolete.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool SetAudioOutputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioOutput(inAudioSystem) : StartAudioOutput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioOutput or CNTV2Card::StopAudioOutput instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool GetAudioOutputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset)) {if(!IsAudioOutputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; }	///< @deprecated	Call CNTV2Card::IsAudioOutputRunning instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool SetAudioInputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioInput(inAudioSystem) : StartAudioInput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioInput or CNTV2Card::StopAudioInput instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool GetAudioInputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset))	{if(!IsAudioInputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; } ///< @deprecated	Call CNTV2Card::IsAudioInputRunning instead.
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 #if !defined(NTV2_DEPRECATE_16_1)
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetAnalogAudioIOConfiguration (const NTV2AnalogAudioIO inConfig));	///< @deprecated	Use CNTV2Card::SetAnalogAudioTransmitEnable instead.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetAnalogAudioIOConfiguration (NTV2AnalogAudioIO & outConfig));	///< @deprecated	Use CNTV2Card::GetAnalogAudioTransmitEnable instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadAudioLastOut (ULWord & outValue, const NTV2Channel inChannel))	{return ReadAudioLastOut(outValue, NTV2AudioSystem(inChannel));}	///< @deprecated	Use CNTV2Card::ReadAudioLastOut(ULWord &, const NTV2AudioSystem) instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadAudioLastIn (ULWord & outValue, const NTV2Channel inChannel)) {return ReadAudioLastIn(outValue, NTV2AudioSystem(inChannel));} ///< @deprecated	Use CNTV2Card::ReadAudioLastIn(ULWord &, const NTV2AudioSystem) instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool WriteAudioLastOut (ULWord & outValue, const NTV2Channel inChannel)) {(void)outValue;(void)inChannel; return false;}	///< @deprecated	This function is obsolete.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_1(bool SetAnalogAudioIOConfiguration (const NTV2AnalogAudioIO inConfig));	///< @deprecated	Use CNTV2Card::SetAnalogAudioTransmitEnable instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_1(bool GetAnalogAudioIOConfiguration (NTV2AnalogAudioIO & outConfig));	///< @deprecated	Use CNTV2Card::GetAnalogAudioTransmitEnable instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_1(bool ReadAudioLastOut (ULWord & outValue, const NTV2Channel inChannel))	{return ReadAudioLastOut(outValue, NTV2AudioSystem(inChannel));}	///< @deprecated	Use CNTV2Card::ReadAudioLastOut(ULWord &, const NTV2AudioSystem) instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_1(bool ReadAudioLastIn (ULWord & outValue, const NTV2Channel inChannel)) {return ReadAudioLastIn(outValue, NTV2AudioSystem(inChannel));} ///< @deprecated	Use CNTV2Card::ReadAudioLastIn(ULWord &, const NTV2AudioSystem) instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_1(bool WriteAudioLastOut (ULWord & outValue, const NTV2Channel inChannel)) {(void)outValue;(void)inChannel; return false;}	///< @deprecated	This function is obsolete.
 #endif	//	!defined(NTV2_DEPRECATE_16_1)
 #if !defined(NTV2_DEPRECATE_16_3)
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool WriteAudioLastOut (const ULWord inValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1)) {(void)inValue;(void)inAudioSystem; return false;}	///< @deprecated	This function is obsolete.
-#endif	//	!defined(NTV2_DEPRECATE_16_1)
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_3(bool WriteAudioLastOut (const ULWord inValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1)) {(void)inValue;(void)inAudioSystem; return false;}	///< @deprecated	This function is obsolete.
+#endif	//	!defined(NTV2_DEPRECATE_16_3)
 #if !defined(NTV2_DEPRECATE_17_0)
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool CanDoAudioWaitForVBI(void)) {return IsSupported(kDeviceAudioCanWaitForVBI);}	///< @deprecated	Use CNTV2Card::features().CanDoAudioWaitForVBI() or CNTV2DriverInterface::IsSupported instead (was new in SDK 16.0)
+	AJA_VIRTUAL inline NTV2_DEPRECATED_17_0(bool CanDoAudioWaitForVBI(void)) {return IsSupported(kDeviceAudioCanWaitForVBI);}	///< @deprecated	Use CNTV2Card::features().CanDoAudioWaitForVBI() or CNTV2DriverInterface::IsSupported instead (was new in SDK 16.0)
 #endif	//	!defined(NTV2_DEPRECATE_17_0)
 #if !defined(NTV2_DEPRECATE_17_5)
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetAudioOutputEmbedderState (const NTV2Channel sdi, bool & enb)) {return GetSDIOutputAudioEnabled(sdi,enb);} ///< @deprecated	Introduced in SDK 13.0, replaced in SDK 17.5 with CNTV2Card::GetSDIOutputAudioEnabled
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioOutputEmbedderState (const NTV2Channel sdi, const bool & enb)) {return SetSDIOutputAudioEnabled(sdi,enb);} ///< @deprecated	Introduced in SDK 13.0, replaced in SDK 17.5 with CNTV2Card::SetSDIOutputAudioEnabled
+	AJA_VIRTUAL inline NTV2_DEPRECATED_17_5(bool GetAudioOutputEmbedderState (const NTV2Channel sdi, bool & enb)) {return GetSDIOutputAudioEnabled(sdi,enb);} ///< @deprecated	Introduced in SDK 13.0, replaced in SDK 17.5 with CNTV2Card::GetSDIOutputAudioEnabled
+	AJA_VIRTUAL inline NTV2_DEPRECATED_17_5(bool SetAudioOutputEmbedderState (const NTV2Channel sdi, const bool & enb)) {return SetSDIOutputAudioEnabled(sdi,enb);} ///< @deprecated	Introduced in SDK 13.0, replaced in SDK 17.5 with CNTV2Card::SetSDIOutputAudioEnabled
 #endif	//	defined(NTV2_DEPRECATE_17_5)
 	///@}
 
@@ -2406,8 +2404,8 @@ public:
 	///@}
 
 	#if !defined(NTV2_DEPRECATE_16_3)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool WriteGlobalControl(const ULWord inVal))		{return WriteRegister(kRegGlobalControl, inVal);}	///< @deprecated	This function is obsolete. Do not use it.
-		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadGlobalControl(ULWord * pOutVal))	{return pOutVal ? ReadRegister(kRegGlobalControl, *pOutVal) : false;}	///< @deprecated	This function is obsolete. Do not use it.
+		AJA_VIRTUAL NTV2_DEPRECATED_16_3(bool WriteGlobalControl(const ULWord inVal))		{return WriteRegister(kRegGlobalControl, inVal);}	///< @deprecated	This function is obsolete. Do not use it.
+		AJA_VIRTUAL inline NTV2_DEPRECATED_16_3(bool ReadGlobalControl(ULWord * pOutVal))	{return pOutVal ? ReadRegister(kRegGlobalControl, *pOutVal) : false;}	///< @deprecated	This function is obsolete. Do not use it.
 	#endif	//	!defined(NTV2_DEPRECATE_16_3)
 
 
@@ -2500,23 +2498,23 @@ public:
 
 #if !defined(NTV2_DEPRECATE_16_0)
 	//	OEM Mapping to Userspace Functions
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetBaseAddress(NTV2Channel channel, ULWord **pBaseAddress));	///< @deprecated	Obsolete starting in SDK 16.0, do not use
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetBaseAddress(ULWord **pBaseAddress));	///< @deprecated	Obsolete starting in SDK 16.0, do not use
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetRegisterBaseAddress(ULWord regNumber, ULWord ** pRegAddress));	///< @deprecated	Obsolete starting in SDK 16.0, do not use
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetXena2FlashBaseAddress(ULWord ** pXena2FlashAddress));	///< @deprecated	Obsolete starting in SDK 16.0, do not use
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool GetBaseAddress(NTV2Channel channel, ULWord **pBaseAddress));	///< @deprecated	Obsolete starting in SDK 16.0, do not use
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool GetBaseAddress(ULWord **pBaseAddress));	///< @deprecated	Obsolete starting in SDK 16.0, do not use
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool GetRegisterBaseAddress(ULWord regNumber, ULWord ** pRegAddress));	///< @deprecated	Obsolete starting in SDK 16.0, do not use
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool GetXena2FlashBaseAddress(ULWord ** pXena2FlashAddress));	///< @deprecated	Obsolete starting in SDK 16.0, do not use
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 
 #if !defined(NTV2_DEPRECATE_17_0)
 	//	Read-Only Status Registers
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadStatusRegister (ULWord *pVal))			{return pVal ? ReadRegister(kRegStatus, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadStatus2Register (ULWord *pVal))			{return pVal ? ReadRegister(kRegStatus2, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadInputStatusRegister (ULWord *pVal))		{return pVal ? ReadRegister(kRegInputStatus, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadInputStatus2Register (ULWord *pVal))		{return pVal ? ReadRegister(kRegInputStatus2, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadInput56StatusRegister (ULWord *pVal))		{return pVal ? ReadRegister(kRegInput56Status, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadInput78StatusRegister (ULWord *pVal))		{return pVal ? ReadRegister(kRegInput78Status, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool Read3GInputStatusRegister(ULWord *pVal))		{return pVal ? ReadRegister(kRegSDIInput3GStatus, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool Read3GInputStatus2Register(ULWord *pVal))		{return pVal ? ReadRegister(kRegSDIInput3GStatus2, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool Read3GInput5678StatusRegister(ULWord *pVal))	{return pVal ? ReadRegister(kRegSDI5678Input3GStatus, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
+	AJA_VIRTUAL inline NTV2_DEPRECATED_17_0(bool ReadStatusRegister (ULWord *pVal))			{return pVal ? ReadRegister(kRegStatus, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
+	AJA_VIRTUAL inline NTV2_DEPRECATED_17_0(bool ReadStatus2Register (ULWord *pVal))			{return pVal ? ReadRegister(kRegStatus2, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
+	AJA_VIRTUAL inline NTV2_DEPRECATED_17_0(bool ReadInputStatusRegister (ULWord *pVal))		{return pVal ? ReadRegister(kRegInputStatus, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
+	AJA_VIRTUAL inline NTV2_DEPRECATED_17_0(bool ReadInputStatus2Register (ULWord *pVal))		{return pVal ? ReadRegister(kRegInputStatus2, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
+	AJA_VIRTUAL inline NTV2_DEPRECATED_17_0(bool ReadInput56StatusRegister (ULWord *pVal))		{return pVal ? ReadRegister(kRegInput56Status, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
+	AJA_VIRTUAL inline NTV2_DEPRECATED_17_0(bool ReadInput78StatusRegister (ULWord *pVal))		{return pVal ? ReadRegister(kRegInput78Status, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
+	AJA_VIRTUAL inline NTV2_DEPRECATED_17_0(bool Read3GInputStatusRegister(ULWord *pVal))		{return pVal ? ReadRegister(kRegSDIInput3GStatus, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
+	AJA_VIRTUAL inline NTV2_DEPRECATED_17_0(bool Read3GInputStatus2Register(ULWord *pVal))		{return pVal ? ReadRegister(kRegSDIInput3GStatus2, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
+	AJA_VIRTUAL inline NTV2_DEPRECATED_17_0(bool Read3GInput5678StatusRegister(ULWord *pVal))	{return pVal ? ReadRegister(kRegSDI5678Input3GStatus, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
 #endif	//	!defined(NTV2_DEPRECATE_17_0)
 
 	AJA_VIRTUAL bool	SupportsP2PTransfer (void); ///< @return	True if this device can directly transmit data to another PCIe device via DMA;	otherwise false.
@@ -3032,8 +3030,8 @@ public:
 	AJA_VIRTUAL bool	GetRegisterWriteMode (NTV2RegisterWriteMode & outValue, const NTV2Channel inFrameStore = NTV2_CHANNEL1);
 
 	#if !defined (NTV2_DEPRECATE_16_0)
-		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	SetRegisterWritemode(NTV2RegisterWriteMode inVal, const NTV2Channel inChan=NTV2_CHANNEL1))	{return SetRegisterWriteMode(inVal,inChan);}		///< @deprecated	Use CNTV2Card::SetRegisterWriteMode instead.
-		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetRegisterWritemode(NTV2RegisterWriteMode & outVal, const NTV2Channel inChan=NTV2_CHANNEL1))	{return SetRegisterWriteMode(outVal,inChan);}	///< @deprecated	Use CNTV2Card::GetRegisterWriteMode instead.
+		AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool SetRegisterWritemode(NTV2RegisterWriteMode inVal, const NTV2Channel inChan=NTV2_CHANNEL1))	{return SetRegisterWriteMode(inVal,inChan);}		///< @deprecated	Use CNTV2Card::SetRegisterWriteMode instead.
+		AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool GetRegisterWritemode(NTV2RegisterWriteMode & outVal, const NTV2Channel inChan=NTV2_CHANNEL1))	{return SetRegisterWriteMode(outVal,inChan);}	///< @deprecated	Use CNTV2Card::GetRegisterWriteMode instead.
 	#endif	//	NTV2_DEPRECATE_16_0
 	///@}
 
@@ -3633,7 +3631,9 @@ public:
 		@see		\ref vidop-indexing, CNTV2Card::SetFrameBufferSize
 	**/
 	AJA_VIRTUAL bool	GetFrameBufferSize (const NTV2Channel inChannel, NTV2Framesize & outValue);
+#if !defined(NTV2_DEPRECATE_17_2)
 	using CNTV2DriverInterface::GetFrameBufferSize;		//	Keep CNTV2DriverInterface::GetFrameBufferSize visible after being shadowed by CNTV2Card::GetFrameBufferSize
+#endif//!defined(NTV2_DEPRECATE_17_2)
 
 	/**
 		@return		True if the device intrinsic frame buffer size is currently settable and set by software
@@ -4485,7 +4485,7 @@ public:
 	AJA_VIRTUAL bool	GetRoutingForChannel (const NTV2Channel inChannel, CNTV2SignalRouter & outRouting);
 
 #if !defined(NTV2_DEPRECATE_17_0)
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool HasCanConnectROM(void)) {return IsSupported(kDeviceHasXptConnectROM);}	///< @deprecated	Use CNTV2Card::features().HasCrosspointConnectROM() or IsSupported(kDeviceHasXptConnectROM) instead
+	AJA_VIRTUAL inline NTV2_DEPRECATED_17_0(bool HasCanConnectROM(void)) {return IsSupported(kDeviceHasXptConnectROM);}	///< @deprecated	Use CNTV2Card::features().HasCrosspointConnectROM() or IsSupported(kDeviceHasXptConnectROM) instead
 #endif	//	!defined(NTV2_DEPRECATE_17_0)
 	/**
 		@brief		Answers with the implemented crosspoint connections (if known).
@@ -5242,10 +5242,10 @@ public:
 	AJA_VIRTUAL bool		SetAnalogLTCOutClockChannel (const UWord inLTCOutput, const NTV2Channel inChannel);
 
 #if !defined(NTV2_DEPRECATE_16_3)
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetLTCOnReference(bool val))		{return SetLTCInputEnable(val);}	///< @deprecated	Use SetLTCInputEnable instead. First deprecated in SDK 16.3.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetLTCOnReference(bool & outVal))	{return GetLTCInputEnable(outVal);}	///< @deprecated	Use GetLTCInputEnable instead. First deprecated in SDK 16.3.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetLTCEmbeddedOutEnable (const bool inNewValue));	///< @deprecated	Obsolete, do not use. First deprecated in SDK 16.3.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetLTCEmbeddedOutEnable (bool & outValue));			///< @deprecated	Obsolete, do not use. First deprecated in SDK 16.3.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_3(bool SetLTCOnReference(bool val))		{return SetLTCInputEnable(val);}	///< @deprecated	Use SetLTCInputEnable instead. First deprecated in SDK 16.3.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_3(bool GetLTCOnReference(bool & outVal))	{return GetLTCInputEnable(outVal);}	///< @deprecated	Use GetLTCInputEnable instead. First deprecated in SDK 16.3.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_3(bool SetLTCEmbeddedOutEnable (const bool inNewValue));	///< @deprecated	Obsolete, do not use. First deprecated in SDK 16.3.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_3(bool GetLTCEmbeddedOutEnable (bool & outValue));	///< @deprecated	Obsolete, do not use. First deprecated in SDK 16.3.
 #endif	//	!defined(NTV2_DEPRECATE_16_3)
 	///@}
 
@@ -6555,14 +6555,14 @@ protected:
 
 public:
 #if !defined(NTV2_DEPRECATE_17_6)
-	AJA_VIRTUAL bool NTV2_DEPRECATED_f(HevcGetDeviceInfo (HevcDeviceInfo* pInfo))	{(void)pInfo; return false;}		///< @deprecated	Corvid HEVC support dropped in SDK 17.6
-	AJA_VIRTUAL bool NTV2_DEPRECATED_f(HevcWriteRegister (ULWord addr, ULWord val, ULWord mask = 0xffffffff, ULWord shift = 0))	{(void)addr; (void)val; (void)mask; (void)shift; return false;}		///< @deprecated	Corvid HEVC support dropped in SDK 17.6
-	AJA_VIRTUAL bool NTV2_DEPRECATED_f(HevcReadRegister (ULWord addr, ULWord* pVal, ULWord mask = 0xffffffff, ULWord shift = 0))	{(void)addr; (void)pVal; (void)mask; (void)shift; return false;}///< @deprecated	Corvid HEVC support dropped in SDK 17.6
-	AJA_VIRTUAL bool NTV2_DEPRECATED_f(HevcSendCommand (HevcDeviceCommand* pCmd))	{(void)pCmd; return false;}			///< @deprecated	Corvid HEVC support dropped in SDK 17.6
-	AJA_VIRTUAL bool NTV2_DEPRECATED_f(HevcVideoTransfer (HevcDeviceTransfer* pXfer))	{(void)pXfer; return false;}	///< @deprecated	Corvid HEVC support dropped in SDK 17.6
-	AJA_VIRTUAL bool NTV2_DEPRECATED_f(HevcGetStatus (HevcDeviceStatus* pStat))	{(void)pStat; return false;}			///< @deprecated	Corvid HEVC support dropped in SDK 17.6
-	AJA_VIRTUAL bool NTV2_DEPRECATED_f(HevcDebugInfo (HevcDeviceDebug* pDbg))	{(void)pDbg; return false;}				///< @deprecated	Corvid HEVC support dropped in SDK 17.6
-#endif//defined(AJA_RETAIN_HEVC)
+	AJA_VIRTUAL bool NTV2_DEPRECATED_17_6(HevcGetDeviceInfo (HevcDeviceInfo* pInfo))	{(void)pInfo; return false;}		///< @deprecated	Corvid HEVC support dropped in SDK 17.6
+	AJA_VIRTUAL bool NTV2_DEPRECATED_17_6(HevcWriteRegister (ULWord addr, ULWord val, ULWord mask = 0xffffffff, ULWord shift = 0))	{(void)addr; (void)val; (void)mask; (void)shift; return false;}		///< @deprecated	Corvid HEVC support dropped in SDK 17.6
+	AJA_VIRTUAL bool NTV2_DEPRECATED_17_6(HevcReadRegister (ULWord addr, ULWord* pVal, ULWord mask = 0xffffffff, ULWord shift = 0))	{(void)addr; (void)pVal; (void)mask; (void)shift; return false;}///< @deprecated	Corvid HEVC support dropped in SDK 17.6
+	AJA_VIRTUAL bool NTV2_DEPRECATED_17_6(HevcSendCommand (HevcDeviceCommand* pCmd))	{(void)pCmd; return false;}			///< @deprecated	Corvid HEVC support dropped in SDK 17.6
+	AJA_VIRTUAL bool NTV2_DEPRECATED_17_6(HevcVideoTransfer (HevcDeviceTransfer* pXfer))	{(void)pXfer; return false;}	///< @deprecated	Corvid HEVC support dropped in SDK 17.6
+	AJA_VIRTUAL bool NTV2_DEPRECATED_17_6(HevcGetStatus (HevcDeviceStatus* pStat))	{(void)pStat; return false;}			///< @deprecated	Corvid HEVC support dropped in SDK 17.6
+	AJA_VIRTUAL bool NTV2_DEPRECATED_17_6(HevcDebugInfo (HevcDeviceDebug* pDbg))	{(void)pDbg; return false;}				///< @deprecated	Corvid HEVC support dropped in SDK 17.6
+#endif//defined(NTV2_DEPRECATE_17_6)
 
 	/**
 		@name	HDMI HDR Support
@@ -6806,12 +6806,12 @@ public:
 	///@}
 
 #if !defined(NTV2_DEPRECATE_17_5)
-	AJA_VIRTUAL inline bool NTV2_DEPRECATED_f(IsBreakoutBoardConnected (void)) {return IsSupported(kDeviceHasBreakoutBoard);}	///< @deprecated	Use features().HasBreakoutBoard() instead (new in SDK 17.0)
+	AJA_VIRTUAL inline bool NTV2_DEPRECATED_17_5(IsBreakoutBoardConnected (void)) {return IsSupported(kDeviceHasBreakoutBoard);}	///< @deprecated	Use features().HasBreakoutBoard() instead (new in SDK 17.0)
 #endif	//	NTV2_DEPRECATE_17_5
 
 #if !defined(NTV2_DEPRECATE_16_1)
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioOutputMonitorSource (const NTV2AudioMonitorSelect inChannelPair, const NTV2Channel inAudioSystem = NTV2_CHANNEL1))	{return SetAudioOutputMonitorSource(inChannelPair, NTV2AudioSystem(inAudioSystem));}	///< @deprecated	Use the function that uses NTV2AudioChannelPair and NTV2AudioSystem params.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetAudioOutputMonitorSource (NTV2AudioMonitorSelect & chp, NTV2Channel & ch)) {NTV2AudioSystem sys;  if (GetAudioOutputMonitorSource(chp, sys)) {ch = NTV2Channel(sys); return true;}	 return false;} ///< @deprecated	Use the function that uses NTV2AudioChannelPair and NTV2AudioSystem params.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_1(bool SetAudioOutputMonitorSource (const NTV2AudioMonitorSelect inChannelPair, const NTV2Channel inAudioSystem = NTV2_CHANNEL1))	{return SetAudioOutputMonitorSource(inChannelPair, NTV2AudioSystem(inAudioSystem));}	///< @deprecated	Use the function that uses NTV2AudioChannelPair and NTV2AudioSystem params.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_1(bool GetAudioOutputMonitorSource (NTV2AudioMonitorSelect & chp, NTV2Channel & ch)) {NTV2AudioSystem sys;  if (GetAudioOutputMonitorSource(chp, sys)) {ch = NTV2Channel(sys); return true;}	 return false;} ///< @deprecated	Use the function that uses NTV2AudioChannelPair and NTV2AudioSystem params.
 #endif	//	NTV2_DEPRECATE_16_1
 
 protected:
@@ -6855,7 +6855,9 @@ private:
 													NTV2FrameBufferFormat format);
 	AJA_VIRTUAL bool	IsBufferSizeChangeRequired(NTV2Channel channel, NTV2FrameGeometry geometry,
 									NTV2FrameBufferFormat currentFormat, NTV2FrameBufferFormat newFormat);
-	AJA_VIRTUAL bool	GetFBSizeAndCountFromHW(ULWord & outSize, ULWord & outCount);
+#if !defined(NTV2_DEPRECATE_17_2)
+	AJA_VIRTUAL NTV2_DEPRECATED_17_2(bool GetFBSizeAndCountFromHW(ULWord & outSize, ULWord & outCount));
+#endif//!defined(NTV2_DEPRECATE_17_2)
 
 	AJA_VIRTUAL bool	IsMultiFormatActive (void); ///< @return	True if the device supports the multi format feature and it's enabled; otherwise false.
 	AJA_VIRTUAL bool	CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFirst, const NTV2Channel inLast);

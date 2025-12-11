@@ -53,6 +53,72 @@ TEST_SUITE("filename" * doctest::description("functions in streams/common/filena
 
 typedef	vector<NTV2VANCMode>	NTV2VANCModes;
 
+#if defined(NTV2_DEPRECATE_17_2)
+	static UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBufferFormat inFBF)
+	{
+		UWord	factor = 1; //	default
+		switch (inFG)
+		{
+			case NTV2_FG_4x1920x1080:
+			case NTV2_FG_1920x1080:
+				if (inFBF == NTV2_FBF_10BIT_ARGB  ||  inFBF == NTV2_FBF_16BIT_ARGB	||	inFBF == NTV2_FBF_48BIT_RGB || inFBF == NTV2_FBF_12BIT_RGB_PACKED )
+					factor = 2;
+				break;
+
+			case NTV2_FG_2048x1556:
+			case NTV2_FG_2048x1588:
+				factor = (inFBF == NTV2_FBF_10BIT_ARGB	||	inFBF == NTV2_FBF_16BIT_ARGB  ||  inFBF == NTV2_FBF_48BIT_RGB || inFBF == NTV2_FBF_12BIT_RGB_PACKED)  ?	 4	:  2;
+				break;
+
+			case NTV2_FG_4x2048x1080:
+			case NTV2_FG_2048x1080:
+			case NTV2_FG_1920x1112:
+			case NTV2_FG_1920x1114:
+			case NTV2_FG_2048x1112:
+			case NTV2_FG_2048x1114:
+				factor = (inFBF == NTV2_FBF_16BIT_ARGB)	 ?	4  :  2;
+				break;
+
+			case NTV2_FG_4x3840x2160:
+				switch (inFBF)
+				{
+					case NTV2_FBF_12BIT_RGB_PACKED:
+					case NTV2_FBF_48BIT_RGB:	return 24;
+					case NTV2_FBF_10BIT_ARGB:	return 22;
+					case NTV2_FBF_16BIT_ARGB:	factor = 2; break;
+					default:					break;
+				}
+				break;
+
+			case NTV2_FG_4x4096x2160:
+				switch (inFBF)
+				{
+					case NTV2_FBF_ARGB:
+					case NTV2_FBF_RGBA:
+					case NTV2_FBF_ABGR:
+					case NTV2_FBF_10BIT_RGB:
+					case NTV2_FBF_10BIT_DPX:
+					case NTV2_FBF_10BIT_YCBCRA:
+					case NTV2_FBF_10BIT_DPX_LE:
+					case NTV2_FBF_10BIT_RGB_PACKED: return 17;
+					case NTV2_FBF_12BIT_RGB_PACKED:
+					case NTV2_FBF_48BIT_RGB:		return 26;
+					case NTV2_FBF_10BIT_ARGB:		return 23;
+					case NTV2_FBF_16BIT_ARGB:		return 34;
+					default:						break;
+				}
+				break;
+
+			default:	break;
+		}
+		if (inFG == NTV2_FG_4x1920x1080 || inFG == NTV2_FG_4x2048x1080)
+			factor *= 4;
+		if (inFG == NTV2_FG_4x3840x2160 || inFG == NTV2_FG_4x4096x2160)
+			factor *= 16;
+		return factor;
+	}	//	Get8MBFrameSizeFactor
+#endif // if defined(NTV2_DEPRECATE_17_2)
+
 
 void ntv2debug_marker() {}
 TEST_SUITE("ntv2debug" * doctest::description("ntv2 debug string functions")) {

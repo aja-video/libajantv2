@@ -171,11 +171,11 @@ class AJAExport NTV2TestPatternGen
 		/**
 			@deprecated	Use the DrawTestPattern method that requires an NTV2Buffer to specify the buffer to fill.
 		**/
-		virtual NTV2_DEPRECATED_f(bool DrawTestPattern (const NTV2TestPatternID tp, const NTV2FormatDesc & fd, NTV2TestPatBuffer & buf));
+		virtual NTV2_DEPRECATED_16_0(bool DrawTestPattern (const NTV2TestPatternID tp, const NTV2FormatDesc & fd, NTV2TestPatBuffer & buf));
 		/**
 			@deprecated	Use the DrawTestPattern method that requires an NTV2Buffer to specify the buffer to fill.
 		**/
-		virtual NTV2_DEPRECATED_f(bool DrawTestPattern (const NTV2TestPatternID tp, const uint32_t w, const uint32_t h, const NTV2PixelFormat pf, NTV2TestPatBuffer & buf));
+		virtual NTV2_DEPRECATED_16_0(bool DrawTestPattern (const NTV2TestPatternID tp, const uint32_t w, const uint32_t h, const NTV2PixelFormat pf, NTV2TestPatBuffer & buf));
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 		///@}
 

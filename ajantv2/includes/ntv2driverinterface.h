@@ -375,8 +375,10 @@ class AJAExport CNTV2DriverInterface
 		AJA_VIRTUAL bool	ControlDriverDebugMessages (NTV2_DriverDebugMessageSet msgSet,  bool enable);
 	///@}
 
-		AJA_VIRTUAL inline ULWord	GetNumFrameBuffers (void) const				{return _ulNumFrameBuffers;}
-		AJA_VIRTUAL inline ULWord	GetFrameBufferSize (void) const				{return _ulFrameBufferSize;}
+#if !defined(NTV2_DEPRECATE_17_2)
+		AJA_VIRTUAL inline NTV2_DEPRECATED_17_2(ULWord GetNumFrameBuffers (void) const)	{return _ulNumFrameBuffers;}
+		AJA_VIRTUAL inline NTV2_DEPRECATED_17_2(ULWord GetFrameBufferSize (void) const)	{return _ulFrameBufferSize;}
+#endif//!defined(NTV2_DEPRECATE_17_2)
 
 		/**
 			@brief		Answers with the currently-installed bitfile information.
@@ -579,7 +581,7 @@ class AJAExport CNTV2DriverInterface
 		**/
 		AJA_VIRTUAL std::string			GetDescription (void) const;	//	New in SDK 17.0
 #if defined(NTV2_NUB_CLIENT_SUPPORT)  &&  !defined(NTV2_DEPRECATE_16_3)
-		AJA_VIRTUAL inline NTV2NubProtocolVersion GetNubProtocolVersion (void) const	{return 0;}	///< @return	My nub protocol version.
+		AJA_VIRTUAL inline NTV2_DEPRECATED_16_3(NTV2NubProtocolVersion GetNubProtocolVersion (void) const)	{return 0;}	///< @return	My nub protocol version.
 #endif
 		/**
 			@return		Const reference to my connection parameters dictionary (currently valid only for remote/software devices).
@@ -589,31 +591,31 @@ class AJAExport CNTV2DriverInterface
 		//	DEPRECATED FUNCTIONS
 #if !defined(NTV2_DEPRECATE_16_0)
 	// SuspendAudio/ResumeAudio were only implemented on MacOS
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SuspendAudio(void))	{return true;}
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool ResumeAudio(const ULWord inFBSize))	{(void) inFBSize; return true;}
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool SuspendAudio(void))	{return true;}
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool ResumeAudio(const ULWord inFBSize))	{(void) inFBSize; return true;}
 	//	Memory Mapping/Unmapping
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool MapFrameBuffers(void))	{return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool UnmapFrameBuffers(void))	{return true;}	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool MapRegisters(void))		{return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool UnmapRegisters(void))		{return true;}	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool MapXena2Flash(void))		{return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool UnmapXena2Flash(void))	{return true;}	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool MapFrameBuffers(void))	{return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool UnmapFrameBuffers(void))	{return true;}	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool MapRegisters(void))		{return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool UnmapRegisters(void))		{return true;}	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool MapXena2Flash(void))		{return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool UnmapXena2Flash(void))	{return true;}	///< @deprecated	Obsolete starting in SDK 16.0.
 	//	Others
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool DmaUnlock(void))	{return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool CompleteMemoryForDMA(ULWord * pHostBuffer))	{(void)pHostBuffer; return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool PrepareMemoryForDMA(ULWord * pHostBuffer, const ULWord inNumBytes))	{(void)pHostBuffer; (void)inNumBytes; return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetInterruptCount(const INTERRUPT_ENUMS eInt, ULWord *pCnt))	{return pCnt ? GetInterruptCount(eInt, *pCnt) : false;}	///< @deprecated	Use version of this function that accepts a non-const reference.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool ReadRegisterMulti(const ULWord numRegs, ULWord * pOutWhichRegFailed, NTV2RegInfo aRegs[]));	///< @deprecated	Use CNTV2DriverInterface::ReadRegisters instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(ULWord	GetPCISlotNumber(void) const)	{return _pciSlot;}			///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(Word SleepMs(const LWord msec));	///< @deprecated	Obsolete starting in SDK 16.0. Use AJATime::Sleep instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(ULWord	GetAudioFrameBufferNumber(void) const)	{return GetNumFrameBuffers() - 1;}	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool DmaUnlock(void))	{return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool CompleteMemoryForDMA(ULWord * pHostBuffer))	{(void)pHostBuffer; return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool PrepareMemoryForDMA(ULWord * pHostBuffer, const ULWord inNumBytes))	{(void)pHostBuffer; (void)inNumBytes; return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(bool GetInterruptCount(const INTERRUPT_ENUMS eInt, ULWord *pCnt))	{return pCnt ? GetInterruptCount(eInt, *pCnt) : false;}	///< @deprecated	Use version of this function that accepts a non-const reference.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool ReadRegisterMulti(const ULWord numRegs, ULWord * pOutWhichRegFailed, NTV2RegInfo aRegs[]));	///< @deprecated	Use CNTV2DriverInterface::ReadRegisters instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(ULWord	GetPCISlotNumber(void) const)	{return _pciSlot;}			///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_16_0(Word SleepMs(const LWord msec));	///< @deprecated	Obsolete starting in SDK 16.0. Use AJATime::Sleep instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_0(ULWord	GetAudioFrameBufferNumber(void) const)	{return GetNumFrameBuffers() - 1;}	///< @deprecated	Obsolete starting in SDK 16.0.
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 #if !defined(NTV2_DEPRECATE_16_3)
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetDefaultDeviceForPID(const int32_t procID)) {(void)procID; return false;}	///< @deprecated	Obsolete, first deprecated in SDK 14.3 when classic Apple QuickTime support was dropped.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool IsDefaultDeviceForPID(const int32_t procID))  {(void)procID; return false;}	///< @deprecated	Obsolete, first deprecated in SDK 14.3 when classic Apple QuickTime support was dropped.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_3(bool SetDefaultDeviceForPID(const int32_t procID)) {(void)procID; return false;}	///< @deprecated	Obsolete, first deprecated in SDK 14.3 when classic Apple QuickTime support was dropped.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_16_3(bool IsDefaultDeviceForPID(const int32_t procID))  {(void)procID; return false;}	///< @deprecated	Obsolete, first deprecated in SDK 14.3 when classic Apple QuickTime support was dropped.
 #endif	//	!defined(NTV2_DEPRECATE_16_3)
 #if !defined(NTV2_DEPRECATE_17_6)
-	AJA_VIRTUAL inline bool	NTV2_DEPRECATED_f(HevcSendMessage(HevcMessageHeader* pMsg))	{(void)pMsg; return false;}	///< @deprecated	Corvid HEVC support dropped in SDK 17.6
+	AJA_VIRTUAL inline bool	NTV2_DEPRECATED_17_6(HevcSendMessage(HevcMessageHeader* pMsg))	{(void)pMsg; return false;}	///< @deprecated	Corvid HEVC support dropped in SDK 17.6
 #endif//!defined(NTV2_DEPRECATE_17_6)
 
 #if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
@@ -708,8 +710,10 @@ class AJAExport CNTV2DriverInterface
 		ULWord *			_pCh1FrameBaseAddress;		///< @deprecated	Obsolete starting in SDK 16.0.
 		ULWord *			_pCh2FrameBaseAddress;		///< @deprecated	Obsolete starting in SDK 16.0.
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
+#if !defined(NTV2_DEPRECATE_17_2)
 		ULWord				_ulNumFrameBuffers;
 		ULWord				_ulFrameBufferSize;
+#endif//!defined(NTV2_DEPRECATE_17_2)
 #if !defined(NTV2_DEPRECATE_16_0)
 		ULWord				_pciSlot;					//	DEPRECATE!
 #endif	//	!defined(NTV2_DEPRECATE_16_0)

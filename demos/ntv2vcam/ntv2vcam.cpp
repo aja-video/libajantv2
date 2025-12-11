@@ -622,7 +622,7 @@ NTV2VCAM::~NTV2VCAM()
 	if (!mDoMultiFormat)
 	{
 		mDevice.ReleaseStreamForApplication(gDemoAppSignature, int32_t(AJAProcess::GetPid()));
-		mDevice.SetEveryFrameServices(mSavedTaskMode);
+		mDevice.SetTaskMode(mSavedTaskMode);
 	}
 }
 
@@ -779,7 +779,7 @@ bool NTV2VCAM::Initialize()
 			return false;
 		}
 	}
-	if (!mDevice.GetEveryFrameServices(mSavedTaskMode))
+	if (!mDevice.GetTaskMode(mSavedTaskMode))
 	{
 		cerr << "## ERROR: (" << errno << ") Unable to get device's retail service task mode" << endl;
 		mErrorCode = AJA_VW_GETFRAMESERVICESFAILED;
@@ -787,7 +787,7 @@ bool NTV2VCAM::Initialize()
 	}
 	else
 	{
-		if (!mDevice.SetEveryFrameServices(NTV2_OEM_TASKS))
+		if (!mDevice.SetTaskMode(NTV2_OEM_TASKS))
 		{
 			cerr << "## ERROR: (" << errno << ") Unable to set device's retail service task mode to oem tasks" << endl;
 			mErrorCode = AJA_VW_SETFRAMESERVICESFAILED;
@@ -1437,7 +1437,7 @@ void NTV2VCAM::SetupAudio()
 bool NTV2VCAM::GetInputRouting(NTV2XptConnections& conns, const bool isInputRGB)
 {
 	const bool				isFrameRGB(::IsRGBFormat(mPixelFormat));
-	const NTV2InputXptID	fbIXpt(::GetFrameBufferInputXptFromChannel(mInputChannel));
+	const NTV2InputXptID	fbIXpt(::GetFrameStoreInputXptFromChannel(mInputChannel));
 	const NTV2OutputXptID	inputOXpt(::GetInputSourceOutputXpt(mInputSource, false, isInputRGB));
 	const NTV2InputXptID	cscVidIXpt(::GetCSCInputXptFromChannel(mInputChannel));
 	NTV2OutputXptID			cscOXpt(::GetCSCOutputXptFromChannel(mInputChannel, /*key?*/false, /*RGB?*/isFrameRGB));
@@ -1470,7 +1470,7 @@ bool NTV2VCAM::GetInputRouting4K(NTV2XptConnections& conns, const bool isInputRG
 	{	//	HDMI
 		if (mDevice.features().CanDo12gRouting())
 		{	//	FB <== SDIIn
-			in = ::GetFrameBufferInputXptFromChannel(mInputChannel);
+			in = ::GetFrameStoreInputXptFromChannel(mInputChannel);
 			out = ::GetInputSourceOutputXpt(mInputSource);
 			conns.insert(NTV2Connection(in, out));
 		}
@@ -1486,7 +1486,7 @@ bool NTV2VCAM::GetInputRouting4K(NTV2XptConnections& conns, const bool isInputRG
 						out = ::GetInputSourceOutputXpt(mInputSource, /*DS2*/false, isInputRGB, /*quadrant*/path);
 						conns.insert(NTV2Connection(in, out));
 						//	FB <== MUX
-						in = ::GetFrameBufferInputXptFromChannel(NTV2Channel(fb + path / 2), /*Binput*/path & 1);
+						in = ::GetFrameStoreInputXptFromChannel(NTV2Channel(fb + path / 2), /*Binput*/path & 1);
 						out = ::GetTSIMuxOutputXptFromChannel(NTV2Channel(mux + path / 2), /*LinkB*/path & 1, /*RGB*/isInputRGB);
 						conns.insert(NTV2Connection(in, out));
 					}
@@ -1504,7 +1504,7 @@ bool NTV2VCAM::GetInputRouting4K(NTV2XptConnections& conns, const bool isInputRG
 						out = ::GetCSCOutputXptFromChannel(NTV2Channel(csc + path), /*key*/false, /*rgb*/isFrameRGB);
 						conns.insert(NTV2Connection(in, out));
 						//	FB <== MUX
-						in = ::GetFrameBufferInputXptFromChannel(NTV2Channel(fb + path / 2), /*DS2*/path & 1);
+						in = ::GetFrameStoreInputXptFromChannel(NTV2Channel(fb + path / 2), /*DS2*/path & 1);
 						out = ::GetTSIMuxOutputXptFromChannel(NTV2Channel(mux + path / 2), /*LinkB*/path & 1, /*rgb*/isFrameRGB);
 						conns.insert(NTV2Connection(in, out));
 					}
@@ -1522,7 +1522,7 @@ bool NTV2VCAM::GetInputRouting4K(NTV2XptConnections& conns, const bool isInputRG
 						out = ::GetCSCOutputXptFromChannel(NTV2Channel(csc + path), /*key*/false, /*rgb*/isFrameRGB);
 						conns.insert(NTV2Connection(in, out));
 						//	FB <== MUX
-						in = ::GetFrameBufferInputXptFromChannel(NTV2Channel(fb + path / 2), /*DS2*/path & 1);
+						in = ::GetFrameStoreInputXptFromChannel(NTV2Channel(fb + path / 2), /*DS2*/path & 1);
 						out = ::GetTSIMuxOutputXptFromChannel(NTV2Channel(mux + path / 2), /*LinkB*/path & 1, /*rgb*/isFrameRGB);
 						conns.insert(NTV2Connection(in, out));
 					}
@@ -1538,7 +1538,7 @@ bool NTV2VCAM::GetInputRouting4K(NTV2XptConnections& conns, const bool isInputRG
 	{	//	SDI
 		if (mDevice.features().CanDo12gRouting())
 		{	//	FB <== SDIIn
-			in = ::GetFrameBufferInputXptFromChannel(mInputChannel);
+			in = ::GetFrameStoreInputXptFromChannel(mInputChannel);
 			out = ::GetInputSourceOutputXpt(mInputSource);
 			conns.insert(NTV2Connection(in, out));
 		}
@@ -1563,7 +1563,7 @@ bool NTV2VCAM::GetInputRouting4K(NTV2XptConnections& conns, const bool isInputRG
 						out = ::GetCSCOutputXptFromChannel(NTV2Channel(csc + path), /*key*/false, /*rgb*/isFrameRGB);
 						conns.insert(NTV2Connection(in, out));
 						//	FB <== MUX
-						in = ::GetFrameBufferInputXptFromChannel(NTV2Channel(fb + path / 2), /*DS2*/path & 1);
+						in = ::GetFrameStoreInputXptFromChannel(NTV2Channel(fb + path / 2), /*DS2*/path & 1);
 						out = ::GetTSIMuxOutputXptFromChannel(NTV2Channel(mux + path / 2), /*LinkB*/path & 1, /*rgb*/isFrameRGB);
 						conns.insert(NTV2Connection(in, out));
 					}	//	for each spigot
@@ -1577,7 +1577,7 @@ bool NTV2VCAM::GetInputRouting4K(NTV2XptConnections& conns, const bool isInputRG
 						out = ::GetInputSourceOutputXpt(::NTV2ChannelToInputSource(NTV2Channel(sdi + path)));
 						conns.insert(NTV2Connection(in, out));
 						//	FB <== CSC
-						in = ::GetFrameBufferInputXptFromChannel(NTV2Channel(fb + path));
+						in = ::GetFrameStoreInputXptFromChannel(NTV2Channel(fb + path));
 						out = ::GetCSCOutputXptFromChannel(NTV2Channel(csc + path), /*key*/false, /*rgb*/isFrameRGB);
 						conns.insert(NTV2Connection(in, out));
 					}	//	for each spigot
@@ -1594,7 +1594,7 @@ bool NTV2VCAM::GetInputRouting4K(NTV2XptConnections& conns, const bool isInputRG
 						out = ::GetInputSourceOutputXpt(::NTV2ChannelToInputSource(NTV2Channel(sdi + path)));
 						conns.insert(NTV2Connection(in, out));
 						//	FB <== MUX
-						in = ::GetFrameBufferInputXptFromChannel(NTV2Channel(fb + path / 2), /*DS2*/path & 1);
+						in = ::GetFrameStoreInputXptFromChannel(NTV2Channel(fb + path / 2), /*DS2*/path & 1);
 						out = ::GetTSIMuxOutputXptFromChannel(NTV2Channel(mux + path / 2), /*LinkB*/path & 1, /*rgb*/isFrameRGB);
 						conns.insert(NTV2Connection(in, out));
 					}	//	for each spigot
@@ -1603,7 +1603,7 @@ bool NTV2VCAM::GetInputRouting4K(NTV2XptConnections& conns, const bool isInputRG
 				{
 					for (path = 0; path < 4; path++)
 					{	//	FB <== SDIIn
-						in = ::GetFrameBufferInputXptFromChannel(NTV2Channel(fb + path));
+						in = ::GetFrameStoreInputXptFromChannel(NTV2Channel(fb + path));
 						out = ::GetInputSourceOutputXpt(::NTV2ChannelToInputSource(NTV2Channel(sdi + path)));
 						conns.insert(NTV2Connection(in, out));
 					}	//	for each path
