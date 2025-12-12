@@ -44,6 +44,13 @@ typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter
 #define	kQParamVDevFileName		"vdevfname"		///< @brief	.vdev file name (with extension)
 #define	kQParamVDevIndex		"vdevindex"		///< @brief	Device index number for .vdev virtual device
 
+//	AJA VDEV JSON keys:
+#define kVDevJSON_Name			"name"			///< @brief	Optional name for virtual device to override .vdev file name (expects string value)
+#define kVDevJSON_URLSpec		"urlspec"		///< @brief	URLspec for virtual device (expects string value)
+#define kVDevJSON_Disabled		"disabled"		///< @brief	Virtual device is disabled if value is true (expects boolean value)
+#define kVDevJSON_Plugin		"plugin"		///< @deprecated	No longer used
+#define kVDevJSON_Host			"host"			///< @deprecated	No longer used
+
 //	Local URL schemes:
 #define	kLegalSchemeNTV2		"ntv2"
 #define	kLegalSchemeNTV2Local	"ntv2local"
