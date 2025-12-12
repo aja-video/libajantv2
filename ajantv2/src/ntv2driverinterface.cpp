@@ -140,12 +140,17 @@ bool CNTV2DriverInterface::Open (const UWord inDeviceIndex)
 	if (!OpenLocalPhysical(inDeviceIndex))
 	{
 		//	Check for virtual device...
+		static ULWord sRecursionCheck(0), RECURSION_LIMIT(32);
 		NTV2DeviceInfo info;
 		if (!CNTV2DeviceScanner::GetDeviceInfo (inDeviceIndex, info))
 			return false;
+		sRecursionCheck++;	//	increment
+		if (sRecursionCheck > RECURSION_LIMIT)
+			{DIFAIL("Failed: " << DEC(RECURSION_LIMIT) << " '.vdev' bounces -- limit exceeded"); return false;}
 		if (!Open(info.vdevUrl))
-			return false;	//	Open vdev urlSpec failed
+			{sRecursionCheck--;  return false;}	//	Open vdev urlSpec failed
 		setDeviceIndexNumber(UWord(info.deviceIndex));	//	Patch _boardNumber
+		sRecursionCheck--;	//	decrement
 		return true;
 	}	//	if OpenLocalPhysical failed
 

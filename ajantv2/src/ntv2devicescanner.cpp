@@ -850,27 +850,54 @@ bool CNTV2DeviceScanner::GetVDevList (NTV2DeviceInfoList & outVDevList)
 
 		NTV2DeviceInfo newVDev;
 		newVDev.isVirtualDevice		= true;
-		newVDev.deviceIndex			= vdIndex++;
+		newVDev.deviceIndex			= vdIndex;
 		newVDev.deviceID			= DEVICE_ID_SOFTWARE;
 		newVDev.deviceIdentifier	= "";
 		newVDev.vdevName			= "";
+		bool explicitlyDisabled(false);
 
 		//	EXPECTED JSON KEYS:
-		//	"urlspec"	[required]	Specifies urlspec used to load the plugin. NOTE: It must have at least one query param in the URL.
+		//	"urlspec"	[required]	Specifies urlspec used to load the plugin.
 		//	"name"		[optional]	Specifies a human-readable name for the device.
 		//							If not specified, the .vdev file's base name is used instead.
-		auto pluginVal (vdevJson["plugin"]), nameVal (vdevJson["name"]), hostVal (vdevJson["host"]), urlspecVal (vdevJson["urlspec"]);
+		//	"disabled"	[optional]	Specify boolean 'true' to explicitly disable the device;  'false' retains device.
+		//							If not specified, the device will always be considered enabled.
+		if (vdevJson.size() > 32)
+			{PLFAIL("File '" << vdevFile << "': more than 32 keys");  continue;}
+		NTV2StringSet keys;
+		for (auto it(vdevJson.cbegin());  it != vdevJson.cend();  ++it)
+			if (keys.find(it.key()) == keys.end())
+				keys.insert(it.key());
+		NTV2StringSet legalKeys = {kVDevJSON_Name, kVDevJSON_Disabled, kVDevJSON_URLSpec};
+		NTV2StringList goodKeys, badKeys;
+		for (NTV2StringSetConstIter itKey(keys.begin());  itKey != keys.end();  ++itKey)
+		{
+			if (legalKeys.find(*itKey) == legalKeys.end())
+				badKeys.push_back(*itKey);
+			else
+				goodKeys.push_back(*itKey);
+		}
+		if (!badKeys.empty())
+			PLWARN("File '" << vdevFile << "': ignored " << DEC(badKeys.size()) << " unknown key(s): '" << aja::join(badKeys, "', '") << "'");
+		auto nameVal (vdevJson[kVDevJSON_Name]), urlspecVal (vdevJson[kVDevJSON_URLSpec]), disabledVal (vdevJson[kVDevJSON_Disabled]);
 		if (urlspecVal.is_null())
 			{PLFAIL("File '" << vdevFile << "': missing required 'urlspec' parameter");  continue;}
+		if (disabledVal.is_boolean())
+		{
+			NTV2_ASSERT(!disabledVal.is_null());
+			explicitlyDisabled = disabledVal.get<bool>();
+		}
+		else if (!disabledVal.is_null())
+			{PLFAIL("File '" << vdevFile << "': invalid 'disabled' value -- expected boolean 'true' or 'false' value");  continue;}
+		if (explicitlyDisabled)
+			{PLNOTE("File '" << vdevFile << "': explicitly 'disabled'");  continue;}
 		newVDev.vdevUrl = urlspecVal.get<std::string>();	//	done, we have the vdevUrl
-		if (!pluginVal.is_null())
-			PLWARN("File '" << vdevFile << "': 'plugin' parameter ignored");
-		if (!hostVal.is_null())
-			PLWARN("File '" << vdevFile << "': 'host' parameter ignored");
+		NTV2DeviceSpecParser parser (newVDev.vdevUrl);	//	Check it
 		if (!nameVal.is_null())
 			newVDev.vdevName = nameVal.get<std::string>();	//	Name specified in JSON file
 		{	//	URLencode & append these URL params:  &vdevfname=   &vdevfpath=    &vdevname=   &vdevbasename=
-			newVDev.vdevUrl += "&" kQParamVDevFolderPath "=" + ::PercentEncode(vdevPath);
+			newVDev.vdevUrl += parser.HasQueryParams() ? "&" : "?";
+			newVDev.vdevUrl += kQParamVDevFolderPath "=" + ::PercentEncode(vdevPath);
 			string fName (vdevFile);
 			fName.erase(fName.find(vdevPath), vdevPath.length()+1);		//	Remove everything up to file name
 			newVDev.vdevUrl += "&" kQParamVDevFileName "=" + ::PercentEncode(fName);	//	Remember file name
@@ -887,6 +914,7 @@ bool CNTV2DeviceScanner::GetVDevList (NTV2DeviceInfoList & outVDevList)
 		}
 
 		outVDevList.push_back(newVDev);
+		vdIndex++;	//	Now increment the device index number
 	}	//	for each vdev file found
 	return true;
 #endif	//	else NTV2_PREVENT_PLUGIN_LOAD
