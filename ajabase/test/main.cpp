@@ -704,7 +704,13 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 		args.push_back("-pix-fmt");
 		args.push_back("yuv10");
 		CHECK_EQ(parser.Parse(args), true);
-		CHECK_EQ(parser.UsageText().length(), 206);
+#if defined(AJA_MAC)
+	CHECK_EQ(parser.UsageText().length(), 228);
+#elif defined(AJA_LINUX)
+	CHECK_EQ(parser.UsageText().length(), 227);
+#elif defined(AJA_WINDOWS)
+	CHECK_EQ(parser.UsageText().length(), 218);
+#endif
 	}
 	TEST_CASE("AJACommandLineParser C++98 compliant")
 	{
