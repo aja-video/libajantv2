@@ -132,8 +132,8 @@ set(AJANTV2_HEADERS
     includes/ntv2fixed.h
     includes/ntv2formatdescriptor.h
     includes/ntv2konaflashprogram.h
-#   includes/ntv2m31enums.h				# removed in SDK 17.6
-#   includes/ntv2m31publicinterface.h	# removed in SDK 17.6
+    includes/ntv2m31enums.h				# deprecated in SDK 17.6
+    includes/ntv2m31publicinterface.h	# deprecated in SDK 17.6
     includes/ntv2mailbox.h
     includes/ntv2mbcontroller.h
     includes/ntv2mcsfile.h
