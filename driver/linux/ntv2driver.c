@@ -435,8 +435,20 @@ static struct pci_device_id pci_device_id_tab[] =
 	   0, 0,											// Class, class_mask
 	   0												// Opaque data
 	},
-	{  // KonaX
+	{  // KonaIP 25g
         NTV2_VENDOR_ID, NTV2_DEVICE_ID_KONAIP_25G,		// Vendor and device IDs
+	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
+	   0, 0,											// Class, class_mask
+	   0												// Opaque data
+	},
+	{  // CORVID88 Gen3
+	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_CORVID88_GEN3,	// Vendor and device IDs
+	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
+	   0, 0,											// Class, class_mask
+	   0												// Opaque data
+	},
+	{  // CORVID44 Gen3
+	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_CORVID44_GEN3,	// Vendor and device IDs
 	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
 	   0, 0,											// Class, class_mask
 	   0												// Opaque data
