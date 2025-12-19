@@ -50,34 +50,6 @@
 		}
 	}	//	NTV2DeviceCanDo292Out
 
-	bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0)
-	{
-		switch (index0)
-		{
-			case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut1);
-			case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut2);
-			case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut3);
-			case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut4);
-			case 4:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut5);
-			case 5:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut6);
-			case 6:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut7);
-			case 7:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut8);
-			default:	return false;
-		}
-	}	//	NTV2DeviceCanDo3GOut
-
-	bool NTV2DeviceCanDo12GOut (NTV2DeviceID boardID, UWord index0)
-	{
-		switch (index0)
-		{
-			case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut1);
-			case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut2);
-			case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut3);
-			case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut4);
-			default:	return false;
-		}
-	}	//	NTV2DeviceCanDo12GOut
-
 	bool NTV2DeviceCanDo292In (NTV2DeviceID boardID, UWord index0)
 	{
 		switch (index0)
@@ -87,34 +59,6 @@
 			default:	return false;
 		}
 	}	//	NTV2DeviceCanDo292In
-
-	bool NTV2DeviceCanDo3GIn (NTV2DeviceID boardID, UWord index0)
-	{
-		switch (index0)
-		{
-			case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn1);
-			case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn2);
-			case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn3);
-			case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn4);
-			case 4:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn5);
-			case 5:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn6);
-			case 6:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn7);
-			case 7:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn8);
-			default:	return false;
-		}
-	}	//	NTV2DeviceCanDo3GIn
-
-	bool NTV2DeviceCanDo12GIn (NTV2DeviceID boardID, UWord index0)
-	{
-		switch (index0)
-		{
-			case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn1);
-			case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn2);
-			case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn3);
-			case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn4);
-			default:	return false;
-		}
-	}	//	NTV2DeviceCanDo12GIn
 
 	bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0)
 	{
@@ -244,6 +188,63 @@
 			factor *= 16;
 		return factor;
 	}	//	Get8MBFrameSizeFactor
+#endif	//	!defined(NTV2_DEPRECATE_17_2)
+
+	bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0)
+	{
+		switch (index0)
+		{
+			case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut1);
+			case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut2);
+			case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut3);
+			case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut4);
+			case 4:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut5);
+			case 5:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut6);
+			case 6:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut7);
+			case 7:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut8);
+			default:	return false;
+		}
+	}	//	NTV2DeviceCanDo3GOut
+
+	bool NTV2DeviceCanDo12GOut (NTV2DeviceID boardID, UWord index0)
+	{
+		switch (index0)
+		{
+			case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut1);
+			case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut2);
+			case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut3);
+			case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut4);
+			default:	return false;
+		}
+	}	//	NTV2DeviceCanDo12GOut
+
+	bool NTV2DeviceCanDo3GIn (NTV2DeviceID boardID, UWord index0)
+	{
+		switch (index0)
+		{
+			case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn1);
+			case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn2);
+			case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn3);
+			case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn4);
+			case 4:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn5);
+			case 5:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn6);
+			case 6:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn7);
+			case 7:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn8);
+			default:	return false;
+		}
+	}	//	NTV2DeviceCanDo3GIn
+
+	bool NTV2DeviceCanDo12GIn (NTV2DeviceID boardID, UWord index0)
+	{
+		switch (index0)
+		{
+			case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn1);
+			case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn2);
+			case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn3);
+			case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn4);
+			default:	return false;
+		}
+	}	//	NTV2DeviceCanDo12GIn
 
 
 	// Overloading not supported by the ANSI C compiler used for Linux drivers.
@@ -320,7 +321,6 @@
 		return (NTV2DeviceGetNumberFrameBuffers_Ex(boardID)-2);
 	}
 	#endif		// #if defined(__CPLUSPLUS__) || defined(__cplusplus)
-
 
 	ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID id, NTV2FrameGeometry fg, NTV2FrameBufferFormat fbf)
 	{
@@ -412,6 +412,8 @@
             case DEVICE_ID_KONAIP_25G:
 			case DEVICE_ID_IP25_R:
 			case DEVICE_ID_IP25_T:
+			case DEVICE_ID_CORVID44_GEN3:
+			case DEVICE_ID_CORVID88_GEN3:
 				switch (fg)
 				{
 				case NTV2_FG_4x3840x2160:
@@ -583,6 +585,8 @@
 			case DEVICE_ID_TTAP_PRO:
 			case DEVICE_ID_KONAX:
             case DEVICE_ID_KONAIP_25G:
+			case DEVICE_ID_CORVID44_GEN3:
+			case DEVICE_ID_CORVID88_GEN3:
 			case DEVICE_ID_IP25_R:
 			case DEVICE_ID_IP25_T:
 				switch (fg)
@@ -627,7 +631,6 @@
 		return divisor  ?  NTV2DeviceGetNumberFrameBuffers_Ex(id) / divisor  :  0;
 		#endif
 	}   //  NTV2DeviceGetNumberFrameBuffers
-#endif	//	!defined(NTV2_DEPRECATE_17_2)
 
 ULWord NTV2DeviceGetNumberVideoFrameBuffers (NTV2DeviceID inDeviceID, NTV2FrameGeometry inFrameGeometry, NTV2Framesize inFrameSize)
 {

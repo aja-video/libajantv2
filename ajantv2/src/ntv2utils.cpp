@@ -4614,11 +4614,13 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_CORVID24:				return inForRetailDisplay ? "Corvid 24"					: "Corvid24";
 		case DEVICE_ID_CORVID3G:				return inForRetailDisplay ? "Corvid 3G"					: "Corvid3G";
 		case DEVICE_ID_CORVID44:				return inForRetailDisplay ? "Corvid 44"					: "Corvid44";
+		case DEVICE_ID_CORVID44_GEN3:			return inForRetailDisplay ? "Corvid 44 Gen3"			: "Corvid-44-Gen3";
 		case DEVICE_ID_CORVID44_2X4K:			return inForRetailDisplay ? "Corvid 44 12G 2x4K"		: "Corvid44-12G-2x4K";
 		case DEVICE_ID_CORVID44_8K:				return inForRetailDisplay ? "Corvid 44 12G 8K"			: "Corvid44-12G-8K";
 		case DEVICE_ID_CORVID44_8KMK:			return inForRetailDisplay ? "Corvid 44 12G 8KMK"		: "Corvid44-12G-8KMK";
 		case DEVICE_ID_CORVID44_PLNR:			return inForRetailDisplay ? "Corvid 44 12G PLNR"		: "Corvid44-12G-PLNR";
 		case DEVICE_ID_CORVID88:				return inForRetailDisplay ? "Corvid 88"					: "Corvid88";
+		case DEVICE_ID_CORVID88_GEN3:			return inForRetailDisplay ? "Corvid 88 Gen3"			: "Corvid-88-Gen3";
 		case DEVICE_ID_CORVIDHBR:				return inForRetailDisplay ? "Corvid HB-R"				: "CorvidHBR";
 		case DEVICE_ID_CORVIDHEVC:				return inForRetailDisplay ? "Corvid HEVC"				: "CorvidHEVC";
 		case DEVICE_ID_IO4K:					return "Io4K";
@@ -7632,6 +7634,8 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 	case DEVICE_ID_IOX3:						return "iox3.bit";
 	case DEVICE_ID_KONAX:						return "konax.bit";
 	case DEVICE_ID_KONAXM:						return "konaxm.bit";
+	case DEVICE_ID_CORVID44_GEN3:				return "corvid44gen3.bit";
+	case DEVICE_ID_CORVID88_GEN3:				return "corvid88gen3.bit";
 	default:									return "";
 	}
 	return "";
@@ -7732,7 +7736,9 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_CORVID44_8KMK,
 														DEVICE_ID_CORVID44_PLNR,
 														DEVICE_ID_CORVID44,
+														DEVICE_ID_CORVID44_GEN3,
 														DEVICE_ID_CORVID88,
+														DEVICE_ID_CORVID88_GEN3,
 														DEVICE_ID_CORVIDHBR,
 														DEVICE_ID_CORVIDHEVC,
 														DEVICE_ID_IO4K,

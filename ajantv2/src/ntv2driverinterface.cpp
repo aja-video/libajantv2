@@ -93,8 +93,10 @@ CNTV2DriverInterface::CNTV2DriverInterface ()
 		,_pCh1FrameBaseAddress			(AJA_NULL)
 		,_pCh2FrameBaseAddress			(AJA_NULL)
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
+#if !defined(NTV2_DEPRECATE_17_2)
 		,_ulNumFrameBuffers				(0)
 		,_ulFrameBufferSize				(0)
+#endif//!defined(NTV2_DEPRECATE_17_2)
 #if !defined(NTV2_DEPRECATE_16_0)
 		,_pciSlot						(0)			//	DEPRECATE!
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
@@ -138,12 +140,17 @@ bool CNTV2DriverInterface::Open (const UWord inDeviceIndex)
 	if (!OpenLocalPhysical(inDeviceIndex))
 	{
 		//	Check for virtual device...
+		static ULWord sRecursionCheck(0), RECURSION_LIMIT(32);
 		NTV2DeviceInfo info;
 		if (!CNTV2DeviceScanner::GetDeviceInfo (inDeviceIndex, info))
 			return false;
+		sRecursionCheck++;	//	increment
+		if (sRecursionCheck > RECURSION_LIMIT)
+			{DIFAIL("Failed: " << DEC(RECURSION_LIMIT) << " '.vdev' bounces -- limit exceeded"); return false;}
 		if (!Open(info.vdevUrl))
-			return false;	//	Open vdev urlSpec failed
+			{sRecursionCheck--;  return false;}	//	Open vdev urlSpec failed
 		setDeviceIndexNumber(UWord(info.deviceIndex));	//	Patch _boardNumber
+		sRecursionCheck--;	//	decrement
 		return true;
 	}	//	if OpenLocalPhysical failed
 
@@ -712,6 +719,8 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
         case DEVICE_ID_KONAIP_25G:					bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_25G;					break;
     case DEVICE_ID_IP25_T:
 		case DEVICE_ID_IP25_R:						bitFileInfo.bitFileType = NTV2_BITFILE_TYPE_INVALID;				break;
+		case DEVICE_ID_CORVID44_GEN3:				bitFileInfo.bitFileType = NTV2_BITFILE_CORVID44_GEN3;				break;
+		case DEVICE_ID_CORVID88_GEN3:				bitFileInfo.bitFileType = NTV2_BITFILE_CORVID44_GEN3;				break;
 		case DEVICE_ID_SOFTWARE:
 		case DEVICE_ID_NOTFOUND:					bitFileInfo.bitFileType = NTV2_BITFILE_TYPE_INVALID;				break;
 	#if !defined (_DEBUG)
@@ -943,8 +952,10 @@ void CNTV2DriverInterface::FinishOpen (void)
 	ReadRegister (kRegCh1Control, val1, kRegMaskFrameFormat, kRegShiftFrameFormat); //	Read PixelFormat
 	ReadRegister (kRegCh1Control, val2, kRegMaskFrameFormatHiBit, kRegShiftFrameFormatHiBit);
 	NTV2PixelFormat pf(NTV2PixelFormat((val1 & 0x0F) | ((val2 & 0x1) << 4)));
+#if !defined(NTV2_DEPRECATE_17_2)
 	_ulFrameBufferSize = ::NTV2DeviceGetFrameBufferSize(_boardID, fg, pf);
 	_ulNumFrameBuffers = ::NTV2DeviceGetNumberFrameBuffers(_boardID, fg, pf);
+#endif//!defined(NTV2_DEPRECATE_17_2)
 
 	ULWord returnVal1 = false;
 	ULWord returnVal2 = false;

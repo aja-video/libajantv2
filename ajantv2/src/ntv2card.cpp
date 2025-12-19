@@ -33,6 +33,7 @@ CNTV2Card::CNTV2Card (const UWord inDeviceIndex, const string & inHostName)
 	bool openOK = hostName.empty()	?  CNTV2DriverInterface::Open(inDeviceIndex) :	CNTV2DriverInterface::Open(hostName);
 	if (openOK)
 	{
+#if !defined(NTV2_DEPRECATE_17_2)
 		if (IsBufferSizeSetBySW())
 		{
 			NTV2Framesize fbSize;
@@ -50,6 +51,7 @@ CNTV2Card::CNTV2Card (const UWord inDeviceIndex, const string & inHostName)
 			_ulFrameBufferSize = ::NTV2DeviceGetFrameBufferSize (GetDeviceID (), fg, format);
 			_ulNumFrameBuffers = ::NTV2DeviceGetNumberFrameBuffers (GetDeviceID (), fg, format);
 		}
+#endif//!defined(NTV2_DEPRECATE_17_2)
 	}
 }
 

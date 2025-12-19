@@ -389,7 +389,7 @@ bool NTV2StreamGrabber::SetupInput (void)
 		const NTV2FormatDescriptor fd(mCurrentVideoFormat, mFrameBufferFormat, vm);
 		mFrameDimensions.set (fd.GetRasterWidth(), fd.GetRasterHeight());
 		const QString vfString (::NTV2VideoFormatToString (mCurrentVideoFormat).c_str ());
-		qDebug() << "## DEBUG:  mInputSource=" << mChannel << ", mCurrentVideoFormat=" << vfString << ", width=" << mFrameDimensions.Width() << ", height=" << mFrameDimensions.Height();
+		qDebug() << "## DEBUG:  mInputSource=" << mChannel << ", mCurrentVideoFormat=" << vfString << ", width=" << mFrameDimensions.width() << ", height=" << mFrameDimensions.height();
 
  		mFormatIsProgressive = IsProgressivePicture (mCurrentVideoFormat);
         if (!mbFixedReference)

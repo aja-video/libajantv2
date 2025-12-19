@@ -93,7 +93,7 @@ MasterPort::MasterPort ()
 
 MasterPort::~MasterPort ()
 {
-	cerr << *this << " destructor" << endl;
+//	cerr << *this << " destructor" << endl;
 	if (mpMasterPort)
 		IONotificationPortDestroy (mpMasterPort);
 	mpMasterPort = NULL;
@@ -107,10 +107,10 @@ MasterPort::~MasterPort ()
 class MasterPortDestroyer
 {
 	public:
-		explicit inline MasterPortDestroyer ()		{cerr << "MasterPortDestroyer is armed" << endl;}
+		explicit inline MasterPortDestroyer ()		{}	//{cerr << "MasterPortDestroyer is armed" << endl;}
 		virtual inline ~MasterPortDestroyer ()
 		{
-			cerr << "MasterPortDestroyer triggered" << endl;
+			//cerr << "MasterPortDestroyer triggered" << endl;
 			gMasterPort = NULL;
 		}	//	destructor
 

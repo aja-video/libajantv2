@@ -322,6 +322,26 @@ void NTV2DeviceSpecParser::Parse (void)
 		isIndexNum = ParseDecNumber(posIndexNum, tokIndexNum);
 		isDeviceID = ParseDeviceID(posDevID, tokDevID);
 		isModelName = ParseModelName(posModelName, tokModelName);
+		//	Check for query...
+		size_t posQuery(0);
+		if (isDeviceID) posQuery = posDevID;
+		else if (isSerial) posQuery = posSerial;
+		else if (isModelName) posQuery = posModelName;
+		else if (isIndexNum) posQuery = posIndexNum;
+		if (posQuery)
+		{
+			NTV2Dictionary params;
+			if (ParseQuery(posQuery, params))
+			{
+				mResult.insert(kConnectParamQuery, DeviceSpec().substr(mPos, posQuery-mPos+1));
+				mQueryParams = params;
+				mPos = posQuery;
+				if (isDeviceID) posDevID = mPos;
+				else if (isSerial) posSerial = mPos;
+				else if (isModelName) posModelName = mPos;
+				else if (isIndexNum) posIndexNum = mPos;
+			}
+		}
 	}
 	do
 	{
