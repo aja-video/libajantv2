@@ -1,5 +1,15 @@
 project(ajantv2)
 
+# Turn this option to ON if want to generate framework
+option(AJANTV2_BUILD_FRAMEWORK "Build libajantv2 as a macOS Framework?" OFF)
+
+if(AJANTV2_BUILD_FRAMEWORK)
+    if(APPLE)
+        # This forces your existing AJANTV2_BUILD_SHARED option to be ON due to framework is SHARED
+        set(AJANTV2_BUILD_SHARED ON CACHE BOOL "Framework build requires shared libs" FORCE)
+    endif()
+endif()
+
 include(CMakePackageConfigHelpers)
 include(ExternalProject)
 
@@ -456,7 +466,42 @@ set(AJABASE_SYS_BM_SOURCES
     ../ajabase/system/bm/lockimpl.cpp
     ../ajabase/system/bm/processimpl.cpp
     ../ajabase/system/bm/threadimpl.cpp)
-
+set(AJADEXT_HEADERS
+    ../driver/ntv2anc.h
+    ../driver/ntv2audio.h
+    ../driver/ntv2autocirc.h
+    ../driver/ntv2autofunc.h
+    ../driver/ntv2aux.h
+    ../driver/ntv2commonreg.h
+    ../driver/ntv2displayid.h
+    ../driver/ntv2gen2regs_8a34045.h
+    ../driver/ntv2gen2regs_rc32012a.h
+    ../driver/ntv2gen2regs.h
+    ../driver/ntv2genlock.h
+    ../driver/ntv2genlock2.h
+    ../driver/ntv2genregs.h
+    ../driver/ntv2hdmiedid.h
+    ../driver/ntv2hdmiin.h
+    ../driver/ntv2hdmiin4.h
+    ../driver/ntv2hdmiout4.h
+    ../driver/ntv2hin4reg.h
+    ../driver/ntv2hinreg.h
+    ../driver/ntv2hout4reg.h
+    ../driver/ntv2infoframe.h
+    ../driver/ntv2kona.h
+    ../driver/ntv2mailbox.h
+    ../driver/ntv2mcap.h
+    ../driver/ntv2pciconfig.h
+    ../driver/ntv2rp188.h
+    ../driver/ntv2setup.h
+    ../driver/ntv2stream.h
+    ../driver/ntv2system.h
+    ../driver/ntv2video.h
+    ../driver/ntv2videoraster.h
+    ../driver/ntv2videorasterreg.h
+    ../driver/ntv2vpid.h
+    ../driver/ntv2xpt.h
+    ../driver/ntv2xptlookup.h)
 set(AJABASE_HEADERS
     ${AJABASE_COMMON_HEADERS}
     ${AJABASE_NETWORK_HEADERS}
@@ -649,6 +694,77 @@ if (NOT TARGET ${PROJECT_NAME})
             ${AJANTV2_TARGET_COMPILE_DEFS})
 
         set_target_properties(${PROJECT_NAME} PROPERTIES VERSION "${AJA_NTV2_VER_STR}")
+          if(AJANTV2_BUILD_FRAMEWORK AND APPLE)
+            function(_put_headers SUBFOLDER)
+              # Remaining args are header paths
+              foreach(h IN LISTS ARGN)
+                # Make sure the file is part of the target's sources…
+                target_sources(${PROJECT_NAME} PRIVATE "${h}")
+                # …and tell Xcode/cmake where to place it inside the bundle
+                set_source_files_properties("${h}"
+                  PROPERTIES MACOSX_PACKAGE_LOCATION "Headers/${SUBFOLDER}")
+              endforeach()
+            endfunction()
+
+              set(NTV2_VERSION_H_GENERATED "${CMAKE_CURRENT_BINARY_DIR}/includes/ntv2version.h")
+
+              set(FRAMEWORK_PUBLIC_HEADERS
+                  ${AJABASE_COMMON_HEADERS}
+                  ${AJABASE_NETWORK_HEADERS}
+                  ${AJABASE_PERSISTENCE_HEADERS}
+                  ${AJABASE_PNP_HEADERS}
+                  ${AJABASE_PNP_MAC_HEADERS}
+                  ${AJABASE_SYS_HEADERS}
+                  ${AJABASE_SYS_MAC_HEADERS}
+                  ${AJAANC_HEADERS}
+                  ${AJADEXT_HEADERS}
+                  ${AJANTV2_HEADERS}
+                  ${AJANTV2_MAC_HEADERS}
+                  ${AJANTV2_UTILITY_PUBLIC_HEADERS}
+                  ${NTV2_VERSION_H_GENERATED}
+              )
+
+              # force the build system to ensure the file exists
+              target_sources(${PROJECT_NAME} PRIVATE "${NTV2_VERSION_H_GENERATED}")
+
+              set(_AJANTV2_VER "1.0.0")
+              if(EXISTS "${AJANTV2_VERSION_FILENAME}")
+                  file(READ "${AJANTV2_VERSION_FILENAME}" _verTxt)
+                  string(REGEX MATCH "([0-9]+\\.[0-9]+(\\.[0-9]+)?)" _m "${_verTxt}")
+                  if(_m)
+                    set(_AJANTV2_VER "${CMAKE_MATCH_1}")
+                  endif()
+              endif()
+
+              # Set the properties to build 'ajantv2' as a framework
+              set_target_properties(${PROJECT_NAME} PROPERTIES
+                  FRAMEWORK TRUE
+                  XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Development"
+                  XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "9VB857J7CD"
+                  XCODE_ATTRIBUTE_CODE_SIGN_STYLE "Automatic"
+                  XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED "YES"
+                  INSTALL_NAME_DIR "@rpath"
+                  MACOSX_FRAMEWORK_IDENTIFIER com.aja.osx.framework.ajantv2
+                  FRAMEWORK_VERSION A
+                  MACOSX_FRAMEWORK_SHORT_VERSION_STRING "${_AJANTV2_VER}"
+                  MACOSX_FRAMEWORK_BUNDLE_VERSION "${_AJANTV2_VER}"
+              )
+              _put_headers("ajabase/common"      ${AJABASE_COMMON_HEADERS})
+              _put_headers("ajabase/network"     ${AJABASE_NETWORK_HEADERS})
+              _put_headers("ajabase/persistence" ${AJABASE_PERSISTENCE_HEADERS})
+              _put_headers("ajabase/pnp"         ${AJABASE_PNP_HEADERS})
+              _put_headers("ajabase/pnp/mac"     ${AJABASE_PNP_MAC_HEADERS})
+              _put_headers("ajabase/system"      ${AJABASE_SYS_HEADERS})
+              _put_headers("ajabase/system/mac"  ${AJABASE_SYS_MAC_HEADERS})
+
+              _put_headers("ajaanc/includes"     ${AJAANC_HEADERS})
+	      _put_headers("driver"              ${AJADEXT_HEADERS})
+
+              _put_headers("./"                  ${AJANTV2_HEADERS})
+              _put_headers("./"                  ${AJANTV2_MAC_HEADERS})
+              _put_headers("./"                  ${NTV2_VERSION_H_GENERATED})
+          endif()
+
         if (AJA_CODE_SIGN)
             aja_code_sign(${PROJECT_NAME})
         endif()
