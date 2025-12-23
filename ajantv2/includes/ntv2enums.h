@@ -79,6 +79,7 @@ typedef enum
 	DEVICE_ID_KONALHIDVI				= 0x10266401,	///< @brief See \ref konalhi
 	DEVICE_ID_KONAX						= 0X10958501,	///< @brief See \ref konax
 	DEVICE_ID_KONAXM					= 0X10958500,	///< @brief See \ref konaxm
+	DEVICE_ID_KONAX_4CH                 = 0x10958511,   ///< @brief See \ref konax
 	DEVICE_ID_SOFTWARE					= 0x534F4654,	///< @brief Software device that doesn't emulate one of the above devices
 	DEVICE_ID_SOJI_3DLUT				= 0x10922400,
     DEVICE_ID_SOJI_DIAGS                = 0x10922499,
@@ -141,8 +142,9 @@ typedef enum
         (__d__) == DEVICE_ID_IOIP_2110_RGB12)
 
 #define DEVICE_IS_KONAX(__d__)                                  \
-    (   (__d__) == DEVICE_ID_KONAXM ||       					\
-        (__d__) == DEVICE_ID_KONAX)
+    (   (__d__) == DEVICE_ID_KONAXM     ||       				\
+        (__d__) == DEVICE_ID_KONAX      ||                      \
+		(__d__) == DEVICE_ID_KONAX_4CH)
 
 #define NTV2_DEVICE_SUPPORTS_SMPTE2110(__d__)	(		(__d__) == DEVICE_ID_KONAIP_2110			\
 													||	(__d__) == DEVICE_ID_KONAIP_2110_RGB12		\
@@ -3437,6 +3439,7 @@ typedef enum
     NTV2_BITFILE_KONAIP_25G			= 93,
 	NTV2_BITFILE_CORVID44_GEN3		= 94,
 	NTV2_BITFILE_CORVID88_GEN3		= 95,
+	NTV2_BITFILE_KONAX_4CH          = 96,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
 
