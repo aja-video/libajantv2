@@ -24,8 +24,10 @@ const char * NTV2DeviceIDString (const NTV2DeviceID id)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_CORVID44_2X4K)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_CORVID44_8K)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_CORVID44_8KMK)
+		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_CORVID44_GEN3)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_CORVID44_PLNR)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_CORVID88)
+		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_CORVID88_GEN3)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_CORVIDHBR)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_CORVIDHEVC)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_IO4K)
@@ -91,7 +93,7 @@ const char * NTV2DeviceIDString (const NTV2DeviceID id)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_NOTFOUND)
 	}
 	return "";
-}
+}	//	NTV2DeviceIDString
 
 
 const char * NTV2DeviceString (const NTV2DeviceID id)
@@ -107,7 +109,9 @@ const char * NTV2DeviceString (const NTV2DeviceID id)
 		case DEVICE_ID_CORVID44_8KMK:				return "Corvid44_8KMK";
 		case DEVICE_ID_CORVID44_PLNR:				return "Corvid44_PLNR";
 		case DEVICE_ID_CORVID44:					return "Corvid44";
+		case DEVICE_ID_CORVID44_GEN3:				return "Corvid44Gen3";
 		case DEVICE_ID_CORVID88:					return "Corvid88";
+		case DEVICE_ID_CORVID88_GEN3:				return "Corvid88Gen3";
 		case DEVICE_ID_CORVIDHBR:					return "CorvidHBR";
 		case DEVICE_ID_CORVIDHEVC:					return "CorvidHEVC";
 		case DEVICE_ID_IO4K:						return "Io4K";
@@ -171,10 +175,9 @@ const char * NTV2DeviceString (const NTV2DeviceID id)
 		case DEVICE_ID_IP25_R:						return "IP25-R";
 		case DEVICE_ID_IP25_T:						return "IP25-T";
 		case DEVICE_ID_NOTFOUND:					return "Unknown";
-	}
-
+	}	//	switch
 	return "";
-}
+}	//	NTV2DeviceString
 
 
 const char * NTV2StandardString (NTV2Standard std)
