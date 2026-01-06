@@ -107,6 +107,7 @@ endif
 AJANTV2INCS = $(A_LIB_NTV2_INC)/ajaexport.h \
 			$(A_LIB_NTV2_INC)/ajatypes.h \
 			$(A_LIB_NTV2_INC)/ntv2audiodefines.h \
+			$(A_LIB_NTV2_INC)/ntv2deprecate.h \
 			$(A_LIB_NTV2_INC)/ntv2devicefeatures.h \
 			$(A_LIB_NTV2_INC)/ntv2devicefeatures.hh \
 			$(A_LIB_NTV2_INC)/ntv2driverprocamp.h \

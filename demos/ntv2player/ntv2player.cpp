@@ -13,9 +13,6 @@
 #include "ajabase/common/timebase.h"
 #include "ajabase/system/process.h"
 #include "ajabase/system/file_io.h"
-#include "ajaanc/includes/ancillarydata_hdr_sdr.h"
-#include "ajaanc/includes/ancillarydata_hdr_hdr10.h"
-#include "ajaanc/includes/ancillarydata_hdr_hlg.h"
 #include <fstream>	//	For ifstream
 
 using namespace std;
@@ -501,7 +498,6 @@ void NTV2Player::ConsumeFrames (void)
 	ULWord					acOptions (AUTOCIRCULATE_WITH_RP188);
 	AUTOCIRCULATE_TRANSFER	outputXfer;
 	AUTOCIRCULATE_STATUS	outputStatus;
-	AJAAncillaryData *		pPkt (AJA_NULL);
 	ULWord					goodXfers(0), badXfers(0), starves(0), noRoomWaits(0);
 	ifstream *				pAncStrm (AJA_NULL);
 
@@ -510,20 +506,7 @@ void NTV2Player::ConsumeFrames (void)
 	mDevice.WaitForOutputVerticalInterrupt(mConfig.fOutputChannel, 4);	//	Let it stop
 	PLNOTE("Thread started");
 
-	if (pPkt)
-	{	//	Allocate page-aligned host Anc buffer...
-		uint32_t hdrPktSize	(0);
-		if (!outputXfer.acANCBuffer.Allocate(gAncMaxSizeBytes, BUFFER_PAGE_ALIGNED)  ||  !outputXfer.acANCBuffer.Fill(0LL))
-			PLWARN("Anc buffer " << xHEX0N(gAncMaxSizeBytes,8) << "(" << DEC(gAncMaxSizeBytes) << ")-byte allocate failed -- HDR anc insertion disabled");
-		else if (AJA_FAILURE(pPkt->GenerateTransmitData (outputXfer.acANCBuffer, outputXfer.acANCBuffer,  hdrPktSize)))
-		{
-			PLWARN("HDR anc insertion disabled -- GenerateTransmitData failed");
-			outputXfer.acANCBuffer.Deallocate();
-		}
-		else
-			acOptions |= AUTOCIRCULATE_WITH_ANC;
-	}
-	else if (!mConfig.fAncDataFilePath.empty())
+	if (!mConfig.fAncDataFilePath.empty())
 	{	//	Open raw anc file for reading...
 		pAncStrm = new ifstream(mConfig.fAncDataFilePath.c_str(), ios::binary);
 		do
