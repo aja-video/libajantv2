@@ -71,14 +71,14 @@ typedef enum
 	DEVICE_ID_KONAIP_2022				= 0x10646700,	///< @brief See \ref konaip
 	DEVICE_ID_KONAIP_2110				= 0x10646706,	///< @brief See \ref konaip
 	DEVICE_ID_KONAIP_2110_RGB12			= 0x10646707,	///< @brief See \ref konaip
-    DEVICE_ID_KONAIP_25G				= 0X11001400,	///< @brief See \ref konaip25g
+    DEVICE_ID_KONAIP_25G				= 0x11001400,	///< @brief See \ref konaip25g
 	DEVICE_ID_KONAIP_2TX_1SFP_J2K		= 0x10646703,	///< @brief See \ref konaip
 	DEVICE_ID_KONAIP_4CH_2SFP			= 0x10646701,	///< @brief See \ref konaip
 	DEVICE_ID_KONALHEPLUS				= 0x10352300,	///< @brief See \ref konalheplus
 	DEVICE_ID_KONALHI					= 0x10266400,	///< @brief See \ref konalhi
 	DEVICE_ID_KONALHIDVI				= 0x10266401,	///< @brief See \ref konalhi
-	DEVICE_ID_KONAX						= 0X10958501,	///< @brief See \ref konax
-	DEVICE_ID_KONAXM					= 0X10958500,	///< @brief See \ref konaxm
+	DEVICE_ID_KONAX						= 0x10958501,	///< @brief See \ref konax
+	DEVICE_ID_KONAXM					= 0x10958500,	///< @brief See \ref konaxm
 	DEVICE_ID_SOFTWARE					= 0x534F4654,	///< @brief Software device that doesn't emulate one of the above devices
 	DEVICE_ID_SOJI_3DLUT				= 0x10922400,
     DEVICE_ID_SOJI_DIAGS                = 0x10922499,
