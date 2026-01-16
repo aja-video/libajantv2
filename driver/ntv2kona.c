@@ -222,7 +222,7 @@ bool StartDriverProcesses(Ntv2DriverProcessContext* inProcessContext)
 	
 	#ifdef AJA_RASTERIZER
         if ((deviceID == DEVICE_ID_KONAXM)	||
-            (deviceID == DEVICE_ID_KONAX) . ||
+            (deviceID == DEVICE_ID_KONAX)   ||
             (deviceID == DEVICE_ID_KONAIP_25G))
 		{
 			ntv2Message("Starting Raster Monitor\n");
