@@ -523,6 +523,7 @@ string CNTV2Bitfile::GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID
 		case DEVICE_ID_KONALHIDVI:				break;
 		case DEVICE_ID_KONAX:					return "konax";
 		case DEVICE_ID_KONAXM:					return "konaxm";
+		case DEVICE_ID_KONAX_4CH:               return "konax_4ch";
 		case DEVICE_ID_SOJI_3DLUT:				return "soji_3dlut";
 		case DEVICE_ID_SOJI_OE1:				return "soji_oe_cfg1";
 		case DEVICE_ID_SOJI_OE2:				return "soji_oe_cfg2";
@@ -651,8 +652,10 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_SOJI_3DLUT).append("_tprom");
 
 		case DEVICE_ID_KONAX:
-		case DEVICE_ID_KONAXM:			return GetPrimaryHardwareDesignName (DEVICE_ID_KONAX) == designName
-											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_KONAXM);
+		case DEVICE_ID_KONAXM:
+		case DEVICE_ID_KONAX_4CH:			return GetPrimaryHardwareDesignName (DEVICE_ID_KONAX) == designName
+											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_KONAXM)
+											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_KONAX_4CH);
 
 		case DEVICE_ID_CORVID44_8KMK:
 		case DEVICE_ID_CORVID44_8K:

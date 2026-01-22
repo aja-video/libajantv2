@@ -4670,6 +4670,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONALHIDVI:				return inForRetailDisplay ? "KONA LHi DVI"				: "KonaLHiDVI";
 		case DEVICE_ID_KONAX:					return inForRetailDisplay ? "KONA X"					: "KonaX";
 		case DEVICE_ID_KONAXM:					return inForRetailDisplay ? "KONA XM"					: "KonaXM";
+		case DEVICE_ID_KONAX_4CH:               return inForRetailDisplay ? "KONA X 4CH"                : "KonaX_4CH";
 		case DEVICE_ID_KONAIP_25G:				return "KonaIP 25G";
 		case DEVICE_ID_SOJI_3DLUT:				return "SOJI-3DLUT";
 		case DEVICE_ID_SOJI_DIAGS:				return "SOJI-DIAGS";
@@ -7634,6 +7635,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 	case DEVICE_ID_IOX3:						return "iox3.bit";
 	case DEVICE_ID_KONAX:						return "konax.bit";
 	case DEVICE_ID_KONAXM:						return "konaxm.bit";
+	case DEVICE_ID_KONAX_4CH:                   return "konax_4ch.bit";
 	case DEVICE_ID_CORVID44_GEN3:				return "corvid44gen3.bit";
 	case DEVICE_ID_CORVID88_GEN3:				return "corvid88gen3.bit";
 	default:									return "";
@@ -7787,6 +7789,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_KONALHIDVI,
 														DEVICE_ID_KONAX,
 														DEVICE_ID_KONAXM,
+														DEVICE_ID_KONAX_4CH,
 														DEVICE_ID_SOFTWARE,
 														DEVICE_ID_SOJI_OE1,
 														DEVICE_ID_SOJI_OE2,
@@ -7995,6 +7998,7 @@ string NTV2BitfileTypeToString (const NTV2BitfileType inValue, const bool inComp
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"IoIP 2110 RGB12",			NTV2_BITFILE_IOIP_2110_RGB12);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaX",					NTV2_BITFILE_KONAX);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaXM",					NTV2_BITFILE_KONAXM);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaX_4Ch",				NTV2_BITFILE_KONAX_4CH);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"(Invalid)",				NTV2_BITFILE_TYPE_INVALID);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"(Illegal)",				NTV2_BITFILE_NUMBITFILETYPES);
 	}

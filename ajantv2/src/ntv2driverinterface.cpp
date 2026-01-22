@@ -716,6 +716,7 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 		case DEVICE_ID_IOX3:						bitFileInfo.bitFileType = NTV2_BITFILE_IOX3_MAIN;					break;
 		case DEVICE_ID_KONAX:						bitFileInfo.bitFileType = NTV2_BITFILE_KONAX;						break;
 		case DEVICE_ID_KONAXM:						bitFileInfo.bitFileType = NTV2_BITFILE_KONAXM;						break;
+		case DEVICE_ID_KONAX_4CH:                   bitFileInfo.bitFileType = NTV2_BITFILE_KONAX_4CH;                   break;
         case DEVICE_ID_KONAIP_25G:					bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_25G;					break;
     case DEVICE_ID_IP25_T:
 		case DEVICE_ID_IP25_R:						bitFileInfo.bitFileType = NTV2_BITFILE_TYPE_INVALID;				break;
@@ -1688,7 +1689,8 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 																|| devID == DEVICE_ID_KONA5_8K			|| devID == DEVICE_ID_KONA5_3DLUT
 																|| devID == DEVICE_ID_KONA5_8K_MV_TX	|| devID == DEVICE_ID_CORVID44_8KMK
 																|| devID == DEVICE_ID_CORVID44_8K		|| devID == DEVICE_ID_CORVID44_2X4K
-																|| devID == DEVICE_ID_CORVID44_PLNR		|| devID == DEVICE_ID_KONAX;
+																|| devID == DEVICE_ID_CORVID44_PLNR		|| devID == DEVICE_ID_KONAX
+																|| devID == DEVICE_ID_KONAX_4CH;
 													break;
 
 		case kDeviceCanDoDSKOpacity:				outValue = ::NTV2DeviceCanDoDSKOpacity(devID);						break;	//	Deprecate?
