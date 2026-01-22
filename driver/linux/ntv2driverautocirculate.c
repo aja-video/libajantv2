@@ -6422,6 +6422,11 @@ GetAudioRate(ULWord deviceNumber, NTV2AudioSystem audioSystem)
 	ULWord		rateLow;
 	ULWord		rateHigh;
 
+    if (audioSystem > NTV2_AUDIOSYSTEM_8)
+    {
+        audioSystem = NTV2_AUDIOSYSTEM_1;
+    }
+    
 	control = GetAudioControlRegister(deviceNumber, audioSystem);
 	rateLow = ReadRegister(deviceNumber, control, kRegMaskAudioRate, kRegShiftAudioRate);
 	if (rateLow == 1)

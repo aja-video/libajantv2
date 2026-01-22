@@ -2252,7 +2252,7 @@ private:
 			for (unsigned ch(0);  ch < 3;  ch++)
 				oss << "Ch " << DEC(2*(ch+2)) << " 1080p50/p60 Link-B Mode: " << EnabDisab(inRegValue & BLinkModes[ch]) << endl;
 			for (unsigned ch(0);  ch < 4;  ch++)
-				oss << "Ch " << DEC(ch+1) << "/" << DEC(ch+2) << " 2SI Mode: " << EnabDisab(inRegValue & k425Masks[ch]) << endl;
+				oss << "Ch " << DEC(ch*2+1) << "/" << DEC(ch*2+2) << " 2SI Mode: " << EnabDisab(inRegValue & k425Masks[ch]) << endl;
 			oss << "2SI Min Align Delay 1-4: "	<< EnabDisab(inRegValue & BIT(24))			<< endl
 				<< "2SI Min Align Delay 5-8: "	<< EnabDisab(inRegValue & BIT(25));
 			return oss.str();
@@ -4565,7 +4565,7 @@ private:
 		{	(void) inRegNum;
 			ostringstream	oss;
 			if (::NTV2DeviceCanDoBreakoutBoard(inDeviceID))
-				oss << "BOB : "							<< ((inRegValue & kRegMaskBOBAbsent) ? "Disconnected" : "Connected")			<< endl
+				oss << "Break Out Board: "				<< ((inRegValue & kRegMaskBOBAbsent) ? "Disconnected" : "Connected")			<< endl
 					<< "ADAV801 Initialization: "		<< ((inRegValue & kRegMaskBOBADAV801UpdateStatus) ? "Complete" : "In Progress") << endl
 					<< "ADAV801 DIR Locked(Debug): "	<< DEC(inRegValue & kRegMaskBOBADAV801DIRLocked);
 			else

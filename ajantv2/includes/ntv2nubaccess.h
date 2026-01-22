@@ -38,6 +38,19 @@ typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter
 #define	kQParamShowParams		"showparams"	///< @brief	Query parameter option that dumps parameters into message log
 #define	kQParamDebugRegistry	"debugregistry"	///< @brief	Query parameter option that enables debugging of PluginRegistry
 
+//	AJA VDEV params:
+#define	kQParamVDevFolderPath	"vdevfpath"		///< @brief	Path to folder containing .vdev files
+#define	kQParamVDevName			"vdevname"		///< @brief	Device name, if not specified in .vdev file, then base name of .vdev file
+#define	kQParamVDevFileName		"vdevfname"		///< @brief	.vdev file name (with extension)
+#define	kQParamVDevIndex		"vdevindex"		///< @brief	Device index number for .vdev virtual device
+
+//	AJA VDEV JSON keys:
+#define kVDevJSON_Name			"name"			///< @brief	Optional name for virtual device to override .vdev file name (expects string value)
+#define kVDevJSON_URLSpec		"urlspec"		///< @brief	URLspec for virtual device (expects string value)
+#define kVDevJSON_Disabled		"disabled"		///< @brief	Virtual device is disabled if value is true (expects boolean value)
+#define kVDevJSON_Plugin		"plugin"		///< @deprecated	No longer used
+#define kVDevJSON_Host			"host"			///< @deprecated	No longer used
+
 //	Local URL schemes:
 #define	kLegalSchemeNTV2		"ntv2"
 #define	kLegalSchemeNTV2Local	"ntv2local"
@@ -157,7 +170,9 @@ class AJAExport NTV2DeviceSpecParser
 	public:
 										NTV2DeviceSpecParser (const std::string inSpec = "");	///< @brief	My constructor. If given device specification is non-empty, proceeds to Parse it
 		void							Reset (const std::string inSpec = "");	///< @brief	Resets me, then parses the given device specification
-		inline const std::string &		DeviceSpec (void) const						{return mSpec;}		///< @return	The device specification I've parsed
+		inline const std::string &		DeviceSpec (void) const						{return mSpec;}		///< @returns	the original devSpec I parsed
+		std::string						MakeDeviceSpec (const bool urlEncodeQuery) const;	///< @returns	reconstituted device spec
+		std::string						MakeQueryString (const bool urlEncode) const;		///< @returns	reconstituted query string
 		inline bool						HasDeviceSpec (void) const					{return !DeviceSpec().empty();}	///< @return	True if I have a device specification
 		inline bool						Successful (void) const						{return !Failed();}	///< @return	True if successfully parsed
 		inline bool						Failed (void) const							{return DeviceSpec().empty() ? true : HasErrors();}	///< @return	True if empty device spec or parser had errors
@@ -181,6 +196,7 @@ class AJAExport NTV2DeviceSpecParser
 		UWord							DeviceIndex (void) const;
 		inline const NTV2Dictionary &	QueryParams (void) const					{return mQueryParams;}	///< @return	True if ErrorCount is non-zero
 		inline std::string				QueryParam (const std::string & inKey) const	{return mQueryParams.valueForKey(inKey);}	///< @return	Query parameter value for the given query parameter key (empty string if no such key)
+		inline bool						HasQueryParams (void) const					{return !QueryParams().empty();}	///< @returns	true if has any query params
 		#if defined(_DEBUG)
 		static void						test (void);
 		#endif	//	defined(_DEBUG)
@@ -189,6 +205,7 @@ class AJAExport NTV2DeviceSpecParser
 		void			Parse (void);
 		bool			ParseHexNumber (size_t & pos, std::string & outToken);
 		bool			ParseDecNumber (size_t & pos, std::string & outToken);
+		bool			ParseAlphaNum (size_t & pos, std::string & outToken, const std::string & inOtherChars = "");	//	Starts with letter followed by run of letters and/or digits and/or other chars
 		bool			ParseAlphaNumeric (size_t & pos, std::string & outToken, const std::string & inOtherChars = "");	//	A run of letters and/or decimal digits and/or other chars
 		bool			ParseScheme (size_t & pos, std::string & outToken);	//	An alphanumeric name followed by "://"
 		bool			ParseSerialNum (size_t & pos, std::string & outToken);	//	An 8 or 9 character alphanumeric name or a 64-bit hex number
@@ -219,6 +236,9 @@ class AJAExport NTV2DeviceSpecParser
 		NTV2ConnectParams	mResult;		///< @brief	Parse results, a key/value dictionary
 		NTV2Dictionary		mQueryParams;	///< @brief	Parse results, query params (key/value dictionary)
 		size_t				mPos;			///< @brief	Last character position
+
+	public:	//	Class Methods
+		static bool		ParseQueryParams (const NTV2Dictionary & inParams, NTV2Dictionary & outQueryParams);
 };	//	NTV2DeviceSpecParser
 
 
@@ -343,12 +363,11 @@ class AJAExport NTV2RPCClientAPI : public NTV2RPCBase
 		}
 
 		#if !defined(NTV2_DEPRECATE_16_3)	//	These functions are going away
-		virtual bool	NTV2DriverGetBitFileInformationRemote	(BITFILE_INFO_STRUCT & bitFileInfo, const NTV2BitFileType bitFileType);
-		virtual bool	NTV2DriverGetBuildInformationRemote	(BUILD_INFO_STRUCT & buildInfo);
-		virtual bool	NTV2DownloadTestPatternRemote	(const NTV2Channel channel, const NTV2PixelFormat testPatternFBF,
-														const UWord signalMask, const bool testPatDMAEnb, const ULWord testPatNum);
-		virtual bool	NTV2ReadRegisterMultiRemote	(const ULWord numRegs, ULWord & outFailedRegNum, NTV2RegInfo outRegs[]);
-		virtual bool	NTV2GetDriverVersionRemote	(ULWord & outDriverVersion);
+		virtual NTV2_DEPRECATED_16_3(bool NTV2DriverGetBitFileInformationRemote(BITFILE_INFO_STRUCT & nfo, const NTV2BitFileType typ));
+		virtual NTV2_DEPRECATED_16_3(bool NTV2DriverGetBuildInformationRemote(BUILD_INFO_STRUCT & buildInfo));
+		virtual NTV2_DEPRECATED_16_3(bool NTV2DownloadTestPatternRemote(const NTV2Channel ch, const NTV2PixelFormat pf, const UWord msk, const bool dma, const ULWord tpNum));
+		virtual NTV2_DEPRECATED_16_3(bool NTV2ReadRegisterMultiRemote(const ULWord numRegs, ULWord & outFailedRegNum, NTV2RegInfo outRegs[]));
+		virtual NTV2_DEPRECATED_16_3(bool NTV2GetDriverVersionRemote(ULWord & vers));
 		#endif	//	!defined(NTV2_DEPRECATE_16_3)
 
 		virtual			~NTV2RPCClientAPI();	///< @brief	My destructor, automatically calls NTV2Disconnect.

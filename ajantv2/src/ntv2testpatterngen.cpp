@@ -18,6 +18,8 @@
 #include "ajabase/common/common.h"
 #include "math.h"
 
+#include <random>
+
 #define TPGFAIL(__x__)	AJA_sERROR	(AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
 #define TPGWARN(__x__)	AJA_sWARNING(AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
 #define TPGNOTE(__x__)	AJA_sNOTICE (AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
@@ -2341,6 +2343,8 @@ static TPStringMap & CreateTPStringMap (TPStringMap & outMap)
 	outMap.insert(TPStringPair(NTV2_TestPatt_ColorQuadrantBorder,	string("Color Quadrant Border")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_ColorQuadrantTsi,		string("Color Quadrant Tsi")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_TsiAlignment,			string("Color Quadrant Tsi2")));
+	outMap.insert(TPStringPair(NTV2_TestPatt_NoiseUniform,			string("Uniform Noise")));
+	outMap.insert(TPStringPair(NTV2_TestPatt_NoiseGaussian,			string("Gaussian Noise")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_ZonePlate_12b_RGB,		string("ZonePlate 12b RGB")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_LinearRamp_12b_RGB,	string("LinearRamp 12b RGB")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_HLG_Narrow_12b_RGB,	string("HLG_Narrow 12b RGB")));
@@ -2549,6 +2553,14 @@ NTV2TestPatternNames NTV2TestPatternGen::getTestPatternNames (void)
 	return result;
 }	//	getTestPatternNames
 
+std::string NTV2TestPatternGen::findTestPatternName (const NTV2TestPatternSelect inPattern)
+{
+	TPStringMap TPNames;
+	::CreateTPStringMap(TPNames);
+	TPStringMapConstIter iter(TPNames.find(inPattern));
+	return iter != TPNames.end() ? iter->second : "";
+}
+
 NTV2StringList NTV2TestPatternGen::getColorNames (void)
 {
 	NTV2StringList result;
@@ -2640,6 +2652,8 @@ bool NTV2TestPatternGen::drawIt (void)
 		case NTV2_TestPatt_Border:				result = DrawBorderFrame();				break;
 		case NTV2_TestPatt_SlantRamp:			result = DrawSlantRampFrame();			break;
 		case NTV2_TestPatt_ZonePlate:			result = DrawZonePlateFrame();			break;
+		case NTV2_TestPatt_NoiseUniform:		result = DrawNoiseUniformFrame();		break;
+		case NTV2_TestPatt_NoiseGaussian:		result = DrawNoiseGaussianFrame();		break;
 		case NTV2_TestPatt_ColorQuadrant:		result = DrawColorQuadrantFrame();		break;
 		case NTV2_TestPatt_ColorQuadrantBorder: result = DrawQuadrantBorderFrame();		break;
 		case NTV2_TestPatt_LinearRamp:			result = DrawLinearRampFrame();			break;
@@ -3138,6 +3152,96 @@ bool NTV2TestPatternGen::DrawZonePlateFrame()
 		mpDstBuffer += mDstLinePitch;
 	}
 	return true;
+}
+
+inline uint16_t clamp10(int v)
+{
+    return (v < 0) ? 0 : (v > 1023 ? 1023 : uint16_t(v));
+}
+
+bool NTV2TestPatternGen::DrawNoiseUniformFrame()
+{
+    // Peak uniform noise range (0..1 slider → 0..kUniformPeak)
+    constexpr double kUniformPeak = 512.0;
+    const double amplitude = mSliderValue * kUniformPeak;
+	static thread_local std::mt19937 rng(12345678);
+    std::uniform_real_distribution<double> uni(-1.0, 1.0);
+
+    const uint16_t midY  = 512;
+    const uint16_t midCb = 512;
+    const uint16_t midCr = 512;
+
+    for (uint32_t line = 0; line < mDstFrameHeight; ++line)
+    {
+        for (uint32_t pixel = 0; pixel < mDstFrameWidth; ++pixel)
+        {
+            const double nY  = uni(rng) * amplitude;
+            const double nCb = uni(rng) * amplitude;
+            const double nCr = uni(rng) * amplitude;
+
+            const uint16_t Y  = (uint16_t)clamp10(int(midY  + nY));
+            const uint16_t Cb = (uint16_t)clamp10(int(midCb + nCb));
+            const uint16_t Cr = (uint16_t)clamp10(int(midCr + nCr));
+
+            // v210 unpacked: Cb/Cr alternating, Y at +1
+            mpUnpackedLineBuffer[pixel * 2 + 1] = Y;
+            mpUnpackedLineBuffer[pixel * 2 + 0] = (pixel & 1) ? Cr : Cb;
+        }
+
+        ConvertUnpacked10BitYCbCrToPixelFormat(
+            mpUnpackedLineBuffer,
+            mpPackedLineBuffer,
+            mDstFrameWidth,
+            mDstPixelFormat,
+            mSetRGBSmpteRange,
+            mSetAlphaFromLuma
+        );
+
+        memcpy(mpDstBuffer, mpPackedLineBuffer, mDstLinePitch);
+        mpDstBuffer += mDstLinePitch;
+    }
+
+    return true;
+}
+
+bool NTV2TestPatternGen::DrawNoiseGaussianFrame()
+{
+    // Full-scale sigma (0..1 slider → 0.. kGaussianSigma)
+    constexpr double kGaussianSigma = 256.0;
+    const double sigma = mSliderValue * kGaussianSigma;
+    static thread_local std::mt19937 rng(12345678);
+    std::normal_distribution<double> norm(0.0, sigma);
+
+    const uint16_t midY  = 512;
+    const uint16_t midCb = 512;
+    const uint16_t midCr = 512;
+
+    for (uint32_t line = 0; line < mDstFrameHeight; ++line)
+    {
+        for (uint32_t pixel = 0; pixel < mDstFrameWidth; ++pixel)
+        {
+            const uint16_t Y  = (uint16_t)clamp10(int(midY  + norm(rng)));
+            const uint16_t Cb = (uint16_t)clamp10(int(midCb + norm(rng)));
+            const uint16_t Cr = (uint16_t)clamp10(int(midCr + norm(rng)));
+
+            mpUnpackedLineBuffer[pixel * 2 + 1] = Y;
+            mpUnpackedLineBuffer[pixel * 2 + 0] = (pixel & 1) ? Cr : Cb;
+        }
+
+        ConvertUnpacked10BitYCbCrToPixelFormat(
+            mpUnpackedLineBuffer,
+            mpPackedLineBuffer,
+            mDstFrameWidth,
+            mDstPixelFormat,
+            mSetRGBSmpteRange,
+            mSetAlphaFromLuma
+        );
+
+        memcpy(mpDstBuffer, mpPackedLineBuffer, mDstLinePitch);
+        mpDstBuffer += mDstLinePitch;
+    }
+
+    return true;
 }
 
 bool NTV2TestPatternGen::DrawColorQuadrantFrame()

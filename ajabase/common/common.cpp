@@ -533,20 +533,34 @@ bool is_legal_decimal_number (const std::string & inStr, const size_t inMaxLengt
 	return true;
 }
 
-uint64_t is_legal_hex_serial_number (const std::string & inStr)	//	0x3236333331375458
+uint64_t is_legal_hex_serial_number (const std::string & inStr)	//	returns zero for invalid values. Valid example: 0x3236333331375458
 {
 	if (inStr.length() < 3)
 		return 0ULL;	//	Too small
 	std::string hexStr(inStr);  lower(hexStr);	//	hexStr is lower case
+
+	//	Remove leading '0x' or 'x', if any...
 	if (hexStr[0] == '0'  &&  hexStr[1] == 'x')
-		hexStr.erase(0, 2);	//	Remove '0x' if present
+		hexStr.erase(0, 2);	//	Remove leading '0x'
+	else if (hexStr[0] == 'x')
+		hexStr.erase(0, 1);	//	Remove leading 'x'
+
+	//	Remove leading zeroes, if any (stop when length is 16)...
+	while (hexStr.length() > 16 && hexStr.at(0) == '0')
+		hexStr.erase(0, 1); // Remove leading '0'
+	//	No more than 16 chars...
 	if (hexStr.length() > 16)
-		return 0ULL;	//	Too big
+		return 0ULL;	//	Too big, exceeds 16 chars
+	//	If short, add leading zeroes til length is 16
+	while (hexStr.length() < 16)
+		hexStr = '0' + hexStr;	//	prepend another '0'
+
+	//	All chars must be hex digits...
 	for (size_t ndx(0);  ndx < hexStr.size();  ndx++)
 		if (!is_hex_digit(hexStr.at(ndx)))
 			return 0ULL;	//	Invalid hex digit
-	while (hexStr.length() != 16)
-		hexStr = '0' + hexStr;	//	prepend another '0'
+
+	//	Finally, convert to uint64_t...
 	std::istringstream iss(hexStr);
 	uint64_t u64(0);
 	iss >> std::hex >> u64;

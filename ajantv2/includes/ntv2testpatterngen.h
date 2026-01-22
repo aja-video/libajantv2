@@ -44,6 +44,8 @@ enum NTV2TestPatternSelect
 	NTV2_TestPatt_ColorQuadrantBorder,
 	NTV2_TestPatt_ColorQuadrantTsi,
 	NTV2_TestPatt_TsiAlignment,
+	NTV2_TestPatt_NoiseUniform,
+	NTV2_TestPatt_NoiseGaussian,
 	NTV2_TestPatt_ZonePlate_12b_RGB,
 	NTV2_TestPatt_LinearRamp_12b_RGB,
 	NTV2_TestPatt_HLG_Narrow_12b_RGB,
@@ -87,6 +89,12 @@ class AJAExport NTV2TestPatternGen
 			@return		An ordered collection of strings containing the names of all available test patterns.
 		**/
 		static NTV2TestPatternNames		getTestPatternNames (void);
+
+		/**
+		    @return		The test pattern name that corresponds to the given pattern.
+			@param[in]	inPattern Specifies the test pattern.
+		 **/
+		static std::string				findTestPatternName (const NTV2TestPatternSelect inPattern);
 
 		/**
 			@return		An ordered collection of strings containing the names of all available flat-field "web colors".
@@ -163,11 +171,11 @@ class AJAExport NTV2TestPatternGen
 		/**
 			@deprecated	Use the DrawTestPattern method that requires an NTV2Buffer to specify the buffer to fill.
 		**/
-		virtual NTV2_DEPRECATED_f(bool DrawTestPattern (const NTV2TestPatternID tp, const NTV2FormatDesc & fd, NTV2TestPatBuffer & buf));
+		virtual NTV2_DEPRECATED_16_0(bool DrawTestPattern (const NTV2TestPatternID tp, const NTV2FormatDesc & fd, NTV2TestPatBuffer & buf));
 		/**
 			@deprecated	Use the DrawTestPattern method that requires an NTV2Buffer to specify the buffer to fill.
 		**/
-		virtual NTV2_DEPRECATED_f(bool DrawTestPattern (const NTV2TestPatternID tp, const uint32_t w, const uint32_t h, const NTV2PixelFormat pf, NTV2TestPatBuffer & buf));
+		virtual NTV2_DEPRECATED_16_0(bool DrawTestPattern (const NTV2TestPatternID tp, const uint32_t w, const uint32_t h, const NTV2PixelFormat pf, NTV2TestPatBuffer & buf));
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 		///@}
 
@@ -206,6 +214,8 @@ class AJAExport NTV2TestPatternGen
 		virtual bool	DrawLinearRampFrame ();
 		virtual bool	DrawSlantRampFrame ();
 		virtual bool	DrawZonePlateFrame ();
+		virtual bool	DrawNoiseUniformFrame();
+		virtual bool	DrawNoiseGaussianFrame();
 		virtual bool	DrawQuadrantBorderFrame ();
 		virtual bool	DrawColorQuadrantFrame ();
 		virtual bool	DrawColorQuadrantFrameTsi ();

@@ -184,7 +184,7 @@ bool CNTV2WinDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 	}
 
 	REFGUID refguid = _GUID_PROPSET;
-	_boardNumber = inDeviceIndex;
+	setDeviceIndexNumber(inDeviceIndex);
 
 	DWORD dwShareMode (GetShareMode() ? FILE_SHARE_READ | FILE_SHARE_WRITE : 0);
 	DWORD dwFlagsAndAttributes = FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED;
@@ -197,7 +197,7 @@ bool CNTV2WinDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 		return false;
 	spDevIFaceData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
 	myguid = refguid;
-	if (!SetupDiEnumDeviceInterfaces(_hDevInfoSet, NULL, &myguid, _boardNumber, &spDevIFaceData))
+	if (!SetupDiEnumDeviceInterfaces(_hDevInfoSet, NULL, &myguid, GetIndexNumber(), &spDevIFaceData))
 	{
 		SetupDiDestroyDeviceInfoList(_hDevInfoSet);
 		return false;
@@ -253,7 +253,7 @@ bool CNTV2WinDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 	_boardOpened = true;
 	CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID);
 
-	WDIINFO ("Opened '" << boardStr << "' deviceID=" << HEX8(_boardID) << " deviceIndex=" << DEC(_boardNumber));
+	WDIINFO ("Opened '" << boardStr << "' deviceID=" << HEX8(_boardID) << " deviceIndex=" << DEC(GetIndexNumber()));
 	return true;
 }	//	OpenLocalPhysical
 
@@ -282,7 +282,7 @@ bool CNTV2WinDriverInterface::CloseLocalPhysical (void)
 
 	if (_hDevice != INVALID_HANDLE_VALUE)
 		CloseHandle(_hDevice);
-	WDIINFO ("Closed deviceID=" << HEX8(_boardID) << " deviceIndex=" << DEC(_boardNumber));
+	WDIINFO ("Closed deviceID=" << HEX8(_boardID) << " deviceIndex=" << DEC(GetIndexNumber()));
 
 	_hDevice = INVALID_HANDLE_VALUE;
 	_boardOpened = false;
@@ -328,12 +328,12 @@ bool CNTV2WinDriverInterface::ReadRegister (const ULWord inRegNum,	ULWord & outV
 	if (ok)
 	{
 		outValue = propStruct.ulRegisterValue;
-#if 0	//	Fake KONAIP25G from C4412G (see also NTV2GetRegisters::GetRegisterValues):
-		if (inRegNum == kRegBoardID  &&  outValue == DEVICE_ID_CORVID44_8K)
-			outValue = DEVICE_ID_KONAIP_25G;
-		else if (inRegNum == kRegReserved83  ||  inRegNum == kRegLPRJ45IP)
-			outValue = 0x0A03FAD9;	//	Local IPv4    10.3.250.217
-#endif	//	0
+#if defined(NTV2_PRETEND_DEVICE)
+	if (inRegNum == kRegBoardID  &&  outValue == NTV2_PRETEND_DEVICE_FROM)
+		outValue = NTV2_PRETEND_DEVICE_TO;
+//	else if (inRegNum == kRegReserved83  ||  inRegNum == kRegLPRJ45IP)
+//		outValue = 0x0A03FAD9;	//	Local IPv4    10.3.250.217
+#endif	//	NTV2_PRETEND_DEVICE
 		return true;
 	}
 	WDIFAIL("reg=" << DEC(inRegNum) << " val=" << xHEX0N(outValue,8) << " msk=" << xHEX0N(inMask,8) << " shf=" << DEC(inShift) << " failed: " << ::GetKernErrStr(GetLastError()));

@@ -63,9 +63,9 @@ AJAEvent::SetState(bool signaled)
 
 
 AJAStatus
-AJAEvent::GetState(bool* pSignaled)
+AJAEvent::GetState(bool & outSignaled)
 {
-	return mpImpl->GetState(pSignaled);
+	return mpImpl->GetState(&outSignaled);
 }
 
 

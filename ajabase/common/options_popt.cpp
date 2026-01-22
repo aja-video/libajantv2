@@ -386,7 +386,7 @@ int poptReadFile(const char * fn, char ** bp, size_t * nbp, int flags)
 	goto exit;
 
 	if ((file.Seek(0, eAJASeekEnd)) != AJA_STATUS_SUCCESS
-	 || (nb = file.Tell()) == (off_t)-1
+	 || (nb = (off_t)file.Tell()) == (off_t)-1
 	 || file.Seek(0, eAJASeekSet) != AJA_STATUS_SUCCESS
 	 || (b = (char*)calloc(sizeof(*b), (size_t)nb + 1)) == NULL
 	 || file.Read((uint8_t *)b, (uint32_t)nb) != (uint32_t)nb)

@@ -64,7 +64,7 @@ void NTV2Burn::Quit (void)
 	{	//	Release the device...
 		mDevice.ReleaseStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid()));
 		if (NTV2_IS_VALID_TASK_MODE(mSavedTaskMode))
-			mDevice.SetEveryFrameServices(mSavedTaskMode);	//	Restore prior task mode
+			mDevice.SetTaskMode(mSavedTaskMode);	//	Restore prior task mode
 	}
 }	//	Quit
 
@@ -89,17 +89,17 @@ AJAStatus NTV2Burn::Init (void)
 	ULWord	appSignature	(0);
 	int32_t	appPID			(0);
 	mDevice.GetStreamingApplication (appSignature, appPID);	//	Who currently "owns" the device?
-	mDevice.GetEveryFrameServices(mSavedTaskMode);			//	Save the current device state
+	mDevice.GetTaskMode(mSavedTaskMode);	//	Save the current device state
 	if (!mConfig.fDoMultiFormat)
 	{
 		if (!mDevice.AcquireStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid())))
 		{
 			cerr << "## ERROR:  Unable to acquire device because another app (pid " << appPID << ") owns it" << endl;
-			return AJA_STATUS_BUSY;		//	Some other app is using the device
+			return AJA_STATUS_BUSY;	//	Some other app is using the device
 		}
-		mDevice.ClearRouting();									//	Clear the current device routing (since I "own" the device)
+		mDevice.ClearRouting();				//	Clear the current device routing (since I "own" the device)
 	}
-	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Force OEM tasks
+	mDevice.SetTaskMode(NTV2_OEM_TASKS);	//	Force OEM tasks
 
 	//	Configure the SDI relays if present
 	if (mDevice.features().HasSDIRelays())
@@ -460,7 +460,7 @@ AJAStatus NTV2Burn::SetupHostBuffers (void)
 void NTV2Burn::RouteInputSignal (void)
 {
 	const NTV2OutputCrosspointID	inputOutputXpt	(::GetInputSourceOutputXpt(mConfig.fInputSource));
-	const NTV2InputCrosspointID		fbInputXpt		(::GetFrameBufferInputXptFromChannel(mConfig.fInputChannel));
+	const NTV2InputCrosspointID		fbInputXpt		(::GetFrameStoreInputXptFromChannel(mConfig.fInputChannel));
 	const bool						isRGB			(::IsRGBFormat(mConfig.fPixelFormat));
 
 	if (isRGB)
@@ -483,7 +483,7 @@ void NTV2Burn::RouteInputSignal (void)
 void NTV2Burn::RouteOutputSignal (void)
 {
 	const NTV2InputXptID outputInputXpt (::GetOutputDestInputXpt(mConfig.fOutputDest));
-	const NTV2OutputXptID fbOutputXpt (::GetFrameBufferOutputXptFromChannel(mConfig.fOutputChannel, ::IsRGBFormat(mConfig.fPixelFormat)));
+	const NTV2OutputXptID fbOutputXpt (::GetFrameStoreOutputXptFromChannel(mConfig.fOutputChannel, ::IsRGBFormat(mConfig.fPixelFormat)));
 	const bool isRGB (::IsRGBFormat(mConfig.fPixelFormat));
 	NTV2OutputXptID outputXpt (fbOutputXpt);
 
@@ -592,8 +592,7 @@ void NTV2Burn::PlayFrames (void)
 	BURNNOTE("Thread started");
 
 	//	Initialize AutoCirculate...
-	if (!mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel, mConfig.fOutputFrames.count(), mAudioSystem, acOptions,
-											1 /*numChannels*/,  mConfig.fOutputFrames.firstFrame(),  mConfig.fOutputFrames.lastFrame()))
+	if (!mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel, mConfig.fOutputFrames, mAudioSystem, acOptions))
 		{BURNFAIL("AutoCirculateInitForOutput failed");  mGlobalQuit = true;}
 	else if (!mConfig.WithVideo())
 	{	//	Video suppressed --
@@ -704,12 +703,10 @@ void NTV2Burn::CaptureFrames (void)
 	mDevice.AutoCirculateStop(mConfig.fInputChannel);
 
 	//	Initialize AutoCirculate...
-	if (!mDevice.AutoCirculateInitForInput (mConfig.fInputChannel,			//	channel
-											mConfig.fInputFrames.count(),	//	numFrames (zero if specifying range)
-											mAudioSystem,					//	audio system
-											acOptions,						//	flags
-											1,								//	frameStores to gang
-											mConfig.fInputFrames.firstFrame(), mConfig.fInputFrames.lastFrame()))
+	if (!mDevice.AutoCirculateInitForInput (mConfig.fInputChannel,	//	channel
+											mConfig.fInputFrames,	//	frame count/range
+											mAudioSystem,			//	audio system
+											acOptions))				//	flags
 		{BURNFAIL("AutoCirculateInitForInput failed");  mGlobalQuit = true;}
 	else
 		//	Start AutoCirculate running...

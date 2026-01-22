@@ -59,6 +59,8 @@
 #define NTV2_DEVICE_ID_KONAXM               0xEB28
 #define NTV2_DEVICE_ID_KONAX                0xEB29
 #define NTV2_DEVICE_ID_KONAIP_25G			0XEB30
+#define NTV2_DEVICE_ID_CORVID88_GEN3		0XEB31
+#define NTV2_DEVICE_ID_CORVID44_GEN3		0XEB32
 #define PRIVATIZE(name)						AJANTV2_ ## name
 
 

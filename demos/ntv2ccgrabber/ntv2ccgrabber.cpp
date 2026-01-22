@@ -92,7 +92,7 @@ NTV2CCGrabber::~NTV2CCGrabber ()
 
 	if (!mConfig.fDoMultiFormat)
 	{
-		mDevice.SetEveryFrameServices(mSavedTaskMode);
+		mDevice.SetTaskMode(mSavedTaskMode);
 		mDevice.ReleaseStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));
 	}
 
@@ -163,10 +163,10 @@ AJAStatus NTV2CCGrabber::Init (void)
 	{
 		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
 			{cerr << "## ERROR:  Cannot acquire -- device busy" << endl;  return AJA_STATUS_BUSY;}	//	Some other app owns the device
-		mDevice.GetEveryFrameServices(mSavedTaskMode);	//	Save the current task mode
+		mDevice.GetTaskMode(mSavedTaskMode);	//	Save the current task mode
 	}
 
-	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);		//	Use the OEM service level
+	mDevice.SetTaskMode(NTV2_OEM_TASKS);	//	Use the OEM service level
 
 	if (mDevice.features().CanDoMultiFormat())
 		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
@@ -383,7 +383,7 @@ static const NTV2WidgetID	g3GSDIOutputs[]	= {	NTV2_Wgt3GSDIOut1,	NTV2_Wgt3GSDIOu
 												NTV2_Wgt3GSDIOut5,	NTV2_Wgt3GSDIOut6,	NTV2_Wgt3GSDIOut7,	NTV2_Wgt3GSDIOut8	};
 
 static const NTV2WidgetID	g12GSDIOutputs[]= {	NTV2_Wgt12GSDIOut1,	NTV2_Wgt12GSDIOut2,	NTV2_Wgt12GSDIOut3,	NTV2_Wgt12GSDIOut4,
-												NTV2_WIDGET_INVALID, NTV2_WIDGET_INVALID, NTV2_WIDGET_INVALID, NTV2_WIDGET_INVALID	};
+												NTV2_Wgt12GSDIOut5, NTV2_Wgt12GSDIOut6, NTV2_Wgt12GSDIOut7, NTV2_Wgt12GSDIOut8	};
 
 
 bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
@@ -412,7 +412,7 @@ bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 															::GetSDIInputOutputXptFromChannel(sdiIn, /*DS2?*/false)));
 				mInputConnections.insert(NTV2XptConnection(::GetDLInInputXptFromChannel(sdiIn, /*linkB?*/true),
 															::GetSDIInputOutputXptFromChannel(sdiIn, /*DS2?*/true)));
-				mInputConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(sdiIn),
+				mInputConnections.insert(NTV2XptConnection(::GetFrameStoreInputXptFromChannel(sdiIn),
 															::GetDLInOutputXptFromChannel(frmSt)));
 				if (ShowRoutingProgress) mDevice.ApplySignalRoute(mInputConnections);
 			}
@@ -432,9 +432,9 @@ bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 															::GetSDIInputOutputXptFromChannel(sdiIn, /*DS2?*/true)));
 				mInputConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(tsiMux, /*lnkB?*/ndx & 1),
 															::GetDLInOutputXptFromChannel(sdiIn)));
-				mInputConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(frmSt, /*lnkB?*/false),
+				mInputConnections.insert(NTV2XptConnection(::GetFrameStoreInputXptFromChannel(frmSt, /*lnkB?*/false),
 															::GetTSIMuxOutputXptFromChannel(tsiMux,/*lnkB?*/false, /*rgb?*/true)));
-				mInputConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(frmSt, /*lnkB?*/true),
+				mInputConnections.insert(NTV2XptConnection(::GetFrameStoreInputXptFromChannel(frmSt, /*lnkB?*/true),
 															::GetTSIMuxOutputXptFromChannel(tsiMux,/*lnkB?*/true, /*rgb?*/true)));
 				if (ShowRoutingProgress) mDevice.ApplySignalRoute(mInputConnections);
 			}
@@ -445,7 +445,7 @@ bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 		if (isSquares)	//	SDIIn ==> CSC ==> RGBFrameStore
 			for (size_t ndx(0);  ndx < sdiInputs.size();  ndx++)
 			{	NTV2Channel frmSt(frameStores.at(ndx)), sdiIn(sdiInputs.at(ndx));
-				mInputConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(frmSt),
+				mInputConnections.insert(NTV2XptConnection(::GetFrameStoreInputXptFromChannel(frmSt),
 															::GetCSCOutputXptFromChannel(frmSt, /*key?*/false, /*RGB?*/true)));
 				mInputConnections.insert(NTV2XptConnection(::GetCSCInputXptFromChannel(frmSt),
 															::GetSDIInputOutputXptFromChannel(sdiIn)));
@@ -465,7 +465,7 @@ bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 			for (size_t ndx(0);  ndx < cscs.size();  ndx++)
 			{	NTV2Channel frmSt(frameStores.at(ndx/2)), sdiIn(sdiInputs.at(ndx/2)), tsiMux(tsiMuxes.at(ndx/2)),
 							csc(cscs.at(ndx));
-				mInputConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(frmSt, /*inputB?*/ndx & 1),
+				mInputConnections.insert(NTV2XptConnection(::GetFrameStoreInputXptFromChannel(frmSt, /*inputB?*/ndx & 1),
 															::GetTSIMuxOutputXptFromChannel(tsiMux,/*linkB?*/ndx & 1,/*rgb?*/true)));
 				mInputConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(tsiMux, /*linkB?*/ndx & 1),
 															::GetCSCOutputXptFromChannel(csc, /*key?*/false, /*rgb?*/true)));
@@ -481,7 +481,7 @@ bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 		{
 			for (size_t ndx(0);  ndx < sdiInputs.size();  ndx++)
 			{	NTV2Channel frmSt(frameStores.at(ndx)), csc(activeCSCs.at(ndx)), sdi(sdiInputs.at(ndx));
-				mInputConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(frmSt, /*BInput?*/false),
+				mInputConnections.insert(NTV2XptConnection(::GetFrameStoreInputXptFromChannel(frmSt, /*BInput?*/false),
 															::GetCSCOutputXptFromChannel(csc)));
 				mInputConnections.insert(NTV2XptConnection(::GetCSCInputXptFromChannel(csc),
 															::GetDLInOutputXptFromChannel(sdi)));
@@ -503,7 +503,7 @@ bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 		{
 			for (size_t ndx(0);  ndx < sdiInputs.size();  ndx++)
 			{	NTV2Channel frmSt(frameStores.at(ndx)), sdiIn(sdiInputs.at(ndx));
-				mInputConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(frmSt),
+				mInputConnections.insert(NTV2XptConnection(::GetFrameStoreInputXptFromChannel(frmSt),
 															::GetSDIInputOutputXptFromChannel(sdiIn)));
 				if (ShowRoutingProgress) mDevice.ApplySignalRoute(mInputConnections);
 			}
@@ -525,10 +525,10 @@ bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 				if (!is4KHFR)
 					mConnections.insert(NTV2XptConnection(::GetTSIMuxInputXptFromChannel(tsiMux, /*linkB?*/true),
 										::GetSDIInputOutputXptFromChannel(sdiIn, /*DS2?*/true)));
-				mConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(frmSt, /*inputB?*/is4KHFR && (ndx & 1)),
+				mConnections.insert(NTV2XptConnection(::GetFrameStoreInputXptFromChannel(frmSt, /*inputB?*/is4KHFR && (ndx & 1)),
 									::GetTSIMuxOutputXptFromChannel(tsiMux,/*linkB?*/is4KHFR && (ndx & 1))));
 				if (!is4KHFR)
-					mConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(frmSt, /*inputB?*/true),
+					mConnections.insert(NTV2XptConnection(::GetFrameStoreInputXptFromChannel(frmSt, /*inputB?*/true),
 										::GetTSIMuxOutputXptFromChannel(tsiMux,/*linkB?*/true)));
 				if (ShowRoutingProgress) mDevice.ApplySignalRoute(mInputConnections);
 			}
@@ -708,13 +708,8 @@ void NTV2CCGrabber::CaptureFrames (void)
 			SetOutputStandards(currentVF);	//	...output standard may need changing
 
 		mDevice.AutoCirculateStop(mConfig.fInputChannel);
-		if (!mDevice.AutoCirculateInitForInput(	mConfig.fInputChannel,		//	primary channel
-												mConfig.fFrames.count(),	//	numFrames (zero if specifying range)
-												mAudioSystem,				//	audio system
-												AUTOCIRCULATE_WITH_RP188
-													| (mDevice.features().CanDoCustomAnc() ? AUTOCIRCULATE_WITH_ANC : 0),	//	flags
-												1,	//	numChannels to gang
-												mConfig.fFrames.firstFrame(), mConfig.fFrames.lastFrame()))
+		if (!mDevice.AutoCirculateInitForInput(	mConfig.fInputChannel, mConfig.fFrames, mAudioSystem, AUTOCIRCULATE_WITH_RP188
+															| (mDevice.features().CanDoCustomAnc() ? AUTOCIRCULATE_WITH_ANC : 0)))
 			{CAPFAIL("Failed to init Ch" << DEC(mConfig.fInputChannel+1) << " for input"); break;}
 
 		//	Start AutoCirculate...
@@ -1314,7 +1309,7 @@ AJAStatus NTV2CCGrabber::SetupOutputVideo (const NTV2VideoFormat inVideoFormat)
 bool NTV2CCGrabber::RouteOutputSignal (const NTV2VideoFormat inVideoFormat)
 {
 	NTV2_ASSERT (mConfig.fBurnCaptions);	//	Must be burning captions
-	const NTV2OutputCrosspointID	frameStoreOutputRGB	(::GetFrameBufferOutputXptFromChannel (mOutputChannel, true));	//	true=RGB
+	const NTV2OutputCrosspointID	frameStoreOutputRGB	(::GetFrameStoreOutputXptFromChannel (mOutputChannel, true));	//	true=RGB
 	const NTV2OutputCrosspointID	cscOutputYUV		(::GetCSCOutputXptFromChannel (mOutputChannel));
 	const NTV2OutputCrosspointID	cscOutputKey		(::GetCSCOutputXptFromChannel (mOutputChannel, true));	//	true=key
 	const NTV2OutputCrosspointID	mixerOutputYUV		(::GetMixerOutputXptFromChannel (mOutputChannel));

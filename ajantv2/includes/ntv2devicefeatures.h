@@ -61,6 +61,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoEnhancedCSC,					///< @brief True if device has enhanced CSCs.
 	kDeviceCanDoFrameStore1Display,				///< @brief True if device can display/output video from FrameStore 1.
 	kDeviceCanDoFreezeOutput,					///< @brief True if device can freeze output video.
+	kDeviceCanDoGPIO,							///< @brief	True if device has GPIO interface.	(New in SDK 18.0)
 	kDeviceCanDoHDMIOutStereo,					///< @brief True if device supports 3D/stereo HDMI video output.
 	kDeviceCanDoHDV,							///< @brief True if device can squeeze/stretch between 1920x1080 and 1440x1080.
 	kDeviceCanDoHDVideo,						///< @brief True if device can handle HD (High Definition) video.
@@ -72,7 +73,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoPCMControl,						///< @brief True if device can mark specific audio channel pairs as not carrying PCM (Pulse Code Modulation) audio.
 	kDeviceCanDoPCMDetection,					///< @brief True if device can detect which audio channel pairs are not carrying PCM (Pulse Code Modulation) audio.
 	kDeviceCanDoPIO,							///< @brief True if device supports Programmed I/O.
-	kDeviceCanDoPlayback,						///< @note Calculate based on kDeviceGetNumVideoOutputs and kDeviceGetNumHDMIVideoOutputs and kDeviceGetNumAnalogVideoOutputs
+	kDeviceCanDoPlayback,						///< @brief True if device has any SDI, HDMI or analog video outputs.
 	kDeviceCanDoProgrammableCSC,				///< @brief True if device has at least one programmable color space converter widget.
 	kDeviceCanDoProgrammableRS422,				///< @brief True if device has at least one RS-422 serial port, and it (they) can be programmed (for baud rate, parity, etc.).
 	kDeviceCanDoProRes,							///< @brief True if device can can accommodate Apple ProRes-compressed video in its frame buffers.
@@ -91,6 +92,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanMeasureTemperature,				///< @brief True if device can measure its FPGA die temperature.
 	kDeviceCanReportFrameSize,					///< @brief True if device can report its frame size.
 	kDeviceHasBiDirectionalSDI,					///< @brief True if device SDI connectors are bi-directional.
+	kDeviceHasBracketLED,						///< @brief True if device has LED(s) on the card bracket. (New in SDK 18.0)
 	kDeviceHasColorSpaceConverterOnChannel2,	///< @brief Calculate based on if NTV2_WgtCSC2 is present.
 	kDeviceHasNWL,								///< @brief True if device has NorthWest Logic DMA hardware.
 	kDeviceHasPCIeGen2,							///< @brief True if device supports 2nd-generation PCIe.
@@ -274,35 +276,38 @@ extern "C"
 #endif
 
 #if !defined(NTV2_DEPRECATE_17_2)
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudioOut(const NTV2DeviceID id));		///< @deprecated	Starting in SDK 17.1. Call DeviceCapabilities::CanDoAudioOutput instead
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudioIn(const NTV2DeviceID id));		///< @deprecated	Starting in SDK 17.1. Call DeviceCapabilities::CanDoAudioInput instead
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo292Out(NTV2DeviceID id, UWord ndx));	///< @deprecated	Starting in SDK 17.1. Call DeviceCapabilities::CanDoWidget(NTV2WidgetType_SDIOut, ndx) instead
-	AJAExport NTV2_SHOULD_DEPRECATE(bool NTV2DeviceCanDo3GOut (NTV2DeviceID id, UWord ndx));	///< @deprecated	Starting in SDK 17.1. Call DeviceCapabilities::CanDoWidget(NTV2WidgetType_SDIOut3G, ndx) instead
-	AJAExport NTV2_SHOULD_DEPRECATE(bool NTV2DeviceCanDo12GOut(NTV2DeviceID id, UWord ndx));	///< @deprecated	Starting in SDK 17.1. Call DeviceCapabilities::CanDoWidget(NTV2WidgetType_SDIOut12G, ndx) instead
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo292In(NTV2DeviceID id, UWord ndx));		///< @deprecated	Starting in SDK 17.1. Call DeviceCapabilities::CanDoWidget(NTV2WidgetType_SDIIn, ndx) instead
-	AJAExport NTV2_SHOULD_DEPRECATE(bool NTV2DeviceCanDo3GIn(NTV2DeviceID id, UWord ndx));	///< @deprecated	Starting in SDK 17.1. Call DeviceCapabilities::CanDoWidget(NTV2WidgetType_SDIIn3G, ndx) instead
-	AJAExport NTV2_SHOULD_DEPRECATE(bool NTV2DeviceCanDo12GIn(NTV2DeviceID id, UWord ndx));	///< @deprecated	Starting in SDK 17.1. Call DeviceCapabilities::CanDoWidget(NTV2WidgetType_SDIIn12G, ndx) instead
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID id, UWord ndx));		///< @deprecated	Starting in SDK 17.1
-	AJAExport NTV2_SHOULD_DEPRECATE(bool NTV2DeviceCanDoOutputDestination (const NTV2DeviceID id, const NTV2OutputDest od));	///< @deprecated	Starting in SDK 17.1
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoColorCorrection (const NTV2DeviceID id));///< @deprecated	Starting in SDK 17.1
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoProgrammableCSC (const NTV2DeviceID id));///< @deprecated	Starting in SDK 17.1
-	AJAExport NTV2_SHOULD_DEPRECATE(UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBufferFormat inFBF));	///< @deprecated	Starting in SDK 17.1
-
-	#if (defined(__CPLUSPLUS__) || defined(__cplusplus)) && !defined(NTV2_BUILDING_DRIVER)
-		AJAExport NTV2_SHOULD_DEPRECATE(ULWord NTV2DeviceGetFrameBufferSize(NTV2DeviceID id));		///< @deprecated	Starting in SDK 17.1
-		AJAExport NTV2_SHOULD_DEPRECATE(ULWord NTV2DeviceGetNumberFrameBuffers(NTV2DeviceID id));	///< @deprecated	Starting in SDK 17.1
-		AJAExport NTV2_SHOULD_DEPRECATE(ULWord NTV2DeviceGetAudioFrameBuffer(NTV2DeviceID id));		///< @deprecated	Starting in SDK 17.1
-		AJAExport NTV2_SHOULD_DEPRECATE(ULWord NTV2DeviceGetAudioFrameBuffer2(NTV2DeviceID id));	///< @deprecated	Starting in SDK 17.1
-	#else
-		AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetFrameBufferSize_Ex(NTV2DeviceID id));	///< @deprecated	Starting in SDK 17.1
-		AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID id));///< @deprecated	Starting in SDK 17.1
-		AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetAudioFrameBuffer_Ex(NTV2DeviceID id));	///< @deprecated	Starting in SDK 17.1
-		AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetAudioFrameBuffer2_Ex(NTV2DeviceID id));	///< @deprecated	Starting in SDK 17.1
-	#endif
-	AJAExport NTV2_SHOULD_DEPRECATE(ULWord NTV2DeviceGetFrameBufferSize(NTV2DeviceID id, NTV2FrameGeometry fg, NTV2FrameBufferFormat fbf));		///< @deprecated	Starting in SDK 17.1
-	AJAExport NTV2_SHOULD_DEPRECATE(ULWord NTV2DeviceGetNumberFrameBuffers(NTV2DeviceID id, NTV2FrameGeometry fg, NTV2FrameBufferFormat fbf));	///< @deprecated	Starting in SDK 17.1
+	AJAExport NTV2_DEPRECATED_17_2(bool NTV2DeviceCanDoAudioOut(const NTV2DeviceID id));		///< @deprecated	Starting in SDK 17.2. Call DeviceCapabilities::CanDoAudioOutput instead
+	AJAExport NTV2_DEPRECATED_17_2(bool NTV2DeviceCanDoAudioIn(const NTV2DeviceID id));		///< @deprecated	Starting in SDK 17.2. Call DeviceCapabilities::CanDoAudioInput instead
+	AJAExport NTV2_DEPRECATED_17_2(bool NTV2DeviceCanDo292Out(NTV2DeviceID id, UWord ndx));	///< @deprecated	Starting in SDK 17.2. Call DeviceCapabilities::CanDoWidget(NTV2WidgetType_SDIOut, ndx) instead
+	AJAExport NTV2_DEPRECATED_17_2(bool NTV2DeviceCanDo292In(NTV2DeviceID id, UWord ndx));		///< @deprecated	Starting in SDK 17.2. Call DeviceCapabilities::CanDoWidget(NTV2WidgetType_SDIIn, ndx) instead
+	AJAExport NTV2_DEPRECATED_17_2(bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID id, UWord ndx));		///< @deprecated	Starting in SDK 17.2
+	AJAExport NTV2_DEPRECATED_17_2(bool NTV2DeviceCanDoOutputDestination (const NTV2DeviceID id, const NTV2OutputDest od));	///< @deprecated	Starting in SDK 17.2
+	AJAExport NTV2_DEPRECATED_17_2(bool NTV2DeviceCanDoColorCorrection (const NTV2DeviceID id));///< @deprecated	Starting in SDK 17.2
+	AJAExport NTV2_DEPRECATED_17_2(bool NTV2DeviceCanDoProgrammableCSC (const NTV2DeviceID id));///< @deprecated	Starting in SDK 17.2
+	AJAExport NTV2_DEPRECATED_17_2(UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBufferFormat inFBF));	///< @deprecated	Starting in SDK 17.2
 #endif	//	defined(NTV2_DEPRECATE_17_2)
-	
+
+//	These functions were originally proposed to be deprecated in SDK 17.2, but they're used extensively in libajaretail.
+AJAExport NTV2_WILL_BE_DEPRECATED(bool NTV2DeviceCanDo3GOut (NTV2DeviceID id, UWord ndx));	///< @deprecated	Starting in SDK 17.2. Use DeviceCapabilities::CanDoWidget(NTV2WidgetType_SDIOut3G, ndx) instead
+AJAExport NTV2_WILL_BE_DEPRECATED(bool NTV2DeviceCanDo3GIn(NTV2DeviceID id, UWord ndx));	///< @deprecated	Starting in SDK 17.2. Use DeviceCapabilities::CanDoWidget(NTV2WidgetType_SDIIn3G, ndx) instead
+AJAExport NTV2_WILL_BE_DEPRECATED(bool NTV2DeviceCanDo12GOut(NTV2DeviceID id, UWord ndx));	///< @deprecated	Starting in SDK 17.2. Use DeviceCapabilities::CanDoWidget(NTV2WidgetType_SDIOut12G, ndx) instead
+AJAExport NTV2_WILL_BE_DEPRECATED(bool NTV2DeviceCanDo12GIn(NTV2DeviceID id, UWord ndx));	///< @deprecated	Starting in SDK 17.2. Use DeviceCapabilities::CanDoWidget(NTV2WidgetType_SDIIn12G, ndx) instead
+
+//	These functions were originally proposed to be deprecated in SDK 17.1, but they're used extensively in the SDK and drivers.
+#if (defined(__CPLUSPLUS__) || defined(__cplusplus)) && !defined(NTV2_BUILDING_DRIVER)
+	AJAExport NTV2_SHOULD_DEPRECATE(ULWord NTV2DeviceGetFrameBufferSize(NTV2DeviceID id));		///< @deprecated	Starting in SDK 17.1
+	AJAExport NTV2_SHOULD_DEPRECATE(ULWord NTV2DeviceGetNumberFrameBuffers(NTV2DeviceID id));	///< @deprecated	Starting in SDK 17.1
+	AJAExport NTV2_SHOULD_DEPRECATE(ULWord NTV2DeviceGetAudioFrameBuffer(NTV2DeviceID id));		///< @deprecated	Starting in SDK 17.1
+	AJAExport NTV2_SHOULD_DEPRECATE(ULWord NTV2DeviceGetAudioFrameBuffer2(NTV2DeviceID id));	///< @deprecated	Starting in SDK 17.1
+#else
+	AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetFrameBufferSize_Ex(NTV2DeviceID id));	///< @deprecated	Starting in SDK 17.1
+	AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID id));///< @deprecated	Starting in SDK 17.1
+	AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetAudioFrameBuffer_Ex(NTV2DeviceID id));	///< @deprecated	Starting in SDK 17.1
+	AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetAudioFrameBuffer2_Ex(NTV2DeviceID id));	///< @deprecated	Starting in SDK 17.1
+#endif
+AJAExport NTV2_WILL_BE_DEPRECATED(ULWord NTV2DeviceGetFrameBufferSize(NTV2DeviceID id, NTV2FrameGeometry fg, NTV2FrameBufferFormat fbf));		///< @deprecated	Starting in SDK 17.1
+AJAExport NTV2_WILL_BE_DEPRECATED(ULWord NTV2DeviceGetNumberFrameBuffers(NTV2DeviceID id, NTV2FrameGeometry fg, NTV2FrameBufferFormat fbf));	///< @deprecated	Starting in SDK 17.1
+
 AJAExport ULWord NTV2DeviceGetNumberVideoFrameBuffers(NTV2DeviceID inDeviceID, NTV2FrameGeometry inFrameGeometry, NTV2Framesize inFramesize);
 AJAExport ULWord NTV2DeviceGetAudioFrameBuffer(NTV2DeviceID boardID, NTV2FrameGeometry frameGeometry, NTV2FrameBufferFormat frameFormat);	//	Revisit for 2MB granularity
 AJAExport ULWord NTV2DeviceGetAudioFrameBuffer2(NTV2DeviceID boardID, NTV2FrameGeometry frameGeometry, NTV2FrameBufferFormat frameFormat);	//	Revisit for 2MB granularity
@@ -329,29 +334,29 @@ AJAExport bool NTV2DeviceGetVideoFormatFromState_Ex2 (	NTV2VideoFormat *		pOutVa
 														const bool				inIsSquareDivision);
 #if !defined(NTV2_DEPRECATE_17_0)
 	//	In SDK 17.0, these were all replaced by NTV2DeviceGetSPIFlashVersion:
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv2(const NTV2DeviceID inDeviceID);) ///< @deprecated	Call NTV2DeviceGetSPIFlashVersion instead.
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv3(const NTV2DeviceID inDeviceID);) ///< @deprecated	Call NTV2DeviceGetSPIFlashVersion instead.
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv4(const NTV2DeviceID inDeviceID);) ///< @deprecated	Call NTV2DeviceGetSPIFlashVersion instead.
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv5(const NTV2DeviceID inDeviceID);) ///< @deprecated	Call NTV2DeviceGetSPIFlashVersion instead.
+	AJAExport NTV2_DEPRECATED_17_0(bool NTV2DeviceHasSPIv2(const NTV2DeviceID inDeviceID);) ///< @deprecated	Use CNTV2Card::features().GetSPIFlashVersion() or NTV2DeviceGetSPIFlashVersion instead
+	AJAExport NTV2_DEPRECATED_17_0(bool NTV2DeviceHasSPIv3(const NTV2DeviceID inDeviceID);) ///< @deprecated	Use CNTV2Card::features().GetSPIFlashVersion() or NTV2DeviceGetSPIFlashVersion instead
+	AJAExport NTV2_DEPRECATED_17_0(bool NTV2DeviceHasSPIv4(const NTV2DeviceID inDeviceID);) ///< @deprecated	Use CNTV2Card::features().GetSPIFlashVersion() or NTV2DeviceGetSPIFlashVersion instead
+	AJAExport NTV2_DEPRECATED_17_0(bool NTV2DeviceHasSPIv5(const NTV2DeviceID inDeviceID);) ///< @deprecated	Use CNTV2Card::features().GetSPIFlashVersion() or NTV2DeviceGetSPIFlashVersion instead
 
 	//	In SDK 17.0, these were replaced by NTV2DeviceGetGenlockVersion...
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasGenlockv2(const NTV2DeviceID devID);)	///< @deprecated	Use NTV2DeviceGetGenlockVersion instead.
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasGenlockv3(const NTV2DeviceID devID);)	///< @deprecated	Use NTV2DeviceGetGenlockVersion instead.
+	AJAExport NTV2_DEPRECATED_17_0(bool NTV2DeviceHasGenlockv2(const NTV2DeviceID devID);)	///< @deprecated	Use CNTV2Card::features().GetGenlockVersion() or NTV2DeviceGetGenlockVersion instead
+	AJAExport NTV2_DEPRECATED_17_0(bool NTV2DeviceHasGenlockv3(const NTV2DeviceID devID);)	///< @deprecated	Use CNTV2Card::features().GetGenlockVersion() or NTV2DeviceGetGenlockVersion instead
 
 	//	In SDK 17.0, this was replaced by NTV2DeviceCanDoWidget(NTV2_WgtCSC2)...
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasColorSpaceConverterOnChannel2(const NTV2DeviceID devID);)	///< @deprecated	Call NTV2DeviceCanDoWidget with NTV2_WgtCSC2 instead.
+	AJAExport NTV2_DEPRECATED_17_0(bool NTV2DeviceHasColorSpaceConverterOnChannel2(const NTV2DeviceID devID);)	///< @deprecated	Call CNTV2Card::features().CanDoWidget(NTV2_WgtCSC2) or NTV2DeviceCanDoWidget instead
 
 	//	In SDK 17.0, these were replaced by NTV2GetMaxNumAudioChannels:
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudio2Channels(const NTV2DeviceID devID);)	///< @deprecated	Use NTV2DeviceGetMaxAudioChannels instead.
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudio6Channels(const NTV2DeviceID devID);)	///< @deprecated	Use NTV2DeviceGetMaxAudioChannels instead.
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudio8Channels(const NTV2DeviceID devID);)	///< @deprecated	Use NTV2DeviceGetMaxAudioChannels instead.
+	AJAExport NTV2_DEPRECATED_17_0(bool NTV2DeviceCanDoAudio2Channels(const NTV2DeviceID devID);)	///< @deprecated	Use CNTV2Card::features().GetMaxAudioChannels() or NTV2DeviceGetMaxAudioChannels instead
+	AJAExport NTV2_DEPRECATED_17_0(bool NTV2DeviceCanDoAudio6Channels(const NTV2DeviceID devID);)	///< @deprecated	Use CNTV2Card::features().GetMaxAudioChannels() or NTV2DeviceGetMaxAudioChannels instead
+	AJAExport NTV2_DEPRECATED_17_0(bool NTV2DeviceCanDoAudio8Channels(const NTV2DeviceID devID);)	///< @deprecated	Use CNTV2Card::features().GetMaxAudioChannels() or NTV2DeviceGetMaxAudioChannels instead
 
 	//	These have been marked deprecated for some time. In SDK 17.0, it's official.
-	AJAExport NTV2_DEPRECATED_f(UWord NTV2DeviceGetNumAudioStreams(const NTV2DeviceID devID);)	///< @deprecated	Use NTV2DeviceGetNumAudioSystems instead.
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudioN(const NTV2DeviceID devID, UWord index0);)	///< @deprecated	Use NTV2DeviceGetNumAudioSystems instead.
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoLTCOutN(const NTV2DeviceID devID, UWord index0);)	///< @deprecated	Use NTV2DeviceGetNumLTCOutputs instead.
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoLTCInN(const NTV2DeviceID devID, UWord index0);)	///< @deprecated	Use NTV2DeviceGetNumLTCInputs instead.
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoRS422N(const NTV2DeviceID devID, const NTV2Channel ch);)	///< @deprecated	Use NTV2DeviceGetNumSerialPorts instead.
+	AJAExport NTV2_DEPRECATED_17_0(UWord NTV2DeviceGetNumAudioStreams(const NTV2DeviceID devID);)	///< @deprecated	Use CNTV2Card::features().GetNumAudioSystems() or NTV2DeviceGetNumAudioSystems instead
+	AJAExport NTV2_DEPRECATED_17_0(bool NTV2DeviceCanDoAudioN(const NTV2DeviceID devID, UWord index0);)	///< @deprecated	Use CNTV2Card::features().GetNumAudioSystems() or NTV2DeviceGetNumAudioSystems instead
+	AJAExport NTV2_DEPRECATED_17_0(bool NTV2DeviceCanDoLTCOutN(const NTV2DeviceID devID, UWord index0);)	///< @deprecated	Use CNTV2Card::features().GetNumLTCOutputs() or NTV2DeviceGetNumLTCOutputs instead
+	AJAExport NTV2_DEPRECATED_17_0(bool NTV2DeviceCanDoLTCInN(const NTV2DeviceID devID, UWord index0);)	///< @deprecated	Use CNTV2Card::features().GetNumLTCInputs() or NTV2DeviceGetNumLTCInputs instead
+	AJAExport NTV2_DEPRECATED_17_0(bool NTV2DeviceCanDoRS422N(const NTV2DeviceID devID, const NTV2Channel ch);)	///< @deprecated	Use CNTV2Card::features().GetNumSerialPorts() or NTV2DeviceGetNumSerialPorts instead
 #endif	//	NTV2_DEPRECATE_17_0
 
 bool work_around_erroneous_compiler_warning (void);	//	This declaration stops erroneous deprecation warnings for NTV2DeviceCanDoTCIndex (immediately below)

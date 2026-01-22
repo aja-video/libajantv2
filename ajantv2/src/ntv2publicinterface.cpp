@@ -386,7 +386,7 @@ ostream & operator << (ostream & inOutStream, const NTV2Buffer & inObj)
 
 ostream & NTV2Buffer::Print (ostream & inOutStream) const
 {
-	inOutStream << (IsAllocatedBySDK() ? "0X" : "0x") << HEX0N(GetRawHostPointer(),16) << "/" << DEC(GetByteCount());
+	inOutStream << (IsAllocatedBySDK() ? "0X" : "0x") << HEX0N(GetRawHostPointer(),16) << "/" << DECN(GetByteCount(),10);
 	return inOutStream;
 }
 
@@ -1416,14 +1416,16 @@ bool NTV2DeviceGetSupportedOutputDests (const NTV2DeviceID inDeviceID, NTV2Outpu
 	outOutputDests.clear();
 	if (!NTV2_IS_VALID_IOKINDS(inKinds))
 		return false;
+	const UWord numSDI(inDeviceID == DEVICE_ID_INVALID ? 8 : ::NTV2DeviceGetNumVideoOutputs(inDeviceID)),
+				numAnl(inDeviceID == DEVICE_ID_INVALID ? 1 : ::NTV2DeviceGetNumAnalogVideoOutputs(inDeviceID)),
+				numHDM(inDeviceID == DEVICE_ID_INVALID ? 1 : ::NTV2DeviceGetNumHDMIVideoOutputs(inDeviceID));
 	for (size_t ndx(0);  ndx < 10;  ndx++)
-	{	const NTV2OutputDest dst(sDsts[ndx]);
-		const bool ok (inDeviceID == DEVICE_ID_INVALID  ?  true  :  ::NTV2DeviceCanDoOutputDestination(inDeviceID, dst));
-		if (ok)
-			if (	(NTV2_OUTPUT_DEST_IS_SDI(dst)		&&  (inKinds & NTV2_IOKINDS_SDI))
-				||	(NTV2_OUTPUT_DEST_IS_HDMI(dst)		&&  (inKinds & NTV2_IOKINDS_HDMI))
-				||	(NTV2_OUTPUT_DEST_IS_ANALOG(dst)	&&  (inKinds & NTV2_IOKINDS_ANALOG))	)
-					outOutputDests.insert(dst);
+	{
+		const NTV2OutputDest dst(sDsts[ndx]);
+		if (   (NTV2_OUTPUT_DEST_IS_SDI(dst)    && (inKinds & NTV2_IOKINDS_SDI)    && (numSDI > ::NTV2OutputDestinationToChannel(dst)))
+			|| (NTV2_OUTPUT_DEST_IS_HDMI(dst)   && (inKinds & NTV2_IOKINDS_HDMI)   && (numHDM)                                        )
+			|| (NTV2_OUTPUT_DEST_IS_ANALOG(dst) && (inKinds & NTV2_IOKINDS_ANALOG) && (numAnl)                                        ) )
+				outOutputDests.insert(dst);
 	}
 	return true;
 }
@@ -3315,12 +3317,12 @@ bool NTV2GetRegisters::GetRegisterValues (NTV2RegisterValueMap & outValues) cons
 	for (ULWord ndx(0);  ndx < mOutNumRegisters;  ndx++)
 	{
 		outValues [pRegArray[ndx]] = pValArray[ndx];
-#if 0	//	Fake KONAIP25G from C4412G (see also CNTV2XXXXDriverInterface::ReadRegister):
-	if (pRegArray[ndx] == kRegBoardID  &&  pValArray[ndx] == DEVICE_ID_CORVID44_8K)
-		outValues [pRegArray[ndx]] = DEVICE_ID_KONAIP_25G;
-	else if (pRegArray[ndx] == kRegReserved83  ||  pRegArray[ndx] == kRegLPRJ45IP)
-		outValues [pRegArray[ndx]] = 0x0A03FAD9;	//	Local IPv4    10.3.250.217
-#endif	//	0
+#if defined(NTV2_PRETEND_DEVICE)
+	if (pRegArray[ndx] == kRegBoardID  &&  pValArray[ndx] == NTV2_PRETEND_DEVICE_FROM)
+		outValues [pRegArray[ndx]] = NTV2_PRETEND_DEVICE_TO;
+//	else if (pRegArray[ndx] == kRegReserved83  ||  pRegArray[ndx] == kRegLPRJ45IP)
+//		outValues [pRegArray[ndx]] = 0x0A03FAD9;	//	Local IPv4    10.3.250.217
+#endif	//	NTV2_PRETEND_DEVICE
 	}
 	return true;
 }
@@ -3337,12 +3339,12 @@ bool NTV2GetRegisters::GetRegisterValues (NTV2RegisterReads & outValues) const
 		for (NTV2RegValueMapConstIter it(regValMap.begin());  it != regValMap.end();  ++it)
 		{
 			NTV2RegInfo regInfo(/*regNum*/it->first, /*regVal*/it->second);
-#if 0		//	Fake KONAIP25G from C4412G (see also CNTV2XXXXDriverInterface::ReadRegister):
-			if (regInfo.regNum() == kRegBoardID  &&  regInfo.value() == DEVICE_ID_CORVID44_8K)
-				regInfo.setValue(DEVICE_ID_KONAIP_25G);
-			else if (regInfo.regNum() == kRegReserved83  ||  regInfo.regNum() == kRegLPRJ45IP)
-				regInfo.setValue(0x0A03FAD9);	//	Local IPv4    10.3.250.217
-#endif	//	0
+#if defined(NTV2_PRETEND_DEVICE)
+			if (regInfo.regNum() == kRegBoardID  &&  regInfo.value() == NTV2_PRETEND_DEVICE_FROM)
+				regInfo.setValue(NTV2_PRETEND_DEVICE_TO);
+//			else if (regInfo.regNum() == kRegReserved83  ||  regInfo.regNum() == kRegLPRJ45IP)
+//				regInfo.setValue(0x0A03FAD9);	//	Local IPv4    10.3.250.217
+#endif	//	NTV2_PRETEND_DEVICE
 			outValues.push_back(regInfo);
 		}
 		return true;
@@ -3358,12 +3360,12 @@ bool NTV2GetRegisters::GetRegisterValues (NTV2RegisterReads & outValues) const
 			else
 				missingTally++; //	Missing register
 				
-#if 0		//	Fake KONAIP25G from C4412G (see also CNTV2XXXXDriverInterface::ReadRegister):
-			if (it->registerNumber == kRegBoardID  &&  it->registerValue == DEVICE_ID_CORVID44_8K)
-				it->registerValue = DEVICE_ID_KONAIP_25G;
-			else if (it->registerNumber == kRegReserved83  ||  it->registerNumber == kRegLPRJ45IP)
-				it->registerValue = 0x0A03FAD9;	//	Local IPv4    10.3.250.217
-#endif	//	0
+#if defined(NTV2_PRETEND_DEVICE)		//	Fake KONAIP25G from C4412G (see also CNTV2XXXXDriverInterface::ReadRegister):
+			if (it->registerNumber == kRegBoardID  &&  it->registerValue == NTV2_PRETEND_DEVICE_FROM)
+				it->registerValue = NTV2_PRETEND_DEVICE_TO;
+//			else if (it->registerNumber == kRegReserved83  ||  it->registerNumber == kRegLPRJ45IP)
+//				it->registerValue = 0x0A03FAD9;	//	Local IPv4    10.3.250.217
+#endif	//	NTV2_PRETEND_DEVICE
 		}
 		return !missingTally;
 	}

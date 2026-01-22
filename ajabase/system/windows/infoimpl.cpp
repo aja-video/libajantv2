@@ -660,6 +660,7 @@ AJASystemInfoImpl::Rescan(AJASystemInfoSections sections)
 			path.append("\\AppData\\Local\\AJA\\");
 		}
 		mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)] = path;
+		mValueMap[int(AJA_SystemInfoTag_Path_NTV2VirtualDevices)] = path;
 
 		TCHAR szPath[MAX_PATH];
 		HRESULT r;
@@ -681,7 +682,9 @@ AJASystemInfoImpl::Rescan(AJASystemInfoSections sections)
 			path.append(szPath);
 	#endif
 			mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreSystem)] = path;
-			path.append("ntv2\\Firmware\\");
+			path.append("ntv2\\");
+			mValueMap[int(AJA_SystemInfoTag_Path_NTV2Plugins)] = path;
+			path.append("Firmware\\");
 			mValueMap[int(AJA_SystemInfoTag_Path_Firmware)] = path;
 		}
 

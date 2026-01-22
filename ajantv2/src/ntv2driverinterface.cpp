@@ -70,31 +70,33 @@ bool CNTV2DriverInterface::GetOverlappedMode (void) {return gOverlappedMode;}
 /////////////// INSTANCE METHODS
 
 CNTV2DriverInterface::CNTV2DriverInterface ()
-	:	_boardNumber					(0),
-		_boardID						(DEVICE_ID_NOTFOUND),
-		_boardOpened					(false),
+	:	_boardNumber					(0)
+		,_boardID						(DEVICE_ID_NOTFOUND)
+		,_boardOpened					(false)
 #if defined(NTV2_WRITEREG_PROFILING)
-		mRecordRegWrites				(false),
-		mSkipRegWrites					(false),
+		,mRecordRegWrites				(false)
+		,mSkipRegWrites					(false)
 #endif
-		_programStatus					(0),
-		_pRPCAPI						(AJA_NULL),
-		mInterruptEventHandles			(),
-		mEventCounts					(),
+		,_programStatus					(0)
+		,_pRPCAPI						(AJA_NULL)
+		,mInterruptEventHandles			()
+		,mEventCounts					()
 #if defined(NTV2_WRITEREG_PROFILING)
-		mRegWrites						(),
-		mRegWritesLock					(),
+		,mRegWrites						()
+		,mRegWritesLock					()
 #endif	//	NTV2_WRITEREG_PROFILING
 #if !defined(NTV2_DEPRECATE_16_0)
-		_pFrameBaseAddress				(AJA_NULL),
-		_pRegisterBaseAddress			(AJA_NULL),
-		_pRegisterBaseAddressLength		(0),
-		_pXena2FlashBaseAddress			(AJA_NULL),
-		_pCh1FrameBaseAddress			(AJA_NULL),
-		_pCh2FrameBaseAddress			(AJA_NULL),
+		,_pFrameBaseAddress				(AJA_NULL)
+		,_pRegisterBaseAddress			(AJA_NULL)
+		,_pRegisterBaseAddressLength	(0)
+		,_pXena2FlashBaseAddress		(AJA_NULL)
+		,_pCh1FrameBaseAddress			(AJA_NULL)
+		,_pCh2FrameBaseAddress			(AJA_NULL)
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
-		_ulNumFrameBuffers				(0),
-		_ulFrameBufferSize				(0)
+#if !defined(NTV2_DEPRECATE_17_2)
+		,_ulNumFrameBuffers				(0)
+		,_ulFrameBufferSize				(0)
+#endif//!defined(NTV2_DEPRECATE_17_2)
 #if !defined(NTV2_DEPRECATE_16_0)
 		,_pciSlot						(0)			//	DEPRECATE!
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
@@ -130,13 +132,27 @@ CNTV2DriverInterface::CNTV2DriverInterface (const CNTV2DriverInterface & inObjTo
 //	Open local physical device (via ajantv2 driver)
 bool CNTV2DriverInterface::Open (const UWord inDeviceIndex)
 {
-	if (IsOpen()  &&  inDeviceIndex == _boardNumber)
+	if (IsOpen()  &&  inDeviceIndex == GetIndexNumber())
 		return true;	//	Same local device requested, already open
 	Close();
 	if (inDeviceIndex >= MaxNumDevices())
 		{DIFAIL("Requested device index '" << DEC(inDeviceIndex) << "' at/past limit of '" << DEC(MaxNumDevices()) << "'"); return false;}
 	if (!OpenLocalPhysical(inDeviceIndex))
-		return false;
+	{
+		//	Check for virtual device...
+		static ULWord sRecursionCheck(0), RECURSION_LIMIT(32);
+		NTV2DeviceInfo info;
+		if (!CNTV2DeviceScanner::GetDeviceInfo (inDeviceIndex, info))
+			return false;
+		sRecursionCheck++;	//	increment
+		if (sRecursionCheck > RECURSION_LIMIT)
+			{DIFAIL("Failed: " << DEC(RECURSION_LIMIT) << " '.vdev' bounces -- limit exceeded"); return false;}
+		if (!Open(info.vdevUrl))
+			{sRecursionCheck--;  return false;}	//	Open vdev urlSpec failed
+		setDeviceIndexNumber(UWord(info.deviceIndex));	//	Patch _boardNumber
+		sRecursionCheck--;	//	decrement
+		return true;
+	}	//	if OpenLocalPhysical failed
 
 #if !defined(NTV2_ALLOW_OPEN_UNSUPPORTED)
 	//	Check if device is officially supported...
@@ -413,10 +429,6 @@ NTV2DeviceID CNTV2DriverInterface::GetDeviceID (void)
 	ULWord value(0);
 	if (IsOpen()  &&  ReadRegister(kRegBoardID, value))
 	{
-#if 0	//	Fake out:
-	if (value == ULWord(DEVICE_ID_CORVID88))	//	Pretend a Corvid88 is a TTapPro
-		value = ULWord(DEVICE_ID_TTAP_PRO);
-#endif
 		const NTV2DeviceID currentValue(NTV2DeviceID(value+0));
 		if (currentValue != _boardID)
 			DIWARN(xHEX0N(this,16) << ":  NTV2DeviceID " << xHEX0N(value,8) << " (" << ::NTV2DeviceIDToString(currentValue)
@@ -704,8 +716,12 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 		case DEVICE_ID_IOX3:						bitFileInfo.bitFileType = NTV2_BITFILE_IOX3_MAIN;					break;
 		case DEVICE_ID_KONAX:						bitFileInfo.bitFileType = NTV2_BITFILE_KONAX;						break;
 		case DEVICE_ID_KONAXM:						bitFileInfo.bitFileType = NTV2_BITFILE_KONAXM;						break;
+		case DEVICE_ID_KONAX_4CH:                   bitFileInfo.bitFileType = NTV2_BITFILE_KONAX_4CH;                   break;
         case DEVICE_ID_KONAIP_25G:					bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_25G;					break;
-		case DEVICE_ID_ZEFRAM:						bitFileInfo.bitFileType = NTV2_BITFILE_TYPE_INVALID;				break;
+    case DEVICE_ID_IP25_T:
+		case DEVICE_ID_IP25_R:						bitFileInfo.bitFileType = NTV2_BITFILE_TYPE_INVALID;				break;
+		case DEVICE_ID_CORVID44_GEN3:				bitFileInfo.bitFileType = NTV2_BITFILE_CORVID44_GEN3;				break;
+		case DEVICE_ID_CORVID88_GEN3:				bitFileInfo.bitFileType = NTV2_BITFILE_CORVID44_GEN3;				break;
 		case DEVICE_ID_SOFTWARE:
 		case DEVICE_ID_NOTFOUND:					bitFileInfo.bitFileType = NTV2_BITFILE_TYPE_INVALID;				break;
 	#if !defined (_DEBUG)
@@ -733,7 +749,7 @@ bool CNTV2DriverInterface::GetPackageInformation (PACKAGE_INFO_STRUCT & packageI
 
 	if (CNTV2AxiSpiFlash::DeviceSupported(NTV2DeviceID(deviceID)))
 	{
-		CNTV2AxiSpiFlash spiFlash(_boardNumber, false);
+		CNTV2AxiSpiFlash spiFlash(GetIndexNumber(), false);
 
 		uint32_t offset = spiFlash.Offset(SPI_FLASH_SECTION_MCSINFO);
 		vector<uint8_t> mcsInfoData;
@@ -937,8 +953,10 @@ void CNTV2DriverInterface::FinishOpen (void)
 	ReadRegister (kRegCh1Control, val1, kRegMaskFrameFormat, kRegShiftFrameFormat); //	Read PixelFormat
 	ReadRegister (kRegCh1Control, val2, kRegMaskFrameFormatHiBit, kRegShiftFrameFormatHiBit);
 	NTV2PixelFormat pf(NTV2PixelFormat((val1 & 0x0F) | ((val2 & 0x1) << 4)));
+#if !defined(NTV2_DEPRECATE_17_2)
 	_ulFrameBufferSize = ::NTV2DeviceGetFrameBufferSize(_boardID, fg, pf);
 	_ulNumFrameBuffers = ::NTV2DeviceGetNumberFrameBuffers(_boardID, fg, pf);
+#endif//!defined(NTV2_DEPRECATE_17_2)
 
 	ULWord returnVal1 = false;
 	ULWord returnVal2 = false;
@@ -1048,6 +1066,11 @@ bool CNTV2DriverInterface::ReadFlashULWord (const ULWord inAddress, ULWord & out
 	if (!timeoutCount)
 		return false;
 	return ReadRegister(kRegXenaxFlashDOUT, outValue);
+}
+
+void CNTV2DriverInterface::setDeviceIndexNumber (const UWord num)
+{
+	_boardNumber = num;
 }
 
 
@@ -1183,17 +1206,19 @@ bool CNTV2DriverInterface::GetStreamingApplication (ULWord & outAppType, int32_t
 string CNTV2DriverInterface::GetDescription (void) const
 {
 	if (!IsRemote())
-		return "";
+		return "";	//	This implementation is intended for remote/plugin devices
 	string desc(_pRPCAPI->Description());
-	const NTV2Dictionary parms(ConnectParams());
-	if (desc.empty()  &&  !parms.empty())
-	{
+	if (desc.empty())
+	{	//	Plugin/remote device didn't provide description
+		const NTV2Dictionary parms(ConnectParams());
 		NTV2StringList strs;
 		if (parms.hasKey(kNTV2PluginRegInfoKey_LongName))
-			strs.push_back("\"" + parms.valueForKey(kNTV2PluginRegInfoKey_LongName) + "\" plugin");
+			strs.push_back("\"" + parms.valueForKey(kNTV2PluginRegInfoKey_LongName) + "\"");
+		else if (parms.hasKey(kNTV2PluginRegInfoKey_ShortName))
+			strs.push_back(parms.valueForKey(kNTV2PluginRegInfoKey_ShortName));
 		if (parms.hasKey(kNTV2PluginRegInfoKey_Description))
 			strs.push_back(parms.valueForKey(kNTV2PluginRegInfoKey_Description));
-		if (parms.hasKey(kNTV2PluginRegInfoKey_Copyright))
+		else if (parms.hasKey(kNTV2PluginRegInfoKey_Copyright))
 			strs.push_back(parms.valueForKey(kNTV2PluginRegInfoKey_Copyright));
 		else if (parms.hasKey(kNTV2PluginRegInfoKey_Vendor))
 			strs.push_back(parms.valueForKey(kNTV2PluginRegInfoKey_Vendor));
@@ -1664,7 +1689,8 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 																|| devID == DEVICE_ID_KONA5_8K			|| devID == DEVICE_ID_KONA5_3DLUT
 																|| devID == DEVICE_ID_KONA5_8K_MV_TX	|| devID == DEVICE_ID_CORVID44_8KMK
 																|| devID == DEVICE_ID_CORVID44_8K		|| devID == DEVICE_ID_CORVID44_2X4K
-																|| devID == DEVICE_ID_CORVID44_PLNR		|| devID == DEVICE_ID_KONAX;
+																|| devID == DEVICE_ID_CORVID44_PLNR		|| devID == DEVICE_ID_KONAX
+																|| devID == DEVICE_ID_KONAX_4CH;
 													break;
 
 		case kDeviceCanDoDSKOpacity:				outValue = ::NTV2DeviceCanDoDSKOpacity(devID);						break;	//	Deprecate?
@@ -1672,6 +1698,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanDoDVCProHD:					outValue = ::NTV2DeviceCanDoDVCProHD(devID);						break;	//	Deprecate?
 		case kDeviceCanDoEnhancedCSC:				outValue = ::NTV2DeviceCanDoEnhancedCSC(devID);						break;	//	Deprecate?
 		case kDeviceCanDoFrameStore1Display:		outValue = ::NTV2DeviceCanDoFrameStore1Display(devID);				break;	//	Deprecate?
+		case kDeviceCanDoGPIO:						outValue = ::NTV2DeviceCanDoGPIO(devID);							break;
 		case kDeviceCanDoHDMIOutStereo:				outValue = ::NTV2DeviceCanDoHDMIOutStereo(devID);					break;	//	Deprecate?
 		case kDeviceCanDoHDV:						outValue = ::NTV2DeviceCanDoHDV(devID);								break;	//	Deprecate?
 		case kDeviceCanDoHDVideo:					outValue = ::NTV2DeviceCanDoHDVideo(devID);							break;	//	Deprecate?
@@ -1704,6 +1731,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanMeasureTemperature:			outValue = ::NTV2DeviceCanMeasureTemperature(devID);				break;
 		case kDeviceCanReportFrameSize:				outValue = ::NTV2DeviceCanReportFrameSize(devID);					break;
 		case kDeviceHasBiDirectionalSDI:			outValue = ::NTV2DeviceHasBiDirectionalSDI(devID);					break;
+		case kDeviceHasBracketLED:					outValue = ::NTV2DeviceHasBracketLED(devID);						break;
 		case kDeviceHasColorSpaceConverterOnChannel2:	outValue = ::NTV2DeviceCanDoWidget(devID, NTV2_WgtCSC2);		break;	//	Deprecate?
 		case kDeviceHasIDSwitch:					outValue = ::NTV2DeviceCanDoIDSwitch(devID);						break;
         case kDeviceHasNTV4FrameStores:				outValue = ::NTV2DeviceHasNTV4FrameStores(devID);                   break;

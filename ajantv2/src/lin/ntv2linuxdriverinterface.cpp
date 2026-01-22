@@ -87,7 +87,7 @@ bool CNTV2LinuxDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 	if (_hDevice == INVALID_HANDLE_VALUE)
         {LDIFAIL("Failed to open device index '" << inDeviceIndex << "'");  return false;}
 
-	_boardNumber = inDeviceIndex;
+	setDeviceIndexNumber(inDeviceIndex);
 	if (!CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID))
 	{
 		LDIFAIL ("ReadRegister failed for 'kRegBoardID': ndx=" << inDeviceIndex << " hDev=" << _hDevice << " id=" << HEX8(_boardID));
@@ -97,10 +97,10 @@ bool CNTV2LinuxDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 			close(int(_hDevice));
 			return false;
 		}
-		LDIDBG("Retry succeeded: ndx=" << _boardNumber << " hDev=" << _hDevice << " id=" << ::NTV2DeviceIDToString(_boardID));
+		LDIDBG("Retry succeeded: ndx=" << GetIndexNumber() << " hDev=" << _hDevice << " id=" << ::NTV2DeviceIDToString(_boardID));
 	}
 	_boardOpened = true;
-	LDIINFO ("Opened '" << boardStr << "' devID=" << HEX8(_boardID) << " ndx=" << DEC(_boardNumber));
+	LDIINFO ("Opened '" << boardStr << "' devID=" << HEX8(_boardID) << " ndx=" << DEC(GetIndexNumber()));
 	return true;
 }
 
@@ -112,13 +112,13 @@ bool CNTV2LinuxDriverInterface::CloseLocalPhysical (void)
 	UnmapDMADriverBuffer();
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 
-	LDIINFO ("Closed deviceID=" << HEX8(_boardID) << " ndx=" << DEC(_boardNumber) << " hDev=" << _hDevice);
+	LDIINFO ("Closed deviceID=" << HEX8(_boardID) << " ndx=" << DEC(GetIndexNumber()) << " hDev=" << _hDevice);
 	if (_hDevice != INVALID_HANDLE_VALUE)
 		close(int(_hDevice));
 	_hDevice = INVALID_HANDLE_VALUE;
 	_boardOpened = false;
 	_boardID = DEVICE_ID_NOTFOUND;
-	_boardNumber = NTV2_MAXBOARDS;
+//	don't change, breaks vdev opening		_boardNumber = NTV2_MAXBOARDS;
 	return true;
 }
 #endif	//	!defined(NTV2_NULL_DEVICE)
@@ -154,12 +154,12 @@ bool CNTV2LinuxDriverInterface::ReadRegister (const ULWord inRegNum,  ULWord & o
 	if (result)
 		{LDIFAIL("IOCTL_NTV2_READ_REGISTER failed");	return false;}
 	outValue = ra.RegisterValue;
-#if 0	//	Fake KONAIP25G from C4412G (see also NTV2GetRegisters::GetRegisterValues):
-	if (inRegNum == kRegBoardID  &&  outValue == DEVICE_ID_CORVID44_8K)
-		outValue = DEVICE_ID_KONAIP_25G;
-	else if (inRegNum == kRegReserved83  ||  inRegNum == kRegLPRJ45IP)
-		outValue = 0x0A03FAD9;	//	Local IPv4    10.3.250.217
-#endif	//	0
+#if defined(NTV2_PRETEND_DEVICE)
+	if (inRegNum == kRegBoardID  &&  outValue == NTV2_PRETEND_DEVICE_FROM)
+		outValue = NTV2_PRETEND_DEVICE_TO;
+//	else if (inRegNum == kRegReserved83  ||  inRegNum == kRegLPRJ45IP)
+//		outValue = 0x0A03FAD9;	//	Local IPv4    10.3.250.217
+#endif	//	NTV2_PRETEND_DEVICE
 	return true;
 }
 

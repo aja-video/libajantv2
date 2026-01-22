@@ -13,9 +13,6 @@
 #include "ajabase/common/timebase.h"
 #include "ajabase/system/process.h"
 #include "ajabase/system/file_io.h"
-#include "ajaanc/includes/ancillarydata_hdr_sdr.h"
-#include "ajaanc/includes/ancillarydata_hdr_hdr10.h"
-#include "ajaanc/includes/ancillarydata_hdr_hlg.h"
 #include <fstream>	//	For ifstream
 
 using namespace std;
@@ -103,7 +100,7 @@ void NTV2Player::Quit (void)
 	{
 		mDevice.ReleaseStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid()));
 		if (NTV2_IS_VALID_TASK_MODE(mSavedTaskMode))
-			mDevice.SetEveryFrameServices(mSavedTaskMode);		//	Restore prior task mode
+			mDevice.SetTaskMode(mSavedTaskMode);	//	Restore prior task mode
 	}
 }	//	Quit
 
@@ -142,11 +139,11 @@ AJAStatus NTV2Player::Init (void)
 
 	if (!mConfig.fDoMultiFormat)
 	{
-		mDevice.GetEveryFrameServices(mSavedTaskMode);		//	Save the current task mode
+		mDevice.GetTaskMode(mSavedTaskMode);	//	Save the current task mode
 		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid())))
-			return AJA_STATUS_BUSY;		//	Device is in use by another app -- fail
+			return AJA_STATUS_BUSY;	//	Device is in use by another app -- fail
 	}
-	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Set OEM service level
+	mDevice.SetTaskMode(NTV2_OEM_TASKS);	//	Set OEM service level
 
 	if (mDevice.features().CanDoMultiFormat())
 		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
@@ -412,7 +409,7 @@ bool NTV2Player::RouteOutputSignal (void)
 	mTCIndexes.clear();
 
 	const NTV2OutputXptID	cscVidOutXpt(::GetCSCOutputXptFromChannel(mConfig.fOutputChannel,  false/*isKey*/,  !isRGB/*isRGB*/));
-	const NTV2OutputXptID	fsVidOutXpt (::GetFrameBufferOutputXptFromChannel(mConfig.fOutputChannel,  isRGB/*isRGB*/,  false/*is425*/));
+	const NTV2OutputXptID	fsVidOutXpt (::GetFrameStoreOutputXptFromChannel(mConfig.fOutputChannel,  isRGB/*isRGB*/,  false/*is425*/));
 	const NTV2InputXptID	cscInputXpt (isRGB ? ::GetCSCInputXptFromChannel(mConfig.fOutputChannel, false/*isKeyInput*/) : NTV2_INPUT_CROSSPOINT_INVALID);
 
 	if (!mConfig.fDoMultiFormat)  //	Not multiformat:  We own the whole device...
@@ -501,7 +498,6 @@ void NTV2Player::ConsumeFrames (void)
 	ULWord					acOptions (AUTOCIRCULATE_WITH_RP188);
 	AUTOCIRCULATE_TRANSFER	outputXfer;
 	AUTOCIRCULATE_STATUS	outputStatus;
-	AJAAncillaryData *		pPkt (AJA_NULL);
 	ULWord					goodXfers(0), badXfers(0), starves(0), noRoomWaits(0);
 	ifstream *				pAncStrm (AJA_NULL);
 
@@ -510,20 +506,7 @@ void NTV2Player::ConsumeFrames (void)
 	mDevice.WaitForOutputVerticalInterrupt(mConfig.fOutputChannel, 4);	//	Let it stop
 	PLNOTE("Thread started");
 
-	if (pPkt)
-	{	//	Allocate page-aligned host Anc buffer...
-		uint32_t hdrPktSize	(0);
-		if (!outputXfer.acANCBuffer.Allocate(gAncMaxSizeBytes, BUFFER_PAGE_ALIGNED)  ||  !outputXfer.acANCBuffer.Fill(0LL))
-			PLWARN("Anc buffer " << xHEX0N(gAncMaxSizeBytes,8) << "(" << DEC(gAncMaxSizeBytes) << ")-byte allocate failed -- HDR anc insertion disabled");
-		else if (AJA_FAILURE(pPkt->GenerateTransmitData (outputXfer.acANCBuffer, outputXfer.acANCBuffer,  hdrPktSize)))
-		{
-			PLWARN("HDR anc insertion disabled -- GenerateTransmitData failed");
-			outputXfer.acANCBuffer.Deallocate();
-		}
-		else
-			acOptions |= AUTOCIRCULATE_WITH_ANC;
-	}
-	else if (!mConfig.fAncDataFilePath.empty())
+	if (!mConfig.fAncDataFilePath.empty())
 	{	//	Open raw anc file for reading...
 		pAncStrm = new ifstream(mConfig.fAncDataFilePath.c_str(), ios::binary);
 		do
@@ -573,8 +556,7 @@ void NTV2Player::ConsumeFrames (void)
 #endif
 
 	//	Initialize & start AutoCirculate...
-	bool initOK = mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,  mConfig.fFrames.count(),  mAudioSystem,  acOptions,
-														1 /*numChannels*/,  mConfig.fFrames.firstFrame(),  mConfig.fFrames.lastFrame());
+	bool initOK = mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,  mConfig.fFrames,  mAudioSystem,  acOptions);
 	if (!initOK)
 		{PLFAIL("AutoCirculateInitForOutput failed");  mGlobalQuit = true;}
 	else if (!mConfig.WithVideo())
@@ -740,10 +722,10 @@ void NTV2Player::ProduceFrames (void)
 			mToneFrequency = gFrequencies[freqNdx];
 			timeOfLastSwitch = currentTime;
 			if (sTotalAncFileBytes)
-				PLINFO("F" << DEC0N(mCurrentFrame,6) << ": " << tcString << ": tone=" << mToneFrequency << "Hz, pattern='"
+				PLDBG("F" << DEC0N(mCurrentFrame,6) << ": " << tcString << ": tone=" << mToneFrequency << "Hz, pattern='"
 						<< tpNames.at(testPatNdx) << "', anc file " << DEC(sCurrentAncFileBytes * 100ULL / sTotalAncFileBytes) << "%");
 			else
-				PLINFO("F" << DEC0N(mCurrentFrame,6) << ": " << tcString << ": tone=" << mToneFrequency << "Hz, pattern='"
+				PLDBG("F" << DEC0N(mCurrentFrame,6) << ": " << tcString << ": tone=" << mToneFrequency << "Hz, pattern='"
 						<< tpNames.at(testPatNdx) << "'");
 		}	//	if time to switch test pattern & tone frequency
 

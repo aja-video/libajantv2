@@ -150,10 +150,12 @@ AJAExport void	ConvertLinetoRGB (UWord *			ycbcrBuffer,
 // ConvertLineto10BitRGB
 // 10 Bit YCbCr and 10 Bit RGB Version
 AJAExport void	ConvertLineto10BitRGB (UWord *				ycbcrBuffer,
-									  RGBAlpha10BitPixel *	rgbaBuffer,
-									  ULWord				numPixels,
-									  bool					fUseSDMatrix,
-									  bool					fUseSMPTERange	= false);
+                                       RGBAlpha10BitPixel *	rgbaBuffer,
+									   ULWord				numPixels,
+									   bool					fUseSDMatrix,
+                                       bool					fUseSMPTERange	= false,
+                                       bool                 fAlphaFromLuma	= false);
+
 // ConvertLineto10BitYCbCrA
 // 10 Bit YCbCr to 10 Bit YCbCrA
 AJAExport void	ConvertLineto10BitYCbCrA (const UWord * pInYCbCrBuffer,
@@ -256,6 +258,10 @@ AJAExport void	PackRGB10BitFor10BitDPX (RGBAlpha10BitPixel *	pBuffer,
 
 // Pack 10 Bit RGBA to NTV2_FBF_10BIT_RGB_PACKED Format for our board
 AJAExport void	PackRGB10BitFor10BitRGBPacked (RGBAlpha10BitPixel * pBuffer,
+												const ULWord		inNumPixels);
+
+// Pack 10 Bit RGBA to NTV2_FBF_10BIT_ARGB Format for our board
+AJAExport void	PackRGB10BitFor10BitARGBPacked (RGBAlpha10BitPixel * pBuffer,
 												const ULWord		inNumPixels);
 
 

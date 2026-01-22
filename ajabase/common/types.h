@@ -25,6 +25,8 @@
 	#define AJA_USE_CPLUSPLUS11  //	If defined, use C++11 features (requires C++11 compiler)
 #endif	//	!defined(AJA_USE_CPLUSPLUS11)
 
+#include "ntv2deprecate.h"
+
 #if defined(AJA_WINDOWS)
 
 	#if !defined(NULL)

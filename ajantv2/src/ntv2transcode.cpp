@@ -366,7 +366,7 @@ void ConvertLinetoRGB(UWord * ycbcrBuffer,
 		ycbcrPixel.y = (UWord)Y1; 
 		ycbcrPixel.cr = (UWord)Cr1; 
 		if( fAlphaFromLuma )
-			ycbcrPixel.Alpha = (UWord)Y1/4;
+			ycbcrPixel.Alpha = ycbcrPixel.y/4;
 
 		if(fUseSDMatrix) {
 			if (fUseSMPTERange) {
@@ -383,6 +383,8 @@ void ConvertLinetoRGB(UWord * ycbcrBuffer,
 		}
 		// Read lone midde Y;
 		ycbcrPixel.y = *ycbcrBuffer++;
+		if( fAlphaFromLuma )
+			ycbcrPixel.Alpha = ycbcrPixel.y/4;
 
 		// Read Next full bandwidth sample
 		// unless we are at the end of a line
@@ -476,7 +478,8 @@ void ConvertLineto10BitRGB(UWord * ycbcrBuffer,
 					  RGBAlpha10BitPixel * rgbaBuffer,
 					  ULWord numPixels,
 					  bool fUseSDMatrix,
-					  bool fUseSMPTERange)
+                      bool fUseSMPTERange,
+    				  bool fAlphaFromLuma)
 {
 	YCbCr10BitAlphaPixel ycbcrPixel = {0,0,0,0};
 	UWord Cb1,Y1,Cr1,Cb2,Y2,Cr2;
@@ -491,6 +494,8 @@ void ConvertLineto10BitRGB(UWord * ycbcrBuffer,
 		ycbcrPixel.cb = (UWord)Cb1;
 		ycbcrPixel.y = (UWord)Y1; 
 		ycbcrPixel.cr = (UWord)Cr1;
+		if( fAlphaFromLuma )
+			ycbcrPixel.Alpha = ycbcrPixel.y;
 
 		if(fUseSDMatrix) {
 			if (fUseSMPTERange) {
@@ -507,6 +512,8 @@ void ConvertLineto10BitRGB(UWord * ycbcrBuffer,
 		}
 		// Read lone midde Y;
 		ycbcrPixel.y = *ycbcrBuffer++;
+		if( fAlphaFromLuma )
+			ycbcrPixel.Alpha = ycbcrPixel.y;
 
 		// Read Next full bandwidth sample
 		// unless we are at the end of a line
@@ -789,6 +796,25 @@ void PackRGB10BitFor10BitRGBPacked (RGBAlpha10BitPixel * pBuffer, const ULWord i
 		value |= ((Red&0x3)<<28) + ((Green&0x3)<<26) + ((Blue&0x3)<<24);
 
 		pOutputBuffer[pixel] = value;
+	}
+}
+
+// Pack 10 Bit RGBA to NTV2_FBF_10BIT_ARGB Format for our board
+void PackRGB10BitFor10BitARGBPacked (RGBAlpha10BitPixel * pBuffer, const ULWord inNumPixels)
+{
+    UByte *	pOutputBuffer (reinterpret_cast<UByte*>(pBuffer));
+    ULWord iByte = 0;
+	for (ULWord pixel(0);  pixel < inNumPixels;	 pixel++)
+	{
+		const ULWord Red	(pBuffer[pixel].Red);
+		const ULWord Green	(pBuffer[pixel].Green);
+		const ULWord Blue	(pBuffer[pixel].Blue);
+		const ULWord Alpha	(pBuffer[pixel].Alpha);
+        pOutputBuffer[iByte++] = (Blue & 0xFF);
+        pOutputBuffer[iByte++] = ((Blue >> 8) & 0x03) | ((Green & 0x3F) << 2);
+        pOutputBuffer[iByte++] = ((Green >> 6) & 0x0F) | ((Red & 0x0F) << 4);
+        pOutputBuffer[iByte++] = ((Red >> 4) & 0x3F) | ((Alpha & 0x03) << 6);
+        pOutputBuffer[iByte++] = ((Alpha >> 2) & 0xFF);
 	}
 }
 

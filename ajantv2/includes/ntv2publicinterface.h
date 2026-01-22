@@ -4465,7 +4465,11 @@ typedef enum
 	NTV2_STANDARD_TASKS,	///< @brief 1: Standard/Retail: device configured by AJA ControlPanel, service/daemon, and driver.
 	NTV2_OEM_TASKS,			///< @brief 2: OEM (recommended): device configured by client application(s) with some driver involvement.
 	NTV2_TASK_MODE_INVALID	= 0xFF
-} NTV2EveryFrameTaskMode, NTV2TaskMode;
+} NTV2TaskMode;
+
+#if !defined(NTV2_DEPRECATE_18_0)
+	typedef NTV2TaskMode	NTV2EveryFrameTaskMode;	///< @deprecated    Use NTV2TaskMode instead.
+#endif	//	!defined(NTV2_DEPRECATE_18_0)
 
 #define NTV2_IS_VALID_TASK_MODE(__m__)		((__m__) == NTV2_DISABLE_TASKS	||	(__m__) == NTV2_STANDARD_TASKS	||	(__m__) == NTV2_OEM_TASKS)
 #define NTV2_IS_STANDARD_TASKS(__m__)		((__m__) == NTV2_STANDARD_TASKS)
@@ -5818,7 +5822,7 @@ typedef enum
 					@param[in]	inWidth		Optionally specifies my initial width dimension, in pixels. Defaults to zero.
 					@param[in]	inHeight	Optionally specifies my initial height dimension, in lines. Defaults to zero.
 				**/
-				explicit inline NTV2FrameSize (const ULWord inWidth = 0, const ULWord inHeight = 0)	{Set (inWidth, inHeight);}
+				explicit inline NTV2FrameSize (const ULWord inWidth = 0, const ULWord inHeight = 0)	{set (inWidth, inHeight);}
 				explicit inline	NTV2FrameSize (const NTV2FrameGeometry inFG)	{set(FGWidth(inFG), FGHeight(inFG));}
 				inline ULWord	width (void) const		{return mWidth;}	///< @return	My width, in pixels.
 				inline ULWord	height (void) const		{return mHeight;}	///< @return	My height, in lines/rows.
@@ -5870,15 +5874,15 @@ typedef enum
 				inline NTV2FrameSize &	swap (void)				{return set (height(), width());}
 
 				#if !defined(NTV2_DEPRECATE_17_5)
-					inline ULWord GetWidth (void) const  {return width();}	///< @deprecated	Use width() instead
-					inline ULWord GetHeight (void) const  {return height();}///< @deprecated	Use height() instead
-					inline ULWord Width (void) const  {return width();}		///< @deprecated	Use width() instead
-					inline ULWord Height (void) const  {return height();}	///< @deprecated	Use height() instead
-					inline bool IsValid (void) const  {return isValid();}	///< @deprecated	Use isValid() instead
-					inline NTV2FrameSize & SetWidth (const ULWord v)	{return setWidth(v);}	///< @deprecated	Use setWidth() instead
-					inline NTV2FrameSize & SetHeight (const ULWord v)	{return setHeight(v);}	///< @deprecated	Use setHeight() instead
-					inline NTV2FrameSize & Set (const ULWord w, const ULWord h)	{return set(w,h);}	///< @deprecated	Use set() instead
-					inline NTV2FrameSize & Reset (void)	{return reset();}	///< @deprecated	Use reset() instead
+					inline ULWord NTV2_DEPRECATED_17_5(GetWidth (void) const)  {return width();}	///< @deprecated	Use width() instead
+					inline ULWord NTV2_DEPRECATED_17_5(GetHeight (void) const)  {return height();}///< @deprecated	Use height() instead
+					inline ULWord NTV2_DEPRECATED_17_5(Width (void) const)  {return width();}		///< @deprecated	Use width() instead
+					inline ULWord NTV2_DEPRECATED_17_5(Height (void) const)  {return height();}	///< @deprecated	Use height() instead
+					inline bool NTV2_DEPRECATED_17_5(IsValid (void) const)  {return isValid();}	///< @deprecated	Use isValid() instead
+					inline NTV2FrameSize & NTV2_DEPRECATED_17_5(SetWidth (const ULWord v))	{return setWidth(v);}	///< @deprecated	Use setWidth() instead
+					inline NTV2FrameSize & NTV2_DEPRECATED_17_5(SetHeight (const ULWord v))	{return setHeight(v);}	///< @deprecated	Use setHeight() instead
+					inline NTV2FrameSize & NTV2_DEPRECATED_17_5(Set (const ULWord w, const ULWord h))	{return set(w,h);}	///< @deprecated	Use set() instead
+					inline NTV2FrameSize & NTV2_DEPRECATED_17_5(Reset (void))	{return reset();}	///< @deprecated	Use reset() instead
 				#endif	//	!defined(NTV2_DEPRECATE_17_5)
 
 				static ULWord	FGWidth (const NTV2FrameGeometry fg);
@@ -5897,7 +5901,7 @@ typedef enum
 			NTV2_END_PRIVATE
 		NTV2_STRUCT_END(NTV2FrameSize)
 		#if !defined(NTV2_DEPRECATE_17_5)
-			typedef NTV2FrameSize	NTV2FrameDimensions;
+			typedef NTV2FrameSize	NTV2FrameDimensions;	///< @deprecated Use NTV2FrameSize instead.
 		#endif	//	!defined(NTV2_DEPRECATE_17_5)
 
 		/**
@@ -5909,8 +5913,10 @@ typedef enum
 						-	A source and destination pitch (span between segments, in elements);
 						-	A segment length, in elements;
 						-	A segment count.
+
 						The element size defaults to 1 byte per element, must be a power-of-2, and cannot be
 						larger than 8 bytes.
+
 						There are also some optional attributes:
 						-	Optional "source vertical flip" flag that if set indicates that during the transfer,
 							the source is read bottom-to-top. Defaults to normal "top-to-bottom" operation.
@@ -6163,7 +6169,7 @@ typedef enum
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
 
 			NTV2_BEGIN_PRIVATE
-				ULWord	mFlags;					///< @brief Lowest 2 bits determines element size, direction bits 8 & 9 (src & dst)
+				ULWord	mFlags;					///< @brief Bits [0:1] determine element size (0=1, 1=2, 2=4, 3=8), reverse direction BIT(8) src, BIT(9) dst
 				ULWord	mNumSegments;			///< @brief Number of segments to transfer (i.e. row count).
 				ULWord	mElementsPerSegment;	///< @brief Size of each segment, in elements.
 				ULWord	mInitialSrcOffset;		///< @brief Initial source offset, in elements.
@@ -7778,6 +7784,12 @@ typedef enum
 				**/
 				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 16.3
 
+				inline ULWord				numRegisters (void) const				{return mInNumRegisters;}	//	New in SDK 18.0
+				inline const NTV2Buffer &	requestedRegisterNumbers (void) const	{return mInRegisters;}		//	New in SDK 18.0
+				inline ULWord &				outNumRegisters (void)					{return mOutNumRegisters;}	//	New in SDK 18.0
+				inline NTV2Buffer &			outGoodRegisterNumbers (void)			{return mOutGoodRegisters;}	//	New in SDK 18.0
+				inline NTV2Buffer &			outRegisterValues (void)				{return mOutValues;}		//	New in SDK 18.0
+
 				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)
 
@@ -7841,6 +7853,10 @@ typedef enum
 					@return A reference to the output stream.
 				**/
 				std::ostream &	Print (std::ostream & inOutStream) const;
+
+				inline const NTV2Buffer &	regInfos (void) const		{return mInRegInfos;}		//	New in SDK 18.0
+				inline ULWord &				outNumFailures (void)		{return mOutNumFailures;}	//	New in SDK 18.0
+				inline NTV2Buffer &			outBadRegIndexes (void)		{return mOutBadRegIndexes;}	//	New in SDK 18.0
 
 				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)
@@ -9091,7 +9107,8 @@ typedef enum
 		#define NTV2_MAIL_BUFFER_SUCCESS				BIT(0)			///< @brief Used in ::NTV2MailBuffer success
 		#define NTV2_MAIL_BUFFER_FAIL					BIT(1)			///< @brief Used in ::NTV2MailBuffer fail
 		#define NTV2_MAIL_BUFFER_OVERFLOW				BIT(2)			///< @brief Used in ::NTV2MailBuffer buffer overflow
-		#define NTV2_MAIL_BUFFER_TIMEOUT				BIT(3)			///< @brief Used in ::NTV2MailBuffer transfer timeout
+		#define NTV2_MAIL_BUFFER_TIMEOUT				BIT(3)			///< @brief Used in ::NTV2MailBuffer transfer timeout (timed out after bytes transferred > 0)
+		#define NTV2_MAIL_BUFFER_TRYAGAIN				BIT(4)			///< @brief Used in ::NTV2MailBuffer transfer try again (timed out before bytes tranferred > 0)
 
         // Mail buffer maximum size
         #define NTV2_MAIL_BUFFER_MAX                    4096        
@@ -9150,6 +9167,9 @@ typedef enum
 
 			typedef std::set <NTV2FrameRate>					NTV2FrameRateSet;					///< @brief A set of distinct NTV2FrameRate values.  New in SDK 17.0.
 			typedef NTV2FrameRateSet::const_iterator			NTV2FrameRateSetConstIter;			///< @brief A handy const iterator for iterating over an NTV2FrameRateSet.
+
+			typedef std::set <NTV2AudioRate>					NTV2AudioRateSet;					///< @brief A set of distinct NTV2AudioRate values.  New in SDK 18.0.
+			typedef NTV2AudioRateSet::const_iterator			NTV2AudioRateSetConstIter;			///< @brief A handy const iterator for iterating over an NTV2AudioRateSet.
 
 			/**
 				@brief		Prints the given ::UWordSequence contents into the given output stream.
@@ -10326,4 +10346,10 @@ typedef struct HDRDriverValues{
 #define NTV2_IS_VALID_HDR_MASTERING_LUMINENCE(__val__)	(true)
 #define NTV2_IS_VALID_HDR_LIGHT_LEVEL(__val__)			(true)
 
+#if 0  &&  defined(_DEBUG)
+	//	One-stop-shop for pretend/fake device swap (AJA internal use only)
+	#define NTV2_PRETEND_DEVICE
+	#define NTV2_PRETEND_DEVICE_FROM	DEVICE_ID_IOX3
+	#define NTV2_PRETEND_DEVICE_TO		DEVICE_ID_KONAHDMI
+#endif	//	 _DEBUG
 #endif	//	NTV2PUBLICINTERFACE_H

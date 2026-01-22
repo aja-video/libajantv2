@@ -369,6 +369,7 @@ AJASystemInfoImpl::Rescan(AJASystemInfoSections sections)
 			mValueMap[int(AJA_SystemInfoTag_Path_UserHome)] = homePath;
 			mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)] = homePath;
 			mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)].append("/.aja/config/");
+			mValueMap[int(AJA_SystemInfoTag_Path_NTV2VirtualDevices)] = std::string(homePath) + "/.aja/";
 		}
 
 		mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreSystem)] = "/opt/aja/config/";
@@ -376,6 +377,7 @@ AJASystemInfoImpl::Rescan(AJASystemInfoSections sections)
 		mValueMap[int(AJA_SystemInfoTag_Path_Applications)] = "/opt/aja/bin/";
 		mValueMap[int(AJA_SystemInfoTag_Path_Utilities)] = "/opt/aja/bin/";
 		mValueMap[int(AJA_SystemInfoTag_Path_Firmware)] = "/opt/aja/firmware/";
+		mValueMap[int(AJA_SystemInfoTag_Path_NTV2Plugins)] = "/opt/aja/";
 
 		ret = AJA_STATUS_SUCCESS;
 	}

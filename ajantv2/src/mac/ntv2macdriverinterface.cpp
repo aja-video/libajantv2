@@ -179,17 +179,29 @@ CNTV2MacDriverInterface::~CNTV2MacDriverInterface (void)
 		io_iterator_t	ioIterator	(0);
 		IOReturn		error		(kIOReturnSuccess);
 		io_object_t		ioObject	(0);
+		#if defined(NTV2_MACOS_SANDBOX)
+		static const string kSvcNames[] = {sNTV2PCIDEXTName, ""};	//	DEXT only, no KEXT
+		static const size_t kNumSvcNames = 1;
+		#else
 		static const string kSvcNames[] = {sNTV2PCIDEXTName, sNTV2PCIKEXTClassName, ""};	//	Try DEXT first, then KEXT
+		static const size_t kNumSvcNames = 2;
+		#endif
 
-		for (size_t svcNdx(0);  svcNdx < 2  &&  !mConnection;  svcNdx++)
+		for (size_t svcNdx(0);  svcNdx < kNumSvcNames  &&  !mConnection;  svcNdx++)
 		{
 			const string &	svcName (kSvcNames[svcNdx]);
 			const char *	pSvcName(svcName.c_str());
+		#if !defined(NTV2_MACOS_SANDBOX)
 			const bool		tryKEXT	(svcName.find("com_aja_iokit") != string::npos);
+		#endif
 
 			//	Create an iterator to search for our driver instances...
 			error = OS_IOServiceGetMatchingServices (kIOMasterPortDefault,
+		#if defined(NTV2_MACOS_SANDBOX)
+													OS_IOServiceNameMatching(pSvcName),
+		#else
 													tryKEXT ? OS_IOServiceMatching(pSvcName) : OS_IOServiceNameMatching(pSvcName),
+		#endif
 													&ioIterator);
 			if (error != kIOReturnSuccess)
 				{DIWARN(KR(error) << ": No '" << svcName << "' driver");  continue;}
@@ -216,7 +228,11 @@ CNTV2MacDriverInterface::~CNTV2MacDriverInterface (void)
 			if (error != kIOReturnSuccess)
 				{DIWARN(KR(error) << ": IOServiceOpen failed for '" << svcName << "' ndx=" << inDeviceIndex);  continue;}
 
+		#if defined(NTV2_MACOS_SANDBOX)
+			mIsDEXT = true;
+		#else
 			mIsDEXT = !tryKEXT;
+		#endif
 		}	//	for each in kServiceNames
 
 		_boardOpened = mConnection != 0;
@@ -225,7 +241,7 @@ CNTV2MacDriverInterface::~CNTV2MacDriverInterface (void)
 		else
 			{DIFAIL(INSTP(this) << ": No connection: ndx=" << inDeviceIndex);  return false;}
 
-		_boardNumber = inDeviceIndex;
+		setDeviceIndexNumber (inDeviceIndex);
 		if (!CNTV2DriverInterface::ReadRegister (kRegBoardID, _boardID))
 		{
 			DIFAIL("ReadRegister(kRegBoardID) failed: ndx=" << inDeviceIndex << " con=" << HEX8(GetIOConnect()) << " boardID=" << HEX8(_boardID));
@@ -234,7 +250,7 @@ CNTV2MacDriverInterface::~CNTV2MacDriverInterface (void)
 		}
 
 		//	Good to go...
-		DIDBG("Opened ndx=" << _boardNumber << " con=" << HEX8(GetIOConnect()) << " id=" << ::NTV2DeviceIDToString(_boardID));
+		DIDBG("Opened ndx=" << GetIndexNumber() << " con=" << HEX8(GetIOConnect()) << " id=" << ::NTV2DeviceIDToString(_boardID));
 		return true;
 
 	}	//	OpenLocalPhysical
@@ -243,9 +259,9 @@ CNTV2MacDriverInterface::~CNTV2MacDriverInterface (void)
 	bool CNTV2MacDriverInterface::CloseLocalPhysical (void)
 	{
 		NTV2_ASSERT(!IsRemote());
-		DIDBG("Closed " << (mIsDEXT ? "DEXT" : "KEXT") << " ndx=" << _boardNumber << " con=" << HEX8(GetIOConnect()) << " id=" << ::NTV2DeviceIDToString(_boardID));
+		DIDBG("Closed " << (mIsDEXT ? "DEXT" : "KEXT") << " ndx=" << GetIndexNumber() << " con=" << HEX8(GetIOConnect()) << " id=" << ::NTV2DeviceIDToString(_boardID));
 		_boardOpened = false;
-		_boardNumber = 0;
+//	leave as-is	_boardNumber = 0;
 		if (mConnection)
 			OS_IOServiceClose(mConnection);
 		mConnection = 0;
@@ -414,17 +430,17 @@ bool CNTV2MacDriverInterface::ReadRegister (const ULWord inRegNum, ULWord & outV
 	}
 	if (kernResult != KERN_SUCCESS)
 	{
-		DIFAIL(KR(kernResult) << ": ndx=" << _boardNumber << ", con=" << HEX8(GetIOConnect())
+		DIFAIL(KR(kernResult) << ": ndx=" << GetIndexNumber() << ", con=" << HEX8(GetIOConnect())
 				<< " -- reg=" << DEC(inRegNum) << ", mask=" << HEX8(inMask) << ", shift=" << HEX8(inShift));
 		return false;
 	}
 	outValue = uint32_t(scalarO_64);
-#if 0	//	Fake KONAIP25G from C4412G (see also NTV2GetRegisters::GetRegisterValues):
-	if (inRegNum == kRegBoardID  &&  outValue == DEVICE_ID_CORVID44_8K)
-		outValue = DEVICE_ID_KONAIP_25G;
-	else if (inRegNum == kRegReserved83  ||  inRegNum == kRegLPRJ45IP)
-		outValue = 0x0A03FAD9;	//	Local IPv4    10.3.250.217
-#endif	//	0
+#if defined(NTV2_PRETEND_DEVICE)
+	if (inRegNum == kRegBoardID  &&  outValue == NTV2_PRETEND_DEVICE_FROM)
+		outValue = ULWord(NTV2_PRETEND_DEVICE_TO);
+//	else if (inRegNum == kRegReserved83  ||  inRegNum == kRegLPRJ45IP)
+//		outValue = 0x0A03FAD9;	//	Local IPv4    10.3.250.217
+#endif	//	NTV2_PRETEND_DEVICE
 	return true;
 }
 

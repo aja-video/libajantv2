@@ -64,7 +64,7 @@ void NTV2StreamPlayer::Quit (void)
 	{
 		mDevice.ReleaseStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid()));
 		if (NTV2_IS_VALID_TASK_MODE(mSavedTaskMode))
-			mDevice.SetEveryFrameServices(mSavedTaskMode);		//	Restore prior task mode
+			mDevice.SetTaskMode(mSavedTaskMode);		//	Restore prior task mode
 	}
 }	//	Quit
 
@@ -99,11 +99,11 @@ AJAStatus NTV2StreamPlayer::Init (void)
 
 	if (!mConfig.fDoMultiFormat)
 	{
-		mDevice.GetEveryFrameServices(mSavedTaskMode);		//	Save the current task mode
+		mDevice.GetTaskMode(mSavedTaskMode);	//	Save the current task mode
 		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid())))
-			return AJA_STATUS_BUSY;		//	Device is in use by another app -- fail
+			return AJA_STATUS_BUSY;	//	Device is in use by another app -- fail
 	}
-	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Set OEM service level
+	mDevice.SetTaskMode(NTV2_OEM_TASKS);	//	Set OEM service level
 
 	if (mDevice.features().CanDoMultiFormat())
 		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
@@ -283,7 +283,7 @@ bool NTV2StreamPlayer::RouteOutputSignal (void)
 	UWord				connectFailures	(0);
 
 	const NTV2OutputXptID	cscVidOutXpt(::GetCSCOutputXptFromChannel(mConfig.fOutputChannel,  false/*isKey*/,  !isRGB/*isRGB*/));
-	const NTV2OutputXptID	fsVidOutXpt (::GetFrameBufferOutputXptFromChannel(mConfig.fOutputChannel,  isRGB/*isRGB*/,  false/*is425*/));
+	const NTV2OutputXptID	fsVidOutXpt (::GetFrameStoreOutputXptFromChannel(mConfig.fOutputChannel,  isRGB/*isRGB*/,  false/*is425*/));
 	const NTV2InputXptID	cscInputXpt (isRGB ? ::GetCSCInputXptFromChannel(mConfig.fOutputChannel, false/*isKeyInput*/) : NTV2_INPUT_CROSSPOINT_INVALID);
 	if (isRGB)
 		if (!mDevice.Connect (cscInputXpt,  fsVidOutXpt,  canVerify))

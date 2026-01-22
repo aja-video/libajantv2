@@ -58,7 +58,7 @@ void NTV2FieldBurn::Quit (void)
 	{	//	Release the device...
 		mDevice.ReleaseStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid()));
 		if (NTV2_IS_VALID_TASK_MODE(mSavedTaskMode))
-			mDevice.SetEveryFrameServices(mSavedTaskMode);	//	Restore prior task mode
+			mDevice.SetTaskMode(mSavedTaskMode);	//	Restore prior task mode
 	}
 }	//	Quit
 
@@ -83,7 +83,7 @@ AJAStatus NTV2FieldBurn::Init (void)
 	ULWord	appSignature	(0);
 	int32_t	appPID			(0);
 	mDevice.GetStreamingApplication (appSignature, appPID);	//	Who currently "owns" the device?
-	mDevice.GetEveryFrameServices(mSavedTaskMode);			//	Save the current device state
+	mDevice.GetTaskMode(mSavedTaskMode);			//	Save the current device state
 	if (!mConfig.fDoMultiFormat)
 	{
 		if (!mDevice.AcquireStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid())))
@@ -93,7 +93,7 @@ AJAStatus NTV2FieldBurn::Init (void)
 		}
 		mDevice.ClearRouting();	//	Clear the current device routing (since I "own" the device)
 	}
-	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);	//	Force OEM tasks
+	mDevice.SetTaskMode(NTV2_OEM_TASKS);	//	Force OEM tasks
 
 	//	Set up the video and audio...
 	status = SetupVideo();
@@ -362,7 +362,7 @@ AJAStatus NTV2FieldBurn::SetupHostBuffers (void)
 void NTV2FieldBurn::RouteInputSignal (void)
 {
 	const NTV2OutputCrosspointID	inputOutputXpt	(::GetInputSourceOutputXpt (mConfig.fInputSource));
-	const NTV2InputCrosspointID		fbInputXpt		(::GetFrameBufferInputXptFromChannel (mConfig.fInputChannel));
+	const NTV2InputCrosspointID		fbInputXpt		(::GetFrameStoreInputXptFromChannel (mConfig.fInputChannel));
 	const bool						isRGB			(::IsRGBFormat(mConfig.fPixelFormat));
 
 	if (isRGB)
@@ -385,7 +385,7 @@ void NTV2FieldBurn::RouteInputSignal (void)
 void NTV2FieldBurn::RouteOutputSignal (void)
 {
 	const NTV2InputCrosspointID		outputInputXpt	(::GetOutputDestInputXpt (mOutputDest));
-	const NTV2OutputCrosspointID	fbOutputXpt		(::GetFrameBufferOutputXptFromChannel (mConfig.fOutputChannel, ::IsRGBFormat (mConfig.fPixelFormat)));
+	const NTV2OutputCrosspointID	fbOutputXpt		(::GetFrameStoreOutputXptFromChannel (mConfig.fOutputChannel, ::IsRGBFormat (mConfig.fPixelFormat)));
 	const bool						isRGB			(::IsRGBFormat(mConfig.fPixelFormat));
 	NTV2OutputCrosspointID			outputXpt		(fbOutputXpt);
 
@@ -510,8 +510,7 @@ void NTV2FieldBurn::PlayFrames (void)
 	}
 
 	//	Initialize AutoCirculate...
-	if (!mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel, mConfig.fOutputFrames.count(), mAudioSystem, acOptions,
-											1 /*numChannels*/,  mConfig.fOutputFrames.firstFrame(),  mConfig.fOutputFrames.lastFrame()))
+	if (!mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel, mConfig.fOutputFrames, mAudioSystem, acOptions))
 		{PLFAIL("AutoCirculateInitForOutput failed");  mGlobalQuit = true;}
 
 	while (!mGlobalQuit)
@@ -655,12 +654,10 @@ void NTV2FieldBurn::CaptureFrames (void)
 	mDevice.AutoCirculateStop (mConfig.fInputChannel);
 
 	//	Initialize AutoCirculate...
-	if (!mDevice.AutoCirculateInitForInput (mConfig.fInputChannel,			//	channel
-											mConfig.fInputFrames.count(),	//	numFrames (zero if specifying range)
-											mAudioSystem,					//	audio system
-											acOptions,						//	flags
-											1,								//	frameStores to gang
-											mConfig.fInputFrames.firstFrame(), mConfig.fInputFrames.lastFrame()))
+	if (!mDevice.AutoCirculateInitForInput (mConfig.fInputChannel,	//	channel
+											mConfig.fInputFrames,	//	frame count/range
+											mAudioSystem,			//	audio system
+											acOptions))				//	flags
 		{BURNFAIL("AutoCirculateInitForInput failed");  mGlobalQuit = true;}
 	else
 		//	Start AutoCirculate running...

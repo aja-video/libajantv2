@@ -59,17 +59,17 @@ ifeq ($(NVIDIA_SRC_DIR),)
 endif
 
 # find the nvidia.ko file
+#ifeq ($(NVIDIA_KO),)
+#	NVIDIA_KO := $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia-p2p.ko'|grep -P 'nvidia-p2p(_[0-9]+)?.ko'|head -1)
+#endif
 ifeq ($(NVIDIA_KO),)
 	NVIDIA_KO := $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia.ko'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
 endif	
 ifeq ($(NVIDIA_KO),)
 	NVIDIA_KO := $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia.ko.xz'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
 endif
-ifeq  ($(shell objdump -t $(NVIDIA_KO) | grep nvidia_p2p_get_pages),)
-	NVIDIA_KO :=
-endif
 ifeq ($(NVIDIA_KO),)
-	NVIDIA_KO := $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia-p2p.ko'|grep -P 'nvidia-p2p(_[0-9]+)?.ko'|head -1)
+	NVIDIA_KO := $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia.ko.zst'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
 endif
 
 ifdef NVIDIA_IGPU
@@ -107,6 +107,7 @@ endif
 AJANTV2INCS = $(A_LIB_NTV2_INC)/ajaexport.h \
 			$(A_LIB_NTV2_INC)/ajatypes.h \
 			$(A_LIB_NTV2_INC)/ntv2audiodefines.h \
+			$(A_LIB_NTV2_INC)/ntv2deprecate.h \
 			$(A_LIB_NTV2_INC)/ntv2devicefeatures.h \
 			$(A_LIB_NTV2_INC)/ntv2devicefeatures.hh \
 			$(A_LIB_NTV2_INC)/ntv2driverprocamp.h \

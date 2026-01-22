@@ -60,7 +60,7 @@ void NTV2Overlay::Quit (void)
 	{	//	Release the device...
 		mDevice.ReleaseStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid()));
 		if (NTV2_IS_VALID_TASK_MODE(mSavedTaskMode))
-			mDevice.SetEveryFrameServices(mSavedTaskMode);	//	Restore prior task mode
+			mDevice.SetTaskMode(mSavedTaskMode);	//	Restore prior task mode
 	}
 }	//	Quit
 
@@ -80,7 +80,7 @@ AJAStatus NTV2Overlay::Init (void)
 	ULWord	appSig(0);
 	int32_t	appPID(0);
 	mDevice.GetStreamingApplication (appSig, appPID);	//	Who currently "owns" the device?
-	mDevice.GetEveryFrameServices(mSavedTaskMode);		//	Save the current device state
+	mDevice.GetTaskMode(mSavedTaskMode);		//	Save the current device state
 
 	if (!mDevice.AcquireStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid())))
 	{
@@ -88,7 +88,7 @@ AJAStatus NTV2Overlay::Init (void)
 		return AJA_STATUS_BUSY;		//	Some other app is using the device
 	}
 	
-	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);	//	Force OEM tasks
+	mDevice.SetTaskMode(NTV2_OEM_TASKS);	//	Force OEM tasks
 	
 	mDevice.EnableChannel(NTV2_CHANNEL1);
 	mDevice.EnableChannel(NTV2_CHANNEL2);
@@ -308,7 +308,7 @@ AJAStatus NTV2Overlay::SetupOverlayBug (void)
 		return AJA_STATUS_MEMORY;
 
 	//	Draw the rectangles into the mBug buffer...
-	for (size_t n(0);  n < sColors.size();  n++)
+	for (ULWord n(0);  n < ULWord(sColors.size());  n++)
 		DrawBox (mBug, mBugRasterInfo, sColors.at(n), thickness, /*topLeftX*/n*2*thickness, /*topLeftY*/n*2*thickness, wdth-2*n*2*thickness, hght-2*n*2*thickness);
 
 	//	Draw a hatch mark in the middle of it...
@@ -426,8 +426,9 @@ void NTV2Overlay::OutputThread (void)
 		{cerr << "## ERROR:  Failed to allocate " << rasterInfo.GetTotalRasterBytes() << "-byte vid buffer" << endl;	return;}
 
 	mDevice.AutoCirculateStop(mConfig.fOutputChannel);
-	if (mDevice.AutoCirculateInitForOutput(mConfig.fOutputChannel, 2) && mDevice.AutoCirculateGetStatus(mConfig.fOutputChannel, acStatus))	//	Find out which buffers we got
-		fbNum = ULWord(acStatus.acStartFrame);	//	Use them
+	if (mDevice.AutoCirculateInitForOutput(mConfig.fOutputChannel, NTV2ACFrameRange(2))
+		&& mDevice.AutoCirculateGetStatus(mConfig.fOutputChannel, acStatus))	//	Find out which buffers we got
+			fbNum = ULWord(acStatus.acStartFrame);	//	Use them
 	else
 		{cerr << "## NOTE:  Allocate 2-frame AC" << DEC(mConfig.fOutputChannel+1) << " range failed" << endl;	return;}
 
@@ -563,7 +564,7 @@ void NTV2Overlay::InputThread (void)
 		}
 
 		AUTOCIRCULATE_STATUS acStatus;
-		if (!mDevice.AutoCirculateInitForInput(mConfig.fInputChannel, 7))
+		if (!mDevice.AutoCirculateInitForInput(mConfig.fInputChannel, NTV2ACFrameRange(7)))
 		{	cerr << "## NOTE:  Input A/C allocate device frame buffer range failed" << endl;
 			mGlobalQuit = true;
 			continue;

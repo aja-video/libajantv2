@@ -310,7 +310,7 @@ class NTV2CCGrabber
 		mutable AJAThread			mCaptureThread;		///< @brief	My capture thread object
 		CNTV2Card					mDevice;			///< @brief	My CNTV2Card instance
 		NTV2DeviceID				mDeviceID;			///< @brief	Keep device ID handy
-		NTV2EveryFrameTaskMode		mSavedTaskMode;		///< @brief	Used to restore the previous task mode
+		NTV2TaskMode				mSavedTaskMode;		///< @brief	Used to restore the previous task mode
 		NTV2AudioSystem				mAudioSystem;		///< @brief	The audio system I'm using
 		NTV2VANCMode				mVancMode;			///< @brief	Actual NTV2VANCMode in use
 		bool						mGlobalQuit;		///< @brief	Set "true" to gracefully stop

@@ -273,12 +273,12 @@ public:
 	/**
 		@return		The full-raster NTV2FrameDimensions (including VANC lines, if any).
 	**/
-	NTV2FrameDimensions				GetFullRasterDimensions (void) const;
+	NTV2FrameSize					GetFullRasterDimensions (void) const;
 
 	/**
 		@return		The visible NTV2FrameDimensions (excluding VANC lines, if any).
 	**/
-	NTV2FrameDimensions				GetVisibleRasterDimensions (void) const;
+	NTV2FrameSize					GetVisibleRasterDimensions (void) const;
 
 	/**
 		@brief		Answers with the equivalent SMPTE line number for the given line offset into the frame buffer I describe.
@@ -351,8 +351,8 @@ public:
 	bool							Is2KFormat (void) const;		///< @return	True if I was created with a 2Kx1080 video format.
 	///@}
 #if !defined(NTV2_DEPRECATE_16_3)
-	inline bool						IsSDFormat (void) const			{return NTV2_IS_SD_VIDEO_FORMAT(GetVideoFormat()) || NTV2_IS_SD_STANDARD(GetVideoStandard());} ///< @deprecated	Obsolete starting in SDK 16.3.
-#endif
+	inline NTV2_DEPRECATED_16_3(bool IsSDFormat(void) const) {return NTV2_IS_SD_VIDEO_FORMAT(GetVideoFormat()) || NTV2_IS_SD_STANDARD(GetVideoStandard());} ///< @deprecated	Obsolete starting in SDK 16.3.
+#endif//!defined(NTV2_DEPRECATE_16_3)
 	void							MakeInvalid (void);				///< @brief	Resets me into an invalid (NULL) state.
 
 	private:
@@ -403,5 +403,16 @@ AJAExport inline std::ostream & operator << (std::ostream & inOutStream, const N
 	@return		True if successful;  otherwise false.
 **/
 AJAExport bool		UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, const NTV2FormatDescriptor & inFormatDesc, UWordSequence & out16BitYUVLine);
+
+/**
+	@brief		Unpacks a line of NTV2_FBF_10BIT_ARGB video into 16-bit-per-component ARGB data.
+	@param[in]	pIn10BitARGBLine		A valid, non-NULL pointer to the start of the line that contains the packed NTV2_FBF_10BIT_ARGB data
+									to be converted.
+	@param[in]	inFormatDesc		Describes the raster.
+	@param[out]	out16BitARGBLine	Receives the unpacked 16-bit-per-component ARGB data. The sequence is cleared before filling.
+									The UWord sequence will be B, G, R, A
+	@return		True if successful;  otherwise false.
+**/
+AJAExport bool		UnpackLine_10BitARGBtoUWordSequence (const void * pIn10BitARGBLine, const NTV2FormatDescriptor & inFormatDesc, UWordSequence & out16BitARGBLine);
 
 #endif	//	NTV2FORMATDESC_H

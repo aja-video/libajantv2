@@ -20,6 +20,11 @@ if [ "${nvidia_ko_fn: -3}" == ".xz" ]; then
    nvidia_ko_ofn=$nvidia_ko_tfn
 fi
 
+if [ "${nvidia_ko_fn: -3}" == "zst" ]; then
+   unzstd $nvidia_ko_fn -o $nvidia_ko_tfn
+   nvidia_ko_ofn=$nvidia_ko_tfn
+fi
+
 # Get the offset to the CRC table
 crc_table_offset=$(objdump -h "${nvidia_ko_ofn}" | grep __kcrctab | awk '{print $6}')
 crc_table_offset_gpl=$(objdump -h "${nvidia_ko_ofn}" | grep __kcrctab_gpl | awk '{print $6}')

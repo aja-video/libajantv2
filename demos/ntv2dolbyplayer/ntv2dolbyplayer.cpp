@@ -126,7 +126,7 @@ void NTV2DolbyPlayer::Quit (void)
 	{
 		mDevice.ReleaseStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid()));
 		if (NTV2_IS_VALID_TASK_MODE(mSavedTaskMode))
-			mDevice.SetEveryFrameServices(mSavedTaskMode);		//	Restore prior task mode
+			mDevice.SetTaskMode(mSavedTaskMode);	//	Restore prior task mode
 	}
 }	//	Quit
 
@@ -160,11 +160,11 @@ AJAStatus NTV2DolbyPlayer::Init (void)
 
 	if (!mConfig.fDoMultiFormat)
 	{
-		mDevice.GetEveryFrameServices(mSavedTaskMode);		//	Save the current task mode
+		mDevice.GetTaskMode(mSavedTaskMode);	//	Save the current task mode
 		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid())))
-			return AJA_STATUS_BUSY;		//	Device is in use by another app -- fail
+			return AJA_STATUS_BUSY;	//	Device is in use by another app -- fail
 	}
-	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Set OEM service level
+	mDevice.SetTaskMode(NTV2_OEM_TASKS);	//	Set OEM service level
 
 	if (mDevice.features().CanDoMultiFormat())
 		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
@@ -178,7 +178,6 @@ AJAStatus NTV2DolbyPlayer::Init (void)
 			{cerr << "## ERROR:  Could not open file: " << mConfig.fDolbyFilePath << endl;	return status;}
 	}
 
-	
 	//	Set up the video and audio...
 	status = SetUpVideo();
 	if (AJA_FAILURE(status))
@@ -406,7 +405,7 @@ AJAStatus NTV2DolbyPlayer::SetUpTestPatternBuffers (void)
 bool NTV2DolbyPlayer::RouteOutputSignal (void)
 {
 	const bool isRGB (::IsRGBFormat(mConfig.fPixelFormat));
-	const NTV2OutputXptID fsVidOutXpt (::GetFrameBufferOutputXptFromChannel (mConfig.fOutputChannel, isRGB, false/*is425*/));
+	const NTV2OutputXptID fsVidOutXpt (::GetFrameStoreOutputXptFromChannel (mConfig.fOutputChannel, isRGB, false/*is425*/));
 
 	mDevice.ClearRouting();		//	Start with clean slate
 

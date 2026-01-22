@@ -16,6 +16,7 @@
 #include "ntv2version.h"
 #include "ntv2devicefeatures.h"	//	Required for NTV2DeviceCanDoVideoFormat
 #include "ajabase/system/lock.h"
+#include "ajabase/system/info.h"
 #include "ajabase/common/common.h"
 #if defined(AJALinux)
 	#include <string.h>	 // For memset
@@ -95,14 +96,17 @@ uint32_t CalcRowBytesForFormat (const NTV2FrameBufferFormat inPixelFormat, const
 		rowBytes = inPixelWidth;
 		break;
 		
+	case NTV2_FBF_10BIT_ARGB:
+        rowBytes = inPixelWidth * 5;
+        break;
+        
 	case NTV2_FBF_8BIT_YCBCR_420PL3:
 	case NTV2_FBF_8BIT_HDV:
 	case NTV2_FBF_10BIT_YCBCRA:
 	case NTV2_FBF_PRORES_DVCPRO:
 	case NTV2_FBF_PRORES_HDV:
-	case NTV2_FBF_10BIT_ARGB:
-	case NTV2_FBF_16BIT_ARGB:
-	case NTV2_FBF_8BIT_YCBCR_422PL3:
+    case NTV2_FBF_16BIT_ARGB:
+    case NTV2_FBF_8BIT_YCBCR_422PL3:
 	case NTV2_FBF_10BIT_RAW_RGB:
 	case NTV2_FBF_10BIT_RAW_YCBCR:
 	case NTV2_FBF_NUMFRAMEBUFFERFORMATS:
@@ -118,7 +122,7 @@ uint32_t CalcRowBytesForFormat (const NTV2FrameBufferFormat inPixelFormat, const
 
 bool UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, UWordSequence & out16BitYUVLine, ULWord inNumPixels)
 {
-	out16BitYUVLine.clear ();
+	out16BitYUVLine.clear();
 	const ULWord *	pInputLine	(reinterpret_cast <const ULWord *> (pIn10BitYUVLine));
 
 	if (!pInputLine)
@@ -128,8 +132,8 @@ bool UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, UWordSequ
 	if (inNumPixels % 6)
 		inNumPixels -= inNumPixels % 6;
 
-	const ULWord	totalULWords	(inNumPixels * 4 / 6);	//	4 ULWords per 6 pixels
-
+	const ULWord totalULWords (inNumPixels * 4 / 6);	//	4 ULWords per 6 pixels
+	out16BitYUVLine.reserve(totalULWords * 3);
 	for (ULWord inputCount (0);	 inputCount < totalULWords;	 inputCount++)
 	{
 		out16BitYUVLine.push_back ((pInputLine [inputCount]		 ) & 0x3FF);
@@ -142,18 +146,19 @@ bool UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, UWordSequ
 
 bool UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, const NTV2FormatDescriptor & inFormatDesc, UWordSequence & out16BitYUVLine)
 {
-	out16BitYUVLine.clear ();
+	out16BitYUVLine.clear();
 	const ULWord *	pInputLine	(reinterpret_cast <const ULWord *> (pIn10BitYUVLine));
 
 	if (!pInputLine)
 		return false;	//	bad pointer
-	if (!inFormatDesc.IsValid ())
+	if (!inFormatDesc.IsValid())
 		return false;	//	bad formatDesc
-	if (inFormatDesc.GetRasterWidth () < 6)
+	if (inFormatDesc.GetRasterWidth() < 6)
 		return false;	//	bad width
 	if (inFormatDesc.GetPixelFormat() != NTV2_FBF_10BIT_YCBCR)
 		return false;	//	wrong FBF
 
+	out16BitYUVLine.reserve(inFormatDesc.linePitch * 3);
 	for (ULWord inputCount (0);	 inputCount < inFormatDesc.linePitch;  inputCount++)
 	{
 		out16BitYUVLine.push_back ((pInputLine [inputCount]		 ) & 0x3FF);
@@ -164,9 +169,36 @@ bool UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, const NTV
 }
 
 
+bool UnpackLine_10BitARGBtoUWordSequence (const void * pIn10BitARGBLine, const NTV2FormatDescriptor & inFormatDesc, UWordSequence & out16BitARGBLine)
+{
+	out16BitARGBLine.clear();
+	const UByte *	pInputLine	(reinterpret_cast <const UByte *> (pIn10BitARGBLine));
+
+	if (!pInputLine)
+		return false;	//	bad pointer
+	if (!inFormatDesc.IsValid())
+		return false;	//	bad formatDesc
+	if (inFormatDesc.GetRasterWidth() < 1)
+		return false;	//	bad width
+	if (inFormatDesc.GetPixelFormat() != NTV2_FBF_10BIT_ARGB)
+		return false;	//	wrong FBF
+
+	out16BitARGBLine.reserve(inFormatDesc.linePitch * 4);
+	for (ULWord inputCount (0);	 inputCount < inFormatDesc.linePitch;  inputCount++)
+	{
+		out16BitARGBLine.push_back ((UWord(pInputLine[1] & 0x03) << 8) | (UWord(pInputLine[0] & 0xFF) >> 0));	//	B
+		out16BitARGBLine.push_back ((UWord(pInputLine[2] & 0x0F) << 6) | (UWord(pInputLine[1] & 0xFC) >> 2));	//	G
+		out16BitARGBLine.push_back ((UWord(pInputLine[3] & 0x3F) << 4) | (UWord(pInputLine[2] & 0xF0) >> 4));	//	R
+		out16BitARGBLine.push_back ((UWord(pInputLine[4] & 0xFF) << 2) | (UWord(pInputLine[3] & 0xC0) >> 6));	//	A
+        pInputLine += 5;
+	}
+	return true;
+}
+
+
 // UnPack10BitYCbCrBuffer
 // UnPack 10 Bit YCbCr Data to 16 bit Word per component
-void UnPack10BitYCbCrBuffer( uint32_t* packedBuffer, uint16_t* ycbcrBuffer, uint32_t numPixels )
+void UnPack10BitYCbCrBuffer (uint32_t* packedBuffer, uint16_t* ycbcrBuffer, uint32_t numPixels)
 {
 	for (  uint32_t sampleCount = 0, dataCount = 0; 
 		sampleCount < (numPixels*2) ; 
@@ -295,10 +327,16 @@ void ConvertUnpacked10BitYCbCrToPixelFormat(uint16_t *unPackedBuffer, uint32_t *
 			PackRGB10BitFor10BitRGBPacked(reinterpret_cast<RGBAlpha10BitPixel*>(packedBuffer), numPixels);
 			break;
 			
+        case NTV2_FBF_10BIT_ARGB:
+            ConvertLineto10BitRGB(unPackedBuffer, reinterpret_cast<RGBAlpha10BitPixel*>(packedBuffer), numPixels, bIsSD, bUseSmpteRange, bAlphaFromLuma);
+            PackRGB10BitFor10BitARGBPacked(reinterpret_cast<RGBAlpha10BitPixel*>(packedBuffer), numPixels);
+            break;
+
 		case NTV2_FBF_12BIT_RGB_PACKED:
 			ConvertLineto16BitRGB(unPackedBuffer, reinterpret_cast<RGBAlpha16BitPixel*>(packedBuffer), numPixels, bIsSD, bUseSmpteRange);
 			Convert16BitARGBTo12BitRGBPacked(reinterpret_cast<RGBAlpha16BitPixel*>(packedBuffer), reinterpret_cast<UByte*>(packedBuffer), numPixels);
 			break;
+            
 	#if defined(_DEBUG)
 		case NTV2_FBF_8BIT_DVCPRO:
 		case NTV2_FBF_8BIT_YCBCR_420PL3:
@@ -306,7 +344,6 @@ void ConvertUnpacked10BitYCbCrToPixelFormat(uint16_t *unPackedBuffer, uint32_t *
 		case NTV2_FBF_10BIT_YCBCRA:
 		case NTV2_FBF_PRORES_DVCPRO:
 		case NTV2_FBF_PRORES_HDV:
-		case NTV2_FBF_10BIT_ARGB:
 		case NTV2_FBF_16BIT_ARGB:
 		case NTV2_FBF_8BIT_YCBCR_422PL3:
 		case NTV2_FBF_10BIT_RAW_RGB:
@@ -622,7 +659,7 @@ bool UnpackLine_10BitYUVtoU16s (vector<uint16_t> & outYCbCrLine, const NTV2Buffe
 		return false;	//	bad width
 
 	const ULWord *	pInputLine	(reinterpret_cast<const ULWord*>(inDescriptor.GetRowAddress(inFrameBuffer.GetHostPointer(), inLineOffset)));
-
+	outYCbCrLine.reserve (inDescriptor.linePitch * 3);
 	for (ULWord inputCount(0);	inputCount < inDescriptor.linePitch;  inputCount++)
 	{
 		outYCbCrLine.push_back((pInputLine[inputCount]		) & 0x3FF);
@@ -1471,6 +1508,62 @@ static bool CopyRaster36BytesPer8Pixels (	UByte *			pDstBuffer,				//	Dest buffe
 }	//	CopyRaster20BytesPer16Pixels
 
 
+//	This function should work on all 5-byte-per-pixel formats
+static bool CopyRaster5BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer to be modified
+										const ULWord	inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
+										const UWord		inDstTotalLines,		//	Dest buffer total raster lines (max height)
+										const UWord		inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
+										const UWord		inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear -- must be evenly divisible by 6
+										const UByte *	pSrcBuffer,				//	Src buffer
+										const ULWord	inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
+										const UWord		inSrcTotalLines,		//	Src buffer total raster lines (max height)
+										const UWord		inSrcVertLineOffset,	//	Src image top edge
+										const UWord		inSrcVertLinesToCopy,	//	Src image height
+										const UWord		inSrcHorzPixelOffset,	//	Src image left edge
+										const UWord		inSrcHorzPixelsToCopy)	//	Src image width
+{
+	const UWord FIVE_BYTES_PER_PIXEL (5);
+
+	if (inDstBytesPerLine % FIVE_BYTES_PER_PIXEL)	//	dst raster width (in bytes) must be evenly divisible by 5
+		return false;
+	if (inSrcBytesPerLine % FIVE_BYTES_PER_PIXEL)	//	src raster width (in bytes) must be evenly divisible by 5
+		return false;
+
+	const ULWord dstMaxPixelWidth (inDstBytesPerLine / FIVE_BYTES_PER_PIXEL);
+	const ULWord srcMaxPixelWidth (inSrcBytesPerLine / FIVE_BYTES_PER_PIXEL);
+	ULWord numHorzPixelsToCopy (inSrcHorzPixelsToCopy);
+	UWord numVertLinesToCopy (inSrcVertLinesToCopy);
+
+	if (inDstHorzPixelOffset >= dstMaxPixelWidth)	//	dst past right edge
+		return false;
+	if (inSrcHorzPixelOffset >= srcMaxPixelWidth)	//	src past right edge
+		return false;
+	if (inSrcHorzPixelOffset + inSrcHorzPixelsToCopy > UWord(srcMaxPixelWidth))
+		numHorzPixelsToCopy -= inSrcHorzPixelOffset + inSrcHorzPixelsToCopy - srcMaxPixelWidth; //	Clip to src raster's right edge
+	if (inDstHorzPixelOffset + numHorzPixelsToCopy > dstMaxPixelWidth)
+		numHorzPixelsToCopy = inDstHorzPixelOffset + numHorzPixelsToCopy - dstMaxPixelWidth;
+	if (inSrcVertLineOffset + inSrcVertLinesToCopy > inSrcTotalLines)
+		numVertLinesToCopy -= inSrcVertLineOffset + inSrcVertLinesToCopy - inSrcTotalLines;		//	Clip to src raster's bottom edge
+	if (numVertLinesToCopy + inDstVertLineOffset >= inDstTotalLines)
+	{
+		if (numVertLinesToCopy + inDstVertLineOffset > inDstTotalLines)
+			numVertLinesToCopy -= numVertLinesToCopy + inDstVertLineOffset - inDstTotalLines;
+		else
+			return true;
+	}
+
+	for (UWord lineNdx (0);	 lineNdx < numVertLinesToCopy;	lineNdx++)	//	for each raster line to copy
+	{
+		const UByte *	pSrcLine	(pSrcBuffer	 +	inSrcBytesPerLine * (inSrcVertLineOffset + lineNdx)	 +	inSrcHorzPixelOffset * FIVE_BYTES_PER_PIXEL);
+		UByte *			pDstLine	(pDstBuffer	 +	inDstBytesPerLine * (inDstVertLineOffset + lineNdx)	 +	inDstHorzPixelOffset * FIVE_BYTES_PER_PIXEL);
+        ::memcpy (pDstLine, pSrcLine, numHorzPixelsToCopy * FIVE_BYTES_PER_PIXEL);	//	copy the line
+	}
+
+	return true;
+
+}	//	CopyRaster5BytesPerPixel
+
+
 //	This function should work on all 4-byte-per-pixel formats
 static bool CopyRaster4BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer to be modified
 										const ULWord	inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
@@ -1708,14 +1801,17 @@ bool CopyRaster (const NTV2PixelFormat	inPixelFormat,			//	Pixel format of both 
 																					pSrcBuffer, inSrcBytesPerLine, inSrcTotalLines, inSrcVertLineOffset, inSrcVertLinesToCopy,
 																					inSrcHorzPixelOffset, inSrcHorzPixelsToCopy);
 	
-		case NTV2_FBF_8BIT_DVCPRO:	//	Lossy
+        case NTV2_FBF_10BIT_ARGB:				return CopyRaster5BytesPerPixel (pDstBuffer, inDstBytesPerLine, inDstTotalLines, inDstVertLineOffset, inDstHorzPixelOffset,
+                                                                                 pSrcBuffer, inSrcBytesPerLine, inSrcTotalLines, inSrcVertLineOffset, inSrcVertLinesToCopy,
+                                                                                 inSrcHorzPixelOffset, inSrcHorzPixelsToCopy);
+
+        case NTV2_FBF_8BIT_DVCPRO:	//	Lossy
 		case NTV2_FBF_8BIT_HDV:		//	Lossy
 		case NTV2_FBF_8BIT_YCBCR_420PL3:
 		case NTV2_FBF_10BIT_YCBCRA:
 		case NTV2_FBF_PRORES_DVCPRO:
 		case NTV2_FBF_PRORES_HDV:
 		case NTV2_FBF_10BIT_RGB_PACKED:
-		case NTV2_FBF_10BIT_ARGB:
 		case NTV2_FBF_16BIT_ARGB:
 		case NTV2_FBF_10BIT_RAW_RGB:
 		case NTV2_FBF_8BIT_YCBCR_422PL3:
@@ -3858,11 +3954,11 @@ NTV2FrameGeometry GetVANCFrameGeometry (const NTV2FrameGeometry inFrameGeometry,
 	return NTV2_FG_INVALID; //	fail
 }
 
-NTV2FrameGeometry GetGeometryFromFrameDimensions (const NTV2FrameDimensions & inFD)
+NTV2FrameGeometry GetGeometryFromFrameDimensions (const NTV2FrameSize & inFD)
 {
 	for (NTV2FrameGeometry fg(NTV2_FG_FIRST);  fg < NTV2_FG_NUMFRAMEGEOMETRIES;	 fg = NTV2FrameGeometry(fg+1))
-		if (::GetNTV2FrameGeometryWidth(fg) == inFD.GetWidth())
-			if (::GetNTV2FrameGeometryHeight(fg) == inFD.GetHeight())
+		if (::GetNTV2FrameGeometryWidth(fg) == inFD.width())
+			if (::GetNTV2FrameGeometryHeight(fg) == inFD.height())
 				return fg;
 	return NTV2_FG_INVALID;
 }
@@ -4518,11 +4614,13 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_CORVID24:				return inForRetailDisplay ? "Corvid 24"					: "Corvid24";
 		case DEVICE_ID_CORVID3G:				return inForRetailDisplay ? "Corvid 3G"					: "Corvid3G";
 		case DEVICE_ID_CORVID44:				return inForRetailDisplay ? "Corvid 44"					: "Corvid44";
-		case DEVICE_ID_CORVID44_2X4K:			return inForRetailDisplay ? "Corvid 44 2x4K"			: "Corvid44-2x4K";
-		case DEVICE_ID_CORVID44_8K:				return inForRetailDisplay ? "Corvid 44 8K"				: "Corvid44-8K";
-		case DEVICE_ID_CORVID44_8KMK:			return inForRetailDisplay ? "Corvid 44 8KMK"			: "Corvid44-8KMK";
-		case DEVICE_ID_CORVID44_PLNR:			return inForRetailDisplay ? "Corvid 44 PLNR"			: "Corvid44-PLNR";
+		case DEVICE_ID_CORVID44_GEN3:			return inForRetailDisplay ? "Corvid 44 Gen3"			: "Corvid-44-Gen3";
+		case DEVICE_ID_CORVID44_2X4K:			return inForRetailDisplay ? "Corvid 44 12G 2x4K"		: "Corvid44-12G-2x4K";
+		case DEVICE_ID_CORVID44_8K:				return inForRetailDisplay ? "Corvid 44 12G 8K"			: "Corvid44-12G-8K";
+		case DEVICE_ID_CORVID44_8KMK:			return inForRetailDisplay ? "Corvid 44 12G 8KMK"		: "Corvid44-12G-8KMK";
+		case DEVICE_ID_CORVID44_PLNR:			return inForRetailDisplay ? "Corvid 44 12G PLNR"		: "Corvid44-12G-PLNR";
 		case DEVICE_ID_CORVID88:				return inForRetailDisplay ? "Corvid 88"					: "Corvid88";
+		case DEVICE_ID_CORVID88_GEN3:			return inForRetailDisplay ? "Corvid 88 Gen3"			: "Corvid-88-Gen3";
 		case DEVICE_ID_CORVIDHBR:				return inForRetailDisplay ? "Corvid HB-R"				: "CorvidHBR";
 		case DEVICE_ID_CORVIDHEVC:				return inForRetailDisplay ? "Corvid HEVC"				: "CorvidHEVC";
 		case DEVICE_ID_IO4K:					return "Io4K";
@@ -4534,6 +4632,8 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_IOIP_2110_RGB12:			return inForRetailDisplay ? "Avid DNxIP s2110_RGB12"	: "IoIP-s2110_RGB12";
 		case DEVICE_ID_IOX3:					return "IoX3";
 		case DEVICE_ID_IOXT:					return "IoXT";
+		case DEVICE_ID_IP25_R:					return "IP25-R";
+		case DEVICE_ID_IP25_T:					return "IP25-T";
 		case DEVICE_ID_KONA1:					return inForRetailDisplay ? "Kona 1"					: "Kona1";
 		case DEVICE_ID_KONA3G:					return inForRetailDisplay ? "KONA 3G"					: "Kona3G";
 		case DEVICE_ID_KONA3GQUAD:				return inForRetailDisplay ? "KONA 3G QUAD"				: "Kona3GQuad"; //	Used to be "KONA 3G" for retail display
@@ -4570,6 +4670,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONALHIDVI:				return inForRetailDisplay ? "KONA LHi DVI"				: "KonaLHiDVI";
 		case DEVICE_ID_KONAX:					return inForRetailDisplay ? "KONA X"					: "KonaX";
 		case DEVICE_ID_KONAXM:					return inForRetailDisplay ? "KONA XM"					: "KonaXM";
+		case DEVICE_ID_KONAX_4CH:               return inForRetailDisplay ? "KONA X 4CH"                : "KonaX_4CH";
 		case DEVICE_ID_KONAIP_25G:				return "KonaIP 25G";
 		case DEVICE_ID_SOJI_3DLUT:				return "SOJI-3DLUT";
 		case DEVICE_ID_SOJI_DIAGS:				return "SOJI-DIAGS";
@@ -4582,7 +4683,6 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_SOJI_OE7:				return "SOJI-OE7";
 		case DEVICE_ID_TTAP:					return inForRetailDisplay ? "T-TAP"						: "TTap";
 		case DEVICE_ID_TTAP_PRO:				return inForRetailDisplay ? "T-TAP Pro"					: "TTapPro";
-		case DEVICE_ID_ZEFRAM:					return "Zefram";
 		case DEVICE_ID_SOFTWARE:				return inForRetailDisplay ? "Software"					: "Software";
 		case DEVICE_ID_NOTFOUND:				return inForRetailDisplay ? "AJA Device"				: "(Not Found)";
 #if defined(_DEBUG)
@@ -5612,9 +5712,9 @@ NTV2VideoFormat GetOutputForConversionMode (const NTV2ConversionMode conversionM
 }
 
 
-ostream & operator << (ostream & inOutStream, const NTV2FrameDimensions inFrameDimensions)
+ostream & operator << (ostream & inOutStream, const NTV2FrameSize & inFrameDimensions)
 {
-	return inOutStream	<< inFrameDimensions.Width() << "Wx" << inFrameDimensions.Height() << "H";
+	return inOutStream	<< inFrameDimensions.width() << "Wx" << inFrameDimensions.height() << "H";
 }
 
 
@@ -6165,10 +6265,18 @@ string NTV2WidgetIDToString (const NTV2WidgetID inValue, const bool inCompactDis
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIIn2", NTV2_Wgt12GSDIIn2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIIn3", NTV2_Wgt12GSDIIn3);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIIn4", NTV2_Wgt12GSDIIn4);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIIn5", NTV2_Wgt12GSDIIn5);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIIn6", NTV2_Wgt12GSDIIn6);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIIn7", NTV2_Wgt12GSDIIn7);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIIn8", NTV2_Wgt12GSDIIn8);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIOut1", NTV2_Wgt12GSDIOut1);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIOut2", NTV2_Wgt12GSDIOut2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIOut3", NTV2_Wgt12GSDIOut3);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIOut4", NTV2_Wgt12GSDIOut4);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIOut5", NTV2_Wgt12GSDIOut5);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIOut6", NTV2_Wgt12GSDIOut6);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIOut7", NTV2_Wgt12GSDIOut7);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "12GSDIOut8", NTV2_Wgt12GSDIOut8);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv4In1", NTV2_WgtHDMIIn1v4);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv4In2", NTV2_WgtHDMIIn2v4);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv4In3", NTV2_WgtHDMIIn3v4);
@@ -6242,7 +6350,7 @@ string NTV2WidgetTypeToString (const NTV2WidgetType inValue, const bool inCompac
 	return "";
 }
 
-string NTV2TaskModeToString (const NTV2EveryFrameTaskMode inValue, const bool inCompactDisplay)
+string NTV2TaskModeToString (const NTV2TaskMode inValue, const bool inCompactDisplay)
 {
 	switch (inValue)
 	{
@@ -7527,6 +7635,9 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 	case DEVICE_ID_IOX3:						return "iox3.bit";
 	case DEVICE_ID_KONAX:						return "konax.bit";
 	case DEVICE_ID_KONAXM:						return "konaxm.bit";
+	case DEVICE_ID_KONAX_4CH:                   return "konax_4ch.bit";
+	case DEVICE_ID_CORVID44_GEN3:				return "corvid44gen3.bit";
+	case DEVICE_ID_CORVID88_GEN3:				return "corvid88gen3.bit";
 	default:									return "";
 	}
 	return "";
@@ -7579,26 +7690,40 @@ NTV2DeviceID NTV2GetDeviceIDFromBitfileName (const string & inBitfileName)
 }
 
 
-string NTV2GetFirmwareFolderPath (void)
+string NTV2GetFirmwareFolderPath (const bool inAddTrailingPathDelim)
 {
-	#if defined (AJAMac)
-		return "/Library/Application Support/AJA/Firmware";
-	#elif defined (MSWindows)
-		HKEY	hKey		(AJA_NULL);
-		DWORD	bufferSize	(1024);
-		char *	lpData		(new char [bufferSize]);
+	string fwPath;
+	AJASystemInfo info (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_Path);
+	info.GetValue (AJA_SystemInfoTag_Path_Firmware, fwPath);
+	const char c (fwPath.empty() ? 0 : fwPath.at(fwPath.length()-1));
+	if (!inAddTrailingPathDelim)
+		if (c == '/' || c == '\\')
+			fwPath.erase(fwPath.length()-1, 1);	//	lop off trailing '/'
+	return fwPath;
+}
 
-		if (RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\AJA", NULL, KEY_READ, &hKey) == ERROR_SUCCESS
-			&& RegQueryValueExA (hKey, "firmwarePath", NULL, NULL, (LPBYTE) lpData, &bufferSize) == ERROR_SUCCESS)
-				return string (lpData);
-		RegCloseKey (hKey);
-		// Windows may not get a result if the ntv2 installer has not been executed (use case client side remote plugins)
-		return "C:\\ProgramData\\AJA\\ntv2\\Firmware";    
-	#elif defined (AJALinux)
-		return "/opt/aja/firmware";
-	#else
-		return "";
-	#endif
+string NTV2GetPluginsFolderPath (const bool inAddTrailingPathDelim)
+{
+	string fwPath;
+	AJASystemInfo info (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_Path);
+	info.GetValue (AJA_SystemInfoTag_Path_NTV2Plugins, fwPath);
+	const char c (fwPath.empty() ? 0 : fwPath.at(fwPath.length()-1));
+	if (!inAddTrailingPathDelim)
+		if (c == '/' || c == '\\')
+			fwPath.erase(fwPath.length()-1, 1);	//	lop off trailing '/'
+	return fwPath;
+}
+
+string NTV2GetVDevFolderPath (const bool inAddTrailingPathDelim)
+{
+	string fwPath;
+	AJASystemInfo info (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_Path);
+	info.GetValue (AJA_SystemInfoTag_Path_NTV2VirtualDevices, fwPath);
+	const char c (fwPath.empty() ? 0 : fwPath.at(fwPath.length()-1));
+	if (!inAddTrailingPathDelim)
+		if (c == '/' || c == '\\')
+			fwPath.erase(fwPath.length()-1, 1);	//	lop off trailing '/'
+	return fwPath;
 }
 
 
@@ -7613,7 +7738,9 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_CORVID44_8KMK,
 														DEVICE_ID_CORVID44_PLNR,
 														DEVICE_ID_CORVID44,
+														DEVICE_ID_CORVID44_GEN3,
 														DEVICE_ID_CORVID88,
+														DEVICE_ID_CORVID88_GEN3,
 														DEVICE_ID_CORVIDHBR,
 														DEVICE_ID_CORVIDHEVC,
 														DEVICE_ID_IO4K,
@@ -7662,6 +7789,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_KONALHIDVI,
 														DEVICE_ID_KONAX,
 														DEVICE_ID_KONAXM,
+														DEVICE_ID_KONAX_4CH,
 														DEVICE_ID_SOFTWARE,
 														DEVICE_ID_SOJI_OE1,
 														DEVICE_ID_SOJI_OE2,
@@ -7674,7 +7802,8 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_SOJI_DIAGS,
 														DEVICE_ID_TTAP,
 														DEVICE_ID_TTAP_PRO,
-														DEVICE_ID_ZEFRAM,
+														DEVICE_ID_IP25_R,
+														DEVICE_ID_IP25_T,
 														DEVICE_ID_NOTFOUND	};
 	if (inKinds == NTV2_DEVICEKIND_NONE)
 		return NTV2DeviceIDSet();
@@ -7816,7 +7945,9 @@ string NTV2BitfileTypeToString (const NTV2BitfileType inValue, const bool inComp
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Kona4 Main",				NTV2_BITFILE_KONA4_MAIN);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Kona4 UFC",				NTV2_BITFILE_KONA4UFC_MAIN);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Corvid88 Main",			NTV2_BITFILE_CORVID88);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Corvid88Gen3 Main",		NTV2_BITFILE_CORVID88_GEN3);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Corvid44 Main",			NTV2_BITFILE_CORVID44);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Corvid44Gen3 Main",		NTV2_BITFILE_CORVID44_GEN3);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Corvid HEVC",				NTV2_BITFILE_CORVIDHEVC);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaIP 2022",				NTV2_BITFILE_KONAIP_2022);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaIP 4CH 2SFP",			NTV2_BITFILE_KONAIP_4CH_2SFP);
@@ -7867,6 +7998,7 @@ string NTV2BitfileTypeToString (const NTV2BitfileType inValue, const bool inComp
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"IoIP 2110 RGB12",			NTV2_BITFILE_IOIP_2110_RGB12);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaX",					NTV2_BITFILE_KONAX);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaXM",					NTV2_BITFILE_KONAXM);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaX_4Ch",				NTV2_BITFILE_KONAX_4CH);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"(Invalid)",				NTV2_BITFILE_TYPE_INVALID);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"(Illegal)",				NTV2_BITFILE_NUMBITFILETYPES);
 	}

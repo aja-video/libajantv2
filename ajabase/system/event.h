@@ -68,12 +68,12 @@ public:
 	/**
 	 *	Get the current state of the event.
 	 *
-	 *	@param[out]	pSignaled				True if signaled
+	 *	@param[out]	outSignaled				Receives true if signaled
 	 *	@return		AJA_STATUS_SUCCESS		State available
 	 *				AJA_STATUS_OPEN			Event not initialized
 	 *				AJA_STATUS_FAIL			Event error
 	 */
-	virtual AJAStatus GetState(bool* pSignaled);
+	virtual AJAStatus GetState(bool & outSignaled);
 	
 	/**
 	 *	Set the manual reset state.
@@ -112,6 +112,8 @@ public:
 	 *				AJA_STATUS_OPEN			Event not initialized
 	 */
 	virtual AJAStatus GetEventObject(uint64_t* pEventObject);
+
+	virtual inline AJAStatus GetState(bool* pSignaled)	{return pSignaled ? GetState(*pSignaled) : AJA_STATUS_BAD_PARAM;}	///< @deprecated
 
 private:
 

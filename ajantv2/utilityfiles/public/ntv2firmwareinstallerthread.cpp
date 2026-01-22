@@ -35,18 +35,9 @@ static const uint32_t	kMilliSecondsPerSecond	(1000);
 
 static string GetFirmwarePath (const NTV2DeviceID inDeviceID)
 {
-	const string	bitfileName		(::NTV2GetBitfileName (inDeviceID));
-	const string	firmwareFolder	(::NTV2GetFirmwareFolderPath ());
-	string			resultPath;
-
-	#if defined (AJAMac)
-		resultPath = firmwareFolder + "/" + bitfileName;	//	Unified Mac driver -- bitfiles in 'firmwareFolder'
-	#elif defined (MSWindows)
-		resultPath = firmwareFolder + "\\" + bitfileName;
-	#elif defined (AJALinux)
-		resultPath = firmwareFolder + "/" + bitfileName;	//	Linux platform-specific location of latest bitfile
-	#endif
-
+	const string bitfileName	(::NTV2GetBitfileName (inDeviceID));
+	const string firmwareFolder	(::NTV2GetFirmwareFolderPath (/*trailingSlash*/true));
+	const string resultPath		(firmwareFolder + bitfileName);
 	return resultPath;
 }
 
