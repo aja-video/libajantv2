@@ -77,8 +77,8 @@ typedef enum
 	DEVICE_ID_KONALHEPLUS				= 0x10352300,	///< @brief See \ref konalheplus
 	DEVICE_ID_KONALHI					= 0x10266400,	///< @brief See \ref konalhi
 	DEVICE_ID_KONALHIDVI				= 0x10266401,	///< @brief See \ref konalhi
-	DEVICE_ID_KONAX						= 0X10958501,	///< @brief See \ref konax
-	DEVICE_ID_KONAXM					= 0X10958500,	///< @brief See \ref konaxm
+	DEVICE_ID_KONAX						= 0x10958501,	///< @brief See \ref konax
+	DEVICE_ID_KONAXM					= 0x10958500,	///< @brief See \ref konaxm
 	DEVICE_ID_KONAX_4CH                 = 0x10958511,   ///< @brief See \ref konax
 	DEVICE_ID_SOFTWARE					= 0x534F4654,	///< @brief Software device that doesn't emulate one of the above devices
 	DEVICE_ID_SOJI_3DLUT				= 0x10922400,
