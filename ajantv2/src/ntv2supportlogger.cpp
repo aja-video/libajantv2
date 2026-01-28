@@ -508,7 +508,7 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 			}
 		}
 
-		if (mDevice.IsIPDevice())
+		if (mDevice.features().CanDoIP())
 		{
 			PACKAGE_INFO_STRUCT pkgInfo;
 			if (mDevice.GetPackageInformation(pkgInfo))

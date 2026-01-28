@@ -1276,6 +1276,7 @@ private:
 		DEF_REGNAME	(kVRegFlashProgramKey);
 		DEF_REGNAME	(kVRegStrictTiming);
 		DEF_REG	(kVRegDriverType,	mDecodeDriverType, READWRITE, kRegClass_Virtual, kRegClass_NULL, kRegClass_NULL);
+		DEF_REG	(kVRegVDevReadyRegNum,	mDecodeVDevReady, READWRITE, kRegClass_Virtual, kRegClass_NULL, kRegClass_NULL);
 		DEF_REGNAME	(kVRegInputSelect);
 		DEF_REGNAME	(kVRegSecondaryFormatSelect);
 		DEF_REGNAME	(kVRegDigitalOutput1Select);
@@ -4509,6 +4510,23 @@ private:
 			return oss.str();
 		}
 	}	mDecodeDriverType;
+	struct DecodeVDevReady : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{	(void) inDeviceID;  (void) inRegNum;
+			ostringstream oss;
+			if (inRegValue)
+			{	string s (CNTV2RegisterExpert::GetDisplayName (inRegValue));
+				oss << "VDev will set ";
+				if (s.empty())
+					oss << "register " << DEC(inRegValue);
+				else
+					oss << s;
+				oss << " when 'IsReady'";
+			}
+			return oss.str();
+		}
+	}	mDecodeVDevReady;
 	
 	struct DecodeIDSwitchStatus : public Decoder
 	{

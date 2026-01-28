@@ -124,9 +124,9 @@ class AJAExport CNTV2DriverInterface
 		AJA_VIRTUAL bool		IsDeviceReady (const bool inCheckValid = false);
 		AJA_VIRTUAL bool		IsMBSystemValid (void);	///< @return	True if microblaze system exists (is valid); otherwise false.
 		AJA_VIRTUAL bool		IsMBSystemReady (void);	///< @return	True if microblaze system is in ready state; otherwise false.
-		AJA_VIRTUAL inline bool	IsIPDevice (void)	{return ::NTV2DeviceCanDoIP(GetDeviceID());}	///< @return	True if I am an IP device; otherwise false.
-        AJA_VIRTUAL inline bool	Is25GIPDevice (void)	{return ::NTV2DeviceCanDo25GIP(GetDeviceID());}	///< @return	True if I am an IP device; otherwise false.
-        AJA_VIRTUAL bool        IsLPSystemReady (void);
+		AJA_VIRTUAL inline NTV2_DEPRECATED_18_0(bool IsIPDevice(void)) {return ::NTV2DeviceCanDoIP(GetDeviceID());}	///< @deprecated	Use IsSupported(kDeviceCanDoIP) instead
+		AJA_VIRTUAL inline NTV2_DEPRECATED_18_0(bool Is25GIPDevice(void)) {return ::NTV2DeviceCanDo25GIP(GetDeviceID());}	///< @deprecated	Use IsSupported(kDeviceCanDo25GIP) instead
+		AJA_VIRTUAL bool		IsLPSystemReady (void);
 	///@}
 
 	/**
@@ -442,27 +442,18 @@ class AJAExport CNTV2DriverInterface
 		AJA_VIRTUAL ULWordSet	GetSupportedItems (const NTV2EnumsID inEnumsID);	//	New in SDK 17.0
 	///@}
 
-		// stream channel operations
-		AJA_VIRTUAL bool	StreamChannelOps (const NTV2Channel inChannel,
-												ULWord flags,
-												NTV2StreamChannel& status);
+	// stream channel operations
+	AJA_VIRTUAL bool	StreamChannelOps (const NTV2Channel inChannel, ULWord flags, NTV2StreamChannel & status);
 
-		// stream buffer operations
-		AJA_VIRTUAL bool	StreamBufferOps (const NTV2Channel inChannel,
-												NTV2Buffer& inBuffer,
-												ULWord64 bufferCookie,
-												ULWord flags,
-												NTV2StreamBuffer& status);
+	// stream buffer operations
+	AJA_VIRTUAL bool	StreamBufferOps (const NTV2Channel inChannel, NTV2Buffer & inBuffer,
+										ULWord64 bufferCookie, ULWord flags, NTV2StreamBuffer & status);
 
-        // mail buffer operations
-        AJA_VIRTUAL bool    MailBufferOps (const NTV2Channel inChannel,
-                                           NTV2Buffer& inBuffer,
-                                           ULWord dataSize,
-                                           ULWord flags,
-                                           ULWord delay,
-                                           ULWord timeout,
-                                           NTV2MailBuffer& status);
-
+	// mail buffer operations
+	AJA_VIRTUAL bool	MailBufferOps (const NTV2Channel inChannel, NTV2Buffer & inBuffer,
+										ULWord dataSize, ULWord flags,
+										ULWord delay, ULWord timeout,
+										NTV2MailBuffer & status);
 	/**
 		@name	Device Ownership
 	**/

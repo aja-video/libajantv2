@@ -37,6 +37,7 @@ typedef enum
 	kVRegCCPlayerBufSizeKB					= VIRTUALREG_START+6,		// NTV2CCPlayer: custom Anc buffer size (KiloBytes)
 	kVRegCCPlayerCustomPkt					= VIRTUALREG_START+7,		// NTV2CCPlayer: if nonzero, insert custom Anc pkt: DID|SID|lineNum
 	kVRegDriverType							= VIRTUALREG_START+10,		// Driver type (MacOS only:  0 == KEXT, 'DEXT' == DEXT)
+	kVRegVDevReadyRegNum					= VIRTUALREG_START+11,		// Register number to check if virtual device "is ready"
 
 	// COMMON_VIRTUAL_REGS_KONA2
 	kVRegInputSelect						= VIRTUALREG_START+20,		// Input 1, Input 2, DualLink

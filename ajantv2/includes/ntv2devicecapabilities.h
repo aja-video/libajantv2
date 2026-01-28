@@ -71,6 +71,7 @@ class AJAExport DeviceCapabilities
 		inline bool		CanDoHDVideo (void)						{return dev.IsSupported(kDeviceCanDoHDVideo);}									///< @returns	True if device can handle HD (High Definition) video
 		inline bool		CanDoHFRRGB (void)						{return dev.IsSupported(kDeviceCanDoHFRRGB);}									///< @returns	True if device supports 1080p RGB at more than 50fps
 		inline bool		CanDoIP (void)							{return dev.IsSupported(kDeviceCanDoIP);}										///< @returns	True if device has SFP network connectors
+		inline bool		CanDo25GIP (void)						{return dev.IsSupported(kDeviceCanDo25GIP);}									///< @returns	True if device has 25Gbps SFP network connectors
 		inline bool		CanDoIsoConvert (void)					{return dev.IsSupported(kDeviceCanDoIsoConvert);}								///< @returns	True if device can do ISO conversion
 		inline bool		CanDoJ2K (void)							{return dev.IsSupported(kDeviceCanDoJ2K);}										///< @returns	True if device supports JPEG 2000 codec
 		inline bool		CanDoLTC (void)							{return dev.IsSupported(kDeviceCanDoLTC);}										///< @returns	True if device has any LTC (Linear TimeCode) inputs

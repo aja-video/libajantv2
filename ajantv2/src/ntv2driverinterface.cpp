@@ -656,8 +656,10 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 		case DEVICE_ID_CORVID44_2X4K:				bitFileInfo.bitFileType = NTV2_BITFILE_CORVID44_2X4K_MAIN;			break;
 		case DEVICE_ID_CORVID44_8K:					bitFileInfo.bitFileType = NTV2_BITFILE_CORVID44_8K_MAIN;			break;
 		case DEVICE_ID_CORVID44_8KMK:				bitFileInfo.bitFileType = NTV2_BITFILE_CORVID44_8KMK_MAIN;			break;
+		case DEVICE_ID_CORVID44_GEN3:				bitFileInfo.bitFileType = NTV2_BITFILE_CORVID44_GEN3;				break;
 		case DEVICE_ID_CORVID44_PLNR:				bitFileInfo.bitFileType = NTV2_BITFILE_CORVID44_PLNR_MAIN;			break;
 		case DEVICE_ID_CORVID88:					bitFileInfo.bitFileType = NTV2_BITFILE_CORVID88;					break;
+		case DEVICE_ID_CORVID88_GEN3:				bitFileInfo.bitFileType = NTV2_BITFILE_CORVID44_GEN3;				break;
 		case DEVICE_ID_CORVIDHBR:					bitFileInfo.bitFileType = NTV2_BITFILE_NUMBITFILETYPES;				break;
 		case DEVICE_ID_CORVIDHEVC:					bitFileInfo.bitFileType = NTV2_BITFILE_CORVIDHEVC;					break;
 		case DEVICE_ID_IO4K:						bitFileInfo.bitFileType = NTV2_BITFILE_IO4K_MAIN;					break;
@@ -718,10 +720,9 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 		case DEVICE_ID_KONAXM:						bitFileInfo.bitFileType = NTV2_BITFILE_KONAXM;						break;
 		case DEVICE_ID_KONAX_4CH:                   bitFileInfo.bitFileType = NTV2_BITFILE_KONAX_4CH;                   break;
         case DEVICE_ID_KONAIP_25G:					bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_25G;					break;
-    case DEVICE_ID_IP25_T:
-		case DEVICE_ID_IP25_R:						bitFileInfo.bitFileType = NTV2_BITFILE_TYPE_INVALID;				break;
-		case DEVICE_ID_CORVID44_GEN3:				bitFileInfo.bitFileType = NTV2_BITFILE_CORVID44_GEN3;				break;
-		case DEVICE_ID_CORVID88_GEN3:				bitFileInfo.bitFileType = NTV2_BITFILE_CORVID44_GEN3;				break;
+
+		case DEVICE_ID_IP25_T:
+		case DEVICE_ID_IP25_R:
 		case DEVICE_ID_SOFTWARE:
 		case DEVICE_ID_NOTFOUND:					bitFileInfo.bitFileType = NTV2_BITFILE_TYPE_INVALID;				break;
 	#if !defined (_DEBUG)
@@ -740,7 +741,7 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 
 bool CNTV2DriverInterface::GetPackageInformation (PACKAGE_INFO_STRUCT & packageInfo)
 {
-	if (!IsDeviceReady(false) || !IsIPDevice())
+	if (!IsDeviceReady(false) || !IsSupported(kDeviceCanDoIP))
 		return false;	// cannot read flash
 
 	string packInfo;
@@ -926,11 +927,11 @@ bool CNTV2DriverInterface::StreamBufferOps (const NTV2Channel inChannel,
 
 bool CNTV2DriverInterface::MailBufferOps (const NTV2Channel inChannel,
 										  NTV2Buffer& inBuffer,
-                                          ULWord dataSize,
-                                          ULWord flags,
-                                          ULWord delay,
-                                          ULWord timeout,
-                                          NTV2MailBuffer& status)
+										  ULWord dataSize,
+										  ULWord flags,
+										  ULWord delay,
+										  ULWord timeout,
+										  NTV2MailBuffer& status)
 {
 	status.mChannel = inChannel;
 	status.mBuffer.Set (inBuffer.GetHostPointer(), inBuffer.GetByteCount());
@@ -1359,29 +1360,38 @@ void CNTV2DriverInterface::BumpEventCount (const INTERRUPT_ENUMS eInterruptType)
 
 bool CNTV2DriverInterface::IsDeviceReady (const bool checkValid)
 {
-    if (!IsIPDevice() && !::NTV2DeviceCanDo25GIP(GetDeviceID()))
+	if (IsRemote())
+	{
+		ULWord reg(0), val(0);
+		if (!ReadRegister(kVRegVDevReadyRegNum, reg))
+			return true;	//	failed to read VReg -- assume ready
+		if (!reg)
+			return true;	//	reg number is zero -- assume ready
+		//	A non-zero register number was returned (hope it's valid)
+		if (!ReadRegister(reg, val))
+			return true;	//	failed to read -- bad reg num? -- assume device ready
+		//	ReadRegister successful!
+		return val;	//	zero means "not ready";  non-zero means "ready"
+	}
+	if (!IsSupported(kDeviceCanDoIP) && !IsSupported(kDeviceCanDo25GIP))
 		return true;	//	Non-IP devices always ready
-    
-    if (IsIPDevice())
-    {
-        if (!IsMBSystemReady())
-            return false;
-    
-        if (checkValid && !IsMBSystemValid())
-            return false;
-    }
-    else
-    {
-        if (!IsLPSystemReady())
-            return false;
-    }
 
+	if (IsSupported(kDeviceCanDoIP))
+	{
+		if (!IsMBSystemReady())
+			return false;
+
+		if (checkValid && !IsMBSystemValid())
+			return false;
+	}
+	else if (!IsLPSystemReady())
+		return false;
 	return true;	//	Ready!
 }
 
 bool CNTV2DriverInterface::IsMBSystemValid (void)
 {
-	if (IsIPDevice())
+	if (IsSupported(kDeviceCanDoIP))
 	{
 		uint32_t val;
 		ReadRegister(SAREK_REGS + kRegSarekIfVersion, val);
@@ -1392,7 +1402,7 @@ bool CNTV2DriverInterface::IsMBSystemValid (void)
 
 bool CNTV2DriverInterface::IsMBSystemReady (void)
 {
-	if (!IsIPDevice())
+	if (!IsSupported(kDeviceCanDoIP))
 		return false;	//	No microblaze
 
 	uint32_t val;
@@ -1407,15 +1417,14 @@ bool CNTV2DriverInterface::IsMBSystemReady (void)
 
 bool CNTV2DriverInterface::IsLPSystemReady (void)
 {
-    if (!::NTV2DeviceCanDo25GIP(GetDeviceID()))
-        return false;	//	No local proc
-    
-    uint32_t val;
-    ReadRegister(kRegReserved83, val);
-    if (val == 0x00)
-        return false;	//	MB not ready
+	if (!IsSupported(kDeviceCanDo25GIP))
+		return false;	//	No local proc
 
-    return true;
+	uint32_t val;
+	ReadRegister(kRegReserved83, val);
+	if (val == 0x00)
+		return false;	//	MB not ready
+	return true;
 }
 
 #if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
@@ -1734,7 +1743,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceHasBracketLED:					outValue = ::NTV2DeviceHasBracketLED(devID);						break;
 		case kDeviceHasColorSpaceConverterOnChannel2:	outValue = ::NTV2DeviceCanDoWidget(devID, NTV2_WgtCSC2);		break;	//	Deprecate?
 		case kDeviceHasIDSwitch:					outValue = ::NTV2DeviceCanDoIDSwitch(devID);						break;
-        case kDeviceHasNTV4FrameStores:				outValue = ::NTV2DeviceHasNTV4FrameStores(devID);                   break;
+		case kDeviceHasNTV4FrameStores:				outValue = ::NTV2DeviceHasNTV4FrameStores(devID);				   break;
 		case kDeviceHasNWL:							outValue = ::NTV2DeviceHasNWL(devID);								break;
 		case kDeviceHasPCIeGen2:					outValue = ::NTV2DeviceHasPCIeGen2(devID);							break;
 		case kDeviceHasRetailSupport:				outValue = ::NTV2DeviceHasRetailSupport(devID);						break;
@@ -1769,6 +1778,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanDoHDMIMultiView:				outValue = ::NTV2DeviceCanDoHDMIMultiView(devID);					break;
 		case kDeviceCanDoHFRRGB:					outValue = ::NTV2DeviceCanDoHFRRGB(devID);							break;
 		case kDeviceCanDoIP:						outValue = ::NTV2DeviceCanDoIP(devID);								break;
+		case kDeviceCanDo25GIP:						outValue = ::NTV2DeviceCanDo25GIP(devID);							break;
 		case kDeviceCanDoMultiLinkAudio:			outValue = ::NTV2DeviceCanDoMultiLinkAudio(devID);					break;
 		case kDeviceCanDoWarmBootFPGA:				outValue = ::NTV2DeviceCanDoWarmBootFPGA(devID);					break;
 		case kDeviceCanReportFailSafeLoaded:		outValue = ::NTV2DeviceCanReportFailSafeLoaded(devID);				break;

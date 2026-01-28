@@ -129,6 +129,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceHasMultiRasterWidget,				///< @brief True if device can rasterize 4 HD signals into a single HDMI output.
 	kDeviceCanDoHFRRGB,							///< @brief True if device supports 1080p RGB at more than 50Hz frame rates.
 	kDeviceCanDoIP,								///< @brief True if device has SFP connectors.
+	kDeviceCanDo25GIP,							///< @brief True if device has 25Gbps SFPs.
 	kDeviceCanDoMultiLinkAudio,					///< @brief True if device supports grouped audio system control.
 	kDeviceCanDoWarmBootFPGA,					///< @brief True if device can warm-boot to load updated firmware.
 	kDeviceCanReportFailSafeLoaded,				///< @brief True if device can report if its "fail-safe" firmware is loaded/running.
