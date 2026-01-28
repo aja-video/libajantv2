@@ -423,6 +423,7 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 					result = NTV2_BreakoutCableXLR;		// no BNC breakout cable available
 				break;
 			case DEVICE_ID_KONAX:
+			case DEVICE_ID_KONAX_4CH:
 				// Do we have a BOB?
 				if (IsSupported(kDeviceHasBreakoutBoard))
 					result = NTV2_BreakoutBoard;

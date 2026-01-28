@@ -198,7 +198,8 @@ bool StartDriverProcesses(Ntv2DriverProcessContext* inProcessContext)
 		}
 	
 		if ((deviceID == DEVICE_ID_KONAXM)	||
-			(deviceID == DEVICE_ID_KONAX))
+			(deviceID == DEVICE_ID_KONAX)   ||
+			(deviceID == DEVICE_ID_KONAX_4CH))
 		{
 			ntv2Message("Starting Genlock v2\n");
 			inProcessContext->pGenlock2Monitor = ntv2_genlock2_open(pSystemContext, "ntv2genlock2", 0);
@@ -221,8 +222,10 @@ bool StartDriverProcesses(Ntv2DriverProcessContext* inProcessContext)
 	#endif
 	
 	#ifdef AJA_RASTERIZER
-		if ((deviceID == DEVICE_ID_KONAXM)	||
-			(deviceID == DEVICE_ID_KONAX))
+        if ((deviceID == DEVICE_ID_KONAXM)	||
+            (deviceID == DEVICE_ID_KONAX)   ||
+            (deviceID == DEVICE_ID_KONAX_4CH) ||
+            (deviceID == DEVICE_ID_KONAIP_25G))
 		{
 			ntv2Message("Starting Raster Monitor\n");
 			inProcessContext->pRasterMonitor = ntv2_videoraster_open(pSystemContext, "ntv2raster", 0);
@@ -315,7 +318,7 @@ bool StartDriverProcesses(Ntv2DriverProcessContext* inProcessContext)
 					{
 						status = ntv2_hdmiin4_configure(inProcessContext->pHDMIIn4Monitor[0], ntv2_edid_type_konahdmi_20, 0);
 					}
-					else if (deviceID == DEVICE_ID_KONAX || deviceID == DEVICE_ID_KONAXM)
+					else if (deviceID == DEVICE_ID_KONAX || deviceID == DEVICE_ID_KONAXM || deviceID == DEVICE_ID_KONAX_4CH)
 					{
 						status = ntv2_hdmiin4_configure(inProcessContext->pHDMIIn4Monitor[0], ntv2_edid_type_konax, 0);
 					}
@@ -404,7 +407,7 @@ bool StartDriverProcesses(Ntv2DriverProcessContext* inProcessContext)
 	
 	#ifdef AJA_HDMI_OUT
 		// configure hdmi output version 4 monitor
-		if ((NTV2DeviceGetHDMIVersion(deviceID) == 4) &&
+		if ((NTV2DeviceGetHDMIVersion(deviceID) >= 4) &&
 			(NTV2DeviceGetNumHDMIVideoOutputs(deviceID) > 0))
 		{
 			ntv2Message("Starting HDMI Out 1 v4\n");
@@ -426,6 +429,26 @@ bool StartDriverProcesses(Ntv2DriverProcessContext* inProcessContext)
 			}
 		}
 	#endif
+    
+    #ifdef AJA_MAILBOX
+        // Clear all mailboxes
+        for (int i = 0; i < NTV2_MAX_MAILBOX; i++)
+        {
+            inProcessContext->pMailbox[i] = NULL;
+        }
+        
+        // Open the first mailbox
+        inProcessContext->pMailbox[0] = ntv2_mailbox_open(pSystemContext, "ntv2mailbox", 0);
+        if (inProcessContext->pMailbox[0] != NULL)
+        {
+            status = ntv2_mailbox_configure(inProcessContext->pMailbox[0], 0x100000);
+            if (status != NTV2_STATUS_SUCCESS)
+            {
+                ntv2_mailbox_close(inProcessContext->pMailbox[0]);
+                inProcessContext->pMailbox[0] = NULL;
+            }
+        }
+    #endif
 
 	// Turn on interrupts
 	EnableNtv2Interrupts(inProcessContext->pSystemContext);
@@ -498,6 +521,13 @@ void StopDriverProcesses(Ntv2DriverProcessContext* inProcessContext)
 		ntv2_setup_disable(inProcessContext->pSetupMonitor);
 	}
 
+    for (int i = 0; i < NTV2_MAX_MAILBOX; i++)
+    {
+        ntv2_mailbox_disable(inProcessContext->pMailbox[i]);
+        ntv2_mailbox_close(inProcessContext->pMailbox[i]);
+        inProcessContext->pMailbox[i] = NULL;
+    }
+        
 	ntv2Message("<- Exit\n");
 }
 
@@ -736,8 +766,8 @@ void InitializeVirtualRegisters(Ntv2SystemContext* pSystemContext)
 		ntv2WriteRegister(pSystemContext, gChannelToVPIDTransferCharacteristics[i], 0);
 		ntv2WriteRegister(pSystemContext, gChannelToVPIDColorimetry[i], 0);
 		ntv2WriteRegister(pSystemContext, gChannelToVPIDLuminance[i], 0);
-        ntv2WriteRegister(pSystemContext, gChannelToSDIOutVPIDRGBRange, 0);
-        ntv2WriteRegister(pSystemContext, gChannelToSDIOutKeySignal, 0);
+        ntv2WriteRegister(pSystemContext, gChannelToSDIOutVPIDRGBRange[i], 0);
+        ntv2WriteRegister(pSystemContext, gChannelToSDIOutKeySignal[i], 0);
 	}
 
 	ntv2WriteRegister(pSystemContext, kVRegBaseFirmwareDeviceID, (uint32_t)deviceID);

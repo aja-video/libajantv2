@@ -53,7 +53,7 @@ static void ReportDeviceFlashStatus (CNTV2Card & inDevice)
 	else
 		warnings << "## WARNING:  No main bitfile found" << endl;
 
-	if (inDevice.IsIPDevice())
+	if (inDevice.features().CanDoIP())
 	{
 		ULWord pkg;
 		inDevice.GetRunningFirmwarePackageRevision(pkg);
@@ -86,7 +86,7 @@ static void ReportDeviceFlashStatus (CNTV2Card & inDevice)
 
 	if (konaFlasher.ReadInfoString())
 		cout << "    Package Info: " << konaFlasher.GetMCSInfo().c_str() << endl;
-	else if (inDevice.IsIPDevice())
+	else if (inDevice.features().CanDoIP())
 		warnings << "## WARNING:  Unable to read package info" << endl;
 
 	if (runningBuildDate.empty()  &&  !::NTV2DeviceCanReportRunningFirmwareDate(konaFlasher.GetDeviceID()))
@@ -183,7 +183,7 @@ int main (int argc, const char** argv)
 	CNTV2Card		device;
 	CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpecifier, device);
 	
-	if (device.IsIPDevice())
+	if (device.features().CanDoIP())
 	{
 		CNTV2KonaFlashProgram konaFlasher(device.GetIndexNumber());
 		if (bForce)
@@ -249,7 +249,7 @@ int main (int argc, const char** argv)
 		if (!bQuiet && device.IsOpen() && ::NTV2DeviceHasSPIFlash(device.GetDeviceID()))
 			ReportDeviceFlashStatus(device);
 
-		if (device.IsIPDevice())
+		if (device.features().CanDoIP())
 		{
 			ULWord dnaLo;
 			device.ReadRegister(kRegSarekDNALow + SAREK_REGS, dnaLo);

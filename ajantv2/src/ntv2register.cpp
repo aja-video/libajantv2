@@ -8,8 +8,6 @@
 #include "ntv2card.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
-#include "ntv2registerexpert.h"
-#include "ntv2endian.h"
 #include "ntv2registersmb.h"
 #include "ntv2konaflashprogram.h"
 #include "ntv2konaflashprogram.h"
@@ -1508,10 +1506,10 @@ bool CNTV2Card::SetReference (const NTV2ReferenceSource inRefSource, const bool 
 		default:							break;
 	}
 
-	if (IsIPDevice())
+	if (IsSupported(kDeviceCanDoIP))
 		WriteRegister(kRegGlobalControl2, ptpControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
 
-	if (GetNumSupported(kDeviceGetNumVideoChannels) > 4 || (IsIPDevice() || Is25GIPDevice()) )
+	if (GetNumSupported(kDeviceGetNumVideoChannels) > 4 || (IsSupported(kDeviceCanDoIP) || IsSupported(kDeviceCanDo25GIP)) )
 		WriteRegister (kRegGlobalControl2, refControl2, kRegMaskRefSource2, kRegShiftRefSource2);
 		
 	return WriteRegister (kRegGlobalControl, refControl1, kRegMaskRefSource, kRegShiftRefSource);
@@ -1525,7 +1523,7 @@ bool CNTV2Card::GetReference (NTV2ReferenceSource & outValue)
 	ULWord	refControl2(0), ptpControl(0);
 	bool result (CNTV2DriverInterface::ReadRegister (kRegGlobalControl, outValue, kRegMaskRefSource, kRegShiftRefSource));
 
-    if ((GetNumSupported(kDeviceGetNumVideoChannels) > 4 || IsIPDevice()) && !NTV2DeviceCanDo25GIP(_boardID) )
+	if ((GetNumSupported(kDeviceGetNumVideoChannels) > 4 || IsSupported(kDeviceCanDoIP)) && !IsSupported(kDeviceCanDo25GIP))
 	{
 		ReadRegister (kRegGlobalControl2,  refControl2,	 kRegMaskRefSource2,  kRegShiftRefSource2);
 		if (refControl2)
@@ -1536,12 +1534,12 @@ bool CNTV2Card::GetReference (NTV2ReferenceSource & outValue)
 				case 2:		outValue = NTV2_REFERENCE_INPUT7;	break;
 				case 3:		outValue = NTV2_REFERENCE_INPUT8;	break;
 
-				case 4:		if (IsIPDevice())
+				case 4:		if (IsSupported(kDeviceCanDoIP))
 								ReadRegister (kRegGlobalControl2, ptpControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
 							outValue = ptpControl == 0 ? NTV2_REFERENCE_SFP1_PCR : NTV2_REFERENCE_SFP1_PTP;
 							break;
 
-				case 5:		if (IsIPDevice())
+				case 5:		if (IsSupported(kDeviceCanDoIP))
 								ReadRegister (kRegGlobalControl2, ptpControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
 							outValue = ptpControl == 0 ? NTV2_REFERENCE_SFP2_PCR : NTV2_REFERENCE_SFP2_PTP;
 							break;
@@ -1550,23 +1548,23 @@ bool CNTV2Card::GetReference (NTV2ReferenceSource & outValue)
 			}
 	}
 
-    if (NTV2DeviceCanDo25GIP(_boardID))
-    {
-        result = ReadRegister(kRegLPPTPSFPStatus, ptpControl);
-        switch(ptpControl)
-        {
-        default:
-        case 0:
-            outValue = NTV2_REFERENCE_FREERUN;
-            break;
-        case 1:
-            outValue = NTV2_REFERENCE_SFP1_PTP;
-            break;
-        case 2:
-            outValue = NTV2_REFERENCE_SFP2_PTP;
-            break;
-        }
-    }
+	if (IsSupported(kDeviceCanDo25GIP))
+	{
+		result = ReadRegister(kRegLPPTPSFPStatus, ptpControl);
+		switch (ptpControl)
+		{
+		default:
+		case 0:
+			outValue = NTV2_REFERENCE_FREERUN;
+			break;
+		case 1:
+			outValue = NTV2_REFERENCE_SFP1_PTP;
+			break;
+		case 2:
+			outValue = NTV2_REFERENCE_SFP2_PTP;
+			break;
+		}
+	}
 
 	if (_boardID == DEVICE_ID_KONAHDMI)
 		switch (outValue)
@@ -2360,7 +2358,7 @@ bool CNTV2Card::GetRunningFirmwarePackageRevision (ULWord & outRevision)
 	outRevision = 0;
 	if (!IsOpen())
 		return false;	//	Not open
-	if (!IsIPDevice())
+	if (!IsSupported(kDeviceCanDoIP))
 		return false;	//	No MicroBlaze
 	return ReadRegister(kRegSarekPackageVersion + SAREK_REGS, outRevision);
 }
@@ -3270,47 +3268,47 @@ bool CNTV2Card::SetSDIOutputStandard (const UWord inOutputSpigot, const NTV2Stan
 	if (IS_OUTPUT_SPIGOT_INVALID(inOutputSpigot))
 		return false;
 
-    NTV2Standard standard(inValue);
+	NTV2Standard standard(inValue);
 	bool is2Kx1080(false);
-    switch(inValue)
-    {
-    case NTV2_STANDARD_2Kx1080p:
-        standard = NTV2_STANDARD_1080p;
-        is2Kx1080 = true;
-        break;
-    case NTV2_STANDARD_2Kx1080i:
-        standard = NTV2_STANDARD_1080;
-        is2Kx1080 = true;
-        break;
-    case NTV2_STANDARD_3840x2160p:
-        standard = NTV2_STANDARD_1080p;
-        is2Kx1080 = false;
-        break;
-    case NTV2_STANDARD_3840HFR:
-        standard = NTV2_STANDARD_1080p;
-        is2Kx1080 = false;
-        break;
-    case NTV2_STANDARD_3840i:
-        standard = NTV2_STANDARD_1080;
-        is2Kx1080 = false;
-        break;
-    case NTV2_STANDARD_4096x2160p:
-        standard = NTV2_STANDARD_1080p;
-        is2Kx1080 = true;
-        break;
-    case NTV2_STANDARD_4096HFR:
-        standard = NTV2_STANDARD_1080p;
-        is2Kx1080 = true;
-        break;
-    case NTV2_STANDARD_4096i:
-        standard = NTV2_STANDARD_1080;
-        is2Kx1080 = true;
-        break;
-    default:
-        break;
-    }
+	switch(inValue)
+	{
+	case NTV2_STANDARD_2Kx1080p:
+		standard = NTV2_STANDARD_1080p;
+		is2Kx1080 = true;
+		break;
+	case NTV2_STANDARD_2Kx1080i:
+		standard = NTV2_STANDARD_1080;
+		is2Kx1080 = true;
+		break;
+	case NTV2_STANDARD_3840x2160p:
+		standard = NTV2_STANDARD_1080p;
+		is2Kx1080 = false;
+		break;
+	case NTV2_STANDARD_3840HFR:
+		standard = NTV2_STANDARD_1080p;
+		is2Kx1080 = false;
+		break;
+	case NTV2_STANDARD_3840i:
+		standard = NTV2_STANDARD_1080;
+		is2Kx1080 = false;
+		break;
+	case NTV2_STANDARD_4096x2160p:
+		standard = NTV2_STANDARD_1080p;
+		is2Kx1080 = true;
+		break;
+	case NTV2_STANDARD_4096HFR:
+		standard = NTV2_STANDARD_1080p;
+		is2Kx1080 = true;
+		break;
+	case NTV2_STANDARD_4096i:
+		standard = NTV2_STANDARD_1080;
+		is2Kx1080 = true;
+		break;
+	default:
+		break;
+	}
 
-    return WriteRegister (gChannelToSDIOutControlRegNum[inOutputSpigot], standard, kK2RegMaskSDIOutStandard, kK2RegShiftSDIOutStandard)
+	return WriteRegister (gChannelToSDIOutControlRegNum[inOutputSpigot], standard, kK2RegMaskSDIOutStandard, kK2RegShiftSDIOutStandard)
 			&&	SetSDIOut2Kx1080Enable(NTV2Channel(inOutputSpigot), is2Kx1080);
 }
 

@@ -3767,7 +3767,7 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
             }
         }
 	
-        if ((ntv2pp->_DeviceID == DEVICE_ID_KONAX) || (ntv2pp->_DeviceID == DEVICE_ID_KONAXM))
+        if ((ntv2pp->_DeviceID == DEVICE_ID_KONAX) || (ntv2pp->_DeviceID == DEVICE_ID_KONAXM) || (ntv2pp->_DeviceID == DEVICE_ID_KONAX_4CH))
         {
             ntv2pp->m_pRasterMonitor = ntv2_videoraster_open(&ntv2pp->systemContext, "ntv2videoraster", 0);
             if (ntv2pp->m_pRasterMonitor != NULL)
@@ -3874,8 +3874,8 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
         linuxSerial = true;
 #endif
 
-        if (isKonaIP || (ntv2pp->_DeviceID == DEVICE_ID_CORVIDHBR) ||
-            (ntv2pp->_DeviceID == DEVICE_ID_KONAX) || (ntv2pp->_DeviceID == DEVICE_ID_KONAXM))
+        if (isKonaIP || (ntv2pp->_DeviceID == DEVICE_ID_CORVIDHBR) || (ntv2pp->_DeviceID == DEVICE_ID_KONAX) || 
+			(ntv2pp->_DeviceID == DEVICE_ID_KONAXM) || (ntv2pp->_DeviceID == DEVICE_ID_KONAX_4CH))
         {
             if ((!linuxSerial && (MakeSerial == 1)) ||
                 (linuxSerial && (MakeSerial != (-1))))
@@ -3932,7 +3932,7 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
             }
         }
         
-        if ((ntv2pp->_DeviceID == DEVICE_ID_KONAX) || (ntv2pp->_DeviceID == DEVICE_ID_KONAXM))
+        if ((ntv2pp->_DeviceID == DEVICE_ID_KONAX) || (ntv2pp->_DeviceID == DEVICE_ID_KONAXM) || (ntv2pp->_DeviceID == DEVICE_ID_KONAX_4CH))
         {
             ntv2pp->m_pGenlock2Monitor = ntv2_genlock2_open(&ntv2pp->systemContext, "ntv2genlock2", 0);
             if (ntv2pp->m_pGenlock2Monitor != NULL)
