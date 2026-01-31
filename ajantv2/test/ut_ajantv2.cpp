@@ -1108,328 +1108,106 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 		}
 	}	//	TEST_CASE("NTV2SegmentedXferInfo")
 
-	TEST_CASE("devicespecparser")
+	TEST_CASE("dictionary-bft")
 	{
 		AJADebug::Open();
-		NTV2DeviceSpecParser parser;
-		LOGNOTE("Legal schemes: " << aja::join(CNTV2DriverInterface::GetLegalSchemeNames(),", "));
-		parser.Reset("ntv2kona1://localhost/?devspec=0&channel=3");
-			CHECK(parser.HasDeviceSpec());
-			CHECK(parser.Successful());
-			CHECK_FALSE(parser.Failed());
-			CHECK(parser.HasScheme());
-			CHECK_FALSE(parser.HasErrors());
-			CHECK_FALSE(parser.IsLocalDevice());
-			CHECK_EQ(parser.Scheme(), "ntv2kona1");
-		parser.Reset("ntv2kona12://localhost/?devspec=0&channel=3");
-			CHECK(parser.HasDeviceSpec());
-			CHECK(parser.Successful());
-			CHECK_FALSE(parser.Failed());
-			CHECK(parser.HasScheme());
-			CHECK_FALSE(parser.HasErrors());
-			CHECK_FALSE(parser.IsLocalDevice());
-			CHECK_EQ(parser.Scheme(), "ntv2kona12");
-	 	parser.Reset("0x10402100");
-			CHECK(parser.HasDeviceSpec());
-			CHECK(parser.Successful());
-			CHECK_FALSE(parser.Failed());
-			CHECK(parser.HasScheme());
-			CHECK_FALSE(parser.HasErrors());
-			CHECK(parser.IsLocalDevice());
-			CHECK_EQ(parser.Scheme(), "ntv2local");
-			CHECK_EQ(parser.DeviceID(), DEVICE_ID_CORVID24);
-		parser.Reset("123extrastuff://localhost/?devspec=0&channel=3");
-			CHECK_FALSE(parser.Successful());
-			CHECK(parser.Failed());
-			CHECK_FALSE(parser.HasScheme());
-			CHECK(parser.HasErrors());
-			CHECK_EQ(parser.Error(), "Extra characters past index number");
-		parser.Reset("_weirdscheme://localhost/?devspec=0&channel=3");
-			CHECK(parser.Successful());
-			CHECK_FALSE(parser.Failed());
-			CHECK(parser.HasScheme());
-			CHECK_FALSE(parser.HasErrors());
-		parser.Reset("corvid24");
-			CHECK(parser.Successful());
-			CHECK_FALSE(parser.Failed());
-			CHECK(parser.HasScheme());
-			CHECK_FALSE(parser.HasErrors());
-			CHECK(parser.IsLocalDevice());
-			CHECK_EQ(parser.DeviceModel(), "corvid24");
-			CHECK_NE(parser.DeviceID(), DEVICE_ID_CORVID24);
-			CHECK_EQ(parser.DeviceSerial(), "");
-			CHECK_EQ(parser.DeviceIndex(), 0);
-		parser.Reset("corvid24foo");
-			CHECK_FALSE(parser.Successful());
-			CHECK(parser.Failed());
-			CHECK_FALSE(parser.HasScheme());
-			CHECK(parser.HasErrors());
-			CHECK_FALSE(parser.IsLocalDevice());
-			CHECK_NE(parser.DeviceModel(), "corvid24");
-			CHECK_EQ(parser.DeviceID(), 0);
-			CHECK_EQ(parser.DeviceSerial(), "");
-			CHECK_EQ(parser.DeviceIndex(), 0);
-			CHECK_EQ(parser.Error(), "Invalid local device specification");
-		parser.Reset("24corvid");	//	This is a legit serial number!
-			CHECK(parser.Successful());
-			CHECK_FALSE(parser.Failed());
-			CHECK(parser.HasScheme());
-			CHECK_FALSE(parser.HasErrors());
-			CHECK(parser.IsLocalDevice());
-			CHECK_EQ(parser.DeviceModel(), "");
-			CHECK_EQ(parser.DeviceID(), 0);
-			CHECK_EQ(parser.DeviceSerial(), "24corvid");
-			CHECK_EQ(parser.DeviceIndex(), 0);
-		parser.Reset("127.0.0.1");
-			CHECK(parser.Successful());
-			CHECK_FALSE(parser.Failed());
-			CHECK(parser.HasScheme());
-			CHECK_FALSE(parser.HasErrors());
-			CHECK_FALSE(parser.IsLocalDevice());
-			CHECK_EQ(parser.Scheme(), "ntv2nubrpclib");
-			CHECK(parser.HasResult(kConnectParamHost));
-			CHECK_EQ(parser.Result(kConnectParamHost), "127.0.0.1");
-			CHECK_FALSE(parser.HasResult(kConnectParamPort));
-		parser.Reset("127.0.0.1:28584");
-			CHECK(parser.Successful());
-			CHECK_FALSE(parser.Failed());
-			CHECK(parser.HasScheme());
-			CHECK_FALSE(parser.HasErrors());
-			CHECK_FALSE(parser.IsLocalDevice());	//	Remote
-			CHECK_EQ(parser.Scheme(), "ntv2nubrpclib");
-			CHECK(parser.HasResult(kConnectParamHost));
-			CHECK_EQ(parser.Result(kConnectParamHost), "127.0.0.1");
-			CHECK(parser.HasResult(kConnectParamPort));
-			CHECK_EQ(parser.Result(kConnectParamPort), "28584");
-		parser.Reset("127.0.0.1xtraChars");
-			CHECK_FALSE(parser.Successful());
-			CHECK(parser.Failed());
-			CHECK(parser.HasScheme());
-			CHECK(parser.HasErrors());
-			CHECK_EQ(parser.Error(), "Parser failed at character position 9");
-		parser.Reset("127.110.50.25.10.20.50");
-			CHECK_FALSE(parser.Successful());
-			CHECK(parser.Failed());
-			CHECK_FALSE(parser.HasScheme());
-			CHECK(parser.HasErrors());
-			CHECK_EQ(parser.Error(), "Extra characters past index number");
-		parser.Reset("ntv2kona1://192.168.122.1/?foo=bar");
-			CHECK(parser.Successful());
-			CHECK_FALSE(parser.Failed());
-			CHECK(parser.HasScheme());
-			CHECK_EQ(parser.Scheme(), "ntv2kona1");
-			CHECK_FALSE(parser.HasErrors());
-			CHECK_FALSE(parser.IsLocalDevice());
-			CHECK(parser.HasResult(kConnectParamHost));
-			CHECK_EQ(parser.Result(kConnectParamHost), "192.168.122.1");
-			CHECK_FALSE(parser.HasResult(kConnectParamPort));
-		parser.Reset("ntv2kona1://192.168.122.50.25.10.20.50/?foo=bar");
-			CHECK_FALSE(parser.Successful());
-			CHECK(parser.Failed());
-			CHECK(parser.HasErrors());
-			CHECK_EQ(parser.Error(), "Bad host address or port number");
-		parser.Reset("ntv2kona1://this.is.a123456.legitimate.dns.name.with.many.subdomains/?foo=bar");
-			CHECK(parser.Successful());
-			CHECK_FALSE(parser.Failed());
-			CHECK(parser.HasScheme());
-			CHECK_EQ(parser.Scheme(), "ntv2kona1");
-			CHECK_FALSE(parser.HasErrors());
-			CHECK_FALSE(parser.IsLocalDevice());
-			CHECK(parser.HasResult(kConnectParamHost));
-			CHECK_EQ(parser.Result(kConnectParamHost), "this.is.a123456.legitimate.dns.name.with.many.subdomains");
-			CHECK_FALSE(parser.HasResult(kConnectParamPort));
-		parser.Reset("ntv2kona1://this.is.a123456.9876bad.dns.name.with.many.subdomains/?foo=bar");
-			CHECK_FALSE(parser.Successful());
-			CHECK(parser.Failed());
-			CHECK(parser.HasErrors());
-			CHECK_EQ(parser.Error(), "Parser failed at character position 28");
-		parser.Reset("ntv2kona1://this.is.a123456.legitimate.dns.name.with.many.subdomains:55333/?foo=bar");
-			CHECK(parser.Successful());
-			CHECK_FALSE(parser.Failed());
-			CHECK(parser.HasScheme());
-			CHECK_EQ(parser.Scheme(), "ntv2kona1");
-			CHECK_FALSE(parser.HasErrors());
-			CHECK_FALSE(parser.IsLocalDevice());
-			CHECK(parser.HasResult(kConnectParamHost));
-			CHECK_EQ(parser.Result(kConnectParamHost), "this.is.a123456.legitimate.dns.name.with.many.subdomains");
-			CHECK(parser.HasResult(kConnectParamPort));
-			CHECK_EQ(parser.Result(kConnectParamPort), "55333");
-		parser.Reset("ntv2local://corvid24");
-			CHECK(parser.Successful());
-			CHECK_FALSE(parser.Failed());
-			CHECK(parser.HasScheme());
-			CHECK_FALSE(parser.HasErrors());
-			CHECK(parser.IsLocalDevice());
-			CHECK_EQ(parser.DeviceModel(), "corvid24");
-			CHECK_NE(parser.DeviceID(), DEVICE_ID_CORVID24);
-			CHECK_EQ(parser.DeviceSerial(), "");
-			CHECK_EQ(parser.DeviceIndex(), 0);
-		parser.Reset("ntv2local://corvid24foo");
-			CHECK_FALSE(parser.Successful());
-			CHECK(parser.Failed());
-			CHECK_FALSE(parser.HasScheme());
-			CHECK(parser.HasErrors());
-			CHECK_FALSE(parser.IsLocalDevice());
-			CHECK_NE(parser.DeviceModel(), "corvid24");
-			CHECK_EQ(parser.DeviceID(), 0);
-			CHECK_EQ(parser.DeviceSerial(), "");
-			CHECK_EQ(parser.DeviceIndex(), 0);
-			CHECK_EQ(parser.Error(), "Invalid local device specification");
-		parser.Reset("ntv2local://kona4?foo=x&bar=y");
-			CHECK(parser.Successful());
-			CHECK_FALSE(parser.Failed());
-			CHECK(parser.HasScheme());
-			CHECK_FALSE(parser.HasErrors());
-			CHECK(parser.IsLocalDevice());
-			CHECK_EQ(parser.DeviceModel(), "kona4");
-			CHECK_NE(parser.DeviceID(), DEVICE_ID_KONA4);
-			CHECK_EQ(parser.DeviceSerial(), "");
-			CHECK_EQ(parser.DeviceIndex(), 0);
-			CHECK_EQ(parser.MakeQueryString(false), "bar=y&foo=x");
-			CHECK_EQ(parser.QueryParam("foo"), "x");
-			CHECK_EQ(parser.QueryParam("bar"), "y");
-		parser.Reset("kona4?foo=x&bar=y");	//	NOT SUPPORTED:  if you insist on a query for a local device, you must use ntv2local://
-			CHECK_FALSE(parser.Successful());
-			CHECK(parser.Failed());
-			CHECK(parser.HasErrors());
-	 	parser.Reset("ntv2local://0x10402100");
-			CHECK(parser.HasDeviceSpec());
-			CHECK(parser.Successful());
-			CHECK_FALSE(parser.Failed());
-			CHECK(parser.HasScheme());
-			CHECK_FALSE(parser.HasErrors());
-			CHECK(parser.IsLocalDevice());
-			CHECK_EQ(parser.Scheme(), "ntv2local");
-			CHECK_EQ(parser.DeviceID(), DEVICE_ID_CORVID24);
-	 	parser.Reset("ntv2local://0x10402100?foo=x&bar=y");
-			CHECK(parser.HasDeviceSpec());
-			CHECK(parser.Successful());
-			CHECK_FALSE(parser.Failed());
-			CHECK(parser.HasScheme());
-			CHECK_FALSE(parser.HasErrors());
-			CHECK(parser.IsLocalDevice());
-			CHECK_EQ(parser.Scheme(), "ntv2local");
-			CHECK_EQ(parser.DeviceID(), DEVICE_ID_CORVID24);
-			CHECK_EQ(parser.MakeQueryString(false), "bar=y&foo=x");
-			CHECK_EQ(parser.QueryParam("foo"), "x");
-			CHECK_EQ(parser.QueryParam("bar"), "y");
-	 	parser.Reset("ntv2local://5");
-			CHECK(parser.HasDeviceSpec());
-			CHECK(parser.Successful());
-			CHECK_FALSE(parser.Failed());
-			CHECK(parser.HasScheme());
-			CHECK_FALSE(parser.HasErrors());
-			CHECK(parser.IsLocalDevice());
-			CHECK_EQ(parser.Scheme(), "ntv2local");
-			CHECK_EQ(parser.DeviceIndex(), 5);
-	 	parser.Reset("ntv2local://5?foo=x&bar=y");
-			CHECK(parser.HasDeviceSpec());
-			CHECK(parser.Successful());
-			CHECK_FALSE(parser.Failed());
-			CHECK(parser.HasScheme());
-			CHECK_FALSE(parser.HasErrors());
-			CHECK(parser.IsLocalDevice());
-			CHECK_EQ(parser.Scheme(), "ntv2local");
-			CHECK_EQ(parser.DeviceIndex(), 5);
-			CHECK_EQ(parser.MakeQueryString(false), "bar=y&foo=x");
-			CHECK_EQ(parser.QueryParam("foo"), "x");
-			CHECK_EQ(parser.QueryParam("bar"), "y");
-	 	parser.Reset("ntv2local://7XT001436");
-			CHECK(parser.HasDeviceSpec());
-			CHECK(parser.Successful());
-			CHECK_FALSE(parser.Failed());
-			CHECK(parser.HasScheme());
-			CHECK_FALSE(parser.HasErrors());
-			CHECK(parser.IsLocalDevice());
-			CHECK_EQ(parser.Scheme(), "ntv2local");
-			CHECK_EQ(parser.DeviceSerial(), "7XT001436");
-	 	parser.Reset("ntv2local://7XT001436?foo=x&bar=y");
-			CHECK(parser.HasDeviceSpec());
-			CHECK(parser.Successful());
-			CHECK_FALSE(parser.Failed());
-			CHECK(parser.HasScheme());
-			CHECK_FALSE(parser.HasErrors());
-			CHECK(parser.IsLocalDevice());
-			CHECK_EQ(parser.Scheme(), "ntv2local");
-			CHECK_EQ(parser.DeviceSerial(), "7XT001436");
-			CHECK_EQ(parser.MakeQueryString(false), "bar=y&foo=x");
-			CHECK_EQ(parser.QueryParam("foo"), "x");
-			CHECK_EQ(parser.QueryParam("bar"), "y");
-/*		parser.Reset("ntv2local://blabber");
-		parser.Reset("ntv2local://blabber.foo.bar");
-		parser.Reset("ntv2local://blabber/");
-		parser.Reset("ntv2local://blabber.foo.bar/");
-		parser.Reset("ntv2local://127.0.0.1");
-		parser.Reset("ntv2local://localhost");
-		parser.Reset("ntv2local://127.0.0.1/");
-		parser.Reset("ntv2local://localhost/");
-		parser.Reset("badscheme://localhost/");
-		parser.Reset("127.0.0.1");
-		parser.Reset("localhost");
-		parser.Reset("127.0.0.1:54321");
-		parser.Reset("localhost:6221");
-		parser.Reset("ntv2nub://127.0.0.1");
-		parser.Reset("ntv2nub://localhost");
-		parser.Reset("ntv2nub://127.0.0.1/");
-		parser.Reset("ntv2nub://localhost/");
-		parser.Reset("ntv2local://corvid24;");
-		parser.Reset("ntv2local://corvid24:/");
-		parser.Reset("ntv2local://corvid24:4/");
-		parser.Reset("ntv2local://corvid24:4goof");
-		parser.Reset("ntv2local://corvid24:4;goof");
-		parser.Reset("ntv2local://corvid24:4/goof");
-		parser.Reset("ntv2local://kona4");
-		parser.Reset("ntv2local://0x10402100");
-		parser.Reset("ntv2local://0x12345678");
-		parser.Reset("ntv2local://0x1234567890");
-		parser.Reset("ntv2local://0x12345678:");
-		parser.Reset("ntv2local://0x12345678;");
-		parser.Reset("ntv2local://0x12345678:/");
-		parser.Reset("ntv2local://0x12345678:goof/");
-		parser.Reset("ntv2local://0x12345678:goof/query");
-		parser.Reset("ntv2://foobar:4/query");
-		parser.Reset("ntv2://ntv2-shm-dev/");
-		parser.Reset("ntv2://ntv2shmdev/");
-*/	// 	
-	// 	CHECK_FALSE(device.Open(""));
-	// 	CHECK_FALSE(device.Open("blabber"));
-	// 	CHECK(device.Open("0"));
-	// 	CHECK_FALSE(device.Open("6"));
-	// 	CHECK(device.Open("corvid24"));
-	// 	CHECK_FALSE(device.Open("kona4"));
-	// 	CHECK_FALSE(device.Open("0x10402100"));
-	// 	CHECK_FALSE(device.Open("0x12345678"));
-	// 	CHECK(device.Open("ntv2local://0"));
-	// 	CHECK(device.Open("ntv2local://corvid24"));
-	// 	CHECK_FALSE(device.Open("ntv2local://kona4"));
-	// 	CHECK_FALSE(device.Open("ntv2local://0x10402100"));
-	// 	CHECK_FALSE(device.Open("ntv2local://0x12345678"));
+		NTV2Dictionary dict, dCmp;
+		CHECK(dict.empty());					//	Confirm empty
+		CHECK_EQ(dict.size(), 0);				//	Confirm zero size
+		CHECK(dict.keys().empty());				//	Confirm no keys
+		CHECK_FALSE(dict.hasKey("x"));			//	Confirm doesn't have "x"
+		CHECK_EQ(dict.valueForKey("x"), "");	//	Confirm nonexistent "x" value is empty string
+		CHECK_EQ(dict.largestKeySize(), 0);		//	Confirm largest key size is zero
+		CHECK_EQ(dict.largestValueSize(), 0);	//	Confirm largest value size is zero
+		string ser;
+		CHECK_FALSE(dict.serialize(ser));		//	Confirm empty dict won't serialize successfully
+		CHECK(ser.empty());						//	Confirm empty dict serialization is empty string
+		CHECK_FALSE(dict.hasKey("y"));			//	Confirm doesn't have "y"
+		CHECK_EQ(dict.u16ValueForKey("y", 400), 400);	//	Confirm nonexistent key u16 value is default
 
-	// 	CHECK(device.Open("ntv2local://0:"));
-	// 	CHECK(device.Open("ntv2local://0:25"));
-	// 	CHECK(device.Open("ntv2local://0:25/"));
-	// 	CHECK(device.Open("ntv2local://0:25/query"));
-	// 	CHECK_FALSE(device.Open("ntv2local://0:25goof"));
-	// 	CHECK_FALSE(device.Open("ntv2local://0:goof"));
-	// 	CHECK_FALSE(device.Open("ntv2local://0goof"));
+		//	Test insertion
+		CHECK_FALSE(dict.insert("", "val"));	//	Confirm insertion of empty key fails
+		CHECK_FALSE(dict.insert("x\ty", "val"));//	Confirm insertion of key containing tab fails
+		CHECK_FALSE(dict.insert("\txy", "val"));//	Confirm insertion of key starting with tab fails
+		CHECK_FALSE(dict.insert("x\ny", "val"));//	Confirm insertion of key containing newline fails
+		CHECK_FALSE(dict.insert("\nxy", "val"));//	Confirm insertion of key starting with newline fails
+		CHECK_FALSE(dict.insert("xy", "v\tw"));	//	Confirm insertion of value containing tab fails
+		CHECK_FALSE(dict.insert("xy", "\tw"));	//	Confirm insertion of value starting with tab fails
+		CHECK_FALSE(dict.insert("xy", "v\nw"));	//	Confirm insertion of value containing newline fails
+		CHECK_FALSE(dict.insert("xy", "\nw"));	//	Confirm insertion of value starting with newline fails
+		CHECK(dict.insert("y", "350"));			//	Confirm insertion of 1st key "y" with value "350" works
+		CHECK(dict.hasKey("y"));				//	Confirm has "y"
+		CHECK_EQ(dict.u16ValueForKey("y", /*default*/400), 350);	//	Confirm "y" u16 value is 350
+		CHECK_EQ(dict.valueForKey("y"), "350");	//	Confirm "y" value is "350"
+		CHECK(dict.insert("zz", "zee"));		//	Confirm insertion of 3rd key "zz" with value "zee" works
+		CHECK(dict.hasKey("zz"));				//	Confirm has "z"
+		CHECK_EQ(dict.valueForKey("zz"), "zee");//	Confirm "zz" value is "zee"
+		NTV2StringSet strs = {"y", "zz"};
+		CHECK_EQ(dict.keys(), strs);			//	Confirm keys are {"y", "zz"}
+		CHECK_EQ(dict.largestKeySize(), 2);		//	Confirm largest key size is 2 ("zz")
+		CHECK_EQ(dict.largestValueSize(), 3);	//	Confirm largest value size is 3 ("zee")
+		CHECK(dict.serialize(ser));				//	Confirm successful serialization
 
-	// 	CHECK_FALSE(device.Open("ntv2local://corvid26"));
-	// 	CHECK_FALSE(device.Open("ntv2local://corvid24;"));
-	// 	CHECK_FALSE(device.Open("ntv2local://corvid24:/"));
-	// 	CHECK(device.Open("ntv2local://corvid24:4/"));
-	// 	CHECK_FALSE(device.Open("ntv2local://corvid24:4goof"));
-	// 	CHECK_FALSE(device.Open("ntv2local://corvid24:4;goof"));
-	// 	CHECK(device.Open("ntv2local://corvid24:4/goof"));
-	// 	CHECK_FALSE(device.Open("ntv2local://kona4"));
-	// 	CHECK_FALSE(device.Open("ntv2local://0x10402100"));
-	// 	CHECK(device.Open("ntv2local://0x12345678"));
-	// 	CHECK_FALSE(device.Open("ntv2local://0x1234567890"));
-	// 	CHECK_FALSE(device.Open("ntv2local://0x12345678:"));
-	// 	CHECK_FALSE(device.Open("ntv2local://0x12345678;"));
-	// 	CHECK_FALSE(device.Open("ntv2local://0x12345678:/"));
-	// 	CHECK_FALSE(device.Open("ntv2local://0x12345678:goof/"));
-	// 	CHECK_FALSE(device.Open("ntv2local://0x12345678:goof/query"));
-	}	//	TEST_CASE("devicespecparser")
+		//	Test Print, serialize/deserialize
+		ostringstream ss, ssCmp; ss << dict;
+		CHECK(dCmp.empty());					//	Confirm dCmp is empty
+		CHECK(dCmp.deserialize(ser));			//	Confirm successful deserialize
+		ssCmp << dCmp;
+		CHECK_EQ(dCmp.size(), dict.size());		//	Confirm dCmp == dict
+		CHECK_EQ(dCmp.keys(), dict.keys());		//	Confirm dCmp == dict
+		CHECK_EQ(ss.str(), ssCmp.str());		//	Confirm dCmp == dict
+		CHECK_EQ(dCmp.largestKeySize(), dict.largestKeySize());		//	Confirm matching largestKeySize
+		CHECK_EQ(dCmp.largestValueSize(), dict.largestValueSize());	//	Confirm matching largestValueSize
+
+		//	Test erase
+		CHECK_EQ(dict.erase("fff"), 0);			//	Confirm erase returns 0 for nonexistent key
+		CHECK_EQ(dict.erase("y"), 1);			//	Confirm erase returns 1 for valid key
+		CHECK_FALSE(dict.hasKey("y"));			//	Confirm no more "y" key
+		CHECK_EQ(dict.u16ValueForKey("y", /*default*/400), 400);	//	Confirm "y" u16 value is default (400)
+		CHECK_EQ(dict.valueForKey("y"), "");	//	Confirm "y" value is empty string
+		CHECK_FALSE(dict.keys().empty());		//	Confirm keys set non-empty
+		CHECK_EQ(dict.keys().size(), 1);		//	Confirm keys() returns set containing 1 key
+		CHECK(dict.hasKey("zz"));				//	Confirm still has "zz" key
+		CHECK_EQ(dict.valueForKey("zz"), "zee");//	Confirm "zz" value is still "zee"
+
+		//	Test updateFrom (replace values for matching keys, ignore non-matching keys)
+		dCmp.clear();
+		CHECK(dCmp.empty());					//	Confirm dCmp empty
+		CHECK(dCmp.insert("alpha", "AAAAAA"));
+		CHECK(dCmp.insert("beta", "B"));
+		CHECK(dCmp.insert("chi", "C"));
+		CHECK(dCmp.insert("zz", "D"));	//	One matching key
+		CHECK_EQ(dict.updateFrom(dCmp), 1);		//	Confirm 1 updated (1 matching key)
+		CHECK_FALSE(dict.keys().empty());		//	Confirm keys set non-empty
+		CHECK_EQ(dict.keys().size(), 1);		//	Confirm keys() returns set containing 1 key
+		CHECK(dict.hasKey("zz"));				//	Confirm still has "zz" key
+		CHECK_EQ(dict.valueForKey("zz"), "D");//	Confirm "zz" value is now "D"
+		CHECK_FALSE(dict.hasKey("alpha"));		//	Confirm "alpha" not added
+		CHECK_EQ(dict.largestKeySize(), 2);		//	Confirm largest key size is 2 ("zz")
+		CHECK_EQ(dict.largestValueSize(), 1);	//	Confirm largest value size is 1 ("D")
+
+		//	Test addFrom (add non-matching keys, ignore matching keys)
+		CHECK_EQ(dict.addFrom(dCmp), 3);		//	Confirm 3 added (3 non-matching keys)
+		CHECK_FALSE(dict.keys().empty());		//	Confirm keys set non-empty
+		CHECK_EQ(dict.keys().size(), 4);		//	Confirm keys() returns set containing 4 keys
+		CHECK(dict.hasKey("zz"));				//	Confirm still has "zz" key
+		CHECK_EQ(dict.valueForKey("zz"), "D");//	Confirm "zz" value is still "D"
+		CHECK(dict.hasKey("alpha"));			//	Confirm "alpha" added
+		CHECK_EQ(dict.valueForKey("alpha"), "AAAAAA");//	Confirm "alpha" value "AAAAAA" added
+		CHECK_EQ(dict.valueForKey("beta"), "B");//	Confirm "beta" value "B" added
+		CHECK_EQ(dict.valueForKey("chi"), "C");	//	Confirm "chi" value "C" added
+		CHECK_EQ(dict.largestKeySize(), 5);		//	Confirm largest key size is 5 ("alpha")
+		CHECK_EQ(dict.largestValueSize(), 6);	//	Confirm largest value size is 6 ("AAAAAAA")
+
+		//	Test clear
+		dict.clear();
+		CHECK(dict.empty());					//	Confirm empty
+		CHECK_EQ(dict.size(), 0);				//	Confirm zero size
+		CHECK(dict.keys().empty());				//	Confirm no keys
+		CHECK_FALSE(dict.hasKey("zz"));			//	Confirm doesn't have "zz"
+		CHECK_EQ(dict.largestKeySize(), 0);		//	Confirm largest key size is zero
+		CHECK_EQ(dict.largestValueSize(), 0);	//	Confirm largest value size is zero
+	}	//	TEST_CASE("dictionary-bft")
 
 	TEST_CASE("Copy Raster")
 	{
@@ -3416,6 +3194,365 @@ TEST_SUITE("NTV2Buffer" * doctest::description("NTV2Buffer tests"))
 		CHECK(orig.IsContentEqual(cmpBuff));
 	}	//	hexstring
 } //NTV2Buffer
+
+
+void ntv2devicespecparser_marker() {}
+TEST_SUITE("NTV2DeviceSpecParser" * doctest::description("DeviceSpecParser tests")) {
+
+	TEST_CASE("devspecparser-parse")
+	{
+		AJADebug::Open();
+		NTV2DeviceSpecParser parser;
+		LOGNOTE("Legal schemes: " << aja::join(CNTV2DriverInterface::GetLegalSchemeNames(),", "));
+		parser.Reset("ntv2kona1://localhost/?devspec=0&channel=3");
+			CHECK(parser.HasDeviceSpec());
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_FALSE(parser.HasErrors());
+			CHECK_FALSE(parser.IsLocalDevice());
+			CHECK_EQ(parser.Scheme(), "ntv2kona1");
+		parser.Reset("ntv2kona12://localhost/?devspec=0&channel=3");
+			CHECK(parser.HasDeviceSpec());
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_FALSE(parser.HasErrors());
+			CHECK_FALSE(parser.IsLocalDevice());
+			CHECK_EQ(parser.Scheme(), "ntv2kona12");
+	 	parser.Reset("0x10402100");
+			CHECK(parser.HasDeviceSpec());
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_FALSE(parser.HasErrors());
+			CHECK(parser.IsLocalDevice());
+			CHECK_EQ(parser.Scheme(), "ntv2local");
+			CHECK_EQ(parser.DeviceID(), DEVICE_ID_CORVID24);
+		parser.Reset("123extrastuff://localhost/?devspec=0&channel=3");
+			CHECK_FALSE(parser.Successful());
+			CHECK(parser.Failed());
+			CHECK_FALSE(parser.HasScheme());
+			CHECK(parser.HasErrors());
+			CHECK_EQ(parser.Error(), "Extra characters past index number");
+		parser.Reset("_weirdscheme://localhost/?devspec=0&channel=3");
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_FALSE(parser.HasErrors());
+		parser.Reset("corvid24");
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_FALSE(parser.HasErrors());
+			CHECK(parser.IsLocalDevice());
+			CHECK_EQ(parser.DeviceModel(), "corvid24");
+			CHECK_NE(parser.DeviceID(), DEVICE_ID_CORVID24);
+			CHECK_EQ(parser.DeviceSerial(), "");
+			CHECK_EQ(parser.DeviceIndex(), 0);
+		parser.Reset("corvid24foo");
+			CHECK_FALSE(parser.Successful());
+			CHECK(parser.Failed());
+			CHECK_FALSE(parser.HasScheme());
+			CHECK(parser.HasErrors());
+			CHECK_FALSE(parser.IsLocalDevice());
+			CHECK_NE(parser.DeviceModel(), "corvid24");
+			CHECK_EQ(parser.DeviceID(), 0);
+			CHECK_EQ(parser.DeviceSerial(), "");
+			CHECK_EQ(parser.DeviceIndex(), 0);
+			CHECK_EQ(parser.Error(), "Invalid local device specification");
+		parser.Reset("24corvid");	//	This is a legit serial number!
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_FALSE(parser.HasErrors());
+			CHECK(parser.IsLocalDevice());
+			CHECK_EQ(parser.DeviceModel(), "");
+			CHECK_EQ(parser.DeviceID(), 0);
+			CHECK_EQ(parser.DeviceSerial(), "24corvid");
+			CHECK_EQ(parser.DeviceIndex(), 0);
+		parser.Reset("127.0.0.1");
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_FALSE(parser.HasErrors());
+			CHECK_FALSE(parser.IsLocalDevice());
+			CHECK_EQ(parser.Scheme(), "ntv2nubrpclib");
+			CHECK(parser.HasResult(kConnectParamHost));
+			CHECK_EQ(parser.Result(kConnectParamHost), "127.0.0.1");
+			CHECK_FALSE(parser.HasResult(kConnectParamPort));
+		parser.Reset("127.0.0.1:28584");
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_FALSE(parser.HasErrors());
+			CHECK_FALSE(parser.IsLocalDevice());	//	Remote
+			CHECK_EQ(parser.Scheme(), "ntv2nubrpclib");
+			CHECK(parser.HasResult(kConnectParamHost));
+			CHECK_EQ(parser.Result(kConnectParamHost), "127.0.0.1");
+			CHECK(parser.HasResult(kConnectParamPort));
+			CHECK_EQ(parser.Result(kConnectParamPort), "28584");
+		parser.Reset("127.0.0.1xtraChars");
+			CHECK_FALSE(parser.Successful());
+			CHECK(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK(parser.HasErrors());
+			CHECK_EQ(parser.Error(), "Parser failed at character position 9");
+		parser.Reset("127.110.50.25.10.20.50");
+			CHECK_FALSE(parser.Successful());
+			CHECK(parser.Failed());
+			CHECK_FALSE(parser.HasScheme());
+			CHECK(parser.HasErrors());
+			CHECK_EQ(parser.Error(), "Extra characters past index number");
+		parser.Reset("ntv2kona1://192.168.122.1/?foo=bar");
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_EQ(parser.Scheme(), "ntv2kona1");
+			CHECK_FALSE(parser.HasErrors());
+			CHECK_FALSE(parser.IsLocalDevice());
+			CHECK(parser.HasResult(kConnectParamHost));
+			CHECK_EQ(parser.Result(kConnectParamHost), "192.168.122.1");
+			CHECK_FALSE(parser.HasResult(kConnectParamPort));
+		parser.Reset("ntv2kona1://192.168.122.50.25.10.20.50/?foo=bar");
+			CHECK_FALSE(parser.Successful());
+			CHECK(parser.Failed());
+			CHECK(parser.HasErrors());
+			CHECK_EQ(parser.Error(), "Bad host address or port number");
+		parser.Reset("ntv2kona1://this.is.a123456.legitimate.dns.name.with.many.subdomains/?foo=bar");
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_EQ(parser.Scheme(), "ntv2kona1");
+			CHECK_FALSE(parser.HasErrors());
+			CHECK_FALSE(parser.IsLocalDevice());
+			CHECK(parser.HasResult(kConnectParamHost));
+			CHECK_EQ(parser.Result(kConnectParamHost), "this.is.a123456.legitimate.dns.name.with.many.subdomains");
+			CHECK_FALSE(parser.HasResult(kConnectParamPort));
+		parser.Reset("ntv2kona1://this.is.a123456.9876bad.dns.name.with.many.subdomains/?foo=bar");
+			CHECK_FALSE(parser.Successful());
+			CHECK(parser.Failed());
+			CHECK(parser.HasErrors());
+			CHECK_EQ(parser.Error(), "Parser failed at character position 28");
+		parser.Reset("ntv2kona1://this.is.a123456.legitimate.dns.name.with.many.subdomains:55333/?foo=bar");
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_EQ(parser.Scheme(), "ntv2kona1");
+			CHECK_FALSE(parser.HasErrors());
+			CHECK_FALSE(parser.IsLocalDevice());
+			CHECK(parser.HasResult(kConnectParamHost));
+			CHECK_EQ(parser.Result(kConnectParamHost), "this.is.a123456.legitimate.dns.name.with.many.subdomains");
+			CHECK(parser.HasResult(kConnectParamPort));
+			CHECK_EQ(parser.Result(kConnectParamPort), "55333");
+		parser.Reset("ntv2local://corvid24");
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_FALSE(parser.HasErrors());
+			CHECK(parser.IsLocalDevice());
+			CHECK_EQ(parser.DeviceModel(), "corvid24");
+			CHECK_NE(parser.DeviceID(), DEVICE_ID_CORVID24);
+			CHECK_EQ(parser.DeviceSerial(), "");
+			CHECK_EQ(parser.DeviceIndex(), 0);
+		parser.Reset("ntv2local://corvid24foo");
+			CHECK_FALSE(parser.Successful());
+			CHECK(parser.Failed());
+			CHECK_FALSE(parser.HasScheme());
+			CHECK(parser.HasErrors());
+			CHECK_FALSE(parser.IsLocalDevice());
+			CHECK_NE(parser.DeviceModel(), "corvid24");
+			CHECK_EQ(parser.DeviceID(), 0);
+			CHECK_EQ(parser.DeviceSerial(), "");
+			CHECK_EQ(parser.DeviceIndex(), 0);
+			CHECK_EQ(parser.Error(), "Invalid local device specification");
+		parser.Reset("ntv2local://kona4?foo=x&bar=y");
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_FALSE(parser.HasErrors());
+			CHECK(parser.IsLocalDevice());
+			CHECK_EQ(parser.DeviceModel(), "kona4");
+			CHECK_NE(parser.DeviceID(), DEVICE_ID_KONA4);
+			CHECK_EQ(parser.DeviceSerial(), "");
+			CHECK_EQ(parser.DeviceIndex(), 0);
+			CHECK_EQ(parser.MakeQueryString(false), "bar=y&foo=x");
+			CHECK_EQ(parser.QueryParam("foo"), "x");
+			CHECK_EQ(parser.QueryParam("bar"), "y");
+		parser.Reset("kona4?foo=x&bar=y");	//	NOT SUPPORTED:  if you insist on a query for a local device, you must use ntv2local://
+			CHECK_FALSE(parser.Successful());
+			CHECK(parser.Failed());
+			CHECK(parser.HasErrors());
+	 	parser.Reset("ntv2local://0x10402100");
+			CHECK(parser.HasDeviceSpec());
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_FALSE(parser.HasErrors());
+			CHECK(parser.IsLocalDevice());
+			CHECK_EQ(parser.Scheme(), "ntv2local");
+			CHECK_EQ(parser.DeviceID(), DEVICE_ID_CORVID24);
+	 	parser.Reset("ntv2local://0x10402100?foo=x&bar=y");
+			CHECK(parser.HasDeviceSpec());
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_FALSE(parser.HasErrors());
+			CHECK(parser.IsLocalDevice());
+			CHECK_EQ(parser.Scheme(), "ntv2local");
+			CHECK_EQ(parser.DeviceID(), DEVICE_ID_CORVID24);
+			CHECK_EQ(parser.MakeQueryString(false), "bar=y&foo=x");
+			CHECK_EQ(parser.QueryParam("foo"), "x");
+			CHECK_EQ(parser.QueryParam("bar"), "y");
+	 	parser.Reset("ntv2local://5");
+			CHECK(parser.HasDeviceSpec());
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_FALSE(parser.HasErrors());
+			CHECK(parser.IsLocalDevice());
+			CHECK_EQ(parser.Scheme(), "ntv2local");
+			CHECK_EQ(parser.DeviceIndex(), 5);
+	 	parser.Reset("ntv2local://5?foo=x&bar=y");
+			CHECK(parser.HasDeviceSpec());
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_FALSE(parser.HasErrors());
+			CHECK(parser.IsLocalDevice());
+			CHECK_EQ(parser.Scheme(), "ntv2local");
+			CHECK_EQ(parser.DeviceIndex(), 5);
+			CHECK_EQ(parser.MakeQueryString(false), "bar=y&foo=x");
+			CHECK_EQ(parser.QueryParam("foo"), "x");
+			CHECK_EQ(parser.QueryParam("bar"), "y");
+	 	parser.Reset("ntv2local://7XT001436");
+			CHECK(parser.HasDeviceSpec());
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_FALSE(parser.HasErrors());
+			CHECK(parser.IsLocalDevice());
+			CHECK_EQ(parser.Scheme(), "ntv2local");
+			CHECK_EQ(parser.DeviceSerial(), "7XT001436");
+	 	parser.Reset("ntv2local://7XT001436?foo=x&bar=y");
+			CHECK(parser.HasDeviceSpec());
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_FALSE(parser.HasErrors());
+			CHECK(parser.IsLocalDevice());
+			CHECK_EQ(parser.Scheme(), "ntv2local");
+			CHECK_EQ(parser.DeviceSerial(), "7XT001436");
+			CHECK_EQ(parser.MakeQueryString(false), "bar=y&foo=x");
+			CHECK_EQ(parser.QueryParam("foo"), "x");
+			CHECK_EQ(parser.QueryParam("bar"), "y");
+/*		parser.Reset("ntv2local://blabber");
+		parser.Reset("ntv2local://blabber.foo.bar");
+		parser.Reset("ntv2local://blabber/");
+		parser.Reset("ntv2local://blabber.foo.bar/");
+		parser.Reset("ntv2local://127.0.0.1");
+		parser.Reset("ntv2local://localhost");
+		parser.Reset("ntv2local://127.0.0.1/");
+		parser.Reset("ntv2local://localhost/");
+		parser.Reset("badscheme://localhost/");
+		parser.Reset("127.0.0.1");
+		parser.Reset("localhost");
+		parser.Reset("127.0.0.1:54321");
+		parser.Reset("localhost:6221");
+		parser.Reset("ntv2nub://127.0.0.1");
+		parser.Reset("ntv2nub://localhost");
+		parser.Reset("ntv2nub://127.0.0.1/");
+		parser.Reset("ntv2nub://localhost/");
+		parser.Reset("ntv2local://corvid24;");
+		parser.Reset("ntv2local://corvid24:/");
+		parser.Reset("ntv2local://corvid24:4/");
+		parser.Reset("ntv2local://corvid24:4goof");
+		parser.Reset("ntv2local://corvid24:4;goof");
+		parser.Reset("ntv2local://corvid24:4/goof");
+		parser.Reset("ntv2local://kona4");
+		parser.Reset("ntv2local://0x10402100");
+		parser.Reset("ntv2local://0x12345678");
+		parser.Reset("ntv2local://0x1234567890");
+		parser.Reset("ntv2local://0x12345678:");
+		parser.Reset("ntv2local://0x12345678;");
+		parser.Reset("ntv2local://0x12345678:/");
+		parser.Reset("ntv2local://0x12345678:goof/");
+		parser.Reset("ntv2local://0x12345678:goof/query");
+		parser.Reset("ntv2://foobar:4/query");
+		parser.Reset("ntv2://ntv2-shm-dev/");
+		parser.Reset("ntv2://ntv2shmdev/");
+*/	// 	
+	// 	CHECK_FALSE(device.Open(""));
+	// 	CHECK_FALSE(device.Open("blabber"));
+	// 	CHECK(device.Open("0"));
+	// 	CHECK_FALSE(device.Open("6"));
+	// 	CHECK(device.Open("corvid24"));
+	// 	CHECK_FALSE(device.Open("kona4"));
+	// 	CHECK_FALSE(device.Open("0x10402100"));
+	// 	CHECK_FALSE(device.Open("0x12345678"));
+	// 	CHECK(device.Open("ntv2local://0"));
+	// 	CHECK(device.Open("ntv2local://corvid24"));
+	// 	CHECK_FALSE(device.Open("ntv2local://kona4"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0x10402100"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0x12345678"));
+
+	// 	CHECK(device.Open("ntv2local://0:"));
+	// 	CHECK(device.Open("ntv2local://0:25"));
+	// 	CHECK(device.Open("ntv2local://0:25/"));
+	// 	CHECK(device.Open("ntv2local://0:25/query"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0:25goof"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0:goof"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0goof"));
+
+	// 	CHECK_FALSE(device.Open("ntv2local://corvid26"));
+	// 	CHECK_FALSE(device.Open("ntv2local://corvid24;"));
+	// 	CHECK_FALSE(device.Open("ntv2local://corvid24:/"));
+	// 	CHECK(device.Open("ntv2local://corvid24:4/"));
+	// 	CHECK_FALSE(device.Open("ntv2local://corvid24:4goof"));
+	// 	CHECK_FALSE(device.Open("ntv2local://corvid24:4;goof"));
+	// 	CHECK(device.Open("ntv2local://corvid24:4/goof"));
+	// 	CHECK_FALSE(device.Open("ntv2local://kona4"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0x10402100"));
+	// 	CHECK(device.Open("ntv2local://0x12345678"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0x1234567890"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0x12345678:"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0x12345678;"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0x12345678:/"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0x12345678:goof/"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0x12345678:goof/query"));
+	}	//	TEST_CASE("devspecparser-parse")
+
+	TEST_CASE("devspecparser-queryparams")
+	{
+		AJADebug::Open();
+		NTV2Dictionary src, dst;
+		dst.insert("foo", "bar");
+		CHECK(NTV2DeviceSpecParser::ParseQueryParams(src, dst));	//	Empty src dict -- not an error
+		CHECK_FALSE(dst.empty());									//	Confirm ParseQueryParams doesn't clear dst
+
+		src.insert("foo", "bar");
+		CHECK(NTV2DeviceSpecParser::ParseQueryParams(src, dst));	//	Missing 'query' key -- not an error
+		CHECK_EQ("bar", dst.valueForKey("foo"));					//	Confirm dst still has "foo=bar"
+
+		src.insert(kConnectParamQuery, "");
+		CHECK(NTV2DeviceSpecParser::ParseQueryParams(src, dst));	//	Empty 'query' key -- not an error
+		CHECK_EQ("bar", dst.valueForKey("foo"));					//	Confirm dst still has "foo=bar"
+
+		src.insert(kConnectParamQuery, "one=alpha");
+		CHECK(NTV2DeviceSpecParser::ParseQueryParams(src, dst));	//	Query doesn't start with '?' -- not an error
+		CHECK_EQ(dst.valueForKey("foo"), "bar");					//	Confirm dst still has "foo=bar"
+		CHECK(dst.hasKey("one"));									//	Confirm dst has 'one'
+		CHECK_EQ(dst.valueForKey("one"), "alpha");					//	Confirm dst has "one=alpha"
+
+		//	Check URL-encoding
+		src.insert(kConnectParamQuery, "?x=foo%3Acolon%2Fslash%3Fquestion%26ampersand%3Dequal");
+		CHECK(NTV2DeviceSpecParser::ParseQueryParams(src, dst));	//	URL-encoded query: "foo:colon/slash?question&ampersand=equal"
+		CHECK_EQ(dst.valueForKey("foo"), "bar");					//	Confirm dst still has "foo=bar"
+		CHECK_EQ(dst.valueForKey("one"), "alpha");					//	Confirm dst still has "one=alpha"
+		CHECK(dst.hasKey("x"));										//	Confirm dst has 'x'
+		CHECK_EQ(dst.valueForKey("x"), "foo:colon/slash?question&ampersand=equal");	//	Confirm URL-decoded value
+	}
+}	//TEST_SUITE("NTV2DeviceSpecParser"
 
 
 void signalrouter_marker() {}

@@ -61,7 +61,6 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoEnhancedCSC,					///< @brief True if device has enhanced CSCs.
 	kDeviceCanDoFrameStore1Display,				///< @brief True if device can display/output video from FrameStore 1.
 	kDeviceCanDoFreezeOutput,					///< @brief True if device can freeze output video.
-	kDeviceCanDoGPIO,							///< @brief	True if device has GPIO interface.	(New in SDK 18.0)
 	kDeviceCanDoHDMIOutStereo,					///< @brief True if device supports 3D/stereo HDMI video output.
 	kDeviceCanDoHDV,							///< @brief True if device can squeeze/stretch between 1920x1080 and 1440x1080.
 	kDeviceCanDoHDVideo,						///< @brief True if device can handle HD (High Definition) video.
@@ -92,7 +91,6 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanMeasureTemperature,				///< @brief True if device can measure its FPGA die temperature.
 	kDeviceCanReportFrameSize,					///< @brief True if device can report its frame size.
 	kDeviceHasBiDirectionalSDI,					///< @brief True if device SDI connectors are bi-directional.
-	kDeviceHasBracketLED,						///< @brief True if device has LED(s) on the card bracket. (New in SDK 18.0)
 	kDeviceHasColorSpaceConverterOnChannel2,	///< @brief Calculate based on if NTV2_WgtCSC2 is present.
 	kDeviceHasNWL,								///< @brief True if device has NorthWest Logic DMA hardware.
 	kDeviceHasPCIeGen2,							///< @brief True if device supports 2nd-generation PCIe.
@@ -129,7 +127,6 @@ typedef enum _NTV2BoolParamID
 	kDeviceHasMultiRasterWidget,				///< @brief True if device can rasterize 4 HD signals into a single HDMI output.
 	kDeviceCanDoHFRRGB,							///< @brief True if device supports 1080p RGB at more than 50Hz frame rates.
 	kDeviceCanDoIP,								///< @brief True if device has SFP connectors.
-	kDeviceCanDo25GIP,							///< @brief True if device has 25Gbps SFPs.
 	kDeviceCanDoMultiLinkAudio,					///< @brief True if device supports grouped audio system control.
 	kDeviceCanDoWarmBootFPGA,					///< @brief True if device can warm-boot to load updated firmware.
 	kDeviceCanReportFailSafeLoaded,				///< @brief True if device can report if its "fail-safe" firmware is loaded/running.
@@ -159,6 +156,9 @@ typedef enum _NTV2BoolParamID
 	kDeviceHasPWMFanControl,					///< @brief	True if device has a PWM-controlled cooling fan.	(New in SDK 17.1)
 	kDeviceROMHasBankSelect,					///< @brief	True if device SPIFlash ROM is bank-selected.	(New in SDK 17.1)
 	kDeviceCanDoVersalSysMon,					///< @brief	True if device supports Versal Adaptive SoC System Monitor.
+	kDeviceCanDoGPIO,							///< @brief	True if device has GPIO interface.	(New in SDK 18.0)
+	kDeviceHasBracketLED,						///< @brief True if device has LED(s) on the card bracket. (New in SDK 18.0)
+	kDeviceCanDo25GIP,							///< @brief True if device has 25Gbps SFPs. (New in SDK 18.0)
 	kNTV2BoolParam_LAST,
 	kNTV2BoolParam_COUNT	= kNTV2BoolParam_LAST-kNTV2BoolParam_FIRST,
 	kDeviceCanDo_INVALID	= kNTV2BoolParam_LAST
