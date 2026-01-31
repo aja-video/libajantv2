@@ -124,7 +124,7 @@ class AJAExport NTV2Dictionary
 		size_t				largestKeySize (void) const;	///< @return	The length of my largest key, in bytes
 		size_t				largestValueSize (void) const;	///< @return	The length of my largest value, in bytes
 		std::ostream &		Print (std::ostream & oss, const bool inCompact = true) const;	///< @brief	Prints human-readable representation to ostream
-		bool				serialize (std::string & outStr) const;	///< @brief	Serializes my contents into the given string
+		bool				serialize (std::string & outStr) const;	///< @brief	Serializes my contents into the given string, returns true if string is not empty
 		///@}
 
 		/**
@@ -238,7 +238,19 @@ class AJAExport NTV2DeviceSpecParser
 		size_t				mPos;			///< @brief	Last character position
 
 	public:	//	Class Methods
-		static bool		ParseQueryParams (const NTV2Dictionary & inParams, NTV2Dictionary & outQueryParams);
+		/**
+			@brief		Parses the string found in the given source dictionary's 'query' key (kConnectParamQuery),
+						storing the key/value pairs of all parsed query parameters into "outQueryParams".
+						Query parameter values are URL-decoded before storing in the "outQueryParams" dictionary.
+			@param[in]	inSrcDict		The dictionary that provides the 'query' string to be parsed. It is not an
+										error if it has no 'query' key, or if the query string is empty. The query
+										string need not start with '?'.
+			@param[out]	outQueryParams	Dictionary that receives the key/value pairs parsed from the source dictionary's
+										'query' string. This dictionary is NOT emptied prior to parsing, but will be
+										changed with the parse results.
+			@returns	True if successful; otherwise false.
+		**/
+		static bool		ParseQueryParams (const NTV2Dictionary & inSrcDict, NTV2Dictionary & outQueryParams);
 };	//	NTV2DeviceSpecParser
 
 

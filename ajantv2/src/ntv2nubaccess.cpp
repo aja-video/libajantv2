@@ -249,7 +249,13 @@ bool NTV2Dictionary::insert (const string & inKey, const string & inValue)
 		return false;
 	if (inValue.find("\n") != string::npos)
 		return false;
-	mDict[inKey] = inValue;
+	try {
+		mDict[inKey] = inValue;	//	Insert or update
+	} catch (bad_alloc) {
+		return false;	//	no memory
+	} catch (...) {
+		return false;	//	failed
+	}
 	return true;
 }
 
@@ -1610,11 +1616,11 @@ bool NTV2PluginLoader::ExtractIssuerInfo (NTV2Dictionary & outInfo, const string
 	return true;
 }	//	ExtractIssuerInfo
 
-bool NTV2DeviceSpecParser::ParseQueryParams (const NTV2Dictionary & inParams, NTV2Dictionary & outQueryParams)
+bool NTV2DeviceSpecParser::ParseQueryParams (const NTV2Dictionary & inSrcDict, NTV2Dictionary & outQueryParams)
 {
-	if (!inParams.hasKey(kConnectParamQuery))
-		return false;
-	string queryStr(inParams.valueForKey(kConnectParamQuery));
+	if (!inSrcDict.hasKey(kConnectParamQuery))
+		return true;	//	It's not an error if there's no 'query' in srcDict
+	string queryStr(inSrcDict.valueForKey(kConnectParamQuery));
 	if (!queryStr.empty())
 		if (queryStr[0] == '?')
 			queryStr.erase(0,1);	//	Remove leading '?'
