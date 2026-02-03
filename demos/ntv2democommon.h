@@ -481,6 +481,14 @@ class AJAExport CNTV2DemoCommon
 			@return		True if the specified device exists and can be opened.
 		**/
 		static bool							IsValidDevice (const std::string & inDeviceSpec);
+
+		/**
+			@brief		Waits for the given device to become ready.
+			@param		dev			The device of interest.
+			@param[in]	maxSeconds	Specifies the maximum number of seconds to delay. Defaults to 30 seconds.
+			@return		True if the given device is ready; otherwise false (timed out or device not open).
+		**/
+		static bool							WaitUntilDeviceReady (CNTV2Card & dev, const ULWord maxSeconds = 30);
 	///@}
 
 	/**

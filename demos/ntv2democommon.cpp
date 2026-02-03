@@ -465,6 +465,18 @@ bool CNTV2DemoCommon::IsValidDevice (const string & inDeviceSpec)
 	return true;
 }
 
+bool CNTV2DemoCommon::WaitUntilDeviceReady (CNTV2Card & dev, ULWord maxSeconds)
+{
+	if (!dev.IsOpen())
+		return false;
+	while (maxSeconds && !dev.IsDeviceReady())
+	{
+		AJATime::Sleep(1000);
+		maxSeconds--;
+	};
+	return dev.IsDeviceReady();
+}
+
 
 NTV2VideoFormatSet CNTV2DemoCommon::GetSupportedVideoFormats (const NTV2VideoFormatKinds inKinds)
 {
