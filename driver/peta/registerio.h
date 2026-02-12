@@ -164,6 +164,9 @@ typedef struct ntv2_private
 	unsigned long _FrameMemoryAddress;
 	size_t _FrameMemorySize;
 	
+	unsigned long _FsMemoryAddress;
+	size_t _FsMemorySize;
+
 	// Holds the number of hardware registers this device supports
 	// Obtained from ntv2devicefeatures.cpp
 	ULWord _numberOfHWRegisters;

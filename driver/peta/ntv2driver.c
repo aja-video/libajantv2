@@ -208,7 +208,8 @@ static int platform_resources_config(ULWord deviceNumber);
 static int platform_resources_release(ULWord deviceNumber);
 static int platform_add_register(ULWord deviceNumber, struct device_node *node);
 static int platform_remove_register(ULWord deviceNumber);
-static int platform_add_memory(ULWord deviceNumber, struct device_node *node);
+static int platform_add_fb_memory(ULWord deviceNumber, struct device_node *node);
+static int platform_add_fs_memory(ULWord deviceNumber, struct device_node *node);
 static int platform_remove_memory(ULWord deviceNumber);
 static int platform_add_interrupt(ULWord deviceNumber, struct device_node *node);
 
@@ -2957,6 +2958,12 @@ static int platform_probe(struct platform_device *pd)
 	// and egg problem.
 	ntv2pp->_DeviceID = ReadDeviceIDRegister(deviceNumber);
 
+    if (ntv2pp->_DeviceID == DEVICE_ID_IP25_T)
+    {
+        ntv2pp->_FsMemoryAddress = 0x60000000000;
+        ntv2pp->_FsMemorySize = 0x80000000;
+    }
+
 	ntv2pp->_numberOfHWRegisters = NTV2DeviceGetMaxRegisterNumber(ntv2pp->_DeviceID);
 
 	ntv2pp->_globalAudioPlaybackMode = NTV2_AUDIOPLAYBACK_NORMALAUTOCIRCULATE;
@@ -3882,11 +3889,20 @@ static int platform_resources_config(ULWord deviceNumber)
         }
         if(!strcmp("mem", node->name))
 		{
-			MSG("%s: found memory\n", ntv2pp->name);
-			ret = platform_add_memory(deviceNumber, node);
+			MSG("%s: found fb memory\n", ntv2pp->name);
+			ret = platform_add_fb_memory(deviceNumber, node);
             if(ret)
 				goto fail;
         }
+#if 0        
+        if(!strcmp("fs", node->name))
+		{
+			MSG("%s: found fs memory\n", ntv2pp->name);
+			ret = platform_add_fs_memory(deviceNumber, node);
+            if(ret)
+				goto fail;
+        }
+#endif        
 		if(!strcmp("irq", node->name))
 		{
 			MSG("%s: found interrupt\n", ntv2pp->name);
@@ -4004,7 +4020,7 @@ static int platform_remove_register(ULWord deviceNumber)
 	return 0;
 }
 
-static int platform_add_memory(ULWord deviceNumber, struct device_node *node)
+static int platform_add_fb_memory(ULWord deviceNumber, struct device_node *node)
 {
 	NTV2PrivateParams *ntv2pp = NULL;
     struct device_node *handle = of_parse_phandle(node, "node", 0);
@@ -4014,7 +4030,7 @@ static int platform_add_memory(ULWord deviceNumber, struct device_node *node)
 
     if (ntv2pp->_FrameMemorySize != 0)
 	{
-        MSG("%s: cannot add memory %s\n", ntv2pp->name, node->full_name);
+        MSG("%s: cannot add fb memory %s\n", ntv2pp->name, node->full_name);
         return -ENOMEM;
     }
 	
@@ -4041,7 +4057,7 @@ static int platform_add_memory(ULWord deviceNumber, struct device_node *node)
 			size <<= 32;
 			size |= values[3];
 
-            MSG("%s: frame memory (%s) addr 0x%08lx  size 0x%lx bytes\n",
+            MSG("%s: frame buffer memory (%s) addr 0x%016lx  size 0x%lx bytes\n",
                      ntv2pp->name, node->full_name, phyaddr, size);
 #if 0
             void *mapped = NULL;
@@ -4057,6 +4073,70 @@ static int platform_add_memory(ULWord deviceNumber, struct device_node *node)
 #endif
 			ntv2pp->_FrameMemoryAddress = phyaddr;
 			ntv2pp->_FrameMemorySize = size;
+			
+            return 0;
+        }
+
+        MSG("%s: found memory node no name\n", ntv2pp->name);
+    }
+	
+    MSG("%s: node %s does not define a memory block\n", ntv2pp->name, node->full_name);
+    return -EINVAL;
+}
+
+static int platform_add_fs_memory(ULWord deviceNumber, struct device_node *node)
+{
+	NTV2PrivateParams *ntv2pp = NULL;
+    struct device_node *handle = of_parse_phandle(node, "node", 0);
+
+	if ( !(ntv2pp = getNTV2Params(deviceNumber)) )
+		return -ENODEV;
+
+    if (ntv2pp->_FsMemorySize != 0)
+	{
+        MSG("%s: cannot add fs memory %s\n", ntv2pp->name, node->full_name);
+        return -ENOMEM;
+    }
+	
+    if (handle != NULL)
+	{
+        if (handle->name != NULL)
+		{
+            uint32_t values[4];
+            int ret;
+            unsigned long phyaddr;
+			unsigned long size;
+
+            MSG("%s: %s is %s\n", ntv2pp->name, node->full_name, handle->name);
+            ret = of_property_read_u32_array(handle, "reg", values, 4);
+            if(ret)
+			{
+                MSG("%s: %s failed to read reg\n", ntv2pp->name, node->full_name);
+                return -EINVAL;
+            }
+            phyaddr = values[0];
+			phyaddr <<= 32;
+			phyaddr |= values[1];
+            size = values[2];
+			size <<= 32;
+			size |= values[3];
+
+            MSG("%s: frame sync memory (%s) addr 0x%016lx  size 0x%lx bytes\n",
+                     ntv2pp->name, node->full_name, phyaddr, size);
+#if 0
+            void *mapped = NULL;
+            struct resource *resource = NULL;
+            resource = request_mem_region(phyaddr, size, ntv2pp->name);
+            if(resource == NULL)
+			{
+				MSG("%s: %s request_mem_region failed\n", ntv2pp->name, node->full_name);
+                return -ENOMEM;
+            }
+            mapped = ioremap(phyaddr, size);
+            MSG("%s: video reg %p mapped\n", ntv2pp->name, mapped);
+#endif
+			ntv2pp->_FsMemoryAddress = phyaddr;
+			ntv2pp->_FsMemorySize = size;
 			
             return 0;
         }

@@ -2605,35 +2605,81 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 		// build card sg list
 		sgCount = 1;
 		sg_init_table(sg, sgCount);
-		sg_dma_address(sg) = pNTV2Params->_FrameMemoryAddress + pDmaContext->videoCardAddress;
-		sg_dma_len(sg) = pDmaContext->videoCardSize;
+        if (pDmaContext->videoCardAddress >= (pNTV2Params->_FrameMemorySize + pNTV2Params->_FsMemorySize))
+        {
+            sg_dma_address(sg) = 0;
+            sg_dma_len(sg) = 0;
+        }
+        else if (pDmaContext->videoCardAddress >= pNTV2Params->_FrameMemorySize)
+        {
+            if (pNTV2Params->_FsMemorySize > 0)
+            {
+                sg_dma_address(sg) = pNTV2Params->_FsMemoryAddress + pDmaContext->videoCardAddress - pNTV2Params->_FrameMemorySize;
+                sg_dma_len(sg) = pDmaContext->videoCardSize;
+                if ((pDmaContext->videoCardAddress + pDmaContext->videoCardSize - pNTV2Params->_FrameMemorySize) > pNTV2Params->_FsMemorySize)
+                {
+                    sg_dma_len(sg) = pNTV2Params->_FsMemorySize - (pDmaContext->videoCardAddress - pNTV2Params->_FrameMemorySize);
+                }
+            }
+            else
+            {
+                sg_dma_address(sg) = 0;
+                sg_dma_len(sg) = 0;
+            }
+        }
+        else
+        {
+            if (pNTV2Params->_FrameMemorySize > 0)
+            {
+                sg_dma_address(sg) = pNTV2Params->_FrameMemoryAddress + pDmaContext->videoCardAddress;
+                sg_dma_len(sg) = pDmaContext->videoCardSize;
+                if ((pDmaContext->videoCardAddress + pDmaContext->videoCardSize) > pNTV2Params->_FrameMemorySize)
+                {
+                    sg_dma_len(sg) = pNTV2Params->_FrameMemorySize - pDmaContext->videoCardAddress;
+                }
+            }
+            else
+            {
+                sg_dma_address(sg) = 0;
+                sg_dma_len(sg) = 0;
+            }
+        }
 
-		NTV2_MSG_PROGRAM("%s%d:%s%d:%s%d: dmaZynqProgram video address %016llx  size %d\n",
+		NTV2_MSG_PROGRAM("%s%d:%s%d:%s%d: dmaZynqProgram video %0lx %x  fb %016lx %x  fs %016lx %x  sg %016llx %x\n",
 						 DMA_MSG_CONTEXT,
+                         pDmaContext->videoCardAddress,
+                         (uint32_t)pDmaContext->videoCardSize,
+                         pNTV2Params->_FrameMemoryAddress,
+                         (uint32_t)pNTV2Params->_FrameMemorySize,
+                         pNTV2Params->_FsMemoryAddress,
+                         (uint32_t)pNTV2Params->_FsMemorySize,
 						 sg_dma_address(sg),
 						 sg_dma_len(sg));
 		
 		// iniatlize dma descriptor
 		pDmaDesc = NULL;
 #ifdef ZEFRAM
-		if (pDmaContext->dmaC2H)
-		{
-			pDmaDesc = zynqmp_dma_prep_sg(pDmaEngine->dmaChannel,
-										  dmaSgList(pDmaContext->pVideoPageBuffer),
-										  dmaSgCount(pDmaContext->pVideoPageBuffer),
-										  sg,
-										  sgCount,
-										  dmaFlags);
-		}
-		else
-		{
-			pDmaDesc = zynqmp_dma_prep_sg(pDmaEngine->dmaChannel,
-										  sg,
-										  sgCount,
-										  dmaSgList(pDmaContext->pVideoPageBuffer),
-										  dmaSgCount(pDmaContext->pVideoPageBuffer),
-										  dmaFlags);
-		}
+        if (sg_dma_len(sg) > 0)
+        {
+            if (pDmaContext->dmaC2H)
+            {
+                pDmaDesc = zynqmp_dma_prep_sg(pDmaEngine->dmaChannel,
+                                              dmaSgList(pDmaContext->pVideoPageBuffer),
+                                              dmaSgCount(pDmaContext->pVideoPageBuffer),
+                                              sg,
+                                              sgCount,
+                                              dmaFlags);
+            }
+            else
+            {
+                pDmaDesc = zynqmp_dma_prep_sg(pDmaEngine->dmaChannel,
+                                              sg,
+                                              sgCount,
+                                              dmaSgList(pDmaContext->pVideoPageBuffer),
+                                              dmaSgCount(pDmaContext->pVideoPageBuffer),
+                                              dmaFlags);
+            }
+        }
 #endif        
 		if (pDmaDesc != NULL)
 		{
