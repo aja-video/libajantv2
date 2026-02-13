@@ -94,7 +94,7 @@ CNTV2DeviceScanner::CNTV2DeviceScanner (const bool inScanNow)
 		}
 	#endif	//	!defined(NTV2_DEPRECATE_16_3)
 
-NTV2DeviceInfoList	GetDeviceInfoList (void)
+NTV2DeviceInfoList	CNTV2DeviceScanner::GetDeviceInfoList (void)
 {
 	AJAAutoLock tmpLock(&sDevInfoListLock);
 	return sDevInfoList;
