@@ -95,6 +95,7 @@ typedef enum
 	//Devices below this line do not have OEM SDK support
 	DEVICE_ID_IP25_R					= 0x11033300,
 	DEVICE_ID_IP25_T					= 0x11033310,
+	DEVICE_ID_7OF9  					= 0x11017700,
 	DEVICE_ID_NOTFOUND					= 0xFFFFFFFF,	///< @brief Invalid or "not found"
 	DEVICE_ID_INVALID					= DEVICE_ID_NOTFOUND
 
