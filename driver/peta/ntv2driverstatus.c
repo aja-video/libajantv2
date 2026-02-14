@@ -120,7 +120,7 @@ void getDeviceVersionString(ULWord deviceNumber, char *deviceVersionString, ULWo
     case DEVICE_ID_KONAIP_25G: deviceStr = "KonaIP_25G"; break;
     case DEVICE_ID_IP25_R: deviceStr = "Zefram"; break;
     case DEVICE_ID_IP25_T: deviceStr = "Zefram-T"; break;
-    case DEVICE_ID_7OF9: deviceStr = "7of9"; break;
+    case DEVICE_ID_FS8: deviceStr = "FS8"; break;
 	
 	default:
 		deviceStr = "Unknown Device";
