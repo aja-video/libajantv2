@@ -115,7 +115,7 @@ AJAStatus NTV2Player::Init (void)
 			cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl; 
 		return AJA_STATUS_OPEN;
 	}
-	if (!CNTV2DemoCommon::WaitUntilDeviceReady(mDevice))
+    if (!mDevice.IsDeviceReady(false))
 		{cerr << "## ERROR:  Device '" << mDevice.GetDescription() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 	if (!mDevice.features().CanDoPlayback())
 		{cerr << "## ERROR:  '" << mDevice.GetDescription() << "' is capture-only" << endl;  return AJA_STATUS_FEATURE;}
