@@ -4609,7 +4609,6 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 {
 	switch (inValue)
 	{	//////////	!!! PLEASE MAINTAIN ALPHABETIC ORDER !!!	//////////
-		case DEVICE_ID_7OF9:					  return "FS8";
 		case DEVICE_ID_CORVID1:					return inForRetailDisplay ? "Corvid 1"					: "Corvid";
 		case DEVICE_ID_CORVID22:				return inForRetailDisplay ? "Corvid 22"					: "Corvid22";
 		case DEVICE_ID_CORVID24:				return inForRetailDisplay ? "Corvid 24"					: "Corvid24";
@@ -4624,6 +4623,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_CORVID88_GEN3:			return inForRetailDisplay ? "Corvid 88 Gen3"			: "Corvid-88-Gen3";
 		case DEVICE_ID_CORVIDHBR:				return inForRetailDisplay ? "Corvid HB-R"				: "CorvidHBR";
 		case DEVICE_ID_CORVIDHEVC:				return inForRetailDisplay ? "Corvid HEVC"				: "CorvidHEVC";
+		case DEVICE_ID_FS8:					  return "FS8";
 		case DEVICE_ID_IO4K:					return "Io4K";
 		case DEVICE_ID_IO4KPLUS:				return inForRetailDisplay ? "Avid DNxIV"				: "Io4KPlus";
 		case DEVICE_ID_IO4KUFC:					return inForRetailDisplay ? "Io4K UFC"					: "Io4KUfc";
@@ -7731,7 +7731,6 @@ string NTV2GetVDevFolderPath (const bool inAddTrailingPathDelim)
 NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 {										//////////	!!! PLEASE MAINTAIN ALPHABETIC ORDER !!!	//////////
 	static const NTV2DeviceID	sValidDeviceIDs []	= {	DEVICE_ID_CORVID1,
-                            DEVICE_ID_7OF9,
 														DEVICE_ID_CORVID22,
 														DEVICE_ID_CORVID24,
 														DEVICE_ID_CORVID3G,
@@ -7745,6 +7744,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_CORVID88_GEN3,
 														DEVICE_ID_CORVIDHBR,
 														DEVICE_ID_CORVIDHEVC,
+                            DEVICE_ID_FS8,
 														DEVICE_ID_IO4K,
 														DEVICE_ID_IO4KPLUS,
 														DEVICE_ID_IO4KUFC,
