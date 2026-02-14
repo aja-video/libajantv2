@@ -4609,6 +4609,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 {
 	switch (inValue)
 	{	//////////	!!! PLEASE MAINTAIN ALPHABETIC ORDER !!!	//////////
+		case DEVICE_ID_7OF9:					  return "FS8";
 		case DEVICE_ID_CORVID1:					return inForRetailDisplay ? "Corvid 1"					: "Corvid";
 		case DEVICE_ID_CORVID22:				return inForRetailDisplay ? "Corvid 22"					: "Corvid22";
 		case DEVICE_ID_CORVID24:				return inForRetailDisplay ? "Corvid 24"					: "Corvid24";
@@ -7730,6 +7731,7 @@ string NTV2GetVDevFolderPath (const bool inAddTrailingPathDelim)
 NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 {										//////////	!!! PLEASE MAINTAIN ALPHABETIC ORDER !!!	//////////
 	static const NTV2DeviceID	sValidDeviceIDs []	= {	DEVICE_ID_CORVID1,
+                            DEVICE_ID_7OF9,
 														DEVICE_ID_CORVID22,
 														DEVICE_ID_CORVID24,
 														DEVICE_ID_CORVID3G,

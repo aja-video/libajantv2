@@ -3101,7 +3101,8 @@ static int platform_probe(struct platform_device *pd)
             }
 	    }
 	
-        if (ntv2pp->_DeviceID == DEVICE_ID_IP25_R || ntv2pp->_DeviceID == DEVICE_ID_IP25_T)
+        if (ntv2pp->_DeviceID == DEVICE_ID_IP25_R ||
+                                      ntv2pp->_DeviceID == DEVICE_ID_IP25_T)
         {
             ntv2pp->m_pRasterMonitor = ntv2_videoraster_open(&ntv2pp->systemContext, "ntv2videoraster", 0);
             if (ntv2pp->m_pRasterMonitor != NULL)
@@ -3903,6 +3904,22 @@ static int platform_resources_config(ULWord deviceNumber)
 				goto fail;
         }
 #endif        
+        if(!strcmp("fs1", node->name))
+		{
+			MSG("%s: found fs memory\n", ntv2pp->name);
+			ret = platform_add_fs_memory(deviceNumber, node);
+            if(ret)
+				goto fail;
+        }
+#if 0
+        if(!strcmp("fs2", node->name))
+		{
+			MSG("%s: found fs memory\n", ntv2pp->name);
+			ret = platform_add_fs_memory(deviceNumber, node);
+            if(ret)
+				goto fail;
+        }
+#endif
 		if(!strcmp("irq", node->name))
 		{
 			MSG("%s: found interrupt\n", ntv2pp->name);
