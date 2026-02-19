@@ -271,6 +271,13 @@ public:
 	bool			GetChangedLines (NTV2RasterLineOffsets & outDiffs, const void * pInBuffer1, const void * pInBuffer2, const ULWord inMaxLines = 0) const;
 
 	/**
+		@brief		Vertically inverts the raster image in the given NTV2Buffer.
+		@param[in]	inFB	Specifies the frame buffer containing the image/raster to be flipped (and includes all planes, if planar).
+		@return		True if successful;  otherwise false.
+	**/
+	bool			FlipVertically (NTV2Buffer & inFB) const;	//	New in SDK 18.1
+
+	/**
 		@return		The full-raster NTV2FrameDimensions (including VANC lines, if any).
 	**/
 	NTV2FrameSize					GetFullRasterDimensions (void) const;

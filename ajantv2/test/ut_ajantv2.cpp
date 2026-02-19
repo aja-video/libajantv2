@@ -2154,6 +2154,111 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 	// 				}
 	// }
 
+	TEST_CASE("NTV2FormatDescVFlip")
+	{
+		{	//	Odd number of lines
+			char sTestRaster[] =	"11111111111111111111111111111111" //  32 bytes
+									"22222222222222222222222222222222"
+									"33333333333333333333333333333333"
+									"44444444444444444444444444444444"
+									"55555555555555555555555555555555";
+			NTV2Buffer rasterBuf(sTestRaster, sizeof(sTestRaster));
+			NTV2FormatDesc fd (/* numLines */ 5, /* pixels per line */ 32, /* 8 ULWords per line */ 8, /* 1stActive */ 0, /* numLumaBits */ 8);
+			CHECK(fd.IsValid());
+			NTV2Buffer original (rasterBuf);
+			CHECK(fd.FlipVertically (rasterBuf));
+			ULWordSequence diffs, expectedDiffs = {0, 1, 3, 4};
+			CHECK(fd.GetChangedLines (diffs, rasterBuf, original, fd.GetFullRasterHeight()));
+			CHECK_EQ(diffs.size(), 4);	//	expect 4 different lines
+			CHECK_EQ(diffs, expectedDiffs);
+			for (ULWord n(0);  n < fd.GetFullRasterHeight();  n++)
+			{	//	verify that lines 0 == 4, 1 == 3, 2 == 2, 3 == 1, 4 == 0
+				NTV2Buffer a, b;
+				CHECK(fd.GetRowBuffer(original, a, n));
+				CHECK(fd.GetRowBuffer(rasterBuf, b, fd.GetFullRasterHeight() - 1 - n));
+				CHECK(a.IsContentEqual(b));
+			}
+		}
+		{	//	Even number of lines
+			char sTestRaster[] =	"11111111111111111111111111111111" //  32 bytes
+									"22222222222222222222222222222222"
+									"33333333333333333333333333333333"
+									"44444444444444444444444444444444";
+			NTV2Buffer rasterBuf(sTestRaster, sizeof(sTestRaster));
+			NTV2FormatDesc fd (/* numLines */ 4, /* pixels per line */ 32, /* 8 ULWords per line */ 8, /* 1stActive */ 0, /* numLumaBits */ 8);
+			NTV2Buffer original (rasterBuf);
+			CHECK(fd.FlipVertically (rasterBuf));
+			ULWordSequence diffs, expectedDiffs = {0, 1, 2, 3};
+			CHECK(fd.GetChangedLines (diffs, rasterBuf, original, fd.GetFullRasterHeight()));
+			CHECK_EQ(diffs.size(), 4);	//	expect 4 different lines
+			CHECK_EQ(diffs, expectedDiffs);
+			for (ULWord n(0);  n < fd.GetFullRasterHeight();  n++)
+			{	//	verify that lines 0 == 4, 1 == 3, 2 == 2, 3 == 1, 4 == 0
+				NTV2Buffer a, b;
+				CHECK(fd.GetRowBuffer(original, a, n));
+				CHECK(fd.GetRowBuffer(rasterBuf, b, fd.GetFullRasterHeight() - 1 - n));
+				CHECK(a.IsContentEqual(b));
+			}
+		}
+		{	//	Even number of lines with 1 VANC line
+			char sTestRaster[] =	"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" //  32 bytes per row
+									"11111111111111111111111111111111"
+									"22222222222222222222222222222222"
+									"33333333333333333333333333333333"
+									"44444444444444444444444444444444";
+			NTV2Buffer rasterBuf(sTestRaster, sizeof(sTestRaster));
+			NTV2FormatDesc fd (/* numLines */ 5, /* pixels per line */ 32, /* 8 ULWords per line */ 8, /* 1stActive */ 1, /* numLumaBits */ 8);
+			NTV2Buffer original (rasterBuf);
+//cout << "Orig:" << endl; original.Dump(cout, /*offst*/0, /*byteCnt*/fd.GetTotalBytes(), /*rdx*/16, /*bytesPerGrp*/1, /*grpsPerRow*/32, /*addrRdx*/10, /*ascii*/true);
+			CHECK(fd.FlipVertically (rasterBuf));
+//cout << "Flipped:" << endl; rasterBuf.Dump(cout, /*offst*/0, /*byteCnt*/fd.GetTotalBytes(), /*rdx*/16, /*bytesPerGrp*/1, /*grpsPerRow*/32, /*addrRdx*/10, /*ascii*/true);
+			ULWordSequence diffs, expectedDiffs = {1, 2, 3, 4};
+			CHECK(fd.GetChangedLines (diffs, rasterBuf, original, fd.GetFullRasterHeight()));
+			CHECK_EQ(diffs.size(), 4);	//	expect 4 different lines
+			CHECK_EQ(diffs, expectedDiffs);
+			for (ULWord topLine(fd.GetFirstActiveLine());  topLine < fd.GetFullRasterHeight();  topLine++)
+			{	//	verify that lines 0 == 0, 1 == 4, 2 == 3, 3 == 2, 4 == 1
+				NTV2Buffer a, b;
+				ULWord botLine(fd.GetFullRasterHeight() - 1 - (topLine - fd.GetFirstActiveLine()));
+				CHECK(fd.GetRowBuffer(original, a, topLine));
+				CHECK(fd.GetRowBuffer(rasterBuf, b, botLine));
+				string sa, sb;  a.toHexString (sa);  b.toHexString(sb);
+//cout << "topLine=" << DEC(topLine) << "  botLine=" << botLine << "  a=" << sa << "  b=" << sb << endl;
+				CHECK(a.IsContentEqual(b));
+			}
+		}
+		{	//	Odd number of lines with 3 VANC lines
+			char sTestRaster[] =	"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" //  32 bytes per row
+									"yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+									"zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+									"11111111111111111111111111111111"
+									"22222222222222222222222222222222"
+									"33333333333333333333333333333333"
+									"44444444444444444444444444444444"
+									"55555555555555555555555555555555";
+			NTV2Buffer rasterBuf(sTestRaster, sizeof(sTestRaster)-1);
+			NTV2FormatDesc fd (/* numLines */ 8, /* pixels per line */ 32, /* 8 ULWords per line */ 8, /* 1stActive */ 3, /* numLumaBits */ 8);
+			NTV2Buffer original (rasterBuf);
+//cout << "Orig:" << endl; original.Dump(cout, /*offst*/0, /*byteCnt*/fd.GetTotalBytes(), /*rdx*/16, /*bytesPerGrp*/1, /*grpsPerRow*/32, /*addrRdx*/10, /*ascii*/true);
+			CHECK(fd.FlipVertically (rasterBuf));
+//cout << "Flipped:" << endl; rasterBuf.Dump(cout, /*offst*/0, /*byteCnt*/fd.GetTotalBytes(), /*rdx*/16, /*bytesPerGrp*/1, /*grpsPerRow*/32, /*addrRdx*/10, /*ascii*/true);
+			ULWordSequence diffs, expectedDiffs = {3, 4, 6, 7};
+			CHECK(fd.GetChangedLines (diffs, rasterBuf, original, fd.GetFullRasterHeight()));
+			CHECK_EQ(diffs.size(), 4);	//	expect 4 different lines
+			CHECK_EQ(diffs, expectedDiffs);
+			for (ULWord topLine(fd.GetFirstActiveLine());  topLine < fd.GetFullRasterHeight();  topLine++)
+			{	//	verify that lines 3 == 7, 4 == 6, 5 == 5, 6 == 4, 7 == 3
+				NTV2Buffer a, b;
+				ULWord botLine(fd.GetFullRasterHeight() - 1 - (topLine - fd.GetFirstActiveLine()));
+				CHECK(fd.GetRowBuffer(original, a, topLine));
+				CHECK(fd.GetRowBuffer(rasterBuf, b, botLine));
+				string sa, sb;  a.toHexString (sa);  b.toHexString(sb);
+				cout << "topLine=" << DEC(topLine) << "  botLine=" << botLine << "  a=" << sa << "  b=" << sb << endl;
+				CHECK(a.IsContentEqual(b));
+			}
+		}
+	}	//	TEST_CASE("NTV2FormatDescVFlip")
+
 	/*
 		NTV2AncCollisionBFT
 		This detects if the Anc area will run into the visible raster.
@@ -3193,6 +3298,25 @@ TEST_SUITE("NTV2Buffer" * doctest::description("NTV2Buffer tests"))
 		CHECK(cmpBuff.SetFromHexString(str64));
 		CHECK(orig.IsContentEqual(cmpBuff));
 	}	//	hexstring
+
+	TEST_CASE("hugesizes")
+	{
+		NTV2Buffer orig;
+		size_t sz(0x0000000101000000);	//	4GB + 16K
+
+		CHECK_FALSE(orig.Set(&orig, sz));
+		sz -= 0x0000000001000000;		//	4GB
+		CHECK_FALSE(orig.Set(&orig, sz));
+		sz -= 0x0000000001000000;		//	16K shy of 4GB
+		CHECK(orig.Set(&orig, sz));
+
+		sz = 0x0000000101000000;		//	4GB + 16K
+		CHECK_FALSE(orig.Allocate(sz));
+		sz -= 0x0000000001000000;		//	4GB
+		CHECK_FALSE(orig.Allocate(sz));
+		sz -= 0x0000000001000000;		//	16K shy of 4GB
+		CHECK(orig.Allocate(sz));
+	}	//	hugesizes
 } //NTV2Buffer
 
 
@@ -3562,7 +3686,8 @@ TEST_SUITE("signal router" * doctest::description("CNTV2SignalRouter & RoutingEx
 		RoutingExpertPtr pExpert1 = RoutingExpert::GetInstance();
 		CHECK(pExpert1->NumInstances() == 1);
 	}
-	TEST_CASE("CNTV2SignalRouter String Conversions") {
+	TEST_CASE("CNTV2SignalRouter String Conversions")
+	{
 		std::string inpXptStr = CNTV2SignalRouter::
 						NTV2InputCrosspointIDToString(NTV2_FIRST_INPUT_CROSSPOINT);
 		CHECK(inpXptStr == "FB1");
@@ -3579,7 +3704,8 @@ TEST_SUITE("signal router" * doctest::description("CNTV2SignalRouter & RoutingEx
 						StringToNTV2OutputCrosspointID("FB1RGBDS2");
 		CHECK(outXptID == NTV2_XptFrameBuffer1_DS2RGB);
 	}
-	TEST_CASE("CNTV2SignalRouter WidgetID helpers") {
+	TEST_CASE("CNTV2SignalRouter WidgetID helpers")
+	{
 		NTV2WidgetIDSet widgetIDs;
 
 		CNTV2SignalRouter::GetWidgetIDs(DEVICE_ID_KONA5, widgetIDs);
@@ -3623,8 +3749,13 @@ TEST_SUITE("signal router" * doctest::description("CNTV2SignalRouter & RoutingEx
 		CHECK(CNTV2SignalRouter::IsHDMIInWidgetType(NTV2WidgetType_HDMIOutV5) == false);
 		CHECK(CNTV2SignalRouter::IsHDMIOutWidgetType(NTV2WidgetType_HDMIOutV5) == true);
 		CHECK(CNTV2SignalRouter::IsHDMIOutWidgetType(NTV2WidgetType_HDMIInV2) == false);
-	}
-}
+	}   //  TEST_CASE("CNTV2SignalRouter WidgetID helpers")
+	TEST_CASE("CNTV2SignalRouter::CreateFromString")
+	{
+		NTV2PossibleConnections conns;
+		CHECK(CNTV2SignalRouter::CreateFromString ("", conns));
+	}   //  TEST_CASE("CNTV2SignalRouter::CreateFromString")
+}   //  TEST_SUITE("signal router")
 
 
 void testpatterngenmarker() {}
