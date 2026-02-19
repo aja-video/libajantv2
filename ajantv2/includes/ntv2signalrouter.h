@@ -530,6 +530,16 @@ class AJAExport CNTV2SignalRouter
 		static bool					CreateFromString (const std::string & inString, NTV2XptConnections & outConnections);	//	New in SDK 16.0
 
 		/**
+			@brief		Decodes a given string into a multimap of potential crosspoint connections.
+			@param[in]	inString			Specifies the string to be parsed. It can contain the pnemonics that
+											CNTV2SignalRouter::PrintCode generates.
+			@param[out] outConnections		Receives the possible connections from what is successfully parsed from the string.
+											It will be empty if this function fails.
+			@return		True if successful;	 otherwise false.
+		**/
+		static bool					CreateFromString (const std::string & inString, NTV2PossibleConnections & outConns);	//	New in SDK 18.1
+
+		/**
 			@brief		Sets the router from the given string.
 			@param[in]	inString		Specifies the string to be parsed.
 			@param[out] outRouter		The CNTV2SignalRouter to be cleared and set from what is parsed from the string.
