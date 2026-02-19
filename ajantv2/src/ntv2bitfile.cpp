@@ -537,9 +537,11 @@ string CNTV2Bitfile::GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID
 		case DEVICE_ID_TTAP_PRO:				return "t_tap_pro";
 		case DEVICE_ID_CORVID44_GEN3:			return "corvid_44_gen3";
 		case DEVICE_ID_CORVID88_GEN3:			return "corvid_88_gen3";
-		case DEVICE_ID_IP25_R:					break;
-		case DEVICE_ID_IP25_T:					break;
-		case DEVICE_ID_SOFTWARE:				break;
+
+		case DEVICE_ID_IP25_R:
+		case DEVICE_ID_IP25_T:
+		case DEVICE_ID_FS8:
+		case DEVICE_ID_SOFTWARE:
 		case DEVICE_ID_NOTFOUND:				break;
 #if !defined(_DEBUG)
 		default:								break;
