@@ -1795,6 +1795,8 @@ bool NTV2Buffer::ByteSwap16 (void)
 
 bool NTV2Buffer::Set (const void * pInUserPointer, const size_t inByteCount)
 {
+	if (uint64_t(inByteCount) >= 0x0000000100000000)	//	inByteCount >= 4GB?
+		return false;	//	Can't store 4GB or larger value in fByteCount
 	Deallocate();
 	fUserSpacePtr = inByteCount ? NTV2Buffer_TO_ULWORD64(pInUserPointer) : 0;
 	fByteCount = ULWord(pInUserPointer ? inByteCount : 0);
@@ -1811,8 +1813,10 @@ bool NTV2Buffer::SetAndFill (const void * pInUserPointer, const size_t inByteCou
 
 bool NTV2Buffer::Allocate (const size_t inByteCount, const bool inPageAligned)
 {
-	if (GetByteCount()	&&	fFlags & NTV2Buffer_ALLOCATED)	//	If already was Allocated
-		if (inByteCount == GetByteCount())					//	If same byte count
+	if (uint64_t(inByteCount) >= 0x0000000100000000)	//	inByteCount >= 4GB?
+		return false;	//	Can't store 4GB or more in fByteCount
+	if (GetByteCount()	&&	IsAllocatedBySDK())			//	If already was Allocated
+		if (inByteCount == GetByteCount())				//	If same byte count
 		{
 			Fill(UByte(0));		//	Zero it...
 			return true;	//	...and return true

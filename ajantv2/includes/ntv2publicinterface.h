@@ -6293,24 +6293,24 @@ typedef enum
 				/**
 					@return		My size, in bytes.
 				**/
-				inline ULWord	GetByteCount (void) const				{return fByteCount;}
+				inline size_t	GetByteCount (void) const				{return size_t(fByteCount);}
 
 				/**
 					@return		True if my host storage was allocated by my Allocate function;	otherwise false if my host storage
 								address and size was provided by the client application.
 				**/
-				inline bool		IsAllocatedBySDK (void) const			{return fFlags & NTV2Buffer_ALLOCATED ? true : false;}
+				inline bool		IsAllocatedBySDK (void) const			{return flags() & NTV2Buffer_ALLOCATED ? true : false;}
 
 				/**
 					@return		True if my host storage was provided by the client application;	 otherwise false if it was allocated
 								by my Allocate function.
 				**/
-				inline bool		IsProvidedByClient (void) const			{return fFlags & NTV2Buffer_ALLOCATED ? false : true;}
+				inline bool		IsProvidedByClient (void) const			{return flags() & NTV2Buffer_ALLOCATED ? false : true;}
 
 				/**
 					@return		True if my host storage was page-aligned when Allocated;  otherwise false.
 				**/
-				inline bool		IsPageAligned (void) const				{return fFlags & NTV2Buffer_PAGE_ALIGNED ? true : false;}	//	New in SDK 17.0
+				inline bool		IsPageAligned (void) const				{return flags() & NTV2Buffer_PAGE_ALIGNED ? true : false;}	//	New in SDK 17.0
 
 				/**
 					@return		True if my user-space pointer is NULL, or my size is zero.
@@ -6325,7 +6325,7 @@ typedef enum
 				/**
 					@return		My size, in bytes, as a size_t.
 				**/
-				inline			operator size_t() const					{return size_t(GetByteCount());}	//	New in SDK 16.0
+				inline			operator size_t() const					{return GetByteCount();}	//	New in SDK 16.0
 
 				/**
 					@param[in]	inByteOffset	Specifies the offset from the start (or end) of my memory buffer.
@@ -6447,21 +6447,17 @@ typedef enum
 				**/
 				template<typename T>	bool Fill (const T & inValue)
 				{
-    				T* pT = reinterpret_cast<T*>(GetHostPointer());
-    				if (!pT) {
-        				return false;
-    				}
-
-					size_t bufferSize = GetByteCount() / sizeof(T);
-					if (bufferSize == 0) {
+					T* pT = reinterpret_cast<T*>(GetHostPointer());
+					if (!pT)
 						return false;
-    				}
 
-    				for (size_t i = 0; i < bufferSize; ++i) {
-        				pT[i] = inValue;
-    				}
+					const size_t bufferSize (GetByteCount() / sizeof(T));
+					if (!bufferSize)
+						return false;
 
-    				return true;
+					for (size_t i(0);  i < bufferSize;  i++)
+						pT[i] = inValue;
+					return true;
 				}
 
 				/**
@@ -6971,6 +6967,10 @@ typedef enum
 				bool						PutU8s (const UByteSequence & inU8s, const size_t inU8Offset = 0);
 				///@}
 
+			private:
+				inline uint8_t				flags (void) const	{return uint8_t(fFlags);}
+
+			public:
 				/**
 					@name	Default Page Size
 				**/
