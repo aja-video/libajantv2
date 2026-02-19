@@ -251,7 +251,7 @@ bool NTV2Dictionary::insert (const string & inKey, const string & inValue)
 		return false;
 	try {
 		mDict[inKey] = inValue;	//	Insert or update
-	} catch (bad_alloc) {
+	} catch (const bad_alloc &) {
 		return false;	//	no memory
 	} catch (...) {
 		return false;	//	failed
