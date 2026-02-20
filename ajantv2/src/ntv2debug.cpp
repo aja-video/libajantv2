@@ -92,6 +92,7 @@ const char * NTV2DeviceIDString (const NTV2DeviceID id)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_VKONA)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_IP25_R)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_IP25_T)
+		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_FS8)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_NOTFOUND)
 	}
 	return "";
@@ -178,6 +179,7 @@ const char * NTV2DeviceString (const NTV2DeviceID id)
 		case DEVICE_ID_VKONA:						return "VKona";
 		case DEVICE_ID_IP25_R:						return "IP25-R";
 		case DEVICE_ID_IP25_T:						return "IP25-T";
+		case DEVICE_ID_FS8:							return "FS8";
 		case DEVICE_ID_NOTFOUND:					return "Unknown";
 	}	//	switch
 	return "";

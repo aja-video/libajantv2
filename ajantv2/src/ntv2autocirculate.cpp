@@ -1235,7 +1235,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 						generateRTP = true; //	Force conversion to RTP
 						if (isIoIP2110)
 						{	//	Copy GUMP to where the driver expects it...
-							const ULWord	gumpLength (std::min(F1MonOffsetFromBottom - F2OffsetFromBottom, gumpF1.GetByteCount()));
+							const ULWord	gumpLength (std::min(F1MonOffsetFromBottom - F2OffsetFromBottom, ULWord(gumpF1.GetByteCount())));
 							gumpF1.CopyFrom(/*src=*/ancF1,	/*srcOffset=*/0,  /*dstOffset=*/0,	/*byteCount=*/gumpLength);
 						}	//	if IoIP
 					}	//	if F1 is GUMP
@@ -1255,7 +1255,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 						generateRTP = true; //	Force conversion to RTP
 						if (isIoIP2110)
 						{	//	Copy GUMP to where the driver expects it...
-							const ULWord	gumpLength (std::min(F2MonOffsetFromBottom, gumpF2.GetByteCount()));
+							const ULWord	gumpLength (std::min(F2MonOffsetFromBottom, ULWord(gumpF2.GetByteCount())));
 							gumpF2.CopyFrom(/*src=*/ancF2,	/*srcOffset=*/0,  /*dstOffset=*/0,	/*byteCount=*/gumpLength);
 						}	//	if IoIP
 					}	//	if F2 is GUMP

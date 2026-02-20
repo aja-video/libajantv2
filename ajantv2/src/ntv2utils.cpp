@@ -4623,6 +4623,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_CORVID88_GEN3:			return inForRetailDisplay ? "Corvid 88 Gen3"			: "Corvid-88-Gen3";
 		case DEVICE_ID_CORVIDHBR:				return inForRetailDisplay ? "Corvid HB-R"				: "CorvidHBR";
 		case DEVICE_ID_CORVIDHEVC:				return inForRetailDisplay ? "Corvid HEVC"				: "CorvidHEVC";
+		case DEVICE_ID_FS8:					  return "FS8";
 		case DEVICE_ID_IO4K:					return "Io4K";
 		case DEVICE_ID_IO4KPLUS:				return inForRetailDisplay ? "Avid DNxIV"				: "Io4KPlus";
 		case DEVICE_ID_IO4KUFC:					return inForRetailDisplay ? "Io4K UFC"					: "Io4KUfc";
@@ -7744,6 +7745,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_CORVID88_GEN3,
 														DEVICE_ID_CORVIDHBR,
 														DEVICE_ID_CORVIDHEVC,
+                            DEVICE_ID_FS8,
 														DEVICE_ID_IO4K,
 														DEVICE_ID_IO4KPLUS,
 														DEVICE_ID_IO4KUFC,
