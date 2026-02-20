@@ -1247,4 +1247,27 @@ ostream & operator << (ostream & oss, const NTV2XptConnections & inObj)
 	return oss;
 }
 
+ostream & operator << (ostream & oss, const NTV2PossibleConnections & inObj)
+{
+	if (inObj.empty())
+		return oss;
+	NTV2InputXptID ixpt (NTV2_INPUT_CROSSPOINT_INVALID);
+	for (NTV2PossibleConnectionsConstIter it(inObj.begin());  it != inObj.end();  )
+	{
+		if (ixpt != it->first)
+		{
+			ixpt = it->first;
+			oss << ::NTV2InputCrosspointIDToString(ixpt) << " <== ";
+		}
+		oss << ::NTV2OutputCrosspointIDToString(it->second);
+		if (++it == inObj.end())
+			break;
+		if (ixpt == it->first)
+			oss << ", ";
+		else
+			oss << endl;
+	}
+	return oss;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Stream Operators End

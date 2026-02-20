@@ -2900,8 +2900,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 		}	//	SUBCASE("CNTV2SignalRouter")
 
 		SUBCASE("NTV2XptConnections")
-		{
-	//	Test NTV2XptConnections, CompareConnections
+		{	//	Test NTV2XptConnections, CompareConnections
 	 		NTV2XptConnections routingA, routingB, newConns, delConns;
 	 		//	A == B
 	 		routingA[NTV2_XptCSC1VidInput] = NTV2_XptFrameBuffer1YUV;
@@ -2965,6 +2964,25 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 	 		CHECK_EQ(delConns.begin()->second, removedConnection.second);
 	 		cerr << "New:" << endl << newConns << endl << "Removed:" << endl << delConns << endl;
 		}	//	SUBCASE("NTV2XptConnections")
+
+		SUBCASE("NTV2PossibleConnections")
+		{	//	Test NTV2PossibleConnections
+	 		NTV2PossibleConnections a, b;
+			a.insert(NTV2Connection(NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1));
+			a.insert(NTV2Connection(NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn2));
+	 		a.insert(NTV2Connection(NTV2_XptCSC1VidInput, NTV2_XptSDIIn1));
+	 		a.insert(NTV2Connection(NTV2_XptCSC1VidInput, NTV2_XptLUT1Out));
+	 		a.insert(NTV2Connection(NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer1YUV));
+	 		a.insert(NTV2Connection(NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer1RGB));
+			CHECK_NE(a,b);	//	check !=
+			b = a;	//	assignment
+			CHECK_EQ(a,b);	//	check ==
+			ostringstream oss;
+			oss << a;		//	check ostream operator <<
+			const string s("NTV2_XptFrameBuffer1Input <== NTV2_XptSDIIn1, NTV2_XptSDIIn2" "\n"
+							"NTV2_XptCSC1VidInput <== NTV2_XptSDIIn1, NTV2_XptLUT1Out, NTV2_XptFrameBuffer1YUV, NTV2_XptFrameBuffer1RGB");
+			CHECK_EQ(oss.str(), s);
+		}	//	SUBCASE("NTV2PossibleConnections")
 	}	//	TEST_CASE("NTV2SignalRouterBFT")
 
 } //bft
