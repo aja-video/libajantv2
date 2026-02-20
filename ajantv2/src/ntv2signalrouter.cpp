@@ -800,20 +800,20 @@ bool CNTV2SignalRouter::CreateFromString (const string & inString, NTV2PossibleC
 
 	if (lines.front().find("<==") != string::npos)
 	{
-//		SRDBG(lines.size() << " lines");
-		for (NTV2StringListConstIter pEachLine(lines.begin());	pEachLine != lines.end();  ++pEachLine)
+		//cout << lines.size() << " lines" << endl;
+		for (size_t lineNum(0);  lineNum < lines.size();  lineNum++)
 		{
-            const string & line (*pEachLine);
-//			SRDBG("	 line '" << *pEachLine << "'");
+            const string & line (lines.at(lineNum));
+			//cout << "	 line '" << line << "'" << endl;
 			size_t	pos (line.find("<=="));
 			if (pos == string::npos)
 				{SRFAIL("Parse error: '<==' missing in line '" << line << "'");  return false;}
 			string leftPiece (line.substr(0, pos));  aja::strip(leftPiece);
 			string rightPiece (line.substr(pos + 3, line.length()));  aja::strip(rightPiece);
-			//SRDBG(" L'" << leftPiece << "',  R'" << rightPiece << "'");
+			//cout << " L'" << leftPiece << "',  R'" << rightPiece << "'" << endl;
 			NTV2InputXptID inputXpt (StringToNTV2InputCrosspointID(leftPiece));
 			if (inputXpt == NTV2_INPUT_CROSSPOINT_INVALID)
-				{SRFAIL("Parse error: invalid input crosspoint from '" << leftPiece << "' from line '" << *pEachLine << "'");	return false;}
+				{SRFAIL("Parse error: invalid input crosspoint from '" << leftPiece << "' from line '" << line << "'");	return false;}
 			NTV2OutputXptID outputXpt(NTV2_OUTPUT_CROSSPOINT_INVALID);
 			if (rightPiece.find(",") != string::npos)
 			{
@@ -839,6 +839,7 @@ bool CNTV2SignalRouter::CreateFromString (const string & inString, NTV2PossibleC
 	else
 		{SRFAIL("Unable to parse '" << lines.front() << "' -- expected '<=='");	 return false;}
 	SRINFO(DEC(outConnections.size()) << " potential connection(s) created from input string");
+	//cout << "Success! Imported " << outConnections.size() << " connections:" << endl << outConnections << endl;
 	return true;
 }
 
