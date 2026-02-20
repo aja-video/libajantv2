@@ -43,6 +43,7 @@ typedef NTV2PossibleConnections::const_iterator			NTV2PossibleConnectionsConstIt
 
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2XptConnection & inObj);
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2XptConnections & inObj);
+AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2PossibleConnections & inObj);	//	New in SDK 18.1
 
 /**
 	@brief	This class is a collection of widget input-to-output connections that can be applied all-at-once to an NTV2 device.
