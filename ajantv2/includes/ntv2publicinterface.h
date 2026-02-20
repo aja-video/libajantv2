@@ -4132,7 +4132,7 @@ NTV2_STRUCT_BEGIN(NTV2RegInfo)
 		inline ULWord			mask (void) const	{return registerMask;}		//	New in SDK 17.5
 		inline ULWord			shift (void) const	{return registerShift;}		//	New in SDK 17.5
 		inline NTV2RegInfo &	setRegNum (const ULWord val){registerNumber = val; return *this;}	//	New in SDK 17.5
-		inline NTV2RegInfo &	setValue (const ULWord val)	{registerShift = val; return *this;}	//	New in SDK 17.5
+		inline NTV2RegInfo &	setValue (const ULWord val)	{registerValue = val; return *this;}	//	New in SDK 17.5
 		inline NTV2RegInfo &	setMask (const ULWord val)	{registerMask = val; return *this;}	//	New in SDK 17.5
 		inline NTV2RegInfo &	setShift (const ULWord val)	{if (val < 32) registerShift = val; return *this;}	//	New in SDK 17.5
 	#endif	//	!defined(NTV2_BUILDING_DRIVER)
