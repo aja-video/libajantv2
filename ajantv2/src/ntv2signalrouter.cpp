@@ -293,31 +293,6 @@ bool CNTV2SignalRouter::ToCodeString (string & outCode, const NTV2XptConnections
 }
 
 
-CNTV2SignalRouter::PrintCodeConfig::PrintCodeConfig ()
-	:	mShowComments		(true),
-		mShowDeclarations	(true),
-		mUseRouter			(false),
-		mPreCommentText		("// "),
-		mPostCommentText	(),
-		mPreClassText		(),
-		mPostClassText		(),
-		mPreVariableText	(),
-		mPostVariableText	(),
-		mPreXptText			(),
-		mPostXptText		(),
-		mPreFunctionText	(),
-		mPostFunctionText	(),
-		mDeviceVarName		("device"),
-		mRouterVarName		("router"),
-		mLineBreakText		("\n"),
-		mFieldBreakText		("\t"),
-		mNew				(),
-		mChanged			(),
-		mMissing			()
-{
-}
-
-
 bool CNTV2SignalRouter::Initialize (void)		//	STATIC
 {
 	AJAAutoLock		locker(&gRoutingExpertLock);

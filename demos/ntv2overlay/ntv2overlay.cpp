@@ -476,7 +476,7 @@ void NTV2Overlay::OutputThread (void)
 				++goodBlits;
 			else
 				++badBlits;
-			if (mDevice.DMAWriteFrame (fbNum + pingPong, hostBuffer, hostBuffer.GetByteCount()))
+			if (mDevice.DMAWriteFrame (fbNum + pingPong, hostBuffer, ULWord(hostBuffer.GetByteCount())))
 				++goodXfers;
 			else
 				++badXfers;

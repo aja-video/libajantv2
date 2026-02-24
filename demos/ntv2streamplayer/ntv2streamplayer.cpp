@@ -554,7 +554,7 @@ void NTV2StreamPlayer::ProduceFrames (void)
 		pFrameData->fVideoBuffer.CopyFrom (mTestPatRasters.at(testPatNdx),
 											/*srcOffset*/ 0,
 											/*dstOffset*/ 0,
-											/*byteCount*/ pFrameData->fVideoBuffer.GetByteCount());
+											/*byteCount*/ ULWord(pFrameData->fVideoBuffer.GetByteCount()));
 	
 		const	CRP188	rp188Info (mCurrentFrame++, 0, 0, 10, tcFormat);
 		NTV2_RP188		tcF1, tcF2;

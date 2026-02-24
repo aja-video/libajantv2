@@ -1918,7 +1918,7 @@ bool NTV2PluginLoader::validate (void)
 				<< "\" doesn't match client SDK version '" << myVers << "'");
 		return fail();
 	}
-#if 1    
+#if 1
 	if (fingerprint != ajaFingerprint)
 	{	P_FAIL("'" << pluginPath() << "':|Plugin not authorized/signed by AJA:|"
 				<< "Issuer serial: " << fingerprint << "|AJA serial: " << ajaFingerprint);
