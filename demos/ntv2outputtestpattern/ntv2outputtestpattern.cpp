@@ -272,7 +272,7 @@ AJAStatus NTV2OutputTestPattern::EmitPattern (void)
 	//	Now simply transfer the contents of the host buffer to the device's current output frame...
 	if (!mDevice.DMAWriteFrame (currentOutputFrame,				//	Device frame number
 								AsULWordPtr(fd.GetRowAddress(hostBuffer.GetHostPointer(), 0)),	//	Host buffer address
-								hostBuffer.GetByteCount()))		//	# bytes to xfer
+								ULWord(hostBuffer.GetByteCount())))		//	# bytes to xfer
 		return AJA_STATUS_FAIL;
 
 	return AJA_STATUS_SUCCESS;

@@ -104,22 +104,22 @@ class AJAExport NTV2FrameData
 
 		//	Inquiry Methods
 		inline NTV2Buffer &	VideoBuffer (void)							{return fVideoBuffer;}
-		inline ULWord		VideoBufferSize (void) const				{return fVideoBuffer.GetByteCount();}
+		inline ULWord		VideoBufferSize (void) const				{return ULWord(fVideoBuffer.GetByteCount());}
 
 		inline NTV2Buffer &	AudioBuffer (void)							{return fAudioBuffer;}
-		inline ULWord		AudioBufferSize (void) const				{return fAudioBuffer.GetByteCount();}
+		inline ULWord		AudioBufferSize (void) const				{return ULWord(fAudioBuffer.GetByteCount());}
 		inline ULWord		NumCapturedAudioBytes (void) const			{return fNumAudioBytes;}
 
 		inline NTV2Buffer &	AncBuffer (void)							{return fAncBuffer;}
-		inline ULWord		AncBufferSize (void) const					{return fAncBuffer.GetByteCount();}
+		inline ULWord		AncBufferSize (void) const					{return ULWord(fAncBuffer.GetByteCount());}
 		inline ULWord		NumCapturedAncBytes (void) const			{return fNumAncBytes;}
 
 		inline NTV2Buffer &	AncBuffer2 (void)							{return fAncBuffer2;}
-		inline ULWord		AncBuffer2Size (void) const					{return fAncBuffer2.GetByteCount();}
+		inline ULWord		AncBuffer2Size (void) const					{return ULWord(fAncBuffer2.GetByteCount());}
 		inline ULWord		NumCapturedAnc2Bytes (void) const			{return fNumAnc2Bytes;}
 
 		inline NTV2Buffer &	VideoBuffer2 (void)							{return fVideoBuffer2;}
-		inline ULWord		VideoBufferSize2 (void) const				{return fVideoBuffer2.GetByteCount();}
+		inline ULWord		VideoBufferSize2 (void) const				{return ULWord(fVideoBuffer2.GetByteCount());}
 
 		inline bool			IsNULL (void) const							{return fVideoBuffer.IsNULL() && fVideoBuffer2.IsNULL()
 																			&& fAudioBuffer.IsNULL() && fAncBuffer.IsNULL()
