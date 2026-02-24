@@ -229,18 +229,39 @@ The `libajantv2` repository can be opened as a directory in **Qt Creator** and b
   </details>
 
 ### Compile-Time Customization <a name="customizing-ntv2"></a>
-There are a number of compile-time macros that control certain capabilities and/or aspects of NTV2:
-- `NTV2_USE_CPLUSPLUS11` (in `ajantv2/includes/ajatypes.h`) — If defined (the default), assumes a C++11 compiler (or later) is being used, and C++11 language features will be used in `libajantv2/ajantv2`.
-Note that this macro will automatically be defined or undefined as necessary by CMake depending on the `CMAKE_CXX_STANDARD` that's in use at build-time.
-Also note that if this macro is defined, so must `AJA_USE_CPLUSPLUS11` (see below) … and vice-versa.
-- `AJA_USE_CPLUSPLUS11` (in `ajabase/common/types.h`) — If defined (the default), assumes a C++11 compiler (or later) is being used, and C++11 language features will be used in `libajantv2/ajabase`.
-Note that this macro will automatically be defined or undefined as necessary by CMake depending on the `CMAKE_CXX_STANDARD` that's in use at build-time.
-Also note that if this macro is defined, so must `NTV2_USE_CPLUSPLUS11` (see above) … and vice-versa.
-- `NTV2_NULL_DEVICE` (in `ajantv2/includes/ajatypes.h`) — If defined, removes all linkage to the NTV2 kernel driver. This is used, for example, to build a “sandboxed” MacOS X application with no linkage to Apple’s IOKit framework. This has the side effect of having `CNTV2DriverInterface::OpenLocalPhysical` always fail, thus permitting only remote or software-plugin/virtual devices to be accessed. This macro is undefined by default.
-- `NTV2_NUB_CLIENT_SUPPORT` (in `ajantv2/includes/ajatypes.h`) — If defined (the default), the SDK will load plugins (DLLs, dylibs, .so’s) as necessary to connect to remote or virtual devices.
-For applications requiring higher security, this macro can be undefined to prevent dynamic plugin loading.
-- `NTV2_WRITEREG_PROFILING` (in `ajantv2/includes/ajatypes.h`) — If defined (the default), the `WriteRegister` profiling API in `CNTV2Card` is available.
-- `NTV2_ALLOW_OPEN_UNSUPPORTED` (in `ajantv2/includes/ajatypes.h`) — If defined, the SDK won’t check if the host-attached device being opened is supported; otherwise (the default), the SDK will fail the `Open` call if the host-attached device being opened is “unsupported”. (See the `NTV2GetSupportedDevices` function in `ntv2utils.h`.)
+There are a number of compile-time macros that control certain capabilities and/or aspects of NTV2.
+These are found in `ajantv2/includes/ajatypes.h` (unless otherwise specified).
+- `NTV2_USE_CPLUSPLUS11` — This macro is defined by default.
+  - If defined, assumes a C++11 compiler (or later) is being used, and C++11 language features will be used in `libajantv2/ajantv2`.
+  - If undefined, the use of C++11 language features are excluded from `libajantv2/ajantv2`.
+  - **NOTE:** This macro is automatically defined or undefined as necessary by CMake depending on the `CMAKE_CXX_STANDARD` that’s in use at build-time.
+  - Also note that if this macro is defined, so must `AJA_USE_CPLUSPLUS11` (see below) … and vice-versa.
+- `AJA_USE_CPLUSPLUS11` (in `ajabase/common/types.h`) — This macro is defined by default.
+  - If defined, assumes a C++11 compiler (or later) is being used, and C++11 language features will be used in `libajantv2/ajabase`.
+  - If undefined, the use of C++11 language features are excluded from `libajantv2/ajabase`.
+  - **NOTE:** This macro is automatically defined or undefined as necessary by CMake depending on the `CMAKE_CXX_STANDARD` that’s in use at build-time.
+  - Also note that if this macro is defined, so must `NTV2_USE_CPLUSPLUS11` (see above) … and vice-versa.
+- `NTV2_PREVENT_PLUGIN_LOAD` — This macro is undefined by default.
+  - If defined, the SDK cannot authenticate or load NTV2 plugins, because…
+    - NTV2’s [**mbedtls**](https://github.com/Mbed-TLS/mbedtls) dependency is removed;
+    - the **NTV2Plugin**, **PluginRegistry** and **NTV2PluginLoader** private classes are excluded from compilation;
+    - `CreateClient()` in the **NTV2RPCClientAPI** and **NTV2RPCServerAPI** classes will always return `nullptr`.
+  - If undefined, the SDK can authenticate and load NTV2 plugins.
+  - **NOTE:** CMake automatically defines this macro if the CMake variable `AJANTV2_DISABLE_PLUGIN_LOAD` is `ON`.
+- `NTV2_WRITEREG_PROFILING` — This macro is defined by default.
+  - If defined, the `WriteRegister` profiling API in `CNTV2Card` is available.
+  - If undefined, `WriteRegister` profiling is unavailable, which may yield a very small performance benefit.
+- `NTV2_NULL_DEVICE` — This macro is undefined by default.
+  - If defined, removes all linkage to the NTV2 kernel driver, causing all calls to `CNTV2DriverInterface::OpenLocalPhysical` to fail,
+    thus allowing only remote/virtual devices to be operated.
+  - If undefined, retains all linkage to the NTV2 kernel driver, allowing normal operation.
+- `NTV2_ALLOW_OPEN_UNSUPPORTED` — This macro is undefined by default.
+  - If defined, the SDK won’t check if the host-attached device being opened is supported.
+  - If undefined, the SDK will fail the `Open` call if the host-attached device being opened is “unsupported”
+    (per the `NTV2GetSupportedDevices` utility function declared in `ntv2utils.h`).
+- `NTV2_NUB_CLIENT_SUPPORT` — *Deprecated in SDK 17.1* — This macro is defined by default.
+  - If defined, the SDK shunts kernel driver calls to the **NTV2RPCClientAPI** if `IsRemote()` returns true.
+  - If undefined, the SDK is prevented from calling into the **NTV2RPCClientAPI**.
 
 ## Building the NTV2 Device Driver <a name="building-driver"></a>
   <details><summary>Linux:</summary>
