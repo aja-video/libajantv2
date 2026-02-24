@@ -11,7 +11,6 @@
 #include "ajaexport.h"
 #include "ntv2publicinterface.h"
 #include <stddef.h>
-#include <sstream>
 #include <set>
 #include <map>
 
@@ -188,37 +187,38 @@ class AJAExport CNTV2SignalRouter
 			@return		A reference to the specified output stream.
 			@see		CNTV2SignalRouter::PrintCode
 		**/
-		virtual std::ostream &						Print (std::ostream & inOutStream, const bool inForRetailDisplay = false) const;
+		virtual std::ostream &		Print (std::ostream & inOutStream, const bool inForRetailDisplay = false) const;
 
 		struct AJAExport PrintCodeConfig
 		{
-			bool		mShowComments;		///< @brief If true, show comments in the generated code
-			bool		mShowDeclarations;	///< @brief If true, show variable declarations in the generated code
-			bool		mUseRouter;			///< @brief If true, use calls to CNTV2SignalRouter instead of CNTV2Card
-			std::string mPreCommentText;	///< @brief Comment prefix text
-			std::string mPostCommentText;	///< @brief Comment postfix text
-			std::string mPreClassText;		///< @brief Class prefix text
-			std::string mPostClassText;		///< @brief Class postfix text
-			std::string mPreVariableText;	///< @brief Variable prefix text
-			std::string mPostVariableText;	///< @brief Variable postfix text
-			std::string mPreXptText;		///< @brief Crosspoint variable prefix text
-			std::string mPostXptText;		///< @brief Crosspoint variable postfix text
-			std::string mPreFunctionText;	///< @brief Function name prefix text
-			std::string mPostFunctionText;	///< @brief Function name postfix text
-			std::string mDeviceVarName;		///< @brief Name to use for CNTV2Card variable
-			std::string mRouterVarName;		///< @brief Name to use for CNTV2SignalRouter variable
-			std::string mLineBreakText;		///< @brief Text to use for line breaks
-			std::string mFieldBreakText;	///< @brief Text to use for field breaks
-			NTV2XptConnections mNew;		///< @brief Optional, to show new connections
-			NTV2XptConnections mChanged;	///< @brief Optional, to show changed connections
-			NTV2XptConnections mMissing;	///< @brief Optional, to show deleted connections
+			bool		mShowComments		= true;		///< @brief If true, show comments in the generated code
+			bool		mShowDeclarations	= true;		///< @brief If true, show variable declarations in the generated code
+			bool		mUseRouter			= false;	///< @brief If true, use calls to CNTV2SignalRouter instead of CNTV2Card
+			std::string mPreCommentText		= "// ";	///< @brief Comment prefix text
+			std::string mPostCommentText	= "";		///< @brief Comment postfix text
+			std::string mPreClassText		= "";		///< @brief Class prefix text
+			std::string mPostClassText		= "";		///< @brief Class postfix text
+			std::string mPreVariableText	= "";		///< @brief Variable prefix text
+			std::string mPostVariableText	= "";		///< @brief Variable postfix text
+			std::string mPreXptText			= "";		///< @brief Crosspoint variable prefix text
+			std::string mPostXptText		= "";		///< @brief Crosspoint variable postfix text
+			std::string mPreFunctionText	= "";		///< @brief Function name prefix text
+			std::string mPostFunctionText	= "";		///< @brief Function name postfix text
+			std::string mDeviceVarName		= "device";	///< @brief Name to use for CNTV2Card variable
+			std::string mRouterVarName		= "router";	///< @brief Name to use for CNTV2SignalRouter variable
+			std::string mLineBreakText		= "\n";		///< @brief Text to use for line breaks
+			std::string mFieldBreakText		= "\t";		///< @brief Text to use for field breaks
+			NTV2XptConnections mNew			= {};		///< @brief Optional, to show new connections
+			NTV2XptConnections mChanged		= {};		///< @brief Optional, to show changed connections
+			NTV2XptConnections mMissing		= {};		///< @brief Optional, to show deleted connections
+
 			/**
 				@brief	Default constructor sets the following default settings:
 						-	include "//"-style comments and variable declarations;
 						-	uses CNTV2Card calls;
 						-	uses standard newline line breaks.
 			**/
-			PrintCodeConfig ();
+			PrintCodeConfig ()	{}
 		};
 
 		/**

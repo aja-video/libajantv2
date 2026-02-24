@@ -13,6 +13,7 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
 #include <ctime>
+#include <sstream>
 
 using namespace std;
 
