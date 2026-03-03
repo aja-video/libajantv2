@@ -2013,7 +2013,7 @@ bool NTV2Buffer::SwapWith (NTV2Buffer & inBuffer)
 	return true;
 }
 
-set<ULWord> & NTV2Buffer::FindAll (set<ULWord> & outOffsets, const NTV2Buffer & inValue) const
+ULWordSet & NTV2Buffer::Find (ULWordSet & outOffsets, const NTV2Buffer & inValue, const size_t inLimit) const
 {
 	outOffsets.clear();
 	if (IsNULL())
@@ -2031,7 +2031,11 @@ set<ULWord> & NTV2Buffer::FindAll (set<ULWord> & outOffsets, const NTV2Buffer & 
 	do
 	{
 		if (!::memcmp(pMyData, pSrchData, srchByteCount))
+		{
 			outOffsets.insert(offset);	//	Record byte offset of match
+			if (inLimit  &&  outOffsets.size() >= inLimit)
+				break;	//	reached limit, early exit
+		}
 		pMyData++;	//	Bump search pointer
 		offset++;	//	Bump search byte offset
 	} while (offset < maxOffset);

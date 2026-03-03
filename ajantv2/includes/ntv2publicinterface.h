@@ -6372,11 +6372,15 @@ typedef enum
 				}
 
 				/**
-					@return		A non-const reference to the outOffsets parameter.
-					@param[out]	outOffsets	Receives the byte offsets to every occurrence in my buffer.
-					@param[in]	inValue		Specifies the data to search for.
+					@brief		Searches me for any number of occurrences of a given byte sequence.
+					@param[out]	outOffsets	Receives the byte offsets of every occurrence found in me.
+					@param[in]	inValue		Specifies the NTV2Buffer that contains the byte sequence to search for.
+					@param[in]	inLimit		Specifies the maximum number of occurrences to report. Zero, the default, means "no limit".
+					@return		A non-const reference to the "outOffsets" parameter. If empty, no occurrences were found.
+					@note		If a large number of matches are anticipated, the caller should call ULWordSet::reserve prior to
+								calling this function.
 				**/
-				ULWordSet &		FindAll (ULWordSet & outOffsets, const NTV2Buffer & inValue) const;	//	New in SDK 16.3
+				ULWordSet &		Find (ULWordSet & outOffsets, const NTV2Buffer & inValue, const size_t inLimit = 0) const;	//	Originally FindAll before SDK 18.1
 
 				/**
 					@return		True if the given memory buffer's contents are identical to my own.
@@ -6387,11 +6391,11 @@ typedef enum
 				bool			IsContentEqual (const NTV2Buffer & inBuffer, const ULWord inByteOffset = 0, const ULWord inByteCount = 0xFFFFFFFF) const;
 
 				/**
-					@brief		Answers with the byte offset to the first or next difference.
+					@brief		Iterates over each byte that differs between myself and the given buffer.
 					@param[in]	inBuffer		Specifies the memory buffer whose contents are to be compared with mine.
 												The buffer sizes must match.
-					@param		byteOffset		On entry, specifies the byte offset where comparing starts (use zero to find the first difference);
-												on exit, receives the byte offset of the next difference found (or 0xFFFFFFFF if identical).
+					@param		byteOffset		On entry, specifies the byte offset where comparing begins (use zero to find the first difference);
+												on exit, receives the byte offset of the next difference found (or 0xFFFFFFFF if no further differences found).
 					@return		True if successful; otherwise false.
 				**/
 				bool			NextDifference (const NTV2Buffer & inBuffer, ULWord & byteOffset) const;
@@ -6966,6 +6970,8 @@ typedef enum
 				**/
 				bool						PutU8s (const UByteSequence & inU8s, const size_t inU8Offset = 0);
 				///@}
+
+				inline NTV2_DEPRECATED_18_1(ULWordSet & FindAll (ULWordSet & outOffsets, const NTV2Buffer & inValue) const) {return Find(outOffsets,inValue);}	//	New in SDK 16.3, renamed in SDK 18.1
 
 			private:
 				inline uint8_t				flags (void) const	{return uint8_t(fFlags);}
