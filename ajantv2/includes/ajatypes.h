@@ -572,6 +572,11 @@
 #else//NTV2_DEPRECATE_17_6
 	#define NTV2_DEPRECATED_18_0(__f__)				NTV2_WILL_BE_DEPRECATED(__f__)
 #endif//NTV2_DEPRECATE_17_6
+#if defined(NTV2_DEPRECATE_18_0)
+	#define NTV2_DEPRECATED_18_1(__f__)				NTV2_DEPRECATED_f(__f__)
+#else//NTV2_DEPRECATE_18_0
+	#define NTV2_DEPRECATED_18_1(__f__)				NTV2_WILL_BE_DEPRECATED(__f__)
+#endif//NTV2_DEPRECATE_18_0
 
 #if !defined(BIT)
 	#if !defined(AJALinux)
