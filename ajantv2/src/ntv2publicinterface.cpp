@@ -505,11 +505,11 @@ ostream & NTV2Buffer::Dump (ostream &		inOStream,
 		const unsigned	maxByteWidth		(inRadix == 8 ? 4 : (inRadix == 10 ? 3 : (inRadix == 2 ? 8 : 2)));
 		const UByte *	pBuffer				(reinterpret_cast <const UByte *> (pInStartAddress));
 		const size_t	asciiBufferSize		(inShowAscii && inGroupsPerRow ? (inBytesPerGroup * inGroupsPerRow + 1) * sizeof (UByte) : 0);	//	Size in bytes, not chars
-		UByte *			pAsciiBuffer		(asciiBufferSize ? new UByte[asciiBufferSize / sizeof(UByte)] : AJA_NULL);
 
 		if (!pInStartAddress)
 			return inOStream;
 
+		UByte * pAsciiBuffer (asciiBufferSize ? new UByte[asciiBufferSize / sizeof(UByte)] : AJA_NULL);
 		if (pAsciiBuffer)
 			::memset (pAsciiBuffer, 0, asciiBufferSize);
 
@@ -2013,7 +2013,7 @@ bool NTV2Buffer::SwapWith (NTV2Buffer & inBuffer)
 	return true;
 }
 
-set<ULWord> & NTV2Buffer::FindAll (set<ULWord> & outOffsets, const NTV2Buffer & inValue) const
+ULWordSet & NTV2Buffer::Find (ULWordSet & outOffsets, const NTV2Buffer & inValue, const size_t inLimit) const
 {
 	outOffsets.clear();
 	if (IsNULL())
@@ -2031,7 +2031,11 @@ set<ULWord> & NTV2Buffer::FindAll (set<ULWord> & outOffsets, const NTV2Buffer & 
 	do
 	{
 		if (!::memcmp(pMyData, pSrchData, srchByteCount))
+		{
 			outOffsets.insert(offset);	//	Record byte offset of match
+			if (inLimit  &&  outOffsets.size() >= inLimit)
+				break;	//	reached limit, early exit
+		}
 		pMyData++;	//	Bump search pointer
 		offset++;	//	Bump search byte offset
 	} while (offset < maxOffset);

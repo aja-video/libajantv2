@@ -89,6 +89,9 @@ class AJAExport NTV2FrameData
 		ULWord			fNumAncBytes;		///< @brief	Actual number of captured F1 anc bytes
 		ULWord			fNumAnc2Bytes;		///< @brief	Actual number of captured F2 anc bytes
 		uint32_t		fFrameFlags;		///< @brief Frame data flags
+		uint64_t		fTimeStampAud;		///< @brief VBI timestamp (device audio clock)
+		uint64_t		fTimeStampOS;		///< @brief VBI timestamp (host OS clock)
+		uint64_t		fUserData;			///< @brief	User data (frame tag/id, for playback)
 	public:
 		explicit inline NTV2FrameData()
 			:	fVideoBuffer	(0),
@@ -100,7 +103,10 @@ class AJAExport NTV2FrameData
 				fNumAudioBytes	(0),
 				fNumAncBytes	(0),
 				fNumAnc2Bytes	(0),
-				fFrameFlags(0)	{}
+				fFrameFlags		(0),
+				fTimeStampAud	(0),
+				fTimeStampOS	(0),
+				fUserData		(0)	{}
 
 		//	Inquiry Methods
 		inline NTV2Buffer &	VideoBuffer (void)							{return fVideoBuffer;}
@@ -109,14 +115,17 @@ class AJAExport NTV2FrameData
 		inline NTV2Buffer &	AudioBuffer (void)							{return fAudioBuffer;}
 		inline ULWord		AudioBufferSize (void) const				{return ULWord(fAudioBuffer.GetByteCount());}
 		inline ULWord		NumCapturedAudioBytes (void) const			{return fNumAudioBytes;}
+		inline bool			HasAudioSamples (void) const				{return NumCapturedAudioBytes() && AudioBufferSize();}
 
 		inline NTV2Buffer &	AncBuffer (void)							{return fAncBuffer;}
 		inline ULWord		AncBufferSize (void) const					{return ULWord(fAncBuffer.GetByteCount());}
 		inline ULWord		NumCapturedAncBytes (void) const			{return fNumAncBytes;}
+		inline bool			HasF1Anc (void) const						{return NumCapturedAncBytes() && AncBufferSize();}
 
 		inline NTV2Buffer &	AncBuffer2 (void)							{return fAncBuffer2;}
 		inline ULWord		AncBuffer2Size (void) const					{return ULWord(fAncBuffer2.GetByteCount());}
 		inline ULWord		NumCapturedAnc2Bytes (void) const			{return fNumAnc2Bytes;}
+		inline bool			HasF2Anc (void) const						{return NumCapturedAnc2Bytes() && AncBuffer2Size();}
 
 		inline NTV2Buffer &	VideoBuffer2 (void)							{return fVideoBuffer2;}
 		inline ULWord		VideoBufferSize2 (void) const				{return ULWord(fVideoBuffer2.GetByteCount());}
@@ -127,6 +136,10 @@ class AJAExport NTV2FrameData
 		inline bool	HasTimecode (const NTV2TCIndex inTCNdx) const		{return fTimecodes.find(inTCNdx) != fTimecodes.end();}
 		NTV2_RP188	Timecode (const NTV2TCIndex inTCNdx) const;
 		inline bool	HasValidTimecode (const NTV2TCIndex inTCNdx) const	{return Timecode(inTCNdx).IsValid();}
+		inline bool HasTimeStamp (void) const							{return fTimeStampAud && fTimeStampOS;}
+		inline uint64_t TimeStamp (const bool useAudioClock = true) const	{return useAudioClock ? fTimeStampAud : fTimeStampOS;}
+		inline uint64_t UserData (void) const							{return fUserData;}
+		inline NTV2FrameData &	SetUserData (const uint64_t val)		{fUserData = val; return *this;}
 
 		//	Modifier Methods
 		inline void		ZeroBuffers (void)		{	if (fVideoBuffer)
@@ -141,12 +154,13 @@ class AJAExport NTV2FrameData
 														fAncBuffer2.Fill(ULWord(0));
 													fNumAudioBytes = fNumAncBytes = fNumAnc2Bytes = 0;
 												}
-		bool			LockAll					(CNTV2Card & inDevice);
-		bool			UnlockAll				(CNTV2Card & inDevice);
+		bool			LockAll (CNTV2Card & inDevice);
+		bool			UnlockAll (CNTV2Card & inDevice);
 
-		bool			Reset (void)			{return fVideoBuffer.Allocate(0) && fVideoBuffer2.Allocate(0)
+		inline bool		Reset (void)			{return fVideoBuffer.Allocate(0) && fVideoBuffer2.Allocate(0)
 														&& fAudioBuffer.Allocate(0) && fAncBuffer.Allocate(0)
 														&& fAncBuffer2.Allocate(0);}
+		bool			SetCapturedFrameInfo (const AUTOCIRCULATE_TRANSFER & inXferInfo, const AUTOCIRCULATE_STATUS & acStatus);
 };	//	NTV2FrameData
 
 typedef std::vector<NTV2FrameData>			NTV2FrameDataArray;				///< @brief A vector of NTV2FrameData elements

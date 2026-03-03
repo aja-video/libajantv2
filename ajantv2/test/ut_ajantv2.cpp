@@ -1285,7 +1285,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 		CHECK(CopyRaster ( NTV2_FBF_8BIT_YCBCR, pDstRaster, nDstBytesPerLine, nDstHeightLines,               30,                  4, pSrcRaster, nSrcBytesPerLine, nSrcHeightLines,               12,    nSrcHeightLines,                  0, nSrcWidthPixels));
 		if (gVerboseOutput)	{std::cerr << "DstRaster:" << std::endl;  dstRaster.Dump(std::cerr, 0/*byteOffset*/, 0/*byteCount*/, 16/*radix*/, 2/*bytes/group*/, nDstWidthPixels/*groups/line*/, 16/*addrRadix*/);}
 		dstRaster.Fill(uint8_t(0xAA));	//	::memset (pDstRaster, 0xAA, nDstBytes);
-	}
+	}	//TEST_CASE("Copy Raster")
 
 	TEST_CASE("NTV2Debug")
 	{
@@ -1676,7 +1676,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 		CHECK_EQ(::NTV2AudioChannelPairToString (NTV2_AudioChannel57_58), "NTV2_AudioChannel57_58");
 		CHECK_EQ(::NTV2AudioChannelQuadToString (NTV2_AudioChannel37_40), "NTV2_AudioChannel37_40");
 		CHECK_EQ(::NTV2AudioChannelOctetToString (NTV2_AudioChannel121_128), "NTV2_AudioChannel121_128");
-	}
+	}	//TEST_CASE("NTV2AudioChannelPairs Quad Octet")
 
 	// TEST_CASE("NTV2RegisterExpert")
 	// {
@@ -2253,7 +2253,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 				CHECK(fd.GetRowBuffer(original, a, topLine));
 				CHECK(fd.GetRowBuffer(rasterBuf, b, botLine));
 				string sa, sb;  a.toHexString (sa);  b.toHexString(sb);
-				cout << "topLine=" << DEC(topLine) << "  botLine=" << botLine << "  a=" << sa << "  b=" << sb << endl;
+//cout << "topLine=" << DEC(topLine) << "  botLine=" << botLine << "  a=" << sa << "  b=" << sb << endl;
 				CHECK(a.IsContentEqual(b));
 			}
 		}
@@ -3061,6 +3061,7 @@ TEST_SUITE("NTV2Buffer" * doctest::description("NTV2Buffer tests"))
 					std::cerr << spain.GetString(n, len) << std::endl;
 		}
 
+		//	Vector conversion, IsContentEqual
 		std::vector<uint64_t> u64s;
 		std::vector<uint32_t> u32s;
 		std::vector<uint16_t> u16s;
@@ -3241,6 +3242,53 @@ TEST_SUITE("NTV2Buffer" * doctest::description("NTV2Buffer tests"))
 			CHECK(buff16.Truncate(buff16.GetByteCount()-1));	//	Keep shortening by 1 byte
 	}	//	truncate_test
 
+	#define DULWS(_l_, _x_)		cout << _l_; for(ULWordSetConstIter it(_x_.begin());  it != _x_.end(); ) {cout << DEC(*it);  if (++it != _x_.end()) cout << ", ";} cout << endl;
+
+	TEST_CASE("find_test")
+	{
+		//					               1         2         3         4
+		//					     01234567890123456789012345678901234567890123
+		static const string s1 ("The rain in Spain stays mainly on the plain."),
+							s2 ("The rain in Japan stays mainly on the plain."),
+							s3 ("APWRAPWR in Spain stays mainly on WRAPWRAPWR"),
+							s4 ("he "),
+							s5 ("When in the course of human events, et cetera, et cetera"),
+							s6 ("x"),
+							s7 ("a"),
+							s8 ("A");
+		NTV2Buffer b1(&s1[0], s1.length()), b2(&s2[0], s2.length()), b3(&s3[0], s3.length()), b4(&s4[0], s4.length()),
+					b5(&s5[0], s5.length()), b6(&s6[0], s6.length()), b7(&s7[0], s7.length()), b8(&s8[0], s8.length()), bEmpty;
+		ULWordSet offsets, expected;
+
+		expected = {1, 35};	//	"he " occurs twice
+		CHECK_FALSE(b1.Find(offsets, b4).empty());
+		CHECK_EQ(offsets.size(), 2);
+		CHECK_EQ(offsets, expected);
+
+		expected = {};	//	no occurrences
+		CHECK(b1.Find(offsets, bEmpty).empty());//	nothing to search for
+		CHECK(b2.Find(offsets, b5).empty());	//	b5 longer than b2
+		CHECK(b3.Find(offsets, b6).empty());	//	"x" doesn't occur in b3
+		CHECK_EQ(offsets, expected);
+
+		expected = {5, 14, 20, 25, 40};	//	"a" occurs 5 times
+		CHECK_FALSE(b1.Find(offsets, b7).empty());
+		//if (offsets != expected)	{cout << "Line " << (__LINE__ + 1) << endl; DULWS("Offsets: ", offsets); DULWS("Expected: ", expected);}
+		CHECK_EQ(offsets, expected);
+
+		expected = {5, 14, 20};	//	"a" occurs 5 times, but limit to first 3 occurrences
+		CHECK_FALSE(b1.Find(offsets, b7, 3).empty());
+		CHECK_EQ(offsets, expected);
+
+		expected = {14, 20, 25};	//	"a" occurs in b3 5 times
+		CHECK_FALSE(b3.Find(offsets, b7).empty());
+		CHECK_EQ(offsets, expected);
+
+		expected = {0, 4, 36, 40};	//	"A" occurs in b3 4 times
+		CHECK_FALSE(b3.Find(offsets, b8).empty());
+		CHECK_EQ(offsets, expected);
+	}	//	find_test
+
 	TEST_CASE("hexstring")
 	{
 		NTV2Buffer orig(256);
@@ -3334,6 +3382,11 @@ TEST_SUITE("NTV2Buffer" * doctest::description("NTV2Buffer tests"))
 		CHECK_FALSE(orig.Allocate(sz));
 		sz -= 0x0000000001000000;		//	16K shy of 4GB
 		CHECK(orig.Allocate(sz));
+	}	//	hugesizes
+
+	TEST_CASE("find")
+	{
+		NTV2Buffer orig;
 	}	//	hugesizes
 } //NTV2Buffer
 
