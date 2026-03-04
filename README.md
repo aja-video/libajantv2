@@ -262,6 +262,11 @@ These are found in `ajantv2/includes/ajatypes.h` (unless otherwise specified).
 - `NTV2_NUB_CLIENT_SUPPORT` — *Deprecated in SDK 17.1* — This macro is defined by default.
   - If defined, the SDK shunts kernel driver calls to the **NTV2RPCClientAPI** if `IsRemote()` returns true.
   - If undefined, the SDK is prevented from calling into the **NTV2RPCClientAPI**.
+- `NTV2_CHECK_SDRAM_COLLISIONS` — *New in SDK 18.1* — This macro is defined by default.
+  - If defined, calls to **CNTV2Card** functions `AutoCirculateInitForInput()`, `AutoCirculateInitForOutput()`,
+    `StartAudioInput()` and `StartAudioOutput()` will log any SDRAM collisions involving the AutoCirculate channel
+    just initialized or the Audio System just started.
+  - If undefined, the SDRAM collision checking/logging code is excluded from the compilation.
 
 ## Building the NTV2 Device Driver <a name="building-driver"></a>
   <details><summary>Linux:</summary>
