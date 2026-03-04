@@ -294,7 +294,7 @@ bool CNTV2Card::AutoCirculateInitForInput ( const NTV2Channel		inChannel,
 	const bool result (AutoCirculate(autoCircData));	//	Call the OS-specific method
 	if (result)
 	{	//	Success!
-		#if 1
+		#if defined(NTV2_CHECK_SDRAM_COLLISIONS)
 			//	Warn about interference from other channels...
 			ULWordSequence badRgns;
 			SDRAMAuditor auditor(*this);
@@ -315,7 +315,7 @@ bool CNTV2Card::AutoCirculateInitForInput ( const NTV2Channel		inChannel,
 					ACWARN(GetDescription() << ": Input Ch" << DEC(inChannel+1) << ": memory overlap/interference: " << warning.str() << ": " << infoStr);
 				}
 			}	//	for each "bad" region
-		#endif
+		#endif	//	defined(NTV2_CHECK_SDRAM_COLLISIONS)
 		#if 1
 		{	AUTOCIRCULATE_STATUS stat;
 			if (AutoCirculateGetStatus (inChannel, stat)  &&  !stat.IsStopped()  &&  stat.WithAudio())
@@ -455,7 +455,7 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 	const bool result (AutoCirculate(autoCircData));	//	Call the OS-specific method
 	if (result)
 	{	//	Success!
-		#if 1
+		#if defined(NTV2_CHECK_SDRAM_COLLISIONS)
 			//	Warn about interference from other channels...
 			ULWordSequence badRgns;
 			SDRAMAuditor auditor(*this);
@@ -476,7 +476,7 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 					ACWARN(GetDescription() << ": Output Ch" << DEC(inChannel+1) << ": memory overlap/interference: " << warning.str() << ": " << infoStr);
 				}
 			}	//	for each "bad" region
-		#endif
+		#endif	//	defined(NTV2_CHECK_SDRAM_COLLISIONS)
 		#if 1
 		{	AUTOCIRCULATE_STATUS stat;
 			if (AutoCirculateGetStatus (inChannel, stat)  &&  !stat.IsStopped()  &&  stat.WithAudio())
