@@ -123,6 +123,19 @@
 //#define NTV2_MACOS_SANDBOX	
 
 
+/**************************************************************************************************************
+	NTV2_CHECK_SDRAM_COLLISIONS		When defined (the default), calls made to StartAudioInput, StartAudioOutput,
+									AutoCirculateInitForInput or AutoCirculateInitForOutput that result in
+									SDRAM collisions will be logged.
+
+									When undefined, SDRAM collision checking will not be performed for the
+									aforementioned function calls.
+
+									Introduced in SDK 18.1.
+**************************************************************************************************************/
+#define	NTV2_CHECK_SDRAM_COLLISIONS
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////	HELPER MACROS
