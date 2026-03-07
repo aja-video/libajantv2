@@ -37,6 +37,7 @@ typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter
 #define	kQParamShowX509Cert		"showcert"		///< @brief	Query parameter option that dumps X509 certificate info into message log
 #define	kQParamShowParams		"showparams"	///< @brief	Query parameter option that dumps parameters into message log
 #define	kQParamDebugRegistry	"debugregistry"	///< @brief	Query parameter option that enables debugging of PluginRegistry
+#define	kQParamNumWorkers		"numworkers"	///< @brief	Query parameter option that, if non-zero, enables async server mode & specifies # worker threads
 
 //	AJA VDEV params:
 #define	kQParamVDevFolderPath	"vdevfpath"		///< @brief	Path to folder containing .vdev files

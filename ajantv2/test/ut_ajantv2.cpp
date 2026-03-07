@@ -4331,3 +4331,19 @@ TEST_SUITE("NTV2GetRegisters" * doctest::description("NTV2GetRegisters tests"))
 //		CHECK_FALSE(a.GetGoodRegisters(regNums));
 	}	//	TEST_CASE("Basic")
 }	//	TEST_SUITE("NTV2GetRegisters")
+
+#if 0	//	SWDevice testing
+TEST_SUITE("NTV2SWDevice" * doctest::description("NTV2SWDevice tests"))
+{
+	TEST_CASE("Basic")
+	{
+		const string devSpec("ntv2swdevice://foo/");
+		CNTV2Card a;
+		for (size_t num(0);  num < 20;  num++)
+		{
+			CHECK(a.Open(devSpec));
+			CHECK(a.Close());
+		}
+	}	//	TEST_CASE("Basic")
+}	//	TEST_SUITE("NTV2SWDevice")
+#endif	//	SWDevice testing

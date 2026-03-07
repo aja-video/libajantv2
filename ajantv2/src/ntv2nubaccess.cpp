@@ -435,7 +435,7 @@ void NTV2DeviceSpecParser::Parse (void)
 			//	"xxxx://swdevice/?"
 			//		"nosharedmemory"
 			//		"&supportlog=file%3A%2F%2F%2FUsers%2Fdemo%2FDesktop%2FAJAWatcherSupport.log"
-			//		"&sdram=file%3A%2F%2F%2FUsers%2Fdemo%2FDesktop%2FSDRAMsnapshot.dat");
+			//		"&fbinit=file%3A%2F%2F%2FUsers%2Fdemo%2FDesktop%2FSDRAMsnapshot.dat");
 			//	Host[port]/[resource[?query]]
 			size_t posURL(posScheme), posRsrc(0);
 			string	host, port, rsrcPath;
@@ -1024,7 +1024,7 @@ bool NTV2DeviceSpecParser::IsLegalSerialNumChar (const char inChar)
 		specParser.Reset("ntv2://swdevice/?"
 							"nosharedmemory"
 							"&supportlog=file%3A%2F%2F%2FUsers%2Fdemo%2FDesktop%2FAJAWatcherSupport.log"
-							"&sdram=file%3A%2F%2F%2FUsers%2Fdemo%2FDesktop%2FSDRAMsnapshot.dat");
+							"&fbinit=file%3A%2F%2F%2FUsers%2Fdemo%2FDesktop%2FSDRAMsnapshot.dat");
 	}
 #endif	//	defined(_DEBUG)
 
@@ -2276,6 +2276,7 @@ NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const string & inURL)	//	CLAS
 NTV2RPCServerAPI::NTV2RPCServerAPI (NTV2ConnectParams inParams, void * pRefCon)
 	:	NTV2RPCBase(inParams, reinterpret_cast<ULWord*>(pRefCon))
 {
+	mRunning = mTerminate = false;
 	NTV2Buffer spare(&mSpare, sizeof(mSpare));  spare.Fill(0ULL);
 	AJADebug::Open();
 	AJAAtomic::Increment(&gServerConstructCount);
