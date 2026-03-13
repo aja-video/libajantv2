@@ -4332,6 +4332,73 @@ TEST_SUITE("NTV2GetRegisters" * doctest::description("NTV2GetRegisters tests"))
 	}	//	TEST_CASE("Basic")
 }	//	TEST_SUITE("NTV2GetRegisters")
 
+
+TEST_SUITE("NTV2RegInfo" * doctest::description("NTV2RegInfo tests"))
+{
+	TEST_CASE("Basic")
+	{
+		NTV2RegInfo a, b;  b.MakeInvalid();
+		CHECK(a.IsValid());
+		CHECK_EQ(a.regNum(), 0);
+		CHECK_EQ(a.value(), 0);
+		CHECK_EQ(a.mask(), 0xFFFFFFFF);
+		CHECK_EQ(a.shift(), 0);
+		CHECK_FALSE(b.IsValid());
+		CHECK_EQ(b.regNum(), 0xFFFFFFFF);
+		CHECK_EQ(b.value(), 0xFFFFFFFF);
+		CHECK_EQ(b.mask(), 0xFFFFFFFF);
+		CHECK_EQ(b.shift(), 0xFFFFFFFF);
+		CHECK(a < b);
+		CHECK_FALSE(a == b);
+
+		CHECK(b.setRegNum(26).setValue(333).setShift(0).IsValid());
+		CHECK_EQ(b.regNum(), 26);
+		CHECK_EQ(b.value(), 333);
+		CHECK_EQ(b.mask(), 0xFFFFFFFF);
+		CHECK_EQ(b.shift(), 0);
+		//	Check Print()
+		ostringstream oss;	b.Print(oss);
+		CHECK_EQ(oss.str(), "[kRegAud1OutputLastAddr|26: val=0x0000014D]");
+		oss.str("");  b.setShift(4);  b.Print(oss);
+		CHECK_EQ(oss.str(), "[kRegAud1OutputLastAddr|26: val=0x0000014D shf=4]");
+		oss.str("");  b.setMask(0x000EB000);  b.Print(oss);
+		CHECK_EQ(oss.str(), "[kRegAud1OutputLastAddr|26: val=0x0000014D msk=0x000EB000 shf=4]");
+	}	//	TEST_CASE("Basic")
+
+	TEST_CASE("Export")
+	{
+		NTV2RegInfo a(26, 333, 0x0000FFF0, 4), b;  b.MakeInvalid();
+		ostringstream oss;
+		a.PrintCode (oss);//, const int inRadix, const NTV2DeviceID inDeviceID, const string & sCard)
+		CHECK_EQ(oss.str().find("card.WriteRegister (kRegAud1OutputLastAddr, 0x0000014D, 0x0000FFF0, 4);"), 0);
+	}	//	TEST_CASE("Export")
+
+	TEST_CASE("Import")
+	{
+		NTV2RegInfo a(26, 333, 0x0000FFF0, 4), b;  b.MakeInvalid();
+		CHECK_EQ(a.regNum(), 26);
+		CHECK_EQ(a.value(), 333);
+		CHECK_EQ(a.mask(), 0x0000FFF0);
+		CHECK_EQ(a.shift(), 4);
+		CHECK(a.IsValid());
+		CHECK_FALSE(b.IsValid());
+
+		//	Round-trip test:  PrintLog ==> stringList ==> ImportFromLog
+		ostringstream oss;
+		a.PrintLog (oss, DEVICE_ID_TTAP);
+		NTV2StringList lines (aja::split(oss.str(),"\n"));
+		//cout << "'" << aja::join(lines,"', '") << "'" << endl;
+		CHECK(b.ImportFromLog(lines));
+		b.setShift(a.shift()).setMask(a.mask());	//	PrintLog & Import ignore mask & shift:  force to match "a"'s mask & shift
+		CHECK(b.IsValid());
+		CHECK_EQ(b.regNum(), 26);
+		CHECK_EQ(b.value(), 333);
+		CHECK_EQ(b.mask(), 0x0000FFF0);
+		CHECK_EQ(b.shift(), 4);
+		CHECK_EQ(a, b);
+	}	//	TEST_CASE("Import")
+}	//	TEST_SUITE("NTV2RegInfo")
+
 #if 0	//	SWDevice testing
 TEST_SUITE("NTV2SWDevice" * doctest::description("NTV2SWDevice tests"))
 {

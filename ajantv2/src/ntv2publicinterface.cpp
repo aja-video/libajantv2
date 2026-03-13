@@ -31,6 +31,28 @@ using namespace std;
 
 /////////// Stream Operators
 
+ostream & operator << (ostream & inOutStream, const NTV2StringList & inData)
+{
+	for (NTV2StringListConstIter it(inData.begin());  it != inData.end();  )
+	{
+		inOutStream << *it;
+		if (++it != inData.end())
+			inOutStream << ", ";
+	}
+	return inOutStream;
+}
+
+ostream & operator << (ostream & inOutStream, const NTV2StringSet & inData)
+{
+	for (NTV2StringSetConstIter it(inData.begin());	 it != inData.end();  )
+	{
+		inOutStream << *it;
+		if (++it != inData.end())
+			inOutStream << ", ";
+	}
+	return inOutStream;
+}
+
 ostream & operator << (ostream & inOutStr, const NTV2AudioChannelPairs & inSet)
 {
 	if (inSet.empty())
@@ -3494,14 +3516,14 @@ ostream & NTV2RegInfo::Print (ostream & oss, const bool inAsCode) const
 	return oss << "]";
 }
 
-ostream & NTV2RegInfo::PrintCode (ostream & oss, const int inRadix, const NTV2DeviceID inDeviceID) const
+ostream & NTV2RegInfo::PrintCode (ostream & oss, const int inRadix, const NTV2DeviceID inDeviceID, const string & sCard) const
 {
 	const string regName (CNTV2RegisterExpert::GetDisplayName(NTV2RegisterNumber(registerNumber)));
 	const bool readOnly (CNTV2RegisterExpert::IsReadOnly(registerNumber));
 	const bool badName (regName.find(' ') != string::npos);
 	if (readOnly)
 		oss << "//\t";
-	oss << "theDevice.WriteRegister (";
+	oss << sCard << ".WriteRegister (";
 	if (badName)
 		oss << DEC(registerNumber);
 	else
@@ -3534,6 +3556,66 @@ ostream & NTV2RegInfo::PrintCode (ostream & oss, const int inRadix, const NTV2De
 		oss << "  // " << aja::replace(info, "\n", ", ");
 	return oss;
 }
+
+ostream & NTV2RegInfo::PrintLog (ostream & oss, const NTV2DeviceID inDeviceID) const
+{
+	const string name ((regNum() < VIRTUALREG_START)  ||  (regNum() > kVRegLast)  ?  "Register"  :  "VReg");
+	oss << name << " Name: " << CNTV2RegisterExpert::GetDisplayName(regNum()) << endl
+		<< name << " Number: " << regNum() << endl
+		<< name << " Value: " << value() << " : " << xHEX0N(value(),8);
+		//<< "Register Classes: " << CNTV2RegisterExpert::GetRegisterClasses(regNum()) << endl
+	const string sVal(CNTV2RegisterExpert::GetDisplayValue (regNum(), value(), inDeviceID));
+//	if (!sVal.empty())		//	stay compatible with older supportlogs
+		oss << endl
+			<< sVal << endl;
+	return oss;
+}
+
+bool NTV2RegInfo::ImportFromLog (const NTV2StringList & inLogLines)
+{
+	ULWord received(0), rcvdRegNum(0), rcvdRegVal(0);	//	what was received
+	static const string sNumber (" Number: "), sValue (" Value: "), sHexPrefix(" : 0x");
+	for (size_t ndx(0);  ndx < inLogLines.size();  ndx++)
+	{
+		string line (inLogLines.at(ndx));
+		size_t posNumber (line.find(sNumber));
+		if (posNumber != string::npos)
+		{	//	e.g. "VReg Number: 10394" pos=4, then 4+9=13
+			if (received & 0x0001)
+				continue;	//	uh-oh, already received "Number:"
+			line.erase(0, posNumber + sNumber.length());	//	only decimal number should remain
+			if (!aja::is_legal_decimal_number (line, line.length()))
+				continue;	//	missing decimal register number, keep looking
+			rcvdRegNum = aja::stoull(line);	//	Read the reg number
+			received |= 0x00000001;	//	received register number
+			continue;
+		}	//	if " Number: " found
+		size_t posValue(inLogLines.at(ndx).find(sValue));
+		if (posValue != string::npos)
+		{	//	e.g. "VReg Value: 13966 : 0x0000368E"
+			if (received & 0x0002)
+				continue;	//	uh-oh, already received "Value:"
+			posValue += sValue.length();
+			line.erase(0, posValue + sValue.length());	//	remainder: "13966 : 0x0000368E"
+			aja::strip(line);		aja::lower(line);	//	strip any remaining whitespace, then force lower case
+			//	Check for non-hex digits...
+			size_t numHexDigits(0);
+			for (size_t ndx(0);  ndx < line.size();  ndx++)
+				if (aja::is_hex_digit(line.at(ndx)))
+					numHexDigits++;
+			if (numHexDigits != line.length())
+				continue;	//	mismatch indicates bad hex digit(s), keep looking
+			//	Read the value...
+			istringstream iss(line);
+			iss >> std::hex >> rcvdRegVal;
+			received |= 0x0002;	//	received register value
+			continue;
+		}	//	if " Value: " found
+	}	//	for each line
+	if (received == 3)
+		setRegNum(rcvdRegNum).setValue(rcvdRegVal).setMask(0xFFFFFFFF).setShift(0);
+	return received == 3;	//	success if we got both " Number: " and " Value: "
+}	//	ImportFromLog
 
 
 ostream & NTV2PrintULWordVector (const NTV2ULWordVector & inObj, ostream & inOutStream)

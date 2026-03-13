@@ -55,6 +55,15 @@
 	typedef ULWordSet::const_iterator			ULWordSetConstIter;
 	typedef ULWordSet::iterator					ULWordSetIter;
 
+	typedef std::vector <std::string>			NTV2StringList;			//	New in SDK 12.5
+	typedef NTV2StringList::iterator			NTV2StringListIter;		//	New in SDK 16.0
+	typedef NTV2StringList::const_iterator		NTV2StringListConstIter;//	New in SDK 12.5
+	AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2StringList & inData);	//	New in SDK 15.5
+
+	typedef std::set <std::string>				NTV2StringSet;			//	New in SDK 12.5
+	typedef NTV2StringSet::const_iterator		NTV2StringSetConstIter; //	New in SDK 12.5
+	AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2StringSet & inData);
+
 	typedef std::set <NTV2AudioChannelPair>			NTV2AudioChannelPairs;			///< @brief A set of distinct NTV2AudioChannelPair values.
 	typedef NTV2AudioChannelPairs::const_iterator	NTV2AudioChannelPairsConstIter; ///< @brief Handy const iterator to iterate over a set of distinct NTV2AudioChannelPair values.
 	AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioChannelPairs & inSet); ///<	@brief	Handy ostream writer for NTV2AudioChannelPairs.
@@ -4057,7 +4066,7 @@ NTV2_STRUCT_BEGIN(NTV2RegInfo)
 
 	#if !defined(NTV2_BUILDING_DRIVER)
 		/**
-			@brief	Constructs me from the given parameters.
+			@brief	Constructs a valid NTV2RegInfo from the given optional parameters.
 			@param[in]	inRegNum	Specifies the register number to use. If not specified, defaults to zero.
 			@param[in]	inValue		Specifies the register value to use. If not specified, defaults to zero.
 			@param[in]	inMask		Specifies the bit mask to use. If not specified, defaults to 0xFFFFFFFF.
@@ -4121,16 +4130,35 @@ NTV2_STRUCT_BEGIN(NTV2RegInfo)
 		/**
 			@brief		Renders me to the given output stream as source code using a "WriteRegister" function call.
 			@param		outputStream	Specifies the output stream to write into.
-			@param[in]	inRadix			Optionally specifies the radix to use for the my register value. Defaults to hexadecimal (base 16).
+			@param[in]	inRadix			Optionally specifies the radix to use for the register value. Defaults to hexadecimal (base 16).
 			@param[in]	inDeviceID		Optionally specifies the ::NTV2DeviceID for properly interpreting my register values.
+			@param[in]	inCNTV2CardName	Optionally specifies the CNTV2Card identifier name. Defaults to "card".
 			@return		The output stream.
 		**/
-		std::ostream &	PrintCode (std::ostream & outputStream, const int inRadix = 16, const NTV2DeviceID inDeviceID = DEVICE_ID_INVALID) const; //	New in SDK 16.0, added inDeviceID in 16.2
+		std::ostream &	PrintCode (std::ostream & outputStream, const int inRadix = 16, const NTV2DeviceID inDeviceID = DEVICE_ID_INVALID, const std::string & sCard = "card") const; //	New in SDK 16.0, added inDeviceID in 16.2
+
+		/**
+			@brief		Renders me to the given output stream in "supportlog" format.
+			@param		outputStream	Specifies the output stream to write into.
+			@param[in]	inDeviceID		Optionally specifies the ::NTV2DeviceID for properly interpreting my register value.
+			@return		The output stream.
+		**/
+		std::ostream &	PrintLog (std::ostream & outputStream, const NTV2DeviceID inDeviceID = DEVICE_ID_INVALID) const; //	New in SDK 18.1
+
+		/**
+			@brief		Resets me using the given "Number:" and "Value:" lines from the support log.
+			@param[in]	inLogLines		A string sequence that provides at least 2 lines from a "supportlog":
+										one containing " Number: " followed by a decimal register number;
+										another containing " Value: " with an 8-digit hexadecimal number immdiately following " : 0x" on that same line.
+			@return		True if successful; otherwise false.
+		**/
+		bool			ImportFromLog (const NTV2StringList & inLogLines); //	New in SDK 18.1
 
 		inline ULWord			regNum (void) const	{return registerNumber;}	//	New in SDK 17.5
 		inline ULWord			value (void) const	{return registerValue;}		//	New in SDK 17.5
 		inline ULWord			mask (void) const	{return registerMask;}		//	New in SDK 17.5
 		inline ULWord			shift (void) const	{return registerShift;}		//	New in SDK 17.5
+		inline ULWord			offset (void) const	{return registerValue == 0xFFFFFFFF ? 0xFFFFFFFF : registerValue * 4;}	//	New in SDK 18.1
 		inline NTV2RegInfo &	setRegNum (const ULWord val){registerNumber = val; return *this;}	//	New in SDK 17.5
 		inline NTV2RegInfo &	setValue (const ULWord val)	{registerValue = val; return *this;}	//	New in SDK 17.5
 		inline NTV2RegInfo &	setMask (const ULWord val)	{registerMask = val; return *this;}	//	New in SDK 17.5

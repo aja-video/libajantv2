@@ -1152,15 +1152,6 @@ AJAExport std::string NTV2DieTempScaleToString			(const NTV2DieTempScale			inVal
 	inline NTV2_DEPRECATED_16_1(std::string NTV2AudioMonitorSelectToString (const NTV2AudioMonitorSelect v, const bool b = false)) {return NTV2AudioChannelPairToString(v, b);} ///< @deprecated	Use ::NTV2AudioChannelPairToString instead.
 #endif	//	!defined(NTV2_DEPRECATE_16_1)
 
-typedef std::vector <std::string>		NTV2StringList;			//	New in SDK 12.5
-typedef NTV2StringList::iterator		NTV2StringListIter;		//	New in SDK 16.0
-typedef NTV2StringList::const_iterator	NTV2StringListConstIter;//	New in SDK 12.5
-typedef std::set <std::string>			NTV2StringSet;			//	New in SDK 12.5
-typedef NTV2StringSet::const_iterator	NTV2StringSetConstIter; //	New in SDK 12.5
-
-AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2StringList & inData);	//	New in SDK 15.5
-AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2StringSet & inData);
-
 AJAExport NTV2RegisterReads FromRegNumSet	(const NTV2RegNumSet &		inRegNumSet);
 AJAExport NTV2RegNumSet		ToRegNumSet		(const NTV2RegisterReads &	inRegReads);
 AJAExport bool				GetRegNumChanges (const NTV2RegNumSet & inBefore, const NTV2RegNumSet & inAfter, NTV2RegNumSet & outGone, NTV2RegNumSet & outSame, NTV2RegNumSet & outAdded);
