@@ -4158,7 +4158,7 @@ NTV2_STRUCT_BEGIN(NTV2RegInfo)
 		inline ULWord			value (void) const	{return registerValue;}		//	New in SDK 17.5
 		inline ULWord			mask (void) const	{return registerMask;}		//	New in SDK 17.5
 		inline ULWord			shift (void) const	{return registerShift;}		//	New in SDK 17.5
-		inline ULWord			offset (void) const	{return registerValue == 0xFFFFFFFF ? 0xFFFFFFFF : registerValue * 4;}	//	New in SDK 18.1
+		inline ULWord			offset (void) const	{return registerNumber == 0xFFFFFFFF ? 0xFFFFFFFF : registerNumber * 4;}	//	New in SDK 18.1
 		inline NTV2RegInfo &	setRegNum (const ULWord val){registerNumber = val; return *this;}	//	New in SDK 17.5
 		inline NTV2RegInfo &	setValue (const ULWord val)	{registerValue = val; return *this;}	//	New in SDK 17.5
 		inline NTV2RegInfo &	setMask (const ULWord val)	{registerMask = val; return *this;}	//	New in SDK 17.5
