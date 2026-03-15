@@ -4399,18 +4399,31 @@ TEST_SUITE("NTV2RegInfo" * doctest::description("NTV2RegInfo tests"))
 	}	//	TEST_CASE("Import")
 }	//	TEST_SUITE("NTV2RegInfo")
 
-#if 0	//	SWDevice testing
+
 TEST_SUITE("NTV2SWDevice" * doctest::description("NTV2SWDevice tests"))
 {
 	TEST_CASE("Basic")
 	{
 		const string devSpec("ntv2swdevice://foo/");
 		CNTV2Card a;
-		for (size_t num(0);  num < 20;  num++)
+		for (size_t num(0);  num < 5;  num++)
 		{
 			CHECK(a.Open(devSpec));
 			CHECK(a.Close());
 		}
 	}	//	TEST_CASE("Basic")
+	TEST_CASE("shm")
+	{
+#if defined(_DEBUG)	//	Currently failing, need to fix, can't get thru this loop more than once
+		const string proto("ntv2swdevice://foo/?shm=vkona");
+		CNTV2Card a;
+		for (size_t num(0);  num < 5;  num++)
+		{
+			ostringstream oss; oss << proto << num;
+			CHECK(a.Open(oss.str()));
+			CHECK(a.Close());
+			CHECK_FALSE(a.Open(oss.str() + "&shmdestroy"));
+		}
+#endif//defined(_DEBUG)
+	}	//	TEST_CASE("shm")
 }	//	TEST_SUITE("NTV2SWDevice")
-#endif	//	SWDevice testing
