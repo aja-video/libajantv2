@@ -1397,6 +1397,7 @@ typedef enum NTV2DeviceKindFilter
 	NTV2_DEVICEKIND_CUSTOM_AUX		= NTV2_DEVICEKIND_CUSTOM_ANC,
 	NTV2_DEVICEKIND_RELAYS			= 0x2000,	///< @brief Specifies devices that have SDI bypass relays.
 	NTV2_DEVICEKIND_MICROCONTROLLER	= 0x4000,	///< @brief Specifies devices that have a microcontroller.
+	NTV2_DEVICEKIND_AJA_INTERNAL	= 0x8000,	///< @brief Specifies devices that internally use NTV2.
 	NTV2_DEVICEKIND_NONE			= 0x0000	///< @brief Doesn't specify any kind of device.
 } NTV2DeviceKindFilter;
 

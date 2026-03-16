@@ -1377,7 +1377,11 @@ bool NTV2DeviceGetSupportedPixelFormats (const NTV2DeviceID inDeviceID, NTV2Pixe
 				break;
 			}
 
-	NTV2_ASSERT ((isOkay && !outFormats.empty() ) || (!isOkay && outFormats.empty() ));
+	const NTV2DeviceIDSet supportedDevices(::NTV2GetSupportedDevices(NTV2_DEVICEKIND_ALL - NTV2_DEVICEKIND_AJA_INTERNAL));
+	if (supportedDevices.find(inDeviceID) != supportedDevices.end())
+	{//	NTV2_ASSERT ((isOkay && !outFormats.empty() ) || (!isOkay && outFormats.empty() ));
+		return isOkay && !outFormats.empty();
+	}
 	return isOkay;
 
 }	//	NTV2DeviceGetSupportedPixelFormats

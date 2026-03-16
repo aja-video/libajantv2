@@ -7728,6 +7728,7 @@ string NTV2GetVDevFolderPath (const bool inAddTrailingPathDelim)
 	return fwPath;
 }
 
+#define IsAJAInternalDevice(_d_)	(((_d_) == DEVICE_ID_IP25_R) || ((_d_) == DEVICE_ID_IP25_T) || ((_d_) == DEVICE_ID_FS8))
 
 NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 {										//////////	!!! PLEASE MAINTAIN ALPHABETIC ORDER !!!	//////////
@@ -7745,7 +7746,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_CORVID88_GEN3,
 														DEVICE_ID_CORVIDHBR,
 														DEVICE_ID_CORVIDHEVC,
-                            DEVICE_ID_FS8,
+														DEVICE_ID_FS8,
 														DEVICE_ID_IO4K,
 														DEVICE_ID_IO4KPLUS,
 														DEVICE_ID_IO4KUFC,
@@ -7755,6 +7756,8 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_IOIP_2110,
 														DEVICE_ID_IOX3,
 														DEVICE_ID_IOXT,
+														DEVICE_ID_IP25_R,
+														DEVICE_ID_IP25_T,
 														DEVICE_ID_KONA1,
 														DEVICE_ID_KONA3G,
 														DEVICE_ID_KONA3GQUAD,
@@ -7806,15 +7809,13 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_TTAP,
 														DEVICE_ID_TTAP_PRO,
 														DEVICE_ID_VKONA,
-														DEVICE_ID_IP25_R,
-														DEVICE_ID_IP25_T,
 														DEVICE_ID_NOTFOUND	};
 	if (inKinds == NTV2_DEVICEKIND_NONE)
 		return NTV2DeviceIDSet();
 
 	NTV2DeviceIDSet result;
 	if (inKinds == NTV2_DEVICEKIND_SOFTWARE)
-		{result.insert(DEVICE_ID_SOFTWARE); return result;}
+		{result.insert(DEVICE_ID_SOFTWARE); result.insert(DEVICE_ID_VKONA); return result;}
 
 	for (unsigned ndx(0);  ndx < sizeof(sValidDeviceIDs) / sizeof(NTV2DeviceID);  ndx++)
 	{
@@ -7847,6 +7848,8 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 		else if (inKinds & NTV2_DEVICEKIND_CUSTOM_ANC  &&  ::NTV2DeviceCanDoCustomAnc(deviceID))
 			insertIt = true;
 		else if (inKinds & NTV2_DEVICEKIND_RELAYS  &&  ::NTV2DeviceHasSDIRelays(deviceID))
+			insertIt = true;
+		else if (inKinds & NTV2_DEVICEKIND_AJA_INTERNAL  &&  IsAJAInternalDevice(deviceID))
 			insertIt = true;
 		if (insertIt)
 			result.insert (deviceID);

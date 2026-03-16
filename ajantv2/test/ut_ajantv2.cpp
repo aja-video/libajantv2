@@ -155,8 +155,8 @@ TEST_SUITE("ntv2debug" * doctest::description("ntv2 debug string functions")) {
 		CHECK(std::string(NTV2DeviceString(DEVICE_ID_CORVID44_8KMK)) == "Corvid44_8KMK");
 		CHECK(std::string(NTV2DeviceString(DEVICE_ID_KONAIP_2110)) == "KonaIP_2110");
 		CHECK(std::string(NTV2DeviceString(DEVICE_ID_IOIP_2110)) == "DNxIP_2110");
-		CHECK(std::string(NTV2DeviceString(DEVICE_ID_CORVID44_GEN3)) == "Corvid44gen3");
-		CHECK(std::string(NTV2DeviceString(DEVICE_ID_CORVID88_GEN3)) == "Corvid88gen3");
+		CHECK(std::string(NTV2DeviceString(DEVICE_ID_CORVID44_GEN3)) == "Corvid44Gen3");
+		CHECK(std::string(NTV2DeviceString(DEVICE_ID_CORVID88_GEN3)) == "Corvid88Gen3");
 	}
 
 	TEST_CASE("StandardString")
