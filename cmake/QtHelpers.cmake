@@ -90,13 +90,13 @@ function(aja_deploy_qt_libs target)
         if (_is_target_bundle)
             message(STATUS "macOS bundle: ${target}")
             add_custom_command(TARGET ${target} POST_BUILD
-                COMMAND ${_qt_bin_dir}/macdeployqt $<TARGET_BUNDLE_DIR:${target}>/ -always-overwrite
+                COMMAND ${_qt_bin_dir}/macdeployqt $<TARGET_BUNDLE_DIR:${target}>/ -always-overwrite $<$<CONFIG:Debug>:-no-strip>
                 COMMENT "Deploying Qt Frameworks into target .app bundle: '${target}' (macdeployqt)"
             )
         else()
             message(STATUS "macOS binary: ${target}")
             add_custom_command(TARGET ${target} POST_BUILD
-                COMMAND ${_qt_bin_dir}/macdeployqt $<TARGET_FILE_DIR:${target}>/ -executable=$<TARGET_FILE_DIR:${target}>/${target} -always-overwrite
+                COMMAND ${_qt_bin_dir}/macdeployqt $<TARGET_FILE_DIR:${target}>/ -executable=$<TARGET_FILE_DIR:${target}>/${target} -always-overwrite $<$<CONFIG:Debug>:-no-strip>
                 COMMENT "Deploying Qt Frameworks into target binary: '${target}' (macdeployqt)"
             )
         endif()
@@ -178,13 +178,13 @@ function(aja_deploy_qt_libs_to_dest target dest)
         if (_is_target_bundle)
             message(STATUS "macOS bundle: ${target}")
             add_custom_command(TARGET ${target} POST_BUILD
-                COMMAND ${_qt_bin_dir}/macdeployqt $<TARGET_BUNDLE_DIR:${target}>/ -always-overwrite
+                COMMAND ${_qt_bin_dir}/macdeployqt $<TARGET_BUNDLE_DIR:${target}>/ -always-overwrite $<$<CONFIG:Debug>:-no-strip>
                 COMMENT "Deploying Qt Frameworks into target .app bundle: '${target}' (macdeployqt)"
             )
         else()
             message(STATUS "macOS binary: ${target}")
             add_custom_command(TARGET ${target} POST_BUILD
-                COMMAND ${_qt_bin_dir}/macdeployqt $<TARGET_FILE_DIR:${target}>/ -executable=$<TARGET_FILE_DIR:${target}>/${target} -always-overwrite
+                COMMAND ${_qt_bin_dir}/macdeployqt $<TARGET_FILE_DIR:${target}>/ -executable=$<TARGET_FILE_DIR:${target}>/${target} -always-overwrite $<$<CONFIG:Debug>:-no-strip>
                 COMMENT "Deploying Qt Frameworks into target binary: '${target}' (macdeployqt)"
             )
         endif()

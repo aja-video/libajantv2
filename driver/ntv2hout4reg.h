@@ -86,6 +86,8 @@ NTV2_REG(ntv2_reg_hdmi_control,								127,
 	NTV2_FLD(ntv2_fld_hdmiin_channel34_swap_disable,			1,	5);			/* hdmi input audio channel 3/4 swap disable */	
 	NTV2_FLD(ntv2_fld_hdmiout_channel34_swap_disable,			1,	6);			/* hdmi output audio channel 3/4 swap disable */	
 	NTV2_FLD(ntv2_fld_hdmiout_prefer_420,						1,	7);			/* hdmi output prefer 4K/UHD 420 */	
+	NTV2_FLD(ntv2_fld_hdmiout_force_yuv,						1,	8);			/* hdmi output force yuv color space */	
+	NTV2_FLD(ntv2_fld_hdmiout_force_rgb,						1,	9);			/* hdmi output force rgb color space */	
 	NTV2_FLD(ntv2_fld_hdmiin_color_depth,						2,	12);		/* hdmi input bit depth */	
 	NTV2_FLD(ntv2_fld_hdmiin_color_space,						2,	14);		/* hdmi input color space */
 	NTV2_FLD(ntv2_fld_hdmiout_audio_rate,						2,	16);		/* audio rate */

@@ -31,6 +31,28 @@ using namespace std;
 
 /////////// Stream Operators
 
+ostream & operator << (ostream & inOutStream, const NTV2StringList & inData)
+{
+	for (NTV2StringListConstIter it(inData.begin());  it != inData.end();  )
+	{
+		inOutStream << *it;
+		if (++it != inData.end())
+			inOutStream << ", ";
+	}
+	return inOutStream;
+}
+
+ostream & operator << (ostream & inOutStream, const NTV2StringSet & inData)
+{
+	for (NTV2StringSetConstIter it(inData.begin());	 it != inData.end();  )
+	{
+		inOutStream << *it;
+		if (++it != inData.end())
+			inOutStream << ", ";
+	}
+	return inOutStream;
+}
+
 ostream & operator << (ostream & inOutStr, const NTV2AudioChannelPairs & inSet)
 {
 	if (inSet.empty())
@@ -505,11 +527,11 @@ ostream & NTV2Buffer::Dump (ostream &		inOStream,
 		const unsigned	maxByteWidth		(inRadix == 8 ? 4 : (inRadix == 10 ? 3 : (inRadix == 2 ? 8 : 2)));
 		const UByte *	pBuffer				(reinterpret_cast <const UByte *> (pInStartAddress));
 		const size_t	asciiBufferSize		(inShowAscii && inGroupsPerRow ? (inBytesPerGroup * inGroupsPerRow + 1) * sizeof (UByte) : 0);	//	Size in bytes, not chars
-		UByte *			pAsciiBuffer		(asciiBufferSize ? new UByte[asciiBufferSize / sizeof(UByte)] : AJA_NULL);
 
 		if (!pInStartAddress)
 			return inOStream;
 
+		UByte * pAsciiBuffer (asciiBufferSize ? new UByte[asciiBufferSize / sizeof(UByte)] : AJA_NULL);
 		if (pAsciiBuffer)
 			::memset (pAsciiBuffer, 0, asciiBufferSize);
 
@@ -1355,7 +1377,11 @@ bool NTV2DeviceGetSupportedPixelFormats (const NTV2DeviceID inDeviceID, NTV2Pixe
 				break;
 			}
 
-	NTV2_ASSERT ((isOkay && !outFormats.empty() ) || (!isOkay && outFormats.empty() ));
+	const NTV2DeviceIDSet supportedDevices(::NTV2GetSupportedDevices(NTV2_DEVICEKIND_ALL - NTV2_DEVICEKIND_AJA_INTERNAL));
+	if (supportedDevices.find(inDeviceID) != supportedDevices.end())
+	{//	NTV2_ASSERT ((isOkay && !outFormats.empty() ) || (!isOkay && outFormats.empty() ));
+		return isOkay && !outFormats.empty();
+	}
 	return isOkay;
 
 }	//	NTV2DeviceGetSupportedPixelFormats
@@ -1795,6 +1821,8 @@ bool NTV2Buffer::ByteSwap16 (void)
 
 bool NTV2Buffer::Set (const void * pInUserPointer, const size_t inByteCount)
 {
+	if (uint64_t(inByteCount) >= 0x0000000100000000)	//	inByteCount >= 4GB?
+		return false;	//	Can't store 4GB or larger value in fByteCount
 	Deallocate();
 	fUserSpacePtr = inByteCount ? NTV2Buffer_TO_ULWORD64(pInUserPointer) : 0;
 	fByteCount = ULWord(pInUserPointer ? inByteCount : 0);
@@ -1811,8 +1839,10 @@ bool NTV2Buffer::SetAndFill (const void * pInUserPointer, const size_t inByteCou
 
 bool NTV2Buffer::Allocate (const size_t inByteCount, const bool inPageAligned)
 {
-	if (GetByteCount()	&&	fFlags & NTV2Buffer_ALLOCATED)	//	If already was Allocated
-		if (inByteCount == GetByteCount())					//	If same byte count
+	if (uint64_t(inByteCount) >= 0x0000000100000000)	//	inByteCount >= 4GB?
+		return false;	//	Can't store 4GB or more in fByteCount
+	if (GetByteCount()	&&	IsAllocatedBySDK())			//	If already was Allocated
+		if (inByteCount == GetByteCount())				//	If same byte count
 		{
 			Fill(UByte(0));		//	Zero it...
 			return true;	//	...and return true
@@ -2009,7 +2039,7 @@ bool NTV2Buffer::SwapWith (NTV2Buffer & inBuffer)
 	return true;
 }
 
-set<ULWord> & NTV2Buffer::FindAll (set<ULWord> & outOffsets, const NTV2Buffer & inValue) const
+ULWordSet & NTV2Buffer::Find (ULWordSet & outOffsets, const NTV2Buffer & inValue, const size_t inLimit) const
 {
 	outOffsets.clear();
 	if (IsNULL())
@@ -2027,7 +2057,11 @@ set<ULWord> & NTV2Buffer::FindAll (set<ULWord> & outOffsets, const NTV2Buffer & 
 	do
 	{
 		if (!::memcmp(pMyData, pSrchData, srchByteCount))
+		{
 			outOffsets.insert(offset);	//	Record byte offset of match
+			if (inLimit  &&  outOffsets.size() >= inLimit)
+				break;	//	reached limit, early exit
+		}
 		pMyData++;	//	Bump search pointer
 		offset++;	//	Bump search byte offset
 	} while (offset < maxOffset);
@@ -3486,14 +3520,14 @@ ostream & NTV2RegInfo::Print (ostream & oss, const bool inAsCode) const
 	return oss << "]";
 }
 
-ostream & NTV2RegInfo::PrintCode (ostream & oss, const int inRadix, const NTV2DeviceID inDeviceID) const
+ostream & NTV2RegInfo::PrintCode (ostream & oss, const int inRadix, const NTV2DeviceID inDeviceID, const string & sCard) const
 {
 	const string regName (CNTV2RegisterExpert::GetDisplayName(NTV2RegisterNumber(registerNumber)));
 	const bool readOnly (CNTV2RegisterExpert::IsReadOnly(registerNumber));
 	const bool badName (regName.find(' ') != string::npos);
 	if (readOnly)
 		oss << "//\t";
-	oss << "theDevice.WriteRegister (";
+	oss << sCard << ".WriteRegister (";
 	if (badName)
 		oss << DEC(registerNumber);
 	else
@@ -3526,6 +3560,66 @@ ostream & NTV2RegInfo::PrintCode (ostream & oss, const int inRadix, const NTV2De
 		oss << "  // " << aja::replace(info, "\n", ", ");
 	return oss;
 }
+
+ostream & NTV2RegInfo::PrintLog (ostream & oss, const NTV2DeviceID inDeviceID) const
+{
+	const string name ((regNum() < VIRTUALREG_START)  ||  (regNum() > kVRegLast)  ?  "Register"  :  "VReg");
+	oss << name << " Name: " << CNTV2RegisterExpert::GetDisplayName(regNum()) << endl
+		<< name << " Number: " << regNum() << endl
+		<< name << " Value: " << value() << " : " << xHEX0N(value(),8);
+		//<< "Register Classes: " << CNTV2RegisterExpert::GetRegisterClasses(regNum()) << endl
+	const string sVal(CNTV2RegisterExpert::GetDisplayValue (regNum(), value(), inDeviceID));
+//	if (!sVal.empty())		//	stay compatible with older supportlogs
+		oss << endl
+			<< sVal << endl;
+	return oss;
+}
+
+bool NTV2RegInfo::ImportFromLog (const NTV2StringList & inLogLines)
+{
+	ULWord received(0), rcvdRegNum(0), rcvdRegVal(0);	//	what was received
+	static const string sNumber (" Number: "), sValue (" Value: "), sHexPrefix(" : 0x");
+	for (size_t ndx(0);  ndx < inLogLines.size();  ndx++)
+	{
+		string line (inLogLines.at(ndx));
+		size_t posNumber (line.find(sNumber));
+		if (posNumber != string::npos)
+		{	//	e.g. "VReg Number: 10394" pos=4, then 4+9=13
+			if (received & 0x0001)
+				continue;	//	uh-oh, already received "Number:"
+			line.erase(0, posNumber + sNumber.length());	//	only decimal number should remain
+			if (!aja::is_legal_decimal_number (line, line.length()))
+				continue;	//	missing decimal register number, keep looking
+			rcvdRegNum = aja::stoull(line);	//	Read the reg number
+			received |= 0x00000001;	//	received register number
+			continue;
+		}	//	if " Number: " found
+		size_t posValue(inLogLines.at(ndx).find(sValue));
+		if (posValue != string::npos)
+		{	//	e.g. "VReg Value: 13966 : 0x0000368E"
+			if (received & 0x0002)
+				continue;	//	uh-oh, already received "Value:"
+			posValue += sValue.length();
+			line.erase(0, posValue + sValue.length());	//	remainder: "13966 : 0x0000368E"
+			aja::strip(line);		aja::lower(line);	//	strip any remaining whitespace, then force lower case
+			//	Check for non-hex digits...
+			size_t numHexDigits(0);
+			for (size_t ndx(0);  ndx < line.size();  ndx++)
+				if (aja::is_hex_digit(line.at(ndx)))
+					numHexDigits++;
+			if (numHexDigits != line.length())
+				continue;	//	mismatch indicates bad hex digit(s), keep looking
+			//	Read the value...
+			istringstream iss(line);
+			iss >> std::hex >> rcvdRegVal;
+			received |= 0x0002;	//	received register value
+			continue;
+		}	//	if " Value: " found
+	}	//	for each line
+	if (received == 3)
+		setRegNum(rcvdRegNum).setValue(rcvdRegVal).setMask(0xFFFFFFFF).setShift(0);
+	return received == 3;	//	success if we got both " Number: " and " Value: "
+}	//	ImportFromLog
 
 
 ostream & NTV2PrintULWordVector (const NTV2ULWordVector & inObj, ostream & inOutStream)

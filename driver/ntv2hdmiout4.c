@@ -715,7 +715,7 @@ wait:
 
 static Ntv2Status ntv2_hdmiout4_initialize(struct ntv2_hdmiout4 *ntv2_hout)
 {
-    ntv2_hout->device_id = ntv2_reg_read(ntv2_hout->system_context, ntv2_reg_device_id, 0);
+    ntv2_hout->device_id = (NTV2DeviceID)ntv2_reg_read(ntv2_hout->system_context, ntv2_reg_device_id, 0);
     ntv2_hout->hdmi_version = NTV2DeviceGetHDMIVersion(ntv2_hout->device_id);
     
 	ntv2_displayid_config(&ntv2_hout->edid, ntv2_hdmiout4_edid_read, ntv2_hout);
@@ -2280,13 +2280,15 @@ static bool has_config_changed(struct ntv2_hdmiout4 *ntv2_hout)
 		NTV2_FLD_MASK(ntv2_fld_hdmiout_channel34_swap_disable) |
 		NTV2_FLD_MASK(ntv2_fld_hdmiout_channel_select) |
 		NTV2_FLD_MASK(ntv2_fld_hdmiout_prefer_420) |
+		NTV2_FLD_MASK(ntv2_fld_hdmiout_force_yuv) |
+		NTV2_FLD_MASK(ntv2_fld_hdmiout_force_rgb) |
 		NTV2_FLD_MASK(ntv2_fld_hdmiout_force_config);
 
 	// read hdmi configuration
 	value_config = ntv2_reg_read(ntv2_hout->system_context, ntv2_reg_hdmiout_output_config, ntv2_hout->index);
 	value_config &= mask_config;
 
-	// read hdmi source rgb vs yuv crosspoint
+    // read hdmi source rgb vs yuv crosspoint
     switch (ntv2_hout->index)
     {
 #if 0        
@@ -2312,10 +2314,19 @@ static bool has_config_changed(struct ntv2_hdmiout4 *ntv2_hout)
         value_rgb = NTV2_FLD_GET(ntv2_fld_hdmiout_hdmi_rgb, value_rgb);
         break;
     }
-
+    
 	// read audio configuration
 	value_control = ntv2_reg_read(ntv2_hout->system_context, ntv2_reg_hdmi_control, ntv2_hout->index);
 	value_control &= mask_control;
+
+    if (NTV2_FLD_GET(ntv2_fld_hdmiout_force_yuv, value_control) != 0)
+    {
+        value_rgb = 0;
+    }
+    if (NTV2_FLD_GET(ntv2_fld_hdmiout_force_rgb, value_control) != 0)
+    {
+        value_rgb = 1;
+    }
 
 	// look for changes
 	if ((value_config == ntv2_hout->hdmi_config) &&

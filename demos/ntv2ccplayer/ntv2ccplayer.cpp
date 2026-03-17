@@ -1642,7 +1642,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	}	//	if audio not suppressed
 
 	//	Set up the transfer buffers...
-	xferInfo.SetVideoBuffer(reinterpret_cast<ULWord *>(mVideoBuffer.GetHostPointer()), mVideoBuffer.GetByteCount());
+	xferInfo.SetVideoBuffer(reinterpret_cast<ULWord *>(mVideoBuffer.GetHostPointer()), ULWord(mVideoBuffer.GetByteCount()));
 	if (mConfig.fSuppressTimecode)
 		xferInfo.acOutputTimeCodes.Set (AJA_NULL, 0);
 	PLNOTE("Playout thread started: 608F1PktLine=" << DEC(kF1PktLineNumCEA608) << " 608F2PktLine=" << DEC(kF2PktLineNumCEA608)

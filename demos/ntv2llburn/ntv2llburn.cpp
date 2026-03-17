@@ -722,7 +722,7 @@ void NTV2LLBurn::ProcessFrames (void)
 		}	//	if mConfig.WithAudio()
 
 		//	Transfer the new frame to system memory...
-		mDevice.DMAReadFrame (currentInFrame, mpHostVideoBuffer, mpHostVideoBuffer.GetByteCount());
+		mDevice.DMAReadFrame (currentInFrame, mpHostVideoBuffer, ULWord(mpHostVideoBuffer.GetByteCount()));
 
 		if (doAncInput)
 		{	//	Transfer received Anc data into my F1 & F2 buffers...
@@ -806,7 +806,7 @@ void NTV2LLBurn::ProcessFrames (void)
 		}	//	if mConfig.WithAudio()
 
 		//	Send the updated frame back to the board for display...
-		mDevice.DMAWriteFrame (currentOutFrame, mpHostVideoBuffer, mpHostVideoBuffer.GetByteCount());
+		mDevice.DMAWriteFrame (currentOutFrame, mpHostVideoBuffer, ULWord(mpHostVideoBuffer.GetByteCount()));
 
 		if (doAncOutput)
 		{

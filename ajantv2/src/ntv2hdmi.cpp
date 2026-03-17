@@ -632,6 +632,37 @@ bool CNTV2Card::GetHDMIOutPrefer420 (bool & outValue, const NTV2Channel inWhichH
 	return CNTV2DriverInterface::ReadRegister (reg, outValue, kRegMaskHDMIOutPrefer420, kRegShiftHDMIOutPrefer420);
 }
 
+bool CNTV2Card::SetHDMIOutForceYUV (const bool value, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIInputControl);
+	if (!GetHDMIOutInputControlRegNum(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister (reg, ULWord(value), kRegMaskHDMIOutForceYUV, kRegShiftHDMIOutForceYUV);
+}
+
+bool CNTV2Card::GetHDMIOutForceYUV (bool & outValue, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIInputControl);
+	if (!GetHDMIOutInputControlRegNum(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister (reg, outValue, kRegMaskHDMIOutForceYUV, kRegShiftHDMIOutForceYUV);
+}
+
+bool CNTV2Card::SetHDMIOutForceRGB (const bool value, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIInputControl);
+	if (!GetHDMIOutInputControlRegNum(reg, inWhichHDMIOut))
+		return false;
+	return WriteRegister (reg, ULWord(value), kRegMaskHDMIOutForceRGB, kRegShiftHDMIOutForceRGB);
+}
+
+bool CNTV2Card::GetHDMIOutForceRGB (bool & outValue, const NTV2Channel inWhichHDMIOut)
+{
+	ULWord reg(kRegHDMIInputControl);
+	if (!GetHDMIOutInputControlRegNum(reg, inWhichHDMIOut))
+		return false;
+	return CNTV2DriverInterface::ReadRegister (reg, outValue, kRegMaskHDMIOutForceRGB, kRegShiftHDMIOutForceRGB);
+}
 
 bool CNTV2Card::SetHDMIOutDecimateMode (const bool inIsEnabled)
 {

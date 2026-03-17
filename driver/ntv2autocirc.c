@@ -2214,7 +2214,7 @@ void AutoCircTransferFields(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto,
 	pTransfer->acInSegmentedDMAInfo.acNumSegments = lines / 2;
 }
 
-bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t isrTimeStamp)
+bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, uint64_t isrTimeStamp)
 {
 	NTV2DeviceID deviceID = pAutoCirc->deviceID;
 	Ntv2SystemContext* pSysCon = pAutoCirc->pSysCon;
@@ -2651,7 +2651,15 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 						uint32_t actualLastIn = GetAudioLastIn(pSysCon, pAuto->audioSystem);
 						uint32_t startAddress = newStartAddress - GetAudioReadOffset(pSysCon, pAuto->audioSystem);
 						// calculate the difference between the expected start address and the actual address
-						uint64_t delta = abs(actualLastIn - startAddress);
+						uint64_t delta = 0;//abs(actualLastIn - startAddress);
+						if (actualLastIn < startAddress)
+						{
+							delta = (GetAudioWrapAddress(pSysCon, pAuto->audioSystem) - startAddress) + 1 + actualLastIn;
+						}
+						else
+						{
+							delta = actualLastIn - startAddress;
+						}
 						if (delta > GetAudioWrapAddress(pSysCon, pAuto->audioSystem) / 2)
 						{
 							delta = GetAudioWrapAddress(pSysCon, pAuto->audioSystem) - delta;
@@ -2966,7 +2974,15 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 								{
 									// calculate the difference between the expected start address and the actual address
 									uint32_t startAddress = pActiveFrameStamp->audioExpectedAddress;
-									uint64_t delta = abs(audioOutLastAddress - startAddress);
+									uint64_t delta = 0;//audioOutLastAddress - startAddress;
+									if (audioOutLastAddress < startAddress)
+									{
+										delta = (GetAudioWrapAddress(pSysCon, pAuto->audioSystem) - startAddress) + 1 + audioOutLastAddress;
+									}
+									else
+									{
+										delta = audioOutLastAddress - startAddress;
+									}
 									if (delta > GetAudioWrapAddress(pSysCon, pAuto->audioSystem) / 2)
 									{
 										delta = GetAudioWrapAddress(pSysCon, pAuto->audioSystem) - delta;
@@ -3660,7 +3676,7 @@ void AutoCircWriteHDMIAux(NTV2AutoCirc* pAutoCirc, uint32_t* pAuxData, uint32_t 
 			for (iData = 0; iData < numData/4; iData++, auxReg++)
 				ntv2WriteRegister(pSysCon, auxReg, pAux[iData]);
 		}
-		if (NTV2DeviceGetHDMIVersion(deviceID) == 4)
+		if (NTV2DeviceGetHDMIVersion(deviceID) >= 4)
 		{
 //			ntv2_hdmiout4_write_info_frame(m_pHDMIOut4Monitor[channel],
 //										   numData, ((uint8_t*)pAux) + (iAux * numData));

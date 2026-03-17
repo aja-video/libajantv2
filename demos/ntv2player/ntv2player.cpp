@@ -111,21 +111,23 @@ AJAStatus NTV2Player::Init (void)
 
 	//	Open the device...
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mDevice))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
-
+	{	if (aja::lower(mConfig.fDeviceSpec) != "list" && mConfig.fDeviceSpec != "?")
+			cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl; 
+		return AJA_STATUS_OPEN;
+	}
     if (!mDevice.IsDeviceReady(false))
-		{cerr << "## ERROR:  Device '" << mDevice.GetDisplayName() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
+		{cerr << "## ERROR:  Device '" << mDevice.GetDescription() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 	if (!mDevice.features().CanDoPlayback())
-		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is capture-only" << endl;  return AJA_STATUS_FEATURE;}
+		{cerr << "## ERROR:  '" << mDevice.GetDescription() << "' is capture-only" << endl;  return AJA_STATUS_FEATURE;}
 
 	const UWord maxNumChannels (mDevice.features().GetNumFrameStores());
 
 	//	Beware -- some older devices (e.g. Corvid1) can only output from FrameStore 2...
-	if ((mConfig.fOutputChannel == NTV2_CHANNEL1) && (!mDevice.features().CanDoFrameStore1Display()))
+	if (mConfig.fOutputChannel == NTV2_CHANNEL1  &&  !mDevice.features().CanDoFrameStore1Display())
 		mConfig.fOutputChannel = NTV2_CHANNEL2;
 	if (UWord(mConfig.fOutputChannel) >= maxNumChannels)
 	{
-		cerr	<< "## ERROR:  '" << mDevice.GetDisplayName() << "' can't use Ch" << DEC(mConfig.fOutputChannel+1)
+		cerr	<< "## ERROR:  '" << mDevice.GetDescription() << "' can't use Ch" << DEC(mConfig.fOutputChannel+1)
 				<< " -- only supports Ch1" << (maxNumChannels > 1  ?  string("-Ch") + string(1, char(maxNumChannels+'0'))  :  "") << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
@@ -141,7 +143,9 @@ AJAStatus NTV2Player::Init (void)
 	{
 		mDevice.GetTaskMode(mSavedTaskMode);	//	Save the current task mode
 		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid())))
+		{	cerr	<< "## ERROR:  '" << mDevice.GetDescription() << "' is in use by another process" << endl;
 			return AJA_STATUS_BUSY;	//	Device is in use by another app -- fail
+		}
 	}
 	mDevice.SetTaskMode(NTV2_OEM_TASKS);	//	Set OEM service level
 
@@ -167,8 +171,7 @@ AJAStatus NTV2Player::Init (void)
 		return status;
 
 	//	Set up the device signal routing...
-	if (!RouteOutputSignal())
-		return AJA_STATUS_FAIL;
+	RouteOutputSignal();	//	(Ignore routing failures)
 
 	//	Lastly, prepare my AJATimeCodeBurn instance...
 	if (!mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat(mConfig.fPixelFormat), mFormatDesc.numPixels, mFormatDesc.numLines))
@@ -176,10 +179,9 @@ AJAStatus NTV2Player::Init (void)
 
 	//	Ready to go...
 	#if defined(_DEBUG)
-		cerr << mConfig;
-		if (mDevice.IsRemote())
-			cerr	<< "Device Description:  " << mDevice.GetDescription() << endl;
-		cerr << endl;
+		cerr << mConfig
+			<< "Device Description:  " << mDevice.GetDescription() << endl
+			<< endl;
 	#endif	//	defined(_DEBUG)
 	return AJA_STATUS_SUCCESS;
 
@@ -190,7 +192,7 @@ AJAStatus NTV2Player::SetUpVideo (void)
 {
 	//	Configure the device to output the requested video format...
  	if (mConfig.fVideoFormat == NTV2_FORMAT_UNKNOWN)
-		return AJA_STATUS_BAD_PARAM;
+		{cerr << "## ERROR: unknown video format" << endl;  return AJA_STATUS_BAD_PARAM;}
 	if (!mDevice.features().CanDoVideoFormat(mConfig.fVideoFormat))
 	{	cerr	<< "## ERROR:  '" << mDevice.GetDisplayName() << "' doesn't support "
 				<< ::NTV2VideoFormatToString(mConfig.fVideoFormat) << endl;
@@ -204,11 +206,10 @@ AJAStatus NTV2Player::SetUpVideo (void)
 
 	//	This demo doesn't playout dual-link RGB over SDI -- only YCbCr.
 	//	Check that this device has a CSC to convert RGB to YUV...
-	if (::IsRGBFormat(mConfig.fPixelFormat))	//	If RGB FBF...
-		if (UWord(mConfig.fOutputChannel) > mDevice.features().GetNumCSCs())	//	No CSC for this channel?
-			{cerr << "## ERROR: No CSC for channel " << DEC(mConfig.fOutputChannel+1) << " to convert RGB pixel format" << endl;
-				return AJA_STATUS_UNSUPPORTED;}
-
+	if (::IsRGBFormat(mConfig.fPixelFormat)  &&  UWord(mConfig.fOutputChannel) > mDevice.features().GetNumCSCs())
+	{	cerr << "## ERROR: No CSC for channel " << DEC(mConfig.fOutputChannel+1) << " to convert RGB pixel format" << endl;
+		return AJA_STATUS_UNSUPPORTED;
+	}
 	if (!mDevice.features().CanDo3GLevelConversion() && mConfig.fDoABConversion && ::IsVideoFormatA(mConfig.fVideoFormat))
 		mConfig.fDoABConversion = false;
 	if (mConfig.fDoABConversion)
@@ -217,7 +218,10 @@ AJAStatus NTV2Player::SetUpVideo (void)
 	//	Keep the raster description handy...
 	mFormatDesc = NTV2FormatDescriptor(mConfig.fVideoFormat, mConfig.fPixelFormat);
 	if (!mFormatDesc.IsValid())
+	{	cerr << "## ERROR: " << mDevice.GetDescription() << ": bad raster descriptor for " << ::NTV2VideoFormatToString(mConfig.fVideoFormat)
+			<< " and " << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat) << endl;
 		return AJA_STATUS_FAIL;
+	}
 
 	//  If we own the whole device, make sure all FrameStores are disabled (good practice) 
 	if (!mConfig.fDoMultiFormat)
@@ -294,7 +298,6 @@ AJAStatus NTV2Player::SetUpAudio (void)
 		mDevice.SetHDMIOutAudioFormat(NTV2_AUDIO_FORMAT_LPCM);
 		mDevice.SetHDMIOutAudioSource8Channel(NTV2_AudioChannel1_8, mAudioSystem);
 	}
-
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetUpAudio
@@ -361,18 +364,17 @@ AJAStatus NTV2Player::SetUpTestPatternBuffers (void)
 	for (size_t tpNdx(0);  tpNdx < testPatIDs.size();  tpNdx++)
 		mTestPatRasters.push_back(NTV2Buffer());
 
-	if (!mFormatDesc.IsValid())
-		{PLFAIL("Bad format descriptor");  return AJA_STATUS_FAIL;}
+	NTV2_ASSERT(mFormatDesc.IsValid() && "Bad format descriptor");	//	(Already checked in SetupVideo)
 	if (mFormatDesc.IsVANC())
-		{PLFAIL("VANC should have been disabled: " << mFormatDesc);  return AJA_STATUS_FAIL;}
+		{cerr << "## ERROR: VANC should have been disabled: " << mFormatDesc << endl;  return AJA_STATUS_FAIL;}
 
 	//	Set up one video buffer for each test pattern...
 	for (size_t tpNdx(0);  tpNdx < testPatIDs.size();  tpNdx++)
 	{
 		//	Allocate the buffer memory...
 		if (!mTestPatRasters.at(tpNdx).Allocate (mFormatDesc.GetTotalBytes(), BUFFER_PAGE_ALIGNED))
-		{	PLFAIL("Test pattern buffer " << DEC(tpNdx+1) << " of " << DEC(testPatIDs.size()) << ": "
-					<< xHEX0N(mFormatDesc.GetTotalBytes(),8) << "-byte page-aligned alloc failed");
+		{	cerr << "## ERROR: Test pattern buffer " << DEC(tpNdx+1) << " of " << DEC(testPatIDs.size()) << ": "
+					<< xHEX0N(mFormatDesc.GetTotalBytes(),8) << "-byte page-aligned alloc failed" << endl;
 			return AJA_STATUS_MEMORY;
 		}
 
@@ -387,7 +389,7 @@ AJAStatus NTV2Player::SetUpTestPatternBuffers (void)
 		#ifdef NTV2_BUFFER_LOCKING
 			//	Try to prelock the memory, including its scatter-gather list...
 			if (!mDevice.DMABufferLock(mTestPatRasters.at(tpNdx), /*alsoLockSegmentMap=*/true))
-				PLWARN("Test pattern buffer " << DEC(tpNdx+1) << " of " << DEC(testPatIDs.size()) << ": failed to pre-lock");
+				cerr << "## WARNING: Test pattern buffer " << DEC(tpNdx+1) << " of " << DEC(testPatIDs.size()) << " failed pre-lock" << endl;
 		#endif
 	}	//	loop for each predefined pattern
 
@@ -413,9 +415,7 @@ bool NTV2Player::RouteOutputSignal (void)
 	const NTV2InputXptID	cscInputXpt (isRGB ? ::GetCSCInputXptFromChannel(mConfig.fOutputChannel, false/*isKeyInput*/) : NTV2_INPUT_CROSSPOINT_INVALID);
 
 	if (!mConfig.fDoMultiFormat)  //	Not multiformat:  We own the whole device...
-	{
 		mDevice.ClearRouting();		//	Start with clean slate
-	}
 
 	if (isRGB)
 		if (!mDevice.Connect (cscInputXpt,  fsVidOutXpt,  canVerify))
@@ -685,7 +685,7 @@ void NTV2Player::ProduceFrames (void)
 			pFrameData->fVideoBuffer.CopyFrom (mTestPatRasters.at(testPatNdx),
 												/*srcOffset*/ 0,
 												/*dstOffset*/ 0,
-												/*byteCount*/ pFrameData->fVideoBuffer.GetByteCount());
+												/*byteCount*/ ULWord(pFrameData->fVideoBuffer.GetByteCount()));
 
 		const	CRP188	rp188Info (mCurrentFrame++, 0, 0, 10, tcFormat);
 		NTV2_RP188		tcF1, tcF2;

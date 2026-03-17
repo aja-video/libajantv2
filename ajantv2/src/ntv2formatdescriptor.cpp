@@ -1199,6 +1199,27 @@ bool NTV2FormatDescriptor::GetChangedLines (NTV2RasterLineOffsets & outDiffs, co
 	return true;
 }
 
+bool NTV2FormatDescriptor::FlipVertically (NTV2Buffer & inFB) const
+{
+	UWord plane (0);
+	if (inFB)
+		do
+		{
+			ULWord topLineNdx (GetFirstActiveLine()), botLineNdx(GetFullRasterHeight() - 1);
+			const ULWord bytesPerLine (GetBytesPerRow(plane));
+			NTV2Buffer tmpLineBuf(bytesPerLine), topLineBuf, botLineBuf;
+			while (topLineNdx < botLineNdx
+					&& GetRowBuffer(inFB, topLineBuf, topLineNdx++, plane)
+					&& GetRowBuffer(inFB, botLineBuf, botLineNdx--, plane))
+					{
+						tmpLineBuf = topLineBuf;
+						topLineBuf = botLineBuf;
+						botLineBuf = tmpLineBuf;
+					}
+		} while (++plane < GetNumPlanes());
+	return inFB;
+}	//	FlipVertically
+
 
 ostream & NTV2FormatDescriptor::Print (ostream & oss, const bool inDetailed) const
 {

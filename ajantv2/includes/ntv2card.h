@@ -4881,6 +4881,40 @@ public:
 	AJA_VIRTUAL bool		GetHDMIOutPrefer420 (bool & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
 	/**
+		@brief						Sets if the given HDMI output to YUV color.
+		@param[in]	inNewValue		Specify true to force YUV;  otherwise specify false.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
+	AJA_VIRTUAL bool		SetHDMIOutForceYUV (const bool inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	/**
+		@brief						Answers if the given HDMI output is forced to YUV color.
+		@param[out]	outValue		Receives true if HDMI output is YUV;  otherwise false.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
+	AJA_VIRTUAL bool		GetHDMIOutForceYUV (bool & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+
+	/**
+		@brief						Sets if the given HDMI output to RGB color.
+		@param[in]	inNewValue		Specify true to force RGB;  otherwise specify false.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
+	AJA_VIRTUAL bool		SetHDMIOutForceRGB (const bool inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	/**
+		@brief						Answers if the given HDMI output is forced to RGB color.
+		@param[out]	outValue		Receives true if HDMI output is RGB;  otherwise false.
+		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
+									Defaults to the first one.
+		@return						True if successful;	 otherwise false.
+	**/
+	AJA_VIRTUAL bool		GetHDMIOutForceRGB (bool & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+
+	/**
 		@brief						Answers with the bit depth of the downstream device connected to the given HDMI output.
 		@param[out]	outValue		Receives the bit depth of the downstream HDMI device.
 		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.

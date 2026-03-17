@@ -451,6 +451,38 @@ bool NTV2FrameData::UnlockAll (CNTV2Card & inDevice)
 	return !errorCount;
 }
 
+bool NTV2FrameData::SetCapturedFrameInfo (const AUTOCIRCULATE_TRANSFER & inXferInfo, const AUTOCIRCULATE_STATUS & acStatus)
+{
+	fTimeStampAud = inXferInfo.GetFrameInfo().acAudioClockTimeStamp;	//	Grab VBI timestamp (audio clock)
+	fTimeStampOS = inXferInfo.GetFrameInfo().acFrameTime;				//	Grab VBI timestamp (OS clock)
+	if (acStatus.WithRP188() || acStatus.WithLTC())
+		inXferInfo.GetInputTimeCodes (fTimecodes, acStatus.GetChannel(), /*ValidOnly*/ true);
+	if (acStatus.WithAudio())
+	{
+		fNumAudioBytes = inXferInfo.GetCapturedAudioByteCount();
+		NTV2Buffer zero (fAudioBuffer.GetHostAddress(fNumAudioBytes),
+						fAudioBuffer.GetByteCount() - fNumAudioBytes);
+		zero.Fill(uint32_t(0));
+	}
+	if (acStatus.WithCustomAnc()  &&  AncBuffer())
+	{
+		fNumAncBytes = inXferInfo.GetCapturedAncByteCount(/*isF2*/false);
+		//	Clear stale anc data from the anc buffers...
+		NTV2Buffer stale (fAncBuffer.GetHostAddress(fNumAncBytes),
+							fAncBuffer.GetByteCount() - fNumAncBytes);
+		stale.Fill(uint8_t(0));
+	}
+	if (acStatus.WithCustomAnc()  &&  AncBuffer2())
+	{
+		fNumAnc2Bytes = inXferInfo.GetCapturedAncByteCount(/*isF2*/true);
+		//	Clear stale anc data from the anc buffers...
+		NTV2Buffer stale (fAncBuffer2.GetHostAddress(fNumAnc2Bytes),
+							fAncBuffer2.GetByteCount() - fNumAnc2Bytes);
+		stale.Fill(uint8_t(0));
+	}
+	return true;
+}
+
 
 bool CNTV2DemoCommon::IsValidDevice (const string & inDeviceSpec)
 {

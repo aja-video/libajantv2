@@ -219,7 +219,7 @@ void NTV2StreamGrabber::run (void)
 
 						//	Prelock and map the buffer
 						if (!mNTV2Card.DMABufferLock(reinterpret_cast<PULWord>(buffers[i].GetHostAddress (0)), 
-														buffers[i].GetByteCount(), 
+														ULWord(buffers[i].GetByteCount()),
 														true))
 						{
 							qDebug() << "## WARNING:  Cannot DMA lock input buffer";

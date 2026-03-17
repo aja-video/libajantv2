@@ -55,6 +55,15 @@
 	typedef ULWordSet::const_iterator			ULWordSetConstIter;
 	typedef ULWordSet::iterator					ULWordSetIter;
 
+	typedef std::vector <std::string>			NTV2StringList;			//	New in SDK 12.5
+	typedef NTV2StringList::iterator			NTV2StringListIter;		//	New in SDK 16.0
+	typedef NTV2StringList::const_iterator		NTV2StringListConstIter;//	New in SDK 12.5
+	AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2StringList & inData);	//	New in SDK 15.5
+
+	typedef std::set <std::string>				NTV2StringSet;			//	New in SDK 12.5
+	typedef NTV2StringSet::const_iterator		NTV2StringSetConstIter; //	New in SDK 12.5
+	AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2StringSet & inData);
+
 	typedef std::set <NTV2AudioChannelPair>			NTV2AudioChannelPairs;			///< @brief A set of distinct NTV2AudioChannelPair values.
 	typedef NTV2AudioChannelPairs::const_iterator	NTV2AudioChannelPairsConstIter; ///< @brief Handy const iterator to iterate over a set of distinct NTV2AudioChannelPair values.
 	AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioChannelPairs & inSet); ///<	@brief	Handy ostream writer for NTV2AudioChannelPairs.
@@ -94,21 +103,23 @@
 	#define	NTV2_RPC_DECODESERVER_DECL	bool RPCDecodeServer (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex);
 	#define	NTV2_RPC_ENCODESERVER_DECL	bool RPCEncodeServer (NTV2_RPC_BLOB_TYPE & inBlob);
 
-	#define NTV2_RPC_CODEC_DECLS	NTV2_RPC_ENCODE_DECL	\
-									NTV2_RPC_DECODE_DECL	\
-									NTV2_RPC_DECODECLIENT_DECL	\
-									NTV2_RPC_ENCODECLIENT_DECL	\
-									NTV2_RPC_DECODESERVER_DECL	\
-									NTV2_RPC_ENCODESERVER_DECL	
+	#define NTV2_RPC_CODEC_DECLS		public:						\
+										NTV2_RPC_ENCODE_DECL		\
+										NTV2_RPC_DECODE_DECL		\
+										NTV2_RPC_DECODECLIENT_DECL	\
+										NTV2_RPC_ENCODECLIENT_DECL	\
+										NTV2_RPC_DECODESERVER_DECL	\
+										NTV2_RPC_ENCODESERVER_DECL	
 
-	// NTV2Buffer has it's own RPC encode / decode methods
+	//	NTV2Buffer has its own RPC encode/decode methods
 	#define	NTV2_RPC_BUFFER_ENCODE_DECL		bool RPCEncode (NTV2_RPC_BLOB_TYPE & outBlob, bool fillBuffer=true);
 	#define	NTV2_RPC_BUFFER_DECODE_DECL		bool RPCDecode (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex, bool fillBuffer=true);
 	#define	NTV2_RPC_BUFFER_DECODE2_DECL	bool RPCDecodeNoAllocate (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex);
-	#define NTV2_RPC_BUFFER_CODEC_DECLS		NTV2_RPC_BUFFER_ENCODE_DECL		\
+
+	#define NTV2_RPC_BUFFER_CODEC_DECLS		public:							\
+											NTV2_RPC_BUFFER_ENCODE_DECL		\
 											NTV2_RPC_BUFFER_DECODE_DECL		\
 											NTV2_RPC_BUFFER_DECODE2_DECL
-									
 #else
 	#define NTV2_RPC_CODEC_DECLS
 	#define NTV2_RPC_BUFFER_CODEC_DECLS
@@ -1636,6 +1647,8 @@ typedef enum
 	kRegMaskHDMISwapInputAudCh34	= BIT(5),
 	kRegMaskHDMISwapOutputAudCh34	= BIT(6),
 	kRegMaskHDMIOutPrefer420		= BIT(7),
+	kRegMaskHDMIOutForceYUV  		= BIT(8),
+	kRegMaskHDMIOutForceRGB 		= BIT(9),
 	kRegMaskHDMIInColorDepth		= BIT(13)+BIT(12),
 	kRegMaskHDMIInColorSpace		= BIT(15)+BIT(14),
 	kRegMaskHDMIOutAudioRate		= BIT(17)+BIT(16),
@@ -2721,6 +2734,8 @@ typedef enum
 	kRegShiftHDMISwapInputAudCh34		= 5,
 	kRegShiftHDMISwapOutputAudCh34		= 6,
 	kRegShiftHDMIOutPrefer420			= 7,
+	kRegShiftHDMIOutForceYUV			= 8,
+	kRegShiftHDMIOutForceRGB			= 9,
 	kRegShiftHDMIInColorDepth			= 12,
 	kRegShiftHDMIInColorSpace			= 14,
 	kRegShiftHDMIOutAudioRate			= 16,
@@ -4051,7 +4066,7 @@ NTV2_STRUCT_BEGIN(NTV2RegInfo)
 
 	#if !defined(NTV2_BUILDING_DRIVER)
 		/**
-			@brief	Constructs me from the given parameters.
+			@brief	Constructs a valid NTV2RegInfo from the given optional parameters.
 			@param[in]	inRegNum	Specifies the register number to use. If not specified, defaults to zero.
 			@param[in]	inValue		Specifies the register value to use. If not specified, defaults to zero.
 			@param[in]	inMask		Specifies the bit mask to use. If not specified, defaults to 0xFFFFFFFF.
@@ -4115,18 +4130,37 @@ NTV2_STRUCT_BEGIN(NTV2RegInfo)
 		/**
 			@brief		Renders me to the given output stream as source code using a "WriteRegister" function call.
 			@param		outputStream	Specifies the output stream to write into.
-			@param[in]	inRadix			Optionally specifies the radix to use for the my register value. Defaults to hexadecimal (base 16).
+			@param[in]	inRadix			Optionally specifies the radix to use for the register value. Defaults to hexadecimal (base 16).
 			@param[in]	inDeviceID		Optionally specifies the ::NTV2DeviceID for properly interpreting my register values.
+			@param[in]	inCNTV2CardName	Optionally specifies the CNTV2Card identifier name. Defaults to "card".
 			@return		The output stream.
 		**/
-		std::ostream &	PrintCode (std::ostream & outputStream, const int inRadix = 16, const NTV2DeviceID inDeviceID = DEVICE_ID_INVALID) const; //	New in SDK 16.0, added inDeviceID in 16.2
+		std::ostream &	PrintCode (std::ostream & outputStream, const int inRadix = 16, const NTV2DeviceID inDeviceID = DEVICE_ID_INVALID, const std::string & sCard = "card") const; //	New in SDK 16.0, added inDeviceID in 16.2
+
+		/**
+			@brief		Renders me to the given output stream in "supportlog" format.
+			@param		outputStream	Specifies the output stream to write into.
+			@param[in]	inDeviceID		Optionally specifies the ::NTV2DeviceID for properly interpreting my register value.
+			@return		The output stream.
+		**/
+		std::ostream &	PrintLog (std::ostream & outputStream, const NTV2DeviceID inDeviceID = DEVICE_ID_INVALID) const; //	New in SDK 18.1
+
+		/**
+			@brief		Resets me using the given "Number:" and "Value:" lines from the support log.
+			@param[in]	inLogLines		A string sequence that provides at least 2 lines from a "supportlog":
+										one containing " Number: " followed by a decimal register number;
+										another containing " Value: " with an 8-digit hexadecimal number immdiately following " : 0x" on that same line.
+			@return		True if successful; otherwise false.
+		**/
+		bool			ImportFromLog (const NTV2StringList & inLogLines); //	New in SDK 18.1
 
 		inline ULWord			regNum (void) const	{return registerNumber;}	//	New in SDK 17.5
 		inline ULWord			value (void) const	{return registerValue;}		//	New in SDK 17.5
 		inline ULWord			mask (void) const	{return registerMask;}		//	New in SDK 17.5
 		inline ULWord			shift (void) const	{return registerShift;}		//	New in SDK 17.5
+		inline ULWord			offset (void) const	{return registerNumber == 0xFFFFFFFF ? 0xFFFFFFFF : registerNumber * 4;}	//	New in SDK 18.1
 		inline NTV2RegInfo &	setRegNum (const ULWord val){registerNumber = val; return *this;}	//	New in SDK 17.5
-		inline NTV2RegInfo &	setValue (const ULWord val)	{registerShift = val; return *this;}	//	New in SDK 17.5
+		inline NTV2RegInfo &	setValue (const ULWord val)	{registerValue = val; return *this;}	//	New in SDK 17.5
 		inline NTV2RegInfo &	setMask (const ULWord val)	{registerMask = val; return *this;}	//	New in SDK 17.5
 		inline NTV2RegInfo &	setShift (const ULWord val)	{if (val < 32) registerShift = val; return *this;}	//	New in SDK 17.5
 	#endif	//	!defined(NTV2_BUILDING_DRIVER)
@@ -4211,10 +4245,8 @@ typedef struct RP188_STRUCT {
 	ULWord	DBB;
 	ULWord	Low;		//	|  BG 4	 | Secs10 |	 BG 3  | Secs 1 |  BG 2	 | Frms10 |	 BG 1  | Frms 1 |
 	ULWord	High;		//	|  BG 8	 | Hrs 10 |	 BG 7  | Hrs  1 |  BG 6	 | Mins10 |	 BG 5  | Mins 1 |
-	#if !defined(NTV2_BUILDING_DRIVER)
-		public:
-			NTV2_RPC_CODEC_DECLS
-	#endif	//	user-space clients only
+
+	NTV2_RPC_CODEC_DECLS
 } RP188_STRUCT;
 
 
@@ -4509,9 +4541,8 @@ typedef struct AUTOCIRCULATE_STATUS_STRUCT
 	BOOL_					bWithColorCorrection;
 	BOOL_					bWithVidProc;
 	BOOL_					bWithCustomAncData;
-	#if !defined (NTV2_BUILDING_DRIVER)
-		NTV2_RPC_CODEC_DECLS
-	#endif	//	!defined (NTV2_BUILDING_DRIVER)
+
+	NTV2_RPC_CODEC_DECLS
 } AUTOCIRCULATE_STATUS_STRUCT;
 
 
@@ -4691,10 +4722,8 @@ typedef struct FRAME_STAMP_STRUCT
 	ULWord				currentLineCount;			//! At Call Line# _currently_ being OUTPUT (at the time of the IOCTL_NTV2_GET_FRAMESTAMP)
 	ULWord				currentReps;				//! Contains validCount (Play - reps remaining, Record - drops on frame)
 	ULWord				currenthUser;				//! User cookie at last vblank
-	#if !defined (NTV2_BUILDING_DRIVER)
-		public:
-			NTV2_RPC_CODEC_DECLS
-	#endif	//	user-space clients only
+
+	NTV2_RPC_CODEC_DECLS
 } FRAME_STAMP_STRUCT;
 
 
@@ -4784,10 +4813,7 @@ typedef struct AUTOCIRCULATE_TRANSFER_STRUCT
 	ULWord							videoSegmentCardPitch;	//	Offset (in bytes) between the beginning of one board segment and the beginning of the next board segment (i.e. board memory rowBytes)
 	NTV2QuarterSizeExpandMode		videoQuarterSizeExpand; //	Turns on the "quarter-size expand" (2x H + 2x V) hardware
 
-	#if !defined (NTV2_BUILDING_DRIVER)
-		public:
-			NTV2_RPC_CODEC_DECLS
-	#endif	//	user-space clients only
+	NTV2_RPC_CODEC_DECLS
 } AUTOCIRCULATE_TRANSFER_STRUCT, *PAUTOCIRCULATE_TRANSFER_STRUCT;
 
 
@@ -4942,10 +4968,8 @@ typedef struct AUTOCIRCULATE_TASK_STRUCT
 	ULWord reserved1;
 	ULWord reserved2;
 	ULWord reserved3;
-	#if !defined (NTV2_BUILDING_DRIVER)
-		public:
-			NTV2_RPC_CODEC_DECLS
-	#endif	//	user-space clients only
+
+	NTV2_RPC_CODEC_DECLS
 } AUTOCIRCULATE_TASK_STRUCT, *PAUTOCIRCULATE_TASK_STRUCT;
 
 typedef struct
@@ -6289,24 +6313,24 @@ typedef enum
 				/**
 					@return		My size, in bytes.
 				**/
-				inline ULWord	GetByteCount (void) const				{return fByteCount;}
+				inline size_t	GetByteCount (void) const				{return size_t(fByteCount);}
 
 				/**
 					@return		True if my host storage was allocated by my Allocate function;	otherwise false if my host storage
 								address and size was provided by the client application.
 				**/
-				inline bool		IsAllocatedBySDK (void) const			{return fFlags & NTV2Buffer_ALLOCATED ? true : false;}
+				inline bool		IsAllocatedBySDK (void) const			{return flags() & NTV2Buffer_ALLOCATED ? true : false;}
 
 				/**
 					@return		True if my host storage was provided by the client application;	 otherwise false if it was allocated
 								by my Allocate function.
 				**/
-				inline bool		IsProvidedByClient (void) const			{return fFlags & NTV2Buffer_ALLOCATED ? false : true;}
+				inline bool		IsProvidedByClient (void) const			{return flags() & NTV2Buffer_ALLOCATED ? false : true;}
 
 				/**
 					@return		True if my host storage was page-aligned when Allocated;  otherwise false.
 				**/
-				inline bool		IsPageAligned (void) const				{return fFlags & NTV2Buffer_PAGE_ALIGNED ? true : false;}	//	New in SDK 17.0
+				inline bool		IsPageAligned (void) const				{return flags() & NTV2Buffer_PAGE_ALIGNED ? true : false;}	//	New in SDK 17.0
 
 				/**
 					@return		True if my user-space pointer is NULL, or my size is zero.
@@ -6321,7 +6345,7 @@ typedef enum
 				/**
 					@return		My size, in bytes, as a size_t.
 				**/
-				inline			operator size_t() const					{return size_t(GetByteCount());}	//	New in SDK 16.0
+				inline			operator size_t() const					{return GetByteCount();}	//	New in SDK 16.0
 
 				/**
 					@param[in]	inByteOffset	Specifies the offset from the start (or end) of my memory buffer.
@@ -6368,11 +6392,15 @@ typedef enum
 				}
 
 				/**
-					@return		A non-const reference to the outOffsets parameter.
-					@param[out]	outOffsets	Receives the byte offsets to every occurrence in my buffer.
-					@param[in]	inValue		Specifies the data to search for.
+					@brief		Searches me for any number of occurrences of a given byte sequence.
+					@param[out]	outOffsets	Receives the byte offsets of every occurrence found in me.
+					@param[in]	inValue		Specifies the NTV2Buffer that contains the byte sequence to search for.
+					@param[in]	inLimit		Specifies the maximum number of occurrences to report. Zero, the default, means "no limit".
+					@return		A non-const reference to the "outOffsets" parameter. If empty, no occurrences were found.
+					@note		If a large number of matches are anticipated, the caller should call ULWordSet::reserve prior to
+								calling this function.
 				**/
-				ULWordSet &		FindAll (ULWordSet & outOffsets, const NTV2Buffer & inValue) const;	//	New in SDK 16.3
+				ULWordSet &		Find (ULWordSet & outOffsets, const NTV2Buffer & inValue, const size_t inLimit = 0) const;	//	Originally FindAll before SDK 18.1
 
 				/**
 					@return		True if the given memory buffer's contents are identical to my own.
@@ -6383,11 +6411,11 @@ typedef enum
 				bool			IsContentEqual (const NTV2Buffer & inBuffer, const ULWord inByteOffset = 0, const ULWord inByteCount = 0xFFFFFFFF) const;
 
 				/**
-					@brief		Answers with the byte offset to the first or next difference.
+					@brief		Iterates over each byte that differs between myself and the given buffer.
 					@param[in]	inBuffer		Specifies the memory buffer whose contents are to be compared with mine.
 												The buffer sizes must match.
-					@param		byteOffset		On entry, specifies the byte offset where comparing starts (use zero to find the first difference);
-												on exit, receives the byte offset of the next difference found (or 0xFFFFFFFF if identical).
+					@param		byteOffset		On entry, specifies the byte offset where comparing begins (use zero to find the first difference);
+												on exit, receives the byte offset of the next difference found (or 0xFFFFFFFF if no further differences found).
 					@return		True if successful; otherwise false.
 				**/
 				bool			NextDifference (const NTV2Buffer & inBuffer, ULWord & byteOffset) const;
@@ -6443,21 +6471,17 @@ typedef enum
 				**/
 				template<typename T>	bool Fill (const T & inValue)
 				{
-    				T* pT = reinterpret_cast<T*>(GetHostPointer());
-    				if (!pT) {
-        				return false;
-    				}
-
-					size_t bufferSize = GetByteCount() / sizeof(T);
-					if (bufferSize == 0) {
+					T* pT = reinterpret_cast<T*>(GetHostPointer());
+					if (!pT)
 						return false;
-    				}
 
-    				for (size_t i = 0; i < bufferSize; ++i) {
-        				pT[i] = inValue;
-    				}
+					const size_t bufferSize (GetByteCount() / sizeof(T));
+					if (!bufferSize)
+						return false;
 
-    				return true;
+					for (size_t i(0);  i < bufferSize;  i++)
+						pT[i] = inValue;
+					return true;
 				}
 
 				/**
@@ -6967,6 +6991,12 @@ typedef enum
 				bool						PutU8s (const UByteSequence & inU8s, const size_t inU8Offset = 0);
 				///@}
 
+				inline NTV2_DEPRECATED_18_1(ULWordSet & FindAll (ULWordSet & outOffsets, const NTV2Buffer & inValue) const) {return Find(outOffsets,inValue);}	//	New in SDK 16.3, renamed in SDK 18.1
+
+			private:
+				inline uint8_t				flags (void) const	{return uint8_t(fFlags);}
+
+			public:
 				/**
 					@name	Default Page Size
 				**/

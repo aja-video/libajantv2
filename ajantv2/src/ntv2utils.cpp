@@ -4623,6 +4623,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_CORVID88_GEN3:			return inForRetailDisplay ? "Corvid 88 Gen3"			: "Corvid-88-Gen3";
 		case DEVICE_ID_CORVIDHBR:				return inForRetailDisplay ? "Corvid HB-R"				: "CorvidHBR";
 		case DEVICE_ID_CORVIDHEVC:				return inForRetailDisplay ? "Corvid HEVC"				: "CorvidHEVC";
+		case DEVICE_ID_FS8:					  return "FS8";
 		case DEVICE_ID_IO4K:					return "Io4K";
 		case DEVICE_ID_IO4KPLUS:				return inForRetailDisplay ? "Avid DNxIV"				: "Io4KPlus";
 		case DEVICE_ID_IO4KUFC:					return inForRetailDisplay ? "Io4K UFC"					: "Io4KUfc";
@@ -4683,6 +4684,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_SOJI_OE7:				return "SOJI-OE7";
 		case DEVICE_ID_TTAP:					return inForRetailDisplay ? "T-TAP"						: "TTap";
 		case DEVICE_ID_TTAP_PRO:				return inForRetailDisplay ? "T-TAP Pro"					: "TTapPro";
+		case DEVICE_ID_VKONA:					return inForRetailDisplay ? "VKONA"						: "VKona";
 		case DEVICE_ID_SOFTWARE:				return inForRetailDisplay ? "Software"					: "Software";
 		case DEVICE_ID_NOTFOUND:				return inForRetailDisplay ? "AJA Device"				: "(Not Found)";
 #if defined(_DEBUG)
@@ -7726,6 +7728,7 @@ string NTV2GetVDevFolderPath (const bool inAddTrailingPathDelim)
 	return fwPath;
 }
 
+#define IsAJAInternalDevice(_d_)	(((_d_) == DEVICE_ID_IP25_R) || ((_d_) == DEVICE_ID_IP25_T) || ((_d_) == DEVICE_ID_FS8))
 
 NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 {										//////////	!!! PLEASE MAINTAIN ALPHABETIC ORDER !!!	//////////
@@ -7743,6 +7746,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_CORVID88_GEN3,
 														DEVICE_ID_CORVIDHBR,
 														DEVICE_ID_CORVIDHEVC,
+														DEVICE_ID_FS8,
 														DEVICE_ID_IO4K,
 														DEVICE_ID_IO4KPLUS,
 														DEVICE_ID_IO4KUFC,
@@ -7752,6 +7756,8 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_IOIP_2110,
 														DEVICE_ID_IOX3,
 														DEVICE_ID_IOXT,
+														DEVICE_ID_IP25_R,
+														DEVICE_ID_IP25_T,
 														DEVICE_ID_KONA1,
 														DEVICE_ID_KONA3G,
 														DEVICE_ID_KONA3GQUAD,
@@ -7802,15 +7808,14 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_SOJI_DIAGS,
 														DEVICE_ID_TTAP,
 														DEVICE_ID_TTAP_PRO,
-														DEVICE_ID_IP25_R,
-														DEVICE_ID_IP25_T,
+														DEVICE_ID_VKONA,
 														DEVICE_ID_NOTFOUND	};
 	if (inKinds == NTV2_DEVICEKIND_NONE)
 		return NTV2DeviceIDSet();
 
 	NTV2DeviceIDSet result;
 	if (inKinds == NTV2_DEVICEKIND_SOFTWARE)
-		{result.insert(DEVICE_ID_SOFTWARE); return result;}
+		{result.insert(DEVICE_ID_SOFTWARE); result.insert(DEVICE_ID_VKONA); return result;}
 
 	for (unsigned ndx(0);  ndx < sizeof(sValidDeviceIDs) / sizeof(NTV2DeviceID);  ndx++)
 	{
@@ -7843,6 +7848,8 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 		else if (inKinds & NTV2_DEVICEKIND_CUSTOM_ANC  &&  ::NTV2DeviceCanDoCustomAnc(deviceID))
 			insertIt = true;
 		else if (inKinds & NTV2_DEVICEKIND_RELAYS  &&  ::NTV2DeviceHasSDIRelays(deviceID))
+			insertIt = true;
+		else if (inKinds & NTV2_DEVICEKIND_AJA_INTERNAL  &&  IsAJAInternalDevice(deviceID))
 			insertIt = true;
 		if (insertIt)
 			result.insert (deviceID);
@@ -8066,28 +8073,6 @@ static ostream & operator << (ostream & inOutStr, const NTV2InputCrosspointIDs &
 	return inOutStr;
 }
 */
-
-ostream & operator << (ostream & inOutStream, const NTV2StringList & inData)
-{
-	for (NTV2StringListConstIter it(inData.begin());  it != inData.end();  )
-	{
-		inOutStream << *it;
-		if (++it != inData.end())
-			inOutStream << ", ";
-	}
-	return inOutStream;
-}
-
-ostream & operator << (ostream & inOutStream, const NTV2StringSet & inData)
-{
-	for (NTV2StringSetConstIter it(inData.begin());	 it != inData.end();  )
-	{
-		inOutStream << *it;
-		if (++it != inData.end())
-			inOutStream << ", ";
-	}
-	return inOutStream;
-}
 
 
 NTV2RegisterReads FromRegNumSet (const NTV2RegNumSet & inRegNumSet)

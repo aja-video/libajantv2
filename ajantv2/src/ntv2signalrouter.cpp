@@ -293,31 +293,6 @@ bool CNTV2SignalRouter::ToCodeString (string & outCode, const NTV2XptConnections
 }
 
 
-CNTV2SignalRouter::PrintCodeConfig::PrintCodeConfig ()
-	:	mShowComments		(true),
-		mShowDeclarations	(true),
-		mUseRouter			(false),
-		mPreCommentText		("// "),
-		mPostCommentText	(),
-		mPreClassText		(),
-		mPostClassText		(),
-		mPreVariableText	(),
-		mPostVariableText	(),
-		mPreXptText			(),
-		mPostXptText		(),
-		mPreFunctionText	(),
-		mPostFunctionText	(),
-		mDeviceVarName		("device"),
-		mRouterVarName		("router"),
-		mLineBreakText		("\n"),
-		mFieldBreakText		("\t"),
-		mNew				(),
-		mChanged			(),
-		mMissing			()
-{
-}
-
-
 bool CNTV2SignalRouter::Initialize (void)		//	STATIC
 {
 	AJAAutoLock		locker(&gRoutingExpertLock);
@@ -783,6 +758,66 @@ bool CNTV2SignalRouter::CreateFromString (const string & inString, CNTV2SignalRo
 	return outRouter.ResetFrom(connections);
 }
 
+bool CNTV2SignalRouter::CreateFromString (const string & inString, NTV2PossibleConnections & outConnections) //	STATIC
+{
+	NTV2StringList	lines;
+	string	stringToParse(inString);	aja::strip(aja::lower(stringToParse));
+	aja::replace(stringToParse, " ", "");
+	aja::replace(stringToParse, "\t", "");
+	aja::replace(stringToParse, "&lt;","<");	//	in case uuencoded
+
+	outConnections.clear();
+	if (Tokenize(stringToParse, lines, "\n\r", true).empty())	//	Split the string at line breaks
+	{
+		SRWARN("No lines resulted from input string '" << stringToParse << "'");
+		return true;	//	Nothing there
+	}
+
+	if (lines.front().find("<==") != string::npos)
+	{
+		//cout << lines.size() << " lines" << endl;
+		for (size_t lineNum(0);  lineNum < lines.size();  lineNum++)
+		{
+            const string & line (lines.at(lineNum));
+			//cout << "	 line '" << line << "'" << endl;
+			size_t	pos (line.find("<=="));
+			if (pos == string::npos)
+				{SRFAIL("Parse error: '<==' missing in line '" << line << "'");  return false;}
+			string leftPiece (line.substr(0, pos));  aja::strip(leftPiece);
+			string rightPiece (line.substr(pos + 3, line.length()));  aja::strip(rightPiece);
+			//cout << " L'" << leftPiece << "',  R'" << rightPiece << "'" << endl;
+			NTV2InputXptID inputXpt (StringToNTV2InputCrosspointID(leftPiece));
+			if (inputXpt == NTV2_INPUT_CROSSPOINT_INVALID)
+				{SRFAIL("Parse error: invalid input crosspoint from '" << leftPiece << "' from line '" << line << "'");	return false;}
+			NTV2OutputXptID outputXpt(NTV2_OUTPUT_CROSSPOINT_INVALID);
+			if (rightPiece.find(",") != string::npos)
+			{
+				NTV2StringList rtPieces(aja::split(rightPiece, ","));
+				for (size_t n(0);  n < rtPieces.size();  n++)
+				{
+					string s(rtPieces.at(n));
+					outputXpt = StringToNTV2OutputCrosspointID(aja::strip(s));
+					if (!NTV2_IS_VALID_OutputCrosspointID(outputXpt))
+						{SRWARN("Skipped invalid output crosspoint from '" << s << "' in line '" << line << "'");  continue;}
+					outConnections.insert(NTV2Connection(inputXpt, outputXpt));
+				}
+			}
+			else
+			{
+				outputXpt = StringToNTV2OutputCrosspointID(rightPiece);
+				if (!NTV2_IS_VALID_OutputCrosspointID(outputXpt))
+					{SRWARN("Skipped invalid output crosspoint from '" << rightPiece << "' in line '" << line << "'");  continue;}
+				outConnections.insert(NTV2Connection(inputXpt, outputXpt));
+			}
+		}	//	for each line
+	}
+	else
+		{SRFAIL("Unable to parse '" << lines.front() << "' -- expected '<=='");	 return false;}
+	SRINFO(DEC(outConnections.size()) << " potential connection(s) created from input string");
+	//cout << "Success! Imported " << outConnections.size() << " connections:" << endl << outConnections << endl;
+	return true;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// CNTV2SignalRouter	End
 
 
@@ -1183,6 +1218,29 @@ ostream & operator << (ostream & oss, const NTV2XptConnections & inObj)
 	{
 		oss << *it;
 		if (++it != inObj.end())
+			oss << endl;
+	}
+	return oss;
+}
+
+ostream & operator << (ostream & oss, const NTV2PossibleConnections & inObj)
+{
+	if (inObj.empty())
+		return oss;
+	NTV2InputXptID ixpt (NTV2_INPUT_CROSSPOINT_INVALID);
+	for (NTV2PossibleConnectionsConstIter it(inObj.begin());  it != inObj.end();  )
+	{
+		if (ixpt != it->first)
+		{
+			ixpt = it->first;
+			oss << ::NTV2InputCrosspointIDToString(ixpt) << " <== ";
+		}
+		oss << ::NTV2OutputCrosspointIDToString(it->second);
+		if (++it == inObj.end())
+			break;
+		if (ixpt == it->first)
+			oss << ", ";
+		else
 			oss << endl;
 	}
 	return oss;

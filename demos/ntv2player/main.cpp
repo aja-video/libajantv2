@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2player/main.cpp
-	@brief		Demonstration application that plays synthesized SD/HD video.
+	@brief		Demonstration application that plays synthesized video.
 	@copyright	(C) 2012-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
@@ -65,9 +65,6 @@ int main (int argc, const char ** argv)
 
 	//	Device
 	const string deviceSpec (pDeviceSpec ? pDeviceSpec : "0");
-	if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
-		return 1;
-
 	PlayerConfig config(deviceSpec);
 
 	//	Channel
@@ -123,34 +120,34 @@ int main (int argc, const char ** argv)
 	config.fDoMultiFormat	= doMultiFormat	? true	: false;	//	Multiformat mode?
 	config.fTransmitLTC		= xmitLTC		? true	: false;
 
-	//	Instantiate and initialize the NTV2Player object...
-	NTV2Player player(config);
-	AJAStatus status = player.Init();
-	if (AJA_FAILURE(status))
-		{cout << "## ERROR:  Initialization failed: " << ::AJAStatusToString(status) << endl;	return 1;}
+	{	//	Instantiate and initialize the NTV2Player object...
+		NTV2Player player(config);
+		AJAStatus status = player.Init();
+		if (AJA_FAILURE(status))
+			return 1;
 
-	::signal (SIGINT, SignalHandler);
-	#if defined(AJAMac)
-		::signal (SIGHUP, SignalHandler);
-		::signal (SIGQUIT, SignalHandler);
-	#endif
+		::signal (SIGINT, SignalHandler);
+		#if defined(AJAMac)
+			::signal (SIGHUP, SignalHandler);
+			::signal (SIGQUIT, SignalHandler);
+		#endif
 
-	//	Run it...
-	player.Run();
+		//	Run it...
+		player.Run();
 
-	cout	<< "   Frames   Frames   Buffer" << endl
-			<< "   Played  Dropped    Level" << endl;
-	do
-	{	//	Poll its status until stopped...
-		AUTOCIRCULATE_STATUS outputStatus;
-		player.GetACStatus(outputStatus);
-		cout	<< setw(9) << outputStatus.GetProcessedFrameCount()
-				<< setw(9) << outputStatus.GetDroppedFrameCount()
-				<< setw(9) << outputStatus.GetBufferLevel() << "\r" << flush;
-		AJATime::Sleep(2000);
-	} while (player.IsRunning() && !gGlobalQuit);	//	loop til done
-
-	cout << endl;
+		cout	<< "   Frames   Frames   Buffer" << endl
+				<< "   Played  Dropped    Level" << endl;
+		do
+		{	//	Poll its status until stopped...
+			AUTOCIRCULATE_STATUS outputStatus;
+			player.GetACStatus(outputStatus);
+			cout	<< setw(9) << outputStatus.GetProcessedFrameCount()
+					<< setw(9) << outputStatus.GetDroppedFrameCount()
+					<< setw(9) << outputStatus.GetBufferLevel() << "\r" << flush;
+			AJATime::Sleep(2000);
+		} while (player.IsRunning() && !gGlobalQuit);	//	loop til done
+		cout << endl;
+	}	//	NTV2Player scope
 	return 0;
 
 }	//	main

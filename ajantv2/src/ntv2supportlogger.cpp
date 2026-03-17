@@ -508,7 +508,7 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 			}
 		}
 
-		if (mDevice.IsIPDevice())
+		if (mDevice.features().CanDoIP())
 		{
 			PACKAGE_INFO_STRUCT pkgInfo;
 			if (mDevice.GetPackageInformation(pkgInfo))
@@ -603,48 +603,18 @@ void CNTV2SupportLogger::FetchRegisterLog (ostringstream & oss) const
 {
 	NTV2RegisterReads	regs;
 	const NTV2DeviceID	deviceID	(mDevice.GetDeviceID());
-	NTV2RegNumSet		deviceRegs	(CNTV2RegisterExpert::GetRegistersForDevice (deviceID));
-	const NTV2RegNumSet virtualRegs (CNTV2RegisterExpert::GetRegistersForClass (kRegClass_Virtual));
+	const int			options		(mDevice.IsSupported(kDeviceHasXptConnectROM) ? kIncludeOtherRegs_XptROM : kIncludeOtherRegs_None);
 	static const string sDashes		(96, '-');
 
-	//	Dang, GetRegistersForDevice doesn't/can't read kRegCanDoRegister, so add the CanConnectROM regs here...
-	if (mDevice.IsSupported(kDeviceHasXptConnectROM))
-		for (ULWord regNum(kRegFirstValidXptROMRegister);  regNum < ULWord(kRegInvalidValidXptROMRegister);	 regNum++)
-			deviceRegs.insert(regNum);
-
+	NTV2RegNumSet deviceRegs (CNTV2RegisterExpert::GetRegistersForDevice (deviceID, options | kIncludeOtherRegs_VRegs));
 	oss << endl << deviceRegs.size() << " Device Registers " << sDashes << endl << endl;
 	regs = ::FromRegNumSet (deviceRegs);
 	if (!mDevice.ReadRegisters (regs))
 		oss << "## NOTE:  Driver failed to return one or more registers (those will be zero)" << endl;
 	for (NTV2RegisterReadsConstIter it (regs.begin());	it != regs.end();  ++it)
 	{
-		const NTV2RegInfo & regInfo (*it);
-		const uint32_t		regNum	(regInfo.registerNumber);
-		//const uint32_t	offset	(regInfo.registerNumber * 4);
-		const uint32_t		value	(regInfo.registerValue);
-		oss << endl
-			<< "Register Name: " << CNTV2RegisterExpert::GetDisplayName(regNum) << endl
-			<< "Register Number: " << regNum << endl
-			<< "Register Value: " << value << " : " << xHEX0N(value,8) << endl
-		//	<< "Register Classes: " << CNTV2RegisterExpert::GetRegisterClasses(regNum) << endl
-			<< CNTV2RegisterExpert::GetDisplayValue (regNum, value, deviceID) << endl;
-	}
-
-	regs = ::FromRegNumSet (virtualRegs);
-	oss << endl << virtualRegs.size() << " Virtual Registers " << sDashes << endl << endl;
-	if (!mDevice.ReadRegisters (regs))
-		oss << "## NOTE:  Driver failed to return one or more virtual registers (those will be zero)" << endl;
-	for (NTV2RegisterReadsConstIter it (regs.begin());	it != regs.end();  ++it)
-	{
-		const NTV2RegInfo & regInfo (*it);
-		const uint32_t		regNum	(regInfo.registerNumber);
-		//const uint32_t	offset	(regInfo.registerNumber * 4);
-		const uint32_t		value	(regInfo.registerValue);
-		oss << endl
-			<< "VReg Name: " << CNTV2RegisterExpert::GetDisplayName(regNum) << endl
-			<< "VReg Number: " << setw(10) << regNum << endl
-			<< "VReg Value: " << value << " : " << xHEX0N(value,8) << endl
-			<< CNTV2RegisterExpert::GetDisplayValue (regNum, value, deviceID)	<< endl;
+		oss << endl;
+		it->PrintLog(oss, deviceID);
 	}
 }	//	FetchRegisterLog
 

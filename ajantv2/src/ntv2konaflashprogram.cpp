@@ -139,7 +139,7 @@ bool CNTV2KonaFlashProgram::WriteCommand(_FLASH_COMMAND inCommand)
 
 bool CNTV2KonaFlashProgram::SetMBReset()
 {
-	if (!IsIPDevice())
+	if (!features().CanDoIP())
 		return false;
 	bool resetOK(false);
 	//	Hold MB in reset
@@ -509,7 +509,7 @@ bool CNTV2KonaFlashProgram::ReadInfoString()
 	}
 	else
 	{
-		if (_deviceID != 0x010220 || !IsIPDevice())
+		if (_deviceID != 0x010220 || !features().CanDoIP())
 			return false;
 		uint32_t baseAddress = _mcsInfoOffset;
 		SetFlashBlockIDBank(MCS_INFO_BLOCK);
@@ -1154,7 +1154,7 @@ bool CNTV2KonaFlashProgram::CreateEDIDIntelRecord()
 
 bool CNTV2KonaFlashProgram::ProgramMACAddresses(MacAddr * mac1, MacAddr * mac2)
 {
-	if(!IsIPDevice())
+	if (!features().CanDoIP())
 		return false;
 
 	if (!mac1  ||  !mac2)
@@ -1248,12 +1248,7 @@ bool CNTV2KonaFlashProgram::ProgramMACAddresses(MacAddr * mac1, MacAddr * mac2)
 
 bool CNTV2KonaFlashProgram::ReadMACAddresses(MacAddr & mac1, MacAddr & mac2)
 {
-	uint32_t lo;
-	uint32_t hi;
-	uint32_t lo2;
-	uint32_t hi2;
-
-	if(!IsIPDevice())
+	if (!features().CanDoIP())
 		return false;
 
 	if (_spiFlash)
@@ -1291,6 +1286,7 @@ bool CNTV2KonaFlashProgram::ReadMACAddresses(MacAddr & mac1, MacAddr & mac2)
 	}
 	else
 	{
+		uint32_t lo, hi, lo2, hi2;
 		uint32_t baseAddress = GetBaseAddressForProgramming(MAC_FLASHBLOCK);
 		SetFlashBlockIDBank(MAC_FLASHBLOCK);
 
@@ -1336,13 +1332,12 @@ bool CNTV2KonaFlashProgram::ReadMACAddresses(MacAddr & mac1, MacAddr & mac2)
 		mac2.mac[4] = (hi2 & 0xff000000) >> 24;
 		mac2.mac[5] = (hi2 & 0x00ff0000) >> 16;
 	}
-
 	return true;
 }
 
 bool CNTV2KonaFlashProgram::ProgramLicenseInfo (const string & licenseString)
 {
-	if(!IsIPDevice())
+	if (!features().CanDoIP())
 		return false;
 
 	if (_spiFlash)
@@ -1366,7 +1361,6 @@ bool CNTV2KonaFlashProgram::ProgramLicenseInfo (const string & licenseString)
 	}
 	else
 	{
-
 		EraseBlock(LICENSE_BLOCK);
 
 		SetFlashBlockIDBank(LICENSE_BLOCK);
@@ -1407,8 +1401,7 @@ bool CNTV2KonaFlashProgram::ProgramLicenseInfo (const string & licenseString)
 bool CNTV2KonaFlashProgram::ReadLicenseInfo(string& serialString)
 {
 	const uint32_t maxSize = 100;
-
-	if(!IsIPDevice())
+	if (!features().CanDoIP())
 		return false;
 
 	if (_spiFlash)

@@ -123,6 +123,19 @@
 //#define NTV2_MACOS_SANDBOX	
 
 
+/**************************************************************************************************************
+	NTV2_CHECK_SDRAM_COLLISIONS		When defined (the default), calls made to StartAudioInput, StartAudioOutput,
+									AutoCirculateInitForInput or AutoCirculateInitForOutput that result in
+									SDRAM collisions will be logged.
+
+									When undefined, SDRAM collision checking will not be performed for the
+									aforementioned function calls.
+
+									Introduced in SDK 18.1.
+**************************************************************************************************************/
+#define	NTV2_CHECK_SDRAM_COLLISIONS
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////	HELPER MACROS
@@ -572,6 +585,11 @@
 #else//NTV2_DEPRECATE_17_6
 	#define NTV2_DEPRECATED_18_0(__f__)				NTV2_WILL_BE_DEPRECATED(__f__)
 #endif//NTV2_DEPRECATE_17_6
+#if defined(NTV2_DEPRECATE_18_0)
+	#define NTV2_DEPRECATED_18_1(__f__)				NTV2_DEPRECATED_f(__f__)
+#else//NTV2_DEPRECATE_18_0
+	#define NTV2_DEPRECATED_18_1(__f__)				NTV2_WILL_BE_DEPRECATED(__f__)
+#endif//NTV2_DEPRECATE_18_0
 
 #if !defined(BIT)
 	#if !defined(AJALinux)

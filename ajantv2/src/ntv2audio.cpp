@@ -10,6 +10,7 @@
 #include "ntv2audiodefines.h"
 #include "ajabase/common/common.h"
 #include "ajabase/system/debug.h"
+#include "ajabase/system/systemtime.h"
 #ifdef MSWindows
 	#include <math.h>
 	#pragma warning(disable: 4800)
@@ -1073,22 +1074,26 @@ bool CNTV2Card::GetAudioOutputMonitorSource (NTV2AudioChannelPair & outChannelPa
 	return result;
 }
 
-bool CNTV2Card::StartAudioOutput (const NTV2AudioSystem inAudioSystem, const bool inWaitForVBI)
+bool CNTV2Card::StartAudioOutput (const NTV2AudioSystem inAudSys, bool inWaitForVBI)
 {
-	if (inAudioSystem >= NTV2_NUM_AUDIOSYSTEMS)
+	if (inAudSys >= NTV2_NUM_AUDIOSYSTEMS)
 		return false;	//	Bad AudioSystem
-	const ULWord audioCtrlRegNum(gAudioSystemToAudioControlRegNum[inAudioSystem]);
-	if (inWaitForVBI)
+	const ULWord audioCtrlRegNum(gAudioSystemToAudioControlRegNum[inAudSys]);
+	if (IsSupported(kDeviceAudioCanWaitForVBI))
 	{
-		if (!IsSupported(kDeviceAudioCanWaitForVBI))
-			return false;	//	Caller requested wait-til-VBI, but firmware doesn't support it
 		//	Set or clear the start-at-VBI bit...
 		if (!WriteRegister(audioCtrlRegNum, inWaitForVBI ? 1UL : 0UL,  kRegMaskOutputStartAtVBI, kRegShiftOutputStartAtVBI))
 			return false;
 	}
+	else if (inWaitForVBI)
+		{inWaitForVBI = false;  AUDWARN("Aud" << DEC(inAudSys+1) << " wait-for-VBI requested but not supported on " << GetDescription());}
+
 	if (!WriteRegister (audioCtrlRegNum, 0, kRegMaskResetAudioOutput, kRegShiftResetAudioOutput))
 		return false;
-#if 1
+	AUDINFO("Aud" << DEC(inAudSys+1) << " output started" << (inWaitForVBI ? " at VBI" : "") << " on " << GetDescription());
+	if (inWaitForVBI  &&  IsSupported(kDeviceAudioCanWaitForVBI))	//	Restore default start-at-VBI bit setting
+		{AJATime::Sleep(20);  WriteRegister(audioCtrlRegNum, 0UL,  kRegMaskOutputStartAtVBI, kRegShiftOutputStartAtVBI);}
+#if defined(NTV2_CHECK_SDRAM_COLLISIONS)
 	//	Now that this audio system is reading from SDRAM, see if its buffer is colliding with other device SDRAM activity...
 	ULWordSequence badRgns;
 	SDRAMAuditor auditor;
@@ -1100,24 +1105,28 @@ bool CNTV2Card::StartAudioOutput (const NTV2AudioSystem inAudioSystem, const boo
 		NTV2StringSet tags;
 		auditor.GetTagsForFrameIndex (startBlk, tags);
 		const string infoStr (aja::join(tags, ", "));
-		ostringstream acLabel;  acLabel << "Aud" << DEC(inAudioSystem+1);	//	Search for label e.g. "Aud2"
+		ostringstream acLabel;  acLabel << "Aud" << DEC(inAudSys+1);	//	Search for label e.g. "Aud2"
 		if (infoStr.find(acLabel.str()) != string::npos)
 		{	ostringstream warning;
 			if (numBlks > 1)
 				warning << "8MB Frms " << DEC0N(startBlk,3) << "-" << DEC0N(startBlk+numBlks-1,3);
 			else
 				warning << "8MB Frm  " << DEC0N(startBlk,3);
-			AUDWARN("Aud" << DEC(inAudioSystem+1) << " memory overlap/interference: " << warning.str() << ": " << infoStr);
+			AUDWARN("Aud" << DEC(inAudSys+1) << " memory overlap/interference: " << warning.str() << ": " << infoStr);
 		}
 	}	//	for each "bad" region
-#endif
+#endif	//	defined(NTV2_CHECK_SDRAM_COLLISIONS)
 	return true;
 }	//	StartAudioOutput
 
-bool CNTV2Card::StopAudioOutput (const NTV2AudioSystem inAudioSystem)
+bool CNTV2Card::StopAudioOutput (const NTV2AudioSystem inAudSys)
 {
-	return inAudioSystem < NTV2_NUM_AUDIOSYSTEMS
-			&&	WriteRegister (gAudioSystemToAudioControlRegNum[inAudioSystem], 1, kRegMaskResetAudioOutput, kRegShiftResetAudioOutput);
+	if (inAudSys >= NTV2_NUM_AUDIOSYSTEMS)
+		return false;
+	if (!WriteRegister (gAudioSystemToAudioControlRegNum[inAudSys], 1, kRegMaskResetAudioOutput, kRegShiftResetAudioOutput))
+		return false;
+	AUDINFO("Aud" << DEC(inAudSys+1) << " output stopped on " << GetDescription());
+	return true;
 }
 
 bool CNTV2Card::IsAudioOutputRunning (const NTV2AudioSystem inAudioSystem, bool & outIsRunning)
@@ -1162,22 +1171,26 @@ bool CNTV2Card::GetAudioOutputPause (const NTV2AudioSystem inAudioSystem, bool &
 }
 
 
-bool CNTV2Card::StartAudioInput (const NTV2AudioSystem inAudioSystem, const bool inWaitForVBI)
+bool CNTV2Card::StartAudioInput (const NTV2AudioSystem inAudSys, bool inWaitForVBI)
 {
-	if (inAudioSystem >= NTV2_NUM_AUDIOSYSTEMS)
+	if (inAudSys >= NTV2_NUM_AUDIOSYSTEMS)
 		return false;	//	Bad AudioSystem
-	const ULWord audioCtrlRegNum(gAudioSystemToAudioControlRegNum[inAudioSystem]);
-	if (inWaitForVBI)
+	const ULWord audioCtrlRegNum(gAudioSystemToAudioControlRegNum[inAudSys]);
+	if (IsSupported(kDeviceAudioCanWaitForVBI))
 	{
-		if (!IsSupported(kDeviceAudioCanWaitForVBI))
-			return false;	//	Caller requested wait-til-VBI, but firmware doesn't support it
 		//	Set or clear the start-at-VBI bit...
 		if (!WriteRegister(audioCtrlRegNum, inWaitForVBI ? 1UL : 0UL,  kRegMaskInputStartAtVBI, kRegShiftInputStartAtVBI))
 			return false;
 	}
+	else if (inWaitForVBI)
+		AUDWARN("Aud" << DEC(inAudSys+1) << " wait-for-VBI requested but not supported on " << GetDescription());
+
 	if (!WriteRegister (audioCtrlRegNum, 0, kRegMaskResetAudioInput, kRegShiftResetAudioInput))
 		return false;
-#if 1
+	AUDINFO("Aud" << DEC(inAudSys+1) << " input started" << (inWaitForVBI ? " at VBI" : "") << " on " << GetDescription());
+	if (inWaitForVBI  &&  IsSupported(kDeviceAudioCanWaitForVBI))	//	Restore default start-at-VBI bit setting
+		{AJATime::Sleep(20);  WriteRegister(audioCtrlRegNum, 0UL,  kRegMaskInputStartAtVBI, kRegShiftInputStartAtVBI);}
+#if defined(NTV2_CHECK_SDRAM_COLLISIONS)
 	//	Now that this audio system is writing into SDRAM, see if its buffer is colliding with other device SDRAM activity...
 	ULWordSequence badRgns;
 	SDRAMAuditor auditor;
@@ -1189,25 +1202,29 @@ bool CNTV2Card::StartAudioInput (const NTV2AudioSystem inAudioSystem, const bool
 		NTV2StringSet tags;
 		auditor.GetTagsForFrameIndex (startBlk, tags);
 		const string infoStr (aja::join(tags, ", "));
-		ostringstream acLabel;  acLabel << "Aud" << DEC(inAudioSystem+1);	//	Search for label e.g. "Aud2"
+		ostringstream acLabel;  acLabel << "Aud" << DEC(inAudSys+1);	//	Search for label e.g. "Aud2"
 		if (infoStr.find(acLabel.str()) != string::npos)
 		{	ostringstream warning;
 			if (numBlks > 1)
 				warning << "8MB Frms " << DEC0N(startBlk,3) << "-" << DEC0N(startBlk+numBlks-1,3);
 			else
 				warning << "8MB Frm  " << DEC0N(startBlk,3);
-			AUDWARN("Aud" << DEC(inAudioSystem+1) << " memory overlap/interference: " << warning.str() << ": " << infoStr);
+			AUDWARN("Aud" << DEC(inAudSys+1) << " memory overlap/interference: " << warning.str() << ": " << infoStr);
 		}
 	}	//	for each "bad" region
-#endif
+#endif	//	defined(NTV2_CHECK_SDRAM_COLLISIONS)
 	return true;
 }	//	StartAudioInput
 
 
-bool CNTV2Card::StopAudioInput (const NTV2AudioSystem inAudioSystem)
+bool CNTV2Card::StopAudioInput (const NTV2AudioSystem inAudSys)
 {
-	return inAudioSystem < NTV2_NUM_AUDIOSYSTEMS
-		&& WriteRegister (gAudioSystemToAudioControlRegNum [inAudioSystem], 1, kRegMaskResetAudioInput, kRegShiftResetAudioInput);
+	if (inAudSys >= NTV2_NUM_AUDIOSYSTEMS)
+	return false;
+	if (!WriteRegister (gAudioSystemToAudioControlRegNum [inAudSys], 1, kRegMaskResetAudioInput, kRegShiftResetAudioInput))
+	return false;
+	AUDINFO("Aud" << DEC(inAudSys+1) << " input stopped on " << GetDescription());
+	return true;
 }
 
 
