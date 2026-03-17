@@ -8,6 +8,7 @@
 
 #include <linux/kernel.h>
 #include <linux/string.h>
+#include <linux/ktime.h>
 
 #include "ntv42device.h"
 #include "ntv42message.h"
@@ -56,6 +57,7 @@ int ntv42device_create(ntv42_device_t** device, void* host)
     dev->index = i;
     dev->host = host;
     dev->state = ntv42device_state_init;
+    init_waitqueue_head(&dev->event_wait);
 
     ntv42_info("ntv42dev%d: create device\n", dev->index);
 
@@ -143,10 +145,66 @@ int ntv42device_message(ntv42_device_t* device, void* message, uint32_t size)
     return ret;
 }
 
-int ntv42device_event(ntv42_device_t* device, uint32_t index)
+/**
+ * Event slot layout (flat index into event_count/event_enabled arrays):
+ *   0-7:   output_vsync[0..7]   (type 0x0001)
+ *   8-15:  input_vsync[0..7]    (type 0x0002)
+ *   16:    reference[0]         (type 0x0003)
+ *   17-24: input_change[0..7]   (type 0x0004)
+ *   25-32: audio_in_wrap[0..7]  (type 0x0200)
+ *   33-40: audio_out_wrap[0..7] (type 0x0201)
+ * Returns -1 if type/index combination is not mapped.
+ */
+int ntv42device_event_slot(uint32_t type, uint32_t index)
 {
+    switch (type) {
+    case 0x0001: /* output_vsync */
+        return (index < NTV42_EVENT_MAX_OUTPUTS) ? (int)(0 + index) : -1;
+    case 0x0002: /* input_vsync */
+        return (index < NTV42_EVENT_MAX_INPUTS) ? (int)(8 + index) : -1;
+    case 0x0003: /* reference */
+        return (index == 0) ? 16 : -1;
+    case 0x0004: /* input_change */
+        return (index < NTV42_EVENT_MAX_INPUTS) ? (int)(17 + index) : -1;
+    case 0x0200: /* audio_in_wrap */
+        return (index < 8) ? (int)(25 + index) : -1;
+    case 0x0201: /* audio_out_wrap */
+        return (index < 8) ? (int)(33 + index) : -1;
+    default:
+        return -1;
+    }
+}
+
+bool ntv42device_event_supported(ntv42_device_t* device, uint32_t type, uint32_t index)
+{
+    if (device == NULL)
+        return false;
+    return ntv42device_event_slot(type, index) >= 0;
+}
+
+/* Forward declaration for regbatch ISR hook */
+extern void ntv42_regbatch_check(ntv42_device_t *device, uint32_t event_type, uint32_t event_index);
+
+int ntv42device_event(ntv42_device_t* device, uint32_t type, uint32_t index)
+{
+    int slot;
+
     if ((device == NULL) || (device->state == ntv42device_state_unknown))
         return NTV42_RETURN_BAD_PARAMETER;
+
+    slot = ntv42device_event_slot(type, index);
+    if (slot < 0 || slot >= NTV42_EVENT_SLOT_MAX)
+        return NTV42_RETURN_BAD_PARAMETER;
+
+    /* Execute any register batches triggered by this event (Phase 4) */
+    ntv42_regbatch_check(device, type, index);
+
+    /* Increment counter and record timestamp */
+    device->event_count[slot]++;
+    device->event_timestamp[slot] = ktime_get_ns();
+
+    /* Wake anyone waiting for events on this device */
+    wake_up(&device->event_wait);
 
     return NTV42_RETURN_SUCCESS;
 }

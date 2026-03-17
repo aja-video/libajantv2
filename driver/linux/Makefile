@@ -243,8 +243,8 @@ HEVCINCS =
 endif
 
 ifdef AJA_NTV42
-NTV42INCS = ../ntv42device.h
-NTV42SRCS = ../ntv42device.c
+NTV42INCS = ../ntv42device.h ../ntv42ioctl.h
+NTV42SRCS = ../ntv42device.c ../ntv42ioctl.c ../ntv42ioctl_event.c ../ntv42ioctl_dma.c ../ntv42regbatch.c
 else
 NTV42INCS =
 NTV42SRCS =

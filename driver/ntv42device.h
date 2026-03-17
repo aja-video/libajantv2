@@ -11,6 +11,7 @@
 #ifdef AJALinux
 
 #include <linux/types.h>
+#include <linux/wait.h>
 
 #define NTV42_RETURN_SUCCESS        (0)
 #define NTV42_RETURN_FAIL           (-EAGAIN)
@@ -31,6 +32,13 @@
 #define NTV42_DEVICE_NAME_MAX   16
 #define NTV42_DEVICE_DESC_MAX   32
 #define NTV42_DEVICE_BAR_MAX    8
+
+/** Maximum event slots per device (covers all type+index combinations) */
+#define NTV42_EVENT_SLOT_MAX    64
+
+/** Maximum outputs/inputs for event mapping */
+#define NTV42_EVENT_MAX_OUTPUTS 8
+#define NTV42_EVENT_MAX_INPUTS  8
 
 /** Host device state */
 typedef enum ntv42device_state_t {
@@ -73,6 +81,19 @@ typedef struct ntv42_device_t {
     ntv42device_state_t     state;                              // Device state
     int                     bar_count;                          // Total number of bars
     ntv42_bar_t             bar[NTV42_DEVICE_BAR_MAX];          // Bar info
+
+    /* DMA infrastructure (Phase 3) */
+    uint8_t                *dma_buf;                            // Bounce buffer (dummy devices)
+    uint64_t                dma_buf_size;                       // Bounce buffer size
+    int                     (*dma_transfer)(void* host, uint32_t direction,
+                                            void __user *user_buf, uint64_t device_addr,
+                                            uint64_t bytes, uint64_t *bytes_xfered);
+
+    /* Event infrastructure (Phase 2) */
+    uint64_t                event_count[NTV42_EVENT_SLOT_MAX];  // Per-slot event counters
+    uint64_t                event_timestamp[NTV42_EVENT_SLOT_MAX]; // Per-slot last timestamp (ns)
+    bool                    event_enabled[NTV42_EVENT_SLOT_MAX]; // Per-slot enabled flags
+    wait_queue_head_t       event_wait;                         // Single wait queue for all events
 } ntv42_device_t;
 
 
@@ -93,8 +114,14 @@ int ntv42device_state(ntv42_device_t* device, ntv42device_state_t state);
 /** Device message handler */
 int ntv42device_message(ntv42_device_t* device, void* message, uint32_t size);
 
-/** Device event handler */
-int ntv42device_event(ntv42_device_t* device, uint32_t index);
+/** Device event handler — called from ISR with ntv42 event type and index */
+int ntv42device_event(ntv42_device_t* device, uint32_t type, uint32_t index);
+
+/** Convert event (type, index) to flat slot number. Returns -1 if invalid. */
+int ntv42device_event_slot(uint32_t type, uint32_t index);
+
+/** Check if event slot is supported for this device */
+bool ntv42device_event_supported(ntv42_device_t* device, uint32_t type, uint32_t index);
 
 
 
