@@ -424,6 +424,10 @@ const uint32_t ntv2_reg_out_freq3 =		0x36c3;
 const uint32_t ntv2_reg_out_freq4 =		0x36c4;
 const uint32_t ntv2_reg_out_freq5 =		0x36c5;
 
+const uint32_t ntv2_reg_genlock_reset = 0x30;
+const uint32_t ntv2_genlock_reset_shift = 6;
+const uint32_t ntv2_genlock_reset_mask = 0x40;
+
 const int64_t c_spi_timeout			= 10000;
 
 

@@ -35,6 +35,7 @@ NTV2MetalE2E::~NTV2MetalE2E ()
 AJAStatus NTV2MetalE2E::DoSomething (void)
 {
     mDevice.Open(0);
+    mDevice.SetTaskMode(NTV2_OEM_TASKS);
 	NTV2DeviceID mDeviceID = mDevice.GetDeviceID();	//	Keep this ID handy -- it's used frequently
 
     //if (mDeviceID != DEVICE_ID_KONAX)
@@ -114,6 +115,37 @@ AJAStatus NTV2MetalE2E::SetUpGenlock (void)
         gdat++;
     }
 
+    // Wait for initial lock
+    count = 0;
+    outFreq1 = RegRead(ntv2_reg_out_freq1);
+    outFreq2 = RegRead(ntv2_reg_out_freq2);
+    outFreq3 = RegRead(ntv2_reg_out_freq3);
+    outFreq4 = RegRead(ntv2_reg_out_freq4);
+    outFreq5 = RegRead(ntv2_reg_out_freq5);
+    while( (outFreq1 & 0xffffff00) != 0x08D9EE00 &&
+           (outFreq2 & 0xffffff00) != 0x08D7AA00 &&
+           (outFreq3 & 0xffffff00) != 0x019BFC00 &&
+           (outFreq4 & 0xffffff00) != 0x00BB8000 &&
+           (outFreq5 & 0xffffff00) != 0x08D9EE00 &&
+            count < 10000)
+    {
+        WaitGenlock2(1000);
+        outFreq1 = RegRead(ntv2_reg_out_freq1);
+        outFreq2 = RegRead(ntv2_reg_out_freq2);
+        outFreq3 = RegRead(ntv2_reg_out_freq3);
+        outFreq4 = RegRead(ntv2_reg_out_freq4);
+        outFreq5 = RegRead(ntv2_reg_out_freq5);
+        count++;
+    }
+
+    if (count >= 10000){
+        // genlock2 initial lock check timeout
+        return AJA_STATUS_FAIL;
+    }
+
+    // Reset Genlock
+    mDevice.WriteRegister(ntv2_reg_genlock_reset, 1, ntv2_genlock_reset_mask, ntv2_genlock_reset_shift);
+    mDevice.WriteRegister(ntv2_reg_genlock_reset, 0, ntv2_genlock_reset_mask, ntv2_genlock_reset_shift);
 
     return AJA_STATUS_SUCCESS;
 	
