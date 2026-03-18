@@ -2626,7 +2626,8 @@ private:
 		{	(void) inRegNum;	(void) inDeviceID;
 			ostringstream	oss;
 			oss	<< "Has CanConnect Xpt Route ROM: "		<< YesNo(inRegValue & BIT(0)) << endl
-				<< "AudioSystems can start on VBI: "	<< YesNo(inRegValue & BIT(1));
+				<< "AudioSystems can start on VBI: "	<< YesNo(inRegValue & BIT(1)) << endl
+				<< "AncIns supports HANC insertion: "	<< YesNo(inRegValue & BIT(2));
 			return oss.str();
 		}
 	}	mDecodeCanDoStatus;
