@@ -2627,7 +2627,11 @@ private:
 			ostringstream	oss;
 			oss	<< "Has CanConnect Xpt Route ROM: "		<< YesNo(inRegValue & BIT(0)) << endl
 				<< "AudioSystems can start on VBI: "	<< YesNo(inRegValue & BIT(1)) << endl
-				<< "AncIns supports HANC insertion: "	<< YesNo(inRegValue & BIT(2));
+				<< "Main Flash SPI Controller: "		<< YesNo(inRegValue & BIT(2)) << endl
+				<< "MB Flash SPI Controller: "			<< YesNo(inRegValue & BIT(3)) << endl
+				<< "Has Enhanced (NTV4) FrameStores: "	<< YesNo(inRegValue & BIT(4)) << endl
+				<< "Can report Mixer delay: "			<< YesNo(inRegValue & BIT(5)) << endl
+				<< "AncIns supports HANC insertion: "	<< YesNo(inRegValue & BIT(6));
 			return oss.str();
 		}
 	}	mDecodeCanDoStatus;

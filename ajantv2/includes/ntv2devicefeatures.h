@@ -159,6 +159,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoGPIO,							///< @brief	True if device has GPIO interface.	(New in SDK 18.0)
 	kDeviceHasBracketLED,						///< @brief True if device has LED(s) on the card bracket. (New in SDK 18.0)
 	kDeviceCanDo25GIP,							///< @brief True if device has 25Gbps SFPs. (New in SDK 18.0)
+	kDeviceCanReportMixerDelay,					///< @brief	True if device can report Mixer delay. (New in SDK 18.1)
 	kNTV2BoolParam_LAST,
 	kNTV2BoolParam_COUNT	= kNTV2BoolParam_LAST-kNTV2BoolParam_FIRST,
 	kDeviceCanDo_INVALID	= kNTV2BoolParam_LAST

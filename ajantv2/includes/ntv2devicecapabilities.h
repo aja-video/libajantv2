@@ -104,6 +104,7 @@ class AJAExport DeviceCapabilities
 		inline bool		CanMeasureTemperature (void)			{return dev.IsSupported(kDeviceCanMeasureTemperature);}							///< @returns	True if device can measure its FPGA die temperature
 		inline bool		CanReportFailSafeLoaded (void)			{return dev.IsSupported(kDeviceCanReportFailSafeLoaded);}						///< @returns	True if device can report if its "fail-safe" firmware is loaded/running
 		inline bool		CanReportFrameSize (void)				{return dev.IsSupported(kDeviceCanReportFrameSize);}							///< @returns	True if device can report its intrinsic frame size
+		inline bool		CanReportMixerDelay (void)				{return dev.IsSupported(kDeviceCanReportMixerDelay);}							///< @returns	True if device can report Mixer delay
 		inline bool		CanReportRunningFirmwareDate (void)		{return dev.IsSupported(kDeviceCanReportRunningFirmwareDate);}					///< @returns	True if device can report its running (and not necessarily installed) firmware date
 		inline bool		CanThermostat (void)					{return dev.IsSupported(kDeviceCanThermostat);}									///< @returns	True if device fan can be thermostatically controlled
 		inline bool		HasAudioMonitorRCAJacks (void)			{return dev.IsSupported(kDeviceHasAudioMonitorRCAJacks);}						///< @returns	True if device has a pair of unbalanced RCA audio monitor output connectors

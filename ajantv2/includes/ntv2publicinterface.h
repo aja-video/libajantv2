@@ -1462,7 +1462,11 @@ typedef enum
 	//	kRegCanDoStatus
 	kRegMaskCanDoValidXptROM			= BIT(0),
 	kRegMaskCanDoAudioWaitForVBI		= BIT(1),
-	kRegMaskCanDoHancInsertion			= BIT(2),
+	kRegMaskMainFlashSPIController		= BIT(2),
+	kRegMaskMBFlashSPIController		= BIT(3),
+	kRegMaskHasNTV4FrameStores			= BIT(4),
+	kRegMaskCanReportMixerDelay			= BIT(5),
+	kRegMaskCanDoHancInsertion			= BIT(6),
 
 	//	kRegLUTV2Control
 	kRegMaskLUT1Enable					= BIT(0),
@@ -2556,7 +2560,11 @@ typedef enum
 	//	kRegCanDoStatus
 	kRegShiftCanDoValidXptROM			= 0,
 	kRegShiftCanDoAudioWaitForVBI		= 1,
-	kRegShiftCanDoHancInsertion			= 2,
+	kRegShiftMainFlashSPIController		= 2,
+	kRegShiftMBFlashSPIController		= 3,
+	kRegShiftHasNTV4FrameStores			= 4,
+	kRegShiftCanReportMixerDelay		= 5,
+	kRegShiftCanDoHancInsertion			= 6,
 
 	//	kRegLUTV2Control
 	kRegShiftLUT1Enable					= 0,
