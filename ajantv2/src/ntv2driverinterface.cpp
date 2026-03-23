@@ -313,7 +313,16 @@ bool CNTV2DriverInterface::OpenRemote (const NTV2DeviceSpecParser & inParser)
 	//	this process that describe the plugin, its signature, and any query parameters it
 	//	requires or accepts for further configuration.
 	DIDBG("Opening " << inParser.InfoString());
-	NTV2RPCAPI * pClient (NTV2RPCClientAPI::CreateClient(connectParams));
+	NTV2RPCAPI * pClient (nullptr);
+	try {
+		pClient = NTV2RPCClientAPI::CreateClient(connectParams);
+	} catch (std::bad_alloc &) {
+		pClient = nullptr;
+		DIFAIL("bad_alloc exception");
+	} catch (...) {
+		pClient = nullptr;
+		DIFAIL("exception");
+	}
 	if (!pClient)
 		return false;	//	Failed to instantiate plugin client
 

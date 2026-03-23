@@ -2219,10 +2219,18 @@ NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (NTV2ConnectParams & params)	/
 		NTV2PluginLoader loader(params);
 		fpCreateClient pFunc (reinterpret_cast<fpCreateClient>(loader.getFunctionAddress(kFuncNameCreateClient)));
 		if (!pFunc)
-			return AJA_NULL;
+			{NBCFAIL("'" << kFuncNameCreateClient << "' has NULL function address: " << params);  return AJA_NULL;}
 
 		//	Call plugin's Create function to instantiate the NTV2RPCClientAPI object...
-		pRPCObject = (*pFunc) (loader.refCon(), params, AJA_NTV2_SDK_VERSION);
+		try {
+			pRPCObject = (*pFunc) (loader.refCon(), params, AJA_NTV2_SDK_VERSION);
+		} catch (std::bad_alloc &) {
+			pRPCObject = nullptr;
+			NBCFAIL("'" << kFuncNameCreateClient << "' bad_alloc exception in CreateClient function");
+		} catch (...) {
+			pRPCObject = nullptr;
+			NBCFAIL("'" << kFuncNameCreateClient << "' exception in CreateClient function");
+		}
 		if (!pRPCObject)
 			NBCFAIL("'" << kFuncNameCreateClient << "' returned NULL client instance from: " << params);
 		else
@@ -2247,14 +2255,22 @@ NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (NTV2ConfigParams & params)	//
 		NTV2PluginLoader loader(params);
 		fpCreateServer pFunc = reinterpret_cast<fpCreateServer>(loader.getFunctionAddress(kFuncNameCreateServer));
 		if (!pFunc)
-			return AJA_NULL;
+			{NBCFAIL("'" << kFuncNameCreateServer << "' has NULL function address: " << params);  return AJA_NULL;}
 
 		//	Call plugin's Create function to instantiate the NTV2RPCServerAPI object...
-		pRPCObject = (*pFunc) (loader.refCon(), params, AJA_NTV2_SDK_VERSION);
+		try {
+			pRPCObject = (*pFunc) (loader.refCon(), params, AJA_NTV2_SDK_VERSION);
+		} catch (std::bad_alloc &) {
+			pRPCObject = nullptr;
+			NBCFAIL("'" << kFuncNameCreateServer << "' bad_alloc exception in CreateServer function");
+		} catch (...) {
+			pRPCObject = nullptr;
+			NBCFAIL("'" << kFuncNameCreateServer << "' exception in CreateServer function");
+		}
 		if (!pRPCObject)
-			NBSFAIL("'" << kFuncNameCreateServer << "' returned NULL server instance from: " << params);
+			NBCFAIL("'" << kFuncNameCreateServer << "' returned NULL server instance from: " << params);
 		else
-			NBSINFO("'" << kFuncNameCreateServer << "' created server instance " << xHEX0N(uint64_t(pRPCObject),16));
+			NBCINFO("'" << kFuncNameCreateServer << "' created server instance " << xHEX0N(uint64_t(pRPCObject),16));
 	}
 	return pRPCObject;	//	It's caller's responsibility to delete pRPCObject
 #endif
