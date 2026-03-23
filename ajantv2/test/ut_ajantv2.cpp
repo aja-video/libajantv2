@@ -4404,6 +4404,7 @@ TEST_SUITE("NTV2SWDevice" * doctest::description("NTV2SWDevice tests"))
 {
 	TEST_CASE("Basic")
 	{
+		if (!AJADebug::IsOpen()) AJADebug::Open();
 		const string devSpec("ntv2swdevice://foo/");
 		CNTV2Card a;
 		for (size_t num(0);  num < 5;  num++)
