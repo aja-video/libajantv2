@@ -2342,8 +2342,10 @@ bool CNTV2Card::ProgramMainFlash (const string & inFileName, const bool bInForce
 	ostringstream msgs;
 	string	progResults;
 	const bool ok(devFlasher.SetBitFile(inFileName, msgs, MAIN_FLASHBLOCK));
+#if 0
 	if (bInForceUpdate)
 		devFlasher.SetMBReset();
+#endif
 	if (ok)
 		progResults = devFlasher.Program(false);
 	else

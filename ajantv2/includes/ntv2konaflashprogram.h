@@ -57,10 +57,10 @@ public:
 	bool			ReadHeader (FlashBlockID flashBlock);
 	bool			ReadInfoString();
 	bool			SetBitFile (const std::string & inBitfileName, std::ostream & outMsgs, const FlashBlockID blockNumber = AUTO_FLASHBLOCK);	//	New in SDK 16.0
-	bool			SetMCSFile (const std::string & sMCSFileName);
+//	bool			SetMCSFile (const std::string & sMCSFileName);
 	std::string		Program (bool fullVerify = false);
-	bool			ProgramFromMCS(bool verify);
-	bool			ProgramSOC(bool verify = true);
+//	bool			ProgramFromMCS(bool verify);
+//	bool			ProgramSOC(bool verify = true);
 	bool			ProgramCustom (const std::string & sCustomFileName, const uint32_t addr, std::ostream & outMsgs);
     bool			ProgramKonaxMB (const std::string & sCustomFileName, const uint32_t addr, std::ostream & outMsgs);
 	bool			EraseBlock (FlashBlockID blockNumber);
@@ -74,7 +74,7 @@ public:
 	bool			SetFlashBlockIDBank(FlashBlockID blockID);
 	bool			ROMHasBankSelect();
 	uint32_t		ReadBankSelect ();
-	bool			SetMBReset();
+//	bool			SetMBReset();
 	bool			IsInstalledFWRunning (bool & outIsRunning, std::ostream & outErrorMsgs);
 	bool			WriteCommand(_FLASH_COMMAND inCommand);
 
@@ -142,11 +142,11 @@ public:
 			case LICENSE_BLOCK:			return 1;
 		}
 	}
-
+#if 0
 	bool VerifySOCPartition(FlashBlockID flashID, uint32_t FlashBlockOffset);
 	bool CheckAndFixMACs();
 	bool MakeMACsFromSerial( const char *sSerialNumber, MacAddr *pMac1, MacAddr *pMac2 );
-
+#endif
 protected:
 	NTV2Buffer		_bitFileBuffer;
 	uint8_t *		_customFileBuffer;

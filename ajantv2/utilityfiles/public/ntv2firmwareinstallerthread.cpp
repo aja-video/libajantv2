@@ -175,7 +175,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 	if (!m_device.GetInstalledBitfileInfo (numBytes, installedDate, installedTime))
 		FITWARN("CNTV2FirmwareInstallerThread:  Unable to obtain installed bitfile info");
 	m_device.GetSerialNumberString(serialNumStr);
-
+#if 0
 	if (m_bitfilePath.find(".mcs") != string::npos)
 	{
 		CNTV2KonaFlashProgram kfp;
@@ -228,7 +228,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 		FITNOTE("CNTV2FirmwareInstallerThread:  MCS update succeeded");
 		return AJA_STATUS_SUCCESS;
 	}	//	if MCS
-
+#endif
 	if (m_useDynamicReconfig)
 	{
 		m_device.AddDynamicDirectory(::NTV2GetFirmwareFolderPath());

@@ -184,7 +184,7 @@ int main (int argc, const char** argv)
 	const string	license			(pFirmwareLicense ? pFirmwareLicense : "");
 	CNTV2Card		device;
 	CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpecifier, device);
-	
+#if 0
 	if (device.features().CanDoIP())
 	{
 		CNTV2KonaFlashProgram konaFlasher(device.GetIndexNumber());
@@ -192,7 +192,7 @@ int main (int argc, const char** argv)
 			konaFlasher.SetMBReset();
 		konaFlasher.CheckAndFixMACs();
 	}
-
+#endif
 	if (bBitfileInfo)
 	{
 		//	--info option --- just dump bitfile info to cout

@@ -136,11 +136,9 @@ bool CNTV2KonaFlashProgram::WriteCommand(_FLASH_COMMAND inCommand)
 	
 	return WriteRegister(kRegXenaxFlashControlStatus, theCommand);
 }
-
+#if 0
 bool CNTV2KonaFlashProgram::SetMBReset()
 {
-	return false;
-#if 0
 	if (!features().CanDoIP())
 		return false;
 	bool resetOK(false);
@@ -155,9 +153,8 @@ bool CNTV2KonaFlashProgram::SetMBReset()
 		resetOK = WriteRegister(SAREK_REGS + kRegSarekControl, 0x01);
 	//	Take SPI bus control
 	return resetOK && WriteRegister(SAREK_REGS + kRegSarekSpiSelect, 0x01);
-#endif
 }
-
+#endif
 bool CNTV2KonaFlashProgram::IsInstalledFWRunning (bool & outIsRunning, ostream & outMsgs)
 {
 	UWord	runningYear(0), runningMonth(0), runningDay(0);
@@ -1505,7 +1502,7 @@ uint32_t CNTV2KonaFlashProgram::ReadBankSelect()
 	}
 	return bankNumber&0xf;
 }
-
+#if 0
 bool CNTV2KonaFlashProgram::SetMCSFile (const string & inMCSFileName)
 {
 	if (!_bQuiet)
@@ -1963,7 +1960,7 @@ bool CNTV2KonaFlashProgram::ProgramSOC (const bool verify)
 	SetBankSelect(BANK_0);
 	return true;
 }
-
+#endif
 static bool getFileSize (const string & fileName, size_t & outSizeBytes)
 {
 	outSizeBytes = 0;
@@ -2197,7 +2194,7 @@ void CNTV2KonaFlashProgram::ParsePartitionFromFileLines(uint32_t address, uint16
 	_bankSize = uint32_t(_partitionBuffer.size());
 	return;
 }
-
+#if 0
 bool CNTV2KonaFlashProgram::VerifySOCPartition(FlashBlockID flashID, uint32_t flashBlockOffset)
 {
 	SetFlashBlockIDBank(flashID);
@@ -2248,7 +2245,7 @@ bool CNTV2KonaFlashProgram::VerifySOCPartition(FlashBlockID flashID, uint32_t fl
 		cout << "Program verify: 100%					 " << endl;
 	return true;
 }
-
+#endif
 void CNTV2KonaFlashProgram::DisplayData (const uint32_t address, const uint32_t wordCount)
 {
 	const uint32_t WORDS_PER_LINE(4);
@@ -2345,7 +2342,7 @@ bool CNTV2KonaFlashProgram::FullProgram (vector<uint8_t> & dataBuffer)
 	SetWarmBootFirmwareReload(true);
 	return true;
 }
-
+#if 0
 bool CNTV2KonaFlashProgram::CheckAndFixMACs()
 {
 	MacAddr mac1, mac2;
@@ -2486,8 +2483,7 @@ bool CNTV2KonaFlashProgram::MakeMACsFromSerial( const char *sSerialNumber, MacAd
 		cerr << "Unrecognized or unspecified serial number '" << sSerialNumber << "'" << endl;
 	return false;
 }
-
-
+#endif
 
 #ifdef MSWindows
 #pragma warning(default: 4800)
