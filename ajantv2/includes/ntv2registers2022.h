@@ -7,7 +7,7 @@
 
 #ifndef REGISTERS_2022_H
 #define REGISTERS_2022_H
-
+#if 0
 #include "ntv2registersmb.h"
 
 /////////////////////////////////////////////////////////////////////
@@ -382,5 +382,5 @@
 #define kRegTsAesDecapAudioEmbedVidStat			6
 #define kRegTsAesDecapFrameCount				7
 #define kRegTsAesDecapByteCount					8
-
+#endif
 #endif // REGISTERS_2022_H

@@ -7,7 +7,7 @@
 
 #ifndef NTV2_2110CONFIG_H
 #define NTV2_2110CONFIG_H
-
+#if 0
 #include "ntv2card.h"
 #include "ntv2enums.h"
 #include "ntv2registers2110.h"
@@ -486,5 +486,5 @@ private:
 	std::vector<std::string>	tokens;
 
 };	//	CNTV2Config2110
-
+#endif
 #endif // NTV2_2110CONFIG_H

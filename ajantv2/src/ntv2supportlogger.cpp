@@ -507,7 +507,7 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 				AJASystemInfo::append(infoTable, "SFP URL", sfpURLStings[i]);
 			}
 		}
-
+#if 0
 		if (mDevice.features().CanDoIP())
 		{
 			PACKAGE_INFO_STRUCT pkgInfo;
@@ -550,6 +550,7 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 				AJASystemInfo::append(infoTable, "License Enable Mask", xHEX0NStr(licenseStatus & 0xff,2));
 			}
 		}	//	if IsIPDevice
+#endif
 		if (mDevice.IsRemote())
 		{
 			if (!mDevice.GetHostName().empty())

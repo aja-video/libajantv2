@@ -139,6 +139,8 @@ bool CNTV2KonaFlashProgram::WriteCommand(_FLASH_COMMAND inCommand)
 
 bool CNTV2KonaFlashProgram::SetMBReset()
 {
+	return false;
+#if 0
 	if (!features().CanDoIP())
 		return false;
 	bool resetOK(false);
@@ -153,6 +155,7 @@ bool CNTV2KonaFlashProgram::SetMBReset()
 		resetOK = WriteRegister(SAREK_REGS + kRegSarekControl, 0x01);
 	//	Take SPI bus control
 	return resetOK && WriteRegister(SAREK_REGS + kRegSarekSpiSelect, 0x01);
+#endif
 }
 
 bool CNTV2KonaFlashProgram::IsInstalledFWRunning (bool & outIsRunning, ostream & outMsgs)

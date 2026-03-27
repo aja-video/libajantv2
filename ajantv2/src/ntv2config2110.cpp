@@ -4,7 +4,7 @@
 	@brief		Implements the CNTV2Config2110 class.
 	@copyright	(C) 2014-2022 AJA Video Systems, Inc.	
 **/
-
+#if 0
 #include "ntv2config2110.h"
 #include "ntv2endian.h"
 #include "ntv2card.h"
@@ -3408,4 +3408,4 @@ uint64_t CNTV2Config2110::GetNTPTimestamp()
 {
 	return CNTV2MBController::GetNTPTimestamp();
 }
-
+#endif

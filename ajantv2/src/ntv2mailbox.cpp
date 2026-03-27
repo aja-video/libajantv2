@@ -4,7 +4,7 @@
 	@brief		Implementation of CNTV2MailBox class.
 	@copyright	(C) 2015-2022 AJA Video Systems, Inc.
 **/
-
+#if 0
 #include "ntv2mailbox.h"
 #include "ntv2utils.h"
 #include <string.h>
@@ -409,5 +409,4 @@ uint32_t CNTV2MailBox::getFeatures()
 	mDevice.ReadRegister(SAREK_REGS + kRegSarekFwCfg, val);
 	return val;
 }
-
-
+#endif

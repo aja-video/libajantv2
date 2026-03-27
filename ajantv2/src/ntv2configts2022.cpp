@@ -4,7 +4,7 @@
 	@brief		Implements the CNTV2ConfigTs2022 class.
 	@copyright	(C) 2014-2022 AJA Video Systems, Inc.
 **/
-
+#if 0
 #include "ntv2configts2022.h"
 #include "ntv2endian.h"
 #include "ntv2card.h"
@@ -1152,4 +1152,4 @@ int32_t CNTV2ConfigTs2022::CalculateTsGen(const NTV2Channel channel)
 
 	return (int32_t) d1;
 }
-
+#endif

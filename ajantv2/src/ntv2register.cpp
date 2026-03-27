@@ -2360,7 +2360,7 @@ bool CNTV2Card::GetRunningFirmwarePackageRevision (ULWord & outRevision)
 		return false;	//	Not open
 	if (!IsSupported(kDeviceCanDoIP))
 		return false;	//	No MicroBlaze
-	return ReadRegister(kRegSarekPackageVersion + SAREK_REGS, outRevision);
+	return false;//ReadRegister(kRegSarekPackageVersion + SAREK_REGS, outRevision);
 }
 
 bool CNTV2Card::GetRunningFirmwareRevision (UWord & outRevision)

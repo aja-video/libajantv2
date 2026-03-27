@@ -8,6 +8,7 @@
 #ifndef REGISTERS_MB_H
 #define REGISTERS_MB_H
 
+#if 0
 #define SAREK_MAX_CHANS 4
 #define SAREK_MAX_PORTS 2
 
@@ -498,5 +499,5 @@
 #define kRegCS_vfifo_av_diff_48khz		0x2a
 #define kRegCS_vfifo_level				0x2b
 #define kRegCS_sfp_status				0x2c
-
+#endif
 #endif // REGISTERS_MB_H

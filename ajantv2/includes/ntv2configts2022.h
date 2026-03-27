@@ -7,7 +7,7 @@
 
 #ifndef NTV2_2022CONFIGTS_H
 #define NTV2_2022CONFIGTS_H
-
+#if 0
 #include "ntv2card.h"
 #include "ntv2enums.h"
 #include "ntv2registers2022.h"
@@ -119,5 +119,5 @@ public:
 	int32_t				_transactionCount;
 
 };	//	CNTV2ConfigTs2022
-
+#endif
 #endif // NTV2_2022CONFIGTS_H

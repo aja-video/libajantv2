@@ -7,7 +7,7 @@
 
 #ifndef CNTV2MAILBOX_H
 #define CNTV2MAILBOX_H
-
+#if 0
 #include "ntv2card.h"
 #include "ntv2enums.h"
 #include "ntv2registers2022.h"
@@ -104,5 +104,5 @@ private:
 	uint64_t	_startTime;
 	uint32_t	_seqNum;
 };
-
+#endif
 #endif // CNTV2MAILBOX_H

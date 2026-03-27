@@ -12,7 +12,9 @@
 #include "ntv2utils.h"
 #include "ntv2bitfile.h"
 #include "ntv2mcsfile.h"
+#if 0
 #include "ntv2registers2022.h"
+#endif
 #include "sys/stat.h"
 #include "ntv2democommon.h"
 #include "ajabase/common/options_popt.h"
@@ -248,7 +250,7 @@ int main (int argc, const char** argv)
 		}
 		if (!bQuiet && device.IsOpen() && ::NTV2DeviceHasSPIFlash(device.GetDeviceID()))
 			ReportDeviceFlashStatus(device);
-
+#if 0
 		if (device.features().CanDoIP())
 		{
 			ULWord dnaLo;
@@ -269,6 +271,7 @@ int main (int argc, const char** argv)
 				 << ((licenseStatus & SAREK_LICENSE_VALID) ? " License is valid" : " License NOT valid")
 				 << endl;
 		}
+#endif
 		return AJA_STATUS_SUCCESS;	//	Done!
 	}
 	else if (bitfilePaths.size() > 1)

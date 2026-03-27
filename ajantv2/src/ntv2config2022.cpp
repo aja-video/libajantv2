@@ -4,7 +4,7 @@
 	@brief		Implements the CNTV2Config2022 class.
 	@copyright	(C) 2014-2022 AJA Video Systems, Inc.
 **/
-
+#if 0
 #include "ntv2config2022.h"
 #include "ntv2configts2022.h"
 #include "ntv2endian.h"
@@ -1693,3 +1693,4 @@ NTV2Channel CNTV2Config2022::VideoStreamToChannel(const NTV2Stream stream)
 	}
 	return channel;
 }
+#endif

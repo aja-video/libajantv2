@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 #include <map>
-
+#if 0
 #define KIPDPRINT						0
 
 #if defined(MSWindows)
@@ -826,5 +826,5 @@ public:
 		return pos;
 	}
 };
-
 #endif
+#endif	//	NTV2TSHELPER_H

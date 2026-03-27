@@ -7,7 +7,7 @@
 
 #ifndef REGISTERS_2110_H
 #define REGISTERS_2110_H
-
+#if 0
 #include "ntv2registersmb.h"
 
 #define SAREK_4175_TX_PACKETIZER_1				(0x200000/4)
@@ -367,5 +367,5 @@
 #define kRegTxNtv2VideoDecode2		(S2110_BLOCK_BASE+5)
 #define kRegTxNtv2VideoDecode3		(S2110_BLOCK_BASE+6)
 #define kRegTxNtv2VideoDecode4		(S2110_BLOCK_BASE+7)
-
+#endif
 #endif // REGISTERS_2110_H

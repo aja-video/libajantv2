@@ -4,7 +4,7 @@
 	@brief		Implementation of CNTV2MBController class.
 	@copyright	(C) 2015-2022 AJA Video Systems, Inc.	
 **/
-
+#if 0
 #include "ntv2mbcontroller.h"
 #include <sstream>
 #include <fstream>
@@ -958,4 +958,4 @@ bool CNTV2MBController::SetLLDPInfo(string sysName)
 	mIpErrorCode = NTV2IpErrInvalidMBResponse;
 	return false;
 }
-
+#endif

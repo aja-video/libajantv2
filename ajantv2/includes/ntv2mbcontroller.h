@@ -7,7 +7,7 @@
 
 #ifndef NTV2MBCONTROLLER_H
 #define NTV2MBCONTROLLER_H
-
+#if 0
 #include "ntv2card.h"
 #include "ntv2mailbox.h"
 #include <iostream>
@@ -182,5 +182,5 @@ private:
 
 private:
 };
-
+#endif
 #endif // NTV2MBCONTROLLER_H

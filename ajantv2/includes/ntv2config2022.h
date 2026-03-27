@@ -7,7 +7,7 @@
 
 #ifndef NTV2_2022CONFIG_H
 #define NTV2_2022CONFIG_H
-
+#if 0
 #include "ntv2card.h"
 #include "ntv2enums.h"
 #include "ntv2registers2022.h"
@@ -248,5 +248,5 @@ private:
 	bool		_is_txTop34;
 	bool		_isIoIp;
 };	//	CNTV2Config2022
-
+#endif
 #endif // NTV2_2022CONFIG_H

@@ -1402,17 +1402,21 @@ bool CNTV2DriverInterface::IsDeviceReady (const bool checkValid)
 
 bool CNTV2DriverInterface::IsMBSystemValid (void)
 {
+#if 0
 	if (IsSupported(kDeviceCanDoIP))
 	{
 		uint32_t val;
 		ReadRegister(SAREK_REGS + kRegSarekIfVersion, val);
 		return val == SAREK_IF_VERSION;
 	}
+#endif
 	return true;
 }
 
 bool CNTV2DriverInterface::IsMBSystemReady (void)
 {
+return false;
+#if 0
 	if (!IsSupported(kDeviceCanDoIP))
 		return false;	//	No microblaze
 
@@ -1424,6 +1428,7 @@ bool CNTV2DriverInterface::IsMBSystemReady (void)
 	// Not enough to read MB State, we need to make sure MB is running
 	ReadRegister(SAREK_REGS + kRegSarekMBUptime, val);
 	return (val < 2) ? false : true;
+#endif
 }
 
 bool CNTV2DriverInterface::IsLPSystemReady (void)
