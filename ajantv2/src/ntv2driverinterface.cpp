@@ -12,7 +12,7 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2nubaccess.h"
 #include "ntv2bitfile.h"
-#include "ntv2registersmb.h"	//	for SAREK_REGS
+//#include "ntv2registersmb.h"	//	for SAREK_REGS
 #include "ntv2spiinterface.h"
 #include "ntv2utils.h"
 #include "ntv2version.h"

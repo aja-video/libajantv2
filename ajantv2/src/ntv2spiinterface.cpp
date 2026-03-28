@@ -12,9 +12,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
-#include "ntv2registersmb.h"
-#include "ntv2mcsfile.h"
+//#include "ntv2registersmb.h"
+//#include "ntv2mcsfile.h"
 
 using namespace std;
 

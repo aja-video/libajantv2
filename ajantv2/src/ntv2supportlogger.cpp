@@ -9,7 +9,7 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2konaflashprogram.h"
 #include "ntv2registerexpert.h"
-#include "ntv2registersmb.h"
+//#include "ntv2registersmb.h"
 #include "ntv2rp188.h"
 #include "ajabase/common/common.h"
 #include "ajabase/persistence/persistence.h"

@@ -8,7 +8,7 @@
 #include "ntv2card.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
-#include "ntv2registersmb.h"
+//#include "ntv2registersmb.h"
 #include "ntv2konaflashprogram.h"
 #include "ntv2konaflashprogram.h"
 #include "ntv2vpid.h"
