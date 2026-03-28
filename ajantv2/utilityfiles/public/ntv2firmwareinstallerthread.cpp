@@ -47,7 +47,6 @@ int NeedsFirmwareUpdate (CNTV2Card & inDevice, string & outReason)
 	string			installedDate, installedTime, serialNumStr, newFirmwareDescription;
 	ULWord			numBytes		(0);
 	CNTV2Bitfile	bitfile;
-	CNTV2MCSfile	mcsFile;
 
 	outReason.clear();
 	if (!inDevice.IsOpen())
@@ -57,6 +56,8 @@ int NeedsFirmwareUpdate (CNTV2Card & inDevice, string & outReason)
 	if (inDevice.IsRemote())
 		{outReason = "device '" + inDevice.GetDescription() + "' not local physical";	return kFirmwareUpdateCheckFailed;}
 	const string firmwarePath (::GetFirmwarePath(inDevice.GetDeviceID()));
+#if 0
+	CNTV2MCSfile	mcsFile;
 	if (firmwarePath.find(".mcs") != std::string::npos)
 	{
 		//	.MCS file?
@@ -79,7 +80,7 @@ int NeedsFirmwareUpdate (CNTV2Card & inDevice, string & outReason)
 		outReason = "on-device firmware " + installedDate + " older than on-disk bitfile firmware " + bitfile.GetDate ();
 		return -1;	//	on-device firmware older than on-disk bitfile firmware
 	}
-
+#endif
 	if (inDevice.GetInstalledBitfileInfo (numBytes, installedDate, installedTime))
 	{
 		if (bitfile.Open (firmwarePath))

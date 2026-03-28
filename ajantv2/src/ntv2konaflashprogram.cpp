@@ -6,7 +6,7 @@
 **/
 #include "ntv2konaflashprogram.h"
 #include "ntv2endian.h"
-#include "ntv2registersmb.h"
+//#include "ntv2registersmb.h"
 #include "ajabase/system/debug.h"
 #include "ajabase/system/systemtime.h"
 #include "ajabase/common/common.h"
@@ -79,7 +79,7 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram ()
 		_flashID			(MAIN_FLASHBLOCK),
 		_deviceID			(0),
 		_bQuiet				(false),
-		_mcsStep			(0),
+//		_mcsStep			(0),
 		_failSafePadding	(0),
 		_spiFlash			(AJA_NULL),
 		_hasExtendedCommandSupport	(false)
@@ -107,7 +107,7 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram (const UWord boardNumber)
 		_flashID			(MAIN_FLASHBLOCK),
 		_deviceID			(0),
 		_bQuiet				(false),
-		_mcsStep			(0),
+//		_mcsStep			(0),
 		_failSafePadding	(0),
 		_spiFlash			(AJA_NULL),
 		_hasExtendedCommandSupport	(false)
@@ -2190,7 +2190,7 @@ void CNTV2KonaFlashProgram::ParsePartitionFromFileLines(uint32_t address, uint16
 	bool getnext = false;
 	if (address != 0x0000 && address != 0x0200)
 		getnext = true;
-	_mcsFile.GetPartition(_partitionBuffer, uint16_t(address), partitionOffset, getnext);
+//	_mcsFile.GetPartition(_partitionBuffer, uint16_t(address), partitionOffset, getnext);
 	_bankSize = uint32_t(_partitionBuffer.size());
 	return;
 }

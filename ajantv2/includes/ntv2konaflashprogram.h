@@ -17,7 +17,7 @@
 #include <fcntl.h>
 #include <iostream>
 #include "ntv2debug.h"
-#include "ntv2mcsfile.h"
+//#include "ntv2mcsfile.h"
 #include "ntv2spiinterface.h"
 #include "ntv2bitfile.h"
 
@@ -84,7 +84,7 @@ public:
 	std::string		GetTime (void) const		{return _parser.Time();}
 	const NTV2BitfileHeaderParser & Parser (void) const	{return _parser;}
 	uint32_t		GetNumBytes(void) const		{return _numBytes;}
-	const std::string &	GetMCSInfo (void) const	{return _mcsInfo;}
+//	const std::string &	GetMCSInfo (void) const	{return _mcsInfo;}
 	void ParsePartitionFromFileLines(uint32_t address, uint16_t & partitionOffset);
 	bool CreateBankRecord(BankSelect bankID);
 
@@ -96,7 +96,7 @@ public:
 	bool ProgramInfoFromString(std::string infoString);
 	bool FullProgram(std::vector<uint8_t> & dataBuffer);
 
-	int32_t	 NextMcsStep() {return ++_mcsStep;}
+//	int32_t	 NextMcsStep() {return ++_mcsStep;}
 
 	bool WaitForFlashNOTBusy();
 	bool ProgramFlashValue(uint32_t address, uint32_t value);
@@ -173,8 +173,10 @@ protected:
 	FlashBlockID	_flashID;
 	uint32_t		_deviceID;
 	bool			_bQuiet;
+#if 0
 	int32_t			_mcsStep;
 	CNTV2MCSfile	_mcsFile;
+#endif
 	std::vector<uint8_t> _partitionBuffer;
 	uint32_t		_failSafePadding;
 	CNTV2SpiFlash * _spiFlash;
