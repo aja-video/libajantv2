@@ -8,7 +8,6 @@
 #include "ntv2card.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
-//#include "ntv2registersmb.h"
 #include "ntv2konaflashprogram.h"
 #include "ntv2konaflashprogram.h"
 #include "ntv2vpid.h"
@@ -2342,7 +2341,7 @@ bool CNTV2Card::ProgramMainFlash (const string & inFileName, const bool bInForce
 	ostringstream msgs;
 	string	progResults;
 	const bool ok(devFlasher.SetBitFile(inFileName, msgs, MAIN_FLASHBLOCK));
-#if 0
+#if 0	//	IP10G purge
 	if (bInForceUpdate)
 		devFlasher.SetMBReset();
 #endif
@@ -2362,7 +2361,7 @@ bool CNTV2Card::GetRunningFirmwarePackageRevision (ULWord & outRevision)
 		return false;	//	Not open
 	if (!IsSupported(kDeviceCanDoIP))
 		return false;	//	No MicroBlaze
-	return false;//ReadRegister(kRegSarekPackageVersion + SAREK_REGS, outRevision);
+	return false;	//	IP10G purge		//	ReadRegister(kRegSarekPackageVersion + SAREK_REGS, outRevision);
 }
 
 bool CNTV2Card::GetRunningFirmwareRevision (UWord & outRevision)

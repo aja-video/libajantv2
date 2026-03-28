@@ -9,7 +9,6 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2konaflashprogram.h"
 #include "ntv2registerexpert.h"
-//#include "ntv2registersmb.h"
 #include "ntv2rp188.h"
 #include "ajabase/common/common.h"
 #include "ajabase/persistence/persistence.h"
@@ -507,7 +506,7 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 				AJASystemInfo::append(infoTable, "SFP URL", sfpURLStings[i]);
 			}
 		}
-#if 0
+#if 0	//	IP10G purge
 		if (mDevice.features().CanDoIP())
 		{
 			PACKAGE_INFO_STRUCT pkgInfo;
@@ -550,7 +549,7 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 				AJASystemInfo::append(infoTable, "License Enable Mask", xHEX0NStr(licenseStatus & 0xff,2));
 			}
 		}	//	if IsIPDevice
-#endif
+#endif	//	IP10G purge
 		if (mDevice.IsRemote())
 		{
 			if (!mDevice.GetHostName().empty())

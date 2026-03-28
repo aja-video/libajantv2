@@ -6,7 +6,6 @@
 **/
 #include "ntv2konaflashprogram.h"
 #include "ntv2endian.h"
-//#include "ntv2registersmb.h"
 #include "ajabase/system/debug.h"
 #include "ajabase/system/systemtime.h"
 #include "ajabase/common/common.h"

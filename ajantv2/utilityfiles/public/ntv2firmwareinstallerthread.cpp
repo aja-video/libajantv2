@@ -56,7 +56,7 @@ int NeedsFirmwareUpdate (CNTV2Card & inDevice, string & outReason)
 	if (inDevice.IsRemote())
 		{outReason = "device '" + inDevice.GetDescription() + "' not local physical";	return kFirmwareUpdateCheckFailed;}
 	const string firmwarePath (::GetFirmwarePath(inDevice.GetDeviceID()));
-#if 0
+#if 0	//	IP10G purge
 	CNTV2MCSfile	mcsFile;
 	if (firmwarePath.find(".mcs") != std::string::npos)
 	{
@@ -80,7 +80,7 @@ int NeedsFirmwareUpdate (CNTV2Card & inDevice, string & outReason)
 		outReason = "on-device firmware " + installedDate + " older than on-disk bitfile firmware " + bitfile.GetDate ();
 		return -1;	//	on-device firmware older than on-disk bitfile firmware
 	}
-#endif
+#endif	//	IP10G purge
 	if (inDevice.GetInstalledBitfileInfo (numBytes, installedDate, installedTime))
 	{
 		if (bitfile.Open (firmwarePath))
@@ -176,7 +176,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 	if (!m_device.GetInstalledBitfileInfo (numBytes, installedDate, installedTime))
 		FITWARN("CNTV2FirmwareInstallerThread:  Unable to obtain installed bitfile info");
 	m_device.GetSerialNumberString(serialNumStr);
-#if 0
+#if 0	//	IP10G purge
 	if (m_bitfilePath.find(".mcs") != string::npos)
 	{
 		CNTV2KonaFlashProgram kfp;
@@ -229,7 +229,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 		FITNOTE("CNTV2FirmwareInstallerThread:  MCS update succeeded");
 		return AJA_STATUS_SUCCESS;
 	}	//	if MCS
-#endif
+#endif	//	IP10G purge
 	if (m_useDynamicReconfig)
 	{
 		m_device.AddDynamicDirectory(::NTV2GetFirmwareFolderPath());
