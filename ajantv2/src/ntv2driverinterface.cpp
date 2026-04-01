@@ -1083,6 +1083,12 @@ bool CNTV2DriverInterface::ReadFlashULWord (const ULWord inAddress, ULWord & out
 void CNTV2DriverInterface::setDeviceIndexNumber (const UWord num)
 {
 	_boardNumber = num;
+	if (IsRemote())		//	Remote/virtual device?
+		if (_pRPCAPI->HasConnectParam(kQParamVDevIndex))	//	.vdev-originated device?
+		{
+			//	Special handling for .vdev devices to work with AJA ControlPanel and R2 services
+			CNTV2DeviceScanner::PatchDeviceInfo (_boardNumber, *this);
+		}
 }
 
 
