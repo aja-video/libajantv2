@@ -491,7 +491,7 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 			AJASystemInfo::append(infoTable, "Installed Bitfile Build Date",	dateStr + " " + timeStr);
 		}
 		
-		if (::NTV2DeviceHasLPProductCode(mDevice.GetDeviceID()))
+		if (mDevice.features().HasLPProductCode())
 		{
 			AJASystemInfo::append(infoTable, "URL INFO", "");
 			std::string urlString;
@@ -550,18 +550,18 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 			}
 		}	//	if IsIPDevice
 #endif	//	IP10G purge
+		#if defined(AJAMac)
+			connType = mDevice.GetConnectionType();
+			if (!connType.empty())
+				AJASystemInfo::append(infoTable, "Driver Connection", connType);
+		#endif	//	AJAMac
 		if (mDevice.IsRemote())
 		{
 			if (!mDevice.GetHostName().empty())
 				AJASystemInfo::append(infoTable, "Host Name", mDevice.GetHostName());
 			if (!mDevice.GetDescription().empty())
 				AJASystemInfo::append(infoTable, "Device Description", mDevice.GetDescription());
-		}	//	if remote/fake device
-		#if defined(AJAMac)
-			connType = mDevice.GetConnectionType();
-			if (!connType.empty())
-				AJASystemInfo::append(infoTable, "Driver Connection", connType);
-		#endif	//	AJAMac
+		}
 	}	//	if IsOpen
 
 	AJASystemInfo hostInfo;
@@ -596,6 +596,20 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 	}
 
 	oss << AJASystemInfo::ToString(infoTable) << endl;
+
+	if (mDevice.IsOpen() && mDevice.IsRemote())
+	{
+		const NTV2Dictionary params (mDevice.ConnectParams());
+		if (!params.empty())
+		{
+			infoTable.clear();
+			AJASystemInfo::append(infoTable, "CONNECT PARAMETERS");
+			const NTV2StringSet kys(params.keys());
+			for (NTV2StringSetConstIter pKey(kys.begin());  pKey != kys.end();  ++pKey)
+				AJASystemInfo::append(infoTable, *pKey, params.valueForKey(*pKey));
+			oss << AJASystemInfo::ToString(infoTable) << endl;
+		}
+	}	//	if remote/virtual/software device
 }	//	FetchInfoLog
 
 
