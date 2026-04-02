@@ -229,28 +229,25 @@ string CNTV2Card::SerialNum64ToString (const uint64_t inSerialNumber)	//	Class m
 bool CNTV2Card::GetSerialNumberString (string & outSerialNumberString)
 {
 	ULWord spiFlashVers(0);
-	if (!GetNumericParam(kDeviceGetSPIFlashVersion, spiFlashVers))
-		return false;
-    const NTV2DeviceID deviceID(GetDeviceID());
-    bool hasLPPC = NTV2DeviceHasLPProductCode(deviceID);
-    if (hasLPPC || spiFlashVers >= 6)
-    {
-        //	Newer devices use 4 regs:  kRegReserved54 thru kRegReserved57
-        ULWord serialArray[] = {0,0,0,0};
-        ReadRegister(hasLPPC ? kRegReserved54 : kRegReserved56, serialArray[0]);
-        ReadRegister(hasLPPC ? kRegReserved55 : kRegReserved57, serialArray[1]);
-        ReadRegister(hasLPPC ? kRegReserved56 : kRegReserved54, serialArray[2]);
-        ReadRegister(hasLPPC ? kRegReserved57 : kRegReserved55, serialArray[3]);
-        outSerialNumberString.clear();
-        for (int serialIndex = 0;  serialIndex < 4;  serialIndex++)
-            if (serialArray[serialIndex] != 0xffffffff)
-                for (int i = 0;  i < 4;  i++)
-                {
-                    const char tempChar(((serialArray[serialIndex] >> (i*8)) & 0xff));
-                    if (tempChar > 0 && tempChar != '.')
-                        outSerialNumberString.push_back(tempChar);
-                }
-    }
+	const bool hasLPPC(IsSupported(kDeviceHasLPProductCode));
+	if (hasLPPC  ||  (GetNumericParam(kDeviceGetSPIFlashVersion, spiFlashVers) && spiFlashVers >= 6))
+	{
+		//	Newer devices use 4 regs:  kRegReserved54 thru kRegReserved57
+		ULWord serialArray[] = {0,0,0,0};
+		ReadRegister(hasLPPC ? kRegReserved54 : kRegReserved56, serialArray[0]);
+		ReadRegister(hasLPPC ? kRegReserved55 : kRegReserved57, serialArray[1]);
+		ReadRegister(hasLPPC ? kRegReserved56 : kRegReserved54, serialArray[2]);
+		ReadRegister(hasLPPC ? kRegReserved57 : kRegReserved55, serialArray[3]);
+		outSerialNumberString.clear();
+		for (int serialIndex = 0;  serialIndex < 4;  serialIndex++)
+			if (serialArray[serialIndex] != 0xffffffff)
+				for (int i = 0;  i < 4;  i++)
+				{
+					const char tempChar(((serialArray[serialIndex] >> (i*8)) & 0xff));
+					if (tempChar > 0 && tempChar != '.')
+						outSerialNumberString.push_back(tempChar);
+				}
+	}
 	else
 	{	//	Older devices use 2 regs:  kRegReserved54 & kRegReserved55
 		outSerialNumberString = ::SerialNum64ToString(GetSerialNumber());
@@ -258,11 +255,12 @@ bool CNTV2Card::GetSerialNumberString (string & outSerialNumberString)
 			{outSerialNumberString = "INVALID?";  return false;}
 
 		//	Prepend 5/6/7 for Io4K+/IoIP/IoX3, respectively...
+		const NTV2DeviceID deviceID (GetDeviceID());
 		if (deviceID == DEVICE_ID_IO4KPLUS)
 			outSerialNumberString = "5" + outSerialNumberString;	//	Io4K+/DNXIV: prepend "5"
 		else if (deviceID == DEVICE_ID_IOIP_2022 ||
-                 deviceID == DEVICE_ID_IOIP_2110 ||
-                 deviceID == DEVICE_ID_IOIP_2110_RGB12)
+				 deviceID == DEVICE_ID_IOIP_2110 ||
+				 deviceID == DEVICE_ID_IOIP_2110_RGB12)
 			outSerialNumberString = "6" + outSerialNumberString;	//	IoIP: prepend "6"
 		else if (deviceID == DEVICE_ID_IOX3)
 			outSerialNumberString = "7" + outSerialNumberString;	//	IoX3: prepend "7"
@@ -437,7 +435,7 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 
 bool CNTV2Card::GetLPExternalConfigurationURLString (string & outURLString)
 {
-	if (!NTV2DeviceHasLPProductCode(GetDeviceID()))
+	if (!IsSupported(kDeviceHasLPProductCode))
 		return false;
 	uint32_t portIP(0);
 	int ipOctet(0);
@@ -463,7 +461,7 @@ bool CNTV2Card::GetLPExternalConfigurationURLString (string & outURLString)
 
 bool CNTV2Card::GetLPTunnelConfigurationURLString (string & outURLString)
 {
-	if (!NTV2DeviceHasLPProductCode(GetDeviceID()))
+	if (!IsSupported(kDeviceHasLPProductCode))
 		return false;
 	uint32_t portIP(0);
 	int ipOctet(0);
@@ -489,17 +487,16 @@ bool CNTV2Card::GetLPTunnelConfigurationURLString (string & outURLString)
 
 int CNTV2Card::GetSFPConfigurationURLStrings(std::vector<std::string> & OutSFPURLStrings)
 {
-	if (!NTV2DeviceHasLPProductCode(GetDeviceID()) || NTV2DeviceGetNum25GSFPs(GetDeviceID()) == 0)
+	const ULWord numSFPs (GetNumSupported(kDeviceGetNum25GSFPs));
+	if (!IsSupported(kDeviceHasLPProductCode) || numSFPs == 0)
 		return 0;
-	
-	UWord numSFPs = NTV2DeviceGetNum25GSFPs(GetDeviceID());
-	
-	for (int i = 0; i < numSFPs; i++)
+
+	for (ULWord ndx(0);  ndx < numSFPs;  ndx++)
 	{
 		uint32_t portIP(0);
 		int ipOctet(0);
 		ostringstream tempString;
-		ReadRegister(kRegLPSFP1IP+i, portIP);
+		ReadRegister(kRegLPSFP1IP + ndx, portIP);
 		if (portIP == 0)
 			return false;
 		

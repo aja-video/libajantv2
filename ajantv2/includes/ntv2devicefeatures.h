@@ -160,6 +160,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceHasBracketLED,						///< @brief True if device has LED(s) on the card bracket. (New in SDK 18.0)
 	kDeviceCanDo25GIP,							///< @brief True if device has 25Gbps SFPs. (New in SDK 18.0)
 	kDeviceCanReportMixerDelay,					///< @brief	True if device can report Mixer delay. (New in SDK 18.1)
+	kDeviceHasLPProductCode,					///< @brief	True if device has a local processor handling the product code. (New in SDK 18.1)
 	kNTV2BoolParam_LAST,
 	kNTV2BoolParam_COUNT	= kNTV2BoolParam_LAST-kNTV2BoolParam_FIRST,
 	kDeviceCanDo_INVALID	= kNTV2BoolParam_LAST
@@ -226,6 +227,7 @@ typedef enum _NTV2NumericParamID
 	kDeviceGetNumTSIMuxers,						///< @brief	The number of TSI muxers on the device. (New in SDK 17.0)
 	kDeviceGetSPIFlashVersion,					///< @brief	The SPI-flash version on the device. (New in SDK 17.1)
 	kDeviceGetGenlockVersion,					///< @brief	The version number of the device's genlock hardware/firmware. (New in SDK 17.6)
+	kDeviceGetNum25GSFPs,						///< @brief	The number of 25Gbps SFPs on the device. (New in SDK 18.1)
 	kNTV2NumericParam_LAST,
 	kNTV2NumericParam_COUNT	= kNTV2NumericParam_LAST-kNTV2NumericParam_FIRST,
 	kDeviceGetNum_INVALID	= kNTV2NumericParam_LAST

@@ -420,7 +420,7 @@ class AJAExport CNTV2DriverInterface
 									{	ULWord value(0);
 										if (IsOpen())
 											GetBoolParam (ULWord(inParamID), value);
-										return bool(value);
+										return value ? true : false;
 									}
 		/**
 			@return		The requested quantity for the given device feature.
