@@ -12,7 +12,6 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2nubaccess.h"
 #include "ntv2bitfile.h"
-#include "ntv2registersmb.h"	//	for SAREK_REGS
 #include "ntv2spiinterface.h"
 #include "ntv2utils.h"
 #include "ntv2version.h"
@@ -1408,28 +1407,12 @@ bool CNTV2DriverInterface::IsDeviceReady (const bool checkValid)
 
 bool CNTV2DriverInterface::IsMBSystemValid (void)
 {
-	if (IsSupported(kDeviceCanDoIP))
-	{
-		uint32_t val;
-		ReadRegister(SAREK_REGS + kRegSarekIfVersion, val);
-		return val == SAREK_IF_VERSION;
-	}
 	return true;
 }
 
 bool CNTV2DriverInterface::IsMBSystemReady (void)
 {
-	if (!IsSupported(kDeviceCanDoIP))
-		return false;	//	No microblaze
-
-	uint32_t val;
-	ReadRegister(SAREK_REGS + kRegSarekMBState, val);
-	if (val != 0x01)
-		return false;	//	MB not ready
-
-	// Not enough to read MB State, we need to make sure MB is running
-	ReadRegister(SAREK_REGS + kRegSarekMBUptime, val);
-	return (val < 2) ? false : true;
+	return false;
 }
 
 bool CNTV2DriverInterface::IsLPSystemReady (void)
@@ -1794,6 +1777,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceHasGenlockv3:					outValue = GetNumSupported(kDeviceGetGenlockVersion) == 3;			break;	//	Deprecate
 		case kDeviceHasHeadphoneJack:				outValue = ::NTV2DeviceHasHeadphoneJack(devID);						break;
 		case kDeviceHasLEDAudioMeters:				outValue = ::NTV2DeviceHasLEDAudioMeters(devID);					break;
+		case kDeviceHasLPProductCode:				outValue = ::NTV2DeviceHasLPProductCode(devID);						break;
 		case kDeviceHasRotaryEncoder:				outValue = ::NTV2DeviceHasRotaryEncoder(devID);						break;
 		case kDeviceHasSPIv5:						outValue = ::NTV2DeviceGetSPIFlashVersion(devID) == 5;				break;
 		case kDeviceHasXilinxDMA:					outValue = ::NTV2DeviceHasXilinxDMA(devID);							break;
@@ -1846,6 +1830,7 @@ bool CNTV2DriverInterface::GetNumericParam (const ULWord inParamID, ULWord & out
 		case kDeviceGetMaxTransferCount:				outVal = ::NTV2DeviceGetMaxTransferCount (devID);				break;
 		case kDeviceGetNum2022ChannelsSFP1:				outVal = ::NTV2DeviceGetNum2022ChannelsSFP1 (devID);			break;
 		case kDeviceGetNum2022ChannelsSFP2:				outVal = ::NTV2DeviceGetNum2022ChannelsSFP2 (devID);			break;
+		case kDeviceGetNum25GSFPs:						outVal = ::NTV2DeviceGetNum25GSFPs (devID);						break;
 		case kDeviceGetNum4kQuarterSizeConverters:		outVal = ::NTV2DeviceGetNum4kQuarterSizeConverters (devID);		break;
 		case kDeviceGetNumAESAudioInputChannels:		outVal = ::NTV2DeviceGetNumAESAudioInputChannels (devID);		break;
 		case kDeviceGetNumAESAudioOutputChannels:		outVal = ::NTV2DeviceGetNumAESAudioOutputChannels (devID);		break;

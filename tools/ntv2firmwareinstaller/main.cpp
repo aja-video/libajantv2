@@ -12,7 +12,9 @@
 #include "ntv2utils.h"
 #include "ntv2bitfile.h"
 #include "ntv2mcsfile.h"
+#if 0
 #include "ntv2registers2022.h"
+#endif
 #include "sys/stat.h"
 #include "ntv2democommon.h"
 #include "ajabase/common/options_popt.h"
@@ -85,7 +87,7 @@ static void ReportDeviceFlashStatus (CNTV2Card & inDevice)
 		warnings << "## WARNING:  No fail-safe bitfile found" << endl;
 
 	if (konaFlasher.ReadInfoString())
-		cout << "    Package Info: " << konaFlasher.GetMCSInfo().c_str() << endl;
+		cout << "    Package Info: " << "(N/A)"/*konaFlasher.GetMCSInfo().c_str()*/ << endl;
 	else if (inDevice.features().CanDoIP())
 		warnings << "## WARNING:  Unable to read package info" << endl;
 
@@ -113,25 +115,7 @@ static void ReportDeviceFlashStatus (CNTV2Card & inDevice)
 
 
 /**
-	ntv2firmwareinstaller [-d|--device spec] [-p|--progress] [-w|--wait] [-q|--quiet]  [bitFilePath [...]]
-
 	Installs firmware on a given device.
-
-	...where...
-
-	path/to/bitfile			Specifies an absolute or relative path to the firmware bitfile to be --info'd or installed.
-
-	-d |--device spec		Specifies the target device to be flashed using an index number, serial number or model name
-							(see CNTV2DeviceScanner::GetFirstDeviceFromArgument). If not specified, defaults to the first
-							device found (i.e., the one using index number zero).
-
-	-p | --progress			(Optional)  Show installation progress.
-
-	-w | --wait				(Optional)  Prompts user to "press Enter key" when installation completes.
-
-	-q | --quiet			(Optional)  Don't show status messages.
-
-	-i | --info				(Optional)  Don't install, just show info about specified firmware bitfile(s).
 **/
 int main (int argc, const char** argv)
 {
@@ -182,7 +166,7 @@ int main (int argc, const char** argv)
 	const string	license			(pFirmwareLicense ? pFirmwareLicense : "");
 	CNTV2Card		device;
 	CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpecifier, device);
-	
+#if 0
 	if (device.features().CanDoIP())
 	{
 		CNTV2KonaFlashProgram konaFlasher(device.GetIndexNumber());
@@ -190,7 +174,7 @@ int main (int argc, const char** argv)
 			konaFlasher.SetMBReset();
 		konaFlasher.CheckAndFixMACs();
 	}
-
+#endif
 	if (bBitfileInfo)
 	{
 		//	--info option --- just dump bitfile info to cout
@@ -216,7 +200,7 @@ int main (int argc, const char** argv)
 		for (StringListConstIter iter (bitfilePaths.begin());  iter != bitfilePaths.end();  ++iter)
 		{
 			const string &			bitfilePath (*iter);
-			const string::size_type	posMCS		(bitfilePath.rfind(".mcs"));
+//			const string::size_type	posMCS		(bitfilePath.rfind(".mcs"));
 			const string::size_type	posBIT		(bitfilePath.rfind(".bit"));
 
 			if (posBIT != string::npos  &&  (posBIT + 4) == bitfilePath.length())
@@ -230,6 +214,7 @@ int main (int argc, const char** argv)
 				else
 					cerr	<< "## ERROR:  Unable to open '" << bitfilePath << "' -- " << bitfileInfo.GetLastError() << endl;
 			}
+#if 0
 			else if (posMCS != string::npos  &&  (posMCS + 4) == bitfilePath.length())
 			{
 				CNTV2MCSfile	mcsInfo;
@@ -243,12 +228,13 @@ int main (int argc, const char** argv)
 				else
 					cerr	<< "## ERROR:  Unable to open MCS bitfile '" << bitfilePath << "'" << endl;
 			}
+#endif
 			else
 				cerr	<< "## ERROR:  File '" << bitfilePath << "' doesn't end with '.bit' or '.mcs'" << endl;
 		}
 		if (!bQuiet && device.IsOpen() && ::NTV2DeviceHasSPIFlash(device.GetDeviceID()))
 			ReportDeviceFlashStatus(device);
-
+#if 0
 		if (device.features().CanDoIP())
 		{
 			ULWord dnaLo;
@@ -269,6 +255,7 @@ int main (int argc, const char** argv)
 				 << ((licenseStatus & SAREK_LICENSE_VALID) ? " License is valid" : " License NOT valid")
 				 << endl;
 		}
+#endif
 		return AJA_STATUS_SUCCESS;	//	Done!
 	}
 	else if (bitfilePaths.size() > 1)

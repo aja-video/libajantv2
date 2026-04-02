@@ -6,7 +6,6 @@
 **/
 #include "ntv2konaflashprogram.h"
 #include "ntv2endian.h"
-#include "ntv2registersmb.h"
 #include "ajabase/system/debug.h"
 #include "ajabase/system/systemtime.h"
 #include "ajabase/common/common.h"
@@ -79,7 +78,7 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram ()
 		_flashID			(MAIN_FLASHBLOCK),
 		_deviceID			(0),
 		_bQuiet				(false),
-		_mcsStep			(0),
+//		_mcsStep			(0),
 		_failSafePadding	(0),
 		_spiFlash			(AJA_NULL),
 		_hasExtendedCommandSupport	(false)
@@ -107,7 +106,7 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram (const UWord boardNumber)
 		_flashID			(MAIN_FLASHBLOCK),
 		_deviceID			(0),
 		_bQuiet				(false),
-		_mcsStep			(0),
+//		_mcsStep			(0),
 		_failSafePadding	(0),
 		_spiFlash			(AJA_NULL),
 		_hasExtendedCommandSupport	(false)
@@ -136,7 +135,7 @@ bool CNTV2KonaFlashProgram::WriteCommand(_FLASH_COMMAND inCommand)
 	
 	return WriteRegister(kRegXenaxFlashControlStatus, theCommand);
 }
-
+#if 0
 bool CNTV2KonaFlashProgram::SetMBReset()
 {
 	if (!features().CanDoIP())
@@ -154,7 +153,7 @@ bool CNTV2KonaFlashProgram::SetMBReset()
 	//	Take SPI bus control
 	return resetOK && WriteRegister(SAREK_REGS + kRegSarekSpiSelect, 0x01);
 }
-
+#endif
 bool CNTV2KonaFlashProgram::IsInstalledFWRunning (bool & outIsRunning, ostream & outMsgs)
 {
 	UWord	runningYear(0), runningMonth(0), runningDay(0);
@@ -1502,7 +1501,7 @@ uint32_t CNTV2KonaFlashProgram::ReadBankSelect()
 	}
 	return bankNumber&0xf;
 }
-
+#if 0
 bool CNTV2KonaFlashProgram::SetMCSFile (const string & inMCSFileName)
 {
 	if (!_bQuiet)
@@ -1960,7 +1959,7 @@ bool CNTV2KonaFlashProgram::ProgramSOC (const bool verify)
 	SetBankSelect(BANK_0);
 	return true;
 }
-
+#endif
 static bool getFileSize (const string & fileName, size_t & outSizeBytes)
 {
 	outSizeBytes = 0;
@@ -2190,11 +2189,11 @@ void CNTV2KonaFlashProgram::ParsePartitionFromFileLines(uint32_t address, uint16
 	bool getnext = false;
 	if (address != 0x0000 && address != 0x0200)
 		getnext = true;
-	_mcsFile.GetPartition(_partitionBuffer, uint16_t(address), partitionOffset, getnext);
+//	_mcsFile.GetPartition(_partitionBuffer, uint16_t(address), partitionOffset, getnext);
 	_bankSize = uint32_t(_partitionBuffer.size());
 	return;
 }
-
+#if 0
 bool CNTV2KonaFlashProgram::VerifySOCPartition(FlashBlockID flashID, uint32_t flashBlockOffset)
 {
 	SetFlashBlockIDBank(flashID);
@@ -2245,7 +2244,7 @@ bool CNTV2KonaFlashProgram::VerifySOCPartition(FlashBlockID flashID, uint32_t fl
 		cout << "Program verify: 100%					 " << endl;
 	return true;
 }
-
+#endif
 void CNTV2KonaFlashProgram::DisplayData (const uint32_t address, const uint32_t wordCount)
 {
 	const uint32_t WORDS_PER_LINE(4);
@@ -2342,7 +2341,7 @@ bool CNTV2KonaFlashProgram::FullProgram (vector<uint8_t> & dataBuffer)
 	SetWarmBootFirmwareReload(true);
 	return true;
 }
-
+#if 0
 bool CNTV2KonaFlashProgram::CheckAndFixMACs()
 {
 	MacAddr mac1, mac2;
@@ -2483,8 +2482,7 @@ bool CNTV2KonaFlashProgram::MakeMACsFromSerial( const char *sSerialNumber, MacAd
 		cerr << "Unrecognized or unspecified serial number '" << sSerialNumber << "'" << endl;
 	return false;
 }
-
-
+#endif
 
 #ifdef MSWindows
 #pragma warning(default: 4800)

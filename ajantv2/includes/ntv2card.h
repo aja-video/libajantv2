@@ -1644,7 +1644,7 @@ public:
 		@note		It is not an error to call this function when the Audio System's playout side is already running.
 		@note		Applications using \ref aboutautocirculate won't need to call this function, since AutoCirculate
 					configures the Audio System automatically.
-		@see		CNTV2Card::StopAudioOutput, CNTV2Card::IsAudioOutputRunning, CNTV2Card::CanDoAudioWaitForVBI, \ref audop-playout
+		@see		CNTV2Card::StopAudioOutput, CNTV2Card::IsAudioOutputRunning, DeviceCapabilities::CanDoAudioWaitForVBI, \ref audop-playout
 	**/
 	AJA_VIRTUAL bool		StartAudioOutput (const NTV2AudioSystem inAudioSystem, const bool inWaitForVBI = false);	//	New in SDK 14.3
 
@@ -1706,7 +1706,7 @@ public:
 		@note		It is not an error to call this function when the Audio System's capture side is already running.
 		@note		Applications using \ref aboutautocirculate won't need to call this function, since AutoCirculate
 					configures the Audio System automatically.
-		@see		CNTV2Card::StopAudioInput, CNTV2Card::IsAudioInputRunning, \ref audop-capture
+		@see		CNTV2Card::StopAudioInput, CNTV2Card::IsAudioInputRunning, DeviceCapabilities::CanDoAudioWaitForVBI, \ref audop-capture
 	**/
 	AJA_VIRTUAL bool		StartAudioInput (const NTV2AudioSystem inAudioSystem, const bool inWaitForVBI = false);	//	New in SDK 14.3
 

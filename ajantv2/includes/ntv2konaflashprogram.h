@@ -17,7 +17,7 @@
 #include <fcntl.h>
 #include <iostream>
 #include "ntv2debug.h"
-#include "ntv2mcsfile.h"
+//#include "ntv2mcsfile.h"
 #include "ntv2spiinterface.h"
 #include "ntv2bitfile.h"
 
@@ -57,10 +57,10 @@ public:
 	bool			ReadHeader (FlashBlockID flashBlock);
 	bool			ReadInfoString();
 	bool			SetBitFile (const std::string & inBitfileName, std::ostream & outMsgs, const FlashBlockID blockNumber = AUTO_FLASHBLOCK);	//	New in SDK 16.0
-	bool			SetMCSFile (const std::string & sMCSFileName);
+//	bool			SetMCSFile (const std::string & sMCSFileName);
 	std::string		Program (bool fullVerify = false);
-	bool			ProgramFromMCS(bool verify);
-	bool			ProgramSOC(bool verify = true);
+//	bool			ProgramFromMCS(bool verify);
+//	bool			ProgramSOC(bool verify = true);
 	bool			ProgramCustom (const std::string & sCustomFileName, const uint32_t addr, std::ostream & outMsgs);
     bool			ProgramKonaxMB (const std::string & sCustomFileName, const uint32_t addr, std::ostream & outMsgs);
 	bool			EraseBlock (FlashBlockID blockNumber);
@@ -74,7 +74,7 @@ public:
 	bool			SetFlashBlockIDBank(FlashBlockID blockID);
 	bool			ROMHasBankSelect();
 	uint32_t		ReadBankSelect ();
-	bool			SetMBReset();
+//	bool			SetMBReset();
 	bool			IsInstalledFWRunning (bool & outIsRunning, std::ostream & outErrorMsgs);
 	bool			WriteCommand(_FLASH_COMMAND inCommand);
 
@@ -84,7 +84,7 @@ public:
 	std::string		GetTime (void) const		{return _parser.Time();}
 	const NTV2BitfileHeaderParser & Parser (void) const	{return _parser;}
 	uint32_t		GetNumBytes(void) const		{return _numBytes;}
-	const std::string &	GetMCSInfo (void) const	{return _mcsInfo;}
+//	const std::string &	GetMCSInfo (void) const	{return _mcsInfo;}
 	void ParsePartitionFromFileLines(uint32_t address, uint16_t & partitionOffset);
 	bool CreateBankRecord(BankSelect bankID);
 
@@ -96,7 +96,7 @@ public:
 	bool ProgramInfoFromString(std::string infoString);
 	bool FullProgram(std::vector<uint8_t> & dataBuffer);
 
-	int32_t	 NextMcsStep() {return ++_mcsStep;}
+//	int32_t	 NextMcsStep() {return ++_mcsStep;}
 
 	bool WaitForFlashNOTBusy();
 	bool ProgramFlashValue(uint32_t address, uint32_t value);
@@ -142,11 +142,11 @@ public:
 			case LICENSE_BLOCK:			return 1;
 		}
 	}
-
+#if 0
 	bool VerifySOCPartition(FlashBlockID flashID, uint32_t FlashBlockOffset);
 	bool CheckAndFixMACs();
 	bool MakeMACsFromSerial( const char *sSerialNumber, MacAddr *pMac1, MacAddr *pMac2 );
-
+#endif
 protected:
 	NTV2Buffer		_bitFileBuffer;
 	uint8_t *		_customFileBuffer;
@@ -173,8 +173,10 @@ protected:
 	FlashBlockID	_flashID;
 	uint32_t		_deviceID;
 	bool			_bQuiet;
+#if 0
 	int32_t			_mcsStep;
 	CNTV2MCSfile	_mcsFile;
+#endif
 	std::vector<uint8_t> _partitionBuffer;
 	uint32_t		_failSafePadding;
 	CNTV2SpiFlash * _spiFlash;
