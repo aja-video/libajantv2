@@ -13,7 +13,6 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2devicescanner.h"
 #include "ntv2democommon.h"
-#include "ntv2task.h"
 #include "ntv2utils.h"
 #include "ntv2vpid.h"
 #include "ajabase/common/types.h"

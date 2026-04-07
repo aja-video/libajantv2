@@ -164,7 +164,7 @@ set(AJANTV2_HEADERS
     includes/ntv2signalrouter.h
     includes/ntv2spiinterface.h
     includes/ntv2supportlogger.h
-    includes/ntv2task.h
+#   includes/ntv2task.h					# removed in SDK 18.1
     includes/ntv2testpatterngen.h
     includes/ntv2transcode.h
 #   includes/ntv2tshelper.h				# removed in SDK 18.1
@@ -224,7 +224,7 @@ set(AJANTV2_SOURCES
     src/ntv2stream.cpp
     src/ntv2subscriptions.cpp
     src/ntv2supportlogger.cpp
-    src/ntv2task.cpp
+#   src/ntv2task.cpp					# removed in SDK 18.1
     src/ntv2testpatterngen.cpp
     src/ntv2transcode.cpp
 #   src/ntv2utf8.cpp					# removed in SDK 17.1

@@ -9,20 +9,10 @@
 #define _NTV2BURN4KQUADRANT_H
 
 #include "ntv2card.h"
-//#include "ntv2devicefeatures.h"
-//#include "ntv2devicescanner.h"
 #include "ntv2democommon.h"
-//#include "ntv2task.h"
-//#include "ntv2utils.h"
-//#include "ntv2rp188.h"
-//#include "ajabase/common/types.h"
-//#include "ajabase/common/videotypes.h"
-//#include "ajabase/common/timecode.h"
 #include "ajabase/common/timecodeburn.h"
 #include "ajabase/common/circularbuffer.h"
 #include "ajabase/system/thread.h"
-//#include "ajabase/system/process.h"
-//#include "ajabase/system/systemtime.h"
 
 
 /**
