@@ -85,7 +85,7 @@ public:
 	const NTV2BitfileHeaderParser & Parser (void) const	{return _parser;}
 	uint32_t		GetNumBytes(void) const		{return _numBytes;}
 //	const std::string &	GetMCSInfo (void) const	{return _mcsInfo;}
-	void ParsePartitionFromFileLines(uint32_t address, uint16_t & partitionOffset);
+//	void ParsePartitionFromFileLines(uint32_t address, uint16_t & partitionOffset);
 	bool CreateBankRecord(BankSelect bankID);
 
 	bool ProgramMACAddresses(MacAddr * mac1, MacAddr * mac2);

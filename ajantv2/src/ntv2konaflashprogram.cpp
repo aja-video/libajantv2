@@ -2181,7 +2181,7 @@ bool CNTV2KonaFlashProgram::ROMHasBankSelect()
 {
 	return ::NTV2DeviceROMHasBankSelect(_boardID);
 }
-
+#if 0
 void CNTV2KonaFlashProgram::ParsePartitionFromFileLines(uint32_t address, uint16_t & partitionOffset)
 {
 	_partitionBuffer.clear();
@@ -2193,7 +2193,7 @@ void CNTV2KonaFlashProgram::ParsePartitionFromFileLines(uint32_t address, uint16
 	_bankSize = uint32_t(_partitionBuffer.size());
 	return;
 }
-#if 0
+
 bool CNTV2KonaFlashProgram::VerifySOCPartition(FlashBlockID flashID, uint32_t flashBlockOffset)
 {
 	SetFlashBlockIDBank(flashID);
