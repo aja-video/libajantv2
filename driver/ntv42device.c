@@ -9,6 +9,7 @@
 #include <linux/kernel.h>
 #include <linux/string.h>
 #include <linux/ktime.h>
+#include <linux/sched.h>
 
 #include "ntv42device.h"
 #include "ntv42message.h"
