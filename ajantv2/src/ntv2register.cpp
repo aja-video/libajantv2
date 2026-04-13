@@ -3043,14 +3043,14 @@ bool CNTV2Card::GetMixerFGMatteEnabled (const UWord inWhichMixer, bool & outIsEn
 	outIsEnabled = false;
 	if (ULWord(inWhichMixer) >= GetNumSupported(kDeviceGetNumMixers))
 		return false;
-	return !CNTV2DriverInterface::ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], outIsEnabled, kRegMaskVidProcFGMatteEnable, kRegShiftVidProcFGMatteEnable);
+	return CNTV2DriverInterface::ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], outIsEnabled, kRegMaskVidProcFGMatteEnable, kRegShiftVidProcFGMatteEnable);
 }
 
 bool CNTV2Card::SetMixerFGMatteEnabled (const UWord inWhichMixer, const bool inIsEnabled)
 {
 	if (ULWord(inWhichMixer) >= GetNumSupported(kDeviceGetNumMixers))
 		return false;
-	return !WriteRegister (gIndexToVidProcControlRegNum[inWhichMixer], inIsEnabled?1:0, kRegMaskVidProcFGMatteEnable, kRegShiftVidProcFGMatteEnable);
+	return WriteRegister (gIndexToVidProcControlRegNum[inWhichMixer], inIsEnabled?1:0, kRegMaskVidProcFGMatteEnable, kRegShiftVidProcFGMatteEnable);
 }
 
 bool CNTV2Card::GetMixerBGMatteEnabled (const UWord inWhichMixer, bool & outIsEnabled)
@@ -3058,14 +3058,14 @@ bool CNTV2Card::GetMixerBGMatteEnabled (const UWord inWhichMixer, bool & outIsEn
 	outIsEnabled = false;
 	if (ULWord(inWhichMixer) >= GetNumSupported(kDeviceGetNumMixers))
 		return false;
-	return !CNTV2DriverInterface::ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], outIsEnabled, kRegMaskVidProcBGMatteEnable, kRegShiftVidProcBGMatteEnable);
+	return CNTV2DriverInterface::ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], outIsEnabled, kRegMaskVidProcBGMatteEnable, kRegShiftVidProcBGMatteEnable);
 }
 
 bool CNTV2Card::SetMixerBGMatteEnabled (const UWord inWhichMixer, const bool inIsEnabled)
 {
 	if (ULWord(inWhichMixer) >= GetNumSupported(kDeviceGetNumMixers))
 		return false;
-	return !WriteRegister (gIndexToVidProcControlRegNum[inWhichMixer], inIsEnabled?1:0, kRegMaskVidProcBGMatteEnable, kRegShiftVidProcBGMatteEnable);
+	return WriteRegister (gIndexToVidProcControlRegNum[inWhichMixer], inIsEnabled?1:0, kRegMaskVidProcBGMatteEnable, kRegShiftVidProcBGMatteEnable);
 }
 
 static const ULWord gMatteColorRegs[]	= { kRegFlatMatteValue /*13*/,	kRegFlatMatte2Value /*249*/,	kRegFlatMatte3Value /*487*/,	kRegFlatMatte4Value /*490*/, 0, 0, 0, 0};
