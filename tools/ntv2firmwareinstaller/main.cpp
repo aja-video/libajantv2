@@ -11,10 +11,6 @@
 #include "ntv2devicescanner.h"
 #include "ntv2utils.h"
 #include "ntv2bitfile.h"
-#include "ntv2mcsfile.h"
-#if 0
-#include "ntv2registers2022.h"
-#endif
 #include "sys/stat.h"
 #include "ntv2democommon.h"
 #include "ajabase/common/options_popt.h"

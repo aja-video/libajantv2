@@ -541,33 +541,8 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdateIPDevice (const NTV2DeviceID inDe
 	}
 	case DEVICE_ID_TTAP_PRO:
 		return designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_TTAP_PRO);
-*/	case DEVICE_ID_KONAIP_2022:
-	case DEVICE_ID_KONAIP_4CH_2SFP:
-	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
-	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
-	case DEVICE_ID_KONAIP_1RX_1TX_2110:
-	case DEVICE_ID_KONAIP_2110:
-	case DEVICE_ID_KONAIP_2110_RGB12:
-		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_2022) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_4CH_2SFP) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_2TX_1SFP_J2K) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_1RX_1TX_2110) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_2110) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_2110_RGB12) ||
-				designName == "s2022_56_2p2ch_rxtx_mb" ||
-				designName == "s2022_12_2ch_tx_spoof" ||
-				designName == "s2022_12_2ch_tx" ||
-				designName == "s2022_12_2ch_rx" ||
-				designName == "s2022_56_4ch_rxtx_fec" ||
-				designName == "s2110_1rx_1tx"); 
-	case DEVICE_ID_IOIP_2022:
-	case DEVICE_ID_IOIP_2110:
-	case DEVICE_ID_IOIP_2110_RGB12:
-		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2022) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2110) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2110_RGB12));
+*/
 	default: break;
 	}
 	return false;
-}
+}	//	ShouldUpdateIPDevice

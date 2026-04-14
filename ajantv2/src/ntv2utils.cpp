@@ -4628,9 +4628,9 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_IO4KPLUS:				return inForRetailDisplay ? "Avid DNxIV"				: "Io4KPlus";
 		case DEVICE_ID_IO4KUFC:					return inForRetailDisplay ? "Io4K UFC"					: "Io4KUfc";
 		case DEVICE_ID_IOEXPRESS:				return inForRetailDisplay ? "IoExpress"					: "IoExpress";
-		case DEVICE_ID_IOIP_2022:				return inForRetailDisplay ? "Avid DNxIP s2022"			: "IoIP-s2022";
-		case DEVICE_ID_IOIP_2110:				return inForRetailDisplay ? "Avid DNxIP s2110"			: "IoIP-s2110";
-		case DEVICE_ID_IOIP_2110_RGB12:			return inForRetailDisplay ? "Avid DNxIP s2110_RGB12"	: "IoIP-s2110_RGB12";
+//		case DEVICE_ID_IOIP_2022:				return inForRetailDisplay ? "Avid DNxIP s2022"			: "IoIP-s2022";
+//		case DEVICE_ID_IOIP_2110:				return inForRetailDisplay ? "Avid DNxIP s2110"			: "IoIP-s2110";
+//		case DEVICE_ID_IOIP_2110_RGB12:			return inForRetailDisplay ? "Avid DNxIP s2110_RGB12"	: "IoIP-s2110_RGB12";
 		case DEVICE_ID_IOX3:					return "IoX3";
 		case DEVICE_ID_IOXT:					return "IoXT";
 		case DEVICE_ID_IP25_R:					return "IP25-R";
@@ -4659,13 +4659,13 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONA5_OE8:				return "Kona5-OE8";
 		case DEVICE_ID_KONA5_OE9:				return "Kona5-OE9";
 		case DEVICE_ID_KONAHDMI:				return inForRetailDisplay ? "Kona HDMI"					: "KonaHDMI";
-		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K: return "KonaIP J2K 1I 1O";
-		case DEVICE_ID_KONAIP_1RX_1TX_2110:		return "KonaIP s2110 1I 1O";
-		case DEVICE_ID_KONAIP_2022:				return "KonaIP s2022";
-		case DEVICE_ID_KONAIP_2110:				return "KonaIP s2110";
-		case DEVICE_ID_KONAIP_2110_RGB12:		return "KonaIP s2110 RGB12";
-		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:		return "KonaIP J2K 2O";
-		case DEVICE_ID_KONAIP_4CH_2SFP:			return "KonaIP s2022 2+2";
+//		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K: return "KonaIP J2K 1I 1O";
+//		case DEVICE_ID_KONAIP_1RX_1TX_2110:		return "KonaIP s2110 1I 1O";
+//		case DEVICE_ID_KONAIP_2022:				return "KonaIP s2022";
+//		case DEVICE_ID_KONAIP_2110:				return "KonaIP s2110";
+//		case DEVICE_ID_KONAIP_2110_RGB12:		return "KonaIP s2110 RGB12";
+//		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:		return "KonaIP J2K 2O";
+//		case DEVICE_ID_KONAIP_4CH_2SFP:			return "KonaIP s2022 2+2";
 		case DEVICE_ID_KONALHEPLUS:				return inForRetailDisplay ? "KONA LHe+"					: "KonaLHe+";
 		case DEVICE_ID_KONALHI:					return inForRetailDisplay ? "KONA LHi"					: "KonaLHi";
 		case DEVICE_ID_KONALHIDVI:				return inForRetailDisplay ? "KONA LHi DVI"				: "KonaLHiDVI";
@@ -4693,7 +4693,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 #endif
 	}
 	return inForRetailDisplay ? "Unknown" : "???";
-}
+}	//	NTV2DeviceIDToString
 
 
 NTV2Channel GetNTV2ChannelForIndex (const ULWord inIndex)
@@ -7586,20 +7586,20 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 	case DEVICE_ID_KONA3GQUAD:					return "kona3gquad.bit";
 	case DEVICE_ID_KONA4:						return "kona4.bit";
 	case DEVICE_ID_KONA4UFC:					return "kona4ufc.bit";
-	case DEVICE_ID_KONAIP_2022:					return "konaip2022.mcs";
-	case DEVICE_ID_KONAIP_4CH_2SFP:				return "s2022_56_2p2ch_rxtx.mcs";
-	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "kip_j2k_1i1o.mcs";
-	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "kip_j2k_2o.mcs";
-	case DEVICE_ID_KONAIP_1RX_1TX_2110:			return "s2110_1rx_1tx.mcs";
+//	case DEVICE_ID_KONAIP_2022:					return "konaip2022.mcs";
+//	case DEVICE_ID_KONAIP_4CH_2SFP:				return "s2022_56_2p2ch_rxtx.mcs";
+//	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "kip_j2k_1i1o.mcs";
+//	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "kip_j2k_2o.mcs";
+//	case DEVICE_ID_KONAIP_1RX_1TX_2110:			return "s2110_1rx_1tx.mcs";
 	case DEVICE_ID_KONALHEPLUS:					return "konalheplus.bit";
 	case DEVICE_ID_KONALHI:						return "konalhi.bit";
 	case DEVICE_ID_TTAP:						return "ttap.bit";
 	case DEVICE_ID_IO4KPLUS:					return "io4kplus.bit";
-	case DEVICE_ID_IOIP_2022:					return "ioip2022.mcs";
-	case DEVICE_ID_IOIP_2110:					return "ioip2110.mcs";
-	case DEVICE_ID_IOIP_2110_RGB12:				return "ioip2110rgb.mcs";
-	case DEVICE_ID_KONAIP_2110:					return "konaip2110.mcs";
-	case DEVICE_ID_KONAIP_2110_RGB12:			return "konaip2110rgb.mcs";
+//	case DEVICE_ID_IOIP_2022:					return "ioip2022.mcs";
+//	case DEVICE_ID_IOIP_2110:					return "ioip2110.mcs";
+//	case DEVICE_ID_IOIP_2110_RGB12:				return "ioip2110rgb.mcs";
+//	case DEVICE_ID_KONAIP_2110:					return "konaip2110.mcs";
+//	case DEVICE_ID_KONAIP_2110_RGB12:			return "konaip2110rgb.mcs";
 	case DEVICE_ID_KONAHDMI:					return "konahdmi4rx.bit";
 	case DEVICE_ID_KONA1:						return "kona1.bit";
 	case DEVICE_ID_KONA5:						return "kona5_retail_tprom.bit";
@@ -7751,9 +7751,9 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_IO4KPLUS,
 														DEVICE_ID_IO4KUFC,
 														DEVICE_ID_IOEXPRESS,
-														DEVICE_ID_IOIP_2022,
-														DEVICE_ID_IOIP_2110_RGB12,
-														DEVICE_ID_IOIP_2110,
+//														DEVICE_ID_IOIP_2022,
+//														DEVICE_ID_IOIP_2110_RGB12,
+//														DEVICE_ID_IOIP_2110,
 														DEVICE_ID_IOX3,
 														DEVICE_ID_IOXT,
 														DEVICE_ID_IP25_R,
@@ -7782,13 +7782,13 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_KONA5_OE8,
 														DEVICE_ID_KONA5_OE9,
 														DEVICE_ID_KONAHDMI,
-														DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K,
-														DEVICE_ID_KONAIP_1RX_1TX_2110,
-														DEVICE_ID_KONAIP_2022,
-														DEVICE_ID_KONAIP_2110_RGB12,
-														DEVICE_ID_KONAIP_2110,
-														DEVICE_ID_KONAIP_2TX_1SFP_J2K,
-														DEVICE_ID_KONAIP_4CH_2SFP,
+//														DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K,
+//														DEVICE_ID_KONAIP_1RX_1TX_2110,
+//														DEVICE_ID_KONAIP_2022,
+//														DEVICE_ID_KONAIP_2110_RGB12,
+//														DEVICE_ID_KONAIP_2110,
+//														DEVICE_ID_KONAIP_2TX_1SFP_J2K,
+//														DEVICE_ID_KONAIP_4CH_2SFP,
 														DEVICE_ID_KONAIP_25G,
 														DEVICE_ID_KONALHEPLUS,
 														DEVICE_ID_KONALHI,
@@ -7835,7 +7835,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 			insertIt = true;
 		else if (inKinds & NTV2_DEVICEKIND_ANALOG  &&  (::NTV2DeviceGetNumAnalogVideoInputs(deviceID)+::NTV2DeviceGetNumAnalogVideoOutputs(deviceID)) > 0)
 			insertIt = true;
-		else if (inKinds & NTV2_DEVICEKIND_SFP	&&	::NTV2DeviceCanDoIP(deviceID))
+		else if (inKinds & NTV2_DEVICEKIND_SFP	&&	(::NTV2DeviceCanDoIP(deviceID) || ::NTV2DeviceCanDo25GIP(deviceID)))
 			insertIt = true;
 		else if (inKinds & NTV2_DEVICEKIND_EXTERNAL	 &&	 ::NTV2DeviceIsExternalToHost(deviceID))
 			insertIt = true;

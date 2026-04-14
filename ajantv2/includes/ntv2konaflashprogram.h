@@ -17,7 +17,6 @@
 #include <fcntl.h>
 #include <iostream>
 #include "ntv2debug.h"
-//#include "ntv2mcsfile.h"
 #include "ntv2spiinterface.h"
 #include "ntv2bitfile.h"
 
