@@ -196,7 +196,7 @@ int main (int argc, const char** argv)
 		for (StringListConstIter iter (bitfilePaths.begin());  iter != bitfilePaths.end();  ++iter)
 		{
 			const string &			bitfilePath (*iter);
-//			const string::size_type	posMCS		(bitfilePath.rfind(".mcs"));
+			const string::size_type	posMCS		(bitfilePath.rfind(".mcs"));
 			const string::size_type	posBIT		(bitfilePath.rfind(".bit"));
 
 			if (posBIT != string::npos  &&  (posBIT + 4) == bitfilePath.length())
@@ -210,21 +210,8 @@ int main (int argc, const char** argv)
 				else
 					cerr	<< "## ERROR:  Unable to open '" << bitfilePath << "' -- " << bitfileInfo.GetLastError() << endl;
 			}
-#if 0
 			else if (posMCS != string::npos  &&  (posMCS + 4) == bitfilePath.length())
-			{
-				CNTV2MCSfile	mcsInfo;
-				if (mcsInfo.GetMCSHeaderInfo(bitfilePath))
-					cout    << left << setw(int(maxlen)) << bitfilePath << "  "
-							<< left << setw(11) << "---" << " " << right
-							<< mcsInfo.GetBitfileDateString() << " " << mcsInfo.GetBitfileTimeString() << "  "
-							<< left << setw(18) << mcsInfo.GetBitfileDesignString()
-							<< "  " << mcsInfo.GetMCSPackageVersionString()
-							<< "  " << mcsInfo.GetMCSPackageDateString() << endl;
-				else
-					cerr	<< "## ERROR:  Unable to open MCS bitfile '" << bitfilePath << "'" << endl;
-			}
-#endif
+				cerr	<< "## WARNING:  MCS file info display is no longer supported: '" << bitfilePath << "'" << endl;
 			else
 				cerr	<< "## ERROR:  File '" << bitfilePath << "' doesn't end with '.bit' or '.mcs'" << endl;
 		}
