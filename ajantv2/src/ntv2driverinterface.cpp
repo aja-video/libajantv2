@@ -748,7 +748,7 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 	::strncpy(bitFileInfo.designNameStr, bitFileDesignNameString.c_str(), sizeof(bitFileInfo.designNameStr)-1);
 	return true;
 }
-
+#if 0	//	IoIP/KonaIP10G purge
 bool CNTV2DriverInterface::GetPackageInformation (PACKAGE_INFO_STRUCT & packageInfo)
 {
 	if (!IsDeviceReady(false) || !IsSupported(kDeviceCanDoIP))
@@ -850,7 +850,7 @@ bool CNTV2DriverInterface::GetPackageInformation (PACKAGE_INFO_STRUCT & packageI
 	packageInfo.packageNumber = results[7];
 	return true;
 }
-
+#endif	//	IoIP/KonaIP10G purge
 // Common remote card DriverGetBuildInformation.  Subclasses have overloaded function
 // that does platform-specific function on local cards.
 bool CNTV2DriverInterface::DriverGetBuildInformation (BUILD_INFO_STRUCT & buildInfo)

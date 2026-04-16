@@ -36,15 +36,13 @@
 #endif
 
 #if defined(AJALinux ) || defined(AJAMac)
-//	#include <sys/types.h>	//	** MrBill **	Not needed for AJALinux, needed for AJAMac?
-//	#include <netinet/in.h>	//	** MrBill **	Not needed for AJALinux, needed for AJAMac?
 	#include <unistd.h>	//	for usleep
 #elif defined(MSWindows)
 	#include <WinSock2.h>
 	#include <assert.h>
 #endif
 
-
+#if 0	//	IoIP/KonaIP10G purge
 typedef struct
 {
 	std::string		buildNumber;
@@ -52,7 +50,7 @@ typedef struct
 	std::string		date;
 	std::string		time;
 } PACKAGE_INFO_STRUCT, *PPACKAGE_INFO_STRUCT;
-
+#endif	//	IoIP/KonaIP10G purge
 
 /**
 	@brief	I'm the base class that undergirds the platform-specific derived classes (from which ::CNTV2Card is ultimately derived).
@@ -395,13 +393,6 @@ class AJAExport CNTV2DriverInterface
 		**/
 		AJA_VIRTUAL bool DriverGetBuildInformation (BUILD_INFO_STRUCT & outBuildInfo);
 
-		/**
-			@brief		Answers with the IP device's package information.
-			@param[out]	outPkgInfo	Receives the package information.
-			@return		True if successful;  otherwise false.
-		**/
-		AJA_VIRTUAL bool GetPackageInformation (PACKAGE_INFO_STRUCT & outPkgInfo);
-
 		AJA_VIRTUAL bool BitstreamWrite (const NTV2Buffer & inBuffer, const bool inFragment, const bool inSwap);
 		AJA_VIRTUAL bool BitstreamReset (const bool inConfiguration, const bool inInterface);
 		AJA_VIRTUAL bool BitstreamStatus (NTV2ULWordVector & outRegValues);
@@ -608,6 +599,9 @@ class AJAExport CNTV2DriverInterface
 #if !defined(NTV2_DEPRECATE_17_6)
 	AJA_VIRTUAL inline bool	NTV2_DEPRECATED_17_6(HevcSendMessage(HevcMessageHeader* pMsg))	{(void)pMsg; return false;}	///< @deprecated	Corvid HEVC support dropped in SDK 17.6
 #endif//!defined(NTV2_DEPRECATE_17_6)
+#if 0	//	IoIP/KonaIP10G purge
+		AJA_VIRTUAL bool GetPackageInformation (PACKAGE_INFO_STRUCT & outPkgInfo);	//	Obsolete
+#endif	//	IoIP/KonaIP10G purge
 
 #if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
 		/**
