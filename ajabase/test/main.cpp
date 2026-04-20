@@ -397,7 +397,201 @@ TEST_SUITE("common" * doctest::description("functions in ajabase/common/common.h
 		CHECK(strcmp(target3, source2) == 0);
 	}
 
-} //common
+	TEST_CASE("aja::parsing")
+	{
+		SUBCASE("is_hex_digit")
+		{
+			CHECK(aja::is_hex_digit('0'));
+			CHECK(aja::is_hex_digit('1'));
+			CHECK(aja::is_hex_digit('2'));
+			CHECK(aja::is_hex_digit('3'));
+			CHECK(aja::is_hex_digit('4'));
+			CHECK(aja::is_hex_digit('5'));
+			CHECK(aja::is_hex_digit('6'));
+			CHECK(aja::is_hex_digit('7'));
+			CHECK(aja::is_hex_digit('8'));
+			CHECK(aja::is_hex_digit('9'));
+			CHECK(aja::is_hex_digit('A'));
+			CHECK(aja::is_hex_digit('B'));
+			CHECK(aja::is_hex_digit('C'));
+			CHECK(aja::is_hex_digit('D'));
+			CHECK(aja::is_hex_digit('E'));
+			CHECK(aja::is_hex_digit('F'));
+			CHECK_FALSE(aja::is_hex_digit('G'));
+			CHECK_FALSE(aja::is_hex_digit('Z'));
+			CHECK_FALSE(aja::is_hex_digit('.'));
+			CHECK(aja::is_hex_digit('a'));
+			CHECK(aja::is_hex_digit('b'));
+			CHECK(aja::is_hex_digit('c'));
+			CHECK(aja::is_hex_digit('d'));
+			CHECK(aja::is_hex_digit('e'));
+			CHECK(aja::is_hex_digit('f'));
+			CHECK_FALSE(aja::is_hex_digit('g'));
+		}
+		SUBCASE("is_decimal_digit")
+		{
+			CHECK(aja::is_decimal_digit('0'));
+			CHECK(aja::is_decimal_digit('1'));
+			CHECK(aja::is_decimal_digit('2'));
+			CHECK(aja::is_decimal_digit('3'));
+			CHECK(aja::is_decimal_digit('4'));
+			CHECK(aja::is_decimal_digit('5'));
+			CHECK(aja::is_decimal_digit('6'));
+			CHECK(aja::is_decimal_digit('7'));
+			CHECK(aja::is_decimal_digit('8'));
+			CHECK(aja::is_decimal_digit('9'));
+			CHECK_FALSE(aja::is_decimal_digit('A'));
+			CHECK_FALSE(aja::is_decimal_digit('B'));
+			CHECK_FALSE(aja::is_decimal_digit('C'));
+			CHECK_FALSE(aja::is_decimal_digit('D'));
+			CHECK_FALSE(aja::is_decimal_digit('E'));
+			CHECK_FALSE(aja::is_decimal_digit('F'));
+			CHECK_FALSE(aja::is_decimal_digit('G'));
+			CHECK_FALSE(aja::is_decimal_digit('Z'));
+			CHECK_FALSE(aja::is_decimal_digit('.'));
+			CHECK_FALSE(aja::is_decimal_digit('a'));
+			CHECK_FALSE(aja::is_decimal_digit('b'));
+			CHECK_FALSE(aja::is_decimal_digit('c'));
+			CHECK_FALSE(aja::is_decimal_digit('d'));
+			CHECK_FALSE(aja::is_decimal_digit('e'));
+			CHECK_FALSE(aja::is_decimal_digit('f'));
+			CHECK_FALSE(aja::is_decimal_digit('g'));
+		}
+		SUBCASE("is_alpha_numeric_char")
+		{
+			CHECK(aja::is_alpha_numeric('0'));
+			CHECK(aja::is_alpha_numeric('5'));
+			CHECK(aja::is_alpha_numeric('9'));
+			CHECK(aja::is_alpha_numeric('3'));
+			CHECK(aja::is_alpha_numeric('4'));
+			CHECK(aja::is_alpha_numeric('5'));
+			CHECK(aja::is_alpha_numeric('6'));
+			CHECK(aja::is_alpha_numeric('7'));
+			CHECK(aja::is_alpha_numeric('8'));
+			CHECK(aja::is_alpha_numeric('9'));
+			CHECK(aja::is_alpha_numeric('A'));
+			CHECK(aja::is_alpha_numeric('G'));
+			CHECK(aja::is_alpha_numeric('L'));
+			CHECK(aja::is_alpha_numeric('O'));
+			CHECK(aja::is_alpha_numeric('Q'));
+			CHECK(aja::is_alpha_numeric('U'));
+			CHECK(aja::is_alpha_numeric('X'));
+			CHECK(aja::is_alpha_numeric('Z'));
+			CHECK_FALSE(aja::is_alpha_numeric('.'));
+			CHECK(aja::is_alpha_numeric('a'));
+			CHECK(aja::is_alpha_numeric('h'));
+			CHECK(aja::is_alpha_numeric('m'));
+			CHECK(aja::is_alpha_numeric('p'));
+			CHECK(aja::is_alpha_numeric('r'));
+			CHECK(aja::is_alpha_numeric('v'));
+			CHECK(aja::is_alpha_numeric('z'));
+			CHECK_FALSE(aja::is_alpha_numeric(','));
+			CHECK_FALSE(aja::is_alpha_numeric('!'));
+		}
+		SUBCASE("is_alpha_numeric_str")
+		{
+			CHECK_FALSE(aja::is_alpha_numeric(""));
+			CHECK_FALSE(aja::is_alpha_numeric(" "));
+			CHECK(aja::is_alpha_numeric("One01Two02Three03"));
+			CHECK(aja::is_alpha_numeric("OneTwoThree"));
+			CHECK(aja::is_alpha_numeric("0123"));
+			CHECK_FALSE(aja::is_alpha_numeric("One01 Two02Three03"));
+			CHECK_FALSE(aja::is_alpha_numeric("One01,Two02Three03"));
+			CHECK_FALSE(aja::is_alpha_numeric("."));
+		}
+		SUBCASE("is_legal_decimal_number")
+		{
+			CHECK(aja::is_legal_decimal_number("0"));
+			CHECK(aja::is_legal_decimal_number("00"));
+			CHECK_FALSE(aja::is_legal_decimal_number("000"));
+			CHECK_FALSE(aja::is_legal_decimal_number(""));
+			CHECK_FALSE(aja::is_legal_decimal_number(" "));
+			CHECK_FALSE(aja::is_legal_decimal_number("0x3236333331375458"));
+			CHECK(aja::is_legal_decimal_number("18446744073709551615", 20));
+			CHECK_FALSE(aja::is_legal_decimal_number("018446744073709551615", 25));
+			CHECK(aja::is_legal_decimal_number("255",5));
+			CHECK(aja::is_legal_decimal_number("1255",5));
+			CHECK(aja::is_legal_decimal_number("12355",5));
+			CHECK_FALSE(aja::is_legal_decimal_number("12.55",5));
+			CHECK_FALSE(aja::is_legal_decimal_number("12,5",5));
+			CHECK_FALSE(aja::is_legal_decimal_number("1e-5",5));
+			CHECK_FALSE(aja::is_legal_decimal_number("-1e5",5));
+			CHECK_FALSE(aja::is_legal_decimal_number("123455",5));
+		}
+		SUBCASE("is_legal_hex_serial_number")
+		{
+			CHECK(aja::is_legal_hex_serial_number("0x3236333331375458"));
+			CHECK(aja::is_legal_hex_serial_number("0X3236333331375458"));
+			CHECK(aja::is_legal_hex_serial_number("x3236333331375458"));
+			CHECK(aja::is_legal_hex_serial_number("X3236333331375458"));
+			CHECK_FALSE(aja::is_legal_hex_serial_number("xx3236333331375458"));
+			CHECK_FALSE(aja::is_legal_hex_serial_number("XX3236333331375458"));
+			CHECK_FALSE(aja::is_legal_hex_serial_number("0x53236333331375458"));
+			CHECK_FALSE(aja::is_legal_hex_serial_number("0x"));
+			CHECK_FALSE(aja::is_legal_hex_serial_number(""));
+			CHECK(aja::is_legal_hex_serial_number("000000000000000000003236333331375458"));
+			CHECK(aja::is_legal_hex_serial_number("x000000000000000000003236333331375458"));
+			CHECK(aja::is_legal_hex_serial_number("X000000000000000000003236333331375458"));
+			CHECK(aja::is_legal_hex_serial_number("0X000000000000000000003236333331375458"));
+			CHECK(aja::is_legal_hex_serial_number("5458"));
+			CHECK(aja::is_legal_hex_serial_number("ABCDEF12345458"));
+		}
+		SUBCASE("is_legal_hex_number")
+		{
+			CHECK(aja::is_legal_hex_number("0x3236333331375458"));
+			CHECK(aja::is_legal_hex_number("0X3236333331375458"));
+			CHECK(aja::is_legal_hex_number("x3236333331375458"));
+			CHECK(aja::is_legal_hex_number("X3236333331375458"));
+			CHECK(aja::is_legal_hex_number("0x32bC333dF1375458"));
+			CHECK(aja::is_legal_hex_number("x32bC333dF1375458"));
+			CHECK(aja::is_legal_hex_number("32bC333dF1375458"));
+			CHECK_FALSE(aja::is_legal_hex_number("XX3236333331375458"));
+			CHECK_FALSE(aja::is_legal_hex_number("0x53236333331375458"));
+			CHECK_FALSE(aja::is_legal_hex_number("0x"));
+			CHECK_FALSE(aja::is_legal_hex_number(""));
+			CHECK(aja::is_legal_hex_number("000000000000000000003236333331375458"));
+			CHECK(aja::is_legal_hex_number("x000000000000000000003236333331375458"));
+			CHECK(aja::is_legal_hex_number("X000000000000000000003236333331375458"));
+			CHECK(aja::is_legal_hex_number("0X000000000000000000003236333331375458"));
+			CHECK(aja::is_legal_hex_number("5458"));
+			CHECK(aja::is_legal_hex_number("5"));
+			CHECK(aja::is_legal_hex_number("a"));
+			CHECK(aja::is_legal_hex_number("ABCDEF12345458"));
+
+			CHECK_FALSE(aja::is_legal_hex_number("0x3236333331375458", 6));
+			CHECK(aja::is_legal_hex_number("0X323633", 6));
+			CHECK(aja::is_legal_hex_number("0X00000000000000000000000000000000323633", 6));
+			CHECK(aja::is_legal_hex_number("x00000000000000000000000000000000323633", 6));
+			CHECK(aja::is_legal_hex_number("00000000000000000000000000000000323633", 6));
+			CHECK(aja::is_legal_hex_number("323633", 6));
+			CHECK_FALSE(aja::is_legal_hex_number("3236330", 6));
+			CHECK_FALSE(aja::is_legal_hex_number("323633", 0));
+			CHECK_FALSE(aja::is_legal_hex_number("a", 0));
+			CHECK_FALSE(aja::is_legal_hex_number("", 0));
+			CHECK_FALSE(aja::is_legal_hex_number(" ", 1));
+			CHECK(aja::is_legal_hex_number("a", 1));
+			CHECK(aja::is_legal_hex_number("xa", 1));
+			CHECK(aja::is_legal_hex_number("x0a", 1));
+			CHECK(aja::is_legal_hex_number("x000000000000000000000000000000000000a", 1));
+			CHECK(aja::is_legal_hex_number("0x000000000000000000000000000000000000a", 1));
+			CHECK_FALSE(aja::is_legal_hex_number("0000000000000000000000000000000000000ab", 1));
+			CHECK_FALSE(aja::is_legal_hex_number("ab", 1));
+			CHECK(aja::is_legal_hex_number("ab", 2));
+			CHECK_FALSE(aja::is_legal_hex_number("abc", 2));
+			CHECK(aja::is_legal_hex_number("abc", 3));
+			CHECK_FALSE(aja::is_legal_hex_number("abcd", 3));
+			CHECK(aja::is_legal_hex_number("abcd", 4));
+			CHECK_FALSE(aja::is_legal_hex_number("abcde", 4));
+			CHECK(aja::is_legal_hex_number("abcde", 5));
+			CHECK_FALSE(aja::is_legal_hex_number("abcdef", 5));
+			CHECK(aja::is_legal_hex_number("abcdef", 6));
+			CHECK_FALSE(aja::is_legal_hex_number("abcdefa", 6));
+			CHECK(aja::is_legal_hex_number("abcdefa", 7));
+			CHECK(aja::is_legal_hex_number("a", 6));
+			CHECK(aja::is_legal_hex_number("ABCDEF12345458", 14));
+		}
+	}	//	TEST_CASE("aja::parsing")
+}	//	TEST_SUITE("common")
 
 void commandline_marker() {}
 TEST_SUITE("commandline" * doctest::description("function in ajabase/common/commandline.h")) {
