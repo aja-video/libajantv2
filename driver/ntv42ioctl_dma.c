@@ -17,10 +17,12 @@
 #include "ntv42device.h"
 #include "ntv42ioctl.h"
 
+
 int ntv42_ioctl_dma_transfer(ntv42_device_t *device, unsigned long arg)
 {
     ntv42_ioctl_dma_transfer_t param;
-    void *kbuf = NULL;
+    int status = 0;
+//    void *kbuf = NULL;
 
     if (device == NULL)
         return NTV42_RETURN_NO_DEVICE;
@@ -75,7 +77,7 @@ int ntv42_ioctl_dma_transfer(ntv42_device_t *device, unsigned long arg)
                            param.bytes)) {
             param.status = -EFAULT;
             param.bytes_xfered = 0;
-            copy_to_user((void __user *)arg, &param, sizeof(param));
+            status = copy_to_user((void __user *)arg, &param, sizeof(param));
             return -EFAULT;
         }
     } else {
@@ -85,7 +87,7 @@ int ntv42_ioctl_dma_transfer(ntv42_device_t *device, unsigned long arg)
                          param.bytes)) {
             param.status = -EFAULT;
             param.bytes_xfered = 0;
-            copy_to_user((void __user *)arg, &param, sizeof(param));
+            status = copy_to_user((void __user *)arg, &param, sizeof(param));
             return -EFAULT;
         }
     }

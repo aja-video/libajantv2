@@ -118,8 +118,8 @@ void getDeviceVersionString(ULWord deviceNumber, char *deviceVersionString, ULWo
 	case DEVICE_ID_IOX3: deviceStr = "IoX3"; break;
     case DEVICE_ID_TTAP_PRO: deviceStr = "TTAP_PRO"; break;
     case DEVICE_ID_KONAIP_25G: deviceStr = "KonaIP_25G"; break;
-    case DEVICE_ID_IP25_R: deviceStr = "Zefram"; break;
-    case DEVICE_ID_IP25_T: deviceStr = "Zefram-T"; break;
+    case DEVICE_ID_IP25_R: deviceStr = "IP25_R"; break;
+    case DEVICE_ID_IP25_T: deviceStr = "IP25_T"; break;
     case DEVICE_ID_FS8: deviceStr = "FS8"; break;
 	
 	default:
@@ -189,12 +189,15 @@ full:
 
 void getDeviceSerialNumberString(ULWord deviceNumber, char *deviceIDString, ULWord strMax)
 {
-	ULWord lowId = 0;
-	ULWord highId = 0;
-	char chr[8];
-	int i;
+	ULWord ch0 = 0;
+	ULWord ch4 = 0;
+	ULWord ch8 = 0;
+	ULWord ch12 = 0;
+	char chr[16];
+	int i = 0;
+    int j = 0;
 
-	GetDeviceSerialNumberWords(deviceNumber, &lowId, &highId);
+	GetDeviceSerialNumberWords(deviceNumber, &ch0, &ch4, &ch8, &ch12);
 	
 	if (strMax == 0 || deviceIDString == NULL)
 		return;
@@ -204,33 +207,48 @@ void getDeviceSerialNumberString(ULWord deviceNumber, char *deviceIDString, ULWo
 	if (strMax == 0)
 		goto full;
 
-	chr[0] = (char)(lowId & 0xFF);
-	chr[1] = (char)((lowId >> 8) & 0xFF);
-	chr[2] = (char)((lowId >> 16) & 0xFF);
-   	chr[3] = (char)((lowId >> 24) & 0xFF);
-	chr[4] = (char)(highId & 0xFF);
-	chr[5] = (char)((highId >> 8) & 0xFF);
-	chr[6] = (char)((highId >> 16) & 0xFF);
-	chr[7] = (char)((highId >> 24) & 0xFF);
+	chr[0] = (char)(ch0 & 0xFF);
+	chr[1] = (char)((ch0 >> 8) & 0xFF);
+	chr[2] = (char)((ch0 >> 16) & 0xFF);
+   	chr[3] = (char)((ch0 >> 24) & 0xFF);
+	chr[4] = (char)(ch4 & 0xFF);
+	chr[5] = (char)((ch4 >> 8) & 0xFF);
+	chr[6] = (char)((ch4 >> 16) & 0xFF);
+	chr[7] = (char)((ch4 >> 24) & 0xFF);
+	chr[8] = (char)(ch8 & 0xFF);
+	chr[9] = (char)((ch8 >> 8) & 0xFF);
+	chr[10] = (char)((ch8 >> 16) & 0xFF);
+	chr[11] = (char)((ch8 >> 24) & 0xFF);
+	chr[12] = (char)(ch12 & 0xFF);
+	chr[13] = (char)((ch12 >> 8) & 0xFF);
+	chr[14] = (char)((ch12 >> 16) & 0xFF);
+	chr[15] = (char)((ch12 >> 24) & 0xFF);
 
-	for(i = 0; i < 8; i++)
+	for(i = 0; i < 16; i++)
+    {
 		if ((chr[i] < ' ') || (chr[i] > '~'))
 			break;
+    }
 
-	if (i == 8)
+	if (i > 0)
 	{
-		snprintf(deviceIDString,
-				 strMax, "%c%c%c%c%c%c%c%c",
-				 chr[0], chr[1], chr[2], chr[3],
-				 chr[4], chr[5], chr[6], chr[7]);
+        for (j = 0; j < i; j++)
+        {
+            *deviceIDString++ = chr[j];
+            strMax--;
+            if (strMax == 0)
+                goto full;
+        }
 	}
 	else
 	{
 		snprintf(deviceIDString,
 				 strMax, "not programmed");
+        return;
 	}
+    
 full:
-	deviceIDString[strMax] = '\0';
+	*deviceIDString = '\0';
 }
 
 

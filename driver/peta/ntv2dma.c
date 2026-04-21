@@ -2573,7 +2573,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 	ULWord 		deviceNumber = pDmaContext->deviceNumber;
 	PDMA_ENGINE	pDmaEngine = getDmaEngine(deviceNumber, pDmaContext->engIndex);
 	NTV2PrivateParams *pNTV2Params = getNTV2Params(deviceNumber);
-#ifdef ZEFRAM
+#if defined(ZEFRAM) || defined(AJA_SON)
 	unsigned long dmaFlags = DMA_CTRL_ACK | DMA_PREP_INTERRUPT;
 #endif
 	struct dma_async_tx_descriptor*	pDmaDesc;
@@ -2658,7 +2658,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 		
 		// iniatlize dma descriptor
 		pDmaDesc = NULL;
-#ifdef ZEFRAM
+#if defined(ZEFRAM) || defined(AJA_SON)
         if (sg_dma_len(sg) > 0)
         {
             if (pDmaContext->dmaC2H)
@@ -2727,7 +2727,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 
 		// iniatlize dma descriptor
 		pDmaDesc = NULL;
-#ifdef ZEFRAM
+#if defined(ZEFRAM) || defined(AJA_SON)
 		if (pDmaContext->dmaC2H)
 		{
 			pDmaDesc = zynqmp_dma_prep_sg(pDmaEngine->dmaChannel,
@@ -2780,7 +2780,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 
 		// iniatlize dma descriptor
 		pDmaDesc = NULL;
-#ifdef ZEFRAM
+#if defined(ZEFRAM) || defined(AJA_SON)
 		if (pDmaContext->dmaC2H)
 		{
 			pDmaDesc = zynqmp_dma_prep_sg(pDmaEngine->dmaChannel,
@@ -2833,7 +2833,7 @@ static int dmaZynqProgram(PDMA_CONTEXT pDmaContext)
 
 		// iniatlize dma descriptor
 		pDmaDesc = NULL;
-#ifdef ZEFRAM
+#if defined(ZEFRAM) || defined(AJA_SON)
 		if (pDmaContext->dmaC2H)
 		{
 			pDmaDesc = zynqmp_dma_prep_sg(pDmaEngine->dmaChannel,

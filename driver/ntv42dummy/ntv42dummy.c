@@ -33,20 +33,6 @@
 #include "../ntv42device.h"
 #include "../ntv42ioctl.h"
 
-/* Forward declarations for shared ioctl handlers */
-extern int ntv42_ioctl_version(ntv42_device_t *device, unsigned long arg);
-extern int ntv42_ioctl_reg_read(ntv42_device_t *device, unsigned long arg);
-extern int ntv42_ioctl_reg_write(ntv42_device_t *device, unsigned long arg);
-extern int ntv42_ioctl_device_info(ntv42_device_t *device, unsigned long arg);
-extern int ntv42_ioctl_event_control(ntv42_device_t *device, unsigned long arg);
-extern int ntv42_ioctl_event_wait(ntv42_device_t *device, unsigned long arg);
-extern int ntv42_ioctl_event_status(ntv42_device_t *device, unsigned long arg);
-extern int ntv42_ioctl_dma_transfer(ntv42_device_t *device, unsigned long arg);
-extern int ntv42_ioctl_dma_info(ntv42_device_t *device, unsigned long arg);
-extern int ntv42_ioctl_regbatch_submit(ntv42_device_t *device, unsigned long arg);
-extern int ntv42_ioctl_regbatch_cancel(ntv42_device_t *device, unsigned long arg);
-extern int ntv42_ioctl_regbatch_status(ntv42_device_t *device, unsigned long arg);
-
 #define NTV42_DUMMY_MAX_DEVICES  4
 #define NTV42_DUMMY_BAR0_REGS    1024
 #define NTV42_DUMMY_BAR0_WIDTH   4

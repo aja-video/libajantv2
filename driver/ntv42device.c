@@ -154,6 +154,8 @@ int ntv42device_message(ntv42_device_t* device, void* message, uint32_t size)
  *   17-24: input_change[0..7]   (type 0x0004)
  *   25-32: audio_in_wrap[0..7]  (type 0x0200)
  *   33-40: audio_out_wrap[0..7] (type 0x0201)
+ *   41-48: output_anc[0..7]     (type 0x0005)
+ *   49-56: input_anc[0..7]      (type 0x0006)
  * Returns -1 if type/index combination is not mapped.
  */
 int ntv42device_event_slot(uint32_t type, uint32_t index)
@@ -167,6 +169,10 @@ int ntv42device_event_slot(uint32_t type, uint32_t index)
         return (index == 0) ? 16 : -1;
     case 0x0004: /* input_change */
         return (index < NTV42_EVENT_MAX_INPUTS) ? (int)(17 + index) : -1;
+    case 0x0005: /* output_anc */
+        return (index < NTV42_EVENT_MAX_OUTPUTS) ? (int)(41 + index) : -1;
+    case 0x0006: /* input_anc */
+        return (index < NTV42_EVENT_MAX_INPUTS) ? (int)(49 + index) : -1;
     case 0x0200: /* audio_in_wrap */
         return (index < 8) ? (int)(25 + index) : -1;
     case 0x0201: /* audio_out_wrap */

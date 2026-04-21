@@ -91,20 +91,6 @@
     #include "../ntv42device.h"
     #include "../ntv42ioctl.h"
 
-    /* Forward declarations for ntv42 ioctl handlers */
-    extern int ntv42_ioctl_version(ntv42_device_t *device, unsigned long arg);
-    extern int ntv42_ioctl_reg_read(ntv42_device_t *device, unsigned long arg);
-    extern int ntv42_ioctl_reg_write(ntv42_device_t *device, unsigned long arg);
-    extern int ntv42_ioctl_device_info(ntv42_device_t *device, unsigned long arg);
-    extern int ntv42_ioctl_event_control(ntv42_device_t *device, unsigned long arg);
-    extern int ntv42_ioctl_event_wait(ntv42_device_t *device, unsigned long arg);
-    extern int ntv42_ioctl_event_status(ntv42_device_t *device, unsigned long arg);
-    extern int ntv42_ioctl_dma_transfer(ntv42_device_t *device, unsigned long arg);
-    extern int ntv42_ioctl_dma_info(ntv42_device_t *device, unsigned long arg);
-    extern int ntv42_ioctl_regbatch_submit(ntv42_device_t *device, unsigned long arg);
-    extern int ntv42_ioctl_regbatch_cancel(ntv42_device_t *device, unsigned long arg);
-    extern int ntv42_ioctl_regbatch_status(ntv42_device_t *device, unsigned long arg);
-
     /* BAR0 register read callback for ntv42_device_t */
     static int ntv42_bar0_reg_read(void *host, void *id, ntv42device_regio_t *regio)
     {

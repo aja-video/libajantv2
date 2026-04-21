@@ -16,6 +16,7 @@
 #include "ntv42device.h"
 #include "ntv42ioctl.h"
 
+
 int ntv42_ioctl_event_control(ntv42_device_t *device, unsigned long arg)
 {
     ntv42_ioctl_event_control_t param;
@@ -30,7 +31,7 @@ int ntv42_ioctl_event_control(ntv42_device_t *device, unsigned long arg)
     slot = ntv42device_event_slot(param.type, param.index);
     if (slot < 0)
         return NTV42_RETURN_BAD_PARAMETER;
-
+    
     device->event_enabled[slot] = (param.enable != 0);
     param.count = device->event_count[slot];
 

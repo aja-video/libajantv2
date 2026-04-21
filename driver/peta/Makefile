@@ -17,8 +17,19 @@ CC			 ?= gcc
 ZEFRAM ?= 0
 export ZEFRAM
 
+AJA_SON ?= 0
+export AJA_SON
+
 ifneq ($(ZEFRAM),0)
 EXTRA_DEPS = -DZEFRAM
+endif
+
+ifneq ($(AJA_SON),0)
+EXTRA_DEPS = -DAJA_SON
+endif
+
+ifneq ($(AJA_NTV42),0)
+EXTRA_DEPS += -DAJA_NTV42
 endif
 
 DRIVERTARGET = $(NTV2TARGET).o
@@ -103,8 +114,17 @@ DRIVERINCS = $(A_LIB_NTV2_INC)/ntv2audiodefines.h \
 			$(A_DRIVER_PATH)/ntv2anc.h \
 			$(A_DRIVER_PATH)/ntv2videoraster.h
 
+ifdef AJA_NTV42
+NTV42INCS = ../ntv42device.h ../ntv42ioctl.h
+NTV42SRCS = ../ntv42device.c ../ntv42ioctl.c ../ntv42ioctl_event.c ../ntv42ioctl_dma.c ../ntv42regbatch.c
+else
+NTV42INCS =
+NTV42SRCS =
+endif
+NTV42OBJS = $(patsubst %.c,%.o,$(NTV42SRCS))
+
 obj-m				:= $(DRIVERTARGET)
-$(NTV2TARGET)-objs 	:= $(DRIVEROBJS) $(HEVCOBJS)
+$(NTV2TARGET)-objs 	:= $(DRIVEROBJS) $(NTV42OBJS)
 
 default: makesymlinks all 
 	@echo linux distro: $(DISTRO_TYPE)
@@ -131,7 +151,7 @@ ntv2version_gen:
 	fi
 
 .PHONY: all
-all: ntv2version_gen $(DRIVERINCS) $(DRIVERSRCS) $(HEVCINCS) $(HEVCSRCS)
+all: ntv2version_gen $(DRIVERINCS) $(DRIVERSRCS) $(NTV42INCS) $(NTV42SRCS)
 
 # Make a symlink to the C-only CPP files we need in classes.
 .PHONY: makesymlinks 

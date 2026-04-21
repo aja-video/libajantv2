@@ -41,6 +41,8 @@ static struct ntv42_regbatch batches[NTV42_DEVICE_MAX][NTV42_REGBATCH_MAX_ACTIVE
 static uint32_t batch_next_id[NTV42_DEVICE_MAX];
 static DEFINE_SPINLOCK(batch_lock);
 
+void ntv42_regbatch_check(ntv42_device_t *device, uint32_t event_type, uint32_t event_index);
+
 /**
  * Called from ntv42device_event() in ISR context.
  * Executes all pending batches matching the given trigger.

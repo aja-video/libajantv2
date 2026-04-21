@@ -123,6 +123,3 @@ int ntv42device_event_slot(uint32_t type, uint32_t index);
 /** Check if event slot is supported for this device */
 bool ntv42device_event_supported(ntv42_device_t* device, uint32_t type, uint32_t index);
 
-
-
-
