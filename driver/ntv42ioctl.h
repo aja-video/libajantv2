@@ -194,16 +194,17 @@ typedef struct ntv42_ioctl_regbatch_status_t {
 #define IOCTL_NTV42_REGBATCH_STATUS  _IOWR(NTV42_DEVICE_TYPE, 42, ntv42_ioctl_regbatch_status_t)
 
 /** Driver ioctl interface */
-int ntv42_ioctl_version(ntv42_device_t *device, unsigned long arg);
-int ntv42_ioctl_reg_read(ntv42_device_t *device, unsigned long arg);
-int ntv42_ioctl_reg_write(ntv42_device_t *device, unsigned long arg);
-int ntv42_ioctl_device_info(ntv42_device_t *device, unsigned long arg);
-int ntv42_ioctl_dma_transfer(ntv42_device_t *device, unsigned long arg);
-int ntv42_ioctl_dma_info(ntv42_device_t *device, unsigned long arg);
-int ntv42_ioctl_dma_info(ntv42_device_t *device, unsigned long arg);
-int ntv42_ioctl_event_control(ntv42_device_t *device, unsigned long arg);
-int ntv42_ioctl_event_wait(ntv42_device_t *device, unsigned long arg);
-int ntv42_ioctl_event_status(ntv42_device_t *device, unsigned long arg);
-int ntv42_ioctl_regbatch_submit(ntv42_device_t *device, unsigned long arg);
-int ntv42_ioctl_regbatch_cancel(ntv42_device_t *device, unsigned long arg);
-int ntv42_ioctl_regbatch_status(ntv42_device_t *device, unsigned long arg);
+struct ntv42_device_t;
+int ntv42_ioctl_version(struct ntv42_device_t *device, unsigned long arg);
+int ntv42_ioctl_reg_read(struct ntv42_device_t *device, unsigned long arg);
+int ntv42_ioctl_reg_write(struct ntv42_device_t *device, unsigned long arg);
+int ntv42_ioctl_device_info(struct ntv42_device_t *device, unsigned long arg);
+int ntv42_ioctl_dma_transfer(struct ntv42_device_t *device, unsigned long arg);
+int ntv42_ioctl_dma_info(struct ntv42_device_t *device, unsigned long arg);
+int ntv42_ioctl_dma_info(struct ntv42_device_t *device, unsigned long arg);
+int ntv42_ioctl_event_control(struct ntv42_device_t *device, unsigned long arg);
+int ntv42_ioctl_event_wait(struct ntv42_device_t *device, unsigned long arg);
+int ntv42_ioctl_event_status(struct ntv42_device_t *device, unsigned long arg);
+int ntv42_ioctl_regbatch_submit(struct ntv42_device_t *device, unsigned long arg);
+int ntv42_ioctl_regbatch_cancel(struct ntv42_device_t *device, unsigned long arg);
+int ntv42_ioctl_regbatch_status(struct ntv42_device_t *device, unsigned long arg);
