@@ -125,6 +125,46 @@ static int ntv42_bar0_reg_write(void *host, void *id, ntv42device_regio_t *regio
     regNum = (ULWord)(regio->address / 4);
     return WriteReg(ntv2pp->deviceNumber, regNum, regio->data, regio->mask, regio->shift);
 }
+
+static int ntv42_dma_transfer(void* host, uint32_t direction,
+                              void __user *user_buf, uint64_t device_addr,
+                              uint64_t bytes, uint64_t *bytes_xfered)
+{
+    NTV2PrivateParams *ntv2pp = (NTV2PrivateParams *)host;
+    DMA_PARAMS dmaParams;
+    int status = 0;
+
+    if ((ntv2pp == NULL) || (user_buf == NULL) || (bytes == 0))
+        return NTV42_RETURN_BAD_PARAMETER;
+
+    /* direction 1=to_device, 2=from_device */
+    memset(&dmaParams, 0, sizeof(DMA_PARAMS));
+    dmaParams.deviceNumber = ntv2pp->deviceNumber;
+    dmaParams.toHost = (direction == 2);
+    dmaParams.dmaEngine = NTV2_DMA1;
+    dmaParams.videoChannel = NTV2_CHANNEL1;
+    dmaParams.pVidUserVa = user_buf;
+    dmaParams.vidNumBytes = (uint32_t)bytes;
+    dmaParams.frameOffset = (uint32_t)device_addr;
+
+    MSG("%s%d: ntv42 dma %s device  user %16px offset %08x bytes %d\n",
+        getNTV2ModuleParams()->name, dmaParams.deviceNumber,
+        dmaParams.toHost? "from":"to", dmaParams.pVidUserVa, dmaParams.frameOffset, dmaParams.vidNumBytes);
+
+    status = dmaTransfer(&dmaParams);
+    if (status == 0)
+    {
+        *bytes_xfered = bytes;
+    }
+    else
+    {
+        MSG("%s%d: ntv42 dma failed  status %d\n",
+            getNTV2ModuleParams()->name, dmaParams.deviceNumber, status);
+    }
+
+    return status;
+}
+
 #endif
 
 #if  !defined(x86_64) && !defined(aarch64)
@@ -3338,8 +3378,13 @@ static int platform_probe(struct platform_device *pd)
             ntv42device_bar_add(ntv2pp->ntv42_device, &bar0);
         }
 
+        /* connect the dma engine */
+        ntv2pp->ntv42_device->dma_transfer = ntv42_dma_transfer;
+
+        /* initialize and enable interrupts */
         ntv42InitInterrupts(deviceNumber);
 
+        /* update ntv42 device state */
         ntv42device_state(ntv2pp->ntv42_device, ntv42device_state_enable);
     }
 #endif    
