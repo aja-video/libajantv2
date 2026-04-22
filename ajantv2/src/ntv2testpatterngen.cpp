@@ -3164,7 +3164,11 @@ bool NTV2TestPatternGen::DrawNoiseUniformFrame()
     // Peak uniform noise range (0..1 slider → 0..kUniformPeak)
     constexpr double kUniformPeak = 512.0;
     const double amplitude = mSliderValue * kUniformPeak;
+#ifndef AJA_BAREMETAL // no thread_local for baremetal
 	static thread_local std::mt19937 rng(12345678);
+#else
+	static std::mt19937 rng(12345678);
+#endif
     std::uniform_real_distribution<double> uni(-1.0, 1.0);
 
     const uint16_t midY  = 512;
@@ -3209,7 +3213,11 @@ bool NTV2TestPatternGen::DrawNoiseGaussianFrame()
     // Full-scale sigma (0..1 slider → 0.. kGaussianSigma)
     constexpr double kGaussianSigma = 256.0;
     const double sigma = mSliderValue * kGaussianSigma;
+#ifndef AJA_BAREMETAL // no thread_local for baremetal
     static thread_local std::mt19937 rng(12345678);
+#else
+	static std::mt19937 rng(12345678);
+#endif
     std::normal_distribution<double> norm(0.0, sigma);
 
     const uint16_t midY  = 512;

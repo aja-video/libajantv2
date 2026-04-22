@@ -35,7 +35,6 @@ NTV2MetalE2E::~NTV2MetalE2E ()
 AJAStatus NTV2MetalE2E::DoSomething (void)
 {
     mDevice.Open(0);
-    mDevice.SetTaskMode(NTV2_OEM_TASKS);
 	NTV2DeviceID mDeviceID = mDevice.GetDeviceID();	//	Keep this ID handy -- it's used frequently
 
     //if (mDeviceID != DEVICE_ID_KONAX)

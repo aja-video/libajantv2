@@ -68,7 +68,15 @@ bool ntv2card_register_read(void* card, unsigned int reg, unsigned int* data)
     if ((card == NULL) || (data == NULL))
         return false;
     CNTV2Card* pCard = (CNTV2Card*)card;
-    return pCard->ReadRegister(reg, *data);
+    #ifndef AJA_BAREMETAL // Xilinx compiler doesn't like this for some reason...
+        return pCard->ReadRegister(reg, *data);
+    #else
+        ULWord tmp; 
+        bool status = pCard->ReadRegister(reg, tmp);
+        *data = tmp;
+        return status;
+    #endif
+
 }
 
 bool ntv2card_register_write(void* card, unsigned int reg, unsigned int data)
