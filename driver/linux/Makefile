@@ -382,10 +382,10 @@ dkms-pkg:
 	@for i in "$(RDMASRCS)" ; do \
 		cp $$i tmp/$(DKMSDIR)/libajantv2/driver/linux ; \
 	done
-	@for i in "$(NTV42INCS)" ; do \
+	@for i in $(NTV42INCS) ; do \
 		cp $$i tmp/$(DKMSDIR)/libajantv2/driver ; \
 	done
-	@for i in "$(NTV42SRCS)" ; do \
+	@for i in $(NTV42SRCS) ; do \
 		cp $$i tmp/$(DKMSDIR)/libajantv2/driver ; \
 	done
 	@awk '\
