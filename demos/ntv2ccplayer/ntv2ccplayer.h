@@ -227,7 +227,6 @@ class NTV2CCPlayer
 		AJAThreadList				mGeneratorThreads;		///< @brief	My caption generator threads -- one per caption channel
 		AUTOCIRCULATE_STATUS		mACStatus;				///< @brief	My AutoCirculate status
 		mutable CNTV2Card			mDevice;				///< @brief	My CNTV2Card instance
-		NTV2DeviceID				mDeviceID;				///< @brief	My device (model) identifier
 		NTV2TaskMode				mSavedTaskMode;			///< @brief	Used to restore the previous state
 		NTV2Standard				mVideoStandard;			///< @brief	Output video standard
 		bool						mPlayerQuit;			///< @brief	Set "true" to terminate player

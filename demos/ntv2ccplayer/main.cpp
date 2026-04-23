@@ -111,9 +111,6 @@ int main (int argc, const char ** argv)
 
 	//	Device
 	const string deviceSpec (pDeviceSpec ? pDeviceSpec : "0");
-	if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
-		return 1;
-
 	CCPlayerConfig config(deviceSpec);
 
 	//	Channel
@@ -212,23 +209,20 @@ int main (int argc, const char ** argv)
 	else
 		testPattern = "Flat Field";
 
-	//	NOTE:	From one command line invocation, you can inject different captions into separate caption channels.
-	//			For example:
-	//	./bin/ntv2ccplayer	--device kona4  --channel 3  --stats  --608chan cc1,cc2,cc3,cc4,tx1,tx2,tx3,tx4
-	//						--608mode pop,paint,roll3,roll4  --rate 1000,700,500,300,200
-	//						--end idle,loop,idle,loop,idle,loop,idle,loop
-	//						English.txt  Spanish.txt  French.txt  German.txt  txt1  txt2  txt3  txt4
-
-	//	Users can play one or more caption channels by specifying more than one, separating each with a comma:
+	//	Play multiple caption channels using a comma-separated list of them (no spaces):
 	//			--608chan cc2,cc4,tx1,tx2
-	//	You can vary the mode, end-action and rate for each caption channel in the same way:
-	//			--608mode pop,paint,roll  --rate 1500,800,300,600
-	const NTV2StringList	sCaptionChannels(aja::split(CNTV2DemoCommon::ToLower(pCaptionChan	? pCaptionChan	: "CC1"), ','));
-	const NTV2StringList	sCaptionModes	(aja::split(CNTV2DemoCommon::ToLower(pMode			? pMode			: "roll4"), ','));
-	const NTV2StringList	sEndActions		(aja::split(CNTV2DemoCommon::ToLower(pEndAction		? pEndAction	: "exit"), ','));
-	const NTV2StringList	sCaptionRates	(aja::split(CNTV2DemoCommon::ToLower(pCaptionRate	? pCaptionRate	: "500"), ','));
-	size_t					ndx				(0);
-	size_t					fileNdx			(0);
+	//	Mode, End-Action and Rate also use comma-separated lists (no spaces), and are applied per-caption-channel:
+	//			--608mode pop,paint,roll  --rate 1500,800,300,600  --end idle,loop,idle,loop
+	//	Caption files are assigned sequentially to the caption channels, in caption-channel order.
+	//	Example:	./bin/ntv2ccplayer	--device kona4  --channel 3  --stats  --608chan cc1,cc2,cc3,cc4,tx1,tx2,tx3,tx4
+	//									--608mode pop,paint,roll3,roll4  --rate 1000,700,500,300,200
+	//									--end idle,loop,idle,loop,idle,loop,idle,loop
+	//									English.txt  Spanish.txt  French.txt  German.txt  txt1  txt2  txt3  txt4
+	const NTV2StringList sCaptionChannels(aja::split(CNTV2DemoCommon::ToLower(pCaptionChan  ? pCaptionChan  : "CC1"),   ',')),
+	                     sCaptionModes   (aja::split(CNTV2DemoCommon::ToLower(pMode         ? pMode         : "roll4"), ',')),
+	                     sEndActions     (aja::split(CNTV2DemoCommon::ToLower(pEndAction    ? pEndAction    : "exit"),  ',')),
+	                     sCaptionRates   (aja::split(CNTV2DemoCommon::ToLower(pCaptionRate  ? pCaptionRate  : "500"),   ','));
+	size_t	ndx(0), fileNdx(0);
 
 	for (NTV2StringListConstIter iter (sCaptionChannels.begin());  iter != sCaptionChannels.end();  ++iter, ++ndx)
 	{
@@ -290,21 +284,21 @@ int main (int argc, const char ** argv)
 	config.fOutputDest			= outputSpigot;
 	config.fForceRTP			= uint16_t(forceRTP);
 	config.fVancMode			= forceVanc		? NTV2_VANCMODE_TALLER : NTV2_VANCMODE_OFF;
-	config.fDoMultiFormat		= doMultiFormat	? true	: false;			//	Multiformat mode?
-	config.fDoTsiRouting		= doSquares		? false	: true;
-	config.fDoRGBOnWire			= doRGBOnWire	? true	: false;
-	config.fSuppressLine21		= noLine21		? true : false;
-	config.fSuppress608			= no608			? true : false;
-	config.fSuppress708			= no708			? true : false;
-	config.fSuppressAudio		= noAudio		? true : false;
-	config.fSuppressTimecode	= noTimecode	? true : false;
-	config.fEmitStats			= bEmitStats	? true : false;
+	config.fDoMultiFormat		= doMultiFormat	? true  : false;
+	config.fDoTsiRouting		= doSquares		? false : true;
+	config.fDoRGBOnWire			= doRGBOnWire	? true  : false;
+	config.fSuppressLine21		= noLine21		? true  : false;
+	config.fSuppress608			= no608			? true  : false;
+	config.fSuppress708			= no708			? true  : false;
+	config.fSuppressAudio		= noAudio		? true  : false;
+	config.fSuppressTimecode	= noTimecode	? true  : false;
+	config.fEmitStats			= bEmitStats	? true  : false;
 
 	//	Instantiate and initialize the NTV2CCPlayer object...
 	NTV2CCPlayer player(config);
 	AJAStatus status = player.Init();
 	if (AJA_FAILURE(status))
-		{cout << "## ERROR:  Initialization failed: " << ::AJAStatusToString(status) << endl;	return 1;}
+		return 1;
 
 	::signal (SIGINT, SignalHandler);
 	#if defined (AJAMac)

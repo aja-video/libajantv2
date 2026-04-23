@@ -35,10 +35,10 @@
 
 using namespace std;
 
-
 #define	AsSCCSource(__x__)	reinterpret_cast<SCCSource&>(__x__)
 #define AsUBytePtr(__x__)	reinterpret_cast<UByte*>(__x__)
 //#define	MEASURE_ACCURACY	1		//	Enables a feedback mechanism to precisely generate captions at the desired rate
+//#define	NTV2_ANC_TEST		1
 
 static const uint32_t	kAppSignature	(NTV2_FOURCC('C','C','P','L'));
 
@@ -860,7 +860,6 @@ NTV2CCPlayer::NTV2CCPlayer (const CCPlayerConfig & inConfigData)
 	:	mConfig					(inConfigData),
 		mPlayThread				(),
 		mGeneratorThreads		(),
-		mDeviceID				(DEVICE_ID_NOTFOUND),
 		mSavedTaskMode			(NTV2_DISABLE_TASKS),
 		mVideoStandard			(NTV2_STANDARD_INVALID),
 		mPlayerQuit				(false),
@@ -944,13 +943,14 @@ bool NTV2CCPlayer::DeviceAncExtractorIsAvailable (void)
 AJAStatus NTV2CCPlayer::Init (void)
 {
 	AJAStatus	status	(AJA_STATUS_SUCCESS);
-	CNTV2DemoCommon::SetDefaultPageSize();	//	Set host-specific page size
 
-	//	Any AJA devices out there?
+	//	Open the device...
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mDevice))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
-	mDeviceID = mDevice.GetDeviceID();	//	Keep this ID handy -- it's used frequently
-
+	{	if (aja::lower(mConfig.fDeviceSpec) != "list" && mConfig.fDeviceSpec != "?")
+			cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl; 
+		return AJA_STATUS_OPEN;
+	}
+	CNTV2DemoCommon::SetDefaultPageSize();	//	Set host-specific page size
     if (!mDevice.IsDeviceReady(false))
 		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 	if (!mDevice.features().CanDoPlayback())
@@ -966,22 +966,6 @@ AJAStatus NTV2CCPlayer::Init (void)
 		mDevice.GetTaskMode(mSavedTaskMode);	//	Save the current task mode
 	}
 	mDevice.SetTaskMode(NTV2_OEM_TASKS);		//	Set OEM service level
-
-#if defined(_DEBUG)
-	if (mConfig.fForceRTP & BIT(2))
-	{	//	Hack -- force device to pretend it's a KonaIP2110
-		NTV2Buffer	pDevice (&mDevice, sizeof(CNTV2Card));
-		ULWordSequence	U32s (pDevice.GetU32s(0, pDevice.GetByteCount()/sizeof(uint32_t)));
-		for (unsigned ndx(0);  ndx < U32s.size();  ndx++)
-			if (U32s.at(ndx) == ULWord(mDeviceID))
-			{	//	by patching its _boardID member...
-				mDeviceID = DEVICE_ID_KONAIP_2110;
-				U32s[ndx] = ULWord(mDeviceID);
-				pDevice.PutU32s(U32s);
-				break;
-			}
-	}
-#endif	//	defined(_DEBUG)
 
 	if (mDevice.features().CanDoMultiFormat()  &&  mConfig.fDoMultiFormat)
 		mDevice.SetMultiFormatMode(true);
@@ -1008,7 +992,9 @@ AJAStatus NTV2CCPlayer::Init (void)
 		return status;
 
 	#if defined(_DEBUG)
-		cerr << mConfig << endl;
+		cerr << mConfig
+			<< "Device Description:  " << mDevice.GetDescription() << endl
+			<< endl;
 	#endif	//	defined(_DEBUG)
 	return AJA_STATUS_SUCCESS;
 
@@ -1599,19 +1585,18 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	Bouncer<UWord>				colBouncer			(32 - 11 /*upperLimit*/, 0 /*lowerLimit*/, 0 /*startAt*/);
 	NTV2Buffer					audioBuffer;
 	AUTOCIRCULATE_TRANSFER		xferInfo;
-
-    ULWord ANCKB (2);	//	2 (default, works),  64 fails, 63 works										//	**MrBill**
-	if (NTV2_IS_VANCMODE_OFF(mConfig.fVancMode))
-	{
-		mDevice.WriteRegister(kVRegCCPlayerBufSizeKB, ANCKB);											//	**MrBill**
-		PLINFO("Anc buffer size is " << DEC(ANCKB) << "K");												//	**MrBill**
-		xferInfo.acANCBuffer.Allocate(ANCKB*1024);
-		if (isInterlaced)
-			xferInfo.acANCField2Buffer.Allocate(ANCKB*1024);
-
-		mDevice.WriteRegister(kVRegCCPlayerCustomPkt, 0);	//	**MrBill**
-	}
-
+#if defined(NTV2_ANC_TEST)														//	Test
+	ULWord ANCKB (2);	//	2 (default, works),  64 fails, 63 works				//	Test
+	if (NTV2_IS_VANCMODE_OFF(mConfig.fVancMode))								//	Test
+	{																			//	Test
+		mDevice.WriteRegister(kVRegCCPlayerBufSizeKB, ANCKB);					//	Test
+		PLINFO("Anc buffer size is " << DEC(ANCKB) << "K");						//	Test
+		xferInfo.acANCBuffer.Allocate(ANCKB*1024);								//	Test
+		if (isInterlaced)														//	Test
+			xferInfo.acANCField2Buffer.Allocate(ANCKB*1024);					//	Test
+		mDevice.WriteRegister(kVRegCCPlayerCustomPkt, 0);						//	Test
+	}																			//	Test
+#endif	//	defined(NTV2_ANC_TEST)												//	Test
 	if (!mConfig.fSuppressAudio)
 	{
 		//	Audio setup...
@@ -1744,19 +1729,19 @@ void NTV2CCPlayer::PlayoutFrames (void)
 				packetList.AddAncillaryData(pkt708);
 			}
 		}	//	else HD video
-
-		ULWord val(0);																				//	**MrBill**
-		if (xferInfo.acANCBuffer  &&  mDevice.ReadRegister(kVRegCCPlayerCustomPkt, val)  &&  val)	//	**MrBill**
-		{																							//	**MrBill**
-			AJAAncData pkt;	static const uint8_t sTmp[] = {'T', 'M', 'P', '0'};						//	**MrBill**
-			pkt.SetDataLocation(AJAAncDataLoc (AJAAncDataLink_A, AJAAncDataChannel_Y,				//	**MrBill**
-								AJAAncDataSpace_VANC, uint16_t(val & 0x0000FFFF)));					//	**MrBill**
-			pkt.SetDIDSID(AJAAncDIDSIDPair((val >> 24) & 0xFF, (val >> 16) & 0xFF));				//	**MrBill**
-			pkt.SetPayloadData (sTmp, 4);															//	**MrBill**
-			packetList.AddAncillaryData(pkt);														//	**MrBill**
-		}																							//	**MrBill**
-
-		//	PLDBG("Xmit pkts: " << packetList);	//	DEBUG: Packet list to be transmitted
+#if defined(NTV2_ANC_TEST)																			//	Test
+		ULWord val(0);																				//	Test
+		if (xferInfo.acANCBuffer  &&  mDevice.ReadRegister(kVRegCCPlayerCustomPkt, val)  &&  val)	//	Test
+		{																							//	Test
+			AJAAncData pkt;	static const uint8_t sTmp[] = {'T', 'M', 'P', '0'};						//	Test
+			pkt.SetDataLocation(AJAAncDataLoc (AJAAncDataLink_A, AJAAncDataChannel_Y,				//	Test
+								AJAAncDataSpace_VANC, uint16_t(val & 0x0000FFFF)));					//	Test
+			pkt.SetDIDSID(AJAAncDIDSIDPair((val >> 24) & 0xFF, (val >> 16) & 0xFF));				//	Test
+			pkt.SetPayloadData (sTmp, 4);															//	Test
+			packetList.AddAncillaryData(pkt);														//	Test
+		}																							//	Test
+		PLDBG("Xmit pkts: " << packetList);	//	DEBUG: Packet list to be transmitted				//	Test
+#endif	//	defined(NTV2_ANC_TEST)																	//	Test
 		packetList.SetAllowMultiRTPTransmit(mConfig.fForceRTP & BIT(1));
 		if (NTV2_IS_VANCMODE_ON(mConfig.fVancMode))	//	Write FB VANC lines...
 			packetList.GetVANCTransmitData (mVideoBuffer,  formatDesc);
@@ -1821,15 +1806,16 @@ void NTV2CCPlayer::PlayoutFrames (void)
 		//	Finally ... transfer the frame data to the device...
 		if (!mDevice.AutoCirculateTransfer (mConfig.fOutputChannel, xferInfo))
 			PLFAIL("AutoCirculateTransfer failed");
-
-		if (xferInfo.acANCBuffer  &&  mDevice.ReadRegister(kVRegCCPlayerBufSizeKB, val)  &&  val  &&  val != ANCKB)	//	**MrBill**
-		{																											//	**MrBill**
-			PLINFO("Anc buffer size changed from " << DEC(ANCKB) << "K to " << DEC(val) << "K");					//	**MrBill**
-			ANCKB = val;																							//	**MrBill**
-			xferInfo.acANCBuffer.Allocate(ANCKB*1024);																//	**MrBill**
-			if (isInterlaced)																						//	**MrBill**
-				xferInfo.acANCField2Buffer.Allocate(ANCKB*1024);													//	**MrBill**
-		}																											//	**MrBill**
+#if defined(NTV2_ANC_TEST)																							//	Test
+		if (xferInfo.acANCBuffer  &&  mDevice.ReadRegister(kVRegCCPlayerBufSizeKB, val)  &&  val  &&  val != ANCKB)	//	Test
+		{																											//	Test
+			PLINFO("Anc buffer size changed from " << DEC(ANCKB) << "K to " << DEC(val) << "K");					//	Test
+			ANCKB = val;																							//	Test
+			xferInfo.acANCBuffer.Allocate(ANCKB*1024);																//	Test
+			if (isInterlaced)																						//	Test
+				xferInfo.acANCField2Buffer.Allocate(ANCKB*1024);													//	Test
+		}																											//	Test
+#endif	//	defined(NTV2_ANC_TEST)																					//	Test
 	}	//	loop til quit signaled
 
 	//	Stop AutoCirculate...
