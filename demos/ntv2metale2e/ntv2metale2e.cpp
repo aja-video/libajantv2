@@ -108,7 +108,7 @@ AJAStatus NTV2MetalE2E::SetUpGenlock (void)
         }
         else
         {
-            ntv2Message("Set: %d, Offset: %04X No check\n", count, gdat->addr);
+            //ntv2Message("Set: %d, Offset: %04X No check\n", count, gdat->addr);
         }
         count++;
         gdat++;
@@ -139,6 +139,7 @@ AJAStatus NTV2MetalE2E::SetUpGenlock (void)
 
     if (count >= 10000){
         // genlock2 initial lock check timeout
+        printf("genlock timeout\n");
         return AJA_STATUS_FAIL;
     }
 
@@ -383,20 +384,6 @@ bool NTV2MetalE2E::WaitGenlock2 (uint32_t numMicrosSeconds)
 	while (usTicks < numMicrosSeconds)
 	{
 		usTicks = RegRead(0x3606);
-#if 1
-		if(timeoutCount++ > 100) return false;
-#else
-		if (timeoutCount++ > 100)
-		{
-			ntv2Message("Genlock2 200us wait TIMEDOUT");
-			return false;
-		}
-		else
-		{
-			ntv2Message("Genlock2 timeout count: %d", timeoutCount);
-			return true;
-		}
-#endif
 	}
 	return true;
 }
