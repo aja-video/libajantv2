@@ -98,7 +98,8 @@ typedef enum _NTV2DriveMode
 {
     eDriverModeAll = 0,     // support all driver functions
     eDriverModeRegister,    // only support register access
-    eDriverModeGenlock      // register access with genlock initialization
+    eDriverModeGenlock,     // register access with genlock initialization
+	eDriverModeNoGenlock    // all driver functions with no genlock initialization
 } NTV2DriverMode;
 
 // Singleton module params
