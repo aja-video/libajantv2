@@ -87,6 +87,48 @@
 #include "../ntv2pciconfig.h"
 #include "../ntv2mailbox.h"
 
+#if defined(AJA_NTV42)
+    #include "../ntv42device.h"
+    #include "../ntv42ioctl.h"
+
+    /* BAR0 register read callback for ntv42_device_t */
+    static int ntv42_bar0_reg_read(void *host, void *id, ntv42device_regio_t *regio)
+    {
+        NTV2PrivateParams *ntv2pp = (NTV2PrivateParams *)host;
+        ULWord value = 0;
+        ULWord regNum;
+        int ret;
+        (void)id;
+
+        if (ntv2pp == NULL || regio == NULL)
+            return NTV42_RETURN_BAD_PARAMETER;
+
+        /* Convert byte address to register number (4 bytes per register) */
+        regNum = (ULWord)(regio->address / 4);
+        ret = ReadReg(ntv2pp->deviceNumber, regNum, &value, regio->mask, regio->shift);
+        if (ret != 0)
+            return NTV42_RETURN_IO_ERROR;
+
+        regio->data = value;
+        return NTV42_RETURN_SUCCESS;
+    }
+
+    /* BAR0 register write callback for ntv42_device_t */
+    static int ntv42_bar0_reg_write(void *host, void *id, ntv42device_regio_t *regio)
+    {
+        NTV2PrivateParams *ntv2pp = (NTV2PrivateParams *)host;
+        ULWord regNum;
+        (void)id;
+
+        if (ntv2pp == NULL || regio == NULL)
+            return NTV42_RETURN_BAD_PARAMETER;
+
+        /* Convert byte address to register number (4 bytes per register) */
+        regNum = (ULWord)(regio->address / 4);
+        return WriteReg(ntv2pp->deviceNumber, regNum, regio->data, regio->mask, regio->shift);
+    }
+#endif
+
 #if  !defined(x86_64) && !defined(aarch64)
 #error "*** AJA driver must be built 64 bit ***"
 #endif
@@ -2010,6 +2052,56 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 				}
 				break;
 
+			case NTV2_TYPE_MESSAGE_DATA:
+				{
+                    NTV2MessageData *msg = (NTV2MessageData *)pMessage;
+
+                    // Check message buffer
+                    if ((msg->mMessage.fUserSpacePtr == 0) ||
+                        (msg->mMessage.fByteCount == 0) ||
+                        (msg->mMessage.fByteCount > PAGE_SIZE))
+                    {
+                        returnCode = -EINVAL;
+                        msg->mStatus = (ULWord)returnCode;
+                        goto messageError;
+                    }
+
+                    // Get message buffer
+                    if (copy_from_user((void *)pInBuff,
+                                       (const void *)msg->mMessage.fUserSpacePtr,
+                                       msg->mMessage.fByteCount))
+                    {
+                        returnCode = -EFAULT;
+                        msg->mStatus = (ULWord)returnCode;
+                        goto messageError;
+                    }
+#if defined(AJA_NTV42)
+                    // send to ntv42
+                    returnCode = ntv42device_message(pNTV2Params->ntv42_device, pInBuff, msg->mMessage.fByteCount);
+#else                    
+                    returnCode = -EFAULT;
+                    msg->mStatus = (ULWord)returnCode;
+                    goto messageError;
+#endif                        
+                    // Write back message buffer on request
+                    if ((msg->mFlags & NTV2_MESSAGE_DATA_RW) != 0)
+                    {
+						if (copy_to_user((void *)msg->mMessage.fUserSpacePtr,
+                                    (const void*)pInBuff,
+                                    msg->mMessage.fByteCount))
+						{
+							returnCode = -EFAULT;
+                            msg->mStatus = (ULWord)returnCode;
+							goto messageError;
+						}
+                    }
+
+                    msg->mStatus = (ULWord)returnCode;
+                    if (returnCode != 0)
+                        goto messageError;
+				}
+				break;
+
 			default:
 				returnCode = -EPERM;
 				break;
@@ -2119,6 +2211,44 @@ messageError:
 			return returnCode;
 		}
 		break;
+#endif
+
+#if defined(AJA_NTV42)
+	case IOCTL_NTV42_VERSION:
+		return ntv42_ioctl_version(pNTV2Params->ntv42_device, arg);
+
+	case IOCTL_NTV42_REG_READ:
+		return ntv42_ioctl_reg_read(pNTV2Params->ntv42_device, arg);
+
+	case IOCTL_NTV42_REG_WRITE:
+		return ntv42_ioctl_reg_write(pNTV2Params->ntv42_device, arg);
+
+	case IOCTL_NTV42_DEVICE_INFO:
+		return ntv42_ioctl_device_info(pNTV2Params->ntv42_device, arg);
+
+	case IOCTL_NTV42_EVENT_CONTROL:
+		return ntv42_ioctl_event_control(pNTV2Params->ntv42_device, arg);
+
+	case IOCTL_NTV42_EVENT_WAIT:
+		return ntv42_ioctl_event_wait(pNTV2Params->ntv42_device, arg);
+
+	case IOCTL_NTV42_EVENT_STATUS:
+		return ntv42_ioctl_event_status(pNTV2Params->ntv42_device, arg);
+
+	case IOCTL_NTV42_DMA_TRANSFER:
+		return ntv42_ioctl_dma_transfer(pNTV2Params->ntv42_device, arg);
+
+	case IOCTL_NTV42_DMA_INFO:
+		return ntv42_ioctl_dma_info(pNTV2Params->ntv42_device, arg);
+
+	case IOCTL_NTV42_REGBATCH_SUBMIT:
+		return ntv42_ioctl_regbatch_submit(pNTV2Params->ntv42_device, arg);
+
+	case IOCTL_NTV42_REGBATCH_CANCEL:
+		return ntv42_ioctl_regbatch_cancel(pNTV2Params->ntv42_device, arg);
+
+	case IOCTL_NTV42_REGBATCH_STATUS:
+		return ntv42_ioctl_regbatch_status(pNTV2Params->ntv42_device, arg);
 #endif
 
 	}
@@ -2903,6 +3033,51 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 		++handled;
 	}
 
+#if defined(AJA_NTV42)
+	/* Dispatch interrupts to ntv42 event infrastructure */
+	if (pNTV2Params->ntv42_device != NULL) {
+		/* Output vsync events */
+		if (statusRegister & kIntOutput1VBLActive)
+			ntv42device_event(pNTV2Params->ntv42_device, 0x0001, 0);
+		if (statusRegister & kIntOutput2VBLActive)
+			ntv42device_event(pNTV2Params->ntv42_device, 0x0001, 1);
+		if (statusRegister & kIntOutput3VBLActive)
+			ntv42device_event(pNTV2Params->ntv42_device, 0x0001, 2);
+		if (statusRegister & kIntOutput4VBLActive)
+			ntv42device_event(pNTV2Params->ntv42_device, 0x0001, 3);
+		if (status2Register & kIntOutput5VBLActive)
+			ntv42device_event(pNTV2Params->ntv42_device, 0x0001, 4);
+		if (status2Register & kIntOutput6VBLActive)
+			ntv42device_event(pNTV2Params->ntv42_device, 0x0001, 5);
+		if (status2Register & kIntOutput7VBLActive)
+			ntv42device_event(pNTV2Params->ntv42_device, 0x0001, 6);
+		if (status2Register & kIntOutput8VBLActive)
+			ntv42device_event(pNTV2Params->ntv42_device, 0x0001, 7);
+
+		/* Input vsync events */
+		if (statusRegister & kIntInput1VBLActive)
+			ntv42device_event(pNTV2Params->ntv42_device, 0x0002, 0);
+		if (statusRegister & kIntInput2VBLActive)
+			ntv42device_event(pNTV2Params->ntv42_device, 0x0002, 1);
+		if (status2Register & kIntInput3VBLActive)
+			ntv42device_event(pNTV2Params->ntv42_device, 0x0002, 2);
+		if (status2Register & kIntInput4VBLActive)
+			ntv42device_event(pNTV2Params->ntv42_device, 0x0002, 3);
+		if (status2Register & kIntInput5VBLActive)
+			ntv42device_event(pNTV2Params->ntv42_device, 0x0002, 4);
+		if (status2Register & kIntInput6VBLActive)
+			ntv42device_event(pNTV2Params->ntv42_device, 0x0002, 5);
+		if (status2Register & kIntInput7VBLActive)
+			ntv42device_event(pNTV2Params->ntv42_device, 0x0002, 6);
+		if (status2Register & kIntInput8VBLActive)
+			ntv42device_event(pNTV2Params->ntv42_device, 0x0002, 7);
+
+		/* Audio wrap events */
+		if (statusRegister & kIntAudioWrapActive)
+			ntv42device_event(pNTV2Params->ntv42_device, 0x0201, 0);
+	}
+#endif
+
 	return IRQ_RETVAL(handled);
 }
 
@@ -3154,6 +3329,10 @@ static int __init aja_ntv2_module_init(void)
 	getDriverVersionString(versionString, STRMAX);
 	MSG("%s: driver version %s\n",
 		getNTV2ModuleParams()->name, versionString);
+
+#if defined(AJA_NTV42)
+    ntv42device_init();
+#endif    
 
     // determine driver mode
     strncpy(versionString, DriverMode, STRMAX);
@@ -3953,6 +4132,35 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
             }
         }
     }
+
+#if defined(AJA_NTV42)
+    {
+        ntv42_device_config_t config;
+        ntv42device_create(&ntv2pp->ntv42_device, ntv2pp);
+
+        memset (&config, 0, sizeof(ntv42_device_config_t));
+        getDeviceVersionString(deviceNumber, config.name, NTV42_DEVICE_NAME_MAX - 1);
+        snprintf(config.desc, NTV42_DEVICE_DESC_MAX, "%s dev %d bus %02x",
+                 config.name, deviceNumber, ntv2pp->systemContext.busNumber);
+        getDeviceSerialNumberString(deviceNumber, config.serial, NTV42_DEVICE_DESC_MAX - 1);
+        ntv42device_config(ntv2pp->ntv42_device, &config);
+
+        /* Register BAR0 for register access via ntv42 ioctls */
+        {
+            ntv42_bar_t bar0;
+            memset(&bar0, 0, sizeof(bar0));
+            snprintf(bar0.name, sizeof(bar0.name), "bar0");
+            bar0.address = ntv2pp->_unmappedBAR0Address;
+            bar0.size = ntv2pp->_BAR0MemorySize;
+            bar0.width = 4;
+            bar0.reg_read = ntv42_bar0_reg_read;
+            bar0.reg_write = ntv42_bar0_reg_write;
+            ntv42device_bar_add(ntv2pp->ntv42_device, &bar0);
+        }
+
+        ntv42device_state(ntv2pp->ntv42_device, ntv42device_state_enable);
+    }
+#endif    
     
 #if defined(AJA_CREATE_DEVICE_NODES)
 	// Create the device node
@@ -4002,6 +4210,10 @@ static void remove(struct pci_dev *pdev)
 #endif
 
 	MSG("%s: device remove\n", ntv2pp->name);
+
+#if defined(AJA_NTV42)
+    ntv42device_state(ntv2pp->ntv42_device, ntv42device_state_disable);
+#endif
 
     ntv2pp->ioRemove = true;
 
@@ -4181,6 +4393,11 @@ static void remove(struct pci_dev *pdev)
             pci_disable_msi(ntv2pp->pci_dev);
         }
     }
+
+#if defined(AJA_NTV42)    
+    ntv42device_release(ntv2pp->ntv42_device);
+    ntv2pp->ntv42_device = NULL;
+#endif
     
 	pci_resources_release(ntv2pp);
 
@@ -5702,6 +5919,10 @@ static int suspend(struct pci_dev *pdev, pm_message_t state)
 
 	MSG("%s: device suspend\n", ntv2pp->name);
 
+#if defined(AJA_NTV42)
+    ntv42device_state(ntv2pp->ntv42_device, ntv42device_state_suspend);
+#endif
+
 	// disable hdmi monitor
 	for (j = 0; j < NTV2_MAX_HDMI_MONITOR; j++)
 	{
@@ -5892,6 +6113,10 @@ static int resume(struct pci_dev *pdev)
 
         // enable all dma engines
         dmaEnable(deviceNumber);
+
+#if defined(AJA_NTV42)
+        ntv42device_state(ntv2pp->ntv42_device, ntv42device_state_resume);
+#endif        
     }
 
     return 0;

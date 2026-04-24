@@ -19,13 +19,6 @@
 #include <QtMultimedia>
 #include "ntv2card.h"
 #include "ntv2enums.h"
-#include "ntv2task.h"
-#include "ajabase/common/types.h"
-#include "ajabase/system/process.h"
-#if defined (INCLUDE_AJACC)
-	#include "ajacc/includes/ntv2captiondecoder608.h"
-	#include "ajacc/includes/ntv2captiondecoder708.h"
-#endif	//	INCLUDE_AJACC
 
 #define STREAMPREVIEW_WIDGET_X (960)
 #define STREAMPREVIEW_WIDGET_Y (540)

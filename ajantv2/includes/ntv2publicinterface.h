@@ -1462,7 +1462,11 @@ typedef enum
 	//	kRegCanDoStatus
 	kRegMaskCanDoValidXptROM			= BIT(0),
 	kRegMaskCanDoAudioWaitForVBI		= BIT(1),
-	kRegMaskCanDoHancInsertion			= BIT(2),
+	kRegMaskMainFlashSPIController		= BIT(2),
+	kRegMaskMBFlashSPIController		= BIT(3),
+	kRegMaskHasNTV4FrameStores			= BIT(4),
+	kRegMaskCanReportMixerDelay			= BIT(5),
+	kRegMaskCanDoHancInsertion			= BIT(6),
 
 	//	kRegLUTV2Control
 	kRegMaskLUT1Enable					= BIT(0),
@@ -2556,7 +2560,11 @@ typedef enum
 	//	kRegCanDoStatus
 	kRegShiftCanDoValidXptROM			= 0,
 	kRegShiftCanDoAudioWaitForVBI		= 1,
-	kRegShiftCanDoHancInsertion			= 2,
+	kRegShiftMainFlashSPIController		= 2,
+	kRegShiftMBFlashSPIController		= 3,
+	kRegShiftHasNTV4FrameStores			= 4,
+	kRegShiftCanReportMixerDelay		= 5,
+	kRegShiftCanDoHancInsertion			= 6,
 
 	//	kRegLUTV2Control
 	kRegShiftLUT1Enable					= 0,
@@ -5664,6 +5672,7 @@ typedef enum
 		#define NTV2_IS_VALID_TRAILER_TAG(_x_)	((_x_) == NTV2_TRAILER_TAG)
 
 		#define NTV2_TYPE_VIRTUAL_DATA_RW		NTV2_FOURCC ('v', 'd', 'a', 't')	///< @brief Identifies NTV2VirtualData struct
+		#define NTV2_TYPE_MESSAGE_DATA  		NTV2_FOURCC ('m', 'd', 'a', 't')	///< @brief Identifies NTV2MessageData struct
 		#define NTV2_TYPE_BANKGETSET			NTV2_FOURCC ('b', 'n', 'k', 'S')	///< @brief Identifies NTV2BankSelGetSetRegs struct
 		#define NTV2_TYPE_ACCONTROL				NTV2_FOURCC ('c', 'o', 'n', 't')	///< @brief Identifies AUTOCIRCULATE_STATUS struct
 		#define NTV2_TYPE_ACSTATUS				NTV2_FOURCC ('s', 't', 'a', 't')	///< @brief Identifies AUTOCIRCULATE_STATUS struct
@@ -5701,6 +5710,7 @@ typedef enum
 													(_x_) == NTV2_TYPE_SDISTATS			||	\
 													(_x_) == NTV2_TYPE_BANKGETSET		||	\
 													(_x_) == NTV2_TYPE_VIRTUAL_DATA_RW	||	\
+													(_x_) == NTV2_TYPE_MESSAGE_DATA	    ||	\
 													(_x_) == NTV2_TYPE_AJADEBUGLOGGING	||	\
 													(_x_) == NTV2_TYPE_AJABUFFERLOCK	||	\
 													(_x_) == NTV2_TYPE_AJABITSTREAM		||	\
@@ -7992,6 +8002,53 @@ typedef enum
 
 
 		/**
+			@brief	This is used to perform virtual data reads or writes.
+			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
+		**/
+                    
+		#define NTV2_MESSAGE_DATA_RW			BIT(0)			///< @brief Used in ::NTV2MessageData
+
+        NTV2_STRUCT_BEGIN (NTV2MessageData) //	NTV2_TYPE_MESSAGE_DATA
+			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
+				NTV2Buffer		mMessage;		    ///< @brief Pointer object data to target
+				ULWord			mFlags;		        ///< @brief Message flags
+                ULWord          mStatus;            ///< @brief Message return status
+			NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
+
+			#if !defined (NTV2_BUILDING_DRIVER)
+				/**
+					@brief	Constructs an NTV2VirtualData struct for reading or writing virtual data.
+					@param[in]	inMessage		    Message data
+					@param[in]	inMessageSize	    Message data size
+					@param[in]	inFlags    			Message flags
+				**/
+                explicit	NTV2MessageData (const void* inMessage, const size_t inMessageSize, const ULWord inFlags);
+
+				/**
+					@return The message status
+				**/
+                ULWord		GetStatus (void)    { return mStatus; }
+
+				/**
+					@brief	Prints a human-readable representation of me to the given output stream.
+					@param	inOutStream		Specifies the output stream to use.
+					@return A reference to the output stream.
+				**/
+				std::ostream &	Print (std::ostream & inOutStream) const;
+
+				/**
+					@return		My address casted to an NTV2_HEADER pointer.
+				**/
+				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 16.3
+
+				NTV2_RPC_CODEC_DECLS
+				NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)
+
+			#endif	//	!defined (NTV2_BUILDING_DRIVER)
+		NTV2_STRUCT_END (NTV2MessageData)
+
+
+		/**
 			@brief	This is used by the CNTV2Card::ReadSDIStatistics function.
 			@note	There is no need to access any of this structure's fields directly. Simply call the CNTV2Card instance's ReadSDIStatistics function.
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
@@ -8041,7 +8098,7 @@ typedef enum
 		NTV2_STRUCT_END (NTV2SDIInStatistics)
 
 
-		/**
+        /**
 			@brief		This class/object reports information about the current and/or requested AutoCirculate frame.
 			@details	When used to implement CNTV2Card::AutoCirculateGetFrameStamp, it is its own NTV2_TYPE_ACFRAMESTAMP
 						<tt>'stmp'</tt> message (that replaced the old, obsolete CNTV2Card::GetFrameStamp function).

@@ -404,6 +404,13 @@ AJA_EXPORT bool is_legal_decimal_number (const std::string & inStr, const size_t
 AJA_EXPORT uint64_t is_legal_hex_serial_number (const std::string & inStr);	//	New in SDK 17.1
 
 /**
+ *	@param[in]		inStr			The character string of interest.
+ *	@param[in]		inMaxLength		The maximum number of hexadecimal digits allowed. Defaults to 16.
+ *	@return true if the given string is a hexadecimal number (and does not exceed the maximum length)
+ */
+AJA_EXPORT bool is_legal_hex_number (const std::string & inStr, const size_t inMaxLength = 16);	//	New in SDK 18.1
+
+/**
  *	@param[in]		inStr	The character string of interest.
  *	@return true if every character in the given string is alphanumeric 
  */

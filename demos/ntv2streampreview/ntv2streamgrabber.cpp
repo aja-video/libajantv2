@@ -4,17 +4,10 @@
 	@brief		Contains the implementation of the NTV2StreamGrabber class.
 	@copyright	(C) 2013-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
-#include <ostream>
 #include "ntv2streamgrabber.h"
 #include "ntv2democommon.h"
-#include "ntv2devicefeatures.h"
-#include "ntv2devicescanner.h"
 #include "ntv2utils.h"
-#if defined (INCLUDE_AJACC)
-	#include "ajaanc/includes/ancillarylist.h"
-	#include "ajaanc/includes/ancillarydata_cea608_line21.h"
-	using namespace std;
-#endif
+#include "ajabase/system/process.h"
 
 #define NTV2_NUM_IMAGES		(10)
 

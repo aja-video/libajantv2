@@ -104,6 +104,7 @@ class AJAExport DeviceCapabilities
 		inline bool		CanMeasureTemperature (void)			{return dev.IsSupported(kDeviceCanMeasureTemperature);}							///< @returns	True if device can measure its FPGA die temperature
 		inline bool		CanReportFailSafeLoaded (void)			{return dev.IsSupported(kDeviceCanReportFailSafeLoaded);}						///< @returns	True if device can report if its "fail-safe" firmware is loaded/running
 		inline bool		CanReportFrameSize (void)				{return dev.IsSupported(kDeviceCanReportFrameSize);}							///< @returns	True if device can report its intrinsic frame size
+		inline bool		CanReportMixerDelay (void)				{return dev.IsSupported(kDeviceCanReportMixerDelay);}							///< @returns	True if device can report Mixer delay
 		inline bool		CanReportRunningFirmwareDate (void)		{return dev.IsSupported(kDeviceCanReportRunningFirmwareDate);}					///< @returns	True if device can report its running (and not necessarily installed) firmware date
 		inline bool		CanThermostat (void)					{return dev.IsSupported(kDeviceCanThermostat);}									///< @returns	True if device fan can be thermostatically controlled
 		inline bool		HasAudioMonitorRCAJacks (void)			{return dev.IsSupported(kDeviceHasAudioMonitorRCAJacks);}						///< @returns	True if device has a pair of unbalanced RCA audio monitor output connectors
@@ -120,6 +121,7 @@ class AJAExport DeviceCapabilities
 		inline bool		HasHEVCM31 (void)						{return dev.IsSupported(kDeviceHasHEVCM31);}									///< @returns	True if device has an HEVC M31 encoder/decoder
 		inline bool		HasIDSwitch (void)						{return dev.IsSupported(kDeviceHasIDSwitch);}									///< @returns	True if device has a mechanical identification switch
 		inline bool		HasLEDAudioMeters (void)				{return dev.IsSupported(kDeviceHasLEDAudioMeters);}								///< @returns	True if device has LED audio meters
+		inline bool		HasLPProductCode (void) 				{return dev.IsSupported(kDeviceHasLPProductCode);}								///< @returns	True if device has a local proc handling the product code
 		inline bool		HasMicInput (void)						{return dev.IsSupported(kDeviceHasMicrophoneInput);}							///< @returns	True if device has a microphone input connector
 		inline bool		HasNTV4FrameStores (void)				{return dev.IsSupported(kDeviceHasNTV4FrameStores);}							///< @returns	True if device FrameStores are implemented with NTV4 firmware
 		inline bool		HasNWL (void)							{return dev.IsSupported(kDeviceHasNWL);}										///< @returns	True if device has NorthWest Logic DMA hardware and/or firmware
@@ -157,6 +159,7 @@ class AJAExport DeviceCapabilities
 		inline ULWord	GetMaxTransferCount (void)				{return dev.GetNumSupported(kDeviceGetMaxTransferCount);}						///< @returns	The maximum number of 32-bit words a DMA engine on the device can transfer in one operation
 		inline UWord	GetNum2022ChannelsSFP1 (void)			{return UWord(dev.GetNumSupported(kDeviceGetNum2022ChannelsSFP1));}				///< @returns	The number of SMPTE 2022 channels configured on SFP 1 on the device
 		inline UWord	GetNum2022ChannelsSFP2 (void)			{return UWord(dev.GetNumSupported(kDeviceGetNum2022ChannelsSFP2));}				///< @returns	The number of SMPTE 2022 channels configured on SFP 2 on the device
+		inline UWord	GetNum25GSFPs (void)					{return UWord(dev.GetNumSupported(kDeviceGetNum25GSFPs));}						///< @returns	The number of 25Gbps SFPs on the device
 		inline UWord	GetNum4kQuarterSizeConverters (void)	{return UWord(dev.GetNumSupported(kDeviceGetNum4kQuarterSizeConverters));}		///< @returns	The number of quarter-size 4K/UHD down-converters on the device
 		inline UWord	GetNumAESAudioInputChannels (void)		{return UWord(dev.GetNumSupported(kDeviceGetNumAESAudioInputChannels));}		///< @returns	The number of AES/EBU audio input channels on the device
 		inline UWord	GetNumAESAudioOutputChannels (void)		{return UWord(dev.GetNumSupported(kDeviceGetNumAESAudioOutputChannels));}		///< @returns	The number of AES/EBU audio output channels on the device

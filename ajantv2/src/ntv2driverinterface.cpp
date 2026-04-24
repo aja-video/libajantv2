@@ -12,7 +12,6 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2nubaccess.h"
 #include "ntv2bitfile.h"
-#include "ntv2registersmb.h"	//	for SAREK_REGS
 #include "ntv2spiinterface.h"
 #include "ntv2utils.h"
 #include "ntv2version.h"
@@ -313,7 +312,16 @@ bool CNTV2DriverInterface::OpenRemote (const NTV2DeviceSpecParser & inParser)
 	//	this process that describe the plugin, its signature, and any query parameters it
 	//	requires or accepts for further configuration.
 	DIDBG("Opening " << inParser.InfoString());
-	NTV2RPCAPI * pClient (NTV2RPCClientAPI::CreateClient(connectParams));
+	NTV2RPCAPI * pClient (nullptr);
+	try {
+		pClient = NTV2RPCClientAPI::CreateClient(connectParams);
+	} catch (std::bad_alloc &) {
+		pClient = nullptr;
+		DIFAIL("bad_alloc exception");
+	} catch (...) {
+		pClient = nullptr;
+		DIFAIL("exception");
+	}
 	if (!pClient)
 		return false;	//	Failed to instantiate plugin client
 
@@ -740,7 +748,7 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 	::strncpy(bitFileInfo.designNameStr, bitFileDesignNameString.c_str(), sizeof(bitFileInfo.designNameStr)-1);
 	return true;
 }
-
+#if 0	//	IoIP/KonaIP10G purge
 bool CNTV2DriverInterface::GetPackageInformation (PACKAGE_INFO_STRUCT & packageInfo)
 {
 	if (!IsDeviceReady(false) || !IsSupported(kDeviceCanDoIP))
@@ -842,7 +850,7 @@ bool CNTV2DriverInterface::GetPackageInformation (PACKAGE_INFO_STRUCT & packageI
 	packageInfo.packageNumber = results[7];
 	return true;
 }
-
+#endif	//	IoIP/KonaIP10G purge
 // Common remote card DriverGetBuildInformation.  Subclasses have overloaded function
 // that does platform-specific function on local cards.
 bool CNTV2DriverInterface::DriverGetBuildInformation (BUILD_INFO_STRUCT & buildInfo)
@@ -1074,6 +1082,12 @@ bool CNTV2DriverInterface::ReadFlashULWord (const ULWord inAddress, ULWord & out
 void CNTV2DriverInterface::setDeviceIndexNumber (const UWord num)
 {
 	_boardNumber = num;
+	if (IsRemote())		//	Remote/virtual device?
+		if (_pRPCAPI->HasConnectParam(kQParamVDevIndex))	//	.vdev-originated device?
+		{
+			//	Special handling for .vdev devices to work with AJA ControlPanel and R2 services
+			CNTV2DeviceScanner::PatchDeviceInfo (_boardNumber, *this);
+		}
 }
 
 
@@ -1393,28 +1407,12 @@ bool CNTV2DriverInterface::IsDeviceReady (const bool checkValid)
 
 bool CNTV2DriverInterface::IsMBSystemValid (void)
 {
-	if (IsSupported(kDeviceCanDoIP))
-	{
-		uint32_t val;
-		ReadRegister(SAREK_REGS + kRegSarekIfVersion, val);
-		return val == SAREK_IF_VERSION;
-	}
 	return true;
 }
 
 bool CNTV2DriverInterface::IsMBSystemReady (void)
 {
-	if (!IsSupported(kDeviceCanDoIP))
-		return false;	//	No microblaze
-
-	uint32_t val;
-	ReadRegister(SAREK_REGS + kRegSarekMBState, val);
-	if (val != 0x01)
-		return false;	//	MB not ready
-
-	// Not enough to read MB State, we need to make sure MB is running
-	ReadRegister(SAREK_REGS + kRegSarekMBUptime, val);
-	return (val < 2) ? false : true;
+	return false;
 }
 
 bool CNTV2DriverInterface::IsLPSystemReady (void)
@@ -1692,18 +1690,6 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 																+ GetNumSupported(kDeviceGetNumAnalogVideoInputs)) > 0;	break;
 		case kDeviceCanDoColorCorrection:			outValue = GetNumSupported(kDeviceGetNumLUTs) > 0;					break;	//	Deprecate?
 		case kDeviceCanDoCustomAnc:					outValue = ::NTV2DeviceCanDoCustomAnc(devID);						break;	//	Deprecate?
-
-		//	FOR NOW:	kDeviceCanDoCustomHancInsertion
-		//				REMOVE THIS CASE ONCE ALL KONA5 & CORVID44/12G & KONAX FIRMWARE SETS kRegCanDoStatus BIT(2):
-		case kDeviceCanDoCustomHancInsertion:		outValue =	   devID == DEVICE_ID_IO4KPLUS
-																|| devID == DEVICE_ID_KONA5				|| devID == DEVICE_ID_KONA5_2X4K
-																|| devID == DEVICE_ID_KONA5_8K			|| devID == DEVICE_ID_KONA5_3DLUT
-																|| devID == DEVICE_ID_KONA5_8K_MV_TX	|| devID == DEVICE_ID_CORVID44_8KMK
-																|| devID == DEVICE_ID_CORVID44_8K		|| devID == DEVICE_ID_CORVID44_2X4K
-																|| devID == DEVICE_ID_CORVID44_PLNR		|| devID == DEVICE_ID_KONAX
-																|| devID == DEVICE_ID_KONAX_4CH;
-													break;
-
 		case kDeviceCanDoDSKOpacity:				outValue = ::NTV2DeviceCanDoDSKOpacity(devID);						break;	//	Deprecate?
 		case kDeviceCanDoDualLink:					outValue = ::NTV2DeviceCanDoDualLink(devID);						break;	//	Deprecate?
 		case kDeviceCanDoDVCProHD:					outValue = ::NTV2DeviceCanDoDVCProHD(devID);						break;	//	Deprecate?
@@ -1745,7 +1731,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceHasBracketLED:					outValue = ::NTV2DeviceHasBracketLED(devID);						break;
 		case kDeviceHasColorSpaceConverterOnChannel2:	outValue = ::NTV2DeviceCanDoWidget(devID, NTV2_WgtCSC2);		break;	//	Deprecate?
 		case kDeviceHasIDSwitch:					outValue = ::NTV2DeviceCanDoIDSwitch(devID);						break;
-		case kDeviceHasNTV4FrameStores:				outValue = ::NTV2DeviceHasNTV4FrameStores(devID);				   break;
+		case kDeviceHasNTV4FrameStores:				outValue = ::NTV2DeviceHasNTV4FrameStores(devID);					break;
 		case kDeviceHasNWL:							outValue = ::NTV2DeviceHasNWL(devID);								break;
 		case kDeviceHasPCIeGen2:					outValue = ::NTV2DeviceHasPCIeGen2(devID);							break;
 		case kDeviceHasRetailSupport:				outValue = ::NTV2DeviceHasRetailSupport(devID);						break;
@@ -1791,6 +1777,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceHasGenlockv3:					outValue = GetNumSupported(kDeviceGetGenlockVersion) == 3;			break;	//	Deprecate
 		case kDeviceHasHeadphoneJack:				outValue = ::NTV2DeviceHasHeadphoneJack(devID);						break;
 		case kDeviceHasLEDAudioMeters:				outValue = ::NTV2DeviceHasLEDAudioMeters(devID);					break;
+		case kDeviceHasLPProductCode:				outValue = ::NTV2DeviceHasLPProductCode(devID);						break;
 		case kDeviceHasRotaryEncoder:				outValue = ::NTV2DeviceHasRotaryEncoder(devID);						break;
 		case kDeviceHasSPIv5:						outValue = ::NTV2DeviceGetSPIFlashVersion(devID) == 5;				break;
 		case kDeviceHasXilinxDMA:					outValue = ::NTV2DeviceHasXilinxDMA(devID);							break;
@@ -1843,6 +1830,7 @@ bool CNTV2DriverInterface::GetNumericParam (const ULWord inParamID, ULWord & out
 		case kDeviceGetMaxTransferCount:				outVal = ::NTV2DeviceGetMaxTransferCount (devID);				break;
 		case kDeviceGetNum2022ChannelsSFP1:				outVal = ::NTV2DeviceGetNum2022ChannelsSFP1 (devID);			break;
 		case kDeviceGetNum2022ChannelsSFP2:				outVal = ::NTV2DeviceGetNum2022ChannelsSFP2 (devID);			break;
+		case kDeviceGetNum25GSFPs:						outVal = ::NTV2DeviceGetNum25GSFPs (devID);						break;
 		case kDeviceGetNum4kQuarterSizeConverters:		outVal = ::NTV2DeviceGetNum4kQuarterSizeConverters (devID);		break;
 		case kDeviceGetNumAESAudioInputChannels:		outVal = ::NTV2DeviceGetNumAESAudioInputChannels (devID);		break;
 		case kDeviceGetNumAESAudioOutputChannels:		outVal = ::NTV2DeviceGetNumAESAudioOutputChannels (devID);		break;
@@ -1908,9 +1896,9 @@ bool CNTV2DriverInterface::GetRegInfoForBoolParam (const NTV2BoolParamID inParam
 		case kDeviceHasMicrophoneInput:			outRegInfo.Set(kRegGlobalControl2, 0, kRegMaskIsDNXIV, kRegShiftIsDNXIV);							break;
 		case kDeviceAudioCanWaitForVBI:			outRegInfo.Set(kRegCanDoStatus, 0, kRegMaskCanDoAudioWaitForVBI, kRegShiftCanDoAudioWaitForVBI);	break;
 		case kDeviceHasXptConnectROM:			outRegInfo.Set(kRegCanDoStatus, 0, kRegMaskCanDoValidXptROM, kRegShiftCanDoValidXptROM);			break;
-
-//	BIT(2) IN kRegCanDoStatus NOT YET IN ALL KONA5, CORVID44/12G, KONAX FIRMWARE:
-//		case kDeviceCanDoCustomHancInsertion:	outRegInfo.Set(kRegCanDoStatus, 0, kRegMaskCanDoHancInsertion, kRegShiftCanDoHancInsertion);		break;
+		case kDeviceCanDoCustomHancInsertion:	outRegInfo.Set(kRegCanDoStatus, 0, kRegMaskCanDoHancInsertion, kRegShiftCanDoHancInsertion);		break;
+		case kDeviceHasNTV4FrameStores:			outRegInfo.Set(kRegCanDoStatus, 0, kRegMaskHasNTV4FrameStores, kRegShiftHasNTV4FrameStores);		break;
+		case kDeviceCanReportMixerDelay:		outRegInfo.Set(kRegCanDoStatus, 0, kRegMaskCanReportMixerDelay, kRegShiftCanReportMixerDelay);		break;
 
 		//	kDeviceHasBreakoutBoard's sense is opposite of "BOBAbsent", so set outFlipSense 'true':
 		case kDeviceHasBreakoutBoard:			outRegInfo.Set(kRegBOBStatus, 0, kRegMaskBOBAbsent, kRegShiftBOBAbsent);	outFlipSense = true;	break;

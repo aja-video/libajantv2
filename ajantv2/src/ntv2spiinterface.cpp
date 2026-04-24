@@ -13,9 +13,6 @@
 #include <string>
 #include <vector>
 
-#include "ntv2registersmb.h"
-#include "ntv2mcsfile.h"
-
 using namespace std;
 
 static bool verify_vectors(const std::vector<uint8_t> &dataWritten, const std::vector<uint8_t> &dataRead, bool verbose = false)

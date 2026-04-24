@@ -349,11 +349,6 @@ int WriteReg(	ULWord deviceNumber,
 		}
 		if (registerNumber <= pNTV2Params->_numberOfHWRegisters)
 		{
-# ifdef SOFTWARE_UART_FIFO		/* this is here to prevent a deadlock in the software UART.  Seems that the register access in the ISR and driver initialization deadlock when probe()ing */
-			if (registerNumber != kRegRS422Control
-				&& registerNumber != kRegRS422Transmit
-				&& registerNumber != kRegRS422Transmit)
-# endif
 			ntv2_spin_lock_irqsave(&(pNTV2Params->_registerSpinLock), flags);
 		}
 
@@ -366,159 +361,10 @@ int WriteReg(	ULWord deviceNumber,
 			registerValue |= oldValue;
 		}
 
-#ifdef SOFTWARE_UART_FIFO
-		switch(registerNumber) {
-
-		case kRegRS422Control:
-		{
-			unsigned long flags;
-
-# ifdef UARTRXFIFOSIZE
-			ntv2_spin_lock_irqsave(&pNTV2Params->uartRxFifoLock, flags);
-
-			if(!(registerValue & kRegMaskRS422RXEnable)) {
-				pNTV2Params->uartRxFifoSize = 0;
-			}
-
-			if(registerValue & BIT_7) {
-				pNTV2Params->uartRxFifoOverrun = 0;
-			}
-
-			ntv2_spin_unlock_irqrestore(&pNTV2Params->uartRxFifoLock, flags);
-# endif	// UARTRXFIFOSIZE
-
-# ifdef UARTTXFIFOSIZE
-			ntv2_spin_lock_irqsave(&pNTV2Params->uartTxFifoLock, flags);
-
-			if(!(registerValue & kRegMaskRS422TXEnable)) {
-				pNTV2Params->uartTxFifoSize = 0;
-			}
-
-			ntv2_spin_unlock_irqrestore(&pNTV2Params->uartTxFifoLock, flags);
-# endif	// UARTTXFIFOSIZE
-
-			WRITE_REGISTER_ULWord(deviceNumber, address,registerValue);
-		}
-		break;
-
-		case kRegRS4222Control:
-		{
-			unsigned long flags;
-
-# ifdef UARTRXFIFOSIZE
-			ntv2_spin_lock_irqsave(&pNTV2Params->uartRxFifoLock2, flags);
-
-			if(!(registerValue & kRegMaskRS422RXEnable)) {
-				pNTV2Params->uartRxFifoSize2 = 0;
-			}
-
-			if(registerValue & BIT_7) {
-				pNTV2Params->uartRxFifoOverrun2 = 0;
-			}
-
-			ntv2_spin_unlock_irqrestore(&pNTV2Params->uartRxFifoLock2, flags);
-# endif	// UARTRXFIFOSIZE
-
-# ifdef UARTTXFIFOSIZE
-			ntv2_spin_lock_irqsave(&pNTV2Params->uartTxFifoLock2, flags);
-
-			if(!(registerValue & kRegMaskRS422TXEnable)) {
-				pNTV2Params->uartTxFifoSize2 = 0;
-			}
-
-			ntv2_spin_unlock_irqrestore(&pNTV2Params->uartTxFifoLock2, flags);
-# endif	// UARTTXFIFOSIZE
-
-			WRITE_REGISTER_ULWord(deviceNumber, address,registerValue);
-		}
-		break;
-
-# ifdef UARTTXFIFOSIZE
-		case kRegRS422Transmit:
-		{
-			unsigned long flags;
-
-			ntv2_spin_lock_irqsave(&pNTV2Params->uartTxFifoLock, flags);
-
-			if(pNTV2Params->uartTxFifoSize < UARTTXFIFOSIZE) {
-				pNTV2Params->uartTxFifo[pNTV2Params->uartTxFifoSize++] =
-					registerValue;
-			}
-
-			if(registerMask == NO_MASK) {
-				unsigned i, j;
-
-				for(i = 0; i < pNTV2Params->uartTxFifoSize; ++i) {
-					ULWord control = ReadUARTControl(deviceNumber);
-					if(control & BIT_2) break;
-					registerValue = pNTV2Params->uartTxFifo[i];
-					WriteUARTTransmitData(deviceNumber, registerValue);
-				}
-
-				for(j = 0; j < i; ++j) {
-					pNTV2Params->uartTxFifo[j] = pNTV2Params->uartTxFifo[i+j];
-				}
-
-				pNTV2Params->uartTxFifoSize -= i;
-			}
-
-			ntv2_spin_unlock_irqrestore(&pNTV2Params->uartTxFifoLock, flags);
-		}
-		break;
-
-		case kRegRS4222Transmit:
-		{
-			unsigned long flags;
-
-			ntv2_spin_lock_irqsave(&pNTV2Params->uartTxFifoLock2, flags);
-
-			if(pNTV2Params->uartTxFifoSize2 < UARTTXFIFOSIZE) {
-				pNTV2Params->uartTxFifo2[pNTV2Params->uartTxFifoSize2++] =
-					registerValue;
-			}
-
-			if(registerMask == NO_MASK) {
-				unsigned i, j;
-
-				for(i = 0; i < pNTV2Params->uartTxFifoSize2; ++i) {
-					ULWord control = ReadUARTControl2(deviceNumber);
-					if(control & BIT_2) break;
-					registerValue = pNTV2Params->uartTxFifo2[i];
-					WriteUARTTransmitData(deviceNumber, registerValue);
-				}
-
-				for(j = 0; j < i; ++j) {
-					pNTV2Params->uartTxFifo2[j] = pNTV2Params->uartTxFifo2[i+j];
-				}
-
-				pNTV2Params->uartTxFifoSize2 -= i;
-			}
-
-			ntv2_spin_unlock_irqrestore(&pNTV2Params->uartTxFifoLock2, flags);
-		}
-		break;
-# endif	// UARTTXFIFOSIZE
-
-		default:
-			WRITE_REGISTER_ULWord(deviceNumber, address,registerValue);
-
-			if (registerNumber <= pNTV2Params->_numberOfHWRegisters)
-#  ifdef SOFTWARE_UART_FIFO
-				if (registerNumber != kRegRS422Control
-					&& registerNumber != kRegRS422Transmit
-					&& registerNumber != kRegRS422Transmit)
-#  endif
-				ntv2_spin_unlock_irqrestore(&(pNTV2Params->_registerSpinLock), flags);
-			break;
-		} // switch
-
-#else // !defined(SOFTWARE_UART_FIFO)
-
 		WRITE_REGISTER_ULWord(deviceNumber, address,registerValue);
 
 		if (registerNumber <= pNTV2Params->_numberOfHWRegisters)
 			ntv2_spin_unlock_irqrestore(&(pNTV2Params->_registerSpinLock), flags);
-#endif	// SOFTWARE_UART_FIFO
 
         if (lutLoad)
         {
@@ -861,6 +707,7 @@ int ReadReg(    ULWord deviceNumber,
 	if (!pNTV2Params->registerEnable &&
 		!((registerNumber >= VIRTUALREG_START) && (registerNumber <= kVRegLast)))
 	{
+//		MSG("%s: attempt to read while disabled\n", pNTV2Params->name);
 		if (registerNumber == kRegBoardID)
         {
             *registerValue = pNTV2Params->_DeviceID;
@@ -889,128 +736,9 @@ int ReadReg(    ULWord deviceNumber,
 		{
 //			MSG("%s: attempt to read unsupported hardware register %u address 0x%08lx\n",
 //				pNTV2Params->name, registerNumber, address);
-//			return 0xFFFFFFFF;
             *registerValue = 0;
 			return -EINVAL;
 		}
-
-#ifdef SOFTWARE_UART_FIFO
-		switch(registerNumber) {
-		case kRegRS422Control:
-		{
-			unsigned long flags;
-
-			value = ReadUARTControl(deviceNumber);
-
-# ifdef UARTRXFIFOSIZE
-			// Clear bits for software Rx FIFO. Leave overrun bit (bit 7) alone.
-			// If hardward FIFO has overrun, then the software FIFO needs to
-			// be considered as overrun as well.
-
-			value &= ~(BIT_4 | BIT_5);
-
-			ntv2_spin_lock_irqsave(&pNTV2Params->uartRxFifoLock, flags);
-
-			if(pNTV2Params->uartRxFifoSize) value |= BIT_4;
-			if(pNTV2Params->uartRxFifoSize == UARTRXFIFOSIZE) value |= BIT_5;
-			if(pNTV2Params->uartRxFifoOverrun) value |= BIT_7;
-
-			ntv2_spin_unlock_irqrestore(&pNTV2Params->uartRxFifoLock, flags);
-# endif // UARTRXFIFOSIZE
-
-# ifdef UARTTXFIFOSIZE
-			value &= ~(BIT_1 | BIT_2);
-
-			ntv2_spin_lock_irqsave(&pNTV2Params->uartTxFifoLock, flags);
-
-			if(pNTV2Params->uartTxFifoSize == 0) value |= BIT_1;
-			if(pNTV2Params->uartTxFifoSize == UARTTXFIFOSIZE) value |= BIT_2;
-
-			ntv2_spin_unlock_irqrestore(&pNTV2Params->uartTxFifoLock, flags);
-# endif // UARTTXFIFOSIZE
-		}
-		break;
-
-		case kRegRS4222Control:
-		{
-			unsigned long flags;
-
-			value = ReadUARTControl2(deviceNumber);
-
-# ifdef UARTRXFIFOSIZE
-			// Clear bits for software Rx FIFO. Leave overrun bit (bit 7) alone.
-			// If hardward FIFO has overrun, then the software FIFO needs to
-			// be considered as overrun as well.
-
-			value &= ~(BIT_4 | BIT_5);
-
-			ntv2_spin_lock_irqsave(&pNTV2Params->uartRxFifoLock2, flags);
-
-			if(pNTV2Params->uartRxFifoSize2) value |= BIT_4;
-			if(pNTV2Params->uartRxFifoSize2 == UARTRXFIFOSIZE) value |= BIT_5;
-			if(pNTV2Params->uartRxFifoOverrun2) value |= BIT_7;
-
-			ntv2_spin_unlock_irqrestore(&pNTV2Params->uartRxFifoLock2, flags);
-# endif // UARTRXFIFOSIZE
-
-# ifdef UARTTXFIFOSIZE
-			value &= ~(BIT_1 | BIT_2);
-
-			ntv2_spin_lock_irqsave(&pNTV2Params->uartTxFifoLock2, flags);
-
-			if(pNTV2Params->uartTxFifoSize2 == 0) value |= BIT_1;
-			if(pNTV2Params->uartTxFifoSize2 == UARTTXFIFOSIZE) value |= BIT_2;
-
-			ntv2_spin_unlock_irqrestore(&pNTV2Params->uartTxFifoLock2, flags);
-# endif // UARTTXFIFOSIZE
-		}
-		break;
-
-# ifdef UARTRXFIFOSIZE
-		case kRegRS422Receive:
-		{
-			unsigned long flags;
-
-			ntv2_spin_lock_irqsave(&pNTV2Params->uartRxFifoLock, flags);
-
-			if(pNTV2Params->uartRxFifoSize) {
-				unsigned i, n = --pNTV2Params->uartRxFifoSize;
-				value = pNTV2Params->uartRxFifo[0];
-				for(i = 0; i < n; ++i) {
-					pNTV2Params->uartRxFifo[i] = pNTV2Params->uartRxFifo[i+1];
-				}
-			} else {
-				value = 0;
-			}
-
-			ntv2_spin_unlock_irqrestore(&pNTV2Params->uartRxFifoLock, flags);
-		}
-		break;
-# endif // UARTRXFIFOSIZE
-
-# ifdef UARTRXFIFOSIZE
-		case kRegRS4222Receive:
-		{
-			unsigned long flags;
-
-			ntv2_spin_lock_irqsave(&pNTV2Params->uartRxFifoLock2, flags);
-
-			if(pNTV2Params->uartRxFifoSize2) {
-				unsigned i, n = --pNTV2Params->uartRxFifoSize2;
-				value = pNTV2Params->uartRxFifo2[0];
-				for(i = 0; i < n; ++i) {
-					pNTV2Params->uartRxFifo2[i] = pNTV2Params->uartRxFifo2[i+1];
-				}
-			} else {
-				value = 0;
-			}
-
-			ntv2_spin_unlock_irqrestore(&pNTV2Params->uartRxFifoLock2, flags);
-		}
-		break;
-# endif // UARTRXFIFOSIZE
-		default:
-#endif // SOFTWARE_UART_FIFO
 
 		if (registerNumber <= pNTV2Params->_numberOfHWRegisters)
 			ntv2_spin_lock_irqsave(&(pNTV2Params->_registerSpinLock), flags);
@@ -1019,11 +747,6 @@ int ReadReg(    ULWord deviceNumber,
 
 		if (registerNumber <= pNTV2Params->_numberOfHWRegisters)
 			ntv2_spin_unlock_irqrestore(&(pNTV2Params->_registerSpinLock), flags);
-
-#ifdef SOFTWARE_UART_FIFO
-			break;
-		}
-#endif // SOFTWARE_UART_FIFO
 
 		// Mask and shift is only applied to real registers.
 		value &= registerMask;
@@ -3262,56 +2985,6 @@ void  Init422Uart(ULWord deviceNumber)
 	WriteRegister(deviceNumber, kRegRS4222Control, BIT_6 | BIT_7, NO_MASK, NO_SHIFT);
 }
 
-#ifdef SOFTWARE_UART_FIFO
-
-#ifdef UARTRXFIFOSIZE
-// Method: ReadUARTReceiveData
-	// Input:  NONE
-	// Output: ULWord or equivalent(i.e. ULWord).
-ULWord ReadUARTReceiveData(ULWord deviceNumber)
-{
-	return  READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pUARTReceiveData);
-}
-
-// Method: ReadUARTReceiveData2
-	// Input:  NONE
-	// Output: ULWord or equivalent(i.e. ULWord).
-ULWord ReadUARTReceiveData2(ULWord deviceNumber)
-{
-	return  READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pUARTReceiveData2);
-}
-#endif // UARTRXFIFOSIZE
-
-#ifdef UARTTXFIFOSIZE
-void WriteUARTTransmitData(ULWord deviceNumber, ULWord value)
-{
-	WRITE_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pUARTTransmitData,value);
-}
-
-void WriteUARTTransmitData2(ULWord deviceNumber, ULWord value)
-{
-	WRITE_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pUARTTransmitData2,value);
-}
-#endif // UARTTXFIFOSIZE
-
-// Method: ReadUARTControl
-	// Input:  NONE
-	// Output: ULWord or equivalent(i.e. ULWord).
-ULWord ReadUARTControl(ULWord deviceNumber)
-{
-	return  READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pUARTControl);
-}
-
-// Method: ReadUARTControl2
-	// Input:  NONE
-	// Output: ULWord or equivalent(i.e. ULWord).
-ULWord ReadUARTControl2(ULWord deviceNumber)
-{
-	return  READ_REGISTER_ULWord(deviceNumber, getNTV2Params(deviceNumber)->_pUARTControl2);
-}
-
-#endif	// SOFTWARE_UART_FIFO
-
 bool IsSaveRecallRegister(ULWord deviceNumber, ULWord regNum)
 {
 	switch ( regNum )
@@ -3476,10 +3149,12 @@ bool IsSaveRecallRegister(ULWord deviceNumber, ULWord regNum)
 }
 
 void
-GetDeviceSerialNumberWords(ULWord deviceNumber, ULWord *low, ULWord *high)
+GetDeviceSerialNumberWords(ULWord deviceNumber, ULWord *ch0, ULWord *ch4, ULWord *ch8, ULWord *ch12)
 {
-  *low = ReadRegister(deviceNumber, kRegReserved54, NO_MASK, NO_SHIFT);
-  *high = ReadRegister(deviceNumber, kRegReserved55, NO_MASK, NO_SHIFT);
+  *ch0 = ReadRegister(deviceNumber, kRegReserved54, NO_MASK, NO_SHIFT);
+  *ch4 = ReadRegister(deviceNumber, kRegReserved55, NO_MASK, NO_SHIFT);
+  *ch8 = ReadRegister(deviceNumber, kRegReserved56, NO_MASK, NO_SHIFT);
+  *ch12 = ReadRegister(deviceNumber, kRegReserved57, NO_MASK, NO_SHIFT);
 }
 
 void itoa64(ULWord64 i, char *buffer)

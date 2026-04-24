@@ -8,7 +8,6 @@
 #include "ntv2card.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
-#include "ntv2registersmb.h"
 #include "ntv2konaflashprogram.h"
 #include "ntv2konaflashprogram.h"
 #include "ntv2vpid.h"
@@ -2342,8 +2341,10 @@ bool CNTV2Card::ProgramMainFlash (const string & inFileName, const bool bInForce
 	ostringstream msgs;
 	string	progResults;
 	const bool ok(devFlasher.SetBitFile(inFileName, msgs, MAIN_FLASHBLOCK));
+#if 0	//	IP10G purge
 	if (bInForceUpdate)
 		devFlasher.SetMBReset();
+#endif
 	if (ok)
 		progResults = devFlasher.Program(false);
 	else
@@ -2360,7 +2361,7 @@ bool CNTV2Card::GetRunningFirmwarePackageRevision (ULWord & outRevision)
 		return false;	//	Not open
 	if (!IsSupported(kDeviceCanDoIP))
 		return false;	//	No MicroBlaze
-	return ReadRegister(kRegSarekPackageVersion + SAREK_REGS, outRevision);
+	return false;	//	IP10G purge		//	ReadRegister(kRegSarekPackageVersion + SAREK_REGS, outRevision);
 }
 
 bool CNTV2Card::GetRunningFirmwareRevision (UWord & outRevision)
@@ -3042,14 +3043,14 @@ bool CNTV2Card::GetMixerFGMatteEnabled (const UWord inWhichMixer, bool & outIsEn
 	outIsEnabled = false;
 	if (ULWord(inWhichMixer) >= GetNumSupported(kDeviceGetNumMixers))
 		return false;
-	return !CNTV2DriverInterface::ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], outIsEnabled, kRegMaskVidProcFGMatteEnable, kRegShiftVidProcFGMatteEnable);
+	return CNTV2DriverInterface::ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], outIsEnabled, kRegMaskVidProcFGMatteEnable, kRegShiftVidProcFGMatteEnable);
 }
 
 bool CNTV2Card::SetMixerFGMatteEnabled (const UWord inWhichMixer, const bool inIsEnabled)
 {
 	if (ULWord(inWhichMixer) >= GetNumSupported(kDeviceGetNumMixers))
 		return false;
-	return !WriteRegister (gIndexToVidProcControlRegNum[inWhichMixer], inIsEnabled?1:0, kRegMaskVidProcFGMatteEnable, kRegShiftVidProcFGMatteEnable);
+	return WriteRegister (gIndexToVidProcControlRegNum[inWhichMixer], inIsEnabled?1:0, kRegMaskVidProcFGMatteEnable, kRegShiftVidProcFGMatteEnable);
 }
 
 bool CNTV2Card::GetMixerBGMatteEnabled (const UWord inWhichMixer, bool & outIsEnabled)
@@ -3057,14 +3058,14 @@ bool CNTV2Card::GetMixerBGMatteEnabled (const UWord inWhichMixer, bool & outIsEn
 	outIsEnabled = false;
 	if (ULWord(inWhichMixer) >= GetNumSupported(kDeviceGetNumMixers))
 		return false;
-	return !CNTV2DriverInterface::ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], outIsEnabled, kRegMaskVidProcBGMatteEnable, kRegShiftVidProcBGMatteEnable);
+	return CNTV2DriverInterface::ReadRegister (gIndexToVidProcControlRegNum[inWhichMixer], outIsEnabled, kRegMaskVidProcBGMatteEnable, kRegShiftVidProcBGMatteEnable);
 }
 
 bool CNTV2Card::SetMixerBGMatteEnabled (const UWord inWhichMixer, const bool inIsEnabled)
 {
 	if (ULWord(inWhichMixer) >= GetNumSupported(kDeviceGetNumMixers))
 		return false;
-	return !WriteRegister (gIndexToVidProcControlRegNum[inWhichMixer], inIsEnabled?1:0, kRegMaskVidProcBGMatteEnable, kRegShiftVidProcBGMatteEnable);
+	return WriteRegister (gIndexToVidProcControlRegNum[inWhichMixer], inIsEnabled?1:0, kRegMaskVidProcBGMatteEnable, kRegShiftVidProcBGMatteEnable);
 }
 
 static const ULWord gMatteColorRegs[]	= { kRegFlatMatteValue /*13*/,	kRegFlatMatte2Value /*249*/,	kRegFlatMatte3Value /*487*/,	kRegFlatMatte4Value /*490*/, 0, 0, 0, 0};

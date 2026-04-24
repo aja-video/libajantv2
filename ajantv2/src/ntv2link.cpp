@@ -8,6 +8,7 @@
 
 #include "ntv2link.h"
 #include "ntv2card.h"
+#include "ntv42message.h"
 
 bool ntv2card_open(int index, void** card)
 {
@@ -87,5 +88,22 @@ bool ntv2card_register_write(void* card, unsigned int reg, unsigned int data)
     return pCard->WriteRegister(reg, data);
 }
 
+bool ntv2card_send_message(void* card, void* data, unsigned int size)
+{
+    if ((card == NULL) || (data == NULL) || size < sizeof(struct ntv42_message_header_t))
+        return false;
+    CNTV2Card* pCard = (CNTV2Card*)card;
+    struct ntv42_message_header_t* header = (struct ntv42_message_header_t*)data;
+    ULWord flags = ((header->flags & NTV42_MESSAGE_FLAG_RW) != 0)? NTV2_MESSAGE_DATA_RW : 0;
+
+    NTV2MessageData msg(data, size, flags);
+	if (!pCard->NTV2Message(reinterpret_cast<NTV2_HEADER*>(&msg)))
+        return false;
+
+    if (msg.GetStatus() != 0)
+        return false;
+
+    return true;
+}
 
 

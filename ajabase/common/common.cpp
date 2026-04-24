@@ -523,8 +523,12 @@ bool is_alpha_numeric (const char inChr)
 	return sLegalChars.find(inChr) != std::string::npos;
 }
 
-bool is_legal_decimal_number (const std::string & inStr, const size_t inMaxLength)
+bool is_legal_decimal_number (const std::string & inStr, size_t inMaxLength)
 {
+	if (inStr.empty())
+		return false;	//	No digits
+	if (inMaxLength > 20)
+		inMaxLength = 20;
 	if (inStr.length() > inMaxLength)
 		return false;	//	Too long
 	for (size_t ndx(0);  ndx < inStr.size();  ndx++)
@@ -567,8 +571,42 @@ uint64_t is_legal_hex_serial_number (const std::string & inStr)	//	returns zero 
 	return u64;
 }
 
+bool is_legal_hex_number (const std::string & inStr, size_t inMaxLength)	//	returns false for invalid values. Valid example: 0x32bC333dF1375458
+{
+	std::string hexStr(inStr);  lower(hexStr);	//	hexStr is lower case
+	if (strip(hexStr).empty())
+		return false;	//	empty
+	if (inMaxLength > 64)
+		inMaxLength = 64;	//	clamp to max 64 chars
+	else if (!inMaxLength)
+		return false;	//	zero max length, nothing will be legal
+
+	//	Remove leading '0x' or 'x', if any...
+	if (hexStr.length() > 1  &&  hexStr[0] == '0'  &&  hexStr[1] == 'x')
+		hexStr.erase(0, 2);	//	Remove leading '0x'
+	else if (hexStr.length() > 0  &&  hexStr[0] == 'x')
+		hexStr.erase(0, 1);	//	Remove leading 'x'
+	if (hexStr.empty())
+		return false;
+
+	//	Remove leading zeroes, if any (stop when length is 16)...
+	while (hexStr.length() > inMaxLength && hexStr.at(0) == '0')
+		hexStr.erase(0, 1); // Remove leading '0'
+	//	No more than inMaxLength chars...
+	if (hexStr.length() > inMaxLength)
+		return false;	//	Too big, exceeds 16 chars
+
+	//	All chars must be hex digits...
+	for (size_t ndx(0);  ndx < hexStr.size();  ndx++)
+		if (!is_hex_digit(hexStr.at(ndx)))
+			return false;	//	Invalid hex digit
+	return true;
+}
+
 bool is_alpha_numeric (const std::string & inStr)
 {
+	if (inStr.empty())
+		return false;	//	empty
 	for (size_t ndx(0);  ndx < inStr.size();  ndx++)
 		if (!is_alpha_numeric(inStr.at(ndx)))
 			return false;

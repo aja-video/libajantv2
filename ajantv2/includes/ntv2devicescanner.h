@@ -320,6 +320,7 @@ public:
 #endif	//	!defined(NTV2_DEPRECATE_17_1)
 		static bool		DeviceIDPresent (const NTV2DeviceID inDeviceID, const bool inRescan = false);	///< @deprecated	Do not use
 		static bool		GetDeviceInfo (const ULWord inDeviceIndexNumber, NTV2DeviceInfo & outDeviceInfo, const bool inRescan = false);	///< @deprecated	Do not use
+		static bool		PatchDeviceInfo (const UWord inDevIndex, CNTV2DriverInterface & dev);
 		static NTV2DeviceInfoList	GetDeviceInfoList (void);	///< @deprecated	Do not use
 		static void		SortDeviceInfoList (void)	{}	///< @deprecated	Obsolete
 		static bool		CompareDeviceInfoLists (const NTV2DeviceInfoList & inOldList,
@@ -327,8 +328,13 @@ public:
 												NTV2DeviceInfoList & outDevicesAdded,
 												NTV2DeviceInfoList & outDevicesRemoved);
 	private:
-		static void		SetDeviceAttributes (NTV2DeviceInfo & inDeviceInfo, CNTV2Card & inDevice);
-		static void		SetAudioAttributes (NTV2DeviceInfo & inDeviceInfo, CNTV2Card & inDevice);
+		static void		SetDeviceAttributes (NTV2DeviceInfo & inDeviceInfo, CNTV2DriverInterface & inDev);
+		static void		SetAudioAttributes (NTV2DeviceInfo & inDeviceInfo, CNTV2DriverInterface & inDev);
+		static inline void	SetDeviceAttributes (NTV2DeviceInfo & devInfo, CNTV2Card & dev)
+												{	dev.GetSerialNumberString(devInfo.serialNumber);
+													return SetDeviceAttributes(devInfo, dev.driverInterface());
+												}
+		static inline void	SetAudioAttributes (NTV2DeviceInfo & devInfo, CNTV2Card & dev)	{return SetAudioAttributes(devInfo, dev.driverInterface());}
 		static bool		GetCP2DevList (NTV2DeviceInfoList& outVDevList);
 		static bool		GetVDevList (NTV2DeviceInfoList& outVDevList);
 };	//	CNTV2DeviceScanner

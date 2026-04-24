@@ -56,6 +56,10 @@
 #include "../ntv2genlock2.h"
 #include "../ntv2videoraster.h"
 
+#if defined(AJA_NTV42)
+struct ntv42_device_t;
+#endif
+
 // clean old stuff
 #define FGVCROSSPOINTMASK (BIT_0+BIT_1+BIT_2+BIT_3)
 #define FGVCROSSPOINTSHIFT (0)
@@ -459,6 +463,10 @@ typedef struct ntv2_private
 #if defined(AJA_HEVC)
 	unsigned long _hevcDevNum;
 #endif
+
+#if defined(AJA_NTV42)
+    struct ntv42_device_t* ntv42_device;
+#endif    
 
 	ULWord _AncF2StartMemory[NTV2_MAX_NUM_CHANNELS];
 	ULWord _AncF2StopMemory[NTV2_MAX_NUM_CHANNELS];

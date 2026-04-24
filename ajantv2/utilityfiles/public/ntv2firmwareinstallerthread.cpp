@@ -47,7 +47,6 @@ int NeedsFirmwareUpdate (CNTV2Card & inDevice, string & outReason)
 	string			installedDate, installedTime, serialNumStr, newFirmwareDescription;
 	ULWord			numBytes		(0);
 	CNTV2Bitfile	bitfile;
-	CNTV2MCSfile	mcsFile;
 
 	outReason.clear();
 	if (!inDevice.IsOpen())
@@ -57,6 +56,8 @@ int NeedsFirmwareUpdate (CNTV2Card & inDevice, string & outReason)
 	if (inDevice.IsRemote())
 		{outReason = "device '" + inDevice.GetDescription() + "' not local physical";	return kFirmwareUpdateCheckFailed;}
 	const string firmwarePath (::GetFirmwarePath(inDevice.GetDeviceID()));
+#if 0	//	IP10G purge
+	CNTV2MCSfile	mcsFile;
 	if (firmwarePath.find(".mcs") != std::string::npos)
 	{
 		//	.MCS file?
@@ -79,7 +80,7 @@ int NeedsFirmwareUpdate (CNTV2Card & inDevice, string & outReason)
 		outReason = "on-device firmware " + installedDate + " older than on-disk bitfile firmware " + bitfile.GetDate ();
 		return -1;	//	on-device firmware older than on-disk bitfile firmware
 	}
-
+#endif	//	IP10G purge
 	if (inDevice.GetInstalledBitfileInfo (numBytes, installedDate, installedTime))
 	{
 		if (bitfile.Open (firmwarePath))
@@ -175,7 +176,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 	if (!m_device.GetInstalledBitfileInfo (numBytes, installedDate, installedTime))
 		FITWARN("CNTV2FirmwareInstallerThread:  Unable to obtain installed bitfile info");
 	m_device.GetSerialNumberString(serialNumStr);
-
+#if 0	//	IP10G purge
 	if (m_bitfilePath.find(".mcs") != string::npos)
 	{
 		CNTV2KonaFlashProgram kfp;
@@ -228,7 +229,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 		FITNOTE("CNTV2FirmwareInstallerThread:  MCS update succeeded");
 		return AJA_STATUS_SUCCESS;
 	}	//	if MCS
-
+#endif	//	IP10G purge
 	if (m_useDynamicReconfig)
 	{
 		m_device.AddDynamicDirectory(::NTV2GetFirmwareFolderPath());
@@ -540,33 +541,8 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdateIPDevice (const NTV2DeviceID inDe
 	}
 	case DEVICE_ID_TTAP_PRO:
 		return designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_TTAP_PRO);
-*/	case DEVICE_ID_KONAIP_2022:
-	case DEVICE_ID_KONAIP_4CH_2SFP:
-	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
-	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
-	case DEVICE_ID_KONAIP_1RX_1TX_2110:
-	case DEVICE_ID_KONAIP_2110:
-	case DEVICE_ID_KONAIP_2110_RGB12:
-		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_2022) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_4CH_2SFP) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_2TX_1SFP_J2K) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_1RX_1TX_2110) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_2110) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_2110_RGB12) ||
-				designName == "s2022_56_2p2ch_rxtx_mb" ||
-				designName == "s2022_12_2ch_tx_spoof" ||
-				designName == "s2022_12_2ch_tx" ||
-				designName == "s2022_12_2ch_rx" ||
-				designName == "s2022_56_4ch_rxtx_fec" ||
-				designName == "s2110_1rx_1tx"); 
-	case DEVICE_ID_IOIP_2022:
-	case DEVICE_ID_IOIP_2110:
-	case DEVICE_ID_IOIP_2110_RGB12:
-		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2022) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2110) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2110_RGB12));
+*/
 	default: break;
 	}
 	return false;
-}
+}	//	ShouldUpdateIPDevice

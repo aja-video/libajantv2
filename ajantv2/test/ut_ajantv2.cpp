@@ -4404,6 +4404,7 @@ TEST_SUITE("NTV2SWDevice" * doctest::description("NTV2SWDevice tests"))
 {
 	TEST_CASE("Basic")
 	{
+		if (!AJADebug::IsOpen()) AJADebug::Open();
 		const string devSpec("ntv2swdevice://foo/");
 		CNTV2Card a;
 		for (size_t num(0);  num < 5;  num++)
@@ -4414,6 +4415,7 @@ TEST_SUITE("NTV2SWDevice" * doctest::description("NTV2SWDevice tests"))
 	}	//	TEST_CASE("Basic")
 	TEST_CASE("shm")
 	{
+		if (!AJADebug::IsOpen()) AJADebug::Open();
 #if defined(_DEBUG)	//	Currently failing, need to fix, can't get thru this loop more than once
 		const string proto("ntv2swdevice://foo/?shm=vkona");
 		CNTV2Card a;

@@ -3830,6 +3830,23 @@ ostream & NTV2VirtualData::Print (ostream & inOutStream) const
 	return inOutStream;
 }
 
+NTV2MessageData::NTV2MessageData (const void* inMessage, const size_t inMessageSize, const ULWord inFlags)
+	:	mHeader			(NTV2_TYPE_MESSAGE_DATA, sizeof (NTV2MessageData)),
+		mMessage    	(inMessage, inMessageSize),
+		mFlags   		(inFlags),
+        mStatus         (0)
+{
+	NTV2_ASSERT_STRUCT_VALID;
+}
+
+
+ostream & NTV2MessageData::Print (ostream & inOutStream) const
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	inOutStream << mHeader;
+	return inOutStream;
+}
+
 using namespace ntv2nub;
 
 	/*********************************************************************************************************************

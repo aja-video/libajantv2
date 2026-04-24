@@ -138,8 +138,9 @@ NTV2_REG(ntv2_reg_hdr_green_primary,						330,
                                                             kVRegHDMIOutHDRGreenPrimary3,
                                                             kVRegHDMIOutHDRGreenPrimary4);			/* hdr green primary register */
 	NTV2_FLD(ntv2_fld_hdr_primary_x,							16,	0);			/* rgb primary x value */	
-	NTV2_FLD(ntv2_fld_hdr_primary_y,							16,	16);		/* rgb primary y value */	
-NTV2_REG(ntv2_reg_hdr_blue_primary,							kVRegHDMIOutHDRBluePrimary1,
+	NTV2_FLD(ntv2_fld_hdr_primary_y,							16,	16);		/* rgb primary y value */
+NTV2_REG(ntv2_reg_hdr_blue_primary,							331,
+                                                            kVRegHDMIOutHDRBluePrimary1,
                                                             kVRegHDMIOutHDRBluePrimary2,
                                                             kVRegHDMIOutHDRBluePrimary3,
                                                             kVRegHDMIOutHDRBluePrimary4);			/* hdr blue primary register */

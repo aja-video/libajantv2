@@ -57,6 +57,10 @@
 #include "../ntv2genlock2.h"
 #include "../ntv2videoraster.h"
 
+#if defined(AJA_NTV42)
+struct ntv42_device_t;
+#endif
+
 // clean old stuff
 #define FGVCROSSPOINTMASK (BIT_0+BIT_1+BIT_2+BIT_3)
 #define FGVCROSSPOINTSHIFT (0)
@@ -77,15 +81,6 @@
 #define VIDPROCMUX4SHIFT (6)
 #define VIDPROCMUX5MASK (BIT_8+BIT_9)
 #define VIDPROCMUX5SHIFT (8)
-
-// Comment out SOFTWARE_UART_FIFO define to turn off software FIFO completely.
-//# define SOFTWARE_UART_FIFO
-# ifdef SOFTWARE_UART_FIFO
-// Comment out either UARTRXFIFOSIZE or UARTTXFIFOSIZE to disable
-// Rx or Tx software FIFO.
-# define UARTRXFIFOSIZE	20
-# define UARTTXFIFOSIZE	20
-# endif	// SOFTWARE_UART_FIFO
 
 //#define FPGA_REQ_FOR_DMA	(eFPGAVideoProc)
 //#define NTV2_MAX_FPGA		(eFPGAVideoProc)
@@ -293,23 +288,6 @@ typedef struct ntv2_private
 
 	unsigned long _pDeviceID;			// device ID register
 
-# ifdef SOFTWARE_UART_FIFO
-#  ifdef UARTTXFIFOSIZE
-	unsigned long _pUARTTransmitData;
-#  endif
-#  ifdef UARTRXFIFOSIZE
-	unsigned long _pUARTReceiveData;
-#  endif
-	unsigned long _pUARTControl;
-
-#  ifdef UARTTXFIFOSIZE
-	unsigned long _pUARTTransmitData2;
-#  endif
-#  ifdef UARTRXFIFOSIZE
-	unsigned long _pUARTReceiveData2;
-#  endif
-	unsigned long _pUARTControl2;
-# endif	// SOFTWARE_UART_FIFO
 	NTV2DeviceID _DeviceID;		// device ID value
 
 	wait_queue_head_t       _interruptWait[eNumInterruptTypes];
@@ -357,31 +335,6 @@ typedef struct ntv2_private
 
 	VirtualProcAmpRegisters			_virtualProcAmpRegisters;
 	HardwareProcAmpRegisterImage	_hwProcAmpRegisterImage;
-
-# ifdef SOFTWARE_UART_FIFO
-#  ifdef UARTRXFIFOSIZE
-	spinlock_t uartRxFifoLock;
-	UByte uartRxFifo[UARTRXFIFOSIZE];
-	ULWord uartRxFifoSize;
-	bool uartRxFifoOverrun;
-
-	spinlock_t uartRxFifoLock2;
-	UByte uartRxFifo2[UARTRXFIFOSIZE];
-	ULWord uartRxFifoSize2;
-	bool uartRxFifoOverrun2;
-#  endif
-
-#  ifdef UARTTXFIFOSIZE
-	spinlock_t uartTxFifoLock;
-	UByte uartTxFifo[UARTTXFIFOSIZE];
-	ULWord uartTxFifoSize;
-
-	spinlock_t uartTxFifoLock2;
-	UByte uartTxFifo2[UARTTXFIFOSIZE];
-	ULWord uartTxFifoSize2;
-#  endif
-# endif	// SOFTWARE_UART_FIFO
-
 
 	unsigned int _ntv2IRQ[eNumNTV2IRQDevices];
 
@@ -459,6 +412,22 @@ typedef struct ntv2_private
 #if defined(AJA_HEVC)
 	unsigned long _hevcDevNum;
 #endif
+
+#if defined(AJA_NTV42)
+    struct ntv42_device_t* ntv42_device;
+    
+#if defined(AJA_SON)
+    uint32_t ntv42_irqRegBase;
+    uint32_t ntv42_irqRegEnable;
+    uint32_t ntv42_irqRegActive;
+    uint32_t ntv42_irqRegClear;
+    uint32_t ntv42_irqInterruptEnableMask;
+    uint32_t ntv42_irqVideoInputMask;
+    uint32_t ntv42_irqVideoOutputMask;
+    uint32_t ntv42_irqAncInputDoneMask;
+    uint32_t ntv42_irqAncOutputDoneMask;
+#endif
+#endif    
 
 	ULWord _AncF2StartMemory[NTV2_MAX_NUM_CHANNELS];
 	ULWord _AncF2StopMemory[NTV2_MAX_NUM_CHANNELS];
@@ -662,6 +631,16 @@ ULWord XlnxSgdmaRegBase(ULWord deviceNumber, bool bC2H, int index);
 ULWord XlnxConfigRegBase(ULWord deviceNumber);
 ULWord XlnxIrqRegBase(ULWord deviceNumber);
 ULWord XlnxIrqBitMask(ULWord deviceNumber, bool bC2H, int index);
+void WriteVideoProcessingControl(ULWord deviceNumber,ULWord value);
+ULWord ReadVideoProcessingControl(ULWord deviceNumber);
+void WriteVideoProcessingControlCrosspoint(ULWord deviceNumber,ULWord value);
+ULWord ReadVideoProcessingControlCrosspoint(ULWord deviceNumber);
+ULWord XlnxReadChannelIdentifier(ULWord deviceNumber, bool bC2H, ULWord index);
+bool IsXlnxChannelStream(ULWord idReg);
+bool IsXlnxChannelMapped(ULWord idReg);
+ULWord XlnxReadChannelAlignments(ULWord deviceNumber, bool bC2H, ULWord index);
+ULWord GetXlnxAddressAlignment(ULWord alReg);
+ULWord GetXlnxTransferAlignment(ULWord alReg);
 void EnableXlnxUserInterrupt(ULWord deviceNumber, int index);
 void DisableXlnxUserInterrupt(ULWord deviceNumber, int index);
 ULWord ReadXlnxUserInterrupt(ULWord deviceNumber);
@@ -718,18 +697,6 @@ void SetCustomAncillaryData (ULWord deviceNumber, NTV2Channel channel, CUSTOM_AN
 ////////////////////////////////////////////////////////////////////////////////////////////
 // OEM UART methods
 void  Init422Uart(ULWord deviceNumber);
-#ifdef SOFTWARE_UART_FIFO
-#ifdef UARTRXFIFOSIZE
-ULWord ReadUARTReceiveData(ULWord deviceNumber);
-ULWord ReadUARTReceiveData2(ULWord deviceNumber);
-#endif
-#ifdef UARTTXFIFOSIZE
-void WriteUARTTransmitData(ULWord deviceNumber,ULWord value);
-void WriteUARTTransmitData2(ULWord deviceNumber,ULWord value);
-#endif
-ULWord ReadUARTControl(ULWord deviceNumber);
-ULWord ReadUARTControl2(ULWord deviceNumber);
-#endif // SOFTWARE_UART_FIFO
 
 //////////////////////////////////////////////////////////////////
 // OEM Color Correction Methods
@@ -748,7 +715,7 @@ ULWord GetColorCorrectionSaturation (ULWord deviceNumber, NTV2Channel channel);
 // Utility methods
 //
 bool IsSaveRecallRegister(ULWord deviceNumber, ULWord regNum);
-void GetDeviceSerialNumberWords(ULWord deviceNumber, ULWord *low, ULWord *high);
+void GetDeviceSerialNumberWords(ULWord deviceNumber, ULWord *ch0, ULWord *ch4, ULWord *ch8, ULWord *ch12);
 void itoa64(ULWord64 i, char *buffer);
 inline void interruptHousekeeping(NTV2PrivateParams* pNTV2Params, INTERRUPT_ENUMS interrupt);
 void InitDNXAddressLUT(unsigned long address);
