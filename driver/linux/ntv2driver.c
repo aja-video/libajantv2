@@ -170,7 +170,6 @@ MODULE_PARM(MapFrameBuffers, "i");
 //   all         = support all driver functions (default)
 //   register    = only support register access
 //   genlock     = register access with genlock initialization
-//   no_genlock  = all driver functions with no genlock initialization
 static char* DriverMode = "all";
 module_param(DriverMode, charp, S_IRUGO);
 
@@ -3353,11 +3352,6 @@ static int __init aja_ntv2_module_init(void)
         getNTV2ModuleParams()->driverMode = eDriverModeGenlock;
         MSG("%s: driver mode: register access with genlock\n", getNTV2ModuleParams()->name);;
     }
-	else if (strcmp(driverModeString, "no_genlock") == 0)
-	{
-		getNTV2ModuleParams()->driverMode = eDriverModeNoGenlock;
-		MSG("%s: driver mode: all functions with no genlock initialization\n", getNTV2ModuleParams()->name);;
-	}
     else
     {
         getNTV2ModuleParams()->driverMode = eDriverModeAll;
@@ -4101,7 +4095,7 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
         dmaEnable(deviceNumber);
     }
 
-    if (getNTV2ModuleParams()->driverMode != eDriverModeRegister && getNTV2ModuleParams()->driverMode != eDriverModeNoGenlock)
+    if (getNTV2ModuleParams()->driverMode != eDriverModeRegister)
     {
         if (ntv2pp->_DeviceID == DEVICE_ID_IO4KPLUS)
         {
@@ -4774,9 +4768,7 @@ static void SetupBoard(ULWord deviceNumber)
         WriteRegister(deviceNumber, kRegGlobalControl2, 0, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
     if (NTV2DeviceGetNumVideoChannels(ntv2pp->_DeviceID) > 4)
         WriteRegister(deviceNumber, kRegGlobalControl2, 0, kRegMaskRefSource2, kRegShiftRefSource2);
-	if(getNTV2ModuleParams()->driverMode != eDriverModeNoGenlock){
-		WriteRegister(deviceNumber, kRegGlobalControl, NTV2_REFERENCE_FREERUN, kRegMaskRefSource, kRegShiftRefSource);
-	}
+    WriteRegister(deviceNumber, kRegGlobalControl, NTV2_REFERENCE_FREERUN, kRegMaskRefSource, kRegShiftRefSource);
 }
 
 static bool IsKonaIPDevice(ULWord deviceNumber, NTV2DeviceID deviceID)
