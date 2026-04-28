@@ -12,6 +12,7 @@
 #include "ntv2konaflashprogram.h"
 #include "ntv2vpid.h"
 #include "ajabase/system/debug.h"
+#include "ajabase/system/systemtime.h"
 #include <math.h>
 #include <assert.h>
 #if defined (MSWindows)
@@ -652,14 +653,7 @@ bool CNTV2Card::SetVideoHOffset (int hOffset, const UWord inOutputSpigot)
 		WriteOutputTimingControl(timingValue, inOutputSpigot);
 
 		// Wait a scanline
-		count = 0;
-		ReadLineCount (lineCount);
-		do
-		{	
-			ReadLineCount (lineCount2);
-			if (count > 1000000) return false;
-			count++;
-		} while (lineCount == lineCount2);
+		AJATime::SleepInMicroseconds(80);
 
 		// Now move timing back by 2.
 		timingValue -= 2;
@@ -673,14 +667,7 @@ bool CNTV2Card::SetVideoHOffset (int hOffset, const UWord inOutputSpigot)
 		WriteOutputTimingControl(timingValue, inOutputSpigot);
 
 		// Wait a scanline
-		count = 0;
-		ReadLineCount (lineCount);
-		do
-		{	
-			ReadLineCount (lineCount2);
-			if (count > 1000000) return false;
-			count++;
-		} while (lineCount == lineCount2);				
+		AJATime::SleepInMicroseconds(80);
 		
 		// Now move timing forward by 2.
 		timingValue += 2;
