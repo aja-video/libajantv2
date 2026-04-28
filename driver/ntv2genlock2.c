@@ -415,6 +415,16 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 	uint32_t outFreq1 = 0, outFreq2 = 0, outFreq3 = 0, outFreq4 = 0, outFreq5 = 0;
 	uint8_t dpll0Status[1] = { 0 };
     uint32_t gpioValue;
+
+	// Check if genlock is already configured
+	if(		(reg_read(ntv2_gen, ntv2_reg_out_freq1) & 0xffffff00) == 0x08D9E700 &&
+			(reg_read(ntv2_gen, ntv2_reg_out_freq2) & 0xffffff00) == 0x08D7A400 &&
+			(reg_read(ntv2_gen, ntv2_reg_out_freq3) & 0xffffff00) == 0x019BFB00 &&
+			(reg_read(ntv2_gen, ntv2_reg_out_freq4) & 0xffffff00) == 0x00BB7F00 &&
+			(reg_read(ntv2_gen, ntv2_reg_out_freq5) & 0xffffff00) == 0x08D9E700)
+	{
+		return true;
+	}
     
 	if (NTV2_DEBUG_ACTIVE(NTV2_DEBUG_GENLOCK_CHECK)) check = true;
 

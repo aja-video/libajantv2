@@ -4768,7 +4768,20 @@ static void SetupBoard(ULWord deviceNumber)
         WriteRegister(deviceNumber, kRegGlobalControl2, 0, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
     if (NTV2DeviceGetNumVideoChannels(ntv2pp->_DeviceID) > 4)
         WriteRegister(deviceNumber, kRegGlobalControl2, 0, kRegMaskRefSource2, kRegShiftRefSource2);
-    WriteRegister(deviceNumber, kRegGlobalControl, NTV2_REFERENCE_FREERUN, kRegMaskRefSource, kRegShiftRefSource);
+	if(!(ntv2pp->_DeviceID == DEVICE_ID_KONAX || ntv2pp->_DeviceID == DEVICE_ID_KONAXM || ntv2pp->_DeviceID == DEVICE_ID_KONAX_4CH)) {
+		WriteRegister(deviceNumber, kRegGlobalControl, NTV2_REFERENCE_FREERUN, kRegMaskRefSource, kRegShiftRefSource);
+		return;
+	}
+	// Check if genlock already configured (KonaX Only)
+	if(		(ReadRegister(deviceNumber, 0x36c1, NO_MASK, NO_SHIFT) & 0xffffff00) == 0x08D9E700 &&
+			(ReadRegister(deviceNumber, 0x36c2, NO_MASK, NO_SHIFT) & 0xffffff00) == 0x08D7A400 &&
+			(ReadRegister(deviceNumber, 0x36c3, NO_MASK, NO_SHIFT) & 0xffffff00) == 0x019BFB00 &&
+			(ReadRegister(deviceNumber, 0x36c4, NO_MASK, NO_SHIFT) & 0xffffff00) == 0x00BB7F00 &&
+			(ReadRegister(deviceNumber, 0x36c5, NO_MASK, NO_SHIFT) & 0xffffff00) == 0x08D9E700)
+	{
+		return;
+	}
+	WriteRegister(deviceNumber, kRegGlobalControl, NTV2_REFERENCE_FREERUN, kRegMaskRefSource, kRegShiftRefSource);
 }
 
 static bool IsKonaIPDevice(ULWord deviceNumber, NTV2DeviceID deviceID)
