@@ -14,12 +14,12 @@ using namespace std;
 
 
 int main (int argc, const char ** argv)
-{	//	Create the object that will display the test pattern...
+{	//	Create the object that program genlock and route video...
     NTV2MetalE2E powerUpDemo;
-    AJAStatus status = powerUpDemo.DoSomething();
+    AJAStatus status = powerUpDemo.Run();
 
 	if (AJA_FAILURE(status))
-        {cout << "## ERROR:  doSomething failed: " << ::AJAStatusToString(status) << endl;	return 2;}
+        {cout << "## ERROR:  NTV2MetalE2E failed: " << ::AJAStatusToString(status) << endl;	return 2;}
 
 	return 0;
 

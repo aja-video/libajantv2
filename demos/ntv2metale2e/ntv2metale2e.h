@@ -449,7 +449,7 @@ class NTV2MetalE2E
             @brief		Do something from the KonaX Xilinx Baremetal system
 			@return		AJA_STATUS_SUCCESS if successful; otherwise another AJAStatus code if unsuccessful.
 		**/
-        AJAStatus		DoSomething (void);
+        AJAStatus		Run (void);
 
         /**
             @brief	Sets up the genlock circuit
