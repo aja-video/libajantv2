@@ -49,6 +49,8 @@ int main (int argc, const char ** argv)
 	CNTV2DemoCommon::Popt popt(argc, argv, optionsTable);
 	if (!popt)
 		{cerr << "## ERROR: " << popt.errorStr() << endl;  return 2;}
+	if (!popt.otherArgs().empty())
+		{cerr << "## WARNING: ignored argument(s): '" << aja::join(popt.otherArgs(), "', '") << "'" << endl;  return 2;}
 	if (showVersion)
 		{cout << argv[0] << ", NTV2 SDK " << ::NTV2Version() << endl;  return 0;}
 
