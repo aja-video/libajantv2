@@ -155,7 +155,7 @@ static int ntv2_rdma_map_pages(struct pci_dev* pci_dev, PDMA_PAGE_BUFFER pBuffer
     ret = nvidia_p2p_dma_map_pages(&pci_dev->dev,
                                    pRdmaBuffer->page,
                                    &pRdmaBuffer->map,
-                                   (pBuffer->direction == PCI_DMA_TODEVICE)? DMA_TO_DEVICE : DMA_FROM_DEVICE);
+                                   (pBuffer->direction == DMA_TO_DEVICE)? DMA_TO_DEVICE : DMA_FROM_DEVICE);
 #else
     ret = nvidia_p2p_dma_map_pages(pci_dev,
                                    pRdmaBuffer->page,
