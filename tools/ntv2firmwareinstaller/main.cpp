@@ -81,12 +81,12 @@ static void ReportDeviceFlashStatus (CNTV2Card & inDevice)
 		cout << "Failsafe Bitfile: '" << konaFlasher.GetDesignName() << "' " << konaFlasher.GetDate() << " " << konaFlasher.GetTime() << endl;
 	else
 		warnings << "## WARNING:  No fail-safe bitfile found" << endl;
-
+#if 0	//	IoIP/KonaIP10g purge
 	if (konaFlasher.ReadInfoString())
 		cout << "    Package Info: " << "(N/A)"/*konaFlasher.GetMCSInfo().c_str()*/ << endl;
 	else if (inDevice.features().CanDoIP())
 		warnings << "## WARNING:  Unable to read package info" << endl;
-
+#endif	//	IoIP/KonaIP10g purge
 	if (runningBuildDate.empty()  &&  !::NTV2DeviceCanReportRunningFirmwareDate(konaFlasher.GetDeviceID()))
 		notes << "## NOTE:  This device cannot report its running firmware date/time" << endl;
 

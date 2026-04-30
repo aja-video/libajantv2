@@ -630,7 +630,6 @@ class AJAExport CNTV2DriverInterface
 		AJA_VIRTUAL bool	CloseRemote (void);	///< @brief	Releases host resources associated with the remote/special device connection.
 		AJA_VIRTUAL bool	OpenLocalPhysical (const UWord inDeviceIndex);	///< @brief	Opens the local/physical device connection.
 		AJA_VIRTUAL bool	CloseLocalPhysical (void);	///< @brief	Releases host resources associated with the local/physical device connection.
-		AJA_VIRTUAL bool	ParseFlashHeader (BITFILE_INFO_STRUCT & outBitfileInfo);
 		AJA_VIRTUAL bool	GetBoolParam (const ULWord inParamID,  ULWord & outValue);	//	New in SDK 17.0
 		AJA_VIRTUAL bool	GetNumericParam (const ULWord inParamID,  ULWord & outValue);	//	New in SDK 17.0
 
@@ -660,6 +659,7 @@ class AJAExport CNTV2DriverInterface
 			@brief		Initializes my member variables after a successful Open.
 		**/
 		AJA_VIRTUAL void	FinishOpen (void);
+		AJA_VIRTUAL bool	ParseFlashHeader (BITFILE_INFO_STRUCT & outBitfileInfo);
 		AJA_VIRTUAL bool	ReadFlashULWord (const ULWord inAddress, ULWord & outValue, const ULWord inRetryCount = 1000);
 
 

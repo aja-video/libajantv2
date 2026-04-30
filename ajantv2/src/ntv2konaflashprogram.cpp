@@ -20,6 +20,8 @@
 #define ENUM_CASE_RETURN_VAL_OR_ENUM_STR(condition, retail_name, enum_name)\
 	case(enum_name): return condition ? retail_name : #enum_name
 
+#define MAXBITFILE_HEADERSIZE 512
+
 using namespace std;
 
 #define KFPDBUG(__x__)	AJA_sDEBUG (AJA_DebugUnit_Firmware, AJAFUNC << ": " << __x__)
@@ -27,7 +29,14 @@ using namespace std;
 #define KFPERR(__x__)	do {ostringstream oss;  oss << AJAFUNC << ": " << __x__;  cerr << "## ERROR:    " << oss.str() << endl;  AJA_sERROR  (AJA_DebugUnit_Firmware, oss.str());} while(false)
 #define KFPNOTE(__x__)	do {ostringstream oss;  oss << AJAFUNC << ": " << __x__;  if (!_bQuiet) cout << "## NOTE:  "    << oss.str() << endl;  AJA_sNOTICE (AJA_DebugUnit_Firmware, oss.str());} while(false)
 
+#define FWDBUG(__x__)	AJA_sDEBUG (AJA_DebugUnit_Firmware, AJAFUNC << ": " << __x__)
+#define FWINFO(__x__)	AJA_sINFO (AJA_DebugUnit_Firmware, AJAFUNC << ": " << __x__)
+#define FWWARN(__x__)	AJA_sWARNING (AJA_DebugUnit_Firmware, AJAFUNC << ": " << __x__)
+#define FWFAIL(__x__)	AJA_sERROR (AJA_DebugUnit_Firmware, AJAFUNC << ": " << __x__)
+#define FWNOTE(__x__)	AJA_sNOTICE (AJA_DebugUnit_Firmware, AJAFUNC << ": " << __x__)
+#define	FAIL(_p_)		ostringstream e; e << _p_; FWFAIL(e.str());
 
+#if 0	//	IoIP/KonaIP10g purge
 string MacAddr::AsString(void) const
 {
 	ostringstream	oss;
@@ -35,6 +44,7 @@ string MacAddr::AsString(void) const
 		<< ":" << xHEX0N(uint16_t(mac[3]),2) << ":" << xHEX0N(uint16_t(mac[4]),2) << ":" << xHEX0N(uint16_t(mac[5]),2);
 	return oss.str();
 }
+#endif	//	IoIP/KonaIP10g purge
 
 static CNTV2FlashProgress gNullUpdater;
 
@@ -212,10 +222,8 @@ bool CNTV2KonaFlashProgram::SetBoard(uint32_t index)
 	if (!SetDeviceProperties())
 		return false;
 
-	//For manufacturing use the leds to code the board number
-	uint32_t ledMask = BIT(16)+BIT(17);
-	uint32_t ledShift = 16;
-	return WriteRegister(kRegGlobalControl, index, ledMask, ledShift);
+	//	For manufacturing use the LEDs to code the board number
+	return WriteRegister(kRegGlobalControl, index, kRegMaskLED, kRegShiftLED);
 
 }
 
@@ -486,7 +494,7 @@ bool CNTV2KonaFlashProgram::ReadHeader (FlashBlockID blockID)
 	SetBankSelect(BANK_0);	//	Make sure to reset bank to lower
 	return status;
 }
-
+#if 0	//	IoIP/KonaIP10g purge
 bool CNTV2KonaFlashProgram::ReadInfoString()
 {
 	if (_spiFlash)
@@ -533,8 +541,8 @@ bool CNTV2KonaFlashProgram::ReadInfoString()
 		_mcsInfo = _mcsInfo.substr(0, ffPos);	//	Lop off "\xFF\xFF...", if present
 	return true;
 }
-
-std::string CNTV2KonaFlashProgram::Program(bool fullVerify)
+#endif	//	IoIP/KonaIP10g purge
+string CNTV2KonaFlashProgram::Program(bool fullVerify)
 {
 	if (!_bitFileBuffer)
 		return "Bitfile not open";
@@ -1463,7 +1471,7 @@ bool CNTV2KonaFlashProgram::ReadLicenseInfo(string& serialString)
 			baseAddress += 4;
 		}
 
-		std::string res;
+		string res;
 		if (terminated)
 			res = reinterpret_cast<char*>(license);
 

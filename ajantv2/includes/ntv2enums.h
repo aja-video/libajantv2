@@ -4291,8 +4291,12 @@ typedef enum
 	BANK_0,
 	BANK_1,
 	BANK_2,
-	BANK_3
+	BANK_3,
+	MAX_NUM_BANKS,
+	BANK_INVALID = MAX_NUM_BANKS
 } BankSelect;
+
+#define NTV2_IS_VALID_BANK_SELECT(_x_)	((_x_) >= BANK_0  &&  (_x_) < MAX_NUM_BANKS)
 
 typedef enum {
 	READID_COMMAND			= 0x9F,

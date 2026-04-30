@@ -20,7 +20,6 @@
 #include "ntv2spiinterface.h"
 #include "ntv2bitfile.h"
 
-#define MAXBITFILE_HEADERSIZE 512
 #define MAXMCSINFOSIZE 256
 #define MAXMCSLICENSESIZE 256
 #define MCS_STEPS	   6
@@ -54,12 +53,8 @@ public:
 public:
 	virtual bool	SetBoard (uint32_t index = 0);
 	bool			ReadHeader (FlashBlockID flashBlock);
-	bool			ReadInfoString();
 	bool			SetBitFile (const std::string & inBitfileName, std::ostream & outMsgs, const FlashBlockID blockNumber = AUTO_FLASHBLOCK);	//	New in SDK 16.0
-//	bool			SetMCSFile (const std::string & sMCSFileName);
 	std::string		Program (bool fullVerify = false);
-//	bool			ProgramFromMCS(bool verify);
-//	bool			ProgramSOC(bool verify = true);
 	bool			ProgramCustom (const std::string & sCustomFileName, const uint32_t addr, std::ostream & outMsgs);
     bool			ProgramKonaxMB (const std::string & sCustomFileName, const uint32_t addr, std::ostream & outMsgs);
 	bool			EraseBlock (FlashBlockID blockNumber);
@@ -73,7 +68,6 @@ public:
 	bool			SetFlashBlockIDBank(FlashBlockID blockID);
 	bool			ROMHasBankSelect();
 	uint32_t		ReadBankSelect ();
-//	bool			SetMBReset();
 	bool			IsInstalledFWRunning (bool & outIsRunning, std::ostream & outErrorMsgs);
 	bool			WriteCommand(_FLASH_COMMAND inCommand);
 
@@ -83,8 +77,6 @@ public:
 	std::string		GetTime (void) const		{return _parser.Time();}
 	const NTV2BitfileHeaderParser & Parser (void) const	{return _parser;}
 	uint32_t		GetNumBytes(void) const		{return _numBytes;}
-//	const std::string &	GetMCSInfo (void) const	{return _mcsInfo;}
-//	void ParsePartitionFromFileLines(uint32_t address, uint16_t & partitionOffset);
 	bool CreateBankRecord(BankSelect bankID);
 
 	bool ProgramMACAddresses(MacAddr * mac1, MacAddr * mac2);
@@ -94,8 +86,6 @@ public:
 	void DisplayData(const uint32_t address, const uint32_t len);
 	bool ProgramInfoFromString(std::string infoString);
 	bool FullProgram(std::vector<uint8_t> & dataBuffer);
-
-//	int32_t	 NextMcsStep() {return ++_mcsStep;}
 
 	bool WaitForFlashNOTBusy();
 	bool ProgramFlashValue(uint32_t address, uint32_t value);
@@ -141,11 +131,24 @@ public:
 			case LICENSE_BLOCK:			return 1;
 		}
 	}
-#if 0
+#if 0	//	IoIP/KonaIP10g purge
+	bool	ReadInfoString();
+	bool	SetMCSFile (const std::string & sMCSFileName);
+	bool	ProgramFromMCS(bool verify);
+	bool	ProgramSOC(bool verify = true);
+	bool	SetMBReset();
+	const std::string &	GetMCSInfo (void) const	{return _mcsInfo;}
+	void ParsePartitionFromFileLines(uint32_t address, uint16_t & partitionOffset);
+	bool ProgramMACAddresses(MacAddr * mac1, MacAddr * mac2);
+	bool ReadMACAddresses(MacAddr & mac1, MacAddr & mac2);
+	bool ProgramLicenseInfo(const std::string & licenseString);
+	bool ReadLicenseInfo(std::string & licenseString);
+	bool ProgramInfoFromString(std::string infoString);
+	int32_t	 NextMcsStep() {return ++_mcsStep;}
 	bool VerifySOCPartition(FlashBlockID flashID, uint32_t FlashBlockOffset);
 	bool CheckAndFixMACs();
 	bool MakeMACsFromSerial( const char *sSerialNumber, MacAddr *pMac1, MacAddr *pMac2 );
-#endif
+#endif	//	IoIP/KonaIP10g purge
 protected:
 	NTV2Buffer		_bitFileBuffer;
 	uint8_t *		_customFileBuffer;
