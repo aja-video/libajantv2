@@ -2318,6 +2318,7 @@ bool CNTV2KonaFlashProgram::FullProgram (vector<uint8_t> & dataBuffer)
 				case BANK_1:	currentBank = BANK_2;	break;
 				case BANK_2:	currentBank = BANK_3;	break;
 				case BANK_3:	currentBank = BANK_0;	break;
+				case MAX_NUM_BANKS:	return false;
 			}
 			SetBankSelect(currentBank);
 		}

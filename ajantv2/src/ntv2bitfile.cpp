@@ -481,9 +481,6 @@ string CNTV2Bitfile::GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID
 		case DEVICE_ID_IO4KPLUS:				return "io4kp";
 		case DEVICE_ID_IO4KUFC:					return "io_xt_4k_ufc";		//	IO_XT_4K_UFC
 		case DEVICE_ID_IOEXPRESS:				return "chekov_00_pcie";	//	chekov_00_pcie.ncd
-//		case DEVICE_ID_IOIP_2022:				return "ioip_s2022";
-//		case DEVICE_ID_IOIP_2110:				return "ioip_s2110";
-//		case DEVICE_ID_IOIP_2110_RGB12:			return "ioip_s2110_RGB12";
 		case DEVICE_ID_IOX3:					return "iox3";
 		case DEVICE_ID_IOXT:					return "top_io_tx";			//	top_IO_TX.ncd
 		case DEVICE_ID_KONA1:					return "kona1";
@@ -510,14 +507,7 @@ string CNTV2Bitfile::GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID
 		case DEVICE_ID_KONA5_OE8:				return "kona5_oe_cfg8";
 		case DEVICE_ID_KONA5_OE9:				return "kona5_oe_cfg9";
 		case DEVICE_ID_KONAHDMI:				return "kona_hdmi_4rx";
-//		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:	break;
-//		case DEVICE_ID_KONAIP_1RX_1TX_2110:		break;
-//		case DEVICE_ID_KONAIP_2022:				break;
-//		case DEVICE_ID_KONAIP_2110:				return "konaip_s2110";
-//		case DEVICE_ID_KONAIP_2110_RGB12:		return "konaip_s2110_RGB12";
 		case DEVICE_ID_KONAIP_25G:				break;
-//		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:		break;
-//		case DEVICE_ID_KONAIP_4CH_2SFP:			break;
 		case DEVICE_ID_KONALHEPLUS:				return "lhe_12_pcie";		//	lhe_12_pcie.ncd
 		case DEVICE_ID_KONALHI:					return "top_pike";			//	top_pike.ncd
 		case DEVICE_ID_KONALHIDVI:				break;
@@ -544,7 +534,20 @@ string CNTV2Bitfile::GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID
 		case DEVICE_ID_FS8:
 		case DEVICE_ID_SOFTWARE:
 		case DEVICE_ID_NOTFOUND:				break;
-#if !defined(_DEBUG)
+
+#if defined(_DEBUG)
+		//	IoIP/KonaIP10g purge:
+		case DEVICE_ID_IOIP_2022:
+		case DEVICE_ID_IOIP_2110:
+		case DEVICE_ID_IOIP_2110_RGB12:
+		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
+		case DEVICE_ID_KONAIP_1RX_1TX_2110:
+		case DEVICE_ID_KONAIP_2022:
+		case DEVICE_ID_KONAIP_2110:
+		case DEVICE_ID_KONAIP_2110_RGB12:
+		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
+		case DEVICE_ID_KONAIP_4CH_2SFP:			break;
+#else
 		default:								break;
 #endif
 	}

@@ -4623,14 +4623,11 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_CORVID88_GEN3:			return inForRetailDisplay ? "Corvid 88 Gen3"			: "Corvid-88-Gen3";
 		case DEVICE_ID_CORVIDHBR:				return inForRetailDisplay ? "Corvid HB-R"				: "CorvidHBR";
 		case DEVICE_ID_CORVIDHEVC:				return inForRetailDisplay ? "Corvid HEVC"				: "CorvidHEVC";
-		case DEVICE_ID_FS8:					  return "FS8";
+		case DEVICE_ID_FS8:						return "FS8";
 		case DEVICE_ID_IO4K:					return "Io4K";
 		case DEVICE_ID_IO4KPLUS:				return inForRetailDisplay ? "Avid DNxIV"				: "Io4KPlus";
 		case DEVICE_ID_IO4KUFC:					return inForRetailDisplay ? "Io4K UFC"					: "Io4KUfc";
 		case DEVICE_ID_IOEXPRESS:				return inForRetailDisplay ? "IoExpress"					: "IoExpress";
-//		case DEVICE_ID_IOIP_2022:				return inForRetailDisplay ? "Avid DNxIP s2022"			: "IoIP-s2022";
-//		case DEVICE_ID_IOIP_2110:				return inForRetailDisplay ? "Avid DNxIP s2110"			: "IoIP-s2110";
-//		case DEVICE_ID_IOIP_2110_RGB12:			return inForRetailDisplay ? "Avid DNxIP s2110_RGB12"	: "IoIP-s2110_RGB12";
 		case DEVICE_ID_IOX3:					return "IoX3";
 		case DEVICE_ID_IOXT:					return "IoXT";
 		case DEVICE_ID_IP25_R:					return "IP25-R";
@@ -4659,13 +4656,6 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONA5_OE8:				return "Kona5-OE8";
 		case DEVICE_ID_KONA5_OE9:				return "Kona5-OE9";
 		case DEVICE_ID_KONAHDMI:				return inForRetailDisplay ? "Kona HDMI"					: "KonaHDMI";
-//		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K: return "KonaIP J2K 1I 1O";
-//		case DEVICE_ID_KONAIP_1RX_1TX_2110:		return "KonaIP s2110 1I 1O";
-//		case DEVICE_ID_KONAIP_2022:				return "KonaIP s2022";
-//		case DEVICE_ID_KONAIP_2110:				return "KonaIP s2110";
-//		case DEVICE_ID_KONAIP_2110_RGB12:		return "KonaIP s2110 RGB12";
-//		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:		return "KonaIP J2K 2O";
-//		case DEVICE_ID_KONAIP_4CH_2SFP:			return "KonaIP s2022 2+2";
 		case DEVICE_ID_KONALHEPLUS:				return inForRetailDisplay ? "KONA LHe+"					: "KonaLHe+";
 		case DEVICE_ID_KONALHI:					return inForRetailDisplay ? "KONA LHi"					: "KonaLHi";
 		case DEVICE_ID_KONALHIDVI:				return inForRetailDisplay ? "KONA LHi DVI"				: "KonaLHiDVI";
@@ -4688,8 +4678,19 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_SOFTWARE:				return inForRetailDisplay ? "Software"					: "Software";
 		case DEVICE_ID_NOTFOUND:				return inForRetailDisplay ? "AJA Device"				: "(Not Found)";
 #if defined(_DEBUG)
+		//	IoIP/KonaIP10g purge:
+		case DEVICE_ID_IOIP_2022:
+		case DEVICE_ID_IOIP_2110:
+		case DEVICE_ID_IOIP_2110_RGB12:
+		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
+		case DEVICE_ID_KONAIP_1RX_1TX_2110:
+		case DEVICE_ID_KONAIP_2022:
+		case DEVICE_ID_KONAIP_2110:
+		case DEVICE_ID_KONAIP_2110_RGB12:
+		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
+		case DEVICE_ID_KONAIP_4CH_2SFP:			break;
 #else
-		default:					break;
+		default:								break;
 #endif
 	}
 	return inForRetailDisplay ? "Unknown" : "???";
