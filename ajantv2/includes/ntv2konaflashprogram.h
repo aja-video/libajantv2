@@ -42,16 +42,16 @@ class AJAExport CNTV2FlashProgress
 };	//	CNTV2PercentUpdater
 
 
-class AJAExport CNTV2KonaFlashProgram : public CNTV2Card
+class AJAExport CNTV2KonaFlashProgram
 {
 public:
-	CNTV2KonaFlashProgram();
-	CNTV2KonaFlashProgram (const UWord boardNumber);
+	CNTV2KonaFlashProgram(CNTV2Card & card);
 	virtual ~CNTV2KonaFlashProgram();
 	static std::string	FlashBlockIDToString (const FlashBlockID inID, const bool inShortDisplay = false);	//	New in SDK 16.0
 
 public:
 	virtual bool	SetBoard (uint32_t index = 0);
+	virtual inline CNTV2Card &	device(void) const		{return _card;}
 	bool			ReadHeader (FlashBlockID flashBlock);
 	bool			SetBitFile (const std::string & inBitfileName, std::ostream & outMsgs, const FlashBlockID blockNumber = AUTO_FLASHBLOCK);	//	New in SDK 16.0
 	std::string		Program (bool fullVerify = false);
@@ -131,6 +131,7 @@ public:
 			case LICENSE_BLOCK:			return 1;
 		}
 	}
+	bool SetWarmBootFirmwareReload(bool enable);
 #if 0	//	IoIP/KonaIP10g purge
 	bool	ReadInfoString();
 	bool	SetMCSFile (const std::string & sMCSFileName);
@@ -150,6 +151,7 @@ public:
 	bool MakeMACsFromSerial( const char *sSerialNumber, MacAddr *pMac1, MacAddr *pMac2 );
 #endif	//	IoIP/KonaIP10g purge
 protected:
+	CNTV2Card &		_card;
 	NTV2Buffer		_bitFileBuffer;
 	uint8_t *		_customFileBuffer;
 	uint32_t		_bitFileSize;

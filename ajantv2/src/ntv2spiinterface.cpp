@@ -188,8 +188,9 @@ inline uint32_t make_spi_ready(CNTV2Card& device)
 
 #define wait_for_flash_status_ready() { uint8_t fs=0x00; do { FlashReadStatus(fs); } while(fs & 0x1); }
 
-CNTV2AxiSpiFlash::CNTV2AxiSpiFlash(int index, bool verbose)
-	: CNTV2SpiFlash(verbose), mBaseByteAddress(0x300000), mSize(0), mSectorSize(0)
+CNTV2AxiSpiFlash::CNTV2AxiSpiFlash(CNTV2Card & card, bool verbose)
+	:	CNTV2SpiFlash(card, verbose),
+		mDevice(card), mBaseByteAddress(0x300000), mSize(0), mSectorSize(0)
 {
 	mSpiResetReg	 = (mBaseByteAddress + 0x40) / 4;
 	mSpiControlReg	 = (mBaseByteAddress + 0x60) / 4;
@@ -198,7 +199,6 @@ CNTV2AxiSpiFlash::CNTV2AxiSpiFlash(int index, bool verbose)
 	mSpiReadReg		 = (mBaseByteAddress + 0x6c) / 4;
 	mSpiSlaveReg	 = (mBaseByteAddress + 0x70) / 4;
 	mSpiGlobalIntReg = (mBaseByteAddress + 0x1c) / 4;
-	mDevice.Open(UWord(index));
 
 	SpiReset();
 

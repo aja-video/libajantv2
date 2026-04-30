@@ -34,7 +34,7 @@ typedef StringList::const_iterator	StringListConstIter;
 static void ReportDeviceFlashStatus (CNTV2Card & inDevice)
 {
 	string	dateString, timeString, serialString, serialNumber;
-	CNTV2KonaFlashProgram konaFlasher(inDevice.GetIndexNumber());
+	CNTV2KonaFlashProgram konaFlasher(inDevice);
 	ostringstream	warnings, notes;
 
 	//	Running firmware checks...
@@ -50,14 +50,14 @@ static void ReportDeviceFlashStatus (CNTV2Card & inDevice)
 	}
 	else
 		warnings << "## WARNING:  No main bitfile found" << endl;
-
+#if 0	//	IoIP/KonaIP10g purge
 	if (inDevice.features().CanDoIP())
 	{
 		ULWord pkg;
 		inDevice.GetRunningFirmwarePackageRevision(pkg);
 		cout << " Running Package: " << pkg << endl;
 	}
-
+#endif	//	IoIP/KonaIP10g purge
 	cout << "  Running FW Rev: " << xHex0N(fwRev,2) << "(" << DEC(fwRev) << ")" << endl;
 	if (!runningBuildDate.empty())
 	{
@@ -87,10 +87,10 @@ static void ReportDeviceFlashStatus (CNTV2Card & inDevice)
 	else if (inDevice.features().CanDoIP())
 		warnings << "## WARNING:  Unable to read package info" << endl;
 #endif	//	IoIP/KonaIP10g purge
-	if (runningBuildDate.empty()  &&  !::NTV2DeviceCanReportRunningFirmwareDate(konaFlasher.GetDeviceID()))
+	if (runningBuildDate.empty()  &&  !inDevice.features().CanReportRunningFirmwareDate())
 		notes << "## NOTE:  This device cannot report its running firmware date/time" << endl;
 
-	if (konaFlasher.GetSerialNumberString(serialNumber))
+	if (inDevice.GetSerialNumberString(serialNumber))
 	{
 		cout << "   Serial Number: '" << serialNumber << "'" << endl;
 		//cout	<< "EEPROM shadow of serial num:  0x" << hex << setw (16) << setfill ('0') << ntv2Card.GetSerialNumber()
@@ -98,11 +98,11 @@ static void ReportDeviceFlashStatus (CNTV2Card & inDevice)
 	}
 	else
 		warnings << "## WARNING:  Unable to read serial number" << endl;
-
+#if 0	//	IoIP/KonaIP10g purge
 	MacAddr mac1, mac2;
 	if (konaFlasher.ReadMACAddresses(mac1, mac2))
 		cout	<< "MAC1=" << NTV2_SHOW_MAC_HEX(mac1.mac) << " MAC2=" << NTV2_SHOW_MAC_HEX(mac2.mac) << endl;
-
+#endif	//	IoIP/KonaIP10g purge
 	if (!warnings.str().empty())	//	Any warnings?
 		cerr	<< warnings.str();	//	Spew 'em to stderr
 	if (!notes.str().empty())		//	Any notes?
@@ -219,7 +219,7 @@ int main (int argc, const char** argv)
 		}
 		if (!bQuiet && device.IsOpen() && ::NTV2DeviceHasSPIFlash(device.GetDeviceID()))
 			ReportDeviceFlashStatus(device);
-#if 0
+#if 0	//	IoIP/KonaIP10g purge
 		if (device.features().CanDoIP())
 		{
 			ULWord dnaLo;
@@ -240,7 +240,7 @@ int main (int argc, const char** argv)
 				 << ((licenseStatus & SAREK_LICENSE_VALID) ? " License is valid" : " License NOT valid")
 				 << endl;
 		}
-#endif
+#endif	//	IoIP/KonaIP10g purge
 		return AJA_STATUS_SUCCESS;	//	Done!
 	}
 	else if (bitfilePaths.size() > 1)
@@ -248,9 +248,10 @@ int main (int argc, const char** argv)
 		cerr << "## ERROR:  More than one bitfile path specified" << endl;
 		return AJA_STATUS_BAD_PARAM;
 	}
+#if 0	//	IoIP/KonaIP10g purge
 	else if (!license.empty())
 	{
-		CNTV2KonaFlashProgram konaFlasher(device.GetIndexNumber());
+		CNTV2KonaFlashProgram konaFlasher(device);
 		if (!konaFlasher.ProgramLicenseInfo(license))
 			return AJA_STATUS_FAIL;
 		cout << "Device license: OK" << endl;
@@ -264,7 +265,7 @@ int main (int argc, const char** argv)
 		cout << "MB File Programmed" << endl;
 		return AJA_STATUS_SUCCESS;
 	}
-
+#endif	//	IoIP/KonaIP10g purge
 	if (!device.IsOpen())
 	{
 		cerr << "## ERROR:  Device '" << deviceSpecifier << "' not found" << endl;

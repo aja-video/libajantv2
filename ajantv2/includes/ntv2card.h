@@ -6856,7 +6856,6 @@ protected:
 	AJA_VIRTUAL bool			IS_OUTPUT_SPIGOT_INVALID (const UWord inOutputSpigot);
 	AJA_VIRTUAL bool			IS_INPUT_SPIGOT_INVALID (const UWord inInputSpigot);
 	AJA_VIRTUAL bool			IS_HDMI_INPUT_SPIGOT_INVALID (const UWord inInputHDMIPort);
-	AJA_VIRTUAL bool			SetWarmBootFirmwareReload(bool enable);
 
     AJA_VIRTUAL bool            GetHDMIOutControlReg (ULWord & outRegNum, const NTV2Channel inWhichHDMIOut);
     AJA_VIRTUAL bool            GetHDMIOutInputStatusRegNum (ULWord & outRegNum, const NTV2Channel inWhichHDMIOut);

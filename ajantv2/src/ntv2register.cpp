@@ -2322,7 +2322,7 @@ bool CNTV2Card::GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct)
 
 bool CNTV2Card::ProgramMainFlash (const string & inFileName, const bool bInForceUpdate, const bool bInQuiet)
 {
-	CNTV2KonaFlashProgram devFlasher(GetIndexNumber());
+	CNTV2KonaFlashProgram devFlasher(*this);
 	if (bInQuiet)
 		devFlasher.SetQuietMode();
 	ostringstream msgs;
@@ -4590,15 +4590,6 @@ bool CNTV2Card::GetDieVoltage (double & outVoltage)
 	const double	coreVoltageFloat (double(coreVoltageRaw)/ 1024.0 * 3.0);
 	outVoltage = coreVoltageFloat;
 	return true;
-}
-
-bool CNTV2Card::SetWarmBootFirmwareReload(bool enable)
-{
-	bool canReboot = false;
-	CanWarmBootFPGA(canReboot);
-	if(!canReboot)
-		return false;
-	return WriteRegister(kRegCPLDVersion, enable ? 1:0, BIT(8), 8);
 }
 
 #if defined(READREGMULTICHANGE)

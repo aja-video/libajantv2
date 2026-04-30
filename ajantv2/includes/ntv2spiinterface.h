@@ -24,7 +24,7 @@ typedef enum
 class CNTV2SpiFlash
 {
 public:
-	CNTV2SpiFlash(bool verbose = false) : mVerbose(verbose) {}
+	CNTV2SpiFlash(CNTV2Card & card, bool verbose = false) : mVerbose(verbose) {}
 	virtual ~CNTV2SpiFlash() {}
 
 	virtual bool Read(const uint32_t address, std::vector<uint8_t> &data, uint32_t maxBytes = 1) = 0;
@@ -45,7 +45,7 @@ protected:
 class CNTV2AxiSpiFlash : public CNTV2SpiFlash
 {
 public:
-	CNTV2AxiSpiFlash(int index = 0, bool verbose = false);
+	CNTV2AxiSpiFlash(CNTV2Card & card, bool verbose = false);
 	virtual ~CNTV2AxiSpiFlash();
 
 	// common flash interface
@@ -79,12 +79,10 @@ private:
 
 	void FlashFixAddress(const uint32_t address, std::vector<uint8_t>& commandSequence);
 
+	CNTV2Card &	mDevice;
 	uint32_t	mBaseByteAddress;
 	uint32_t	mSize;
 	uint32_t	mSectorSize;
-
-	CNTV2Card	mDevice;
-
 	uint32_t	mManufactureID;
 	uint32_t	mSpiResetReg;
 	uint32_t	mSpiControlReg;
