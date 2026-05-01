@@ -114,10 +114,9 @@ class CNTV2FirmwareInstallerThread : public AJAThread
 
 	protected:
 		virtual void								InternalUpdateStatus (void) const;
-		/**
-			@return		True if the MCS bitfile can be flashed onto the IP device; otherwise false.
-		**/
+#if 0	//	IoIP/KonaIP10g purge
 		virtual bool								ShouldUpdateIPDevice (const NTV2DeviceID inDeviceID, const std::string & designName) const;
+#endif	//	IoIP/KonaIP10g purge
 
 	private:
 													CNTV2FirmwareInstallerThread ();											//	hidden

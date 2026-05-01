@@ -176,7 +176,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 	if (!m_device.GetInstalledBitfileInfo (numBytes, installedDate, installedTime))
 		FITWARN("CNTV2FirmwareInstallerThread:  Unable to obtain installed bitfile info");
 	m_device.GetSerialNumberString(serialNumStr);
-#if 0	//	IP10G purge
+#if 0	//	IoIP/KonaIP10g purge
 	if (m_bitfilePath.find(".mcs") != string::npos)
 	{
 		CNTV2KonaFlashProgram kfp;
@@ -434,115 +434,11 @@ CNTV2FirmwareInstallerThread & CNTV2FirmwareInstallerThread::operator = (const C
 	NTV2_ASSERT (false);
 	return *this;
 }
-
+#if 0	//	IoIP/KonaIP10g purge
 bool CNTV2FirmwareInstallerThread::ShouldUpdateIPDevice (const NTV2DeviceID inDeviceID, const string & designName) const
 {
-#if 1
-	static const NTV2DeviceID devIDs[] = {	DEVICE_ID_KONAIP_2022,			DEVICE_ID_KONAIP_4CH_2SFP,		DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K,
-											DEVICE_ID_KONAIP_2TX_1SFP_J2K,	DEVICE_ID_KONAIP_1RX_1TX_2110,	DEVICE_ID_KONAIP_2110,
-											DEVICE_ID_IOIP_2022,			DEVICE_ID_IOIP_2110,			inDeviceID};
-	for (int ndx(0);  ndx < 9;  ndx++)
-		cout << ::NTV2DeviceIDToString(devIDs[ndx]) << " name " << CNTV2Bitfile::GetPrimaryHardwareDesignName(devIDs[ndx]) << endl;
-#endif
 	string name (CNTV2Bitfile::GetPrimaryHardwareDesignName(inDeviceID));
-
 	// Can always install over self
-	if (designName == name)
-		return true;
-
-	cout << "Be sure we can install '" << designName.c_str() << "', replacing '" << name.c_str() << "'" << endl;
-
-	//	Special cases -- e.g. bitfile flipping, P2P, etc...
-	//	**MrBill**	DUPLICITOUS		See CNTV2Bitfile::CanFlashDevice in ntv2bitfile.cpp
-	switch (inDeviceID)
-	{
-/*	case DEVICE_ID_CORVID44:
-		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44) ||
-				designName == "corvid_446");	//	Corvid 446
-	case DEVICE_ID_KONA3GQUAD:
-		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA3G) ||
-				designName == "K3G_quad_p2p");	//	K3G_quad_p2p.ncd
-	case DEVICE_ID_KONA3G:
-		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA3GQUAD) ||
-				designName == "K3G_p2p");		//	K3G_p2p.ncd
-	case DEVICE_ID_KONA4UFC:
-		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA4));
-	case DEVICE_ID_KONA5:
-	case DEVICE_ID_KONA5_2X4K:
-	case DEVICE_ID_KONA5_3DLUT:
-	case DEVICE_ID_KONA5_8KMK:
-	case DEVICE_ID_KONA5_8K:
-	case DEVICE_ID_KONA5_OE1:
-	case DEVICE_ID_KONA5_OE2:
-	case DEVICE_ID_KONA5_OE3:
-	case DEVICE_ID_KONA5_OE4:
-	case DEVICE_ID_KONA5_OE5:
-	case DEVICE_ID_KONA5_OE6:
-	case DEVICE_ID_KONA5_OE7:
-	case DEVICE_ID_KONA5_OE8:
-	case DEVICE_ID_KONA5_OE9:
-	case DEVICE_ID_KONA5_OE10:
-	case DEVICE_ID_KONA5_OE11:
-	case DEVICE_ID_KONA5_OE12:
-	case DEVICE_ID_KONA5_8K_MV_TX:
-		return (designName == GetPrimaryDesignName(DEVICE_ID_KONA5) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_2X4K) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_3DLUT) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_8KMK) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_8K) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE1) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE2) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE3) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE4) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE5) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE6) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE7) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE8) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE9) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE10) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE11) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE12) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_8K_MV_TX));
-	case DEVICE_ID_CORVID44_8KMK:
-	case DEVICE_ID_CORVID44_8K:
-	case DEVICE_ID_CORVID44_2X4K:
-	case DEVICE_ID_CORVID44_PLNR:
-		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44_8KMK) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44_8K) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44_2X4K) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44_PLNR));
-	case DEVICE_ID_IO4K:
-		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_IO4KUFC));
-	case DEVICE_ID_IO4KUFC:
-		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_IO4K));
-	case DEVICE_ID_CORVID88:
-		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_CORVID88) ||
-				designName == "CORVID88");		//	older design name
-	case DEVICE_ID_KONA4:
-	{
-		if (m_device.IsIPDevice())
-			return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA4UFC) ||
-					designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_2022) ||
-					designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_4CH_2SFP) ||
-					designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
-					designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_2TX_1SFP_J2K) ||
-					designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_1RX_1TX_2110) ||
-					designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_2110) ||
-					designName == "s2022_56_2p2ch_rxtx_mb" ||
-					designName == "s2022_12_2ch_tx_spoof" ||
-					designName == "s2022_12_2ch_tx" ||
-					designName == "s2022_12_2ch_rx" ||
-					designName == "s2022_56_4ch_rxtx_fec" ||
-					designName == "s2022_56_4ch_rxtx" ||
-					designName == "s2110_4tx" ||
-					designName == "s2022_56_1rx_1tx_2110");
-		else
-			return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA4UFC));
-	}
-	case DEVICE_ID_TTAP_PRO:
-		return designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_TTAP_PRO);
-*/
-	default: break;
-	}
-	return false;
+	return designName == name;
 }	//	ShouldUpdateIPDevice
+#endif	//	IoIP/KonaIP10g purge
