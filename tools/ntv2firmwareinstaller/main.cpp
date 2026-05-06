@@ -257,15 +257,16 @@ int main (int argc, const char** argv)
 		cout << "Device license: OK" << endl;
 		return AJA_STATUS_SUCCESS;
 	}
+#endif	//	IoIP/KonaIP10g purge
 	else if (konaxmbFile)
 	{
-		CNTV2KonaFlashProgram konaFlasher(device.GetIndexNumber());
+		CNTV2KonaFlashProgram konaFlasher(device);
 		if (!konaFlasher.ProgramKonaxMB(konaxmbFile, 0, cerr))
 			return AJA_STATUS_FAIL;
 		cout << "MB File Programmed" << endl;
 		return AJA_STATUS_SUCCESS;
 	}
-#endif	//	IoIP/KonaIP10g purge
+
 	if (!device.IsOpen())
 	{
 		cerr << "## ERROR:  Device '" << deviceSpecifier << "' not found" << endl;
