@@ -1147,6 +1147,9 @@ AJAExport std::string NTV2DieTempScaleToString			(const NTV2DieTempScale			inVal
 	AJAExport NTV2_DEPRECATED_17_6(bool convertHDRRegisterToFloatValues (const HDRRegValues & inRegVals, HDRFloatValues & outFloatVals));	///< @deprecated	Use HDRFloatValues::setFromRegValues instead
 	AJAExport NTV2_DEPRECATED_17_6(void setHDRDefaultsForBT2020 (HDRRegValues & outRegVals));	///< @deprecated	Use HDRRegValues::setBT2020 instead
 	AJAExport NTV2_DEPRECATED_17_6(void setHDRDefaultsForDCIP3 (HDRRegValues & outRegVals));	///< @deprecated	Use HDRRegValues::setDCIP3 instead
+	#if defined(AJAMac)
+	AJAExport NTV2_DEPRECATED_17_6(bool GetInstalledMacDriverVersion (UWord & outMaj, UWord & outMin, UWord & outPt, UWord & outBld, UWord & outType));	///< @deprecated	Do not use
+	#endif	//	AJAMac
 #endif	//	!defined(NTV2_DEPRECATE_17_6)
 #if !defined(NTV2_DEPRECATE_16_1)
 	inline NTV2_DEPRECATED_16_1(std::string NTV2AudioMonitorSelectToString (const NTV2AudioMonitorSelect v, const bool b = false)) {return NTV2AudioChannelPairToString(v, b);} ///< @deprecated	Use ::NTV2AudioChannelPairToString instead.
@@ -1165,8 +1168,5 @@ AJAExport std::string		SerialNum64ToString (const uint64_t & inSerNum);	//	New i
 
 //	FUTURE	** THESE WILL BE DISAPPEARING **		Deprecate in favor of the new "NTV2xxxxxxToString" functions...
 #define NTV2CrosspointIDToString	NTV2OutputCrosspointIDToString	///< @deprecated	Use NTV2OutputCrosspointIDToString
-#if defined (AJAMac)
-	AJAExport bool GetInstalledMacDriverVersion (UWord & outMaj, UWord & outMin, UWord & outPt, UWord & outBld, UWord & outType);
-#endif	//	AJAMac
 
 #endif	//	NTV2UTILS_H

@@ -8261,6 +8261,7 @@ string SerialNum64ToString (const uint64_t & inSerNum)
 	return serialNum;
 }
 
+#if !defined(NTV2_DEPRECATE_17_6)
 #if defined (AJAMac)
 	#include <fstream>
 	#include "ajabase/common/common.h"
@@ -8330,3 +8331,4 @@ string SerialNum64ToString (const uint64_t & inSerNum)
 		return true;
 	}
 #endif	//	AJAMac
+#endif	//	!defined(NTV2_DEPRECATE_17_6)
