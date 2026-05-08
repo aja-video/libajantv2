@@ -141,13 +141,30 @@ namespace aja
 #include <libgen.h> // for dirname()
 namespace aja
 {
-	int reveal_file_in_file_manager(const std::string& filePath)
+	int reveal_file_in_file_manager (const std::string & filePath)
 	{
-		// need to pass the directory of the file to open in file manager, otherwise
-		// will open in the default application for file type
-		std::ostringstream oss;
-		oss << "xdg-open " << "\"" << dirname((char*)filePath.c_str()) << "\"";
-		return ::system(oss.str().c_str());
+		std::ostringstream cmd;
+		if (false)
+		{	//	Use xdg-open:
+			//	xdg-open can't reveal a file, it can only try to open the default app for the file's type.
+			//	Instead, just pass the file's folder path to open that folder in the file manager...
+			cmd << "xdg-open " << "\"" << dirname((char*)filePath.c_str()) << "\"";
+		}
+		else
+		{	//	Use dbus-send:
+			//	dbus-send  --session  --dest=org.freedesktop.FileManager1  --print-reply	\
+			//				--type=method_call /org/freedesktop/FileManager1				\
+			//				org.freedesktop.FileManager1.ShowItems array:string:"file:///home/demo/foo.txt" string:""
+			cmd << "dbus-send"
+				<< "  --session"
+				<< "  --dest=org.freedesktop.FileManager1"
+				<< "  --print-reply"
+				<< "  --type=method_call"
+				<< "  /org/freedesktop/FileManager1"
+				<< "  org.freedesktop.FileManager1.ShowItems"
+				<< "  array:string:\"file://" << filePath << "\" string:\"\"";
+		}
+		return ::system(cmd.str().c_str());
 	}
 } //end aja namespace
 #endif //end AJA_LINUX
