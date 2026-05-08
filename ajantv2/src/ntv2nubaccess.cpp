@@ -931,6 +931,42 @@ bool NTV2DeviceSpecParser::ParseQuery (size_t & pos, NTV2Dictionary & outParams)
 	return !outParams.empty();
 }
 
+bool NTV2DeviceSpecParser::ParseQueryParams (const NTV2Dictionary & inSrcDict, NTV2Dictionary & outQueryParams)
+{
+	if (!inSrcDict.hasKey(kConnectParamQuery))
+		return true;	//	It's not an error if there's no 'query' in srcDict
+	string queryStr(inSrcDict.valueForKey(kConnectParamQuery));
+	if (!queryStr.empty())
+		if (queryStr[0] == '?')
+			queryStr.erase(0,1);	//	Remove leading '?'
+	PLGDBG("Query: '" << queryStr << "'");
+	const NTV2StringList strs(aja::split(queryStr, "&"));
+	for (NTV2StringListConstIter it(strs.begin());  it != strs.end();  ++it)
+	{
+		string str(*it), key, value;
+		if (str.find("=") == string::npos)
+		{	//	No assignment (i.e. no '=') --- just insert key with empty value...
+			key = aja::lower(str);
+			outQueryParams.insert(key, value);
+			PLGDBG("'" << key << "' = ''");
+			continue;
+		}
+		NTV2StringList pieces(aja::split(str,"="));
+		if (pieces.empty())
+			continue;
+		key = aja::lower(pieces.at(0));
+		if (pieces.size() > 1)
+			value = pieces.at(1);
+		if (key.empty())
+			{PLGWARN("Empty key '" << key << "'");  continue;}
+		if (outQueryParams.hasKey(key))
+			PLGDBG("Param '" << key << "' value '" << outQueryParams.valueForKey(key) << "' to be replaced with '" << value << "'");
+		outQueryParams.insert(key, ::PercentDecode(value));
+		PLGDBG("'" << key << "' = '" << outQueryParams.valueForKey(key) << "'");
+	}	//	for each &param
+	return true;
+}	//	ParseQueryParams
+
 bool NTV2DeviceSpecParser::IsUpperLetter (const char inChar)
 {	static const string sHexDigits("_ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 	return sHexDigits.find(inChar) != string::npos;
@@ -1615,42 +1651,6 @@ bool NTV2PluginLoader::ExtractIssuerInfo (NTV2Dictionary & outInfo, const string
 	}	//	for each key/val assignment
 	return true;
 }	//	ExtractIssuerInfo
-
-bool NTV2DeviceSpecParser::ParseQueryParams (const NTV2Dictionary & inSrcDict, NTV2Dictionary & outQueryParams)
-{
-	if (!inSrcDict.hasKey(kConnectParamQuery))
-		return true;	//	It's not an error if there's no 'query' in srcDict
-	string queryStr(inSrcDict.valueForKey(kConnectParamQuery));
-	if (!queryStr.empty())
-		if (queryStr[0] == '?')
-			queryStr.erase(0,1);	//	Remove leading '?'
-	PLGDBG("Query: '" << queryStr << "'");
-	const NTV2StringList strs(aja::split(queryStr, "&"));
-	for (NTV2StringListConstIter it(strs.begin());  it != strs.end();  ++it)
-	{
-		string str(*it), key, value;
-		if (str.find("=") == string::npos)
-		{	//	No assignment (i.e. no '=') --- just insert key with empty value...
-			key = aja::lower(str);
-			outQueryParams.insert(key, value);
-			PLGDBG("'" << key << "' = ''");
-			continue;
-		}
-		NTV2StringList pieces(aja::split(str,"="));
-		if (pieces.empty())
-			continue;
-		key = aja::lower(pieces.at(0));
-		if (pieces.size() > 1)
-			value = pieces.at(1);
-		if (key.empty())
-			{PLGWARN("Empty key '" << key << "'");  continue;}
-		if (outQueryParams.hasKey(key))
-			PLGDBG("Param '" << key << "' value '" << outQueryParams.valueForKey(key) << "' to be replaced with '" << value << "'");
-		outQueryParams.insert(key, ::PercentDecode(value));
-		PLGDBG("'" << key << "' = '" << outQueryParams.valueForKey(key) << "'");
-	}	//	for each &param
-	return true;
-}	//	ParseQueryParams
 
 void * NTV2PluginLoader::getSymbolAddress (const string & inSymbolName, string & outErrorMsg)
 {
