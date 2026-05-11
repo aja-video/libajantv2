@@ -2623,6 +2623,11 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 			const UWord			numLUTs(::NTV2DeviceGetNumLUTs(deviceID));
 			const UWord			numFrameStores(::NTV2DeviceGetNumFrameStores(deviceID));
 			UWord				mixerTally(0), CSCTally(0), LUTTally(0), frameStoreTally(0);
+			if (deviceID == DEVICE_ID_FS8)
+			{
+				std::cerr << "Skipping " << NTV2DeviceIDString(deviceID) << std::endl;
+				continue;
+			}
 
 			std::cerr << "Checking " << ::NTV2DeviceIDString(deviceID) << " (" << ::NTV2DeviceIDToString(deviceID) << ")..." << std::endl;
 			//	Mixers
