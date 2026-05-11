@@ -1324,7 +1324,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 														"KonaIP_1Rx1Tx1SFPJ2K",				"KonaIP_1Rx1Tx2110",			"KonaIP_2022",				"KonaIP_2110",
 														"KonaIP_2Tx1SFPJ2K",				"KonaIP_4ch2SFP",
 														"KonaLHePlus",						"KonaLHi",						"KonaLHiDVI",				"TTap",
-														"Corvid44gen3",						"corvid88gen3",
+														"Corvid44Gen3",						"Corvid88Gen3",
 														""						};
 			for (unsigned ndx (0);  ndx < sizeof (deviceIDs) / sizeof (NTV2DeviceID);  ndx++)
 			{
