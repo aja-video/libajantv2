@@ -128,7 +128,7 @@ public:
 		@param[out]		outPCIDeviceID		Receives my PCI device ID.
 		@return True if successful (and valid);	 otherwise false.
 	**/
-	AJA_VIRTUAL bool				GetPCIDeviceID (ULWord & outPCIDeviceID);
+	AJA_VIRTUAL inline bool			GetPCIDeviceID (ULWord & outPCIDeviceID)	{return ReadRegister (kVRegPCIDeviceID, outPCIDeviceID);}
 
 	/**
 		@return My current breakout box hardware type, if any is attached.
@@ -1002,9 +1002,6 @@ public:
 	**/
 	AJA_VIRTUAL bool		GetFrameBufferOrientation (const NTV2Channel inChannel, NTV2FBOrientation & outValue);
 
-	AJA_VIRTUAL bool		SetAlphaFromInput2Bit (ULWord inValue);
-	AJA_VIRTUAL bool		GetAlphaFromInput2Bit (ULWord & outValue);
-
 	/**
 		@brief		Sets the output frame index number for the given FrameStore. This identifies which frame in device
 					SDRAM will be used for playout after the next VBI.
@@ -1183,13 +1180,21 @@ public:
 	AJA_VIRTUAL bool		GetPulldownMode (NTV2Channel inChannel, bool & outValue);
 
 	/**
-		@brief		Answers with the line offset into the frame currently being read (::NTV2_MODE_DISPLAY) or written
-					(::NTV2_MODE_CAPTURE) for FrameStore 1.
-		@param[out] outValue	Receives the line number currently being read or written.
+		@brief		Answers with the line offset into the frame currently being read (::NTV2_MODE_DISPLAY)
+					or written (::NTV2_MODE_CAPTURE) for the given FrameStore.
+		@param[out]	outValue	Receives the line number currently being read or written (or zero upon failure).
+		@param[in]	inChannel	Specifies the FrameStore of interest as an NTV2Channel (a zero-based index number).
+								Defaults to FrameStore1.
+		@note		Historically, only FrameStore1 was ever implemented in NTV2 firmware.
+					Requesting the line count for any other FrameStore will fail the function (i.e. return false).
 		@return		True if successful;	 otherwise false.
 	**/
-	AJA_VIRTUAL bool		ReadLineCount (ULWord & outValue);
+	AJA_VIRTUAL bool		ReadLineCount (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
+#if !defined(NTV2_DEPRECATE_18_1)
+	AJA_VIRTUAL inline NTV2_DEPRECATED_18_1(bool SetAlphaFromInput2Bit (ULWord value)) {return WriteRegister (kRegCh1Control, value, kRegMaskAlphaFromInput2, kRegShiftAlphaFromInput2);}	///< @deprecated	Deprecated in SDK 18.1
+	AJA_VIRTUAL inline NTV2_DEPRECATED_18_1(bool GetAlphaFromInput2Bit (ULWord & outVal)) {return ReadRegister (kRegCh1Control, outVal, kRegMaskAlphaFromInput2, kRegShiftAlphaFromInput2);}	///< @deprecated	Deprecated in SDK 18.1
+#endif//!defined(NTV2_DEPRECATE_18_1)
 #if !defined(NTV2_DEPRECATE_18_0)
 	AJA_VIRTUAL inline NTV2_DEPRECATED_18_0(bool GetEveryFrameServices(NTV2TaskMode & m)) {return GetTaskMode(m);}	///< @deprecated	Use GetTaskMode instead; deprecated in SDK 18.0
 	AJA_VIRTUAL inline NTV2_DEPRECATED_18_0(bool SetEveryFrameServices(const NTV2TaskMode m)) {return SetTaskMode(m);}	///< @deprecated	Use SetTaskMode instead; deprecated in SDK 18.0
@@ -2413,10 +2418,8 @@ public:
 		@name	Programming
 	**/
 	///@{
-	AJA_VIRTUAL bool	ReadFlashProgramControl(ULWord & outValue);
-	AJA_VIRTUAL bool	IsXilinxProgrammed();
-	AJA_VIRTUAL bool	ProgramMainFlash(const std::string & inFileName, const bool bInForceUpdate = false, const bool bInQuiet = false);	//	inFileName became const std::string& in SDK 16.2
-	AJA_VIRTUAL bool	GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct);
+	AJA_VIRTUAL bool	IsXilinxProgrammed (void);
+	AJA_VIRTUAL bool	GetProgramStatus (SSC_GET_FIRMWARE_PROGRESS_STRUCT * statusStruct);
 
 	/**
 		@brief		Reports the revision number of the currently-running firmware package.
@@ -2503,10 +2506,9 @@ public:
 	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool GetRegisterBaseAddress(ULWord regNumber, ULWord ** pRegAddress));	///< @deprecated	Obsolete starting in SDK 16.0, do not use
 	AJA_VIRTUAL NTV2_DEPRECATED_16_0(bool GetXena2FlashBaseAddress(ULWord ** pXena2FlashAddress));	///< @deprecated	Obsolete starting in SDK 16.0, do not use
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
-
 #if !defined(NTV2_DEPRECATE_17_0)
 	//	Read-Only Status Registers
-	AJA_VIRTUAL inline NTV2_DEPRECATED_17_0(bool ReadStatusRegister (ULWord *pVal))			{return pVal ? ReadRegister(kRegStatus, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
+	AJA_VIRTUAL inline NTV2_DEPRECATED_17_0(bool ReadStatusRegister (ULWord *pVal))				{return pVal ? ReadRegister(kRegStatus, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
 	AJA_VIRTUAL inline NTV2_DEPRECATED_17_0(bool ReadStatus2Register (ULWord *pVal))			{return pVal ? ReadRegister(kRegStatus2, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
 	AJA_VIRTUAL inline NTV2_DEPRECATED_17_0(bool ReadInputStatusRegister (ULWord *pVal))		{return pVal ? ReadRegister(kRegInputStatus, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
 	AJA_VIRTUAL inline NTV2_DEPRECATED_17_0(bool ReadInputStatus2Register (ULWord *pVal))		{return pVal ? ReadRegister(kRegInputStatus2, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
@@ -2516,9 +2518,12 @@ public:
 	AJA_VIRTUAL inline NTV2_DEPRECATED_17_0(bool Read3GInputStatus2Register(ULWord *pVal))		{return pVal ? ReadRegister(kRegSDIInput3GStatus2, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
 	AJA_VIRTUAL inline NTV2_DEPRECATED_17_0(bool Read3GInput5678StatusRegister(ULWord *pVal))	{return pVal ? ReadRegister(kRegSDI5678Input3GStatus, *pVal) : false;}	///< @deprecated	Obsolete starting in SDK 17.0, do not use
 #endif	//	!defined(NTV2_DEPRECATE_17_0)
-
-	AJA_VIRTUAL bool	SupportsP2PTransfer (void); ///< @return	True if this device can directly transmit data to another PCIe device via DMA;	otherwise false.
-	AJA_VIRTUAL bool	SupportsP2PTarget (void);	///< @return	True if this device can directly receive data from another PCIe device via DMA;	 otherwise false.
+#if !defined(NTV2_DEPRECATE_18_1)
+	AJA_VIRTUAL inline NTV2_DEPRECATED_18_1(bool ReadFlashProgramControl(ULWord & outVal)) {return ReadRegister (kRegFlashProgramReg, outVal);}	///< @deprecated	Unnecessary, just call ReadRegister with kRegFlashProgramReg.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_18_1(bool SupportsP2PTransfer(void))	{return IsSupported(kDeviceCanDoP2PTransmit);}	///< @deprecated	Call IsSupported with kDeviceCanDoP2PTransmit instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_18_1(bool SupportsP2PTarget(void))	{return IsSupported(kDeviceCanDoP2PReceive);}	///< @deprecated	Call IsSupported with kDeviceCanDoP2PReceive instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_18_1(bool ProgramMainFlash (const std::string & filePath, const bool forceUpdate = false, const bool quiet = false));	///< @deprecated	Call KonaFlashProgram::ProgramMainFlash instead
+#endif	//	!defined(NTV2_DEPRECATE_18_1)
 
 
 	/**
@@ -2526,20 +2531,20 @@ public:
 	**/
 	///@{
 	/**
-		@brief	The four on-board LEDs can be set by writing 0-15
+		@brief		The four on-board LEDs can be set by writing 0-15
 		@param[in]	inValue		Sets the state of the four on-board LEDs using the least significant
 								four bits of the given ULWord value.
-		@return True if successful;	 otherwise, false.
+		@return		True if successful;	 otherwise, false.
 	**/
-	AJA_VIRTUAL bool	SetLEDState (ULWord inValue);
+	AJA_VIRTUAL inline bool	SetLEDState (const ULWord inValue)	{return WriteRegister (kRegGlobalControl, inValue, kRegMaskLED, kRegShiftLED);}
 
 	/**
-		@brief	Answers with the current state of the four on-board LEDs.
+		@brief		Answers with the current state of the four on-board LEDs.
 		@param[out] outValue	Receives the current state of the four on-board LEDs.
 								Only the least significant four bits of the ULWord have any meaning.
-		@return True if successful;	 otherwise, false.
+		@return		True if successful;	 otherwise, false.
 	**/
-	AJA_VIRTUAL bool			GetLEDState (ULWord & outValue);
+	AJA_VIRTUAL inline bool	GetLEDState (ULWord & outValue)		{return ReadRegister (kRegGlobalControl, outValue, kRegMaskLED, kRegShiftLED);}
 	///@}
 
 

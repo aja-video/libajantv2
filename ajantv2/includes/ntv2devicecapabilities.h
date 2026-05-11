@@ -79,6 +79,8 @@ class AJAExport DeviceCapabilities
 		inline bool		CanDoMSI (void)							{return dev.IsSupported(kDeviceCanDoMSI);}										///< @returns	True if device DMA hardware supports MSI (Message Signaled Interrupts)
 		inline bool		CanDoMultiFormat (void)					{return dev.IsSupported(kDeviceCanDoMultiFormat);}								///< @returns	True if device FrameStores can independently accommodate different video formats
 		inline bool		CanDoMultiLinkAudio (void)				{return dev.IsSupported(kDeviceCanDoMultiLinkAudio);}							///< @returns	True if device supports grouped audio system control
+		inline bool		CanDoP2PTransmit (void)					{return dev.IsSupported(kDeviceCanDoP2PTransmit);}								///< @returns	True if device can directly transmit data to another PCIe device via peer-to-peer DMA.
+		inline bool		CanDoP2PReceive (void)					{return dev.IsSupported(kDeviceCanDoP2PReceive);}								///< @returns	True if device can directly receive data from another PCIe device via peer-to-peer DMA.
 		inline bool		CanDoPCMControl (void)					{return dev.IsSupported(kDeviceCanDoPCMControl);}								///< @returns	True if device can mark specific audio channel pairs as not carrying LPCM
 		inline bool		CanDoPCMDetection (void)				{return dev.IsSupported(kDeviceCanDoPCMDetection);}								///< @returns	True if device can detect which audio channel pairs are not carrying LPCM
 		inline bool		CanDoPIO (void)							{return dev.IsSupported(kDeviceCanDoPIO);}										///< @returns	True if device supports programmed I/O

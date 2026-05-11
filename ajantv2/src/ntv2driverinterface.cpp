@@ -1791,10 +1791,21 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceROMHasBankSelect:				outValue = GetNumSupported(kDeviceGetSPIFlashVersion) >= 3
 																&&  GetNumSupported(kDeviceGetSPIFlashVersion) <= 6;	break;
 		case kDeviceCanDoVersalSysMon:				outValue = ::NTV2DeviceCanDoVersalSysMon(devID);					break;
+
+		case kDeviceCanDoP2PTransmit:
+		case kDeviceCanDoP2PReceive:	{	//									   K3G+P2P	K3GQ+P2P	K4Q		K4UFC	Crv44	Crv88
+											static const ULWordSet	sDevIDsXmit	= {0xDB07,	0xDB08,		0xEB0B,	0xEB0C,	0xEB0E,	0xEB0D},
+																	sDevIDsRcv	= {0xDB07,	0xDB08,				0xEB0C,	0xEB0E,	0xEB0D};
+											const ULWordSet & devIDs (inParamID == kDeviceCanDoP2PTransmit ? sDevIDsXmit : sDevIDsRcv);
+											ULWord pciDevID(0);  if (!ReadRegister (kVRegPCIDeviceID, pciDevID)) return false;
+											outValue = devIDs.find(pciDevID) != devIDs.end();
+											return true;
+										}
+
 		case kDeviceCanDoAudioMixer:
 		case kDeviceHasMicrophoneInput:
 		default:									return false;	//	Bad param
-	}
+	}	//	switch on inParamID
 	return true;	//	Successfully used old ::NTV2DeviceCanDo function
 
 }	//	GetBoolParam

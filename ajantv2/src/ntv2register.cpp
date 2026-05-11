@@ -2276,34 +2276,19 @@ bool CNTV2Card::GetInputFrame (const NTV2Channel inChannel, ULWord & outValue)
 	return ReadRegister (gChannelToInputFrameRegNum[inChannel], outValue);
 }
 
-bool CNTV2Card::SetAlphaFromInput2Bit (ULWord value)							{return WriteRegister (kRegCh1Control, value, kRegMaskAlphaFromInput2, kRegShiftAlphaFromInput2);}
-bool CNTV2Card::GetAlphaFromInput2Bit (ULWord & outValue)						{return ReadRegister (kRegCh1Control, outValue, kRegMaskAlphaFromInput2, kRegShiftAlphaFromInput2);}
-
-bool CNTV2Card::ReadLineCount (ULWord & outValue)
+bool CNTV2Card::ReadLineCount (ULWord & outValue, const NTV2Channel inChannel)
 {
-	return ReadRegister (kRegLineCount, outValue);
+	outValue = 0;
+	return inChannel == NTV2_CHANNEL1  &&  ReadRegister (kRegLineCount, outValue);
 }
-
-bool CNTV2Card::ReadFlashProgramControl (ULWord & outValue)
-{
-	return ReadRegister (kRegFlashProgramReg, outValue);
-}
-
 
 // Determine if Xilinx programmed
 // Input:  NONE
 // Output: ULWord or equivalent(i.e. ULWord).
-bool CNTV2Card::IsXilinxProgrammed()
+bool CNTV2Card::IsXilinxProgrammed (void)
 {
-	ULWord programFlashValue;
-	if(ReadFlashProgramControl(programFlashValue))
-	{
-		if ((programFlashValue & BIT(9)) == BIT(9))
-		{
-			return true;
-		}
-	}
-	return false;
+	ULWord programFlashValue(0);
+	return ReadRegister (kRegFlashProgramReg, programFlashValue)  &&  ((programFlashValue & BIT(9)) == BIT(9));
 }
 
 bool CNTV2Card::GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct)
@@ -2320,26 +2305,28 @@ bool CNTV2Card::GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct)
 	return true;
 }
 
-bool CNTV2Card::ProgramMainFlash (const string & inFileName, const bool bInForceUpdate, const bool bInQuiet)
-{
-	CNTV2KonaFlashProgram devFlasher(*this);
-	if (bInQuiet)
-		devFlasher.SetQuietMode();
-	ostringstream msgs;
-	string	progResults;
-	const bool ok(devFlasher.SetBitFile(inFileName, msgs, MAIN_FLASHBLOCK));
+#if !defined(NTV2_DEPRECATE_18_1)
+	bool CNTV2Card::ProgramMainFlash (const string & inFileName, const bool bInForceUpdate, const bool bInQuiet)
+	{
+		CNTV2KonaFlashProgram devFlasher(*this);
+		if (bInQuiet)
+			devFlasher.SetQuietMode();
+		ostringstream msgs;
+		string	progResults;
+		const bool ok(devFlasher.SetBitFile(inFileName, msgs, MAIN_FLASHBLOCK));
 #if 0	//	IP10G purge
-	if (bInForceUpdate)
-		devFlasher.SetMBReset();
+		if (bInForceUpdate)
+			devFlasher.SetMBReset();
 #endif
-	if (ok)
-		progResults = devFlasher.Program(false);
-	else
-		{AJA_sERROR(AJA_DebugUnit_UserGeneric, INSTP(this) << "::" << AJAFUNC << ": " << msgs.str());  return false;}
-	if (!progResults.empty())
-		AJA_sERROR(AJA_DebugUnit_UserGeneric, INSTP(this) << "::" << AJAFUNC << ": " << progResults);
-	return progResults.empty();
-}
+		if (ok)
+			progResults = devFlasher.Program(false);
+		else
+			{AJA_sERROR(AJA_DebugUnit_UserGeneric, INSTP(this) << "::" << AJAFUNC << ": " << msgs.str());  return false;}
+		if (!progResults.empty())
+			AJA_sERROR(AJA_DebugUnit_UserGeneric, INSTP(this) << "::" << AJAFUNC << ": " << progResults);
+		return progResults.empty();
+	}
+#endif//!defined(NTV2_DEPRECATE_18_1)
 
 bool CNTV2Card::GetRunningFirmwarePackageRevision (ULWord & outRevision)
 {
@@ -2454,55 +2441,9 @@ bool CNTV2Card::GetRunningFirmwareUserID (ULWord & outUserID)
 
 ///////////////////////////////////////////////////////////////////
 
-bool CNTV2Card::GetPCIDeviceID (ULWord & outPCIDeviceID)				{return ReadRegister (kVRegPCIDeviceID, outPCIDeviceID);}
-
-bool CNTV2Card::SupportsP2PTransfer (void)
-{
-	ULWord	pciID	(0);
-
-	if (GetPCIDeviceID (pciID))
-		switch (pciID)
-		{
-			case 0xDB07:  // Kona3G + P2P
-			case 0xDB08:  // Kona3G Quad + P2P
-			case 0xEB0B:  // Kona4quad
-			case 0xEB0C:  // Kona4ufc
-			case 0xEB0E:  // Corvid 44
-			case 0xEB0D:  // Corvid 88
-				return true;
-
-			default:
-				return false;
-		}
-	return false;
-}
-
-
-bool CNTV2Card::SupportsP2PTarget (void)
-{
-	ULWord	pciID	(0);
-
-	if (GetPCIDeviceID (pciID))
-		switch (pciID)
-		{
-			case 0xDB07:  // Kona3G + P2P
-			case 0xDB08:  // Kona3G Quad + P2P
-			case 0xEB0C:  // Kona4ufc
-			case 0xEB0E:  // Corvid 44
-			case 0xEB0D:  // Corvid 88
-				return true;
-
-			default:
-				return false;
-		}
-	return false;
-}
-
-
 bool CNTV2Card::SetRegisterWriteMode (const NTV2RegisterWriteMode value, const NTV2Channel inFrameStore)
 {
 	bool ret;
-
 	if (IS_CHANNEL_INVALID(inFrameStore))
 		return false;
 	if (IsMultiFormatActive())
@@ -2532,10 +2473,6 @@ bool CNTV2Card::GetRegisterWriteMode (NTV2RegisterWriteMode & outValue, const NT
 	outValue = NTV2RegisterWriteMode(value);
 	return true;
 }
-
-
-bool CNTV2Card::SetLEDState (ULWord value)								{return WriteRegister (kRegGlobalControl, value, kRegMaskLED, kRegShiftLED);}
-bool CNTV2Card::GetLEDState (ULWord & outValue)							{return ReadRegister (kRegGlobalControl, outValue, kRegMaskLED, kRegShiftLED);}
 
 
 ////////////////////////////////////////////////////////////////////
