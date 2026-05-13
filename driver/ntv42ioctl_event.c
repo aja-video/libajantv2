@@ -17,7 +17,7 @@
 #include "ntv42ioctl.h"
 
 
-int ntv42_ioctl_event_control(ntv42_device_t *device, unsigned long arg)
+int ntv42_ioctl_event_control(ntv42_device_t *device, void *io, unsigned long arg)
 {
     ntv42_ioctl_event_control_t param;
     int slot;
@@ -41,7 +41,7 @@ int ntv42_ioctl_event_control(ntv42_device_t *device, unsigned long arg)
     return NTV42_RETURN_SUCCESS;
 }
 
-int ntv42_ioctl_event_wait(ntv42_device_t *device, unsigned long arg)
+int ntv42_ioctl_event_wait(ntv42_device_t *device, void *io, unsigned long arg)
 {
     ntv42_ioctl_event_wait_t param;
     int slot;
@@ -95,7 +95,7 @@ int ntv42_ioctl_event_wait(ntv42_device_t *device, unsigned long arg)
     return NTV42_RETURN_SUCCESS;
 }
 
-int ntv42_ioctl_event_status(ntv42_device_t *device, unsigned long arg)
+int ntv42_ioctl_event_status(ntv42_device_t *device, void *io, unsigned long arg)
 {
     ntv42_ioctl_event_status_t param;
     int slot;

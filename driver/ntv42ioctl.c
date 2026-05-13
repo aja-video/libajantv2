@@ -13,7 +13,7 @@
 #include "ntv42device.h"
 #include "ntv42ioctl.h"
 
-int ntv42_ioctl_version(ntv42_device_t *device, unsigned long arg)
+int ntv42_ioctl_version(ntv42_device_t *device, void *io, unsigned long arg)
 {
     ntv42_ioctl_version_t ver;
 
@@ -29,7 +29,7 @@ int ntv42_ioctl_version(ntv42_device_t *device, unsigned long arg)
     return NTV42_RETURN_SUCCESS;
 }
 
-int ntv42_ioctl_reg_read(ntv42_device_t *device, unsigned long arg)
+int ntv42_ioctl_reg_read(ntv42_device_t *device, void *io, unsigned long arg)
 {
     ntv42_ioctl_regio_t param;
     ntv42_bar_t *bar;
@@ -93,7 +93,7 @@ int ntv42_ioctl_reg_read(ntv42_device_t *device, unsigned long arg)
     return NTV42_RETURN_SUCCESS;
 }
 
-int ntv42_ioctl_reg_write(ntv42_device_t *device, unsigned long arg)
+int ntv42_ioctl_reg_write(ntv42_device_t *device, void *io, unsigned long arg)
 {
     ntv42_ioctl_regio_t param;
     ntv42_bar_t *bar;
@@ -157,7 +157,7 @@ int ntv42_ioctl_reg_write(ntv42_device_t *device, unsigned long arg)
     return NTV42_RETURN_SUCCESS;
 }
 
-int ntv42_ioctl_device_info(ntv42_device_t *device, unsigned long arg)
+int ntv42_ioctl_device_info(ntv42_device_t *device, void *io, unsigned long arg)
 {
     ntv42_ioctl_device_info_t info;
     int i;

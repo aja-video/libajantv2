@@ -85,7 +85,7 @@ typedef struct ntv42_device_t {
     /* DMA infrastructure (Phase 3) */
     uint8_t                *dma_buf;                            // Bounce buffer (dummy devices)
     uint64_t                dma_buf_size;                       // Bounce buffer size
-    int                     (*dma_transfer)(void* host, uint32_t direction,
+    int                     (*dma_transfer)(void* host, void* io, uint32_t direction,
                                             void __user *user_buf, uint64_t device_addr,
                                             uint64_t bytes, uint64_t *bytes_xfered);
 

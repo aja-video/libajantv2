@@ -126,31 +126,34 @@ static int ntv42_bar0_reg_write(void *host, void *id, ntv42device_regio_t *regio
     return WriteReg(ntv2pp->deviceNumber, regNum, regio->data, regio->mask, regio->shift);
 }
 
-static int ntv42_dma_transfer(void* host, uint32_t direction,
+static int ntv42_dma_transfer(void* host, void* io, uint32_t direction,
                               void __user *user_buf, uint64_t device_addr,
                               uint64_t bytes, uint64_t *bytes_xfered)
 {
     NTV2PrivateParams *ntv2pp = (NTV2PrivateParams *)host;
+    PFILE_DATA pFileData = (PFILE_DATA)io;
     DMA_PARAMS dmaParams;
     int status = 0;
 
-    if ((ntv2pp == NULL) || (user_buf == NULL) || (bytes == 0))
+    if ((ntv2pp == NULL) || (pFileData == NULL) || (user_buf == NULL) || (bytes == 0))
         return NTV42_RETURN_BAD_PARAMETER;
 
     /* direction 1=to_device, 2=from_device */
     memset(&dmaParams, 0, sizeof(DMA_PARAMS));
     dmaParams.deviceNumber = ntv2pp->deviceNumber;
+    dmaParams.pPageRoot = &pFileData->dmaRoot;
     dmaParams.toHost = (direction == 2);
     dmaParams.dmaEngine = NTV2_DMA1;
     dmaParams.videoChannel = NTV2_CHANNEL1;
     dmaParams.pVidUserVa = user_buf;
     dmaParams.vidNumBytes = (uint32_t)bytes;
     dmaParams.frameOffset = (uint32_t)device_addr;
-
+#if 0
     MSG("%s%d: ntv42 dma %s device  user %16px offset %08x bytes %d\n",
         getNTV2ModuleParams()->name, dmaParams.deviceNumber,
         dmaParams.toHost? "from":"to", dmaParams.pVidUserVa, dmaParams.frameOffset, dmaParams.vidNumBytes);
 
+#endif
     status = dmaTransfer(&dmaParams);
     if (status == 0)
     {
@@ -1752,40 +1755,40 @@ messageError:
 
 #if defined(AJA_NTV42)
 	case IOCTL_NTV42_VERSION:
-		return ntv42_ioctl_version(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_version(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_REG_READ:
-		return ntv42_ioctl_reg_read(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_reg_read(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_REG_WRITE:
-		return ntv42_ioctl_reg_write(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_reg_write(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_DEVICE_INFO:
-		return ntv42_ioctl_device_info(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_device_info(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_EVENT_CONTROL:
-        return ntv42_ioctl_event_control(pNTV2Params->ntv42_device, arg);
+        return ntv42_ioctl_event_control(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_EVENT_WAIT:
-		return ntv42_ioctl_event_wait(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_event_wait(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_EVENT_STATUS:
-		return ntv42_ioctl_event_status(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_event_status(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_DMA_TRANSFER:
-		return ntv42_ioctl_dma_transfer(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_dma_transfer(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_DMA_INFO:
-		return ntv42_ioctl_dma_info(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_dma_info(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_REGBATCH_SUBMIT:
-		return ntv42_ioctl_regbatch_submit(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_regbatch_submit(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_REGBATCH_CANCEL:
-		return ntv42_ioctl_regbatch_cancel(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_regbatch_cancel(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_REGBATCH_STATUS:
-		return ntv42_ioctl_regbatch_status(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_regbatch_status(pNTV2Params->ntv42_device, pFileData, arg);
 #endif
     }
 
@@ -2383,41 +2386,79 @@ irqreturn_t ntv2_fpga_irq(int irq, void *dev_id)
         NTV2PrivateParams* pNTV2Params = (NTV2PrivateParams*)dev_id;
         ULWord deviceNumber = pNTV2Params->deviceNumber;
         uint32_t irqStatus = 0;
+        uint32_t channel = 0x01010101;
+//        uint32_t printCount = 1000;
 
         irqStatus = ReadRegister(deviceNumber, pNTV2Params->ntv42_irqRegActive, NO_MASK, NO_SHIFT);
         while ((irqStatus != 0) && (handled < 100))
         {
             WriteRegister(deviceNumber, pNTV2Params->ntv42_irqRegClear, irqStatus, NO_MASK, NO_SHIFT);
 
-            if (pNTV2Params->ntv42_device != NULL) {
+            if (pNTV2Params->ntv42_device != NULL)
+            {
                 uint32_t maskVideoInput = pNTV2Params->ntv42_irqVideoInputMask;
                 uint32_t maskVideoOutput = pNTV2Params->ntv42_irqVideoOutputMask;
-                uint32_t maskAncInputDone = pNTV2Params->ntv42_irqAncInputDoneMask;
-                uint32_t maskAncOutputDone = pNTV2Params->ntv42_irqAncOutputDoneMask;
+                uint32_t maskAncInput = pNTV2Params->ntv42_irqAncInputMask;
+                uint32_t maskAncOutput = pNTV2Params->ntv42_irqAncOutputMask;
                 
                 for (int i = 0; i < 8; i++)
                 {
                     /* Output vsync events */
                     if (irqStatus & maskVideoOutput)
+                    {
                         ntv42device_event(pNTV2Params->ntv42_device, 0x0001, i);
+                        pNTV2Params->ntv42_irqVideoOutputCount[i]++;
+                        if (maskVideoOutput & channel)
+                            pNTV2Params->ntv42_irqHandledCount[i]++;
+                    }
                     /* Input vsync events */
                     if (irqStatus & maskVideoInput)
+                    {
                         ntv42device_event(pNTV2Params->ntv42_device, 0x0002, i);
+                        pNTV2Params->ntv42_irqVideoInputCount[i]++;
+                        if (maskVideoInput & channel)
+                            pNTV2Params->ntv42_irqHandledCount[i]++;
+                    }
                     /* Output anc events */
-                    if (irqStatus & maskAncOutputDone)
+                    if (irqStatus & maskAncOutput)
+                    {
                         ntv42device_event(pNTV2Params->ntv42_device, 0x0005, i);
+                        pNTV2Params->ntv42_irqAncOutputCount[i]++;
+                        if (maskAncOutput & channel)
+                            pNTV2Params->ntv42_irqHandledCount[i]++;
+                    }
                     /* Input anc events */
-                    if (irqStatus & maskAncInputDone)
+                    if (irqStatus & maskAncInput)
+                    {
                         ntv42device_event(pNTV2Params->ntv42_device, 0x0006, i);
+                        pNTV2Params->ntv42_irqAncInputCount[i]++;
+                        if (maskAncInput & channel)
+                            pNTV2Params->ntv42_irqHandledCount[i]++;
+                    }
 
                     maskVideoInput <<= 1;
                     maskVideoOutput <<= 1;
-                    maskAncInputDone <<= 1;
-                    maskAncOutputDone <<= 1;
+                    maskAncInput <<= 1;
+                    maskAncOutput <<= 1;
                 }
             }
             ++handled;
-
+#if 0            
+            for (int i = 0; i < 8; i++)
+            {
+                uint32_t chn = 0x01010101;
+                if ((chn & channel) && (pNTV2Params->ntv42_irqHandledCount[i] > printCount))
+                {
+                    
+                    MSG("%s%d: chn %d  irq %d  vin %d  vout %d  ain %d  aout %d\n",
+                        getNTV2ModuleParams()->name, deviceNumber, i, pNTV2Params->ntv42_irqHandledCount[i],
+                        pNTV2Params->ntv42_irqVideoInputCount[i], pNTV2Params->ntv42_irqVideoOutputCount[i],
+                        pNTV2Params->ntv42_irqAncInputCount[i], pNTV2Params->ntv42_irqAncOutputCount[i]);
+                    pNTV2Params->ntv42_irqHandledCount[i] = 0;
+                }
+                chn <<= 1;
+            }
+#endif
             irqStatus = ReadRegister(deviceNumber, pNTV2Params->ntv42_irqRegActive, NO_MASK, NO_SHIFT);
         }
     }
@@ -4752,11 +4793,19 @@ static void ntv42InitInterrupts(ULWord deviceNumber)
     ntv2pp->ntv42_irqRegEnable = ntv2pp->ntv42_irqRegBase;
     ntv2pp->ntv42_irqRegActive = ntv2pp->ntv42_irqRegBase + 1;
     ntv2pp->ntv42_irqRegClear = ntv2pp->ntv42_irqRegBase + 2;
-    ntv2pp->ntv42_irqInterruptEnableMask = 0x0000ffff;
+    ntv2pp->ntv42_irqInterruptEnableMask = 0xffffffff;
     ntv2pp->ntv42_irqVideoInputMask     = 0x00000001;
     ntv2pp->ntv42_irqVideoOutputMask    = 0x00000100;
-    ntv2pp->ntv42_irqAncInputDoneMask   = 0x00010000;
-    ntv2pp->ntv42_irqAncOutputDoneMask  = 0x01000000;
+    ntv2pp->ntv42_irqAncInputMask       = 0x00010000;
+    ntv2pp->ntv42_irqAncOutputMask      = 0x01000000;
+    for (int i = 0; i < 8; i++)
+    {
+        ntv2pp->ntv42_irqHandledCount[i]       = 0;
+        ntv2pp->ntv42_irqVideoInputCount[i]    = 0;
+        ntv2pp->ntv42_irqVideoOutputCount[i]   = 0;
+        ntv2pp->ntv42_irqAncInputCount[i]      = 0;
+        ntv2pp->ntv42_irqAncOutputCount[i]     = 0;
+    }
     WriteRegister(deviceNumber, ntv2pp->ntv42_irqRegEnable, ntv2pp->ntv42_irqInterruptEnableMask, NO_MASK, NO_SHIFT);
 #endif        
 }

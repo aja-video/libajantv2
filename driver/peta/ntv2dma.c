@@ -813,7 +813,7 @@ int dmaTransfer(PDMA_PARAMS pDmaParams)
 	dmaC2H = pDmaParams->toHost;
 
 	// serialize all dma if set
-	serialTransfer = ReadRegister(deviceNumber, kVRegDmaSerialize, NO_MASK, NO_SHIFT);
+//	serialTransfer = ReadRegister(deviceNumber, kVRegDmaSerialize, NO_MASK, NO_SHIFT);
 
 	// wait for page lock resource
 	pDmaContext = dmaContextAcquire(pDmaEngine, timeoutJiffies);

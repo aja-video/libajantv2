@@ -424,8 +424,13 @@ typedef struct ntv2_private
     uint32_t ntv42_irqInterruptEnableMask;
     uint32_t ntv42_irqVideoInputMask;
     uint32_t ntv42_irqVideoOutputMask;
-    uint32_t ntv42_irqAncInputDoneMask;
-    uint32_t ntv42_irqAncOutputDoneMask;
+    uint32_t ntv42_irqAncInputMask;
+    uint32_t ntv42_irqAncOutputMask;
+    uint32_t ntv42_irqHandledCount[8];
+    uint32_t ntv42_irqVideoInputCount[8];
+    uint32_t ntv42_irqVideoOutputCount[8];
+    uint32_t ntv42_irqAncInputCount[8];
+    uint32_t ntv42_irqAncOutputCount[8];
 #endif
 #endif    
 

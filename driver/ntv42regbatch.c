@@ -96,7 +96,7 @@ void ntv42_regbatch_check(ntv42_device_t *device, uint32_t event_type, uint32_t 
     }
 }
 
-int ntv42_ioctl_regbatch_submit(ntv42_device_t *device, unsigned long arg)
+int ntv42_ioctl_regbatch_submit(ntv42_device_t *device, void *io, unsigned long arg)
 {
     ntv42_ioctl_regbatch_submit_t param;
     struct ntv42_regbatch *batch = NULL;
@@ -168,7 +168,7 @@ int ntv42_ioctl_regbatch_submit(ntv42_device_t *device, unsigned long arg)
     return NTV42_RETURN_SUCCESS;
 }
 
-int ntv42_ioctl_regbatch_cancel(ntv42_device_t *device, unsigned long arg)
+int ntv42_ioctl_regbatch_cancel(ntv42_device_t *device, void *io, unsigned long arg)
 {
     ntv42_ioctl_regbatch_cancel_t param;
     unsigned long flags;
@@ -200,7 +200,7 @@ int ntv42_ioctl_regbatch_cancel(ntv42_device_t *device, unsigned long arg)
     return NTV42_RETURN_SUCCESS;
 }
 
-int ntv42_ioctl_regbatch_status(ntv42_device_t *device, unsigned long arg)
+int ntv42_ioctl_regbatch_status(ntv42_device_t *device, void *io, unsigned long arg)
 {
     ntv42_ioctl_regbatch_status_t param;
     unsigned long flags;

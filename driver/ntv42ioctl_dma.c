@@ -18,7 +18,7 @@
 #include "ntv42ioctl.h"
 
 
-int ntv42_ioctl_dma_transfer(ntv42_device_t *device, unsigned long arg)
+int ntv42_ioctl_dma_transfer(ntv42_device_t *device, void *io, unsigned long arg)
 {
     ntv42_ioctl_dma_transfer_t param;
     int status = 0;
@@ -39,7 +39,7 @@ int ntv42_ioctl_dma_transfer(ntv42_device_t *device, unsigned long arg)
 
     /* Use device DMA callback if available */
     if (device->dma_transfer != NULL) {
-        int ret = device->dma_transfer(device->host, param.direction,
+        int ret = device->dma_transfer(device->host, io, param.direction,
                                         (void __user *)(uintptr_t)param.host_addr,
                                         param.device_addr, param.bytes,
                                         &param.bytes_xfered);
@@ -101,7 +101,7 @@ int ntv42_ioctl_dma_transfer(ntv42_device_t *device, unsigned long arg)
     return NTV42_RETURN_SUCCESS;
 }
 
-int ntv42_ioctl_dma_info(ntv42_device_t *device, unsigned long arg)
+int ntv42_ioctl_dma_info(ntv42_device_t *device, void *io, unsigned long arg)
 {
     ntv42_ioctl_dma_info_t info;
 
