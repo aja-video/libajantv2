@@ -145,6 +145,18 @@ ULWord READ_REGISTER_ULWord( ULWord deviceNumber, unsigned long address)
 	NTV2PrivateParams* pNTV2Params = getNTV2Params(deviceNumber);
 	ULWord value = 0xffffffff;
 
+#ifdef AJA_SON
+    if (address >= (pNTV2Params->_pGlobalControl + 2048))
+        return readl((void *)address);
+    if (address == (pNTV2Params->_pGlobalControl + (kRegReserved54 * 4)))
+        return 0x38383838;
+    if (address == (pNTV2Params->_pGlobalControl + (kRegReserved55 * 4)))
+        return 0x38383838;
+    if (address == pNTV2Params->_pDeviceID)
+        return DEVICE_ID_FS8;
+    return 0;
+#endif    
+
 	if(address == (pNTV2Params->_VideoAddress+0x118) ) {
 #ifdef DEBUG_UART
 		MSG("READ_REGISTER_ULWord(TX)\n");
@@ -214,9 +226,17 @@ ULWord READ_REGISTER_UByte( ULWord deviceNumber, unsigned long address)
 
 void WRITE_REGISTER_ULWord( ULWord deviceNumber, unsigned long address, ULWord regValue)
 {
-	//NTV2PrivateParams* pNTV2Params = getNTV2Params(deviceNumber);
-	//	printk("WR_: r(%lx) v(%x)\n", (address-pNTV2Params->_BAR0Address)/4, regValue);
+	//  NTV2PrivateParams* pNTV2Params = getNTV2Params(deviceNumber);
+	//  printk("WR_: r(%lx) v(%x)\n", (address-pNTV2Params->_BAR0Address)/4, regValue);
 
+#ifdef AJA_SON
+    {
+        NTV2PrivateParams* pNTV2Params = getNTV2Params(deviceNumber);
+        if (address < (pNTV2Params->_pGlobalControl + 2048))
+            return;
+    }
+#endif    
+    
 	writel(regValue, (void *)address);
 }
 
@@ -1317,6 +1337,9 @@ void ClearUartTxInterrupt2(ULWord deviceNumber)
 	// Output: ULWord or equivalent(i.e. ULWord).
 ULWord ReadDeviceIDRegister(ULWord deviceNumber)
 {
+#ifdef AJA_SON
+    return DEVICE_ID_FS8;
+#endif
 	if (getNTV2Params(deviceNumber)->pci_device == NTV2_DEVICE_ID_IO4KPLUS)
 		return DEVICE_ID_IO4KPLUS;
 

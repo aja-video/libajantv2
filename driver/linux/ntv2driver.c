@@ -2214,40 +2214,40 @@ messageError:
 
 #if defined(AJA_NTV42)
 	case IOCTL_NTV42_VERSION:
-		return ntv42_ioctl_version(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_version(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_REG_READ:
-		return ntv42_ioctl_reg_read(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_reg_read(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_REG_WRITE:
-		return ntv42_ioctl_reg_write(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_reg_write(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_DEVICE_INFO:
-		return ntv42_ioctl_device_info(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_device_info(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_EVENT_CONTROL:
-		return ntv42_ioctl_event_control(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_event_control(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_EVENT_WAIT:
-		return ntv42_ioctl_event_wait(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_event_wait(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_EVENT_STATUS:
-		return ntv42_ioctl_event_status(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_event_status(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_DMA_TRANSFER:
-		return ntv42_ioctl_dma_transfer(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_dma_transfer(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_DMA_INFO:
-		return ntv42_ioctl_dma_info(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_dma_info(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_REGBATCH_SUBMIT:
-		return ntv42_ioctl_regbatch_submit(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_regbatch_submit(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_REGBATCH_CANCEL:
-		return ntv42_ioctl_regbatch_cancel(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_regbatch_cancel(pNTV2Params->ntv42_device, pFileData, arg);
 
 	case IOCTL_NTV42_REGBATCH_STATUS:
-		return ntv42_ioctl_regbatch_status(pNTV2Params->ntv42_device, arg);
+		return ntv42_ioctl_regbatch_status(pNTV2Params->ntv42_device, pFileData, arg);
 #endif
 
 	}
