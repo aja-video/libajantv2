@@ -7814,7 +7814,7 @@ string PercentEncode (const string & inStr)
 	for (size_t ndx(0);	 ndx < inStr.size();  ndx++)
 	{
 		const char chr(inStr.at(size_t(ndx)));
-		if (::isalnum(chr)	||	chr == '-'	||	chr == '_'	||	chr == '.'	||	chr == '~')
+		if (::isalnum(chr)	||	chr == '-'	||	chr == '_'	||	chr == '.'	||	chr == '~' || chr == ':')
 			oss << chr;
 		else
 			oss << "%" << HEX0N(unsigned(chr),2);
@@ -7831,7 +7831,7 @@ string PercentDecode (const string & inStr)
 		switch (state)
 		{
 			case 0:
-				if (::isalnum(chr)	||	chr == '-'	||	chr == '_'	||	chr == '.'	||	chr == '~')
+				if (::isalnum(chr)	||	chr == '-'	||	chr == '_'	||	chr == '.'	||	chr == '~' || chr == ':')
 					oss << chr;
 				if (chr == '%')
 					{state++;  break;}
