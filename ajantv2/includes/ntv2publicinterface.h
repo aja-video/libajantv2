@@ -7279,7 +7279,7 @@ typedef enum
 
 					inline void		ClearResultStatus (void)		{fResultStatus = 0;}	//	New in SDK 17.5
 
-					static std::string FourCCToString (const ULWord in4CC);
+					static std::string FourCCToString (const ULWord in4CC, const char nonPrintable = '?');
 
 					NTV2_RPC_CODEC_DECLS
 				#endif	//	user-space clients only

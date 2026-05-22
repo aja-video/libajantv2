@@ -360,27 +360,35 @@ ostream & NTV2_HEADER::Print (ostream & inOutStream) const
 	return inOutStream << "]";
 }
 
-string NTV2_HEADER::FourCCToString (const ULWord in4CC)
+string NTV2_HEADER::FourCCToString (const ULWord in4CC, char nonPrintable)
 {
 	const char * pU32 (reinterpret_cast<const char *>(&in4CC));
-	ostringstream result;
+	ostringstream result, fourCC;
 	size_t badTally(0);
-	result << "'";
+	if (nonPrintable && !::isprint(nonPrintable))
+		nonPrintable = 0;	//	specified non-printable character to use is itself non-printable:  don't use it
 	for (size_t charPos(0);  charPos < 4;  charPos++)
 	{
 		#if AJATargetBigEndian
-		const char ch(pU32[charPos]);
+			const char ch (pU32[charPos]);
 		#else	//	little-endian:
-			const char ch(pU32[3-charPos]);
+			const char ch (pU32[3 - charPos]);
 		#endif
-		if (ch < ' '  ||  ch > 126)
-			{result << '.';  badTally++;}	//	not printable
+		if (::isprint(ch))
+			fourCC << ch;
 		else
-			result << ch;
+		{
+			if (nonPrintable)
+				fourCC << nonPrintable;
+			badTally++;	//	not printable
+		}
 	}
-	result << "'";
-	if (badTally)
-		result << " (" << xHEX0N(in4CC,8) << ")";
+	if (badTally == 4)
+		result << xHEX0N(in4CC,8);	//	nothing printable, just show hex value
+	else if (badTally)
+		result << "'" << fourCC.str() << "' (" << xHEX0N(in4CC,8) << ")";	//	at least one printable, show 4CC & hex value
+	else
+		result << "'" << fourCC.str() << "'";	//	all printable, show 4CC exclusively (no hex value)
 	return result.str();
 }
 

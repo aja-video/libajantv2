@@ -4480,19 +4480,7 @@ private:
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
 		{	(void) inDeviceID;  (void) inRegNum;
-			char ch;  string str4cc;
-			ch = char((inRegValue & 0xFF000000) >> 24);
-			str4cc += ::isprint(ch) ? ch : '?';
-			ch = char((inRegValue & 0x00FF0000) >> 16);
-			str4cc += ::isprint(ch) ? ch : '?';
-			ch = char((inRegValue & 0x0000FF00) >>  8);
-			str4cc += ::isprint(ch) ? ch : '?';
-			ch = char((inRegValue & 0x000000FF) >>  0);
-			str4cc += ::isprint(ch) ? ch : '?';
-
-			ostringstream	oss;
-			oss << "'" << str4cc << "'";
-			return oss.str();
+			return NTV2_HEADER::FourCCToString(inRegValue);
 		}
 	}	mDecodeFourCC;
 
