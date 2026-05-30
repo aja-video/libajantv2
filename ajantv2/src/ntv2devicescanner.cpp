@@ -21,11 +21,17 @@ using namespace std;
 using json = nlohmann::json;
 
 
-#define PLFAIL(__x__)		AJA_sERROR	(AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
-#define PLWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
-#define PLNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
-#define PLINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
-#define PLDBUG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
+#define VDFAIL(__x__)		AJA_sERROR	(AJA_DebugUnit_VDev, AJAFUNC << ": " << __x__)
+#define VDWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_VDev, AJAFUNC << ": " << __x__)
+#define VDNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_VDev, AJAFUNC << ": " << __x__)
+#define VDINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_VDev, AJAFUNC << ": " << __x__)
+#define VDDBUG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_VDev, AJAFUNC << ": " << __x__)
+
+#define C2FAIL(__x__)		AJA_sERROR	(AJA_DebugUnit_CP2, AJAFUNC << ": " << __x__)
+#define C2WARN(__x__)		AJA_sWARNING(AJA_DebugUnit_CP2, AJAFUNC << ": " << __x__)
+#define C2NOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_CP2, AJAFUNC << ": " << __x__)
+#define C2INFO(__x__)		AJA_sINFO	(AJA_DebugUnit_CP2, AJAFUNC << ": " << __x__)
+#define C2DBUG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_CP2, AJAFUNC << ": " << __x__)
 
 
 #if !defined(NTV2_DEPRECATE_17_1)
@@ -837,7 +843,7 @@ bool CNTV2DeviceScanner::PatchDeviceInfo (const UWord inDevIndex, CNTV2DriverInt
 		return true;	//	Matching device IDs
 
 	//	Mismatched device IDs -- patch sDevInfoList entry...
-	PLNOTE(dev.GetDescription() << ": patched sDevInfoList[" << DEC(inDevIndex) << "]: device ID changed from '"
+	VDNOTE(dev.GetDescription() << ": patched sDevInfoList[" << DEC(inDevIndex) << "]: device ID changed from '"
 			<< ::NTV2DeviceIDToString(devInfo.deviceID) << "' to '"
 			<< ::NTV2DeviceIDToString(devID) << "'");
 	devInfo.deviceID = devID;
@@ -859,19 +865,19 @@ bool CNTV2DeviceScanner::GetVDevList (NTV2DeviceInfoList & outVDevList)
 	AJAFileIO::ReadDirectory(vdevPath, "*.vdev", vdevFiles);
 	for (const auto & vdevFile : vdevFiles)
 	{
-		PLDBUG(vdevFile);
+		VDDBUG(vdevFile);
 		json vdevJson;
 		{
 			std::ifstream vf(vdevFile);
 			if (!vf.is_open())
-				{PLFAIL("Unable to open '" << vdevFile << "'"); return false;}
+				{VDFAIL("Unable to open '" << vdevFile << "'"); return false;}
 			try
 			{
 				vdevJson = json::parse(vf);
 			}
 			catch (const json::parse_error& e)
 			{
-				PLFAIL("Invalid JSON at byte " << e.byte << " in '" << vdevFile << "': " << e.what() << ", exceptionID " << e.id);
+				VDFAIL("Invalid JSON at byte " << e.byte << " in '" << vdevFile << "': " << e.what() << ", exceptionID " << e.id);
 				return false;
 			}
 		}
@@ -891,7 +897,7 @@ bool CNTV2DeviceScanner::GetVDevList (NTV2DeviceInfoList & outVDevList)
 		//	"disabled"	[optional]	Specify boolean 'true' to explicitly disable the device;  'false' retains device.
 		//							If not specified, the device will always be considered enabled.
 		if (vdevJson.size() > 32)
-			{PLFAIL("File '" << vdevFile << "': more than 32 keys");  continue;}
+			{VDFAIL("File '" << vdevFile << "': more than 32 keys");  continue;}
 		NTV2StringSet keys;
 		for (auto it(vdevJson.cbegin());  it != vdevJson.cend();  ++it)
 			if (keys.find(it.key()) == keys.end())
@@ -906,19 +912,19 @@ bool CNTV2DeviceScanner::GetVDevList (NTV2DeviceInfoList & outVDevList)
 				goodKeys.push_back(*itKey);
 		}
 		if (!badKeys.empty())
-			PLWARN("File '" << vdevFile << "': ignored " << DEC(badKeys.size()) << " unknown key(s): '" << aja::join(badKeys, "', '") << "'");
+			VDWARN("File '" << vdevFile << "': ignored " << DEC(badKeys.size()) << " unknown key(s): '" << aja::join(badKeys, "', '") << "'");
 		auto nameVal (vdevJson[kVDevJSON_Name]), urlspecVal (vdevJson[kVDevJSON_URLSpec]), disabledVal (vdevJson[kVDevJSON_Disabled]);
 		if (urlspecVal.is_null())
-			{PLFAIL("File '" << vdevFile << "': missing required 'urlspec' parameter");  continue;}
+			{VDFAIL("File '" << vdevFile << "': missing required 'urlspec' parameter");  continue;}
 		if (disabledVal.is_boolean())
 		{
 			NTV2_ASSERT(!disabledVal.is_null());
 			explicitlyDisabled = disabledVal.get<bool>();
 		}
 		else if (!disabledVal.is_null())
-			{PLFAIL("File '" << vdevFile << "': invalid 'disabled' value -- expected boolean 'true' or 'false' value");  continue;}
+			{VDFAIL("File '" << vdevFile << "': invalid 'disabled' value -- expected boolean 'true' or 'false' value");  continue;}
 		if (explicitlyDisabled)
-			{PLNOTE("File '" << vdevFile << "': explicitly 'disabled'");  continue;}
+			{VDINFO("File '" << vdevFile << "': explicitly 'disabled'");  continue;}
 		newVDev.vdevUrl = urlspecVal.get<std::string>();	//	done, we have the vdevUrl
 		NTV2DeviceSpecParser parser (newVDev.vdevUrl);	//	Check it
 		if (!nameVal.is_null())
@@ -968,14 +974,14 @@ bool CNTV2DeviceScanner::GetCP2DevList (NTV2DeviceInfoList & outVDevList)
 		{
 			std::ifstream vf(vdevFile);
 			if (!vf.is_open())
-				{PLFAIL("Unable to open '" << vdevFile << "'"); return false;}
+				{C2FAIL("Unable to open '" << vdevFile << "'"); return false;}
 			try
 			{
 				vdevJson = json::parse(vf);
 			}
 			catch (const json::parse_error& e)
 			{
-				PLFAIL("Invalid JSON at byte " << e.byte << " in '" << vdevFile << "': " << e.what() << ", exceptionID " << e.id);
+				C2FAIL("Invalid JSON at byte " << e.byte << " in '" << vdevFile << "': " << e.what() << ", exceptionID " << e.id);
 				return false;
 			}
 		}
@@ -994,9 +1000,9 @@ bool CNTV2DeviceScanner::GetCP2DevList (NTV2DeviceInfoList & outVDevList)
 		string hostName;
 		auto pluginVal (vdevJson["plugin"]), nameVal (vdevJson["name"]), hostVal (vdevJson["host"]), urlspecVal (vdevJson["urlspec"]);
 		if (pluginVal.is_null())
-			{PLFAIL("File: '" << vdevFile << "' missing required 'plugin' parameter");  continue;}
+			{C2FAIL("File: '" << vdevFile << "' missing required 'plugin' parameter");  continue;}
 		if (!urlspecVal.is_null())
-			PLWARN("File: '" << vdevFile << "' 'urlspec' parameter ignored");
+			C2WARN("File: '" << vdevFile << "' 'urlspec' parameter ignored");
 
 		newVDev.vdevUrl = pluginVal.get<std::string>();
 		if (!nameVal.is_null())
