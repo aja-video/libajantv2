@@ -172,6 +172,12 @@ AJAStatus AJADebug::Open (bool incrementRefCount)
 			addDebugGroupToLabelVector(AJA_DebugUnit_Firmware);
 			addDebugGroupToLabelVector(AJA_DebugUnit_App_Alloc);
 			addDebugGroupToLabelVector(AJA_DebugUnit_Stream);
+			addDebugGroupToLabelVector(AJA_DebugUnit_AcquireRelease);
+			addDebugGroupToLabelVector(AJA_DebugUnit_CP2);
+			addDebugGroupToLabelVector(AJA_DebugUnit_VDev);
+			addDebugGroupToLabelVector(AJA_DebugUnit_SWDevice);
+			addDebugGroupToLabelVector(AJA_DebugUnit_VKONACDI);
+			addDebugGroupToLabelVector(AJA_DebugUnit_AWS);
 
 			for (int i(AJA_DebugUnit_FirstUnused);	i < AJA_DebugUnit_Size;	 i++)
 			{

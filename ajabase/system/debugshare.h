@@ -104,6 +104,12 @@ typedef enum _AJADebugUnit
 	AJA_DebugUnit_Firmware					= 58,
 	AJA_DebugUnit_App_Alloc					= 59,
 	AJA_DebugUnit_Stream					= 60,
+	AJA_DebugUnit_AcquireRelease			= 61,
+	AJA_DebugUnit_CP2						= 62,
+	AJA_DebugUnit_VDev						= 63,
+	AJA_DebugUnit_SWDevice					= 64,
+	AJA_DebugUnit_VKONACDI					= 65,
+	AJA_DebugUnit_AWS						= 66,
 
 	// to add a new unit:
 	//
@@ -122,14 +128,8 @@ typedef enum _AJADebugUnit
 	// if no more unused units
 	//	 * set AJA_DebugUnit_FirstUnused to the same value as AJA_DebugUnit_Size
 	//
-	AJA_DebugUnit_FirstUnused				= 61,
-	AJA_DebugUnit_Unused_61					= AJA_DebugUnit_FirstUnused,
-	AJA_DebugUnit_Unused_62					= 62,
-	AJA_DebugUnit_Unused_63					= 63,
-	AJA_DebugUnit_Unused_64					= 64,
-	AJA_DebugUnit_Unused_65					= 65,
-	AJA_DebugUnit_Unused_66					= 66,
-	AJA_DebugUnit_Unused_67					= 67,
+	AJA_DebugUnit_FirstUnused				= 67,
+	AJA_DebugUnit_Unused_67					= AJA_DebugUnit_FirstUnused,
 	AJA_DebugUnit_Unused_68					= 68,
 	AJA_DebugUnit_Unused_69					= 69,
 	AJA_DebugUnit_Unused_70					= 70,
