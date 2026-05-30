@@ -57,19 +57,6 @@ static string timecodeToString (const NTV2_RP188 & inRP188)
 	return oss.str();
 }
 
-static string appSignatureToString (const ULWord inAppSignature)
-{
-	ostringstream oss;
-	const string sigStr(NTV2_4CC_AS_STRING(inAppSignature));
-	if (isprint(sigStr.at(0))  &&  isprint(sigStr.at(1))  &&  isprint(sigStr.at(2))	 &&	 isprint(sigStr.at(3)))
-		oss << "'" << sigStr << "'";
-	else if (inAppSignature)
-		oss << "0x" << hex << setw (8) << setfill ('0') << inAppSignature << dec << " (" << inAppSignature << ")";
-	else
-		oss << "'----' (0)";
-	return oss.str();
-}
-
 static string pidToString (const uint32_t inPID)
 {
 	ostringstream	oss;
@@ -685,7 +672,7 @@ void CNTV2SupportLogger::FetchAutoCirculateLog (ostringstream & oss) const
 	else
 		oss	<< "Board Format: " << ::NTV2VideoFormatToString(::getVideoFormat(mDevice, NTV2_CHANNEL1)) << endl;
 
-	oss << "Task mode:  " << ::NTV2TaskModeToString(taskMode) << ", PID=" << pidToString(uint32_t(appPID)) << ", signature=" << appSignatureToString(appSignature) << endl
+	oss << "Task mode:  " << ::NTV2TaskModeToString(taskMode) << ", PID=" << pidToString(uint32_t(appPID)) << ", signature: " << NTV2_HEADER::FourCCToString(appSignature) << endl
 		<< endl
 		<< "Chan/FrameStore   State  Start   End   Act   FrmProc   FrmDrop BufLvl    Audio   RP188     LTC   FBFch   FBOch   Color   VidPr     Anc   HDMIx   Field      VidFmt       PixFmt" << endl
 		<< "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
