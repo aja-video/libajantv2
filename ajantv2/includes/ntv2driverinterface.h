@@ -525,7 +525,7 @@ class AJAExport CNTV2DriverInterface
 		AJA_VIRTUAL bool ReleaseStreamForApplication (const ULWord inAppType, const int32_t inProcessID);
 
 		/**
-			@brief		Sets the four-CC type and process ID of the application that should "own" the AJA device
+			@brief		Forcibly sets the four-CC type and process ID of the application that should "own" the AJA device
 						(i.e. reserve it for exclusive use).
 			@result		True if successful; otherwise false.
 			@param[in]	inAppType		Specifies the 32-bit "four CC" value that helps identify the application that will

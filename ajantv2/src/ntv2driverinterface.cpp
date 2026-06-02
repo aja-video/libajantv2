@@ -1252,9 +1252,9 @@ bool CNTV2DriverInterface::SetStreamingApplication (const ULWord inAppCode, cons
 #if 1	//	original implementation
 	bool result (WriteRegister(kVRegForceApplicationCode, inAppCode)  &&  WriteRegister(kVRegForceApplicationPID, ULWord(inAppPID)));
 	if (result)
-		ARINFO("Streaming app set to " << NTV2_HEADER::FourCCToString(inAppCode) << ", PID to " << DEC(inAppPID));
+		ARINFO("Streaming app forcibly set to " << NTV2_HEADER::FourCCToString(inAppCode) << ", PID to " << DEC(inAppPID));
 	else
-		ARFAIL("Failed to set streaming app to " << NTV2_HEADER::FourCCToString(inAppCode) << ", PID to " << DEC(inAppPID));
+		ARFAIL("Failed to forcibly set streaming app to " << NTV2_HEADER::FourCCToString(inAppCode) << ", PID to " << DEC(inAppPID));
 	return result;
 #else	//	begin	macOS driver implementation (adapted to use VRegs)
 	uint32_t oldAppType(0), oldPID(0), oldRefCount(0);
