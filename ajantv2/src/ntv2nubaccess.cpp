@@ -1080,7 +1080,8 @@ bool NTV2DeviceSpecParser::IsLegalSerialNumChar (const char inChar)
 										AJA_NULL));							//	user params
 		if (lpMsgBuf)
 		{
-			result = reinterpret_cast<const char *>(lpMsgBuf);
+			if (res)
+				result = reinterpret_cast<const char *>(lpMsgBuf);
 			LocalFree(lpMsgBuf);
 		}
 		return result;
@@ -1763,6 +1764,7 @@ bool NTV2PluginLoader::validate (void)
 		{P_FAIL("'SetFromHexString' failed to decode X509 certificate extracted from '" << pluginSigPath() << "' key '" << kNTV2PluginSigFileKey_X509Certificate << "'");  return fail();}
 	if (!signature.SetFromHexString(dict.valueForKey(kNTV2PluginSigFileKey_Signature)))
 		{P_FAIL("'SetFromHexString' failed to decode signature extracted from '" << pluginSigPath() << "' key '" << kNTV2PluginSigFileKey_Signature << "'");  return fail();}
+	if (isVerbose())   {string s; if (signature.toHexString(s)) cout << "## DEBUG1: signature: " << s << endl;}
 
 	//	Grab the signing certificate found in the .sig file...
 	mbedtls_x509_crt crt;			//	Container for X509 certificate
@@ -1782,25 +1784,33 @@ bool NTV2PluginLoader::validate (void)
 		string msg (msgBuff, size_t(msgLength));
 		if (msg.empty())
 		{	P_FAIL("'mbedtls_x509_crt_info' returned no info for X509 cert found in '" << pluginSigPath() << "'");
+			mbedtls_x509_crt_free(&crt);
 			return fail();
 		}
 		if (showCertificate())
 			cout	<< "## DEBUG: Raw X509 certificate info extracted from signature file '" << pluginSigPath() << "':" << endl
 					<< "          " << msg << endl;
 		if (!ExtractCertInfo (certInfo, msg))
+		{	mbedtls_x509_crt_free(&crt);
 			return false;
+		}
 		if (isVerbose())
 		{	cout << "## NOTE: X509 certificate info extracted from signature file '" << pluginSigPath() << "':" << endl;
 			certInfo.Print(cout, false) << endl;
 		}
 		if (certInfo.hasKey("issuer name"))
 			if (!ExtractIssuerInfo (issuerInfo, certInfo.valueForKey("issuer name"), "issuer name"))
+			{	mbedtls_x509_crt_free(&crt);
 				return false;
+			}
 		if (certInfo.hasKey("subject name"))
 			if (!ExtractIssuerInfo (subjectInfo, certInfo.valueForKey("subject name"), "subject name"))
+			{	mbedtls_x509_crt_free(&crt);
 				return false;
+			}
 		if (!certInfo.hasKey(kNTV2PluginInfoKey_Fingerprint))
 		{	P_FAIL("Missing key '" << kNTV2PluginInfoKey_Fingerprint << "' in X509 certificate from '" << pluginSigPath() << "'");
+			mbedtls_x509_crt_free(&crt);
 			return fail();
 		}
 		if (isVerbose()  &&  !issuerInfo.empty())
@@ -1813,14 +1823,17 @@ bool NTV2PluginLoader::validate (void)
 		}
 		if (!issuerInfo.hasKey(kNTV2PluginX500AttrKey_CommonName))
 		{	P_FAIL("Missing 'Issuer' key '" << kNTV2PluginX500AttrKey_CommonName << "' in X509 certificate from '" << pluginSigPath() << "'");
+			mbedtls_x509_crt_free(&crt);
 			return fail();
 		}
 		if (!issuerInfo.hasKey(kNTV2PluginX500AttrKey_OrganizationName))
 		{	P_FAIL("Missing 'Issuer' key '" << kNTV2PluginX500AttrKey_OrganizationName << "' in X509 certificate from '" << pluginSigPath() << "'");
+			mbedtls_x509_crt_free(&crt);
 			return fail();
 		}
 		if (!subjectInfo.hasKey(kNTV2PluginX500AttrKey_OrganizationalUnitName))
 		{	P_FAIL("Missing 'Subject' key '" << kNTV2PluginX500AttrKey_OrganizationalUnitName << "' in X509 certificate from '" << pluginSigPath() << "'");
+			mbedtls_x509_crt_free(&crt);
 			return fail();
 		}
 		mDict.addFrom(certInfo);	//	Store certInfo key/value pairs into client/server instance's params...
@@ -1831,16 +1844,22 @@ bool NTV2PluginLoader::validate (void)
 	ret = mbedtls_md_file (mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), pluginPath().c_str(), checksumFromDLL);
 	if (ret)
 	{	P_FAIL("'mbedtls_md_file' returned " << ret << " (" << mbedErrStr(ret) << ") for '" << pluginPath() << "'");
+		mbedtls_x509_crt_free(&crt);
 		return fail();
 	}
-	if (isVerbose())   {string str; if (checksumFromDLL.toHexString(str)) cout << "## DEBUG: Digest: " << str << endl;}
+	if (isVerbose())   {string s; if (checksumFromDLL.toHexString(s)) cout << "## DEBUG: checksumFromDLL: " << s << endl;}
+	if (isVerbose())   {string s; if (signature.toHexString(s)) cout << "## DEBUG2: signature: " << s << endl;}
 
 	//	Verify the dylib/DLL/so signature...
-	ret = mbedtls_pk_verify (&crt.pk, MBEDTLS_MD_SHA256,
-							/*msgHash*/checksumFromDLL, /*msgHashLength*/0,//checksumFromDLL,
-							/*signatureToVerify*/signature, /*signatureLength*/signature);
+	ret = mbedtls_pk_verify (&crt.pk,					//	PK context
+							MBEDTLS_MD_SHA256,			//	msg digest type (hash algorithm used)
+							checksumFromDLL,			//	Ptr to hash of signed msg
+							0,							//	Byte length of hash --- zero means "use length associated with msg digest type instead"
+							signature,					//	Ptr to signature being verified
+							signature.GetByteCount());	//	Length of signature being verified (in bytes)
 	if (ret)
 	{	P_FAIL("'mbedtls_pk_verify' returned " << ret << " (" << mbedErrStr(ret) << ") for '" << pluginSigPath() << "'");
+		mbedtls_x509_crt_free(&crt);
 		return fail();
 	}
 	mbedtls_x509_crt_free(&crt);	//	Done using the mbedtls_x509_crt struct
