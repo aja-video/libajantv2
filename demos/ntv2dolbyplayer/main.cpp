@@ -66,10 +66,7 @@ int main (int argc, const char ** argv)
 	if (showVersion)
 		{cout << argv[0] << ", NTV2 SDK " << ::NTV2Version() << endl;  return 0;}
 
-	const string deviceSpec		(pDeviceSpec ? pDeviceSpec : "0");
-	if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
-		return 1;
-
+	const string deviceSpec	(pDeviceSpec ? pDeviceSpec : "0");
 	DolbyPlayerConfig config(deviceSpec);
 
 	//	Channel
@@ -126,7 +123,7 @@ int main (int argc, const char ** argv)
 	if (doRamp  &&  pDolbyFile)
 		{cerr	<< "## ERROR:  conflicting options '--ramp' and '--dolby'" << endl;  return 1;}
 
-	//remaining options for this demo
+	//Remaining options for this demo
 	config.fSuppressAudio	= noAudio		? true	: false;
 	config.fSuppressVideo	= noVideo		? true	: false;
 	config.fDoMultiFormat	= doMultiFormat	? true	: false;	//	Multiformat mode?
@@ -134,33 +131,34 @@ int main (int argc, const char ** argv)
 	config.fDoHDMIOutput	= true;  
 	config.fDolbyFilePath = pDolbyFile  ?  pDolbyFile  :  "";
 
-	NTV2DolbyPlayer	player (config);
-	status = player.Init();
-	if (AJA_FAILURE(status))
-		{cout << "## ERROR:  Initialization failed: " << ::AJAStatusToString(status) << endl;	return 1;}
+	{	//	Instantiate and initialize the NTV2DolbyPlayer object...
+		NTV2DolbyPlayer	player (config);
+		status = player.Init();
+		if (AJA_FAILURE(status))
+			{cout << "## ERROR:  Initialization failed: " << ::AJAStatusToString(status) << endl;	return 1;}
 
-	::signal (SIGINT, SignalHandler);
-	#if defined (AJAMac)
-		::signal (SIGHUP, SignalHandler);
-		::signal (SIGQUIT, SignalHandler);
-	#endif
+		::signal (SIGINT, SignalHandler);
+		#if defined (AJAMac)
+			::signal (SIGHUP, SignalHandler);
+			::signal (SIGQUIT, SignalHandler);
+		#endif
 
-	//	Run the player...
-	player.Run();
+		//	Run the player...
+		player.Run();
 
-	cout	<< "  Playout  Playout   Frames" << endl
-			<< "   Frames   Buffer  Dropped" << endl;
-	do
-	{	//	Poll its status until stopped...
-		AUTOCIRCULATE_STATUS outputStatus;
-		player.GetACStatus(outputStatus);
-		cout	<< setw(9) << outputStatus.GetProcessedFrameCount()
-				<< setw(9) << outputStatus.GetDroppedFrameCount()
-				<< setw(9) << outputStatus.GetBufferLevel() << "\r" << flush;
-		AJATime::Sleep(2000);
-	} while (player.IsRunning() && !gGlobalQuit);	//	loop til done
-
-	cout << endl;
+		cout	<< "  Playout  Playout   Frames" << endl
+				<< "   Frames   Buffer  Dropped" << endl;
+		do
+		{	//	Poll its status until stopped...
+			AUTOCIRCULATE_STATUS outputStatus;
+			player.GetACStatus(outputStatus);
+			cout	<< setw(9) << outputStatus.GetProcessedFrameCount()
+					<< setw(9) << outputStatus.GetDroppedFrameCount()
+					<< setw(9) << outputStatus.GetBufferLevel() << "\r" << flush;
+			AJATime::Sleep(2000);
+		} while (player.IsRunning() && !gGlobalQuit);	//	loop til done
+		cout << endl;
+	}	//	NTV2DolbyPlayer scope
 	return 0;
  
 }	//	main

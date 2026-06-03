@@ -60,9 +60,6 @@ int main (int argc, const char ** argv)
 
 	//	Device
 	const string deviceSpec (pDeviceSpec ? pDeviceSpec : "0");
-	if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
-		return 1;
-
 	PlayerConfig config(deviceSpec);
 
 	//	Channel
@@ -117,34 +114,34 @@ int main (int argc, const char ** argv)
 	config.fDoMultiFormat		= doMultiFormat	? true	: false;			//	Multiformat mode?
 	config.fTransmitLTC			= false;
 
-	//	Instantiate and initialize the NTV2StreamPlayer object...
-	NTV2StreamPlayer player(config);
-	AJAStatus status = player.Init();
-	if (AJA_FAILURE(status))
-		{cout << "## ERROR:  Initialization failed: " << ::AJAStatusToString(status) << endl;	return 1;}
+	{	//	Instantiate and initialize the NTV2StreamPlayer object...
+		NTV2StreamPlayer player(config);
+		AJAStatus status = player.Init();
+		if (AJA_FAILURE(status))
+			{cout << "## ERROR:  Initialization failed: " << ::AJAStatusToString(status) << endl;	return 1;}
 
-	::signal (SIGINT, SignalHandler);
-	#if defined(AJAMac)
-		::signal (SIGHUP, SignalHandler);
-		::signal (SIGQUIT, SignalHandler);
-	#endif
+		::signal (SIGINT, SignalHandler);
+		#if defined(AJAMac)
+			::signal (SIGHUP, SignalHandler);
+			::signal (SIGQUIT, SignalHandler);
+		#endif
 
-	//	Run it...
-	player.Run();
+		//	Run it...
+		player.Run();
 
-	cout	<< "   Active   Repeat    Queue" << endl
-			<< "    Count    Count    Depth" << endl;
-	do
-	{	//	Poll its status until stopped...
-		NTV2StreamChannel strStatus;
-		player.GetStreamStatus(strStatus);
-		cout	<< setw(9) << strStatus.mActiveCount
-				<< setw(9) << strStatus.mRepeatCount
-				<< setw(9) << strStatus.GetQueueDepth() << "\r" << flush;
-		AJATime::Sleep(2000);
-	} while (player.IsRunning() && !gGlobalQuit);	//	loop til done
-
-	cout << endl;
+		cout	<< "   Active   Repeat    Queue" << endl
+				<< "    Count    Count    Depth" << endl;
+		do
+		{	//	Poll its status until stopped...
+			NTV2StreamChannel strStatus;
+			player.GetStreamStatus(strStatus);
+			cout	<< setw(9) << strStatus.mActiveCount
+					<< setw(9) << strStatus.mRepeatCount
+					<< setw(9) << strStatus.GetQueueDepth() << "\r" << flush;
+			AJATime::Sleep(2000);
+		} while (player.IsRunning() && !gGlobalQuit);	//	loop til done
+		cout << endl;
+	}	//	NTV2StreamPlayer scope
 	return 0;
 
 }	//	main

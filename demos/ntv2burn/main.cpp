@@ -75,9 +75,6 @@ int main (int argc, const char ** argv)
 
 	//	Device
 	const string deviceSpec (pDeviceSpec ? pDeviceSpec : "0");
-	if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
-		return 1;
-
 	BurnConfig config(deviceSpec);
 
 	//	Input source
@@ -153,41 +150,41 @@ int main (int argc, const char ** argv)
 	if (!config.fWithAnc  &&  config.fWithHanc)
 		{cerr	<< "## ERROR:  '--noanc' and '--hanc' are contradictory" << endl;  return 1;}
 
-	//	Instantiate the NTV2Burn object...
-	NTV2Burn burner (config);
+	{	//	Instantiate and initialize the NTV2Burn object...
+		NTV2Burn burner (config);
 
-	//	Initialize the NTV2Burn instance...
-	AJAStatus status (burner.Init());
-	if (AJA_FAILURE(status))
-		{cerr << "## ERROR:  Initialization failed, status=" << status << endl;  return 4;}
+		//	Initialize the NTV2Burn instance...
+		AJAStatus status (burner.Init());
+		if (AJA_FAILURE(status))
+			{cerr << "## ERROR:  Initialization failed, status=" << status << endl;  return 4;}
 
-	::signal (SIGINT, SignalHandler);
-	#if defined (AJAMac)
-		::signal (SIGHUP, SignalHandler);
-		::signal (SIGQUIT, SignalHandler);
-	#endif
+		::signal (SIGINT, SignalHandler);
+		#if defined (AJAMac)
+			::signal (SIGHUP, SignalHandler);
+			::signal (SIGQUIT, SignalHandler);
+		#endif
 
-	//	Start the burner's capture and playout threads...
-	burner.Run();
+		//	Start the burner's capture and playout threads...
+		burner.Run();
 
-	//	Loop until told to stop...
-	cout	<< "           Capture  Playout  Capture  Playout" << endl
-			<< "   Frames   Frames   Frames   Buffer   Buffer" << endl
-			<< "Processed  Dropped  Dropped    Level    Level" << endl;
-	do
-	{
-		AUTOCIRCULATE_STATUS inputStatus, outputStatus;
-		burner.GetStatus (inputStatus, outputStatus);
-		cout	<< setw(9) << inputStatus.GetProcessedFrameCount()
-				<< setw(9) << inputStatus.GetDroppedFrameCount()
-				<< setw(9) << outputStatus.GetDroppedFrameCount()
-				<< setw(9) << inputStatus.GetBufferLevel()
-				<< setw(9) << outputStatus.GetBufferLevel()
-				<< "\r" << flush;
-		AJATime::Sleep(2000);
-	} while (!gGlobalQuit);	//	loop until signaled
-
-	cout << endl;
+		//	Loop until told to stop...
+		cout	<< "           Capture  Playout  Capture  Playout" << endl
+				<< "   Frames   Frames   Frames   Buffer   Buffer" << endl
+				<< "Processed  Dropped  Dropped    Level    Level" << endl;
+		do
+		{
+			AUTOCIRCULATE_STATUS inputStatus, outputStatus;
+			burner.GetStatus (inputStatus, outputStatus);
+			cout	<< setw(9) << inputStatus.GetProcessedFrameCount()
+					<< setw(9) << inputStatus.GetDroppedFrameCount()
+					<< setw(9) << outputStatus.GetDroppedFrameCount()
+					<< setw(9) << inputStatus.GetBufferLevel()
+					<< setw(9) << outputStatus.GetBufferLevel()
+					<< "\r" << flush;
+			AJATime::Sleep(2000);
+		} while (!gGlobalQuit);	//	loop until signaled
+		cout << endl;
+	}	//	NTV2Burn scope
 	return 0;
 
 }	//	main

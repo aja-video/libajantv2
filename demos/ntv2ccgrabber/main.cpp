@@ -121,9 +121,6 @@ int main (int argc, const char ** argv)
 
 	//	Device
 	const string deviceSpec (pDeviceSpec ? pDeviceSpec : "0");
-	if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
-		return 1;
-
 	CCGrabberConfig	config(deviceSpec);
 
 	//	Channel
@@ -220,46 +217,48 @@ int main (int argc, const char ** argv)
 	config.fUseVanc			= useVanc		? true : false;
 	config.fWithAudio		= grabAudio		? true : false;
 
-	NTV2CCGrabber ccGrabber (config);
+	{	//	Instantiate and initialize the NTV2CCGrabber object...
+		NTV2CCGrabber ccGrabber (config);
 
-	//	Initialize the ccGrabber instance...
-	AJAStatus status (ccGrabber.Init());
-	if (AJA_FAILURE(status))
-		{cerr << "## ERROR:  'ntv2ccgrabber' initialization failed with status " << status << endl;	return 2;}
+		//	Initialize the ccGrabber instance...
+		AJAStatus status (ccGrabber.Init());
+		if (AJA_FAILURE(status))
+			{cerr << "## ERROR:  'ntv2ccgrabber' initialization failed with status " << status << endl;	return 2;}
 
-	::signal (SIGINT, SignalHandler);
-	#if defined (AJAMac)
-		::signal (SIGHUP, SignalHandler);
-		::signal (SIGQUIT, SignalHandler);
-	#endif
+		::signal (SIGINT, SignalHandler);
+		#if defined (AJAMac)
+			::signal (SIGHUP, SignalHandler);
+			::signal (SIGQUIT, SignalHandler);
+		#endif
 
-	//	Run the ccGrabber...
-	if (AJA_FAILURE(ccGrabber.Run()))
-		{cerr << "## ERROR:  'ntv2ccgrabber' capture thread failed to run -- check for AutoCirculate messages in AJALogger?" << endl; return 2;}
+		//	Run the ccGrabber...
+		if (AJA_FAILURE(ccGrabber.Run()))
+			{cerr << "## ERROR:  'ntv2ccgrabber' capture thread failed to run -- check for AutoCirculate messages in AJALogger?" << endl; return 2;}
 
-	//	Loop until someone tells us to stop...
-	while (!gGlobalQuit)
-	{
-		const char	keyPressed	(CNTV2DemoCommon::ReadCharacterPress());
-		if (keyPressed == 'q' || keyPressed == 'Q')
-			SignalHandler(SIGQUIT);
-		else if (keyPressed >= '1' && keyPressed <= '9')
-			ccGrabber.SetCaptionDisplayChannel(NTV2Line21Channel(keyPressed - '1'));
-		else if (keyPressed == '?')
-			cerr << endl << "## HELP:  1=CC1 2=CC2 3=CC3 4=CC4 5=Txt1 6=Txt2 7=Txt3 8=Txt4 Q=Quit H=HUD O=Output S=608Src P=PixFmt ?=Help" << endl;
-		else if (keyPressed == 'h' || keyPressed == 'H')
-			ccGrabber.ToggleHUD();
-		else if (keyPressed == 'v' || keyPressed == 'V')
-			ccGrabber.ToggleVANC();
-		else if (keyPressed == 'o' || keyPressed == 'O')
-			ccGrabber.SwitchOutput();
-		else if (keyPressed == 'p' || keyPressed == 'P')
-			ccGrabber.SwitchPixelFormat();
-		else if (keyPressed == 's' || keyPressed == 'S')
-			ccGrabber.Switch608Source();
-		AJATime::Sleep(500);
-	}
-	cerr << endl;
+		//	Loop until someone tells us to stop...
+		while (!gGlobalQuit)
+		{
+			const char	keyPressed	(CNTV2DemoCommon::ReadCharacterPress());
+			if (keyPressed == 'q' || keyPressed == 'Q')
+				SignalHandler(SIGQUIT);
+			else if (keyPressed >= '1' && keyPressed <= '9')
+				ccGrabber.SetCaptionDisplayChannel(NTV2Line21Channel(keyPressed - '1'));
+			else if (keyPressed == '?')
+				cerr << endl << "## HELP:  1=CC1 2=CC2 3=CC3 4=CC4 5=Txt1 6=Txt2 7=Txt3 8=Txt4 Q=Quit H=HUD O=Output S=608Src P=PixFmt ?=Help" << endl;
+			else if (keyPressed == 'h' || keyPressed == 'H')
+				ccGrabber.ToggleHUD();
+			else if (keyPressed == 'v' || keyPressed == 'V')
+				ccGrabber.ToggleVANC();
+			else if (keyPressed == 'o' || keyPressed == 'O')
+				ccGrabber.SwitchOutput();
+			else if (keyPressed == 'p' || keyPressed == 'P')
+				ccGrabber.SwitchPixelFormat();
+			else if (keyPressed == 's' || keyPressed == 'S')
+				ccGrabber.Switch608Source();
+			AJATime::Sleep(500);
+		}
+		cerr << endl;
+	}	//	NTV2CCGrabber scope
 	return 0;
 
 }	//	main

@@ -483,19 +483,20 @@ bool NTV2FrameData::SetCapturedFrameInfo (const AUTOCIRCULATE_TRANSFER & inXferI
 	return true;
 }
 
-
-bool CNTV2DemoCommon::IsValidDevice (const string & inDeviceSpec)
-{
-	CNTV2Card device;
-	const string deviceSpec	(inDeviceSpec.empty() ? "0" : inDeviceSpec);
-	if (! CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, device))
+#if !defined(NTV2_DEPRECATE_18_1)
+	bool CNTV2DemoCommon::IsValidDevice (const string & inDeviceSpec)
 	{
-		if (deviceSpec != "LIST" && deviceSpec != "list" && deviceSpec != "?")
-			cerr << "## ERROR: Failed to open device spec '" << deviceSpec << "'" << endl;
-		return false;
+		CNTV2Card device;
+		const string deviceSpec	(inDeviceSpec.empty() ? "0" : inDeviceSpec);
+		if (! CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, device))
+		{
+			if (deviceSpec != "LIST" && deviceSpec != "list" && deviceSpec != "?")
+				cerr << "## ERROR: Failed to open device spec '" << deviceSpec << "'" << endl;
+			return false;
+		}
+		return true;
 	}
-	return true;
-}
+#endif//!defined(NTV2_DEPRECATE_18_1)
 
 
 NTV2VideoFormatSet CNTV2DemoCommon::GetSupportedVideoFormats (const NTV2VideoFormatKinds inKinds)

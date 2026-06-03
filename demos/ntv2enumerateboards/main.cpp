@@ -80,13 +80,11 @@ int main (int argc, const char ** argv)
 	CNTV2Card device;
 	const string deviceSpec (pDeviceSpec ? pDeviceSpec : "");
 	if (!deviceSpec.empty())
-	{
-		if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
-			return 2;
-		else if (CNTV2DeviceScanner::GetFirstDeviceFromArgument(deviceSpec, device))
+	{	//	--device option:  show info only for the specified device
+		if (CNTV2DeviceScanner::GetFirstDeviceFromArgument(deviceSpec, device))
 			return ShowDeviceInfo(device);	//	Show info for a single device
-		else
-			{cerr << "## ERROR: Failed to open '" << deviceSpec << "'";  return 2;}
+		cerr << "## ERROR: Failed to open '" << deviceSpec << "'";
+		return 2;
 	}	//	if -d option used
 
 	cout << "AJA NTV2 SDK " << ::NTV2Version() << " supports devices:  " << ::NTV2GetSupportedDevices() << endl;

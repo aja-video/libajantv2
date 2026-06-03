@@ -48,11 +48,7 @@ int main (int argc, const char ** argv)
 	if (showVersion)
 		{cout << argv[0] << ", NTV2 SDK " << ::NTV2Version() << endl;  return 0;}
 
-	//	Device
 	const string deviceSpec (pDeviceSpec ? pDeviceSpec : "0");
-	if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
-		return 1;
-
 	TestPatConfig config(deviceSpec);
 	config.fDoMultiFormat	= doMultiFormat	? true	: false;	//	Multiformat mode?
 
@@ -121,20 +117,21 @@ int main (int argc, const char ** argv)
 		}
 	}
 
-	//	Create the object that will display the test pattern...
-	NTV2OutputTestPattern player(config);
-	AJAStatus status = player.Init();
-	if (AJA_FAILURE(status))
-		{cout << "## ERROR:  Initialization failed: " << ::AJAStatusToString(status) << endl;	return 1;}
+	{	//	Instantiate and initialize the NTV2OutputTestPattern object...
+		NTV2OutputTestPattern player(config);
+		AJAStatus status = player.Init();
+		if (AJA_FAILURE(status))
+			{cout << "## ERROR:  Initialization failed: " << ::AJAStatusToString(status) << endl;	return 1;}
 
-	//	Write the test pattern to the device and make it visible on the output...
-	status = player.EmitPattern();
-	if (AJA_FAILURE(status))
-		{cout << "## ERROR:  EmitPattern failed: " << ::AJAStatusToString(status) << endl;	return 2;}
+		//	Write the test pattern to the device and make it visible on the output...
+		status = player.EmitPattern();
+		if (AJA_FAILURE(status))
+			{cout << "## ERROR:  EmitPattern failed: " << ::AJAStatusToString(status) << endl;	return 2;}
 
-	//	Pause and wait for user to press Return or Enter...
-	cout << "## NOTE:  Press Enter or Return to exit..." << endl;
-	cin.get();
+		//	Pause and wait for user to press Return or Enter...
+		cout << "## NOTE:  Press Enter or Return to exit..." << endl;
+		cin.get();
+	}	//	NTV2OutputTestPattern scope
 
 	return 0;
 

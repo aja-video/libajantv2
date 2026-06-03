@@ -66,9 +66,6 @@ int main (int argc, const char ** argv)
 
 	//	Device
 	const string deviceSpec (pDeviceSpec ? pDeviceSpec : "0");
-	if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
-		return 1;
-
 	CaptureConfig config(deviceSpec);
 
 	//	Channel
@@ -129,32 +126,32 @@ int main (int argc, const char ** argv)
 	config.fWithAnc				= captureAnc ? true : false;			//	Capture anc?
 	config.fDoMultiFormat		= doMultiFormat ? true : false;			//	Multiformat mode?
 
-	//	Instantiate and initialize the NTV2Capture object...
-	NTV2Capture capturer(config);
-	AJAStatus status = capturer.Init();
-	if (AJA_FAILURE(status))
-		{cout << "## ERROR:  Initialization failed: " << ::AJAStatusToString(status) << endl;	return 1;}
+	{	//	Instantiate and initialize the NTV2Capture object...
+		NTV2Capture capturer(config);
+		AJAStatus status = capturer.Init();
+		if (AJA_FAILURE(status))
+			{cout << "## ERROR:  Initialization failed: " << ::AJAStatusToString(status) << endl;	return 1;}
 
-	::signal (SIGINT, SignalHandler);
-	#if defined(AJAMac)
-		::signal (SIGHUP, SignalHandler);
-		::signal (SIGQUIT, SignalHandler);
-	#endif
+		::signal (SIGINT, SignalHandler);
+		#if defined(AJAMac)
+			::signal (SIGHUP, SignalHandler);
+			::signal (SIGQUIT, SignalHandler);
+		#endif
 
-	//	Run it...
-	capturer.Run();
+		//	Run it...
+		capturer.Run();
 
-	cout	<< "   Frames   Frames   Buffer" << endl
-			<< " Captured  Dropped    Level" << endl;
-	do
-	{	//	Poll its status until stopped...
-		ULWord	framesProcessed, framesDropped, bufferLevel;
-		capturer.GetACStatus (framesProcessed, framesDropped, bufferLevel);
-		cout << setw(9) << framesProcessed << setw(9) << framesDropped << setw(9) << bufferLevel << "\r" << flush;
-		AJATime::Sleep(2000);
-	} while (!gGlobalQuit);	//	loop til done
-
-	cout << endl;
+		cout	<< "   Frames   Frames   Buffer" << endl
+				<< " Captured  Dropped    Level" << endl;
+		do
+		{	//	Poll its status until stopped...
+			ULWord	framesProcessed, framesDropped, bufferLevel;
+			capturer.GetACStatus (framesProcessed, framesDropped, bufferLevel);
+			cout << setw(9) << framesProcessed << setw(9) << framesDropped << setw(9) << bufferLevel << "\r" << flush;
+			AJATime::Sleep(2000);
+		} while (!gGlobalQuit);	//	loop til done
+		cout << endl;
+	}	//	NTV2Capture scope
 	return 0;
 
 }	//	main

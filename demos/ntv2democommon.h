@@ -487,17 +487,6 @@ class AJAExport CNTV2DemoCommon
 {
 	public:
 	/**
-		@name	Device Functions
-	**/
-	///@{
-		/**
-			@param[in]	inDeviceSpec	A string containing a decimal index number, device serial number, or a device model name.
-			@return		True if the specified device exists and can be opened.
-		**/
-		static bool							IsValidDevice (const std::string & inDeviceSpec);
-	///@}
-
-	/**
 		@name	Video Format Functions
 	**/
 	///@{
@@ -878,6 +867,7 @@ class AJAExport CNTV2DemoCommon
 	};
 
 	static bool	BFT(void);
+	static bool	NTV2_DEPRECATED_18_1(IsValidDevice (const std::string & spec));	///< @deprecated	No longer necessary
 
 };	//	CNTV2DemoCommon
 

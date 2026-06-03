@@ -59,17 +59,10 @@ int main (int argc, const char ** argv)
 	if (showVersion)
 		{cout << argv[0] << ", NTV2 SDK " << ::NTV2Version() << endl;  return 0;}
 
-	//	Device
-	const string deviceSpec (pDeviceSpec ? pDeviceSpec : "0");
-	if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
-		return 1;
-
-	BurnConfig config (deviceSpec);
-
 	//	Devices
+	const string deviceSpec (pDeviceSpec ? pDeviceSpec : "0");
+	BurnConfig config (deviceSpec);
 	config.fDeviceSpec2 = pOutDevSpec ? pOutDevSpec : "1";
-	if (!CNTV2DemoCommon::IsValidDevice(config.fDeviceSpec2))
-		{cout << "## ERROR:  No such output device '" << config.fDeviceSpec2 << "'" << endl;  return 1;}
 
 	//	Pixel Format
 	const string pixelFormatStr (pPixelFormat  ?  pPixelFormat  :  "");
@@ -96,41 +89,41 @@ int main (int argc, const char ** argv)
 	config.fInputFrames.setCountOnly(5);
 	config.fOutputFrames.setCountOnly(5);
 
-	//	Instantiate the NTV2Burn4KQuadrant object...
-	NTV2Burn4KQuadrant burner (config);
+	{	//	Instantiate and initialize the NTV2Burn4KQuadrant object...
+		NTV2Burn4KQuadrant burner (config);
 
-	::signal (SIGINT, SignalHandler);
-	#if defined (AJAMac)
-		::signal (SIGHUP, SignalHandler);
-		::signal (SIGQUIT, SignalHandler);
-	#endif
+		::signal (SIGINT, SignalHandler);
+		#if defined (AJAMac)
+			::signal (SIGHUP, SignalHandler);
+			::signal (SIGQUIT, SignalHandler);
+		#endif
 
-	//	Initialize the NTV2Burn4KQuadrant instance...
-	AJAStatus status (burner.Init());
-	if (AJA_FAILURE(status))
-		{cerr << "## ERROR:  Initialization failed, status=" << status << endl;  return 4;}
+		//	Initialize the NTV2Burn4KQuadrant instance...
+		AJAStatus status (burner.Init());
+		if (AJA_FAILURE(status))
+			{cerr << "## ERROR:  Initialization failed, status=" << status << endl;  return 4;}
 
-	//	Start the burner's capture and playout threads...
-	burner.Run();
+		//	Start the burner's capture and playout threads...
+		burner.Run();
 
-	//	Loop until someone tells us to stop...
-	cout	<< "           Capture  Playout  Capture  Playout" << endl
-			<< "   Frames   Frames   Frames   Buffer   Buffer" << endl
-			<< "Processed  Dropped  Dropped    Level    Level" << endl;
-	do
-	{
-		AUTOCIRCULATE_STATUS inputStatus, outputStatus;
-		burner.GetACStatus (inputStatus, outputStatus);
-		cout	<< setw(9) << inputStatus.acFramesProcessed
-				<< setw(9) << inputStatus.acFramesDropped
-				<< setw(9) << outputStatus.acFramesDropped
-				<< setw(9) << inputStatus.acBufferLevel
-				<< setw(9) << outputStatus.acBufferLevel
-				<< "\r" << flush;
-		AJATime::Sleep(1000);
-	} while (!gGlobalQuit);	//	loop until signaled
-
-	cout << endl;
+		//	Loop until someone tells us to stop...
+		cout	<< "           Capture  Playout  Capture  Playout" << endl
+				<< "   Frames   Frames   Frames   Buffer   Buffer" << endl
+				<< "Processed  Dropped  Dropped    Level    Level" << endl;
+		do
+		{
+			AUTOCIRCULATE_STATUS inputStatus, outputStatus;
+			burner.GetACStatus (inputStatus, outputStatus);
+			cout	<< setw(9) << inputStatus.acFramesProcessed
+					<< setw(9) << inputStatus.acFramesDropped
+					<< setw(9) << outputStatus.acFramesDropped
+					<< setw(9) << inputStatus.acBufferLevel
+					<< setw(9) << outputStatus.acBufferLevel
+					<< "\r" << flush;
+			AJATime::Sleep(1000);
+		} while (!gGlobalQuit);	//	loop until signaled
+		cout << endl;
+	}	//	NTV2Burn4KQuadrant scope
 	return 0;
 
 }	//	main

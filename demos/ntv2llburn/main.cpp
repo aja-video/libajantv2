@@ -72,9 +72,6 @@ int main (int argc, const char ** argv)
 
 	//	Device
 	const string deviceSpec (pDeviceSpec ? pDeviceSpec : "0");
-	if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
-		return 1;
-
 	BurnConfig config(deviceSpec);
 
 	//	Input source
@@ -112,37 +109,37 @@ int main (int argc, const char ** argv)
 	config.fWithAnc			= doAnc   ? true  : false;
 	config.fWithHanc		= doHanc  ? true  : false;
 
-	//	Instantiate the NTV2LLBurn object...
-	NTV2LLBurn burner (config);
+	{	//	Instantiate and initialize the NTV2LLBurn object...
+		NTV2LLBurn burner (config);
 
-	::signal (SIGINT, SignalHandler);
-	#if defined (AJAMac)
-		::signal (SIGHUP, SignalHandler);
-		::signal (SIGQUIT, SignalHandler);
-	#endif
+		::signal (SIGINT, SignalHandler);
+		#if defined (AJAMac)
+			::signal (SIGHUP, SignalHandler);
+			::signal (SIGQUIT, SignalHandler);
+		#endif
 
-	//	Initialize the NTV2LLBurn instance...
-	AJAStatus status (burner.Init());
-	if (AJA_FAILURE (status))
-		{cerr << "## ERROR:  Initialization failed, status=" << status << endl;  return 4;}
+		//	Initialize the NTV2LLBurn instance...
+		AJAStatus status (burner.Init());
+		if (AJA_FAILURE (status))
+			{cerr << "## ERROR:  Initialization failed, status=" << status << endl;  return 4;}
 
-	//	Start the burner's capture and playout threads...
-	burner.Run();
+		//	Start the burner's capture and playout threads...
+		burner.Run();
 
-	//	Loop until told to stop...
-	cout	<< "   Frames   Frames" << endl
-			<< "Processed  Dropped" << endl;
-	do
-	{
-		ULWord	framesProcessed, framesDropped;
-		burner.GetStatus (framesProcessed, framesDropped);
-		cout	<< setw(9) << framesProcessed
-				<< setw(9) << framesDropped
-				<< "\r" << flush;
-		AJATime::Sleep(2000);
-	} while (!gGlobalQuit);	//	loop until signaled
-
-	cout << endl;
+		//	Loop until told to stop...
+		cout	<< "   Frames   Frames" << endl
+				<< "Processed  Dropped" << endl;
+		do
+		{
+			ULWord	framesProcessed, framesDropped;
+			burner.GetStatus (framesProcessed, framesDropped);
+			cout	<< setw(9) << framesProcessed
+					<< setw(9) << framesDropped
+					<< "\r" << flush;
+			AJATime::Sleep(2000);
+		} while (!gGlobalQuit);	//	loop until signaled
+		cout << endl;
+	}	//	NTV2LLBurn scope
 	return 0;
 
 }	//	main
