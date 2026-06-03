@@ -1585,18 +1585,22 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	Bouncer<UWord>				colBouncer			(32 - 11 /*upperLimit*/, 0 /*lowerLimit*/, 0 /*startAt*/);
 	NTV2Buffer					audioBuffer;
 	AUTOCIRCULATE_TRANSFER		xferInfo;
-#if defined(NTV2_ANC_TEST)														//	Test
-	ULWord ANCKB (2);	//	2 (default, works),  64 fails, 63 works				//	Test
-	if (NTV2_IS_VANCMODE_OFF(mConfig.fVancMode))								//	Test
-	{																			//	Test
+	ULWord ANCKB (2);	//	2 (default)
+	if (NTV2_IS_VANCMODE_OFF(mConfig.fVancMode))
+	{
+#if defined(NTV2_ANC_TEST)
 		mDevice.WriteRegister(kVRegCCPlayerBufSizeKB, ANCKB);					//	Test
 		PLINFO("Anc buffer size is " << DEC(ANCKB) << "K");						//	Test
 		xferInfo.acANCBuffer.Allocate(ANCKB*1024);								//	Test
 		if (isInterlaced)														//	Test
 			xferInfo.acANCField2Buffer.Allocate(ANCKB*1024);					//	Test
 		mDevice.WriteRegister(kVRegCCPlayerCustomPkt, 0);						//	Test
-	}																			//	Test
-#endif	//	defined(NTV2_ANC_TEST)												//	Test
+#else
+		xferInfo.acANCBuffer.Allocate(ANCKB*1024);
+		if (isInterlaced)
+			xferInfo.acANCField2Buffer.Allocate(ANCKB*1024);
+#endif	//	defined(NTV2_ANC_TEST)
+	}	//	if VANC mode is OFF
 	if (!mConfig.fSuppressAudio)
 	{
 		//	Audio setup...
