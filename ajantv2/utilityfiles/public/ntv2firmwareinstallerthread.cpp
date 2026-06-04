@@ -306,14 +306,27 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 		}
 		else
 		{
-			//	ProgramMainFlash used to be able to throw (because XilinxBitfile could throw), but with 12.1 SDK, this is no longer the case.
-			m_updateSuccessful = m_device.ProgramMainFlash (m_bitfilePath.c_str(), m_forceUpdate, !m_verbose);
-			if (!m_updateSuccessful)
-				FITNOTE("CNTV2FirmwareInstallerThread:  'ProgramMainFlash' failed" << endl
-						<< "	 bitfile: " << m_bitfilePath << endl
-						<< "	  device: " << m_device.GetDescription() << ", S/N " << serialNumStr << endl
-						<< "   serialNum: " << serialNumStr << endl
-						<< "	firmware: " << newFirmwareDescription);
+			CNTV2KonaFlashProgram flasher(m_device);
+			if (!m_verbose)
+				flasher.SetQuietMode();
+			ostringstream msgs;
+			m_updateSuccessful = flasher.SetBitFile(m_bitfilePath, msgs, MAIN_FLASHBLOCK);
+			if (m_updateSuccessful)
+			{
+				string progResults (flasher.Program(false));
+				m_updateSuccessful = progResults.empty();
+				if (!m_updateSuccessful)
+					FITERR(progResults);
+			}
+			else
+				FITERR(msgs.str());
+//			m_updateSuccessful = m_device.ProgramMainFlash (m_bitfilePath.c_str(), m_forceUpdate, !m_verbose);
+//			if (!m_updateSuccessful)
+//				FITNOTE("CNTV2FirmwareInstallerThread:  'ProgramMainFlash' failed" << endl
+//						<< "	 bitfile: " << m_bitfilePath << endl
+//						<< "	  device: " << m_device.GetDescription() << ", S/N " << serialNumStr << endl
+//						<< "   serialNum: " << serialNumStr << endl
+//						<< "	firmware: " << newFirmwareDescription);
 		}
 	}	//	if real update
 	else
