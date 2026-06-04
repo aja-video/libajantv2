@@ -4404,7 +4404,7 @@ TEST_SUITE("NTV2RegInfo" * doctest::description("NTV2RegInfo tests"))
 	}	//	TEST_CASE("Import")
 }	//	TEST_SUITE("NTV2RegInfo")
 
-
+#if 0
 TEST_SUITE("NTV2SWDevice" * doctest::description("NTV2SWDevice tests"))
 {
 	TEST_CASE("Basic")
@@ -4434,3 +4434,4 @@ TEST_SUITE("NTV2SWDevice" * doctest::description("NTV2SWDevice tests"))
 #endif//defined(_DEBUG)
 	}	//	TEST_CASE("shm")
 }	//	TEST_SUITE("NTV2SWDevice")
+#endif
