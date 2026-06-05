@@ -6323,7 +6323,7 @@ typedef enum
 				/**
 					@return		My size, in bytes.
 				**/
-				inline size_t	GetByteCount (void) const				{return size_t(fByteCount);}
+				inline ULWord	GetByteCount (void) const				{return fByteCount;}
 
 				/**
 					@return		True if my host storage was allocated by my Allocate function;	otherwise false if my host storage
