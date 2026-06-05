@@ -40,6 +40,12 @@ using namespace std;
 #define ARINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_AcquireRelease, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 #define ARDBG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_AcquireRelease, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 
+#define RPFAIL(__x__)		AJA_sERROR	(AJA_DebugUnit_RPCClient, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define RPWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_RPCClient, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define RPNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_RPCClient, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define RPINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_RPCClient, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define RPDBG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_RPCClient, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+
 #if defined(AJA_LINUX)
 	#define KVRegAcquireRefCount	kVRegAcquireLinuxReferenceCount
 #else
@@ -309,9 +315,9 @@ bool CNTV2DriverInterface::OpenRemote (const NTV2DeviceSpecParser & inParser)
 
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (inParser.Failed())
-		{ostringstream errs; inParser.PrintErrors(errs); DIFAIL("Bad parser: " << errs.str());  return false;}
+		{ostringstream errs; inParser.PrintErrors(errs); RPFAIL("Bad parser: " << errs.str());  return false;}
 	if (inParser.IsLocalDevice())
-		{DIFAIL("Parser infers local device: " << inParser.InfoString());  return false;}
+		{RPFAIL("Parser infers local device: " << inParser.InfoString());  return false;}
 
 	NTV2Dictionary connectParams(inParser.Results());
 	//	This "connectParams" dictionary has keys/values that determine which plugin to load,
@@ -320,19 +326,19 @@ bool CNTV2DriverInterface::OpenRemote (const NTV2DeviceSpecParser & inParser)
 	//	interrogates and validates the plugin.  Several new keys/values are added to it during
 	//	this process that describe the plugin, its signature, and any query parameters it
 	//	requires or accepts for further configuration.
-	DIDBG("Opening " << inParser.InfoString());
+	RPDBG("Opening " << inParser.InfoString());
 	NTV2RPCAPI * pClient (nullptr);
 	try {
 		pClient = NTV2RPCClientAPI::CreateClient(connectParams);
 	} catch (std::bad_alloc &) {
 		pClient = nullptr;
-		DIFAIL("bad_alloc exception");
+		RPFAIL("bad_alloc exception");
 	} catch (...) {
 		pClient = nullptr;
-		DIFAIL("exception");
+		RPFAIL("exception");
 	}
 	if (!pClient)
-		return false;	//	Failed to instantiate plugin client
+		{RPFAIL("Failed to instantiate plugin client: " << inParser.InfoString());  return false;}
 
 	//	At this point, the plugin's NTV2RPCAPI object exists, but may or may not be useable,
 	//	depending on if it's "IsConnected". Before SDK 17.1, the plugin's NTV2Connect function
@@ -341,7 +347,7 @@ bool CNTV2DriverInterface::OpenRemote (const NTV2DeviceSpecParser & inParser)
 	//	plugin in stages via its client interface.
 	if (!pClient->IsConnected())
 		if (!pClient->NTV2Connect())
-		{	DIFAIL("Failed to connect/open '" << inParser.DeviceSpec() << "'");
+		{	RPFAIL("Failed to connect/open '" << inParser.DeviceSpec() << "'");
 			delete pClient;
 			CloseRemote();
 			return false;
@@ -354,7 +360,7 @@ bool CNTV2DriverInterface::OpenRemote (const NTV2DeviceSpecParser & inParser)
 	_pRPCAPI = pClient;
 	_boardOpened = ReadRegister(kRegBoardID, _boardID)  &&  _boardID  &&  _boardID != DEVICE_ID_NOTFOUND;
 	if (!IsRemote() || !IsOpen())
-		DIFAIL("Failed to open '" << inParser.DeviceSpec() << "'");
+		RPFAIL("Failed to open '" << inParser.DeviceSpec() << "'");
 	return IsRemote() && IsOpen();	//	Fail if not remote nor open
 #else	//	NTV2_NUB_CLIENT_SUPPORT
 	DIFAIL("SDK built without 'NTV2_NUB_CLIENT_SUPPORT' -- cannot OpenRemote '" << inParser.DeviceSpec() << "'");
@@ -1118,15 +1124,15 @@ bool CNTV2DriverInterface::AcquireStreamForApplicationWithReference (const ULWor
 	uint32_t curAppCode(0), curAppPID(0), curTaskMode(0);
 	ReadRegister(kVRegApplicationCode, curAppCode) || ReadRegister(kVRegApplicationPID, curAppPID) || ReadRegister(kVRegEveryFrameTaskFilter, curTaskMode);
 
-	//	Check if current owner is deceased
-	if (curAppPID && !AJAProcess::IsValid(curAppPID))
+	//	Check if owner is deceased
+	if (curAppPID  &&  !AJAProcess::IsValid(curAppPID))
 	{
 		//	Process doesn't exist, so release it
 		ARINFO("Streaming app PID " << DEC(curAppPID) << " deceased, will release");
 		ReleaseStreamForApplication (curAppCode, int32_t(curAppPID));	//	ignore result, AJAAgent may have already done this
+		//	Re-sample current appCode, appPID, taskMode...
+		ReadRegister(kVRegApplicationCode, curAppCode) || ReadRegister(kVRegApplicationPID, curAppPID) || ReadRegister(kVRegEveryFrameTaskFilter, curTaskMode);
 	}
-	//	Re-sample current appCode & appPID...
-	ReadRegister(kVRegApplicationCode, curAppCode) || ReadRegister(kVRegApplicationPID, curAppPID);
 	bool result(false);
 	int count(0);
 
@@ -1207,7 +1213,7 @@ bool CNTV2DriverInterface::AcquireStreamForApplication (const ULWord inAppCode, 
 		ReadRegister(kVRegApplicationCode, currentCode) || ReadRegister(kVRegApplicationPID, curAppPID);
 
 		//	Check if owner is deceased
-		if (!AJAProcess::IsValid(curAppPID))
+		if (curAppPID  &&  !AJAProcess::IsValid(curAppPID))
 		{	// Process doesn't exist, so make the board our own
 			ARINFO("Streaming app PID " << DEC(curAppPID) << " deceased, will release");
 			ReleaseStreamForApplication (currentCode, int32_t(curAppPID));	//	ignore result, AJAAgent may have already done this
