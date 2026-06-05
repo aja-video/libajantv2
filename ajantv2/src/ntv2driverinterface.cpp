@@ -1118,10 +1118,10 @@ bool CNTV2DriverInterface::AcquireStreamForApplicationWithReference (const ULWor
 	uint32_t curAppCode(0), curAppPID(0), curTaskMode(0);
 	ReadRegister(kVRegApplicationCode, curAppCode) || ReadRegister(kVRegApplicationPID, curAppPID) || ReadRegister(kVRegEveryFrameTaskFilter, curTaskMode);
 
-	// Check if owner is deceased
-	if (!AJAProcess::IsValid(curAppPID))
+	//	Check if current owner is deceased
+	if (curAppPID && !AJAProcess::IsValid(curAppPID))
 	{
-		// Process doesn't exist, so release it
+		//	Process doesn't exist, so release it
 		ARINFO("Streaming app PID " << DEC(curAppPID) << " deceased, will release");
 		ReleaseStreamForApplication (curAppCode, int32_t(curAppPID));	//	ignore result, AJAAgent may have already done this
 	}
