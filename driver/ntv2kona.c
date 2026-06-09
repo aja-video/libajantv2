@@ -197,9 +197,7 @@ bool StartDriverProcesses(Ntv2DriverProcessContext* inProcessContext)
 			}
 		}
 	
-		if ((deviceID == DEVICE_ID_KONAXM)	||
-			(deviceID == DEVICE_ID_KONAX)   ||
-			(deviceID == DEVICE_ID_KONAX_4CH))
+		if (DEVICE_IS_KONAX(deviceID))
 		{
 			ntv2Message("Starting Genlock v2\n");
 			inProcessContext->pGenlock2Monitor = ntv2_genlock2_open(pSystemContext, "ntv2genlock2", 0);
@@ -222,9 +220,7 @@ bool StartDriverProcesses(Ntv2DriverProcessContext* inProcessContext)
 	#endif
 	
 	#ifdef AJA_RASTERIZER
-        if ((deviceID == DEVICE_ID_KONAXM)	||
-            (deviceID == DEVICE_ID_KONAX)   ||
-            (deviceID == DEVICE_ID_KONAX_4CH) ||
+        if (DEVICE_IS_KONAX(deviceID) ||
             (deviceID == DEVICE_ID_KONAIP_25G))
 		{
 			ntv2Message("Starting Raster Monitor\n");
@@ -318,7 +314,7 @@ bool StartDriverProcesses(Ntv2DriverProcessContext* inProcessContext)
 					{
 						status = ntv2_hdmiin4_configure(inProcessContext->pHDMIIn4Monitor[0], ntv2_edid_type_konahdmi_20, 0);
 					}
-					else if (deviceID == DEVICE_ID_KONAX || deviceID == DEVICE_ID_KONAXM || deviceID == DEVICE_ID_KONAX_4CH)
+					else if (DEVICE_IS_KONAX(deviceID))
 					{
 						status = ntv2_hdmiin4_configure(inProcessContext->pHDMIIn4Monitor[0], ntv2_edid_type_konax, 0);
 					}

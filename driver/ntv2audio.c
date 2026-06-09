@@ -816,6 +816,7 @@ bool SupportStackedAudio(Ntv2SystemContext* context)
         case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
         case DEVICE_ID_KONAIP_4CH_2SFP:
         case DEVICE_ID_KONAX:
+        case DEVICE_ID_KONAX_4CH:
         case DEVICE_ID_KONAXM:
         case DEVICE_ID_SOFTWARE:
         case DEVICE_ID_SOJI_3DLUT:
