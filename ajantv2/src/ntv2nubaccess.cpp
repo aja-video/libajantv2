@@ -1148,7 +1148,15 @@ bool NTV2Plugin::LoadPlugin (const string & path, const string & folderPath, NTV
 		}	//	AddDllDirectory failed
 		HMODULE h = ::LoadLibraryExA(LPCSTR(path.c_str()), AJA_NULL, LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
 		if (!h)
-			loadErr << "Unable to open '" << path << "': " << WinErrStr(::GetLastError());
+		{
+			const string errStr (::WinErrStr(::GetLastError()));
+			if (!errStr.empty())
+				loadErr << errStr;
+		#if defined(_DEBUG)
+			if (!errStr.empty())
+				cerr << "## ERROR: LoadPlugin failed to open '" << path << "':" << endl << errStr << endl;
+		#endif
+		}
 	#else	//	MacOS or Linux
 		//	Open the .dylib (MacOS) or .so (Linux)...
 		void * h = ::dlopen(path.c_str(), RTLD_LAZY);
@@ -1156,7 +1164,12 @@ bool NTV2Plugin::LoadPlugin (const string & path, const string & folderPath, NTV
 		{
 			const char * pErrorStr(::dlerror());
 			const string errStr (pErrorStr ? pErrorStr : "");
-			loadErr << "Unable to open '" << path << "': " << errStr;
+			if (!errStr.empty())
+				loadErr << errStr;
+		#if defined(_DEBUG)
+			if (!errStr.empty())
+				cerr << "## ERROR: LoadPlugin failed to open '" << path << "':" << endl << loadErr.str() << endl;
+		#endif
 		}	//	dlopen failed
 	#endif	//	MacOS or Linux
 	if (!loadErr.str().empty())
