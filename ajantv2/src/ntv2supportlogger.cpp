@@ -557,6 +557,7 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 	AJASystemInfo::append(infoTable, "HOST INFO");
 	hostInfo.GetLabelValuePairs(infoTable, false);
 
+#if 1	//	** BEGIN **		** FUTURE **	REPLACE THIS SECTION WITH CALL TO NEW STATIC FUNCTION IN libajaretail
 	// append the health status of the persistence database files
 	std::vector<std::pair<std::string, bool> > persistenceChecks;
 	persistenceChecks.push_back(std::pair<std::string, bool>("User Persistence Health", false));
@@ -581,6 +582,7 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 				AJASystemInfo::append(infoTable, label, std::string("err(") + aja::to_string(errCode) + ") '" + errMessage + "'");
 		}
 	}
+#endif	//	** END **		** FUTURE **	REPLACE THIS SECTION WITH CALL TO NEW STATIC FUNCTION IN libajaretail
 
 	oss << AJASystemInfo::ToString(infoTable) << endl;
 

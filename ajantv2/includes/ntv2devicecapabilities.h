@@ -134,14 +134,9 @@ class AJAExport DeviceCapabilities
 		inline bool		HasSDIRelays (void)						{return dev.IsSupported(kDeviceHasSDIRelays);}									///< @returns	True if device has bypass relays on its SDI connectors
 		inline bool		HasSPIFlash (void)						{return dev.IsSupported(kDeviceHasSPIFlash);}									///< @returns	True if device has SPI flash hardware
 		inline bool		HasSPIFlashSerial (void)				{return dev.IsSupported(kDeviceHasSPIFlashSerial);}								///< @returns	True if device has serial SPI flash hardware
-		inline bool		HasSPIv2 (void)							{return dev.IsSupported(kDeviceHasSPIv2);}										///< @deprecated	Use DeviceCapabilities::GetSPIFlashVersion instead
-		inline bool		HasSPIv3 (void)							{return dev.IsSupported(kDeviceHasSPIv3);}										///< @deprecated	Use DeviceCapabilities::GetSPIFlashVersion instead
-		inline bool		HasSPIv4 (void)							{return dev.IsSupported(kDeviceHasSPIv4);}										///< @deprecated	Use DeviceCapabilities::GetSPIFlashVersion instead
-		inline bool		HasSPIv5 (void)							{return dev.IsSupported(kDeviceHasSPIv5);}										///< @deprecated	Use DeviceCapabilities::GetSPIFlashVersion instead
 		inline bool		HasXilinxDMA (void)						{return dev.IsSupported(kDeviceHasXilinxDMA);}									///< @returns	True if device has Xilinx DMA hardware and/or firmware
 		inline bool		Is64Bit (void)							{return dev.IsSupported(kDeviceIs64Bit);}										///< @returns	True if device is 64-bit addressable
 		inline bool		IsDirectAddressable (void)				{return dev.IsSupported(kDeviceIsDirectAddressable);}							///< @returns	True if device is direct addressable
-		inline bool		IsDNxIV (void)							{return dev.IsSupported(kDeviceHasMicrophoneInput);}							///< @deprecated	Use DeviceCapabilities::HasMicInput instead
 		inline bool		IsExternalToHost (void)					{return dev.IsSupported(kDeviceIsExternalToHost);}								///< @returns	True if device connects to the host via a cable
 		inline bool		IsLocalPhysical (void)					{return dev.IsSupported(kDeviceIsLocalPhysical);}								///< @returns	True if device is local-host-attached, not remote, software or virtual
 		inline bool		IsSupported (void)						{return dev.IsSupported(kDeviceIsSupported);}									///< @returns	True if device is supported by this SDK
@@ -194,7 +189,6 @@ class AJAExport DeviceCapabilities
 		inline UWord	GetNumSerialPorts (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumSerialPorts));}					///< @returns	The number of RS-422 serial port connectors on the device
 		inline UWord	GetNumTSIMuxers (void)					{return UWord(dev.GetNumSupported(kDeviceGetNumTSIMuxers));}					///< @returns	The number of TSI Mux/Demux widgets on the device
 		inline UWord	GetNumUpConverters (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumUpConverters));}					///< @returns	The number of up-converters on the device
-		inline ULWord	GetNumVideoChannels (void)				{return dev.GetNumSupported(kDeviceGetNumVideoChannels);}						///< @deprecated	Use DeviceCapabilities::GetNumFrameStores instead
 		inline UWord	GetNumVideoInputs (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumVideoInputs));}					///< @returns	The number of SDI video inputs on the device
 		inline UWord	GetNumVideoOutputs (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumVideoOutputs));}					///< @returns	The number of SDI video outputs on the device
 		inline ULWord	GetPingLED (void)						{return dev.GetNumSupported(kDeviceGetPingLED);}								///< @returns	The highest bit number of the LED bits in the Global Control Register on the device
@@ -363,6 +357,14 @@ class AJAExport DeviceCapabilities
 						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_AudioRate));
 							return itms.find(ULWord(inRate)) != itms.end();
 						}
+
+		//	Deprecated Functions
+		inline NTV2_DEPRECATED_18_1(bool HasSPIv2(void))	{return dev.IsSupported(kDeviceHasSPIv2);}	///< @deprecated	Use DeviceCapabilities::GetSPIFlashVersion instead
+		inline NTV2_DEPRECATED_18_1(bool HasSPIv3(void))	{return dev.IsSupported(kDeviceHasSPIv3);}	///< @deprecated	Use DeviceCapabilities::GetSPIFlashVersion instead
+		inline NTV2_DEPRECATED_18_1(bool HasSPIv4(void))	{return dev.IsSupported(kDeviceHasSPIv4);}	///< @deprecated	Use DeviceCapabilities::GetSPIFlashVersion instead
+		inline NTV2_DEPRECATED_18_1(bool HasSPIv5(void))	{return dev.IsSupported(kDeviceHasSPIv5);}	///< @deprecated	Use DeviceCapabilities::GetSPIFlashVersion instead
+		inline NTV2_DEPRECATED_18_1(bool IsDNxIV(void))		{return dev.IsSupported(kDeviceHasMicrophoneInput);}	///< @deprecated	Use DeviceCapabilities::HasMicInput instead
+		inline NTV2_DEPRECATED_18_1(ULWord GetNumVideoChannels(void))	{return dev.GetNumSupported(kDeviceGetNumVideoChannels);}	///< @deprecated	Use DeviceCapabilities::GetNumFrameStores instead
 	private:
 		CNTV2DriverInterface &	dev;	///< @brief	My reference to the NTV2 device
 };	//	DeviceCapabilities

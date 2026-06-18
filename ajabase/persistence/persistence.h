@@ -2,6 +2,7 @@
 /**
 	@file		persistence/persistence.h
 	@brief		Declares the AJAPersistence class.
+	@deprecated	This module will be removed from a future SDK.
 	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
@@ -14,8 +15,9 @@
 
 
 	/**
-	 * Persistence data types.
-	 */
+		@brief		Persistence data types.
+		@deprecated	This enum will be removed from a future SDK.
+	**/
 	enum AJAPersistenceType
 	{
 		AJAPersistenceTypeInt,		
@@ -30,40 +32,40 @@
 
 
 	/**
-	 * Class used to talk to the board in such a way as to maintain a persistant state 
-	 * across apps and reboots.
-	 */
+		@brief		Class that talks to a device in such a way as to maintain a persistant state across apps & reboots.
+		@deprecated	This class will be removed from a future SDK.
+	**/
 	class AJAPersistence
 	{
 		public: 
-			AJAPersistence();
-			AJAPersistence(const std::string& appID, const std::string& deviceType="", const std::string& deviceNumber="", bool bSharePrefFile=false);
-			virtual ~AJAPersistence();
+			NTV2_DEPRECATED_f(AJAPersistence());
+			NTV2_DEPRECATED_f(AJAPersistence(const std::string& appID, const std::string& deviceType="", const std::string& deviceNumber="", bool bSharePrefFile=false));
+			virtual			~AJAPersistence();
 
-			void SetParams(const std::string& appID="", const std::string& deviceType="", const std::string& deviceNumber="", bool bSharePrefFile=false);
-			void GetParams(std::string& appID, std::string& deviceType, std::string& deviceNumber, bool& bSharePrefFile);
+			NTV2_DEPRECATED_f(void SetParams(const std::string& appID="", const std::string& deviceType="", const std::string& deviceNumber="", bool bSharePrefFile=false));
+			NTV2_DEPRECATED_f(void GetParams(std::string& appID, std::string& deviceType, std::string& deviceNumber, bool& bSharePrefFile));
 
-			bool SetValue(const std::string& key, const void *value, AJAPersistenceType type, size_t blobBytes = 0);
-			bool GetValue(const std::string& key, void *value, AJAPersistenceType type, size_t blobBytes = 0);
-			bool FileExists();
-			bool ClearPrefFile();
-			bool DeletePrefFile(bool makeBackup = false);
-			bool StorageHealthCheck(int& errCode, std::string& errMessage);
+			NTV2_DEPRECATED_f(bool SetValue(const std::string& key, const void *value, AJAPersistenceType type, size_t blobBytes = 0));
+			NTV2_DEPRECATED_f(bool GetValue(const std::string& key, void *value, AJAPersistenceType type, size_t blobBytes = 0));
+			NTV2_DEPRECATED_f(bool FileExists());
+			NTV2_DEPRECATED_f(bool ClearPrefFile());
+			NTV2_DEPRECATED_f(bool DeletePrefFile(bool makeBackup = false));
+			NTV2_DEPRECATED_f(bool StorageHealthCheck(int& errCode, std::string& errMessage));
 
-			bool GetValuesInt(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<int>& values);
-			bool GetValuesBool(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<bool>& values);
-			bool GetValuesDouble(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<double>& values);
-			bool GetValuesString(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<std::string>& values);
+			NTV2_DEPRECATED_f(bool GetValuesInt(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<int>& values));
+			NTV2_DEPRECATED_f(bool GetValuesBool(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<bool>& values));
+			NTV2_DEPRECATED_f(bool GetValuesDouble(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<double>& values));
+			NTV2_DEPRECATED_f(bool GetValuesString(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<std::string>& values));
 
-			void PathToPrefFile(std::string& path);
+			NTV2_DEPRECATED_f(void PathToPrefFile(std::string& path));
 
 		public:
 			//	Use these functions to focus read/write logging on specific keys
-			static bool DebugLogAddKey		(const std::string & inKey);
-			static bool	DebugLogHasKeys		(void);
-			static bool	DebugLogHasKey		(const std::string & inKey);
-			static bool	DebugLogRemoveKey	(const std::string & inKey);
-			static bool	DebugLogRemoveAll	(void);
+			static NTV2_DEPRECATED_f(bool	DebugLogAddKey		(const std::string & inKey));
+			static NTV2_DEPRECATED_f(bool	DebugLogHasKeys		(void));
+			static NTV2_DEPRECATED_f(bool	DebugLogHasKey		(const std::string & inKey));
+			static NTV2_DEPRECATED_f(bool	DebugLogRemoveKey	(const std::string & inKey));
+			static NTV2_DEPRECATED_f(bool	DebugLogRemoveAll	(void));
 
 		private:
 			std::string		mAppID;

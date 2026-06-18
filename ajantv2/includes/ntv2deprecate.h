@@ -64,4 +64,104 @@
 //#define NTV2_DEPRECATE_18_0		//	If defined, excludes all symbols/APIs first deprecated in SDK 18.0
 //#define NTV2_DEPRECATE_18_1		//	If defined, excludes all symbols/APIs first deprecated in SDK 18.1
 
+
+//////////////////////////////////////////////////////////////////////////////////
+////////////////////////	NTV2_DEPRECATED_ Macros		//////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+//	These implement compile-time warnings for use of deprecated variables and functions
+#define NTV2_DEPRECATED_INLINE						//	Just a marker/reminder
+#define NTV2_DEPRECATED_FIELD						//	Just a marker/reminder
+#define NTV2_DEPRECATED_VARIABLE					//	Just a marker/reminder
+#define NTV2_DEPRECATED_TYPEDEF						//	Just a marker/reminder
+#define NTV2_DEPRECATED_CLASS						//	Just a marker/reminder
+#define NTV2_SHOULD_BE_DEPRECATED(__f__)			__f__
+#define NTV2_SHOULD_DEPRECATE(__f__)				__f__
+#define NTV2_MUST_DEPRECATE(__f__)					__f__
+#define NTV2_WILL_BE_DEPRECATED(__f__)				__f__
+#if defined(NTV2_BUILDING_DRIVER)
+	//	Disable deprecation warnings in driver builds
+	#define NTV2_DEPRECATED_f(__f__)				__f__
+	#define NTV2_DEPRECATED_v(__v__)				__v__
+	#define NTV2_DEPRECATED_vi(__v__, __i__)		__v__  = (__i__)
+#elif defined(_MSC_VER) && _MSC_VER >= 1600
+	//	Use __declspec(deprecated) for MSVC
+	#define NTV2_DEPRECATED_f(__f__)				__declspec(deprecated) __f__
+	#define NTV2_DEPRECATED_v(__v__)				__v__
+	#define NTV2_DEPRECATED_vi(__v__, __i__)		__v__  = (__i__)
+#elif defined(__clang__)
+	//	Use __attribute__((deprecated)) for LLVM/Clang
+	#define NTV2_DEPRECATED_f(__f__)				__f__  __attribute__((deprecated))
+	#define NTV2_DEPRECATED_v(__v__)				__v__
+	#define NTV2_DEPRECATED_vi(__v__, __i__)		__v__  = (__i__)
+#elif defined(__GNUC__)
+	#if __GNUC__ >= 4
+		//	Use __attribute__((deprecated)) for GCC 4 or later
+		#define NTV2_DEPRECATED_f(__f__)			__f__ __attribute__ ((deprecated))
+		#define NTV2_DEPRECATED_v(__v__)			__v__
+		#define NTV2_DEPRECATED_vi(__v__, __i__)	__v__  = (__i__)
+	#else
+		//	Disable deprecation warnings in GCC prior to GCC 4
+		#define NTV2_DEPRECATED_f(__f__)			__f__
+		#define NTV2_DEPRECATED_v(__v__)			__v__
+		#define NTV2_DEPRECATED_vi(__v__, __i__)	__v__  = (__i__)
+	#endif
+#else
+	//	Disable deprecation warnings
+	#define NTV2_DEPRECATED_f(__f__)				__f__
+	#define NTV2_DEPRECATED_v(__v__)				__v__
+	#define NTV2_DEPRECATED_vi(__v__, __i__)		__v__  = (__i__)
+#endif
+
+#define NTV2_DEPRECATED_16_0(__f__)					NTV2_DEPRECATED_f(__f__)
+#if defined(NTV2_DEPRECATE_16_0)
+	#define NTV2_DEPRECATED_16_1(__f__)				NTV2_DEPRECATED_f(__f__)
+#else//NTV2_DEPRECATE_16_0
+	#define NTV2_DEPRECATED_16_1(__f__)				NTV2_WILL_BE_DEPRECATED(__f__)
+#endif//NTV2_DEPRECATE_16_0
+#if defined(NTV2_DEPRECATE_16_1)
+	#define NTV2_DEPRECATED_16_2(__f__)				NTV2_DEPRECATED_f(__f__)
+#else//NTV2_DEPRECATE_16_1
+	#define NTV2_DEPRECATED_16_2(__f__)				NTV2_WILL_BE_DEPRECATED(__f__)
+#endif//NTV2_DEPRECATE_16_1
+#if defined(NTV2_DEPRECATE_16_2)
+	#define NTV2_DEPRECATED_16_3(__f__)				NTV2_DEPRECATED_f(__f__)
+#else//NTV2_DEPRECATE_16_2
+	#define NTV2_DEPRECATED_16_3(__f__)				NTV2_WILL_BE_DEPRECATED(__f__)
+#endif//NTV2_DEPRECATE_16_2
+#if defined(NTV2_DEPRECATE_16_3)
+	#define NTV2_DEPRECATED_17_0(__f__)				NTV2_DEPRECATED_f(__f__)
+#else//NTV2_DEPRECATE_16_3
+	#define NTV2_DEPRECATED_17_0(__f__)				NTV2_WILL_BE_DEPRECATED(__f__)
+#endif//NTV2_DEPRECATE_16_3
+#if defined(NTV2_DEPRECATE_17_0)
+	#define NTV2_DEPRECATED_17_1(__f__)				NTV2_DEPRECATED_f(__f__)
+#else//NTV2_DEPRECATE_17_0
+	#define NTV2_DEPRECATED_17_1(__f__)				NTV2_WILL_BE_DEPRECATED(__f__)
+#endif//NTV2_DEPRECATE_17_0
+#if defined(NTV2_DEPRECATE_17_1)
+	#define NTV2_DEPRECATED_17_2(__f__)				NTV2_DEPRECATED_f(__f__)
+#else//NTV2_DEPRECATE_17_1
+	#define NTV2_DEPRECATED_17_2(__f__)				NTV2_WILL_BE_DEPRECATED(__f__)
+#endif//NTV2_DEPRECATE_17_1
+#if defined(NTV2_DEPRECATE_17_2)
+	#define NTV2_DEPRECATED_17_5(__f__)				NTV2_DEPRECATED_f(__f__)
+#else//NTV2_DEPRECATE_17_2
+	#define NTV2_DEPRECATED_17_5(__f__)				NTV2_WILL_BE_DEPRECATED(__f__)
+#endif//NTV2_DEPRECATE_17_2
+#if defined(NTV2_DEPRECATE_17_5)
+	#define NTV2_DEPRECATED_17_6(__f__)				NTV2_DEPRECATED_f(__f__)
+#else//NTV2_DEPRECATE_17_5
+	#define NTV2_DEPRECATED_17_6(__f__)				NTV2_WILL_BE_DEPRECATED(__f__)
+#endif//NTV2_DEPRECATE_17_5
+#if defined(NTV2_DEPRECATE_17_6)
+	#define NTV2_DEPRECATED_18_0(__f__)				NTV2_DEPRECATED_f(__f__)
+#else//NTV2_DEPRECATE_17_6
+	#define NTV2_DEPRECATED_18_0(__f__)				NTV2_WILL_BE_DEPRECATED(__f__)
+#endif//NTV2_DEPRECATE_17_6
+#if defined(NTV2_DEPRECATE_18_0)
+	#define NTV2_DEPRECATED_18_1(__f__)				NTV2_DEPRECATED_f(__f__)
+#else//NTV2_DEPRECATE_18_0
+	#define NTV2_DEPRECATED_18_1(__f__)				NTV2_WILL_BE_DEPRECATED(__f__)
+#endif//NTV2_DEPRECATE_18_0
+
 #endif // NTV2DEPRECATE_H

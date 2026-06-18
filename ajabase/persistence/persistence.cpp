@@ -2,6 +2,7 @@
 /**
 	@file		persistence/persistence.cpp
 	@brief		Implements the AJAPersistence class.
+	@deprecated	This module will be removed from a future SDK.
 	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
