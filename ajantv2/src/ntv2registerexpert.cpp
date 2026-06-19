@@ -1285,6 +1285,9 @@ private:
 		DEF_REGNAME	(kVRegAnalogOutputType);
 		DEF_REGNAME	(kVRegAnalogOutBlackLevel);
 		DEF_REGNAME	(kVRegInputSelectUser);
+		DEF_REGNAME (kVRegSWDevMasterRunning);
+		DEF_REGNAME (kVRegSWDevMasterPIDLo);
+		DEF_REGNAME (kVRegSWDevMasterPIDHi);
 		DEF_REGNAME	(kVRegVideoOutPauseMode);
 		DEF_REGNAME	(kVRegPulldownPattern);
 		DEF_REGNAME	(kVRegColorSpaceMode);

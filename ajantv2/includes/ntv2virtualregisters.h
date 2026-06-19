@@ -49,6 +49,10 @@ typedef enum
 	kVRegAnalogOutBlackLevel				= VIRTUALREG_START+26,		// Analog output black level
 	kVRegInputSelectUser					= VIRTUALREG_START+27,		// Input 1, Input 2, DualLink, set by user
 
+	kVRegSWDevMasterRunning					= VIRTUALREG_START+30,		//	SWDevice master running if incrementing over time
+	kVRegSWDevMasterPIDLo					= VIRTUALREG_START+31,		//	SWDevice master PID (LS 32 bits)
+	kVRegSWDevMasterPIDHi					= VIRTUALREG_START+32,		//	SWDevice master PID (MS 32 bits)
+
 	// COMMON_VIRTUAL_REGS_MISC
 	kVRegVideoOutPauseMode					= VIRTUALREG_START+40,		// whether we pause on a frame or a field
 	kVRegPulldownPattern					= VIRTUALREG_START+41,		// which 3:2 pulldown pattern to use
