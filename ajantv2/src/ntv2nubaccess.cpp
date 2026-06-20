@@ -306,6 +306,16 @@ string NTV2DeviceSpecParser::Resource (const bool inStripLeadSlash) const
 	return rsrc;
 }
 
+string NTV2DeviceSpecParser::HostWithPort (void) const
+{
+	string result(Host()), port(Port());
+	if (result.empty())
+		return "";
+	if (!port.empty())
+		result += ":" + port;
+	return result;
+}
+
 void NTV2DeviceSpecParser::Parse (void)
 {
 	//	A run of 3 consecutive letters that match "ntv" -- probably a scheme

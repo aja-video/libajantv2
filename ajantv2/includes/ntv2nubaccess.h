@@ -186,8 +186,11 @@ class AJAExport NTV2DeviceSpecParser
 		inline NTV2StringList			Errors (void) const							{return mErrors;}	///< @return	All errors found by parser
 		inline NTV2ConnectParams		Results (void) const						{return mResult;}	///< @return	A copy of my parse results, a dictionary (of key/value pairs).
 		inline bool						HasResult (const std::string & inKey) const	{return mResult.hasKey(inKey);}	///< @return	True if the given result exists.
-		std::string						Result (const std::string & inKey) const	{return mResult.valueForKey(inKey);}	///< @return	The result value for the given key.
+		inline std::string				Result (const std::string & inKey) const	{return mResult.valueForKey(inKey);}	///< @return	The result value for the given key.
 		std::string						Resource (const bool inStripLeadSlash = true) const;	///< @return	The Result for the kConnectParamResource key
+		inline std::string				Host (void) const							{return Result(kConnectParamHost);}	///< @return	The host portion of the URLspec, if present, otherwise empty
+		inline std::string				Port (void) const							{return Result(kConnectParamPort);}	///< @return	The port number portion of the URLspec, if present, otherwise empty
+		std::string						HostWithPort (void) const;		///< @return	The host with port number (if present), otherwise empty
 		std::ostream &					PrintErrors (std::ostream & oss) const;
 		std::ostream &					Print (std::ostream & oss, const bool inDumpResults = false) const;
 		std::string						InfoString (void) const;
