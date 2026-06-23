@@ -27,16 +27,14 @@ static CNTV2BitfileManager s_BitfileManager;
 bool CNTV2Card::IsDynamicDevice (void)
 {
 	NTV2ULWordVector reg;
-
 	if (!IsOpen())
 		return false;	//	device not open
-
+	if (!IsSupported(kDeviceCanDoFastBitfileSwitching))
+		return false;   //  doesn't support MCAP
 	if (!BitstreamStatus(reg))
 		return false;	//	can't get bitstream status
-
 	if (!reg[BITSTREAM_VERSION])
 		return false;	//	Bitstream version is zero
-
 	return true;
 }
 
@@ -68,6 +66,8 @@ NTV2DeviceID CNTV2Card::GetBaseDeviceID (void)
 NTV2DeviceIDList CNTV2Card::GetDynamicDeviceList (void)
 {
 	NTV2DeviceIDList	result;
+	if (!IsSupported(kDeviceCanDoFastBitfileSwitching))
+		return result;
 	const NTV2DeviceIDSet devs(GetDynamicDeviceIDs());
 	for (NTV2DeviceIDSetConstIter it(devs.begin());	 it != devs.end();	++it)
 		result.push_back(*it);
@@ -78,6 +78,8 @@ NTV2DeviceIDSet CNTV2Card::GetDynamicDeviceIDs (void)
 {
 	NTV2DeviceIDSet result;
 	if (!IsOpen())
+		return result;
+	if (!IsSupported(kDeviceCanDoFastBitfileSwitching))
 		return result;
 
 	const NTV2DeviceID currentDeviceID (GetDeviceID());
@@ -138,6 +140,8 @@ NTV2DeviceIDSet CNTV2Card::GetDynamicDeviceIDs (void)
 
 bool CNTV2Card::CanLoadDynamicDevice (const NTV2DeviceID inDeviceID)
 {
+	if (!IsSupported(kDeviceCanDoFastBitfileSwitching))
+		return false;
 	const NTV2DeviceIDSet devices(GetDynamicDeviceIDs());
 	return devices.find(inDeviceID) != devices.end();
 }
@@ -146,6 +150,8 @@ bool CNTV2Card::LoadDynamicDevice (const NTV2DeviceID inDeviceID)
 {
 	if (!IsOpen())
 		{DDFAIL("Device not open");  return false;}
+	if (!IsSupported(kDeviceCanDoFastBitfileSwitching))
+		{DDFAIL("Fast bitfile switching unsupported");  return false;}
 
 	const NTV2DeviceID currentDeviceID (GetDeviceID());
 	if (!currentDeviceID)
@@ -214,10 +220,14 @@ bool CNTV2Card::LoadDynamicDevice (const NTV2DeviceID inDeviceID)
 
 bool CNTV2Card::AddDynamicBitfile (const string & inBitfilePath)
 {
+	if (!IsSupported(kDeviceCanDoFastBitfileSwitching))
+		return false;
 	return s_BitfileManager.AddFile(inBitfilePath);
 }
 
 bool CNTV2Card::AddDynamicDirectory (const string & inDirectory)
 {
+	if (!IsSupported(kDeviceCanDoFastBitfileSwitching))
+		return false;
 	return s_BitfileManager.AddDirectory(inDirectory);
 }

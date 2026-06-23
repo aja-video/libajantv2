@@ -58,6 +58,7 @@ class AJAExport DeviceCapabilities
 		inline bool		CanDoDualLink (void)					{return dev.IsSupported(kDeviceCanDoDualLink);}									///< @returns	True if device supports 10-bit RGB input/output over 2-wire SDI
 		inline bool		CanDoDVCProHD (void)					{return dev.IsSupported(kDeviceCanDoDVCProHD);}									///< @returns	True if device can squeeze/stretch between 1920x1080/1280x1080 and 1280x720/960x720
 		inline bool		CanDoEnhancedCSC (void)					{return dev.IsSupported(kDeviceCanDoEnhancedCSC);}								///< @returns	True if device has enhanced CSCs
+		inline bool		CanDoFastBitfileSwitching (void)		{return dev.IsSupported(kDeviceCanDoFastBitfileSwitching);}						///< @returns	True if device supports fast bitfile switching
 		inline bool		CanDoFramePulseSelect (void)			{return dev.IsSupported(kDeviceCanDoFramePulseSelect);}							///< @returns	True if device supports frame pulse source independent of reference source
 		inline bool		CanDoFrameStore1Display (void)			{return dev.IsSupported(kDeviceCanDoFrameStore1Display);}						///< @returns	True if device can display/output video from FrameStore 1
 		inline bool		CanDoGPIO (void)						{return dev.IsSupported(kDeviceCanDoGPIO);}										///< @returns	True if device has GPIO interface

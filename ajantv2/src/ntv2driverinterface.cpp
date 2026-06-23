@@ -1856,7 +1856,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceHasRotaryEncoder:				outValue = ::NTV2DeviceHasRotaryEncoder(devID);						break;
 		case kDeviceHasSPIv5:						outValue = ::NTV2DeviceGetSPIFlashVersion(devID) == 5;				break;
 		case kDeviceHasXilinxDMA:					outValue = ::NTV2DeviceHasXilinxDMA(devID);							break;
-		case kDeviceCanDoStreamingDMA:				outValue = GetDeviceID() == DEVICE_ID_KONAXM;						break;
+		case kDeviceCanDoStreamingDMA:				outValue = devID == DEVICE_ID_KONAXM;						break;
 		case kDeviceHasPWMFanControl:				outValue = ::NTV2DeviceHasPWMFanControl(devID);						break;
 		case kDeviceCanDoHDMIQuadRasterConversion:	outValue = (GetNumSupported(kDeviceGetNumHDMIVideoInputs)
 																	||  GetNumSupported(kDeviceGetNumHDMIVideoOutputs))	//	At least 1 HDMI in/out
@@ -1876,6 +1876,18 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 											outValue = devIDs.find(pciDevID) != devIDs.end();
 											return true;
 										}
+		case kDeviceCanDoFastBitfileSwitching:		outValue =	(	(devID == DEVICE_ID_KONA5)			||
+																	(devID == DEVICE_ID_KONA5_8KMK)		||
+																	(devID == DEVICE_ID_KONA5_8K)		||
+																	(devID == DEVICE_ID_KONA5_8K_MV_TX)	||
+																	(devID == DEVICE_ID_KONA5_2X4K)		||
+																	(devID == DEVICE_ID_KONA5_3DLUT)	||
+																	(devID == DEVICE_ID_CORVID44_2X4K)	||
+																	(devID == DEVICE_ID_CORVID44_8K)	||
+																	(devID == DEVICE_ID_CORVID44_8KMK)	||
+																	(devID == DEVICE_ID_CORVID44_GEN3)	||
+																	(devID == DEVICE_ID_CORVID44_PLNR)
+																) ? 1 : 0;												break;
 
 		case kDeviceCanDoAudioMixer:
 		case kDeviceHasMicrophoneInput:
