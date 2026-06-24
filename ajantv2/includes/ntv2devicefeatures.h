@@ -164,6 +164,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoP2PTransmit,					///< @brief	True if device can directly transmit data to another PCIe device via peer-to-peer DMA. (New in SDK 18.1)
 	kDeviceCanDoP2PReceive,						///< @brief	True if device can directly receive data from another PCIe device via peer-to-peer DMA. (New in SDK 18.1)
 	kDeviceCanDoFastBitfileSwitching,			///< @brief	True if device supports fast bitfile switching. (New in SDK 18.1)
+	kDeviceCanDoClockMonitor,					///< @brief	True if device reports genlock frequencies. (New in SDK 18.1)
 	kNTV2BoolParam_LAST,
 	kNTV2BoolParam_COUNT	= kNTV2BoolParam_LAST-kNTV2BoolParam_FIRST,
 	kDeviceCanDo_INVALID	= kNTV2BoolParam_LAST

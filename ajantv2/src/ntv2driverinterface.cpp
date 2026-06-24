@@ -1763,6 +1763,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanDoCapture:					outValue =	(GetNumSupported(kDeviceGetNumVideoInputs)
 																+ GetNumSupported(kDeviceGetNumHDMIVideoInputs)
 																+ GetNumSupported(kDeviceGetNumAnalogVideoInputs)) > 0;	break;
+		case kDeviceCanDoClockMonitor:				outValue = ::NTV2DeviceCanDoClockMonitor(devID);					break;
 		case kDeviceCanDoColorCorrection:			outValue = GetNumSupported(kDeviceGetNumLUTs) > 0;					break;	//	Deprecate?
 		case kDeviceCanDoCustomAnc:					outValue = ::NTV2DeviceCanDoCustomAnc(devID);						break;	//	Deprecate?
 		case kDeviceCanDoDSKOpacity:				outValue = ::NTV2DeviceCanDoDSKOpacity(devID);						break;	//	Deprecate?

@@ -91,8 +91,7 @@ typedef enum
 	kVRegNumberAudioMappingRegisters		= VIRTUALREG_START+78,
 	kVRegAudioSyncTolerance					= VIRTUALREG_START+79,
 	kVRegDmaSerialize						= VIRTUALREG_START+80,
-	kVRegSyncChannel						= VIRTUALREG_START+81,		// Mac name
-	kVRegSyncChannels						= VIRTUALREG_START+81,		// Windows and Linux name for the same thing
+	kVRegSyncChannels						= VIRTUALREG_START+81,
 	kVRegSoftwareUartFifo					= VIRTUALREG_START+82,
 	kVRegTimeCodeCh1Delay					= VIRTUALREG_START+83,
 	kVRegTimeCodeCh2Delay					= VIRTUALREG_START+84,
@@ -341,7 +340,6 @@ typedef enum
 	kVRegAncField1Offset					= VIRTUALREG_START+392,		///< @brief Anc Field1 byte offset from end of frame buffer (GUMP on all boards except RTP for SMPTE2022/IP)
 	kVRegAncField2Offset					= VIRTUALREG_START+393,		///< @brief Anc Field2 byte offset from end of frame buffer (GUMP on all boards except RTP for SMPTE2022/IP)
 	kVRegAgentCheck							= VIRTUALREG_START+394,
-	kVRegUnused_2							= VIRTUALREG_START+395,
 	
 	kVReg4kOutputTransportSelection			= VIRTUALREG_START+396,
 	kVRegCustomAncInputSelect				= VIRTUALREG_START+397,
@@ -357,7 +355,7 @@ typedef enum
 	kVRegVideoFormatCh6						= VIRTUALREG_START+406,
 	kVRegVideoFormatCh7						= VIRTUALREG_START+407,
 	kVRegVideoFormatCh8						= VIRTUALREG_START+408,
-
+#if 0	//	IoIP/KonaIP10g purge
 	// Sarek VOIP section
 	kVRegIPAddrEth0							= VIRTUALREG_START+409,
 	kVRegSubnetEth0							= VIRTUALREG_START+410,
@@ -414,12 +412,12 @@ typedef enum
 	kVRegTxcSfp2LocalPort4					= VIRTUALREG_START+456,
 	kVRegTxcSfp2RemoteIp4					= VIRTUALREG_START+457,
 	kVRegTxcSfp2RemotePort4					= VIRTUALREG_START+458,
-	
+#endif	//	IoIP/KonaIP10g purge
 	kVRegMailBoxAcquire						= VIRTUALREG_START+459,
 	kVRegMailBoxRelease						= VIRTUALREG_START+460,
 	kVRegMailBoxAbort						= VIRTUALREG_START+461,
 	kVRegMailBoxTimeoutNS					= VIRTUALREG_START+462,		//	Units are 100 ns, not nanoseconds!
-
+#if 0	//	IoIP/KonaIP10g purge
 	kVRegRxc_2DecodeSelectionMode1			= VIRTUALREG_START+463,
 	kVRegRxc_2DecodeProgramNumber1			= VIRTUALREG_START+464,
 	kVRegRxc_2DecodeProgramPID1				= VIRTUALREG_START+465,
@@ -462,13 +460,11 @@ typedef enum
 	kVRegKIPEncCfgError						= VIRTUALREG_START+497,
 	kVRegKIPDecCfgError						= VIRTUALREG_START+498,
 	kVRegKIPNetCfgError						= VIRTUALREG_START+499,
+#endif	//	IoIP/KonaIP10g purge
 	kVRegUseHDMI420Mode						= VIRTUALREG_START+500,
-	kVRegUnused501							= VIRTUALREG_START+501,
-	
 	kVRegUserDefinedDBB						= VIRTUALREG_START+502,
 	
 	kVRegHDMIOutAudioChannels				= VIRTUALREG_START+503,
-	kVRegUnused504							= VIRTUALREG_START+504,
 	kVRegZeroHostAncPostCapture				= VIRTUALREG_START+505,
 	kVRegZeroDeviceAncPostCapture			= VIRTUALREG_START+506,
 	kVRegAudioMonitorChannelSelect			= VIRTUALREG_START+507,
@@ -631,57 +627,57 @@ typedef enum
 	kVRegHDMIOutStatus1						= VIRTUALREG_START+641,
 	kVRegAudioOutputToneSelect				= VIRTUALREG_START+642,
 	kVRegDynFirmwareUpdateCounts			= VIRTUALREG_START+643,		//	MS 16 bits: # attempts;  LS 16 bits: # successful
-	kVRegPCILinkSpeed                       = VIRTUALREG_START+644,
-	kVRegPCILinkWidth                       = VIRTUALREG_START+645,
+	kVRegPCILinkSpeed						= VIRTUALREG_START+644,
+	kVRegPCILinkWidth						= VIRTUALREG_START+645,
 
-    // These replace the hardware registers for hdmi output version >= 6
-    kVRegHDMIOutControl1                    = VIRTUALREG_START+646,     // kRegHDMIOutControl 125
-    kVRegHDMIInputStatus1                   = VIRTUALREG_START+647,     // kRegHDMIInputStatus 126
-    kVRegHDMIInputControl1                  = VIRTUALREG_START+648,     // kRegHDMIInputControl 127
-//	kVRegHDMIOutStatus1                     = VIRTUALREG_START+641,     //  Already defined above...
-	kVRegHDMIOutHDRGreenPrimary1            = VIRTUALREG_START+649,
-	kVRegHDMIOutHDRBluePrimary1             = VIRTUALREG_START+650,
-	kVRegHDMIOutHDRRedPrimary1              = VIRTUALREG_START+651,
-	kVRegHDMIOutHDRWhitePoint1              = VIRTUALREG_START+652,
-	kVRegHDMIOutHDRMasterLuminance1         = VIRTUALREG_START+653,
-	kVRegHDMIOutHDRLightLevel1              = VIRTUALREG_START+654,
-	kVRegHDMIOutHDRControl1                 = VIRTUALREG_START+655,
+	// These replace the hardware registers for hdmi output version >= 6
+	kVRegHDMIOutControl1					= VIRTUALREG_START+646,	 // kRegHDMIOutControl 125
+	kVRegHDMIInputStatus1					= VIRTUALREG_START+647,	 // kRegHDMIInputStatus 126
+	kVRegHDMIInputControl1					= VIRTUALREG_START+648,	 // kRegHDMIInputControl 127
+//	kVRegHDMIOutStatus1						= VIRTUALREG_START+641,	 //	Already defined above...
+	kVRegHDMIOutHDRGreenPrimary1			= VIRTUALREG_START+649,
+	kVRegHDMIOutHDRBluePrimary1				= VIRTUALREG_START+650,
+	kVRegHDMIOutHDRRedPrimary1				= VIRTUALREG_START+651,
+	kVRegHDMIOutHDRWhitePoint1				= VIRTUALREG_START+652,
+	kVRegHDMIOutHDRMasterLuminance1			= VIRTUALREG_START+653,
+	kVRegHDMIOutHDRLightLevel1				= VIRTUALREG_START+654,
+	kVRegHDMIOutHDRControl1					= VIRTUALREG_START+655,
 
-    kVRegHDMIOutControl2                    = VIRTUALREG_START+656,
-    kVRegHDMIInputStatus2                   = VIRTUALREG_START+657,
-    kVRegHDMIInputControl2                  = VIRTUALREG_START+658,
-	kVRegHDMIOutStatus2                     = VIRTUALREG_START+659,
-	kVRegHDMIOutHDRGreenPrimary2            = VIRTUALREG_START+660,
-	kVRegHDMIOutHDRBluePrimary2             = VIRTUALREG_START+661,
-	kVRegHDMIOutHDRRedPrimary2              = VIRTUALREG_START+662,
-	kVRegHDMIOutHDRWhitePoint2              = VIRTUALREG_START+663,
-	kVRegHDMIOutHDRMasterLuminance2         = VIRTUALREG_START+664,
-	kVRegHDMIOutHDRLightLevel2              = VIRTUALREG_START+665,
-	kVRegHDMIOutHDRControl2                 = VIRTUALREG_START+666,
+	kVRegHDMIOutControl2					= VIRTUALREG_START+656,
+	kVRegHDMIInputStatus2					= VIRTUALREG_START+657,
+	kVRegHDMIInputControl2					= VIRTUALREG_START+658,
+	kVRegHDMIOutStatus2						= VIRTUALREG_START+659,
+	kVRegHDMIOutHDRGreenPrimary2			= VIRTUALREG_START+660,
+	kVRegHDMIOutHDRBluePrimary2				= VIRTUALREG_START+661,
+	kVRegHDMIOutHDRRedPrimary2				= VIRTUALREG_START+662,
+	kVRegHDMIOutHDRWhitePoint2				= VIRTUALREG_START+663,
+	kVRegHDMIOutHDRMasterLuminance2			= VIRTUALREG_START+664,
+	kVRegHDMIOutHDRLightLevel2				= VIRTUALREG_START+665,
+	kVRegHDMIOutHDRControl2					= VIRTUALREG_START+666,
 
-    kVRegHDMIOutControl3                    = VIRTUALREG_START+667,
-    kVRegHDMIInputStatus3                   = VIRTUALREG_START+668,
-    kVRegHDMIInputControl3                  = VIRTUALREG_START+669,
-	kVRegHDMIOutStatus3                     = VIRTUALREG_START+670,
-	kVRegHDMIOutHDRGreenPrimary3            = VIRTUALREG_START+671,
-	kVRegHDMIOutHDRBluePrimary3             = VIRTUALREG_START+672,
-	kVRegHDMIOutHDRRedPrimary3              = VIRTUALREG_START+673,
-	kVRegHDMIOutHDRWhitePoint3              = VIRTUALREG_START+674,
-	kVRegHDMIOutHDRMasterLuminance3         = VIRTUALREG_START+675,
-	kVRegHDMIOutHDRLightLevel3              = VIRTUALREG_START+676,
-	kVRegHDMIOutHDRControl3                 = VIRTUALREG_START+677,
+	kVRegHDMIOutControl3					= VIRTUALREG_START+667,
+	kVRegHDMIInputStatus3					= VIRTUALREG_START+668,
+	kVRegHDMIInputControl3					= VIRTUALREG_START+669,
+	kVRegHDMIOutStatus3						= VIRTUALREG_START+670,
+	kVRegHDMIOutHDRGreenPrimary3			= VIRTUALREG_START+671,
+	kVRegHDMIOutHDRBluePrimary3				= VIRTUALREG_START+672,
+	kVRegHDMIOutHDRRedPrimary3				= VIRTUALREG_START+673,
+	kVRegHDMIOutHDRWhitePoint3				= VIRTUALREG_START+674,
+	kVRegHDMIOutHDRMasterLuminance3			= VIRTUALREG_START+675,
+	kVRegHDMIOutHDRLightLevel3				= VIRTUALREG_START+676,
+	kVRegHDMIOutHDRControl3					= VIRTUALREG_START+677,
 
-    kVRegHDMIOutControl4                    = VIRTUALREG_START+678,
-    kVRegHDMIInputStatus4                   = VIRTUALREG_START+679,
-    kVRegHDMIInputControl4                  = VIRTUALREG_START+680,
-	kVRegHDMIOutStatus4                     = VIRTUALREG_START+681,
-	kVRegHDMIOutHDRGreenPrimary4            = VIRTUALREG_START+682,
-	kVRegHDMIOutHDRBluePrimary4             = VIRTUALREG_START+683,
-	kVRegHDMIOutHDRRedPrimary4              = VIRTUALREG_START+684,
-	kVRegHDMIOutHDRWhitePoint4              = VIRTUALREG_START+685,
-	kVRegHDMIOutHDRMasterLuminance4         = VIRTUALREG_START+686,
-	kVRegHDMIOutHDRLightLevel4              = VIRTUALREG_START+687,
-	kVRegHDMIOutHDRControl4                 = VIRTUALREG_START+688,
+	kVRegHDMIOutControl4					= VIRTUALREG_START+678,
+	kVRegHDMIInputStatus4					= VIRTUALREG_START+679,
+	kVRegHDMIInputControl4					= VIRTUALREG_START+680,
+	kVRegHDMIOutStatus4						= VIRTUALREG_START+681,
+	kVRegHDMIOutHDRGreenPrimary4			= VIRTUALREG_START+682,
+	kVRegHDMIOutHDRBluePrimary4				= VIRTUALREG_START+683,
+	kVRegHDMIOutHDRRedPrimary4				= VIRTUALREG_START+684,
+	kVRegHDMIOutHDRWhitePoint4				= VIRTUALREG_START+685,
+	kVRegHDMIOutHDRMasterLuminance4			= VIRTUALREG_START+686,
+	kVRegHDMIOutHDRLightLevel4				= VIRTUALREG_START+687,
+	kVRegHDMIOutHDRControl4					= VIRTUALREG_START+688,
 
 	kVRegSDIOutVPIDTransferCharacteristics1	= VIRTUALREG_START+689,
 	kVRegSDIOutVPIDColorimetry1				= VIRTUALREG_START+690,
@@ -723,27 +719,27 @@ typedef enum
 	kVRegSDIOutVPIDLuminance8				= VIRTUALREG_START+719,
 	kVRegSDIOutVPIDRGBRange8				= VIRTUALREG_START+720,
 
-    // channel default key signal
-    kVRegNTV2KeySignal1                     = VIRTUALREG_START+721,
-    kVRegNTV2KeySignal2                     = VIRTUALREG_START+722,
-    kVRegNTV2KeySignal3                     = VIRTUALREG_START+723,
-    kVRegNTV2KeySignal4                     = VIRTUALREG_START+724,
-    kVRegNTV2KeySignal5                     = VIRTUALREG_START+725,
-    kVRegNTV2KeySignal6                     = VIRTUALREG_START+726,
-    kVRegNTV2KeySignal7                     = VIRTUALREG_START+727,
-    kVRegNTV2KeySignal8                     = VIRTUALREG_START+728,
+	// channel default key signal
+	kVRegNTV2KeySignal1						= VIRTUALREG_START+721,
+	kVRegNTV2KeySignal2						= VIRTUALREG_START+722,
+	kVRegNTV2KeySignal3						= VIRTUALREG_START+723,
+	kVRegNTV2KeySignal4						= VIRTUALREG_START+724,
+	kVRegNTV2KeySignal5						= VIRTUALREG_START+725,
+	kVRegNTV2KeySignal6						= VIRTUALREG_START+726,
+	kVRegNTV2KeySignal7						= VIRTUALREG_START+727,
+	kVRegNTV2KeySignal8						= VIRTUALREG_START+728,
 
-    // sdi out key signal override
-    kVRegSDIOutKeySignal1                   = VIRTUALREG_START+729,
-    kVRegSDIOutKeySignal2                   = VIRTUALREG_START+730,
-    kVRegSDIOutKeySignal3                   = VIRTUALREG_START+731,
-    kVRegSDIOutKeySignal4                   = VIRTUALREG_START+732,
-    kVRegSDIOutKeySignal5                   = VIRTUALREG_START+733,
-    kVRegSDIOutKeySignal6                   = VIRTUALREG_START+734,
-    kVRegSDIOutKeySignal7                   = VIRTUALREG_START+735,
-    kVRegSDIOutKeySignal8                   = VIRTUALREG_START+736,
+	// sdi out key signal override
+	kVRegSDIOutKeySignal1					= VIRTUALREG_START+729,
+	kVRegSDIOutKeySignal2					= VIRTUALREG_START+730,
+	kVRegSDIOutKeySignal3					= VIRTUALREG_START+731,
+	kVRegSDIOutKeySignal4					= VIRTUALREG_START+732,
+	kVRegSDIOutKeySignal5					= VIRTUALREG_START+733,
+	kVRegSDIOutKeySignal6					= VIRTUALREG_START+734,
+	kVRegSDIOutKeySignal7					= VIRTUALREG_START+735,
+	kVRegSDIOutKeySignal8					= VIRTUALREG_START+736,
 	
-    kVRegLastAJA							= VIRTUALREG_START+737,		///< @brief The last AJA virtual register slot
+	kVRegLastAJA							= VIRTUALREG_START+737,		///< @brief The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief Last virtual register slot
 
@@ -767,8 +763,8 @@ typedef enum
 	kVRegMaskHDMOutAudioRate				= BIT(23)+BIT(22)+BIT(21)+BIT(20),
 	kVRegMaskHDMOutAudioChannels			= BIT(27)+BIT(26)+BIT(25)+BIT(24),
 
-    kVRegMaskSDIOutVPIDValue                = BIT(0)+BIT(1)+BIT(2)+BIT(3)+BIT(4)+BIT(5)+BIT(6)+BIT(7)+BIT(8)+BIT(9)+BIT(10)+BIT(11)+BIT(12)+BIT(13)+BIT(14)+BIT(15),
-    kVRegMaskSDIOutVPIDOverride             = BIT(16)
+	kVRegMaskSDIOutVPIDValue				= BIT(0)+BIT(1)+BIT(2)+BIT(3)+BIT(4)+BIT(5)+BIT(6)+BIT(7)+BIT(8)+BIT(9)+BIT(10)+BIT(11)+BIT(12)+BIT(13)+BIT(14)+BIT(15),
+	kVRegMaskSDIOutVPIDOverride				= BIT(16)
 } NTV2VirtualRegisterMasks;
 
 typedef enum
@@ -789,8 +785,8 @@ typedef enum
 	kVRegShiftHDMOutAudioRate				= 20,
 	kVRegShiftHDMOutAudioChannels			= 24,
 
-    kVRegShiftSDIOutVPIDValue               = 0,
-    kVRegShiftSDIOutVPIDOverride            = 16
+	kVRegShiftSDIOutVPIDValue				= 0,
+	kVRegShiftSDIOutVPIDOverride			= 16
 } NTV2VirtualRegisterShifts;
 
-#endif// NTV2VIRTUALREGISTERS_H
+#endif	//	NTV2VIRTUALREGISTERS_H

@@ -51,6 +51,7 @@ class AJAExport DeviceCapabilities
 		inline bool		CanDoBreakoutBoard (void)				{return dev.IsSupported(kDeviceCanDoBreakoutBoard);}							///< @returns	True if device supports an AJA breakout board
 		inline bool		CanDoBreakoutBox (void)					{return dev.IsSupported(kDeviceCanDoBreakoutBox);}								///< @returns	True if device supports an AJA breakout box
 		inline bool		CanDoCapture (void)						{return dev.IsSupported(kDeviceCanDoCapture);}									///< @returns	True if device has any SDI, HDMI or analog video inputs
+		inline bool		CanDoClockMonitor (void)				{return dev.IsSupported(kDeviceCanDoClockMonitor);}								///< @returns	True if device can report genlock frequencies
 		inline bool		CanDoColorCorrection (void)				{return dev.IsSupported(kDeviceCanDoColorCorrection);}							///< @returns	True if device has any LUTs
 		inline bool		CanDoCustomAnc (void)					{return dev.IsSupported(kDeviceCanDoCustomAnc);}								///< @returns	True if device has SDI ANC inserter/extractor firmware
 		inline bool		CanDoCustomHancInsertion (void)			{return dev.IsSupported(kDeviceCanDoCustomHancInsertion);}						///< @returns	True if device supports custom HANC packet insertion
