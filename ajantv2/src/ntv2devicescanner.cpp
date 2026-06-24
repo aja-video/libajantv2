@@ -902,7 +902,7 @@ bool CNTV2DeviceScanner::GetVDevList (NTV2DeviceInfoList & outVDevList)
 		for (auto it(vdevJson.cbegin());  it != vdevJson.cend();  ++it)
 			if (keys.find(it.key()) == keys.end())
 				keys.insert(it.key());
-		NTV2StringSet legalKeys = {kVDevJSON_Name, kVDevJSON_Disabled, kVDevJSON_URLSpec};
+		NTV2StringSet legalKeys = {kVDevJSON_Disabled, kVDevJSON_URLSpec};
 		NTV2StringList goodKeys, badKeys;
 		for (NTV2StringSetConstIter itKey(keys.begin());  itKey != keys.end();  ++itKey)
 		{
@@ -913,7 +913,7 @@ bool CNTV2DeviceScanner::GetVDevList (NTV2DeviceInfoList & outVDevList)
 		}
 		if (!badKeys.empty())
 			VDWARN("File '" << vdevFile << "': ignored " << DEC(badKeys.size()) << " unknown key(s): '" << aja::join(badKeys, "', '") << "'");
-		auto nameVal (vdevJson[kVDevJSON_Name]), urlspecVal (vdevJson[kVDevJSON_URLSpec]), disabledVal (vdevJson[kVDevJSON_Disabled]);
+		auto urlspecVal (vdevJson[kVDevJSON_URLSpec]), disabledVal (vdevJson[kVDevJSON_Disabled]);
 		if (urlspecVal.is_null())
 			{VDFAIL("File '" << vdevFile << "': missing required 'urlspec' parameter");  continue;}
 		if (disabledVal.is_boolean())
@@ -927,8 +927,7 @@ bool CNTV2DeviceScanner::GetVDevList (NTV2DeviceInfoList & outVDevList)
 			{VDINFO("File '" << vdevFile << "': explicitly 'disabled'");  continue;}
 		newVDev.vdevUrl = urlspecVal.get<std::string>();	//	done, we have the vdevUrl
 		NTV2DeviceSpecParser parser (newVDev.vdevUrl);	//	Check it
-		if (!nameVal.is_null())
-			newVDev.vdevName = nameVal.get<std::string>();	//	Name specified in JSON file
+
 		{	//	URLencode & append these URL params:  &vdevfname=   &vdevfpath=    &vdevname=   &vdevbasename=
 			newVDev.vdevUrl += parser.HasQueryParams() ? "&" : "?";
 			newVDev.vdevUrl += kQParamVDevFolderPath "=" + ::PercentEncode(vdevPath);
@@ -937,7 +936,7 @@ bool CNTV2DeviceScanner::GetVDevList (NTV2DeviceInfoList & outVDevList)
 			newVDev.vdevUrl += "&" kQParamVDevFileName "=" + ::PercentEncode(fName);	//	Remember file name
 			fName.erase(fName.length()-5, 5);							//	Lop off file name extension
 			if (newVDev.vdevName.empty())
-				newVDev.vdevName = fName;	//	Use file base name if no name specified in JSON file
+				newVDev.vdevName = fName;	//	Use file base name
 			newVDev.vdevUrl += "&" kQParamVDevName "=" + ::PercentEncode(newVDev.vdevName);	//	Remember name
 			ostringstream oss; oss << DEC(newVDev.deviceIndex);
 			newVDev.vdevUrl += "&" kQParamVDevIndex "=" + oss.str();	//	Remember index number

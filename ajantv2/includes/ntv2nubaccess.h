@@ -41,16 +41,16 @@ typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter
 
 //	AJA VDEV params:
 #define	kQParamVDevFolderPath	"vdevfpath"		///< @brief	Path to folder containing .vdev files
-#define	kQParamVDevName			"vdevname"		///< @brief	Device name, if not specified in .vdev file, then base name of .vdev file
+#define	kQParamVDevName			"vdevname"		///< @brief	Base name of .vdev file
 #define	kQParamVDevFileName		"vdevfname"		///< @brief	.vdev file name (with extension)
 #define	kQParamVDevIndex		"vdevindex"		///< @brief	Device index number for .vdev virtual device
 
 //	AJA VDEV JSON keys:
-#define kVDevJSON_Name			"name"			///< @brief	Optional name for virtual device to override .vdev file name (expects string value)
-#define kVDevJSON_URLSpec		"urlspec"		///< @brief	URLspec for virtual device (expects string value)
-#define kVDevJSON_Disabled		"disabled"		///< @brief	Virtual device is disabled if value is true (expects boolean value)
-#define kVDevJSON_Plugin		"plugin"		///< @deprecated	No longer used
-#define kVDevJSON_Host			"host"			///< @deprecated	No longer used
+#define kVDevJSON_URLSpec		"urlspec"		///< @brief	URLspec for VDEV (expects string value)
+#define kVDevJSON_Disabled		"disabled"		///< @brief	VDEV is disabled if value is true (expects boolean value)
+#define kVDevJSON_Name			"name"			///< @deprecated	Not used for VDEVs
+#define kVDevJSON_Plugin		"plugin"		///< @deprecated	Not used for VDEVs
+#define kVDevJSON_Host			"host"			///< @deprecated	Not used for VDEVs
 
 //	Local URL schemes:
 #define	kLegalSchemeNTV2		"ntv2"
