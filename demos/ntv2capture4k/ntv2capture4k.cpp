@@ -22,7 +22,6 @@ using namespace std;
 NTV2Capture4K::NTV2Capture4K (const CaptureConfig & inConfig)
 	:	mConsumerThread		(AJAThread()),
 		mProducerThread		(AJAThread()),
-		mDeviceID			(DEVICE_ID_NOTFOUND),
 		mConfig				(inConfig),
 		mVideoFormat		(NTV2_FORMAT_UNKNOWN),
 		mSavedTaskMode		(NTV2_DISABLE_TASKS),
@@ -74,18 +73,19 @@ AJAStatus NTV2Capture4K::Init (void)
 
 	//	Open the device...
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mDevice))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
-
+	{	if (aja::lower(mConfig.fDeviceSpec) != "list" && mConfig.fDeviceSpec != "?")
+			cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;
+		return AJA_STATUS_OPEN;
+	}
 	if (!mDevice.IsDeviceReady())
-		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
+		{cerr << "## ERROR:  '" << mDevice.GetDescription() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
-	mDeviceID = mDevice.GetDeviceID();						//	Keep the device ID handy, as it's used frequently
 	const bool isKonaHDMI (mDevice.features().GetNumHDMIVideoInputs() > 1);
 	if (!mDevice.features().CanDoCapture())
-		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is playback-only" << endl;  return AJA_STATUS_FEATURE;}
+		{cerr << "## ERROR:  '" << mDevice.GetDescription() << "' is playback-only" << endl;  return AJA_STATUS_FEATURE;}
 
 	if (!mDevice.features().CanDoFrameBufferFormat(mConfig.fPixelFormat))
-	{	cerr	<< "## ERROR:  '" << mDevice.GetDisplayName() << "' doesn't support '"
+	{	cerr	<< "## ERROR:  '" << mDevice.GetDescription() << "' doesn't support '"
 				<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, true) << "' ("
 				<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, false) << ", " << DEC(mConfig.fPixelFormat) << ")" << endl;
 		return AJA_STATUS_UNSUPPORTED;
@@ -99,7 +99,7 @@ AJAStatus NTV2Capture4K::Init (void)
 	{
 		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid())))
 		{
-			cerr << "## ERROR:  Unable to acquire '" << mDevice.GetDisplayName() << "' because another app (pid " << appPID << ") owns it" << endl;
+			cerr << "## ERROR:  Unable to acquire '" << mDevice.GetDescription() << "' because another app (pid " << appPID << ") owns it" << endl;
 			return AJA_STATUS_BUSY;		//	Another app is using the device
 		}
 	}
@@ -113,7 +113,7 @@ AJAStatus NTV2Capture4K::Init (void)
 	if (isKonaHDMI)
 	{	//	KonaHDMI gets special treatment...
 		if (!mConfig.fDoTSIRouting)
-			{cerr << "## ERROR:  UHD/4K on '" << mDevice.GetDisplayName() << "' requires TSI:  omit '--squares' option" << endl;  return AJA_STATUS_BAD_PARAM;}
+			{cerr << "## ERROR:  UHD/4K on '" << mDevice.GetDescription() << "' requires TSI:  omit '--squares' option" << endl;  return AJA_STATUS_BAD_PARAM;}
 		if (mConfig.fInputChannel != NTV2_CHANNEL1  &&  mConfig.fInputChannel != NTV2_CHANNEL3)
 			mConfig.fInputChannel = NTV2_CHANNEL3;
 		mConfig.fInputSource = mConfig.fInputChannel ? NTV2_INPUTSOURCE_HDMI2 : NTV2_INPUTSOURCE_HDMI1;
@@ -123,7 +123,7 @@ AJAStatus NTV2Capture4K::Init (void)
 		mConfig.fDoTSIRouting = false;	//	TSI Mux/Demux built-in to FrameStores
 		if (UWord(origCh) >= mDevice.features().GetNumFrameStores())
 		{
-			cerr << "## ERROR: No such channel Ch" << DEC(origCh) << " for '" << ::NTV2DeviceIDToString(mDeviceID,true) << "'";
+			cerr << "## ERROR: No such channel Ch" << DEC(origCh) << " for '" << mDevice.GetDescription() << "'";
 			return AJA_STATUS_BAD_PARAM;
 		}
 		mConfig.fInputSource = ::NTV2ChannelToInputSource(mConfig.fInputChannel);
@@ -147,7 +147,7 @@ AJAStatus NTV2Capture4K::Init (void)
 	
 	if (mConfig.fInputChannel != origCh)
 		cerr	<< "## WARNING:  Specified channel Ch" << DEC(origCh+1) << " corrected to use Ch"
-				<< DEC(mConfig.fInputChannel+1) << " to work for UHD/4K on '" << mDevice.GetDisplayName() << "'" << endl;
+				<< DEC(mConfig.fInputChannel+1) << " to work for UHD/4K on '" << mDevice.GetDescription() << "'" << endl;
 
 	//	Determine input connectors and frameStores to be used...
 	const UWord numSpigots (mDevice.features().CanDo12gRouting() ? 1 : (mConfig.fDoTSIRouting ? 2 : 4));
@@ -170,10 +170,11 @@ AJAStatus NTV2Capture4K::Init (void)
 		return AJA_STATUS_FAIL;
 
 	#if defined(_DEBUG)
-		cerr	<< mConfig << endl << "FrameStores: " << ::NTV2ChannelSetToStr(mActiveFrameStores) << endl
-				<< "Inputs: " << ::NTV2ChannelSetToStr(mActiveSDIs) << endl;
-		if (mDevice.IsRemote())
-			cerr	<< "Device Description:  " << mDevice.GetDescription() << endl << endl;
+		cerr	<< mConfig << endl
+				<< "Device Description: " << mDevice.GetDescription() << endl
+				<< "FrameStores: " << ::NTV2ChannelSetToStr(mActiveFrameStores) << endl
+				<< "Inputs: " << ::NTV2ChannelSetToStr(mActiveSDIs) << endl
+				<< endl;
 	#endif	//	defined(_DEBUG)
 	return AJA_STATUS_SUCCESS;
 
@@ -305,7 +306,7 @@ bool NTV2Capture4K::RouteInputSignal (void)
 	const bool isInputRGB (inputColorSpace == NTV2_LHIHDMIColorSpaceRGB);
 	NTV2XptConnections connections;
 
-	return CNTV2DemoCommon::GetInputRouting4K (connections, mConfig, mDeviceID, isInputRGB)
+	return CNTV2DemoCommon::GetInputRouting4K (connections, mConfig, mDevice.GetDeviceID(), isInputRGB)
 		&&  mDevice.ApplySignalRoute(connections, !mConfig.fDoMultiFormat);
 
 }	//	RouteInputSignal

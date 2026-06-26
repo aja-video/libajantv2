@@ -117,22 +117,21 @@ int main (int argc, const char ** argv)
 		}
 	}
 
+	int result (0);
+	do
 	{	//	Instantiate and initialize the NTV2OutputTestPattern object...
 		NTV2OutputTestPattern player(config);
-		AJAStatus status = player.Init();
-		if (AJA_FAILURE(status))
-			{cout << "## ERROR:  Initialization failed: " << ::AJAStatusToString(status) << endl;	return 1;}
+		if (AJA_FAILURE(player.Init()))
+			{result = 3;  break;}
 
 		//	Write the test pattern to the device and make it visible on the output...
-		status = player.EmitPattern();
-		if (AJA_FAILURE(status))
-			{cout << "## ERROR:  EmitPattern failed: " << ::AJAStatusToString(status) << endl;	return 2;}
+		if (!player.EmitPattern())
+			{cout << "## ERROR:  EmitPattern failed" << endl;	result = 4;  break;}
 
 		//	Pause and wait for user to press Return or Enter...
 		cout << "## NOTE:  Press Enter or Return to exit..." << endl;
 		cin.get();
-	}	//	NTV2OutputTestPattern scope
-
-	return 0;
+	} while (false);	//	NTV2OutputTestPattern scope
+	return result;
 
 }	// main

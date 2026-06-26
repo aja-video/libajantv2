@@ -155,8 +155,6 @@ class NTV2Burn4KQuadrant
 		AJAThread			mCaptureThread;			///< @brief	My capture thread object
 		CNTV2Card			mInputDevice;			///< @brief	My CNTV2Card input instance
 		CNTV2Card			mOutputDevice;			///< @brief	My CNTV2Card output instance
-		NTV2DeviceID		mInputDeviceID;			///< @brief	My device identifier
-		NTV2DeviceID		mOutputDeviceID;		///< @brief	My device identifier
 		NTV2VideoFormat		mVideoFormat;			///< @brief	My video format
 		NTV2TaskMode		mInputSavedTaskMode;	///< @brief	For restoring the input device's prior task mode
 		NTV2TaskMode		mOutputSavedTaskMode;	///< @brief	For restoring the output device's prior task mode
@@ -166,7 +164,7 @@ class NTV2Burn4KQuadrant
 		bool				mGlobalQuit;			///< @brief	Set "true" to gracefully stop
 		AJATimeCodeBurn		mTCBurner;				///< @brief	My timecode burner
 		uint32_t			mQueueSize;				///< @brief	My queue size
-		NTV2FormatDesc		mFormatDesc;		///< @brief	Describes raster images
+		NTV2FormatDesc		mFormatDesc;			///< @brief	Describes raster images
 		NTV2FrameDataArray	mHostBuffers;			///< @brief	My host buffers
 		CircularBuffer		mFrameDataRing;			///< @brief	AJACircularBuffer that controls frame data access by producer/consumer threads
 

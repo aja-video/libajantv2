@@ -36,9 +36,7 @@ std::ostream & operator << (std::ostream & ioStrm,  const TestPatConfig & inObj)
 
 NTV2OutputTestPattern::NTV2OutputTestPattern (const TestPatConfig & inConfig)
 	:	mConfig				(inConfig),
-		mDeviceID			(DEVICE_ID_NOTFOUND),
-		mSavedTaskMode		(NTV2_TASK_MODE_INVALID),
-		mSavedConnections	()
+		mSavedTaskMode		(NTV2_TASK_MODE_INVALID)
 {
 }	//	constructor
 
@@ -59,9 +57,10 @@ AJAStatus NTV2OutputTestPattern::Init (void)
 {
 	//	Open the device...
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mDevice))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
-	mDeviceID = mDevice.GetDeviceID();	//	Keep this ID handy -- it's used frequently
-
+	{	if (aja::lower(mConfig.fDeviceSpec) != "list" && mConfig.fDeviceSpec != "?")
+			cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;
+		return AJA_STATUS_OPEN;
+	}
     if (!mDevice.IsDeviceReady(false))
 		{cerr << "## ERROR:  Device '" << mDevice.GetDisplayName() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 	if (!mDevice.features().CanDoPlayback())
@@ -86,7 +85,9 @@ AJAStatus NTV2OutputTestPattern::Init (void)
 	{
 		mDevice.GetConnections(mSavedConnections);		//	Save current routing, so it can be restored later
 		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid())))
+		{	cerr	<< "## ERROR:  '" << mDevice.GetDisplayName() << "' can't be acquired -- busy" << endl;
 			return AJA_STATUS_BUSY;		//	Device is in use by another app -- fail
+		}
 	}
 	mDevice.SetTaskMode(NTV2_OEM_TASKS);		//	Set OEM service level
 
@@ -247,7 +248,7 @@ void NTV2OutputTestPattern::RouteOutputSignal (void)
 }	//	RouteOutputSignal
 
 
-AJAStatus NTV2OutputTestPattern::EmitPattern (void)
+bool NTV2OutputTestPattern::EmitPattern (void)
 {
 	//  Connect the FrameStore to the video output...
 	RouteOutputSignal();
@@ -256,25 +257,21 @@ AJAStatus NTV2OutputTestPattern::EmitPattern (void)
 	NTV2FormatDescriptor fd	(mConfig.fVideoFormat, mConfig.fPixelFormat, mConfig.fVancMode);
 	NTV2Buffer hostBuffer (fd.GetTotalBytes());
 	if (hostBuffer.IsNULL())
-		return AJA_STATUS_MEMORY;
+		return false;
 
 	//	Write the requested test pattern into host buffer...
 	NTV2TestPatternGen	testPatternGen;
 	testPatternGen.setVANCToLegalBlack(fd.IsVANC());
 	if (!testPatternGen.DrawTestPattern (mConfig.fTestPatternName,	fd,	hostBuffer))
-		return AJA_STATUS_FAIL;
+		return false;
 
 	//	Find out which frame is currently being output from the frame store...
 	uint32_t currentOutputFrame(0);
 	if (!mDevice.GetOutputFrame (mConfig.fOutputChannel, currentOutputFrame))
-		return AJA_STATUS_FAIL;	//	ReadRegister failure?
+		return false;	//	ReadRegister failure?
 
 	//	Now simply transfer the contents of the host buffer to the device's current output frame...
-	if (!mDevice.DMAWriteFrame (currentOutputFrame,				//	Device frame number
+	return mDevice.DMAWriteFrame (currentOutputFrame,				//	Device frame number
 								AsULWordPtr(fd.GetRowAddress(hostBuffer.GetHostPointer(), 0)),	//	Host buffer address
-								ULWord(hostBuffer.GetByteCount())))		//	# bytes to xfer
-		return AJA_STATUS_FAIL;
-
-	return AJA_STATUS_SUCCESS;
-
+								ULWord(hostBuffer.GetByteCount()));		//	# bytes to xfer
 }	//	EmitPattern

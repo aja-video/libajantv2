@@ -142,11 +142,13 @@ int main (int argc, const char ** argv)
 	config.fWithAnc			= doRecordAux   ? true : false;
 	config.fWithAudio		= doRecordAudio ? true : false;
 
+	int result (0);
+	do
 	{	//	Instantiate and initialize the NTV2DolbyCapture object...
 		NTV2DolbyCapture capturer(config);
 		status = capturer.Init();
 		if (AJA_FAILURE(status))
-			{cout << "## ERROR:  Initialization failed: " << ::AJAStatusToString(status) << endl;	return 1;}
+			{result = 1;  break;}
 
 		::signal (SIGINT, SignalHandler);
 		#if defined (AJAMac)
@@ -167,7 +169,7 @@ int main (int argc, const char ** argv)
 			AJATime::Sleep(2000);
 		} while (!gGlobalQuit);	//	loop til quit time
 		cout << endl;
-	}	//	NTV2DolbyCapture scope
-	return 0;
+	} while (false);	//	NTV2DolbyCapture scope
+	return result;
 
 }	//	main

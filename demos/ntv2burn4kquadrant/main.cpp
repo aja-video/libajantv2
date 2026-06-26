@@ -89,19 +89,18 @@ int main (int argc, const char ** argv)
 	config.fInputFrames.setCountOnly(5);
 	config.fOutputFrames.setCountOnly(5);
 
+	int result (0);
+	do
 	{	//	Instantiate and initialize the NTV2Burn4KQuadrant object...
 		NTV2Burn4KQuadrant burner (config);
+		if (AJA_FAILURE(burner.Init()))
+			{result = 1;  break;}
 
 		::signal (SIGINT, SignalHandler);
 		#if defined (AJAMac)
 			::signal (SIGHUP, SignalHandler);
 			::signal (SIGQUIT, SignalHandler);
 		#endif
-
-		//	Initialize the NTV2Burn4KQuadrant instance...
-		AJAStatus status (burner.Init());
-		if (AJA_FAILURE(status))
-			{cerr << "## ERROR:  Initialization failed, status=" << status << endl;  return 4;}
 
 		//	Start the burner's capture and playout threads...
 		burner.Run();
@@ -123,7 +122,7 @@ int main (int argc, const char ** argv)
 			AJATime::Sleep(1000);
 		} while (!gGlobalQuit);	//	loop until signaled
 		cout << endl;
-	}	//	NTV2Burn4KQuadrant scope
-	return 0;
+	} while (false);	//	NTV2Burn4KQuadrant scope
+	return result;
 
 }	//	main

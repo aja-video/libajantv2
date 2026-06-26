@@ -78,13 +78,14 @@ int main (int argc, const char ** argv)
 
 	//	Device
 	CNTV2Card device;
-	const string deviceSpec (pDeviceSpec ? pDeviceSpec : "");
+	string deviceSpec (pDeviceSpec ? pDeviceSpec : "");
 	if (!deviceSpec.empty())
 	{	//	--device option:  show info only for the specified device
 		if (CNTV2DeviceScanner::GetFirstDeviceFromArgument(deviceSpec, device))
 			return ShowDeviceInfo(device);	//	Show info for a single device
-		cerr << "## ERROR: Failed to open '" << deviceSpec << "'";
-		return 2;
+		if (aja::lower(deviceSpec) != "list" && deviceSpec != "?")
+			{cerr << "## ERROR: Failed to open '" << deviceSpec << "'";  return 2;}
+		return 0;
 	}	//	if -d option used
 
 	cout << "AJA NTV2 SDK " << ::NTV2Version() << " supports devices:  " << ::NTV2GetSupportedDevices() << endl;

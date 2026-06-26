@@ -954,13 +954,13 @@ AJAStatus NTV2CCPlayer::Init (void)
     if (!mDevice.IsDeviceReady(false))
 		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 	if (!mDevice.features().CanDoPlayback())
-		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is capture-only" << endl;  return AJA_STATUS_FEATURE;}
+		{cerr << "## ERROR:  '" << mDevice.GetDescription() << "' is capture-only" << endl;  return AJA_STATUS_FEATURE;}
 
 	if (!mConfig.fDoMultiFormat)
 	{
 		if (!mDevice.AcquireStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid())))
 		{
-			cerr << "## ERROR:  Cannot acquire '" << mDevice.GetDisplayName() << "' because another app owns it" << endl;
+			cerr << "## ERROR:  Cannot acquire '" << mDevice.GetDescription() << "' because another app owns it" << endl;
 			return AJA_STATUS_BUSY;	//	Some other app owns the device
 		}
 		mDevice.GetTaskMode(mSavedTaskMode);	//	Save the current task mode
@@ -1163,7 +1163,7 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 
 	cerr	<< "## NOTE:  Generating '" << ::NTV2VideoFormatToString(mConfig.fVideoFormat)
 			<< "' using " << (NTV2_IS_VANCMODE_ON(mConfig.fVancMode) ? "VANC" : "device Anc inserter")
-			<< " on '" << mDevice.GetDisplayName() << "' to " << ::NTV2OutputDestinationToString(mConfig.fOutputDest)
+			<< " on '" << mDevice.GetDescription() << "' to " << ::NTV2OutputDestinationToString(mConfig.fOutputDest)
 			<< (mConfig.fDoRGBOnWire ? " (DL-RGB)" : "")
 			<< " from FrameStore" << DEC(mConfig.fOutputChannel+1)
 			<< " using " << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat) << endl;

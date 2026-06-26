@@ -11,9 +11,6 @@
 #include "ntv2testpatterngen.h"
 #include "ajabase/common/timebase.h"
 #include "ajabase/system/process.h"
-#include "ajaanc/includes/ancillarydata_hdr_sdr.h"
-#include "ajaanc/includes/ancillarydata_hdr_hdr10.h"
-#include "ajaanc/includes/ancillarydata_hdr_hlg.h"
 
 using namespace std;
 
@@ -50,7 +47,6 @@ NTV2Player8K::NTV2Player8K (const PlayerConfig & inConfig)
 		mConsumerThread		(),
 		mProducerThread		(),
 		mDevice				(),
-		mDeviceID			(DEVICE_ID_INVALID),
 		mSavedTaskMode		(NTV2_TASK_MODE_INVALID),
 		mCurrentFrame		(0),
 		mCurrentSample		(0),
@@ -104,13 +100,14 @@ AJAStatus NTV2Player8K::Init (void)
 
 	//	Open the device...
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mDevice))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
-	mDeviceID = mDevice.GetDeviceID();	//	Keep this ID handy -- it's used frequently
-
+	{	if (aja::lower(mConfig.fDeviceSpec) != "list" && mConfig.fDeviceSpec != "?")
+			cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl; 
+		return AJA_STATUS_OPEN;
+	}
     if (!mDevice.IsDeviceReady(false))
 		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 	if (!mDevice.features().CanDoPlayback())
-		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is capture-only" << endl;  return AJA_STATUS_FEATURE;}
+		{cerr << "## ERROR:  '" << mDevice.GetDescription() << "' is capture-only" << endl;  return AJA_STATUS_FEATURE;}
 
 	const UWord maxNumChannels (mDevice.features().GetNumFrameStores());
 
@@ -169,10 +166,9 @@ AJAStatus NTV2Player8K::Init (void)
 
 	//	Ready to go...
 	#if defined(_DEBUG)
-		cerr << mConfig;
-		if (mDevice.IsRemote())
-			cerr	<< "Device Description:  " << mDevice.GetDescription() << endl;
-		cerr << endl;
+		cerr << mConfig
+			<< "Device Description:  " << mDevice.GetDescription() << endl
+			<< endl;
 	#endif	//	defined(_DEBUG)
 	return AJA_STATUS_SUCCESS;
 
@@ -185,17 +181,17 @@ AJAStatus NTV2Player8K::SetUpVideo (void)
  	if (mConfig.fVideoFormat == NTV2_FORMAT_UNKNOWN)
 		return AJA_STATUS_BAD_PARAM;
 	if (!mDevice.features().CanDoVideoFormat(mConfig.fVideoFormat))
-	{	cerr	<< "## ERROR:  '" << mDevice.GetDisplayName() << "' doesn't support "
+	{	cerr	<< "## ERROR:  '" << mDevice.GetDescription() << "' doesn't support "
 				<< ::NTV2VideoFormatToString(mConfig.fVideoFormat) << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
 	if (!mDevice.features().CanDoFrameBufferFormat(mConfig.fPixelFormat))
-	{	cerr	<< "## ERROR: '" << mDevice.GetDisplayName() << "' doesn't support "
+	{	cerr	<< "## ERROR: '" << mDevice.GetDescription() << "' doesn't support "
 				<< ::NTV2FrameBufferFormatString(mConfig.fPixelFormat) << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
 	if (::IsRGBFormat(mConfig.fPixelFormat) != mConfig.fDoRGBOnWire  &&  mDevice.features().GetNumCSCs() == 0)
-	{	cerr	<< "## ERROR: '" << mDevice.GetDisplayName() << "' has no CSCs, and '--pixelFormat' \""
+	{	cerr	<< "## ERROR: '" << mDevice.GetDescription() << "' has no CSCs, and '--pixelFormat' \""
 				<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, true) << "\" contradicts '--rgb' setting" << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}

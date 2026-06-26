@@ -130,7 +130,6 @@ class NTV2LLBurn
 		BurnConfig			mConfig;				///< @brief	My configuration info
 		AJAThread			mRunThread;				///< @brief	My worker thread object
 		CNTV2Card			mDevice;				///< @brief	My CNTV2Card instance
-		NTV2DeviceID		mDeviceID;				///< @brief	Keep my device ID handy
 		NTV2VideoFormat		mVideoFormat;			///< @brief	Format of video being ingested & played
 		NTV2FormatDesc		mFormatDesc;			///< @brief	Describes raster images
 		NTV2TaskMode		mSavedTaskMode;			///< @brief	For restoring prior state

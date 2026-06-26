@@ -26,13 +26,13 @@ static void SignalHandler (int inSignal)
 
 int main (int argc, const char ** argv)
 {
-	char *			pDeviceSpec		(AJA_NULL);		//	Device specifier string, if any
-	char *			pPixelFormat	(AJA_NULL);		//	Pixel format argument
-	int				channelNumber	(1);			//	Channel/FrameStore to use
-	int				doMultiFormat	(0);			//	MultiFormat mode?
-	int				showVersion		(0);			//	Show version?
-	int				doQuadRouting	(0);			//	Quad/Square routing (i.e. not TSI)?
-	int				numAudioLinks	(1);			//	Number of audio systems for multi-link audio
+	char *	pDeviceSpec		(AJA_NULL);		//	Device specifier string, if any
+	char *	pPixelFormat	(AJA_NULL);		//	Pixel format argument
+	int		channelNumber	(1);			//	Channel/FrameStore to use
+	int		doMultiFormat	(0);			//	MultiFormat mode?
+	int		showVersion		(0);			//	Show version?
+	int		doQuadRouting	(0);			//	Quad/Square routing (i.e. not TSI)?
+	int		numAudioLinks	(1);			//	Number of audio systems for multi-link audio
 	AJADebug::Open();
 
 	//	Command line option descriptions:
@@ -90,11 +90,12 @@ int main (int argc, const char ** argv)
 	config.fWithAnc			= true;									//	Always capture anc
 	config.fDoMultiFormat	= doMultiFormat ? true : false;			//	Multiformat mode?
 
+	int result (0);
+	do
 	{	//	Instantiate and initialize the NTV2Capture4K object...
 		NTV2Capture4K capturer(config);
-		AJAStatus status = capturer.Init();
-		if (AJA_FAILURE(status))
-			{cout << "## ERROR:  Initialization failed: " << ::AJAStatusToString(status) << endl;	return 1;}
+		if (AJA_FAILURE(capturer.Init()))
+			{result = 1;  break;}
 
 		::signal (SIGINT, SignalHandler);
 		#if defined(AJAMac)
@@ -115,7 +116,7 @@ int main (int argc, const char ** argv)
 			AJATime::Sleep(2000);
 		} while (!gGlobalQuit);	//	loop til done
 		cout << endl;
-	}	//	NTV2Capture4K scope
-	return 0;
+	} while (false);	//	NTV2Capture4K scope
+	return result;
 
 }	//	main

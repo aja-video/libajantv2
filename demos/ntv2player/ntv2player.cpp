@@ -194,12 +194,12 @@ AJAStatus NTV2Player::SetUpVideo (void)
  	if (mConfig.fVideoFormat == NTV2_FORMAT_UNKNOWN)
 		{cerr << "## ERROR: unknown video format" << endl;  return AJA_STATUS_BAD_PARAM;}
 	if (!mDevice.features().CanDoVideoFormat(mConfig.fVideoFormat))
-	{	cerr	<< "## ERROR:  '" << mDevice.GetDisplayName() << "' doesn't support "
+	{	cerr	<< "## ERROR:  '" << mDevice.GetDescription() << "' doesn't support "
 				<< ::NTV2VideoFormatToString(mConfig.fVideoFormat) << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
 	if (!mDevice.features().CanDoFrameBufferFormat(mConfig.fPixelFormat))
-	{	cerr	<< "## ERROR: '" << mDevice.GetDisplayName() << "' doesn't support "
+	{	cerr	<< "## ERROR: '" << mDevice.GetDescription() << "' doesn't support "
 				<< ::NTV2FrameBufferFormatString(mConfig.fPixelFormat) << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}

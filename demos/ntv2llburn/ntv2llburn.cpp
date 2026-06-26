@@ -31,7 +31,6 @@ const uint32_t  kNumFrameBuffers (2); // ping-pong between frames N and N+1 (det
 NTV2LLBurn::NTV2LLBurn (const BurnConfig & inConfig)
 	:	mConfig					(inConfig),
 		mRunThread				(AJAThread()),
-		mDeviceID				(DEVICE_ID_NOTFOUND),
 		mVideoFormat			(NTV2_FORMAT_UNKNOWN),
 		mSavedTaskMode			(NTV2_DISABLE_TASKS),
 		mOutputDest				(NTV2_OUTPUTDESTINATION_INVALID),
@@ -83,31 +82,31 @@ AJAStatus NTV2LLBurn::Init (void)
 
 	//	Open the device...
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mDevice))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
-
+	{	if (aja::lower(mConfig.fDeviceSpec) != "list" && mConfig.fDeviceSpec != "?")
+			cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;
+		return AJA_STATUS_OPEN;
+	}
     if (!mDevice.IsDeviceReady (false))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
-
-	mDeviceID = mDevice.GetDeviceID ();		//	Keep the device ID handy since it will be used frequently
+		{cerr << "## ERROR:  '" << mDevice.GetDescription() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
 	//	Burn requires device capable of capturing and playing video...
 	if (!(mDevice.features().CanDoCapture()  &&  mDevice.features().CanDoPlayback()))
-		{cerr << "## ERROR:  Device cannot both capture & play video" << endl;	return AJA_STATUS_BAD_PARAM; }
+		{cerr << "## ERROR:  '" << mDevice.GetDescription() << "' cannot both capture & play video" << endl;	return AJA_STATUS_BAD_PARAM; }
 
 	ULWord	appSignature	(0);
 	int32_t	appPID			(0);
-	mDevice.GetTaskMode (mSavedTaskMode);		//	Save the current device state
+	mDevice.GetTaskMode(mSavedTaskMode);		//	Save the current device state
 	mDevice.GetStreamingApplication (appSignature, appPID);		//	Who currently "owns" the device?
 	if (!mConfig.fDoMultiFormat)
 	{
 		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
 		{
-			cerr << "## ERROR:  Unable to acquire device because another app (pid " << appPID << ") owns it" << endl;
+			cerr << "## ERROR:  Unable to acquire '" << mDevice.GetDescription() << "' because another app (pid " << appPID << ") owns it" << endl;
 			return AJA_STATUS_BUSY;		//	Some other app is using the device
 		}
-		mDevice.ClearRouting ();	//	Clear the current device routing (since I "own" the device)
+		mDevice.ClearRouting();	//	Clear the current device routing (since I "own" the device)
 	}
-	mDevice.SetTaskMode (NTV2_OEM_TASKS);	//	Set the OEM service level
+	mDevice.SetTaskMode(NTV2_OEM_TASKS);	//	Set the OEM service level
 
 	//	Configure the SDI relays if present
 	if (mDevice.features().HasSDIRelays())
@@ -138,16 +137,16 @@ AJAStatus NTV2LLBurn::Init (void)
 
 	//	Set up the video and audio...
 	status = SetupVideo();
-	if (AJA_FAILURE (status))
+	if (AJA_FAILURE(status))
 		return status;
 
 	status = SetupAudio();
-	if (AJA_FAILURE (status))
+	if (AJA_FAILURE(status))
 		return status;
 
 	//	Set up the circular buffers...
 	status = SetupHostBuffers();
-	if (AJA_FAILURE (status))
+	if (AJA_FAILURE(status))
 		return status;
 
 	if (NTV2_IS_ANALOG_TIMECODE_INDEX(mConfig.fTimecodeSource))
@@ -155,7 +154,13 @@ AJAStatus NTV2LLBurn::Init (void)
 
 	//	Lastly, prepare my AJATimeCodeBurn instance...
 	mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat (mConfig.fPixelFormat), mFormatDesc.numPixels, mFormatDesc.numLines);
-
+	//	Ready to go...
+	if (mConfig.IsVerbose())
+	{	cerr << mConfig
+			<< "Device Description: " << mDevice.GetDescription() << endl
+			<< endl;
+	}
+	BURNINFO("Configuration: " << mConfig);
 	return AJA_STATUS_SUCCESS;
 
 }	//	Init

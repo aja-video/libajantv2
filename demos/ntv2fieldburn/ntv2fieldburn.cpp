@@ -26,7 +26,6 @@ NTV2FieldBurn::NTV2FieldBurn (const BurnConfig & inConfig)
 	:	mConfig				(inConfig),
 		mPlayThread			(AJAThread()),
 		mCaptureThread		(AJAThread()),
-		mDeviceID			(DEVICE_ID_NOTFOUND),
 		mVideoFormat		(NTV2_FORMAT_UNKNOWN),
 		mSavedTaskMode		(NTV2_DISABLE_TASKS),
 		mOutputDest			(NTV2_OUTPUTDESTINATION_INVALID),
@@ -69,16 +68,16 @@ AJAStatus NTV2FieldBurn::Init (void)
 
 	//	Open the device...
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mDevice))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
-
+	{	if (aja::lower(mConfig.fDeviceSpec) != "list" && mConfig.fDeviceSpec != "?")
+			cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;
+		return AJA_STATUS_OPEN;
+	}
     if (!mDevice.IsDeviceReady (false))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
-
-	mDeviceID = mDevice.GetDeviceID();	//	Keep the device ID handy since it will be used frequently
+		{cerr << "## ERROR:  '" << mDevice.GetDescription() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 	if (!mDevice.features().CanDoCapture())
-		{cerr << "## ERROR:  Device '" << mDeviceID << "' cannot capture" << endl;  return AJA_STATUS_FEATURE;}
+		{cerr << "## ERROR:  '" << mDevice.GetDescription() << "' cannot capture" << endl;  return AJA_STATUS_FEATURE;}
 	if (!mDevice.features().CanDoPlayback())
-		{cerr << "## ERROR:  Device '" << mDeviceID << "' cannot playout" << endl;  return AJA_STATUS_FEATURE;}
+		{cerr << "## ERROR:  '" << mDevice.GetDescription() << "' cannot playout" << endl;  return AJA_STATUS_FEATURE;}
 
 	ULWord	appSignature	(0);
 	int32_t	appPID			(0);
@@ -88,7 +87,7 @@ AJAStatus NTV2FieldBurn::Init (void)
 	{
 		if (!mDevice.AcquireStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid())))
 		{
-			cerr << "## ERROR:  Unable to acquire device because another app (pid " << appPID << ") owns it" << endl;
+			cerr << "## ERROR:  Unable to acquire '" << mDevice.GetDescription() << "' because another app (pid " << appPID << ") owns it" << endl;
 			return AJA_STATUS_BUSY;		//	Some other app is using the device
 		}
 		mDevice.ClearRouting();	//	Clear the current device routing (since I "own" the device)
@@ -115,13 +114,13 @@ AJAStatus NTV2FieldBurn::Init (void)
 	RouteOutputSignal();
 
 	//	Lastly, prepare my AJATimeCodeBurn instance...
-	mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat (mConfig.fPixelFormat),
-																		mFormatDesc.numPixels,
-																		mFormatDesc.numLines);
+	mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat (mConfig.fPixelFormat), mFormatDesc.numPixels, mFormatDesc.numLines);
 	//	Ready to go...
-	#if defined(_DEBUG)
-		cerr << mConfig << endl;
-	#endif	//	not _DEBUG
+	if (mConfig.IsVerbose())
+	{	cerr << mConfig
+			<< "Device Description:  " << mDevice.GetDescription() << endl
+			<< endl;
+	}
 	BURNINFO("Configuration: " << mConfig);
 	return AJA_STATUS_SUCCESS;
 

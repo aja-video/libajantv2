@@ -150,7 +150,6 @@ class NTV2Burn
 		AJAThread			mPlayThread;		///< @brief	My playout thread object
 		AJAThread			mCaptureThread;		///< @brief	My capture thread object
 		CNTV2Card			mDevice;			///< @brief	My CNTV2Card instance
-		NTV2DeviceID		mDeviceID;			///< @brief	Keep my device ID handy
 		NTV2VideoFormat		mVideoFormat;		///< @brief	Format of video being ingested & played
 		NTV2FormatDesc		mFormatDesc;		///< @brief	Describes raster images
 		NTV2TaskMode		mSavedTaskMode;		///< @brief	For restoring prior state

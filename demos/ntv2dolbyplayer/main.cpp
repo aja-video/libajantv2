@@ -123,7 +123,7 @@ int main (int argc, const char ** argv)
 	if (doRamp  &&  pDolbyFile)
 		{cerr	<< "## ERROR:  conflicting options '--ramp' and '--dolby'" << endl;  return 1;}
 
-	//Remaining options for this demo
+	//	Remaining options for this demo
 	config.fSuppressAudio	= noAudio		? true	: false;
 	config.fSuppressVideo	= noVideo		? true	: false;
 	config.fDoMultiFormat	= doMultiFormat	? true	: false;	//	Multiformat mode?
@@ -131,11 +131,12 @@ int main (int argc, const char ** argv)
 	config.fDoHDMIOutput	= true;  
 	config.fDolbyFilePath = pDolbyFile  ?  pDolbyFile  :  "";
 
+	int result (0);
+	do
 	{	//	Instantiate and initialize the NTV2DolbyPlayer object...
 		NTV2DolbyPlayer	player (config);
-		status = player.Init();
-		if (AJA_FAILURE(status))
-			{cout << "## ERROR:  Initialization failed: " << ::AJAStatusToString(status) << endl;	return 1;}
+		if (AJA_FAILURE(player.Init()))
+			{result = 1;  break;}
 
 		::signal (SIGINT, SignalHandler);
 		#if defined (AJAMac)
@@ -158,7 +159,7 @@ int main (int argc, const char ** argv)
 			AJATime::Sleep(2000);
 		} while (player.IsRunning() && !gGlobalQuit);	//	loop til done
 		cout << endl;
-	}	//	NTV2DolbyPlayer scope
-	return 0;
+	} while (false);	//	NTV2DolbyPlayer scope
+	return result;
  
 }	//	main

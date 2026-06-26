@@ -62,10 +62,10 @@ class NTV2OutputTestPattern
 
 		/**
 			@brief		Generates, transfers and displays the test pattern on the output.
-			@return		AJA_STATUS_SUCCESS if successful; otherwise another AJAStatus code if unsuccessful.
+			@return		true if successful; otherwise false.
 			@note		Do not call this method without first calling my Init method.
 		**/
-		AJAStatus		EmitPattern (void);
+		bool			EmitPattern (void);
 
 
 	//	Protected Instance Methods
@@ -84,11 +84,10 @@ class NTV2OutputTestPattern
 
 	//	Private Member Data
 	private:
-		TestPatConfig			mConfig;			///< @brief	My configuration settings
-		CNTV2Card				mDevice;			///< @brief	My CNTV2Card instance
-		NTV2DeviceID			mDeviceID;			///< @brief	My device identifier
-		NTV2TaskMode			mSavedTaskMode;		///< @brief For restoring previous task mode
-		NTV2XptConnections		mSavedConnections;	///< @brief	For restoring previous routing
+		TestPatConfig		mConfig;			///< @brief	My configuration settings
+		CNTV2Card			mDevice;			///< @brief	My CNTV2Card instance
+		NTV2TaskMode		mSavedTaskMode;		///< @brief For restoring previous task mode
+		NTV2XptConnections	mSavedConnections;	///< @brief	For restoring previous routing
 
 };	//	NTV2OutputTestPattern
 

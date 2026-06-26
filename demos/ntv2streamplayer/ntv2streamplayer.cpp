@@ -30,7 +30,6 @@ NTV2StreamPlayer::NTV2StreamPlayer (const PlayerConfig & inConfig)
 		mConsumerThread		(),
 		mProducerThread		(),
 		mDevice				(),
-		mDeviceID			(DEVICE_ID_INVALID),
 		mSavedTaskMode		(NTV2_TASK_MODE_INVALID),
 		mCurrentFrame		(0),
 		mFormatDesc			(),
@@ -76,8 +75,6 @@ AJAStatus NTV2StreamPlayer::Init (void)
 	//	Open the device...
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mDevice))
 		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
-	mDeviceID = mDevice.GetDeviceID();	//	Keep this ID handy -- it's used frequently
-
     if (!mDevice.IsDeviceReady(false))
 		{cerr << "## ERROR:  Device '" << mDevice.GetDisplayName() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 	if (!mDevice.features().CanDoPlayback())
@@ -133,7 +130,9 @@ AJAStatus NTV2StreamPlayer::Init (void)
 
 	//	Ready to go...
 	#if defined(_DEBUG)
-		cerr << mConfig << endl;
+		cerr << mConfig
+			<< "Device Description:  " << mDevice.GetDescription() << endl
+			<< endl;
 	#endif	//	defined(_DEBUG)
 	return AJA_STATUS_SUCCESS;
 

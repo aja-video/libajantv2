@@ -25,7 +25,6 @@ using namespace std;
 NTV2Capture::NTV2Capture (const CaptureConfig & inConfig)
 	:	mConsumerThread		(AJAThread()),
 		mProducerThread		(AJAThread()),
-		mDeviceID			(DEVICE_ID_NOTFOUND),
 		mConfig				(inConfig),
 		mVideoFormat		(NTV2_FORMAT_UNKNOWN),
 		mSavedTaskMode		(NTV2_DISABLE_TASKS),
@@ -76,19 +75,20 @@ AJAStatus NTV2Capture::Init (void)
 
 	//	Open the device...
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mDevice))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
-
+	{	if (aja::lower(mConfig.fDeviceSpec) != "list" && mConfig.fDeviceSpec != "?")
+			cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;
+		return AJA_STATUS_OPEN;
+	}
 	if (!mDevice.IsDeviceReady())
-		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
+		{cerr << "## ERROR:  '" << mDevice.GetDescription() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
-	mDeviceID = mDevice.GetDeviceID();						//	Keep the device ID handy, as it's used frequently
 	const bool isKonaHDMI (mDevice.features().GetNumHDMIVideoInputs() > 1);
 	const NTV2IOKinds inputType (isKonaHDMI ? NTV2_IOKINDS_HDMI : NTV2_IOKINDS_SDI);
 	if (!mDevice.features().CanDoCapture())
-		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is playback-only" << endl;  return AJA_STATUS_FEATURE;}
+		{cerr << "## ERROR:  '" << mDevice.GetDescription() << "' is playback-only" << endl;  return AJA_STATUS_FEATURE;}
 
 	if (!mDevice.features().CanDoFrameBufferFormat(mConfig.fPixelFormat))
-	{	cerr	<< "## ERROR:  '" << mDevice.GetDisplayName() << "' doesn't support '"
+	{	cerr	<< "## ERROR:  '" << mDevice.GetDescription() << "' doesn't support '"
 				<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, true) << "' ("
 				<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, false) << ", " << DEC(mConfig.fPixelFormat) << ")" << endl;
 		return AJA_STATUS_UNSUPPORTED;
@@ -102,7 +102,7 @@ AJAStatus NTV2Capture::Init (void)
 	{
 		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid())))
 		{
-			cerr << "## ERROR:  Unable to acquire '" << mDevice.GetDisplayName() << "' because another app (pid " << appPID << ") owns it" << endl;
+			cerr << "## ERROR:  Unable to acquire '" << mDevice.GetDescription() << "' because another app (pid " << appPID << ") owns it" << endl;
 			return AJA_STATUS_BUSY;	//	Another app is using the device
 		}
 	}
@@ -124,11 +124,11 @@ AJAStatus NTV2Capture::Init (void)
 	if (!mDevice.features().CanDoInputSource(mConfig.fInputSource))
 	{
 		cerr	<< "## ERROR:  No such input '" << ::NTV2InputSourceToString(mConfig.fInputSource, /*compact?*/true)
-				<< "' on '" << mDevice.GetDisplayName() << "'" << endl;
+				<< "' on '" << mDevice.GetDescription() << "'" << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
 	if (mConfig.fWithAnc  &&  !mDevice.features().CanDoCustomAnc())
-		{cerr << "## ERROR: Anc capture requested, but '" << mDevice.GetDisplayName() << "' has no anc extractors";  return AJA_STATUS_UNSUPPORTED;}
+		{cerr << "## ERROR: Anc capture requested, but '" << mDevice.GetDescription() << "' has no anc extractors";  return AJA_STATUS_UNSUPPORTED;}
 
 	//	Set up the video and audio...
 	status = SetupVideo();
@@ -146,10 +146,9 @@ AJAStatus NTV2Capture::Init (void)
 		return AJA_STATUS_FAIL;
 
 	#if defined(_DEBUG)
-		cerr << mConfig;
-		if (mDevice.IsRemote())
-			cerr	<< "Device Description:  " << mDevice.GetDescription() << endl;
-		cerr << endl;
+		cerr << mConfig
+			<< "Device Description:  " << mDevice.GetDescription() << endl
+			<< endl;
 	#endif	//	defined(_DEBUG)
 	return AJA_STATUS_SUCCESS;
 
@@ -180,7 +179,7 @@ AJAStatus NTV2Capture::SetupVideo (void)
 		{cerr << "## ERROR:  No input signal or unknown format" << endl;  return AJA_STATUS_NOINPUT;}
 	if (!mDevice.features().CanDoVideoFormat(mVideoFormat))
 	{
-		cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' cannot handle " << ::NTV2VideoFormatToString(mVideoFormat) << endl;
+		cerr << "## ERROR:  '" << mDevice.GetDescription() << "' cannot handle " << ::NTV2VideoFormatToString(mVideoFormat) << endl;
 		return AJA_STATUS_UNSUPPORTED;	//	Device can't handle this format
 	}
 	if (NTV2_IS_4K_VIDEO_FORMAT(mVideoFormat) || NTV2_IS_QUAD_QUAD_FORMAT(mVideoFormat))
@@ -189,7 +188,7 @@ AJAStatus NTV2Capture::SetupVideo (void)
             << " input signal -- try 'ntv2capture4k' or 'ntv2capture8k' demo" << endl;
 		return AJA_STATUS_UNSUPPORTED;	//	This demo can't handle this format
 	}
-	CAPNOTE(::NTV2VideoFormatToString(mVideoFormat) << " detected on " << ::NTV2InputSourceToString(mConfig.fInputSource,true) << " on " << mDevice.GetDisplayName());
+	CAPNOTE(::NTV2VideoFormatToString(mVideoFormat) << " detected on " << ::NTV2InputSourceToString(mConfig.fInputSource,true) << " on " << mDevice.GetDescription());
 	mFormatDesc = NTV2FormatDescriptor(mVideoFormat, mConfig.fPixelFormat);
 
 	//	Setting SDI output clock timing/reference is unimportant for capture-only apps...

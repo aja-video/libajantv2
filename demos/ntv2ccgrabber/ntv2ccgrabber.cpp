@@ -41,7 +41,6 @@ NTV2CCGrabber::NTV2CCGrabber (const CCGrabberConfig & inConfigData)
 
 	:	mConfig				(inConfigData),
 		mCaptureThread		(AJAThread()),
-		mDeviceID			(DEVICE_ID_NOTFOUND),
 		mSavedTaskMode		(NTV2_DISABLE_TASKS),
 		mAudioSystem		(mConfig.fWithAudio ? NTV2_AUDIOSYSTEM_1 : NTV2_AUDIOSYSTEM_INVALID),
 		mVancMode			(NTV2_VANCMODE_INVALID),
@@ -122,50 +121,55 @@ AJAStatus NTV2CCGrabber::Init (void)
 
 	//	Open the device...
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument(mConfig.fDeviceSpec, mDevice))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
-
+	{	if (aja::lower(mConfig.fDeviceSpec) != "list" && mConfig.fDeviceSpec != "?")
+			cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;
+		return AJA_STATUS_OPEN;
+	}
     if (!mDevice.IsDeviceReady(false))
 		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
-	mDeviceID = mDevice.GetDeviceID();	//	Keep this handy because it's used frequently
-	const string deviceStr(::NTV2DeviceIDToString(mDeviceID));
-
+	const string devStr(mDevice.GetDescription());
 	if (mConfig.fBurnCaptions)
 	{
-		if (mDevice.features().GetNumFrameStores() < 2)						//	Need 2+ frame stores
+		if (mDevice.features().GetNumFrameStores() < 2)					//	Need 2+ frame stores
 		{
-			cerr	<< "## ERROR:  Device '" << deviceStr << "' can't burn-in captions because at least 2 frame stores are required" << endl;
+			cerr << "## ERROR:  '" << devStr << "' can't burn-in captions because at least 2 frame stores are required" << endl;
 			return AJA_STATUS_FAIL;
 		}
 		if (!mDevice.features().CanDoPlayback())
 		{
-			cerr	<< "## ERROR:  Device '" << deviceStr << "' can't burn-in captions because device can only capture/ingest" << endl;
+			cerr << "## ERROR:  '" << devStr << "' can't burn-in captions because device can only capture/ingest" << endl;
 			return AJA_STATUS_FAIL;
 		}
 		if (mDevice.features().GetNumVideoInputs() < 1  ||  mDevice.features().GetNumVideoOutputs() < 1)	//	Need 1 input & 1 output
 		{
-			cerr	<< "## ERROR:  Device '" << deviceStr << "' can't be used -- at least 1 SDI input and 1 SDI output required" << endl;
+			cerr << "## ERROR:  '" << devStr << "' can't be used -- at least 1 SDI input and 1 SDI output required" << endl;
 			return AJA_STATUS_FAIL;
 		}
-		if (!mDevice.features().GetNumMixers())								//	Need 1 or more mixers
+		if (!mDevice.features().GetNumMixers())							//	Need 1 or more mixers
 		{
-			cerr	<< "## ERROR:  Device '" << deviceStr << "' can't burn-in captions because a mixer/keyer widget is required" << endl;
+			cerr << "## ERROR:  '" << devStr << "' can't burn-in captions because a mixer/keyer widget is required" << endl;
 			return AJA_STATUS_FAIL;
 		}
-		if (!mDevice.features().CanDoFrameBufferFormat(mPlayoutFBF))		//	FrameStore must handle 8-bit RGB with alpha
+		if (!mDevice.features().CanDoFrameBufferFormat(mPlayoutFBF))	//	FrameStore must handle 8-bit RGB with alpha
 		{
-			cerr	<< "## ERROR:  Device '" << deviceStr << "' can't burn-in captions because it can't do 8-bit RGB (with alpha)" << endl;
+			cerr << "## ERROR:  '" << devStr << "' can't burn-in captions because it can't do 8-bit RGB (with alpha)" << endl;
 			return AJA_STATUS_FAIL;
 		}
 	}	//	if --burn
 
+	ULWord appSignature (0);
+	int32_t appPID (0);
+	mDevice.GetStreamingApplication (appSignature, appPID);	//	Who currently "owns" the device?
+	mDevice.GetTaskMode(mSavedTaskMode);					//	Save the current device state
 	if (!mConfig.fDoMultiFormat)
 	{
 		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
-			{cerr << "## ERROR:  Cannot acquire -- device busy" << endl;  return AJA_STATUS_BUSY;}	//	Some other app owns the device
-		mDevice.GetTaskMode(mSavedTaskMode);	//	Save the current task mode
+		{
+			cerr << "## ERROR:  Unable to acquire '" << devStr << "' because another app (pid " << appPID << ") owns it" << endl;
+			return AJA_STATUS_BUSY;	//	Another app is using the device
+		}
 	}
-
 	mDevice.SetTaskMode(NTV2_OEM_TASKS);	//	Use the OEM service level
 
 	if (mDevice.features().CanDoMultiFormat())
@@ -190,7 +194,9 @@ AJAStatus NTV2CCGrabber::Init (void)
 	if (!m608Decoder->SubscribeChangeNotification(Caption608ChangedStatic, this))
 		{cerr << "## WARNING:  SubscribeChangeNotification failed" << endl;	return AJA_STATUS_FAIL;}
 	#if defined(_DEBUG)
-		cerr << mConfig << endl;
+		cerr << mConfig
+			<< "Device Description:  " << mDevice.GetDescription() << endl
+			<< endl;
 	#endif	//	defined(_DEBUG)
 	return AJA_STATUS_SUCCESS;
 

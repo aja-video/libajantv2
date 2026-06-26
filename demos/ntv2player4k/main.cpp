@@ -120,11 +120,13 @@ int main (int argc, const char ** argv)
 	config.fDoLinkGrouping	= doLinkGrping	? true	: false;
 	config.fNumAudioLinks	= UWord(numAudioLinks);
 
+	int result (0);
+	do
 	{	//	Instantiate and initialize the NTV2Player object...
 		NTV2Player4K player(config);
 		AJAStatus status = player.Init();
 		if (AJA_FAILURE(status))
-			return 1;
+			{result = 1;  break;}
 
 		::signal (SIGINT, SignalHandler);
 		#if defined(AJAMac)
@@ -147,7 +149,7 @@ int main (int argc, const char ** argv)
 			AJATime::Sleep(2000);
 		} while (player.IsRunning() && !gGlobalQuit);	//	loop til done
 		cout << endl;
-	}	//	NTV2Player4K scope
-	return 0;
+	} while (false);	//	NTV2Player4K scope
+	return result;
 
 }	//	main

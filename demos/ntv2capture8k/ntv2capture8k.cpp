@@ -19,7 +19,6 @@ using namespace std;
 NTV2Capture8K::NTV2Capture8K (const CaptureConfig & inConfig)
 	:	mConsumerThread		(AJAThread()),
 		mProducerThread		(AJAThread()),
-		mDeviceID			(DEVICE_ID_NOTFOUND),
 		mConfig				(inConfig),
 		mVideoFormat		(NTV2_FORMAT_UNKNOWN),
 		mSavedTaskMode		(NTV2_DISABLE_TASKS),
@@ -72,19 +71,19 @@ AJAStatus NTV2Capture8K::Init (void)
 
 	//	Open the device...
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mDevice))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
-
+	{	if (aja::lower(mConfig.fDeviceSpec) != "list" && mConfig.fDeviceSpec != "?")
+			cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;
+		return AJA_STATUS_OPEN;
+	}
 	if (!mDevice.IsDeviceReady())
-		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
-
-	mDeviceID = mDevice.GetDeviceID();						//	Keep the device ID handy, as it's used frequently
+		{cerr << "## ERROR:  '" << mDevice.GetDescription() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 	if (!mDevice.features().CanDoCapture())
-		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is playback-only" << endl;  return AJA_STATUS_FEATURE;}
+		{cerr << "## ERROR:  '" << mDevice.GetDescription() << "' is playback-only" << endl;  return AJA_STATUS_FEATURE;}
 	if (!mDevice.features().CanDo12gRouting())
-        {cerr << "## ERROR: '" << ::NTV2DeviceIDToString(mDeviceID,true) << "' lacks 12G SDI";  return AJA_STATUS_FEATURE;}
+        {cerr << "## ERROR: '" << mDevice.GetDescription() << "' lacks 12G SDI";  return AJA_STATUS_FEATURE;}
 
 	if (!mDevice.features().CanDoFrameBufferFormat(mConfig.fPixelFormat))
-	{	cerr	<< "## ERROR:  '" << mDevice.GetDisplayName() << "' doesn't support '"
+	{	cerr	<< "## ERROR:  '" << mDevice.GetDescription() << "' doesn't support '"
 				<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, true) << "' ("
 				<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, false) << ", " << DEC(mConfig.fPixelFormat) << ")" << endl;
 		return AJA_STATUS_UNSUPPORTED;
@@ -98,7 +97,7 @@ AJAStatus NTV2Capture8K::Init (void)
 	{
 		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid())))
 		{
-			cerr << "## ERROR:  Unable to acquire '" << mDevice.GetDisplayName() << "' because another app (pid " << appPID << ") owns it" << endl;
+			cerr << "## ERROR:  Unable to acquire '" << mDevice.GetDescription() << "' because another app (pid " << appPID << ") owns it" << endl;
 			return AJA_STATUS_BUSY;		//	Another app is using the device
 		}
 	}
@@ -111,13 +110,13 @@ AJAStatus NTV2Capture8K::Init (void)
 	const NTV2Channel origCh (mConfig.fInputChannel);
 	if (UWord(origCh) >= mDevice.features().GetNumFrameStores())
 	{
-		cerr << "## ERROR: No such Ch" << DEC(origCh+1) << " for '" << ::NTV2DeviceIDToString(mDeviceID,true) << "'" << endl;
+		cerr << "## ERROR: No such Ch" << DEC(origCh+1) << " for '" << mDevice.GetDescription() << "'" << endl;
 		return AJA_STATUS_BAD_PARAM;
 	}
 	//	Must use Ch1/Ch3/Ch5/Ch7;  Must use Ch1 for squares...
 	if ((origCh & 1)  ||  (origCh && !mConfig.fDoTSIRouting))
 	{
-		cerr << "## ERROR: Cannot use Ch" << DEC(origCh+1) << " for '" << ::NTV2DeviceIDToString(mDeviceID,true) << "'" << endl;
+		cerr << "## ERROR: Cannot use Ch" << DEC(origCh+1) << " for '" << mDevice.GetDescription() << "'" << endl;
 		return AJA_STATUS_BAD_PARAM;
 	}
 	mConfig.fInputSource = ::NTV2ChannelToInputSource(mConfig.fInputChannel);	//	Must use corresponding SDI inputs
@@ -143,10 +142,11 @@ AJAStatus NTV2Capture8K::Init (void)
 		return AJA_STATUS_FAIL;
 
 	#if defined(_DEBUG)
-		cerr	<< mConfig << endl << "FrameStores: " << ::NTV2ChannelSetToStr(mActiveFrameStores) << endl
-				<< "Inputs: " << ::NTV2ChannelSetToStr(mActiveSDIs) << endl;
-		if (mDevice.IsRemote())
-			cerr	<< "Device Description:  " << mDevice.GetDescription() << endl << endl;
+		cerr	<< mConfig << endl
+				<< "Device Description: " << mDevice.GetDescription() << endl
+				<< "FrameStores: " << ::NTV2ChannelSetToStr(mActiveFrameStores) << endl
+				<< "Inputs: " << ::NTV2ChannelSetToStr(mActiveSDIs) << endl
+				<< endl;
 	#endif	//	defined(_DEBUG)
 	return AJA_STATUS_SUCCESS;
 

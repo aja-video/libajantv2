@@ -150,13 +150,12 @@ int main (int argc, const char ** argv)
 	if (!config.fWithAnc  &&  config.fWithHanc)
 		{cerr	<< "## ERROR:  '--noanc' and '--hanc' are contradictory" << endl;  return 1;}
 
+	int result (0);
+	do
 	{	//	Instantiate and initialize the NTV2Burn object...
 		NTV2Burn burner (config);
-
-		//	Initialize the NTV2Burn instance...
-		AJAStatus status (burner.Init());
-		if (AJA_FAILURE(status))
-			{cerr << "## ERROR:  Initialization failed, status=" << status << endl;  return 4;}
+		if (AJA_FAILURE(burner.Init()))
+			{result = 1;  break;}
 
 		::signal (SIGINT, SignalHandler);
 		#if defined (AJAMac)
@@ -184,7 +183,7 @@ int main (int argc, const char ** argv)
 			AJATime::Sleep(2000);
 		} while (!gGlobalQuit);	//	loop until signaled
 		cout << endl;
-	}	//	NTV2Burn scope
-	return 0;
+	} while (false);	//	NTV2Burn scope
+	return result;
 
 }	//	main

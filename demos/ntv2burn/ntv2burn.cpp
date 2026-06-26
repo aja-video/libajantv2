@@ -33,7 +33,6 @@ NTV2Burn::NTV2Burn (const BurnConfig & inConfig)
 	:	mConfig			(inConfig),
 		mPlayThread		(AJAThread()),
 		mCaptureThread	(AJAThread()),
-		mDeviceID		(DEVICE_ID_NOTFOUND),
 		mVideoFormat	(NTV2_FORMAT_UNKNOWN),
 		mSavedTaskMode	(NTV2_DISABLE_TASKS),
 		mAudioSystem	(inConfig.WithAudio() ? ::NTV2InputSourceToAudioSystem(inConfig.fInputSource) : NTV2_AUDIOSYSTEM_INVALID),
@@ -75,16 +74,16 @@ AJAStatus NTV2Burn::Init (void)
 
 	//	Open the device...
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mDevice))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
-
+	{	if (aja::lower(mConfig.fDeviceSpec) != "list" && mConfig.fDeviceSpec != "?")
+			cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;
+		return AJA_STATUS_OPEN;
+	}
     if (!mDevice.IsDeviceReady(false))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
-
-	mDeviceID = mDevice.GetDeviceID();	//	Keep the device ID handy since it will be used frequently
+		{cerr << "## ERROR:  '" << mDevice.GetDescription() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 	if (!mDevice.features().CanDoCapture())
-		{cerr << "## ERROR:  Device '" << mDeviceID << "' cannot capture" << endl;  return AJA_STATUS_FEATURE;}
+		{cerr << "## ERROR:  '" << mDevice.GetDescription() << "' cannot capture" << endl;  return AJA_STATUS_FEATURE;}
 	if (!mDevice.features().CanDoPlayback())
-		{cerr << "## ERROR:  Device '" << mDeviceID << "' cannot playout" << endl;  return AJA_STATUS_FEATURE;}
+		{cerr << "## ERROR:  '" << mDevice.GetDescription() << "' cannot playout" << endl;  return AJA_STATUS_FEATURE;}
 
 	ULWord	appSignature	(0);
 	int32_t	appPID			(0);
@@ -94,7 +93,7 @@ AJAStatus NTV2Burn::Init (void)
 	{
 		if (!mDevice.AcquireStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid())))
 		{
-			cerr << "## ERROR:  Unable to acquire device because another app (pid " << appPID << ") owns it" << endl;
+			cerr << "## ERROR:  Unable to acquire '" << mDevice.GetDescription() << "' because another app (pid " << appPID << ") owns it" << endl;
 			return AJA_STATUS_BUSY;	//	Some other app is using the device
 		}
 		mDevice.ClearRouting();				//	Clear the current device routing (since I "own" the device)
@@ -140,15 +139,12 @@ AJAStatus NTV2Burn::Init (void)
 	RouteOutputSignal();
 
 	//	Lastly, prepare my AJATimeCodeBurn instance...
-	mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat (mConfig.fPixelFormat),
-																		mFormatDesc.numPixels,
-																		mFormatDesc.numLines);
+	mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat (mConfig.fPixelFormat), mFormatDesc.numPixels, mFormatDesc.numLines);
 	//	Ready to go...
 	if (mConfig.IsVerbose() || sShowConfig)
-	{	cerr << mConfig;
-		if (mDevice.IsRemote())
-			cerr	<< "Device Description:  " << mDevice.GetDescription() << endl;
-		cerr << endl;
+	{	cerr << mConfig
+			<< "Device Description:  " << mDevice.GetDescription() << endl
+			<< endl;
 	}
 	BURNINFO("Configuration: " << mConfig);
 	return AJA_STATUS_SUCCESS;
@@ -161,7 +157,7 @@ AJAStatus NTV2Burn::SetupVideo (void)
 	//	If no input source specified, choose a default...
 	if (!NTV2_IS_VALID_INPUT_SOURCE(mConfig.fInputSource))
 	{
-		mConfig.fInputSource = ::NTV2ChannelToInputSource(NTV2_CHANNEL1, mDeviceID == DEVICE_ID_KONAHDMI ? NTV2_IOKINDS_HDMI : NTV2_IOKINDS_SDI);
+		mConfig.fInputSource = ::NTV2ChannelToInputSource(NTV2_CHANNEL1, mDevice.GetDeviceID() == DEVICE_ID_KONAHDMI ? NTV2_IOKINDS_HDMI : NTV2_IOKINDS_SDI);
 		if (mConfig.IsVerbose())
 			cout << "## NOTE:  Input source was not specified, will use " << mConfig.ISrcStr() << endl;
 	}
@@ -512,16 +508,13 @@ void NTV2Burn::RouteOutputSignal (void)
 
 		for (NTV2Channel chan (startNum);  chan < endNum;  chan = NTV2Channel (chan + 1))
 		{
-			// this kills vitc capture
-//			mDevice.SetRP188SourceFilter (chan, 0);	//	Set all SDI spigots to capture embedded LTC (VITC could be an option)
-
 			if (chan == mConfig.fInputChannel  ||  chan == mConfig.fOutputChannel)
 				continue;	//	Skip the input & output channel, already routed
 			if (NTV2_IS_VALID_CHANNEL (tcInputChannel) && chan == tcInputChannel)
 				continue;	//	Skip the timecode input channel
 			if (mDevice.features().HasBiDirectionalSDI())
 				mDevice.SetSDITransmitEnable (chan, true);
-			if (CNTV2SignalRouter::GetWidgetForInput (::GetSDIOutputInputXpt (chan, mDevice.features().CanDoDualLink()), outputWidgetID, mDeviceID))
+			if (CNTV2SignalRouter::GetWidgetForInput (::GetSDIOutputInputXpt (chan, mDevice.features().CanDoDualLink()), outputWidgetID, mDevice.GetDeviceID()))
 				if (mDevice.features().CanDoWidget(outputWidgetID))
 				{
 					mDevice.Connect (::GetSDIOutputInputXpt (chan), outputXpt);

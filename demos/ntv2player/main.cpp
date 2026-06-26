@@ -122,11 +122,12 @@ int main (int argc, const char ** argv)
 	config.fDoMultiFormat	= doMultiFormat	? true	: false;	//	Multiformat mode?
 	config.fTransmitLTC		= xmitLTC		? true	: false;
 
+	int result (0);
+	do
 	{	//	Instantiate and initialize the NTV2Player object...
 		NTV2Player player(config);
-		AJAStatus status = player.Init();
-		if (AJA_FAILURE(status))
-			return 1;
+		if (AJA_FAILURE(player.Init()))
+			{result = 1;  break;}
 
 		::signal (SIGINT, SignalHandler);
 		#if defined(AJAMac)
@@ -149,7 +150,7 @@ int main (int argc, const char ** argv)
 			AJATime::Sleep(2000);
 		} while (player.IsRunning() && !gGlobalQuit);	//	loop til done
 		cout << endl;
-	}	//	NTV2Player scope
-	return 0;
+	} while (false);	//	NTV2Player scope
+	return result;
 
 }	//	main

@@ -75,48 +75,43 @@ AJAStatus NTV2Burn4KQuadrant::Init (void)
 
 	//	Open the device...
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mInputDevice))
-		{cerr << "## ERROR:  Input device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
-
-	//	Store the input device ID in a member because it will be used frequently...
-	mInputDeviceID = mInputDevice.GetDeviceID ();
+	{	if (aja::lower(mConfig.fDeviceSpec) != "list" && mConfig.fDeviceSpec != "?")
+			cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;
+		return AJA_STATUS_OPEN;
+	}
 	if (!mInputDevice.features().CanDo4KVideo())
-		{cerr << "## ERROR:  Input device '" << mConfig.fDeviceSpec << "' cannot do 4K/UHD video" << endl;  return AJA_STATUS_UNSUPPORTED;}
-
+		{cerr << "## ERROR:  Input device '" << mInputDevice.GetDescription() << "' cannot do 4K/UHD video" << endl;  return AJA_STATUS_UNSUPPORTED;}
     if (!mInputDevice.IsDeviceReady (false))
-		{cerr << "## ERROR:  Input device '" << mConfig.fDeviceSpec << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
+		{cerr << "## ERROR:  Input device '" << mInputDevice.GetDescription() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
 	//	Output device:
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec2, mOutputDevice))
 		{cerr << "## ERROR:  Output device '" << mConfig.fDeviceSpec2 << "' not found" << endl;  return AJA_STATUS_OPEN;}
-
-	//	Store the output device ID in a member because it will be used frequently...
-	mOutputDeviceID = mOutputDevice.GetDeviceID ();
 	if (!mOutputDevice.features().CanDo4KVideo())
-		{cerr << "## ERROR:  Output device '" << mConfig.fDeviceSpec2 << "' cannot do 4K/UHD video" << endl;  return AJA_STATUS_UNSUPPORTED;}
-
+		{cerr << "## ERROR:  Output device '" << mOutputDevice.GetDescription() << "' cannot do 4K/UHD video" << endl;  return AJA_STATUS_UNSUPPORTED;}
     if (!mOutputDevice.IsDeviceReady(false))
-		{cerr << "## ERROR:  Output device '" << mConfig.fDeviceSpec2 << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
+		{cerr << "## ERROR:  Output device '" << mOutputDevice.GetDescription() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
 	if (mSingleDevice)
 	{
 		if (mInputDevice.features().GetNumFrameStores() < 8)
-			{cerr << "## ERROR:  Single device '" << mConfig.fDeviceSpec2 << "' requires 8 video channels" << endl;  return AJA_STATUS_UNSUPPORTED;}
+			{cerr << "## ERROR:  Single device '" << mOutputDevice.GetDescription() << "' requires 8 video channels" << endl;  return AJA_STATUS_UNSUPPORTED;}
 		mOutputAudioSystem = NTV2_AUDIOSYSTEM_5;
 		mConfig.fOutputChannel = NTV2_CHANNEL5;
 	}
 
 	if (!mInputDevice.AcquireStreamForApplication (kDemoAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
-		{cerr << "## ERROR:  Input device '" << mConfig.fDeviceSpec << "' is in use by another application" << endl;  return AJA_STATUS_BUSY;}
-	mInputDevice.GetTaskMode (mInputSavedTaskMode);	//	Save the current state before changing it
-	mInputDevice.SetTaskMode (NTV2_OEM_TASKS);		//	Since this is an OEM demo, use the OEM service level
+		{cerr << "## ERROR:  Input device '" << mInputDevice.GetDescription() << "' is in use by another application" << endl;  return AJA_STATUS_BUSY;}
+	mInputDevice.GetTaskMode(mInputSavedTaskMode);	//	Save the current state before changing it
+	mInputDevice.SetTaskMode(NTV2_OEM_TASKS);		//	Since this is an OEM demo, use the OEM service level
 
 	if (!mSingleDevice)
 	{
 		if (!mOutputDevice.AcquireStreamForApplication (kDemoAppSignature, static_cast <int32_t>(AJAProcess::GetPid())))
-			{cerr << "## ERROR:  Output device '" << mConfig.fDeviceSpec2 << "' is in use by another application" << endl;  return AJA_STATUS_BUSY;}
+			{cerr << "## ERROR:  Output device '" << mOutputDevice.GetDescription() << "' is in use by another application" << endl;  return AJA_STATUS_BUSY;}
 
-		mOutputDevice.GetTaskMode (mOutputSavedTaskMode);	//	Save the current state before changing it
-		mOutputDevice.SetTaskMode (NTV2_OEM_TASKS);			//	Since this is an OEM demo, use the OEM service level
+		mOutputDevice.GetTaskMode(mOutputSavedTaskMode);	//	Save the current state before changing it
+		mOutputDevice.SetTaskMode(NTV2_OEM_TASKS);			//	Since this is an OEM demo, use the OEM service level
 	}
 
 	if (mInputDevice.features().CanDoMultiFormat())
@@ -185,17 +180,13 @@ AJAStatus NTV2Burn4KQuadrant::Init (void)
 	RouteOutputSignal();
 
 	//	Lastly, prepare my AJATimeCodeBurn instance...
-	mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat (mConfig.fPixelFormat),
-																		mFormatDesc.numPixels,
-																		mFormatDesc.numLines);
+	mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat (mConfig.fPixelFormat), mFormatDesc.numPixels, mFormatDesc.numLines);
 	//	Ready to go...
 	#if defined(_DEBUG)
-		cerr << mConfig;
-		if (mInputDevice.IsRemote())
-			cerr	<< "Input Device Desc:   " << mInputDevice.GetDescription() << endl;
-		if (mOutputDevice.IsRemote())
-			cerr	<< "Output Device Desc:  " << mOutputDevice.GetDescription() << endl;
-		cerr << endl;
+		cerr << mConfig
+			<< "Input Device:  " << mInputDevice.GetDescription() << endl
+			<< "Output Device: " << mOutputDevice.GetDescription() << endl
+			<< endl;
 	#endif	//	not _DEBUG
 	BURNINFO("Configuration: " << mConfig);
 	return AJA_STATUS_SUCCESS;

@@ -89,27 +89,27 @@ int main (int argc, const char ** argv)
 	config.fIsFieldMode		= noFieldMode ? false : true;
 	config.fTimecodeSource	= ::NTV2ChannelToTimecodeIndex(::NTV2InputSourceToChannel(config.fInputSource));
 
+	int result (0);
+	do
 	{	//	Instantiate and initialize the NTV2FieldBurn object...
 		NTV2FieldBurn burner (config);
+		if (AJA_FAILURE(burner.Init()))
+			{result = 1;  break;}
 
 		::signal (SIGINT, SignalHandler);
 		#if defined (AJAMac)
 			::signal (SIGHUP, SignalHandler);
 			::signal (SIGQUIT, SignalHandler);
 		#endif
+
+		//	Start the burner's capture and playout threads...
+		burner.Run();
+
 		const string	hdg1 ("           Capture  Playout  Capture  Playout"),
 						hdg2a("   Fields   Fields   Fields   Buffer   Buffer"),
 						hdg2b("   Frames   Frames   Frames   Buffer   Buffer"),
 						hdg3 ("Processed  Dropped  Dropped    Level    Level"),
 						hdg2 (noFieldMode ? hdg2b : hdg2a);
-
-		//	Initialize the NTV2FieldBurn instance...
-		AJAStatus status (burner.Init());
-		if (AJA_FAILURE (status))
-			{cerr << "## ERROR:  Initialization failed, status=" << status << endl;  return 4;}
-
-		//	Start the burner's capture and playout threads...
-		burner.Run();
 
 		//	Loop until told to stop...
 		cout << hdg1 << endl << hdg2 << endl << hdg3 << endl;
@@ -122,7 +122,7 @@ int main (int argc, const char ** argv)
 			AJATime::Sleep(2000);
 		} while (!gGlobalQuit);	//	loop until signaled
 		cout << endl;
-	}	//	NTV2FieldBurn scope
-	return 0;
+	} while (false);	//	NTV2FieldBurn scope
+	return result;
 
 }	//	main

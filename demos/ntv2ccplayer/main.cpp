@@ -294,54 +294,56 @@ int main (int argc, const char ** argv)
 	config.fSuppressTimecode	= noTimecode	? true  : false;
 	config.fEmitStats			= bEmitStats	? true  : false;
 
-	//	Instantiate and initialize the NTV2CCPlayer object...
-	NTV2CCPlayer player(config);
-	AJAStatus status = player.Init();
-	if (AJA_FAILURE(status))
-		return 1;
-
-	::signal (SIGINT, SignalHandler);
-	#if defined (AJAMac)
-		::signal (SIGHUP, SignalHandler);
-		::signal (SIGQUIT, SignalHandler);
-	#endif
-
-	//	Run it...
-	player.Run();
-
-	size_t	msgsQued (0), bytesQued (0), totMsgsEnq (0), totBytesEnq (0), totMsgsDeq (0), totBytesDeq (0), maxQueDepth (0), droppedFrames (0);
-	if (bEmitStats)
-		cout	<< "  Current  Current    Total    Total    Total    Total      Max         " << endl
-				<< " Messages    Bytes Messages    Bytes Messages    Bytes    Queue  Dropped" << endl
-				<< "   Queued   Queued Enqueued Enqueued Dequeued Dequeued    Depth   Frames" << endl;
-
-	//	Loop until we're told to stop...
+	int result (0);
 	do
-	{	//	Poll the player's encoder's status until stopped...
-		player.GetStatus (msgsQued, bytesQued, totMsgsEnq, totBytesEnq, totMsgsDeq, totBytesDeq, maxQueDepth, droppedFrames);
+	{	//	Instantiate and initialize the NTV2CCPlayer object...
+		NTV2CCPlayer player(config);
+		if (AJA_FAILURE(player.Init()))
+			return 1;
+
+		::signal (SIGINT, SignalHandler);
+		#if defined (AJAMac)
+			::signal (SIGHUP, SignalHandler);
+			::signal (SIGQUIT, SignalHandler);
+		#endif
+
+		//	Run it...
+		player.Run();
+
+		size_t	msgsQued (0), bytesQued (0), totMsgsEnq (0), totBytesEnq (0), totMsgsDeq (0), totBytesDeq (0), maxQueDepth (0), droppedFrames (0);
 		if (bEmitStats)
-			cout	<<	setw(9) << msgsQued
-					<<	setw(9) << bytesQued
-					<<	setw(9) << totMsgsEnq
-					<<	setw(9) << totBytesEnq
-					<<	setw(9) << totMsgsDeq
-					<<	setw(9) << totBytesDeq
-					<<	setw(9) << maxQueDepth
-					<<	setw(9) << droppedFrames  << "\r" << flush;
-	} while (!gGlobalQuit);	//	loop til done
+			cout	<< "  Current  Current    Total    Total    Total    Total      Max         " << endl
+					<< " Messages    Bytes Messages    Bytes Messages    Bytes    Queue  Dropped" << endl
+					<< "   Queued   Queued Enqueued Enqueued Dequeued Dequeued    Depth   Frames" << endl;
 
-	//  Ask the player to stop...
-	player.Quit (gQuitImmediately);
+		//	Loop until we're told to stop...
+		do
+		{	//	Poll the player's encoder's status until stopped...
+			player.GetStatus (msgsQued, bytesQued, totMsgsEnq, totBytesEnq, totMsgsDeq, totBytesDeq, maxQueDepth, droppedFrames);
+			if (bEmitStats)
+				cout	<<	setw(9) << msgsQued
+						<<	setw(9) << bytesQued
+						<<	setw(9) << totMsgsEnq
+						<<	setw(9) << totBytesEnq
+						<<	setw(9) << totMsgsDeq
+						<<	setw(9) << totBytesDeq
+						<<	setw(9) << maxQueDepth
+						<<	setw(9) << droppedFrames  << "\r" << flush;
+		} while (!gGlobalQuit);	//	loop til done
 
-	player.GetStatus (msgsQued, bytesQued, totMsgsEnq, totBytesEnq, totMsgsDeq, totBytesDeq, maxQueDepth, droppedFrames);
-	cout	<< endl
-			<<	msgsQued	<< " message(s) left in queue"	<< endl
-			<<	bytesQued	<< " byte(s) left in queue"		<< endl
-			<<	totMsgsEnq	<< " total message(s) enqueued"	<< endl
-			<<	totBytesEnq	<< " total byte(s) enqueued"	<< endl
-			<<	totMsgsDeq	<< " total message(s) dequeued"	<< endl
-			<<	totBytesDeq	<< " total byte(s) dequeued"	<< endl
-			<<	maxQueDepth	<< " maximum message(s) enqueued" << endl;
-	return 0;
+		//  Ask the player to stop...
+		player.Quit (gQuitImmediately);
+
+		player.GetStatus (msgsQued, bytesQued, totMsgsEnq, totBytesEnq, totMsgsDeq, totBytesDeq, maxQueDepth, droppedFrames);
+		cout	<< endl
+				<<	msgsQued	<< " message(s) left in queue"	<< endl
+				<<	bytesQued	<< " byte(s) left in queue"		<< endl
+				<<	totMsgsEnq	<< " total message(s) enqueued"	<< endl
+				<<	totBytesEnq	<< " total byte(s) enqueued"	<< endl
+				<<	totMsgsDeq	<< " total message(s) dequeued"	<< endl
+				<<	totBytesDeq	<< " total byte(s) dequeued"	<< endl
+				<<	maxQueDepth	<< " maximum message(s) enqueued" << endl;
+	} while (false);	//	NTV2CCPlayer scope ends here
+	return result;
 
 }	//	main

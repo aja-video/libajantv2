@@ -137,14 +137,16 @@ AJAStatus NTV2DolbyPlayer::Init (void)
 
 	//	Open the device...
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mDevice))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
-
+	{	if (aja::lower(mConfig.fDeviceSpec) != "list" && mConfig.fDeviceSpec != "?")
+			cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl; 
+		return AJA_STATUS_OPEN;
+	}
     if (!mDevice.IsDeviceReady(false))
-		{cerr << "## ERROR:  Device '" << mDevice.GetDisplayName() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
+		{cerr << "## ERROR:  Device '" << mDevice.GetDescription() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 	if (!mDevice.features().CanDoPlayback())
-		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is capture-only" << endl;  return AJA_STATUS_FEATURE;}
+		{cerr << "## ERROR:  '" << mDevice.GetDescription() << "' is capture-only" << endl;  return AJA_STATUS_FEATURE;}
 	if (!mDevice.features().GetNumHDMIVideoOutputs())
-		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' has no HDMI outputs" << endl;  return AJA_STATUS_FEATURE;}
+		{cerr << "## ERROR:  '" << mDevice.GetDescription() << "' has no HDMI outputs" << endl;  return AJA_STATUS_FEATURE;}
 
 	const UWord maxNumChannels (mDevice.features().GetNumFrameStores());
 
@@ -153,7 +155,7 @@ AJAStatus NTV2DolbyPlayer::Init (void)
 		mConfig.fOutputChannel = NTV2_CHANNEL2;
 	if (UWord(mConfig.fOutputChannel) >= maxNumChannels)
 	{
-		cerr	<< "## ERROR:  '" << mDevice.GetDisplayName() << "' can't use Ch" << DEC(mConfig.fOutputChannel+1)
+		cerr	<< "## ERROR:  '" << mDevice.GetDescription() << "' can't use Ch" << DEC(mConfig.fOutputChannel+1)
 				<< " -- only supports Ch1" << (maxNumChannels > 1  ?  string("-Ch") + string(1, char(maxNumChannels+'0'))  :  "") << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
@@ -204,10 +206,9 @@ AJAStatus NTV2DolbyPlayer::Init (void)
 
 	//	Ready to go...
 	#if defined(_DEBUG)
-		cerr << mConfig;
-		if (mDevice.IsRemote())
-			cerr	<< "Device Description:  " << mDevice.GetDescription() << endl;
-		cerr << endl;
+		cerr << mConfig
+			<< "Device Description:  " << mDevice.GetDescription() << endl
+			<< endl;
 	#endif	//	defined(_DEBUG)
 	return AJA_STATUS_SUCCESS;
 
@@ -221,12 +222,12 @@ AJAStatus NTV2DolbyPlayer::SetUpVideo (void)
 		return AJA_STATUS_BAD_PARAM;
 
 	if (!mDevice.features().CanDoVideoFormat(mConfig.fVideoFormat))
-	{	cerr	<< "## ERROR:  '" << mDevice.GetDisplayName() << "' doesn't support "
+	{	cerr	<< "## ERROR:  '" << mDevice.GetDescription() << "' doesn't support "
 				<< ::NTV2VideoFormatToString(mConfig.fVideoFormat) << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
 	if (!mDevice.features().CanDoFrameBufferFormat(mConfig.fPixelFormat))
-	{	cerr	<< "## ERROR: '" << mDevice.GetDisplayName() << "' doesn't support "
+	{	cerr	<< "## ERROR: '" << mDevice.GetDescription() << "' doesn't support "
 				<< ::NTV2FrameBufferFormatString(mConfig.fPixelFormat) << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}

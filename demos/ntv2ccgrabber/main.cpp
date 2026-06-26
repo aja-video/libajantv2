@@ -217,13 +217,12 @@ int main (int argc, const char ** argv)
 	config.fUseVanc			= useVanc		? true : false;
 	config.fWithAudio		= grabAudio		? true : false;
 
+	int result (0);
+	do
 	{	//	Instantiate and initialize the NTV2CCGrabber object...
 		NTV2CCGrabber ccGrabber (config);
-
-		//	Initialize the ccGrabber instance...
-		AJAStatus status (ccGrabber.Init());
-		if (AJA_FAILURE(status))
-			{cerr << "## ERROR:  'ntv2ccgrabber' initialization failed with status " << status << endl;	return 2;}
+		if (AJA_FAILURE(ccGrabber.Init()))
+			{result = 1;  break;}
 
 		::signal (SIGINT, SignalHandler);
 		#if defined (AJAMac)
@@ -231,7 +230,7 @@ int main (int argc, const char ** argv)
 			::signal (SIGQUIT, SignalHandler);
 		#endif
 
-		//	Run the ccGrabber...
+		//	Run it...
 		if (AJA_FAILURE(ccGrabber.Run()))
 			{cerr << "## ERROR:  'ntv2ccgrabber' capture thread failed to run -- check for AutoCirculate messages in AJALogger?" << endl; return 2;}
 
@@ -256,9 +255,9 @@ int main (int argc, const char ** argv)
 			else if (keyPressed == 's' || keyPressed == 'S')
 				ccGrabber.Switch608Source();
 			AJATime::Sleep(500);
-		}
+		}	//	loop til gGlobalQuit
 		cerr << endl;
-	}	//	NTV2CCGrabber scope
-	return 0;
+	} while (false);	//	NTV2CCGrabber scope ends here
+	return result;
 
 }	//	main

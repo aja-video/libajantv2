@@ -123,7 +123,6 @@ class NTV2Capture8K
 		AJAThread			mConsumerThread;	///< @brief	My consumer thread object -- consumes the captured frames.
 		AJAThread			mProducerThread;	///< @brief	My producer thread object -- does the frame capturing
 		CNTV2Card			mDevice;			///< @brief	My CNTV2Card instance. This is what I use to talk to the device.
-		NTV2DeviceID		mDeviceID;			///< @brief	My device identifier
 		CaptureConfig		mConfig;			///< @brief	My operating configuration
 		NTV2VideoFormat		mVideoFormat;		///< @brief	My video format
 		NTV2FormatDesc		mFormatDesc;		///< @brief	Describes my video raster

@@ -109,19 +109,18 @@ int main (int argc, const char ** argv)
 	config.fWithAnc			= doAnc   ? true  : false;
 	config.fWithHanc		= doHanc  ? true  : false;
 
+	int result (0);
+	do
 	{	//	Instantiate and initialize the NTV2LLBurn object...
 		NTV2LLBurn burner (config);
+		if (AJA_FAILURE (burner.Init()))
+			{result = 1;  break;}
 
 		::signal (SIGINT, SignalHandler);
 		#if defined (AJAMac)
 			::signal (SIGHUP, SignalHandler);
 			::signal (SIGQUIT, SignalHandler);
 		#endif
-
-		//	Initialize the NTV2LLBurn instance...
-		AJAStatus status (burner.Init());
-		if (AJA_FAILURE (status))
-			{cerr << "## ERROR:  Initialization failed, status=" << status << endl;  return 4;}
 
 		//	Start the burner's capture and playout threads...
 		burner.Run();
@@ -139,7 +138,7 @@ int main (int argc, const char ** argv)
 			AJATime::Sleep(2000);
 		} while (!gGlobalQuit);	//	loop until signaled
 		cout << endl;
-	}	//	NTV2LLBurn scope
-	return 0;
+	} while (false);	//	NTV2LLBurn scope
+	return result;
 
 }	//	main

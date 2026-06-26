@@ -27,14 +27,14 @@ static void SignalHandler (int inSignal)
 
 int main (int argc, const char ** argv)
 {
-	char *			pDeviceSpec		(AJA_NULL);		//	Device specifier string, if any
-	char *			pPixelFormat	(AJA_NULL);		//	Pixel format argument
-	char *			pFramesSpec		(AJA_NULL);		//	AutoCirculate frames spec
-	char *			pAncFilePath	(AJA_NULL);		//	Anc data filepath to play
-	char *			pVideoFormat	(AJA_NULL);		//	Video format to use
-	int				channelNumber	(1);			//	Channel/FrameStore to use
-	int				doMultiFormat	(0);			//	MultiFormat mode?
-	int				showVersion		(0);			//	Show version?
+	char *	pDeviceSpec		(AJA_NULL);		//	Device specifier string, if any
+	char *	pPixelFormat	(AJA_NULL);		//	Pixel format argument
+	char *	pFramesSpec		(AJA_NULL);		//	AutoCirculate frames spec
+	char *	pAncFilePath	(AJA_NULL);		//	Anc data filepath to play
+	char *	pVideoFormat	(AJA_NULL);		//	Video format to use
+	int		channelNumber	(1);			//	Channel/FrameStore to use
+	int		doMultiFormat	(0);			//	MultiFormat mode?
+	int		showVersion		(0);			//	Show version?
 	AJADebug::Open();
 
 	//	Command line option descriptions:
@@ -114,11 +114,12 @@ int main (int argc, const char ** argv)
 	config.fDoMultiFormat		= doMultiFormat	? true	: false;			//	Multiformat mode?
 	config.fTransmitLTC			= false;
 
+	int result (0);
+	do
 	{	//	Instantiate and initialize the NTV2StreamPlayer object...
 		NTV2StreamPlayer player(config);
-		AJAStatus status = player.Init();
-		if (AJA_FAILURE(status))
-			{cout << "## ERROR:  Initialization failed: " << ::AJAStatusToString(status) << endl;	return 1;}
+		if (AJA_FAILURE(player.Init()))
+			{result = 1;  break;}
 
 		::signal (SIGINT, SignalHandler);
 		#if defined(AJAMac)
@@ -141,7 +142,7 @@ int main (int argc, const char ** argv)
 			AJATime::Sleep(2000);
 		} while (player.IsRunning() && !gGlobalQuit);	//	loop til done
 		cout << endl;
-	}	//	NTV2StreamPlayer scope
-	return 0;
+	} while (false);	//	NTV2StreamPlayer scope
+	return result;
 
 }	//	main
