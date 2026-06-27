@@ -502,7 +502,7 @@ ostream & NTV2DeviceSpecParser::Print (ostream & oss, const bool inDumpResults) 
 	else if (HasResult(kConnectParamDevModel))
 		oss << " model '" << DeviceModel() << "'";
 	else if (HasResult(kConnectParamDevID))
-		oss << " ID '" << DeviceID() << "'";
+		oss << " ID " << Result(kConnectParamDevID);
 	else if (HasResult(kConnectParamDevIndex))
 		oss << " " << DeviceIndex();
 	if (HasResult(kConnectParamHost))

@@ -319,9 +319,12 @@ public:
 		static NTV2_DEPRECATED_17_1(void ScanHardware (const UWord inMask))	{(void)inMask;  ScanHardware();}	///< @deprecated	Do not use
 #endif	//	!defined(NTV2_DEPRECATE_17_1)
 		static bool		DeviceIDPresent (const NTV2DeviceID inDeviceID, const bool inRescan = false);	///< @deprecated	Do not use
-		static bool		GetDeviceInfo (const ULWord inDeviceIndexNumber, NTV2DeviceInfo & outDeviceInfo, const bool inRescan = false);	///< @deprecated	Do not use
+		static bool		GetDeviceInfo (const ULWord inDeviceIndexNumber, NTV2DeviceInfo & outDeviceInfo, const bool inRescan = false);
+		static bool		GetDeviceInfoForSerial (const std::string & inSerialNum, NTV2DeviceInfo & outDeviceInfo, const bool inRescan = false);
+		static bool		GetDeviceInfoForModel (const std::string & inModelName, NTV2DeviceInfo & outDeviceInfo, const bool inRescan = false);
+		static bool		GetDeviceInfoForID (const NTV2DeviceID inID, NTV2DeviceInfo & outDeviceInfo, const bool inRescan = false);
 		static bool		PatchDeviceInfo (const UWord inDevIndex, CNTV2DriverInterface & dev);
-		static NTV2DeviceInfoList	GetDeviceInfoList (void);	///< @deprecated	Do not use
+		static NTV2DeviceInfoList	GetDeviceInfoList (void);
 		static void		SortDeviceInfoList (void)	{}	///< @deprecated	Obsolete
 		static bool		CompareDeviceInfoLists (const NTV2DeviceInfoList & inOldList,
 												const NTV2DeviceInfoList & inNewList,

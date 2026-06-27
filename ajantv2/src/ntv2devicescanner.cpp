@@ -155,21 +155,67 @@ bool CNTV2DeviceScanner::DeviceIDPresent (const NTV2DeviceID inDeviceID, const b
 }	//	DeviceIDPresent
 
 
-bool CNTV2DeviceScanner::GetDeviceInfo (const ULWord inDeviceIndexNumber, NTV2DeviceInfo & outDeviceInfo, const bool inRescan)
+bool CNTV2DeviceScanner::GetDeviceInfo (const ULWord inIndexNum, NTV2DeviceInfo & outDeviceInfo, const bool inRescan)
 {
 	AJAAutoLock tmpLock(&sDevInfoListLock);
 	if (inRescan)
 		ScanHardware();
 
 	for (NTV2DeviceInfoListConstIter iter(sDevInfoList.begin()); iter != sDevInfoList.end(); ++iter)
-		if (iter->deviceIndex == inDeviceIndexNumber)
-		{
-			outDeviceInfo = *iter;
-			return true;	//	Found!
-		}
+		if (iter->deviceIndex == inIndexNum)
+			{outDeviceInfo = *iter;  return true;}	//	Found!
 	return false;	//	No devices with this index number
+}
 
-}	//	GetDeviceInfo
+bool CNTV2DeviceScanner::GetDeviceInfoForSerial (const string & inSerialNum, NTV2DeviceInfo & outDeviceInfo, const bool inRescan)
+{
+	AJAAutoLock tmpLock(&sDevInfoListLock);
+	if (inRescan)
+		ScanHardware();
+
+	for (NTV2DeviceInfoListConstIter iter(sDevInfoList.begin());  iter != sDevInfoList.end();  ++iter)
+		if (iter->serialNumber == inSerialNum)
+			{outDeviceInfo = *iter;  return true;}	//	Found!
+	return false;	//	No devices with this serial number
+}
+
+bool CNTV2DeviceScanner::GetDeviceInfoForModel (const string & inModelName, NTV2DeviceInfo & outDeviceInfo, const bool inRescan)
+{
+	AJAAutoLock tmpLock(&sDevInfoListLock);
+	if (inRescan)
+		ScanHardware();
+
+	string nameSubString(inModelName);  aja::lower(nameSubString);
+	for (NTV2DeviceInfoListConstIter iter(sDevInfoList.begin());  iter != sDevInfoList.end();  ++iter)
+	{
+		string devName(iter->deviceIdentifier);  aja::lower(devName);
+		if (devName.find(nameSubString) != string::npos)
+			{outDeviceInfo = *iter;  return true;}	//	Found!
+	}
+	if (nameSubString == "io4kplus")	//	special case Io4K+ / DNXIV
+	{	//	Io4K+ == DNXIV...
+		nameSubString = "avid dnxiv";
+		for (NTV2DeviceInfoListConstIter iter(sDevInfoList.begin());  iter != sDevInfoList.end();  ++iter)
+		{
+			string devName(iter->deviceIdentifier);  aja::lower(devName);
+			if (devName.find(nameSubString) != string::npos)
+				{outDeviceInfo = *iter;  return true;}	//	Found!
+		}
+	}
+	return false;	//	No devices with this model name
+}
+
+bool CNTV2DeviceScanner::GetDeviceInfoForID (const NTV2DeviceID inID, NTV2DeviceInfo & outDeviceInfo, const bool inRescan)
+{
+	AJAAutoLock tmpLock(&sDevInfoListLock);
+	if (inRescan)
+		ScanHardware();
+
+	for (NTV2DeviceInfoListConstIter iter(sDevInfoList.begin());  iter != sDevInfoList.end();  ++iter)
+		if (iter->deviceID == inID)
+			{outDeviceInfo = *iter;  return true;}	//	Found!
+	return false;	//	No devices with this device ID
+}
 
 bool CNTV2DeviceScanner::GetDeviceAtIndex (const ULWord inDeviceIndexNumber, CNTV2Card & outDevice)
 {
@@ -219,9 +265,13 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithName (const string & inNameSubString,
 		if (deviceName.find(nameSubString) != string::npos)
 		{
 			if (sDevInfoList.at(ndx).isVirtualDevice)
-				return outDevice.Open(sDevInfoList.at(ndx).vdevUrl);
-			else
-				return outDevice.Open(UWord(ndx));
+			{
+				bool ok (outDevice.Open(sDevInfoList.at(ndx).vdevUrl));
+				if (ok)
+					outDevice.setDeviceIndexNumber(UWord(sDevInfoList.at(ndx).deviceIndex));	//	Patch _boardNumber
+				return ok;
+			}
+			return outDevice.Open(UWord(ndx));
 		}
 	}
 	if (nameSubString == "io4kplus")
@@ -233,9 +283,13 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithName (const string & inNameSubString,
 			if (deviceName.find(nameSubString) != string::npos)
 			{
 				if (sDevInfoList.at(ndx).isVirtualDevice)
-					return outDevice.Open(sDevInfoList.at(ndx).vdevUrl);
-				else
-					return outDevice.Open(UWord(ndx));
+				{
+					bool ok (outDevice.Open(sDevInfoList.at(ndx).vdevUrl));
+					if (ok)
+						outDevice.setDeviceIndexNumber(UWord(sDevInfoList.at(ndx).deviceIndex));	//	Patch _boardNumber
+					return ok;
+				}
+				return outDevice.Open(UWord(ndx));
 			}
 		}
 	}
@@ -257,7 +311,10 @@ bool CNTV2DeviceScanner::GetVirtualDeviceWithName (const string & inNameString, 
 		string deviceName(sDevInfoList.at(ndx).vdevName);  aja::lower(deviceName);
 		if (deviceName == nameString)
 		{
-			return outDevice.Open(sDevInfoList.at(ndx).vdevUrl);
+			bool ok (outDevice.Open(sDevInfoList.at(ndx).vdevUrl));
+			if (ok)
+				outDevice.setDeviceIndexNumber(UWord(sDevInfoList.at(ndx).deviceIndex));	//	Patch _boardNumber
+			return ok;
 		}
 	}
 	return false;	//	Not found
@@ -882,12 +939,12 @@ bool CNTV2DeviceScanner::GetVDevList (NTV2DeviceInfoList & outVDevList)
 			}
 		}
 
-		NTV2DeviceInfo newVDev;
-		newVDev.isVirtualDevice		= true;
-		newVDev.deviceIndex			= vdIndex;
-		newVDev.deviceID			= DEVICE_ID_SOFTWARE;
-		newVDev.deviceIdentifier	= "";
-		newVDev.vdevName			= "";
+		NTV2DeviceInfo newInfo;
+		newInfo.isVirtualDevice		= true;
+		newInfo.deviceIndex			= vdIndex;
+		newInfo.deviceID			= DEVICE_ID_SOFTWARE;
+		newInfo.deviceIdentifier	= "";
+		newInfo.vdevName			= "";
 		bool explicitlyDisabled(false);
 
 		//	EXPECTED JSON KEYS:
@@ -925,28 +982,32 @@ bool CNTV2DeviceScanner::GetVDevList (NTV2DeviceInfoList & outVDevList)
 			{VDFAIL("File '" << vdevFile << "': invalid 'disabled' value -- expected boolean 'true' or 'false' value");  continue;}
 		if (explicitlyDisabled)
 			{VDINFO("File '" << vdevFile << "': explicitly 'disabled'");  continue;}
-		newVDev.vdevUrl = urlspecVal.get<std::string>();	//	done, we have the vdevUrl
-		NTV2DeviceSpecParser parser (newVDev.vdevUrl);	//	Check it
+		newInfo.vdevUrl = urlspecVal.get<std::string>();	//	done, we have the vdevUrl
+		NTV2DeviceSpecParser parser (newInfo.vdevUrl);	//	Check it
+		if (parser.Failed())
+			{VDFAIL("File '" << vdevFile << "': bad 'urlspec': " << newInfo.vdevUrl << "\n" << aja::join(parser.Errors(), "\n"));  continue;}
+		if (newInfo.vdevUrl.find("://") == string::npos)
+			newInfo.vdevUrl = parser.Scheme() + "://" + newInfo.vdevUrl; //{VDFAIL("File '" << vdevFile << "': expected URL in 'urlspec': " << newInfo.vdevUrl);  continue;}
 
 		{	//	URLencode & append these URL params:  &vdevfname=   &vdevfpath=    &vdevname=   &vdevbasename=
-			newVDev.vdevUrl += parser.HasQueryParams() ? "&" : "?";
-			newVDev.vdevUrl += kQParamVDevFolderPath "=" + ::PercentEncode(vdevPath);
+			newInfo.vdevUrl += parser.HasQueryParams() ? "&" : "?";
+			newInfo.vdevUrl += kQParamVDevFolderPath "=" + ::PercentEncode(vdevPath);
 			string fName (vdevFile);
 			fName.erase(fName.find(vdevPath), vdevPath.length()+1);		//	Remove everything up to file name
-			newVDev.vdevUrl += "&" kQParamVDevFileName "=" + ::PercentEncode(fName);	//	Remember file name
+			newInfo.vdevUrl += "&" kQParamVDevFileName "=" + ::PercentEncode(fName);	//	Remember file name
 			fName.erase(fName.length()-5, 5);							//	Lop off file name extension
-			if (newVDev.vdevName.empty())
-				newVDev.vdevName = fName;	//	Use file base name
-			newVDev.vdevUrl += "&" kQParamVDevName "=" + ::PercentEncode(newVDev.vdevName);	//	Remember name
-			ostringstream oss; oss << DEC(newVDev.deviceIndex);
-			newVDev.vdevUrl += "&" kQParamVDevIndex "=" + oss.str();	//	Remember index number
+			if (newInfo.vdevName.empty())
+				newInfo.vdevName = fName;	//	Use file base name
+			newInfo.vdevUrl += "&" kQParamVDevName "=" + ::PercentEncode(newInfo.vdevName);	//	Remember name
+			ostringstream oss; oss << DEC(newInfo.deviceIndex);
+			newInfo.vdevUrl += "&" kQParamVDevIndex "=" + oss.str();	//	Remember index number
 		}
-		if (!newVDev.vdevName.empty())
-		{	ostringstream oss;  oss << newVDev.vdevName << " - " << newVDev.deviceIndex;
-			newVDev.deviceIdentifier = oss.str();
+		if (!newInfo.vdevName.empty())
+		{	ostringstream oss;  oss << newInfo.vdevName << " - " << newInfo.deviceIndex;
+			newInfo.deviceIdentifier = oss.str();
 		}
 
-		outVDevList.push_back(newVDev);
+		outVDevList.push_back(newInfo);
 		vdIndex++;	//	Now increment the device index number
 	}	//	for each vdev file found
 	return true;

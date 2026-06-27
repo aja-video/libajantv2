@@ -40,11 +40,23 @@ using namespace std;
 #define ARINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_AcquireRelease, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 #define ARDBG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_AcquireRelease, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 
+#define VDFAIL(__x__)		AJA_sERROR	(AJA_DebugUnit_VDev, AJAFUNC << ": " << __x__)
+#define VDWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_VDev, AJAFUNC << ": " << __x__)
+#define VDNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_VDev, AJAFUNC << ": " << __x__)
+#define VDINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_VDev, AJAFUNC << ": " << __x__)
+#define VDDBUG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_VDev, AJAFUNC << ": " << __x__)
+
 #define RPFAIL(__x__)		AJA_sERROR	(AJA_DebugUnit_RPCClient, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 #define RPWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_RPCClient, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 #define RPNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_RPCClient, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 #define RPINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_RPCClient, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 #define RPDBG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_RPCClient, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+
+#define PLFAIL(__x__)		AJA_sERROR	(AJA_DebugUnit_Plugins, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define PLWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_Plugins, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define PLNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_Plugins, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define PLINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_Plugins, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define PLDBG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_Plugins, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 
 #if defined(AJA_LINUX)
 	#define KVRegAcquireRefCount	kVRegAcquireLinuxReferenceCount
@@ -73,10 +85,12 @@ NTV2StringList CNTV2DriverInterface::GetLegalSchemeNames (void)
 	return result;
 }
 
-static bool		gSharedMode(false);
+static const ULWord	RECURSION_LIMIT(16);
+static ULWord		gRecursionCheck(0);	//	THREAD UNSAFE!!   NEEDS TO BE PER-THREAD (THREAD-LOCAL-STORAGE)!!!
+static bool			gSharedMode(false);
 void CNTV2DriverInterface::SetShareMode (const bool inSharedMode)		{gSharedMode = inSharedMode;}
 bool CNTV2DriverInterface::GetShareMode (void)	{return gSharedMode;}
-static bool		gOverlappedMode(false);
+static bool			gOverlappedMode(false);
 void CNTV2DriverInterface::SetOverlappedMode (const bool inOverlapMode) {gOverlappedMode = inOverlapMode;}
 bool CNTV2DriverInterface::GetOverlappedMode (void) {return gOverlappedMode;}
 
@@ -154,17 +168,12 @@ bool CNTV2DriverInterface::Open (const UWord inDeviceIndex)
 	if (!OpenLocalPhysical(inDeviceIndex))
 	{
 		//	Check for virtual device...
-		static ULWord sRecursionCheck(0), RECURSION_LIMIT(32);
 		NTV2DeviceInfo info;
 		if (!CNTV2DeviceScanner::GetDeviceInfo (inDeviceIndex, info))
 			return false;
-		sRecursionCheck++;	//	increment
-		if (sRecursionCheck > RECURSION_LIMIT)
-			{DIFAIL("Failed: " << DEC(RECURSION_LIMIT) << " '.vdev' bounces -- limit exceeded"); return false;}
 		if (!Open(info.vdevUrl))
-			{sRecursionCheck--;  return false;}	//	Open vdev urlSpec failed
+			return false;	//	Open vdev urlSpec failed
 		setDeviceIndexNumber(UWord(info.deviceIndex));	//	Patch _boardNumber
-		sRecursionCheck--;	//	decrement
 		return true;
 	}	//	if OpenLocalPhysical failed
 
@@ -219,30 +228,43 @@ bool CNTV2DriverInterface::Open (const string & inURLSpec)
 	NTV2_ASSERT(_pRPCAPI == AJA_NULL);
 	const NTV2DeviceSpecParser specParser (inURLSpec);
 	if (specParser.HasErrors())
-		{DIFAIL("Bad device specification '" << inURLSpec << "': " << specParser.Error()); return false;}
+		{PLFAIL("Bad device specification '" << inURLSpec << "': " << specParser.Error()); return false;}
 
 	//	URLSpecs can specify locally-attached devices...
 	if (specParser.IsLocalDevice())
 	{	//	Local device...
-		CNTV2Card card;
+		++gRecursionCheck;
+		if (gRecursionCheck > RECURSION_LIMIT)
+			{VDFAIL("Failed: " << DEC(gRecursionCheck) << " '.vdev' bounces has exceeded limit: " << specParser.InfoString());  gRecursionCheck--;  return false;}
+		if (gRecursionCheck > 4*RECURSION_LIMIT/5)
+			VDWARN(DEC(gRecursionCheck) << " '.vdev' bounces near limit (" << DEC(RECURSION_LIMIT) << "): " << specParser.InfoString());
+
+		NTV2DeviceInfo info;
+		bool infoOK(false);
 		if (specParser.HasResult(kConnectParamDevSerial))
-		{	if (CNTV2DeviceScanner::GetDeviceWithSerial(specParser.DeviceSerial(), card))
-				Open(card.GetIndexNumber());
-		}
+			infoOK = CNTV2DeviceScanner::GetDeviceInfoForSerial(specParser.DeviceSerial(), info);
 		else if (specParser.HasResult(kConnectParamDevModel))
-		{	if (CNTV2DeviceScanner::GetFirstDeviceWithName(specParser.DeviceModel(), card))
-				Open(card.GetIndexNumber());
-		}
+			infoOK = CNTV2DeviceScanner::GetDeviceInfoForModel(specParser.DeviceModel(), info);
 		else if (specParser.HasResult(kConnectParamDevID))
-		{	if (CNTV2DeviceScanner::GetFirstDeviceWithID(specParser.DeviceID(), card))
-				Open(card.GetIndexNumber());
+			infoOK = CNTV2DeviceScanner::GetDeviceInfoForID(specParser.DeviceID(), info);
+		if (infoOK)
+		{
+			if (info.isVirtualDevice)
+			{
+				if (Open(info.vdevUrl))
+					setDeviceIndexNumber(UWord(info.deviceIndex));	//	Patch _boardNumber
+			}
+			else
+				Open(info.deviceIndex);
 		}
 		else if (specParser.HasResult(kConnectParamDevIndex))
 			Open(specParser.DeviceIndex());
+		//	else one of GetDeviceInfoForSerial, GetDeviceInfoForModel or GetDeviceInfoForID returned false -- not found
+		gRecursionCheck--;	//	decrement
 		if (!IsOpen())
 			{DIFAIL("Failed to open " << specParser.InfoString());  return false;}
 		return true;
-	}
+	}	//	if IsLocalDevice
 
 	//	Open the remote/virtual device...
 	if (!OpenRemote(specParser))
@@ -341,9 +363,9 @@ bool CNTV2DriverInterface::OpenRemote (const NTV2DeviceSpecParser & inParser)
 		{RPFAIL("Failed to instantiate plugin client: " << inParser.InfoString());  return false;}
 
 	//	At this point, the plugin's NTV2RPCAPI object exists, but may or may not be useable,
-	//	depending on if it's "IsConnected". Before SDK 17.1, the plugin's NTV2Connect function
-	//	was commonly called directly from its constructor. After SDK 17.1.0, OpenRemote is
-	//	responsible for calling NTV2Connect, to allow tools like NTV2Watcher to probe the
+	//	depending on if "IsConnected". Before SDK 17.1, the plugin's NTV2Connect function
+	//	was commonly called directly from its constructor. In SDK 17.1 and later, OpenRemote
+	//	is responsible for calling NTV2Connect, to allow tools like NTV2Watcher to probe the
 	//	plugin in stages via its client interface.
 	if (!pClient->IsConnected())
 		if (!pClient->NTV2Connect())
@@ -1096,7 +1118,11 @@ bool CNTV2DriverInterface::ReadFlashULWord (const ULWord inAddress, ULWord & out
 
 void CNTV2DriverInterface::setDeviceIndexNumber (const UWord num)
 {
-	_boardNumber = num;
+	if (_boardNumber != num)
+	{
+		VDNOTE(GetDescription() << ": patched device index from " << DEC(_boardNumber) << " to " << DEC(num));
+		_boardNumber = num;
+	}
 	if (IsRemote())		//	Remote/virtual device?
 		if (_pRPCAPI->HasConnectParam(kQParamVDevIndex))	//	.vdev-originated device?
 		{

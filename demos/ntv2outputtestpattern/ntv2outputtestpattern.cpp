@@ -43,6 +43,8 @@ NTV2OutputTestPattern::NTV2OutputTestPattern (const TestPatConfig & inConfig)
 
 NTV2OutputTestPattern::~NTV2OutputTestPattern ()
 {
+	if (!mDevice.IsOpen())
+		return;
 	if (!mConfig.fDoMultiFormat)
 		mDevice.ApplySignalRoute(mSavedConnections, /*replace?*/true);	//	Restore prior widget routing
 
