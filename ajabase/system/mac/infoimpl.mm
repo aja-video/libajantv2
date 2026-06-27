@@ -294,7 +294,7 @@ AJASystemInfoImpl::Rescan(AJASystemInfoSections sections)
 			mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)] = homePath;
 			mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)].append("/Library/Preferences/");
 			mValueMap[int(AJA_SystemInfoTag_Path_NTV2VirtualDevices)] = homePath;
-			mValueMap[int(AJA_SystemInfoTag_Path_NTV2VirtualDevices)].append("/Library/Application Support/AJA");
+			mValueMap[int(AJA_SystemInfoTag_Path_NTV2VirtualDevices)].append("/Library/Application Support/AJA/");
 		}
 
 		mValueMap[int(AJA_SystemInfoTag_Path_PersistenceStoreSystem)] = "/Users/Shared/AJA/";
