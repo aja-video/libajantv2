@@ -48,6 +48,8 @@ typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter
 //	AJA VDEV JSON keys:
 #define kVDevJSON_URLSpec		"urlspec"		///< @brief	URLspec for VDEV (expects string value)
 #define kVDevJSON_Disabled		"disabled"		///< @brief	VDEV is disabled if value is true (expects boolean value)
+#define kVDevJSON_SerialNum		"serial"		///< @brief	Running VDEV's serial number (expects string value)
+#define kVDevJSON_DeviceID		"devid"			///< @brief	Running VDEV's device ID (expects string value containing 32-bit hexadecimal value)
 #define kVDevJSON_Name			"name"			///< @deprecated	Not used for VDEVs
 #define kVDevJSON_Plugin		"plugin"		///< @deprecated	Not used for VDEVs
 #define kVDevJSON_Host			"host"			///< @deprecated	Not used for VDEVs

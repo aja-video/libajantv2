@@ -369,14 +369,15 @@ bool CNTV2DeviceScanner::GetDeviceWithSerial (const string & inSerialNumber, CNT
 bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, CNTV2Card & outDevice)
 {
 	outDevice.Close();
-	if (inArgument.empty())
+	string arg(inArgument);  aja::strip(arg);
+	string larg(arg);  aja::lower(larg);
+	if (arg.empty())
 		return false;
 
 	//	Special case:  'LIST' or '?'  ---  print an enumeration of available devices to stdout, then bail
 	AJAAutoLock tmpLock(&sDevInfoListLock);
 	ScanHardware();
-	string upperArg(inArgument);  aja::upper(upperArg);
-	if (upperArg == "LIST" || upperArg == "?")
+	if (larg == "list" || larg == "?")
 	{
 		if (sDevInfoList.empty())
 			cout << "No devices detected" << endl;
@@ -400,46 +401,11 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 				cout << " | " << setw(16) << ::NTV2DeviceIDToString(sDevInfoList.at(ndx).deviceID);
 				cout << endl;
 			}
-		}
+		}	//	for each device
 		return false;
-	}
+	}	//	if 'list' or '?' specified
 
-	for (NTV2DeviceInfoListConstIter iter (sDevInfoList.begin());  iter != sDevInfoList.end();  ++iter)
-	{
-		if (iter->isVirtualDevice)
-		{	bool ok (false);
-			if (to_string(iter->deviceIndex) == inArgument
-				||	iter->deviceIdentifier == inArgument
-				||	iter->vdevName == inArgument
-				||	(aja::is_legal_decimal_number(inArgument, inArgument.length())
-					&& aja::is_legal_hex_serial_number(inArgument)
-					&& iter->deviceID == NTV2DeviceID(stoi(inArgument))))
-						{
-							ok = outDevice.Open(iter->vdevUrl);
-							if (ok)
-								outDevice.setDeviceIndexNumber(UWord(iter->deviceIndex));	//	Patch _boardNumber
-							return ok;
-						}
-			else if (IsLegalSerialNumber(inArgument))
-				return outDevice.Open(inArgument);
-			else if (inArgument.find("://") != string::npos)
-				return outDevice.Open(inArgument);
-		}
-		else
-		{
-			if (to_string(iter->deviceIndex) == inArgument)
-				return outDevice.Open(inArgument);
-			else if (iter->deviceIdentifier == inArgument)
-				return outDevice.Open(inArgument);
-			else if (aja::is_legal_decimal_number(inArgument, inArgument.length()) && aja::is_legal_hex_serial_number(inArgument) && iter->deviceID == NTV2DeviceID(stoi(inArgument)))
-				return outDevice.Open(inArgument);
-			else if (IsLegalSerialNumber(inArgument))
-				return outDevice.Open(inArgument);
-			else if (inArgument.find("://") != string::npos)
-				return outDevice.Open(inArgument);
-		}
-	}
-	return outDevice.Open(inArgument);
+	return outDevice.Open(arg);	//	Just throw arg "over the wall" and let Open deal with it
 }	//	GetFirstDeviceFromArgument
 
 
@@ -953,13 +919,15 @@ bool CNTV2DeviceScanner::GetVDevList (NTV2DeviceInfoList & outVDevList)
 		//							If not specified, the .vdev file's base name is used instead.
 		//	"disabled"	[optional]	Specify boolean 'true' to explicitly disable the device;  'false' retains device.
 		//							If not specified, the device will always be considered enabled.
+		//	"serial"	[optional]	If specified, must be a string containing the device's actual serial number.
+		//	"devid"		[optional]	If specified, must be a string containing the NTV2DeviceID as a hexadecimal value.
 		if (vdevJson.size() > 32)
 			{VDFAIL("File '" << vdevFile << "': more than 32 keys");  continue;}
 		NTV2StringSet keys;
 		for (auto it(vdevJson.cbegin());  it != vdevJson.cend();  ++it)
 			if (keys.find(it.key()) == keys.end())
 				keys.insert(it.key());
-		NTV2StringSet legalKeys = {kVDevJSON_Disabled, kVDevJSON_URLSpec};
+		NTV2StringSet legalKeys = {kVDevJSON_Disabled, kVDevJSON_URLSpec, kVDevJSON_SerialNum, kVDevJSON_DeviceID};
 		NTV2StringList goodKeys, badKeys;
 		for (NTV2StringSetConstIter itKey(keys.begin());  itKey != keys.end();  ++itKey)
 		{
@@ -970,7 +938,8 @@ bool CNTV2DeviceScanner::GetVDevList (NTV2DeviceInfoList & outVDevList)
 		}
 		if (!badKeys.empty())
 			VDWARN("File '" << vdevFile << "': ignored " << DEC(badKeys.size()) << " unknown key(s): '" << aja::join(badKeys, "', '") << "'");
-		auto urlspecVal (vdevJson[kVDevJSON_URLSpec]), disabledVal (vdevJson[kVDevJSON_Disabled]);
+		auto	urlspecVal (vdevJson[kVDevJSON_URLSpec]),	disabledVal (vdevJson[kVDevJSON_Disabled]),
+				serialVal (vdevJson[kVDevJSON_SerialNum]),	devIDVal (vdevJson[kVDevJSON_DeviceID]);
 		if (urlspecVal.is_null())
 			{VDFAIL("File '" << vdevFile << "': missing required 'urlspec' parameter");  continue;}
 		if (disabledVal.is_boolean())
@@ -982,7 +951,36 @@ bool CNTV2DeviceScanner::GetVDevList (NTV2DeviceInfoList & outVDevList)
 			{VDFAIL("File '" << vdevFile << "': invalid 'disabled' value -- expected boolean 'true' or 'false' value");  continue;}
 		if (explicitlyDisabled)
 			{VDINFO("File '" << vdevFile << "': explicitly 'disabled'");  continue;}
-		newInfo.vdevUrl = urlspecVal.get<std::string>();	//	done, we have the vdevUrl
+		if (!serialVal.is_null())
+		{
+			if (!serialVal.is_string())
+				{VDFAIL("File '" << vdevFile << "': invalid 'serial' value -- expected string value");  continue;}
+			newInfo.serialNumber = serialVal.get<string>();
+			aja::strip(newInfo.serialNumber);
+			if (!CNTV2DeviceScanner::IsLegalSerialNumber(newInfo.serialNumber))
+				{VDFAIL("File '" << vdevFile << "': illegal 'serial' value '" << newInfo.serialNumber << "'");  continue;}
+		}
+		if (!devIDVal.is_null())
+		{
+			if (!devIDVal.is_string())
+				{VDFAIL("File '" << vdevFile << "': invalid 'devid' value -- expected string value");  continue;}
+			string id (devIDVal.get<string>());
+			aja::strip(id);
+			if (id.empty())
+				{VDFAIL("File '" << vdevFile << "': empty 'devid' value -- expected non-empty hex string value");  continue;}
+			aja::lower(id);
+			if (!aja::is_legal_hex_number(id, 8))
+				{VDFAIL("File '" << vdevFile << "': empty 'devid' value -- expected 8-hex-digit string value");  continue;}
+			if (id.find("0x") == 0)
+				id.erase(0,2);
+			NTV2DeviceID devid = NTV2DeviceID(aja::stoul(id, nullptr, 16));
+			const NTV2DeviceIDSet legalDevs(::NTV2GetSupportedDevices());
+			if (legalDevs.find(devid) == legalDevs.end())
+				{VDFAIL("File '" << vdevFile << "': 'devid' value 0x" << id << " (" << xHEX0N(devid,8) << ") is unsupported or unknown");  continue;}
+			newInfo.deviceID = devid;
+		}
+		newInfo.vdevUrl = urlspecVal.get<std::string>();	//	we have the vdevUrl!
+
 		NTV2DeviceSpecParser parser (newInfo.vdevUrl);	//	Check it
 		if (parser.Failed())
 			{VDFAIL("File '" << vdevFile << "': bad 'urlspec': " << newInfo.vdevUrl << "\n" << aja::join(parser.Errors(), "\n"));  continue;}

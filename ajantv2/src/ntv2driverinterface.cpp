@@ -263,12 +263,9 @@ bool CNTV2DriverInterface::Open (const string & inURLSpec)
 		gRecursionCheck--;	//	decrement
 		if (!IsOpen())
 			{DIFAIL("Failed to open " << specParser.InfoString());  return false;}
-		return true;
 	}	//	if IsLocalDevice
-
-	//	Open the remote/virtual device...
-	if (!OpenRemote(specParser))
-		return false;	//	Failed to open
+	else if (!OpenRemote(specParser))	//	Open the remote/virtual device...
+		return false;	//	Failed to open remote/virtual device
 
 	FinishOpen();
 	AJAAtomic::Increment(&gOpenCount);
