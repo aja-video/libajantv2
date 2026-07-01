@@ -684,6 +684,10 @@ public:
 		@param[in]	inKeepFramePulseSelect	For devices that support a frame pulse source that's independent of the
 											reference source, specify true to prevent resetting the frame pulse source.
 		@return		True if successful; otherwise false.
+		@note		If setting to ::NTV2_REFERENCE_EXTERNAL, for devices that support LTC input on the reference port
+					(see DeviceCapabilities::CanDoLTCInOnRefPort), this function automatically calls CNTV2Card::SetLTCInputEnable
+					with 'false' to disable LTC input. It will not, however, automaticaly re-enable LTC input when this
+					function is called to change back to an internal reference source.
 		@see		GetReference, GetReferenceVideoFormat, \ref vidop-clocking
 	**/
 	AJA_VIRTUAL bool		SetReference (const NTV2ReferenceSource inRefSource, const bool inKeepFramePulseSelect = false);
