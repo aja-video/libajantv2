@@ -257,6 +257,17 @@ class AJAExport NTV2DeviceSpecParser
 			@returns	True if successful; otherwise false.
 		**/
 		static bool		ParseQueryParams (const NTV2Dictionary & inSrcDict, NTV2Dictionary & outQueryParams);
+
+		/**
+			@brief		Converts the given "query" dictionary into a string suitable for appending onto the query portion
+						a URL.
+			@param[in]	inSrcDict		The dictionary that provides the 'query' key/value pairs to convert.
+										It's not an error if it's empty.
+			@param[out]	outQueryStr		Receives the string that contains the URL-encoded key/value pairs.
+										This string will be empty if the source dictionary is empty.
+			@returns	True if successful; otherwise false.
+		**/
+		static bool		MakeQueryString (const NTV2Dictionary & inSrcDict, std::string & outQueryStr);
 };	//	NTV2DeviceSpecParser
 
 

@@ -3751,6 +3751,13 @@ TEST_SUITE("NTV2DeviceSpecParser" * doctest::description("DeviceSpecParser tests
 		CHECK_EQ(dst.valueForKey("one"), "alpha");					//	Confirm dst still has "one=alpha"
 		CHECK(dst.hasKey("x"));										//	Confirm dst has 'x'
 		CHECK_EQ(dst.valueForKey("x"), "foo:colon/slash?question&ampersand=equal");	//	Confirm URL-decoded value
+
+		//	Check key URL-encoding
+		const string keyEncoded("one%20two%20three"), keyDecoded("one two three");
+		src.insert(kConnectParamQuery, string("?") + keyEncoded + "=OneTwoThree");
+		dst.clear();
+		CHECK(NTV2DeviceSpecParser::ParseQueryParams(src, dst));	//	Param 'one two three' has value "OneTwoThree"
+		CHECK_EQ(dst.valueForKey(keyDecoded), "OneTwoThree");		//	Confirm dst is "OneTwoThree"
 	}
 }	//TEST_SUITE("NTV2DeviceSpecParser"
 

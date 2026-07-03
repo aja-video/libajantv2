@@ -557,21 +557,9 @@ string NTV2DeviceSpecParser::MakeQueryString (const bool urlEncode) const
 {
 	if (!Successful())
 		return "";
-	if (!HasQueryParams())
-		return "";
-	NTV2StringList parms;
-	const NTV2StringSet ks (mQueryParams.keys());
-	for (NTV2StringSetConstIter it(ks.begin());  it != ks.end();  ++it)
-	{
-		ostringstream oss;
-		string k(*it), v(mQueryParams.valueForKey(k));
-		if (urlEncode)
-			oss << ::PercentEncode(k) << "=" << ::PercentEncode(v);
-		else
-			oss << k << "=" << v;
-		parms.push_back(oss.str());
-	}
-	return aja::join(parms, "&");
+	string result;
+	MakeQueryString (mQueryParams, result);
+	return result;
 }
 
 string NTV2DeviceSpecParser::InfoString (void) const
@@ -941,7 +929,7 @@ bool NTV2DeviceSpecParser::ParseQuery (size_t & pos, NTV2Dictionary & outParams)
 	return !outParams.empty();
 }
 
-bool NTV2DeviceSpecParser::ParseQueryParams (const NTV2Dictionary & inSrcDict, NTV2Dictionary & outQueryParams)
+bool NTV2DeviceSpecParser::ParseQueryParams (const NTV2Dictionary & inSrcDict, NTV2Dictionary & outQueryParams)	//	STATIC
 {
 	if (!inSrcDict.hasKey(kConnectParamQuery))
 		return true;	//	It's not an error if there's no 'query' in srcDict
@@ -956,7 +944,7 @@ bool NTV2DeviceSpecParser::ParseQueryParams (const NTV2Dictionary & inSrcDict, N
 		string str(*it), key, value;
 		if (str.find("=") == string::npos)
 		{	//	No assignment (i.e. no '=') --- just insert key with empty value...
-			key = aja::lower(str);
+			key = ::PercentDecode(aja::lower(str));
 			outQueryParams.insert(key, value);
 			PLGDBG("'" << key << "' = ''");
 			continue;
@@ -964,7 +952,7 @@ bool NTV2DeviceSpecParser::ParseQueryParams (const NTV2Dictionary & inSrcDict, N
 		NTV2StringList pieces(aja::split(str,"="));
 		if (pieces.empty())
 			continue;
-		key = aja::lower(pieces.at(0));
+		key = ::PercentDecode(aja::lower(pieces.at(0)));
 		if (pieces.size() > 1)
 			value = pieces.at(1);
 		if (key.empty())
@@ -976,6 +964,29 @@ bool NTV2DeviceSpecParser::ParseQueryParams (const NTV2Dictionary & inSrcDict, N
 	}	//	for each &param
 	return true;
 }	//	ParseQueryParams
+
+bool NTV2DeviceSpecParser::MakeQueryString (const NTV2Dictionary & inSrcDict, std::string & outQueryStr)	//	STATIC
+{
+	outQueryStr.clear();
+	if (inSrcDict.empty())
+		return true;	//	success, but nothing to do
+	NTV2StringList params;
+	const NTV2StringSet keys (inSrcDict.keys());
+	for (NTV2StringSetConstIter it(keys.begin());  it != keys.end();  ++it)
+	{
+		const string key(*it);
+		if (key.empty())
+			continue;	//	empty key?!?!
+		ostringstream oss;
+		oss << ::PercentEncode(key);
+		const string val(inSrcDict.valueForKey(key));
+		if (!val.empty())
+			oss << "=" << ::PercentEncode(val);
+		params.push_back(oss.str());
+	}	//	for each key
+	outQueryStr = "?" + aja::join(params, "&");
+	return true;
+}
 
 bool NTV2DeviceSpecParser::IsUpperLetter (const char inChar)
 {	static const string sHexDigits("_ABCDEFGHIJKLMNOPQRSTUVWXYZ");
