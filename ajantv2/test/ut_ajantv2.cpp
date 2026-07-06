@@ -3420,7 +3420,7 @@ TEST_SUITE("NTV2DeviceSpecParser" * doctest::description("DeviceSpecParser tests
 			CHECK_FALSE(parser.HasErrors());
 			CHECK_FALSE(parser.IsLocalDevice());
 			CHECK_EQ(parser.Scheme(), "ntv2kona12");
-	 	parser.Reset("0x10402100");
+		parser.Reset("0x10402100");
 			CHECK(parser.HasDeviceSpec());
 			CHECK(parser.Successful());
 			CHECK_FALSE(parser.Failed());
@@ -3583,7 +3583,7 @@ TEST_SUITE("NTV2DeviceSpecParser" * doctest::description("DeviceSpecParser tests
 			CHECK_FALSE(parser.Successful());
 			CHECK(parser.Failed());
 			CHECK(parser.HasErrors());
-	 	parser.Reset("ntv2local://0x10402100");
+		parser.Reset("ntv2local://0x10402100");
 			CHECK(parser.HasDeviceSpec());
 			CHECK(parser.Successful());
 			CHECK_FALSE(parser.Failed());
@@ -3592,7 +3592,7 @@ TEST_SUITE("NTV2DeviceSpecParser" * doctest::description("DeviceSpecParser tests
 			CHECK(parser.IsLocalDevice());
 			CHECK_EQ(parser.Scheme(), "ntv2local");
 			CHECK_EQ(parser.DeviceID(), DEVICE_ID_CORVID24);
-	 	parser.Reset("ntv2local://0x10402100?foo=x&bar=y");
+		parser.Reset("ntv2local://0x10402100?foo=x&bar=y");
 			CHECK(parser.HasDeviceSpec());
 			CHECK(parser.Successful());
 			CHECK_FALSE(parser.Failed());
@@ -3604,7 +3604,7 @@ TEST_SUITE("NTV2DeviceSpecParser" * doctest::description("DeviceSpecParser tests
 			CHECK_EQ(parser.MakeQueryString(false), "bar=y&foo=x");
 			CHECK_EQ(parser.QueryParam("foo"), "x");
 			CHECK_EQ(parser.QueryParam("bar"), "y");
-	 	parser.Reset("ntv2local://5");
+		parser.Reset("ntv2local://5");
 			CHECK(parser.HasDeviceSpec());
 			CHECK(parser.Successful());
 			CHECK_FALSE(parser.Failed());
@@ -3613,7 +3613,7 @@ TEST_SUITE("NTV2DeviceSpecParser" * doctest::description("DeviceSpecParser tests
 			CHECK(parser.IsLocalDevice());
 			CHECK_EQ(parser.Scheme(), "ntv2local");
 			CHECK_EQ(parser.DeviceIndex(), 5);
-	 	parser.Reset("ntv2local://5?foo=x&bar=y");
+		parser.Reset("ntv2local://5?foo=x&bar=y");
 			CHECK(parser.HasDeviceSpec());
 			CHECK(parser.Successful());
 			CHECK_FALSE(parser.Failed());
@@ -3625,7 +3625,7 @@ TEST_SUITE("NTV2DeviceSpecParser" * doctest::description("DeviceSpecParser tests
 			CHECK_EQ(parser.MakeQueryString(false), "bar=y&foo=x");
 			CHECK_EQ(parser.QueryParam("foo"), "x");
 			CHECK_EQ(parser.QueryParam("bar"), "y");
-	 	parser.Reset("ntv2local://7XT001436");
+		parser.Reset("ntv2local://7XT001436");
 			CHECK(parser.HasDeviceSpec());
 			CHECK(parser.Successful());
 			CHECK_FALSE(parser.Failed());
@@ -3634,7 +3634,7 @@ TEST_SUITE("NTV2DeviceSpecParser" * doctest::description("DeviceSpecParser tests
 			CHECK(parser.IsLocalDevice());
 			CHECK_EQ(parser.Scheme(), "ntv2local");
 			CHECK_EQ(parser.DeviceSerial(), "7XT001436");
-	 	parser.Reset("ntv2local://7XT001436?foo=x&bar=y");
+		parser.Reset("ntv2local://7XT001436?foo=x&bar=y");
 			CHECK(parser.HasDeviceSpec());
 			CHECK(parser.Successful());
 			CHECK_FALSE(parser.Failed());
@@ -3646,7 +3646,25 @@ TEST_SUITE("NTV2DeviceSpecParser" * doctest::description("DeviceSpecParser tests
 			CHECK_EQ(parser.MakeQueryString(false), "bar=y&foo=x");
 			CHECK_EQ(parser.QueryParam("foo"), "x");
 			CHECK_EQ(parser.QueryParam("bar"), "y");
+
+		parser.Reset("ntv2swdevice://foo/bar?x=foo%3Acolon%2Fslash%3Fquestion%26ampersand%3Dequal&alpha%20beta=one%20two");
+		//	cout << aja::join(parser.Errors(),"\n") << endl;
+			CHECK(parser.HasDeviceSpec());
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_FALSE(parser.HasErrors());
+			CHECK_FALSE(parser.IsLocalDevice());
+			CHECK_EQ(parser.Scheme(), "ntv2swdevice");
+			CHECK_EQ(parser.QueryParam("x"), "foo%3Acolon%2Fslash%3Fquestion%26ampersand%3Dequal");
+			CHECK_EQ(parser.QueryParam("alpha%20beta"), "one%20two");
 /*		parser.Reset("ntv2local://blabber");
+		if (ch == '%')
+		{
+		ch = CharAt(++paramPos);
+		if (IsHexDigit(CharAt(++paramPos)) && IsHexDigit(CharAt(++paramPos)))
+		
+		}
 		parser.Reset("ntv2local://blabber.foo.bar");
 		parser.Reset("ntv2local://blabber/");
 		parser.Reset("ntv2local://blabber.foo.bar/");

@@ -890,7 +890,7 @@ bool NTV2DeviceSpecParser::ParseParamAssignment (size_t & pos, string & outKey, 
 		ch = CharAt(++paramPos);
 	do
 	{
-		if (!ParseAlphaNumeric(paramPos, key))
+		if (!ParseAlphaNumeric(paramPos, key, "%"))
 			break;
 		ch = CharAt(paramPos);
 		if (ch != '=')
@@ -965,7 +965,7 @@ bool NTV2DeviceSpecParser::ParseQueryParams (const NTV2Dictionary & inSrcDict, N
 	return true;
 }	//	ParseQueryParams
 
-bool NTV2DeviceSpecParser::MakeQueryString (const NTV2Dictionary & inSrcDict, std::string & outQueryStr)	//	STATIC
+bool NTV2DeviceSpecParser::MakeQueryString (const NTV2Dictionary & inSrcDict, std::string & outQueryStr, const bool inLeadQuestion)	//	STATIC
 {
 	outQueryStr.clear();
 	if (inSrcDict.empty())
@@ -984,7 +984,9 @@ bool NTV2DeviceSpecParser::MakeQueryString (const NTV2Dictionary & inSrcDict, st
 			oss << "=" << ::PercentEncode(val);
 		params.push_back(oss.str());
 	}	//	for each key
-	outQueryStr = "?" + aja::join(params, "&");
+	if (inLeadQuestion)
+		outQueryStr = "?";
+	outQueryStr += aja::join(params, "&");
 	return true;
 }
 

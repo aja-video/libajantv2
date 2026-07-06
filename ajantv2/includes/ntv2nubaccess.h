@@ -265,9 +265,11 @@ class AJAExport NTV2DeviceSpecParser
 										It's not an error if it's empty.
 			@param[out]	outQueryStr		Receives the string that contains the URL-encoded key/value pairs.
 										This string will be empty if the source dictionary is empty.
+			@param[in]	inLeadQuestion	Optionally specifies if the returned query string should begin with '?'.
+										Defaults to false (omitted).
 			@returns	True if successful; otherwise false.
 		**/
-		static bool		MakeQueryString (const NTV2Dictionary & inSrcDict, std::string & outQueryStr);
+		static bool		MakeQueryString (const NTV2Dictionary & inSrcDict, std::string & outQueryStr, const bool inLeadQuestion = false);
 };	//	NTV2DeviceSpecParser
 
 
