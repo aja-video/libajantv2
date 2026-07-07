@@ -1338,7 +1338,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 
 				const bool isDF = AJATimeCode::QueryIsRP188DropFrame(regTC.fDBB, regTC.fLo, regTC.fHi);
 
-				AJATimeCode						tc;		tc.SetRP188(regTC.fDBB, regTC.fLo, regTC.fHi, ajaTB);
+				AJATimeCode						tc(0, false);		tc.SetRP188(regTC.fDBB, regTC.fLo, regTC.fHi, ajaTB);
 				AJAAncillaryData_Timecode_ATC	atc;	atc.SetTimecode (tc, ajaTB, isDF);
 				atc.SetDBB (uint8_t(regTC.fDBB & 0x000000FF), uint8_t(regTC.fDBB & 0x0000FF00 >> 8));
 				if (NTV2_IS_ATC_VITC2_TIMECODE_INDEX(tcNdx))	//	VITC2?
