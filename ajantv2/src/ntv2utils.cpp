@@ -4663,6 +4663,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONAXM:					return inForRetailDisplay ? "KONA XM"					: "KonaXM";
 		case DEVICE_ID_KONAX_4CH:               return inForRetailDisplay ? "KONA X 4CH"                : "KonaX_4CH";
 		case DEVICE_ID_KONAIP_25G:				return "KonaIP 25G";
+		case DEVICE_ID_KONAIP_25G_8CH:			return "KonaIP 25G 8Ch";
 		case DEVICE_ID_SOJI_3DLUT:				return "SOJI-3DLUT";
 		case DEVICE_ID_SOJI_DIAGS:				return "SOJI-DIAGS";
 		case DEVICE_ID_SOJI_OE1:				return "SOJI-OE1";
@@ -7453,6 +7454,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 //														DEVICE_ID_KONAIP_2TX_1SFP_J2K,
 //														DEVICE_ID_KONAIP_4CH_2SFP,
 														DEVICE_ID_KONAIP_25G,
+														DEVICE_ID_KONAIP_25G_8CH,
 														DEVICE_ID_KONALHEPLUS,
 														DEVICE_ID_KONALHI,
 														DEVICE_ID_KONALHIDVI,

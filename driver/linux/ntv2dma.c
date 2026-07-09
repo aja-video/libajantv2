@@ -810,7 +810,7 @@ static bool dmaHardwareInit(PDMA_ENGINE pDmaEngine)
             pDmaEngine->alignmentMask = 0x3f;
             pDmaEngine->granularityMask = 0x3f;
         }
-        pDmaEngine->deviceDMAOffset = (pNTV2Params->_DeviceID == DEVICE_ID_KONAIP_25G) ? 0x50000000000 : 0;
+        pDmaEngine->deviceDMAOffset = (pNTV2Params->_DeviceID == DEVICE_ID_KONAIP_25G || pNTV2Params->_DeviceID == DEVICE_ID_KONAIP_25G_8CH) ? 0x50000000000 : 0;
 
 		break;
 	default:

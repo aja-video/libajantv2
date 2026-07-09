@@ -251,7 +251,8 @@ bool CNTV2AxiSpiFlash::DeviceSupported(NTV2DeviceID deviceId)
 		(deviceId == DEVICE_ID_KONAX) ||
 		(deviceId == DEVICE_ID_KONAXM) ||
 		(deviceId == DEVICE_ID_KONAX_4CH) ||
-        (deviceId == DEVICE_ID_KONAIP_25G))
+        (deviceId == DEVICE_ID_KONAIP_25G) ||
+		(deviceId == DEVICE_ID_KONAIP_25G_8CH))
 	{
 		return true;
 	}

@@ -72,6 +72,7 @@ typedef enum
 	DEVICE_ID_KONAIP_2110				= 0x10646706,	///< @brief See \ref konaip
 	DEVICE_ID_KONAIP_2110_RGB12			= 0x10646707,	///< @brief See \ref konaip
     DEVICE_ID_KONAIP_25G				= 0x11001400,	///< @brief See \ref konaip25g
+	DEVICE_ID_KONAIP_25G_8CH            = 0x11001401,   ///< @brief See \ref konaip25g
 	DEVICE_ID_KONAIP_2TX_1SFP_J2K		= 0x10646703,	///< @brief See \ref konaip
 	DEVICE_ID_KONAIP_4CH_2SFP			= 0x10646701,	///< @brief See \ref konaip
 	DEVICE_ID_KONALHEPLUS				= 0x10352300,	///< @brief See \ref konalheplus
@@ -154,6 +155,7 @@ typedef enum
 													||	(__d__) == DEVICE_ID_IOIP_2110				\
 													||	(__d__) == DEVICE_ID_IOIP_2110_RGB12		\
 													||	(__d__) == DEVICE_ID_KONAIP_25G				\
+													||  (__d__) == DEVICE_ID_KONAIP_25G_8CH         \
 													||	(__d__) == DEVICE_ID_IP25_R           \
                           ||  (__d__) == DEVICE_ID_IP25_T  )
 

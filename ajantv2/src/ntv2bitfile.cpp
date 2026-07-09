@@ -507,7 +507,8 @@ string CNTV2Bitfile::GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID
 		case DEVICE_ID_KONA5_OE8:				return "kona5_oe_cfg8";
 		case DEVICE_ID_KONA5_OE9:				return "kona5_oe_cfg9";
 		case DEVICE_ID_KONAHDMI:				return "kona_hdmi_4rx";
-		case DEVICE_ID_KONAIP_25G:				break;
+		case DEVICE_ID_KONAIP_25G:
+		case DEVICE_ID_KONAIP_25G_8CH:			break;
 		case DEVICE_ID_KONALHEPLUS:				return "lhe_12_pcie";		//	lhe_12_pcie.ncd
 		case DEVICE_ID_KONALHI:					return "top_pike";			//	top_pike.ncd
 		case DEVICE_ID_KONALHIDVI:				break;
