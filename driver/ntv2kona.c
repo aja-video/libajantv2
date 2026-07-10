@@ -221,13 +221,15 @@ bool StartDriverProcesses(Ntv2DriverProcessContext* inProcessContext)
 	
 	#ifdef AJA_RASTERIZER
         if (DEVICE_IS_KONAX(deviceID) ||
-            (deviceID == DEVICE_ID_KONAIP_25G))
+            (deviceID == DEVICE_ID_KONAIP_25G) ||
+			(deviceID == DEVICE_ID_KONAIP_25G_8CH))
 		{
 			ntv2Message("Starting Raster Monitor\n");
 			inProcessContext->pRasterMonitor = ntv2_videoraster_open(pSystemContext, "ntv2raster", 0);
 			if (inProcessContext->pRasterMonitor != NULL)
 			{
-				status = ntv2_videoraster_configure(inProcessContext->pRasterMonitor, 0x3400, 64, 4);
+				status = ntv2_videoraster_configure(inProcessContext->pRasterMonitor, 0x3400, 64, 
+					(deviceID == DEVICE_ID_KONAIP_25G_8CH) ? 8 : 4);
 				if (status != NTV2_STATUS_SUCCESS)
 				{
 					ntv2_videoraster_close(inProcessContext->pRasterMonitor);

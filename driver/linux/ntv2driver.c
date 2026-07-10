@@ -3986,7 +3986,8 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
             ntv2pp->m_pRasterMonitor = ntv2_videoraster_open(&ntv2pp->systemContext, "ntv2videoraster", 0);
             if (ntv2pp->m_pRasterMonitor != NULL)
             {
-                status = ntv2_videoraster_configure(ntv2pp->m_pRasterMonitor, 0x3400, 64, 4);
+                status = ntv2_videoraster_configure(ntv2pp->m_pRasterMonitor, 0x3400, 64, 
+				(ntv2pp->_DeviceID == DEVICE_ID_KONAIP_25G_8CH) ? 8 : 4);
                 if (status != NTV2_STATUS_SUCCESS)
                 {
                     ntv2_videoraster_close(ntv2pp->m_pRasterMonitor);
