@@ -52,7 +52,10 @@ typedef enum
 	kVRegSWDevMasterRunning					= VIRTUALREG_START+30,		//	SWDevice master running if incrementing over time
 	kVRegSWDevMasterPIDLo					= VIRTUALREG_START+31,		//	SWDevice master PID (LS 32 bits)
 	kVRegSWDevMasterPIDHi					= VIRTUALREG_START+32,		//	SWDevice master PID (MS 32 bits)
-	kVRegSWDevMasterRecordAudio				= VIRTUALREG_START+33,		//	SWDevice master: bits 0-15 (record played AudSys 1-16), 16-31 (record captured AudSys 1-16)
+	kVRegSWDevMasterRecordVideo				= VIRTUALREG_START+33,		//	SWDevice master: bits 0-7 (record output chl 1-8), 8-15 (record input chl 1-8)
+	kVRegSWDevMasterRecordAudio				= VIRTUALREG_START+34,		//	SWDevice master: bits 0-7 (record AudSys 1-8 output), 8-15 (record AudSys 1-8 input)
+	kVRegSWDevMasterRecordAnc				= VIRTUALREG_START+35,		//	SWDevice master: bits 0-7 (record AncIns 1-8), 8-15 (record AncExt 1-8)
+	kVRegSWDevMasterRecordTM				= VIRTUALREG_START+36,		//	SWDevice master: telemetry
 
 	// COMMON_VIRTUAL_REGS_MISC
 	kVRegVideoOutPauseMode					= VIRTUALREG_START+40,		// whether we pause on a frame or a field

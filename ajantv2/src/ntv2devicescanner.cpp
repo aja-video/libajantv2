@@ -375,36 +375,36 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 		return false;
 
 	//	Special case:  'LIST' or '?'  ---  print an enumeration of available devices to stdout, then bail
-	AJAAutoLock tmpLock(&sDevInfoListLock);
-	ScanHardware();
-	if (larg == "list" || larg == "?")
-	{
-		if (sDevInfoList.empty())
-			cout << "No devices detected" << endl;
-		else
-			cout << DEC(sDevInfoList.size()) << " available " << (sDevInfoList.size() == 1 ? "device:" : "devices:") << endl;
-		for (size_t ndx(0);  ndx < sDevInfoList.size();  ndx++)
+	{	AJAAutoLock tmpLock(&sDevInfoListLock);
+		ScanHardware();
+		if (larg == "list" || larg == "?")
 		{
-			if (sDevInfoList.at(ndx).isVirtualDevice)
-			{
-				cout << DECN(ndx, 2) << " | " << setw(8) << "virtual";
-				if (!sDevInfoList.at(ndx).vdevName.empty())
-					cout << " | " << setw(10) << sDevInfoList.at(ndx).vdevName;
-				cout << " | " << sDevInfoList.at(ndx).vdevUrl << endl;
-			}
+			if (sDevInfoList.empty())
+				cout << "No devices detected" << endl;
 			else
+				cout << DEC(sDevInfoList.size()) << " available " << (sDevInfoList.size() == 1 ? "device:" : "devices:") << endl;
+			for (size_t ndx(0);  ndx < sDevInfoList.size();  ndx++)
 			{
-				cout << DECN(ndx, 2) << " | " << setw(8) << "local";
-				const string serNum(sDevInfoList.at(ndx).serialNumber);
-				if (!serNum.empty())
-					cout << " | " << setw(10) << serNum;
-				cout << " | " << setw(16) << ::NTV2DeviceIDToString(sDevInfoList.at(ndx).deviceID);
-				cout << endl;
-			}
-		}	//	for each device
-		return false;
-	}	//	if 'list' or '?' specified
-
+				if (sDevInfoList.at(ndx).isVirtualDevice)
+				{
+					cout << DECN(ndx, 2) << " | " << setw(8) << "virtual";
+					if (!sDevInfoList.at(ndx).vdevName.empty())
+						cout << " | " << setw(10) << sDevInfoList.at(ndx).vdevName;
+					cout << " | " << sDevInfoList.at(ndx).vdevUrl << endl;
+				}
+				else
+				{
+					cout << DECN(ndx, 2) << " | " << setw(8) << "local";
+					const string serNum(sDevInfoList.at(ndx).serialNumber);
+					if (!serNum.empty())
+						cout << " | " << setw(10) << serNum;
+					cout << " | " << setw(16) << ::NTV2DeviceIDToString(sDevInfoList.at(ndx).deviceID);
+					cout << endl;
+				}
+			}	//	for each device
+			return false;
+		}	//	if 'list' or '?' specified
+	}	//	tmpLock scope
 	return outDevice.Open(arg);	//	Just throw arg "over the wall" and let Open deal with it
 }	//	GetFirstDeviceFromArgument
 

@@ -1311,7 +1311,10 @@ private:
 		DEF_REGNAME (kVRegSWDevMasterRunning);
 		DEF_REGNAME (kVRegSWDevMasterPIDLo);
 		DEF_REGNAME (kVRegSWDevMasterPIDHi);
+		DEF_REGNAME (kVRegSWDevMasterRecordVideo);
 		DEF_REGNAME (kVRegSWDevMasterRecordAudio);
+		DEF_REGNAME (kVRegSWDevMasterRecordAnc);
+		DEF_REGNAME (kVRegSWDevMasterRecordTM);
 		DEF_REGNAME	(kVRegVideoOutPauseMode);
 		DEF_REGNAME	(kVRegPulldownPattern);
 		DEF_REGNAME	(kVRegColorSpaceMode);
