@@ -20,7 +20,19 @@
 #include <linux/cdev.h>
 #include <linux/device.h>
 #include <linux/slab.h>
+#include <linux/timer.h>
 #include <linux/uaccess.h>
+#include <linux/version.h>
+
+/* Linux 6.12 renamed from_timer()/del_timer_sync() to timer_container_of()/timer_delete_sync() */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,12,0))
+#define NTV42DUMMY_TIMER_CONTAINER_OF
+#endif
+
+/* Linux 6.2 made the dev_uevent() class callback take a const struct device * */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,2,0))
+#define NTV42DUMMY_CONST_DEV_UEVENT
+#endif
 
 /* Build flags needed by ntv42device.h */
 #ifndef AJALinux
@@ -131,29 +143,29 @@ static long ntv42dummy_ioctl(struct file *file, unsigned int cmd, unsigned long 
 
     switch (cmd) {
     case IOCTL_NTV42_VERSION:
-        return ntv42_ioctl_version(state->device, arg);
+        return ntv42_ioctl_version(state->device, file, arg);
     case IOCTL_NTV42_REG_READ:
-        return ntv42_ioctl_reg_read(state->device, arg);
+        return ntv42_ioctl_reg_read(state->device, file, arg);
     case IOCTL_NTV42_REG_WRITE:
-        return ntv42_ioctl_reg_write(state->device, arg);
+        return ntv42_ioctl_reg_write(state->device, file, arg);
     case IOCTL_NTV42_DEVICE_INFO:
-        return ntv42_ioctl_device_info(state->device, arg);
+        return ntv42_ioctl_device_info(state->device, file, arg);
     case IOCTL_NTV42_EVENT_CONTROL:
-        return ntv42_ioctl_event_control(state->device, arg);
+        return ntv42_ioctl_event_control(state->device, file, arg);
     case IOCTL_NTV42_EVENT_WAIT:
-        return ntv42_ioctl_event_wait(state->device, arg);
+        return ntv42_ioctl_event_wait(state->device, file, arg);
     case IOCTL_NTV42_EVENT_STATUS:
-        return ntv42_ioctl_event_status(state->device, arg);
+        return ntv42_ioctl_event_status(state->device, file, arg);
     case IOCTL_NTV42_DMA_TRANSFER:
-        return ntv42_ioctl_dma_transfer(state->device, arg);
+        return ntv42_ioctl_dma_transfer(state->device, file, arg);
     case IOCTL_NTV42_DMA_INFO:
-        return ntv42_ioctl_dma_info(state->device, arg);
+        return ntv42_ioctl_dma_info(state->device, file, arg);
     case IOCTL_NTV42_REGBATCH_SUBMIT:
-        return ntv42_ioctl_regbatch_submit(state->device, arg);
+        return ntv42_ioctl_regbatch_submit(state->device, file, arg);
     case IOCTL_NTV42_REGBATCH_CANCEL:
-        return ntv42_ioctl_regbatch_cancel(state->device, arg);
+        return ntv42_ioctl_regbatch_cancel(state->device, file, arg);
     case IOCTL_NTV42_REGBATCH_STATUS:
-        return ntv42_ioctl_regbatch_status(state->device, arg);
+        return ntv42_ioctl_regbatch_status(state->device, file, arg);
     default:
         return -ENOTTY;
     }
@@ -174,7 +186,11 @@ static const struct file_operations ntv42dummy_fops = {
 
 static void ntv42dummy_vsync_timer_fn(struct timer_list *t)
 {
+#if defined(NTV42DUMMY_TIMER_CONTAINER_OF)
+    struct ntv42_dummy_state *state = timer_container_of(state, t, vsync_timer);
+#else
     struct ntv42_dummy_state *state = from_timer(state, t, vsync_timer);
+#endif
 
     if (state->device == NULL || !state->vsync_running)
         return;
@@ -193,6 +209,18 @@ static void ntv42dummy_vsync_timer_fn(struct timer_list *t)
 /*============================================================================
  * Module init/exit
  *==========================================================================*/
+
+/* Requests udev create /dev/ntv42dummyN as 0666 instead of the default 0600 root-only,
+ * matching the real ajantv2 driver's device nodes. */
+#if defined(NTV42DUMMY_CONST_DEV_UEVENT)
+static int ntv42dummy_dev_uevent(const struct device *dev, struct kobj_uevent_env *env)
+#else
+static int ntv42dummy_dev_uevent(struct device *dev, struct kobj_uevent_env *env)
+#endif
+{
+    add_uevent_var(env, "DEVMODE=%#o", 0666);
+    return 0;
+}
 
 static int __init ntv42dummy_init(void)
 {
@@ -221,6 +249,7 @@ static int __init ntv42dummy_init(void)
         unregister_chrdev_region(MKDEV(ntv42dummy_major, 0), num_devices);
         return PTR_ERR(ntv42dummy_class);
     }
+    ntv42dummy_class->dev_uevent = ntv42dummy_dev_uevent;
 
     /* Create each dummy device */
     for (i = 0; i < num_devices; i++) {
@@ -292,7 +321,11 @@ static int __init ntv42dummy_init(void)
 err_cleanup:
     for (i = i - 1; i >= 0; i--) {
         dummy_state[i].vsync_running = false;
+#if defined(NTV42DUMMY_TIMER_CONTAINER_OF)
+        timer_delete_sync(&dummy_state[i].vsync_timer);
+#else
         del_timer_sync(&dummy_state[i].vsync_timer);
+#endif
         device_destroy(ntv42dummy_class, MKDEV(ntv42dummy_major, i));
         cdev_del(&dummy_state[i].cdev);
         ntv42device_state(dummy_state[i].device, ntv42device_state_disable);
@@ -310,7 +343,11 @@ static void __exit ntv42dummy_exit(void)
 
     for (i = 0; i < ntv42dummy_device_count; i++) {
         dummy_state[i].vsync_running = false;
+#if defined(NTV42DUMMY_TIMER_CONTAINER_OF)
+        timer_delete_sync(&dummy_state[i].vsync_timer);
+#else
         del_timer_sync(&dummy_state[i].vsync_timer);
+#endif
         device_destroy(ntv42dummy_class, MKDEV(ntv42dummy_major, i));
         cdev_del(&dummy_state[i].cdev);
         kfree(dummy_state[i].device->dma_buf);
@@ -328,6 +365,6 @@ static void __exit ntv42dummy_exit(void)
 module_init(ntv42dummy_init);
 module_exit(ntv42dummy_exit);
 
-MODULE_LICENSE("MIT");
+MODULE_LICENSE("Dual MIT/GPL");
 MODULE_AUTHOR("AJA Video Systems, Inc.");
 MODULE_DESCRIPTION("NTV42 dummy driver for testing");

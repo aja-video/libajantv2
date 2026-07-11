@@ -6,8 +6,9 @@ KDIR ?= /lib/modules/$(KVERSION)/build
 
 # Paths relative to this directory
 DRIVER_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))/..
+AJANTV2_INC_DIR := $(DRIVER_DIR)/../ajantv2/includes
 
-ccflags-y += -DAJALinux -DAJA_NTV42=1 -I$(DRIVER_DIR)
+ccflags-y += -DAJALinux -DAJA_NTV42=1 -I$(DRIVER_DIR) -I$(AJANTV2_INC_DIR)
 
 obj-m := ntv42dummy.o
 ntv42dummy-objs := ntv42dummy_main.o ntv42device.o ntv42ioctl.o ntv42ioctl_event.o ntv42ioctl_dma.o ntv42regbatch.o
