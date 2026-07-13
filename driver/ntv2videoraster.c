@@ -502,6 +502,7 @@ Ntv2Status ntv2_videoraster_update_frame(struct ntv2_videoraster *ntv2_raster, u
     channel_control = ntv2_raster->channel_control[index];
     invert = (NTV2_FLD_GET(ntv2_fld_channel_control_frame_orientation, channel_control) != 0);
 
+    ntv2_raster->frame_size[index] = get_frame_size(ntv2_raster, index);
     frame_size = ntv2_raster->frame_size[index];
     pitch = ntv2_raster->frame_pitch[index];
 
@@ -577,6 +578,29 @@ Ntv2Status ntv2_videoraster_update_frame(struct ntv2_videoraster *ntv2_raster, u
     NTV2_MSG_VIDEORASTER_STATE("%s: chn %d  invert            %d\n", ntv2_raster->name, index, (int)invert);
 
    	return NTV2_STATUS_SUCCESS;
+}
+
+Ntv2Status ntv2_videoraster_update_dynamic(struct ntv2_videoraster *ntv2_raster)
+{
+    uint32_t i;
+
+    if (ntv2_raster == NULL)
+    {
+        return NTV2_STATUS_SUCCESS;
+    }
+	if (!ntv2_raster->monitor_enable)
+		return NTV2_STATUS_SUCCESS;
+
+    // check for frame size change
+    for (i = 0; i < ntv2_raster->num_widgets; i++)
+    {
+        if (get_frame_size(ntv2_raster, i) != ntv2_raster->frame_size[i])
+        {
+            update_format(ntv2_raster, i);
+        }
+    }
+
+    return NTV2_STATUS_SUCCESS;
 }
 
 static Ntv2Status ntv2_videoraster_initialize(struct ntv2_videoraster *ntv2_raster, uint32_t index)

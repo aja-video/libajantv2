@@ -58,5 +58,6 @@ Ntv2Status ntv2_videoraster_disable(struct ntv2_videoraster *ntv2_raster);
 Ntv2Status ntv2_videoraster_update_global(struct ntv2_videoraster *ntv2_raster, uint32_t reg, uint32_t value);
 Ntv2Status ntv2_videoraster_update_channel(struct ntv2_videoraster *ntv2_raster, uint32_t index);
 Ntv2Status ntv2_videoraster_update_frame(struct ntv2_videoraster *ntv2_raster, uint32_t index, bool input, uint32_t frame_number);
+Ntv2Status ntv2_videoraster_update_dynamic(struct ntv2_videoraster *ntv2_raster);
 
 #endif
