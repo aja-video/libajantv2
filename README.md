@@ -762,6 +762,64 @@ This means that if the `NTV2_DEPRECATE` macro is undefined, then existing code t
       - New in **CNTV2Card**
         - New **GetTaskMode** and **SetTaskMode** member functions to replace their deprecated “EveryFrameServices” equivalents.
       - In `ntv2utils.h`, new **NTV2GetPluginsFolderPath** and **NTV2GetVDevFolderPath** utility functions.
+- **SDK 18.1:** Defined macro `NTV2_DEPRECATE_18_1` in `ntv2deprecate.h`.
+  - This release finally purges (removes) everything associated with the obsolete Corvid HEVC, the IoIP, and original 10gbps KonaIP board.
+  - **ajabase**
+    - **AJAPersistence** (and in fact everything in `ajabase/persistence`) is now deprecated, and will be removed in a future SDK.
+    - Until such removal, finally updated **SQLite** from version 3.24.0 (2018) to version 3.53.2 (2026).
+    - New `is_legal_hex_number` function.
+    - `is_legal_hex_number` now returns `bool` (success or fail) and now accepts an optional maximum length (default is 16).
+    - New AJADebug message groups `AJA_DebugUnit_AcquireRelease`, `AJA_DebugUnit_CP2`, `AJA_DebugUnit_VDev`, `AJA_DebugUnit_SWDevice`
+      `AJA_DebugUnit_VKONACDI`, `AJA_DebugUnit_AWS`
+    - Linux implementation of `reveal_file_in_file_manager` now uses **dbus-send** instead of **xdg-open**.
+  - **ajantv2**
+    - Moved most of the `NTV2_DEPRECATE…` related macros into the `ntv2deprecate.h` header file so they can be used in **ajabase**.
+    - **Deleted Header Files:** 14 header files were removed in this release:
+      - 10Gbps KonaIP & IoIP related headers: `ntv2config2022.h`, `ntv2config2110.h`, `ntv2configts2022.h`, `ntv2mailbox.h`,
+        `ntv2mbcontroller.h`, `ntv2mcsfile.h`, `ntv2registers2022.h`, `ntv2registers2110.h`, `ntv2registersmb.h`, `ntv2tshelper.h`
+      - Corvid HEVC related headers: `ntv2m31enums.h`, `ntv2m31publicinterface.h`
+      - Other:  `ntv2task.h`
+    - **Deleted Source Files:** 7 source files were removed in this release:
+      - 10Gbps KonaIP & IoIP related headers: `ntv2config2022.cpp`, `ntv2config2110.cpp`, `ntv2configts2022.cpp`, `ntv2mailbox.cpp`,
+        `ntv2mbcontroller.cpp`, `ntv2mcsfile.cpp`
+      - Other:  `ntv2task.cpp`
+    - New `NTV2_CHECK_SDRAM_COLLISIONS` compile-time macro.
+    - **CNTV2Card** changes
+      - Deprecated member functions:
+        - `GetAlphaFromInput2Bit`, `SetAlphaFromInput2Bit` are considered obsolete
+        - `SupportsP2PTransfer` — use `IsSupported(kDeviceCanDoP2PTransmit)` instead
+        - `SupportsP2PTarget` — use `IsSupported(kDeviceCanDoP2PReceive)` instead
+        - `SetWarmBootFirmwareReload` (obsolete)
+      - New `GetHDMIOutForceYUV`, `SetHDMIOutForceYUV`, `GetHDMIOutForceRGB`, `SetHDMIOutForceRGB` member functions
+    - **DeviceCapabilities** changes
+      - Deprecated member functions:
+        - `GetNumVideoChannels`, `IsDNxIV`
+        - `HasSPIv2`, `HasSPIv3`, `HasSPIv4`, `HasSPIv5`
+      - New member functions: `CanDoClockMonitor`, `CanDoFastBitfileSwitching`, `CanDoP2PTransmit`, `CanDoP2PReceive`,
+        `CanReportMixerDelay`, `HasLPProductCode`, and `GetNum25GSFPs`
+    - New **NTV2BoolParamID** enums: `kDeviceCanReportMixerDelay`, `kDeviceHasLPProductCode`, `kDeviceCanDoP2PTransmit`,
+      `kDeviceCanDoP2PReceive`, `kDeviceCanDoFastBitfileSwitching`,	`kDeviceCanDoClockMonitor`
+    - New **NTV2NumericParamID** enum:  `kDeviceGetNum25GSFPs`
+    - New **CNTV2DeviceScanner** static (class) functions: `GetDeviceInfoForSerial`, `GetDeviceInfoForModel`,
+      `GetDeviceInfoForID`, `PatchDeviceInfo`
+    - **CNTV2DriverInterface** changes:
+      - Deprecated `GetPackageInformation`
+    - New **NTV2DeviceID** enums: `DEVICE_ID_KONAIP_25G_8CH` and `DEVICE_ID_VKONA`
+    - New **NTV2FormatDescriptor** member function: `FlipVertically`
+    - **CNTV2KonaFlashProgram** class changed to no longer derive from **CNTV2Card** and removed IoIP/KonaIP10g specific functions.
+      Also changed **CNTV2SpiFlash** and **CNTV2AxiSpiFlash** ctors to use `CNTV2Card&`.
+    - New **ntv2card_send_message** function in the simple C interface.
+    - **NTV2DeviceSpecParser** changes:
+      - New inquiry functions: `Host`, `Port` and `HostWithPort`
+      - New static (class) function `MakeQueryString`
+    - **NTV2Buffer** changes: replaced (deprecated) `FindAll(ULWordSet&, const NTV2Buffer&)` with `Find(ULWordSet&, const NTV2Buffer&, const size_t)`
+    - New **NTV2MessageData** driver message.
+    - New global **ostream** write operator for **NTV2PossibleConnections**.
+    - New **CNTV2SignalRouter** static (class) member `CreateFromString(const string&, NTV2PossibleConnections&)`.
+  - **Changes to NTV2 demos**
+    - Removed call to `CNTV2DemoCommon::IsValidDevice` from all demos.
+    - In all demos, demo class instance now destroyed before returning from `main`.
+    - Removed NTV2DeviceID member variable from demo classes.
 
 </details>
 
