@@ -4890,35 +4890,35 @@ public:
 	AJA_VIRTUAL bool		GetHDMIOutPrefer420 (bool & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
 	/**
-		@brief						Sets if the given HDMI output to YUV color.
-		@param[in]	inNewValue		Specify true to force YUV;  otherwise specify false.
+		@brief						Sets the given HDMI output to forced YUV colorspace or not.
+		@param[in]	inNewValue		Specify true to force YUV colorspace mode;  otherwise specify false (for unforced).
 		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
-									Defaults to the first one.
+									Defaults to the first HDMI output.
 		@return						True if successful;	 otherwise false.
 	**/
 	AJA_VIRTUAL bool		SetHDMIOutForceYUV (const bool inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 	/**
-		@brief						Answers if the given HDMI output is forced to YUV color.
-		@param[out]	outValue		Receives true if HDMI output is YUV;  otherwise false.
+		@brief						Answers if the given HDMI output is currently forced to YUV colorspace or not.
+		@param[out]	outValue		Receives true if the HDMI output is forced to YUV mode;  otherwise false (unforced).
 		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
-									Defaults to the first one.
+									Defaults to the first HDMI output.
 		@return						True if successful;	 otherwise false.
 	**/
 	AJA_VIRTUAL bool		GetHDMIOutForceYUV (bool & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 
 	/**
-		@brief						Sets if the given HDMI output to RGB color.
-		@param[in]	inNewValue		Specify true to force RGB;  otherwise specify false.
+		@brief						Sets the given HDMI output to forced RGB colorspace or not.
+		@param[in]	inNewValue		Specify true to force RGB colorspace mode;  otherwise specify false (for unforced).
 		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
-									Defaults to the first one.
+									Defaults to the first HDMI output.
 		@return						True if successful;	 otherwise false.
 	**/
 	AJA_VIRTUAL bool		SetHDMIOutForceRGB (const bool inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
 	/**
-		@brief						Answers if the given HDMI output is forced to RGB color.
-		@param[out]	outValue		Receives true if HDMI output is RGB;  otherwise false.
+		@brief						Answers if the given HDMI output is currently forced to RGB colorspace or not.
+		@param[out]	outValue		Receives true if the HDMI output is forced to RGB mode;  otherwise false (unforced).
 		@param[in]	inWhichHDMIOut	Specifies the HDMI output of interest as an ::NTV2Channel, a zero-based index value.
-									Defaults to the first one.
+									Defaults to the first HDMI output.
 		@return						True if successful;	 otherwise false.
 	**/
 	AJA_VIRTUAL bool		GetHDMIOutForceRGB (bool & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);

@@ -1204,7 +1204,25 @@ bool NTV2FormatDescriptor::FlipVertically (NTV2Buffer & inFB) const
 	UWord plane (0);
 	if (inFB)
 		do
-		{
+		{	//	For each plane...
+		#if 0
+			//	Much slower way:  segmented xfer from copy of plane data...
+			NTV2SegmentedXferInfo xferInfo;
+			const ULWord bpr(GetBytesPerRow(plane));
+			NTV2Buffer orig(bpr * GetVisibleRasterHeight());
+			if (!orig.CopyFrom (inFB, /*srcOffset*/bpr * GetFirstActiveLine(), /*dstOffset*/0, bpr * GetVisibleRasterHeight()))
+				return false;
+			xferInfo.setSegmentInfo(/*numSegments*/GetVisibleRasterHeight(), /*segmentLength*/bpr);
+			xferInfo.setSourceDirection(xferInfo.Direction_TopDown);
+			xferInfo.setSourcePitch(/*bytesPerRow*/bpr);
+			xferInfo.setSourceOffset(/*offset*/0);
+			xferInfo.setDestDirection(xferInfo.Direction_BottomUp);
+			xferInfo.setDestPitch(/*bytesPerRow*/bpr);
+			xferInfo.setDestOffset(bpr * (GetRasterHeight() - 1));	//	start at last row
+			if (!inFB.CopyFrom(orig, xferInfo))
+				return false;
+		#else
+			//	Fast way:  swap opposing top/bottom line pairs while converging to middle...
 			ULWord topLineNdx (GetFirstActiveLine()), botLineNdx(GetFullRasterHeight() - 1);
 			const ULWord bytesPerLine (GetBytesPerRow(plane));
 			NTV2Buffer tmpLineBuf(bytesPerLine), topLineBuf, botLineBuf;
@@ -1216,6 +1234,7 @@ bool NTV2FormatDescriptor::FlipVertically (NTV2Buffer & inFB) const
 						topLineBuf = botLineBuf;
 						botLineBuf = tmpLineBuf;
 					}
+		#endif
 		} while (++plane < GetNumPlanes());
 	return inFB;
 }	//	FlipVertically
