@@ -572,7 +572,7 @@ void NTV2Burn4KQuadrant::PlayThreadStatic (AJAThread * pThread, void * pContext)
 void NTV2Burn4KQuadrant::PlayFrames (void)
 {
 	const ULWord			acOptions (AUTOCIRCULATE_WITH_RP188);
-	ULWord					goodXfers(0), badXfers(0), starves(0), noRoomWaits(0);
+	ULWord					goodXfers(0), badXfers(0), starves(0), noRoomWaits(0), startFrm(3);
 	AUTOCIRCULATE_TRANSFER	outputXferInfo;
 	AUTOCIRCULATE_STATUS	outputStatus;
 
@@ -596,6 +596,12 @@ void NTV2Burn4KQuadrant::PlayFrames (void)
 	//	Initialize AutoCirculate...
 	if (!mOutputDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel, mConfig.fOutputFrames, mOutputAudioSystem, acOptions))
 		{BURNFAIL("AutoCirculateInitForOutput failed");  mGlobalQuit = true;}
+	else
+	{	mOutputDevice.AutoCirculateGetStatus (mConfig.fOutputChannel, outputStatus);
+		startFrm = outputStatus.GetFrameCount() - 1;
+		if (startFrm > 3)
+			startFrm = 3;
+	}
 
 	while (!mGlobalQuit)
 	{
@@ -619,12 +625,11 @@ void NTV2Burn4KQuadrant::PlayFrames (void)
 
 			//	Transfer the frame to the device for eventual playout...
 			if (mOutputDevice.AutoCirculateTransfer (mConfig.fOutputChannel, outputXferInfo))
-				goodXfers++;
+			{	if (++goodXfers == startFrm)
+					mOutputDevice.AutoCirculateStart(mConfig.fOutputChannel);
+			}
 			else
 				badXfers++;
-
-			if (goodXfers == 3)	//	Start AutoCirculate playout once 3 frames are buffered on the device...
-				mOutputDevice.AutoCirculateStart(mConfig.fOutputChannel);
 
 			//	Signal that the frame has been "consumed"...
 			mFrameDataRing.EndConsumeNextBuffer();

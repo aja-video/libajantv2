@@ -456,7 +456,7 @@ void NTV2DolbyPlayer::ConsumeFrames (void)
 {
 	AUTOCIRCULATE_TRANSFER	outputXfer;
 	AUTOCIRCULATE_STATUS	outputStatus;
-	ULWord					goodXfers(0), badXfers(0), starves(0), noRoomWaits(0);
+	ULWord					goodXfers(0), badXfers(0), starves(0), noRoomWaits(0), startFrm(3);
 
 	//	Stop AutoCirculate, just in case someone else left it running...
 	mDevice.AutoCirculateStop(mConfig.fOutputChannel);
@@ -479,7 +479,11 @@ void NTV2DolbyPlayer::ConsumeFrames (void)
 		for (uint16_t frmNum(outputStatus.GetStartFrame());  frmNum <= outputStatus.GetEndFrame();  frmNum++)
 			mDevice.DMAWriteFrame(ULWord(frmNum), tmpFrame, mFormatDesc.GetTotalBytes());
 	}	//	else if --novideo
-
+	if (initOK  &&  mDevice.AutoCirculateGetStatus (mConfig.fOutputChannel, outputStatus))
+	{	startFrm = outputStatus.GetFrameCount() - 1;
+		if (startFrm > 3)
+			startFrm = 3;
+	}
 
 	while (!mGlobalQuit)
 	{
@@ -504,12 +508,11 @@ void NTV2DolbyPlayer::ConsumeFrames (void)
 
 			//	Perform the DMA transfer to the device...
 			if (mDevice.AutoCirculateTransfer (mConfig.fOutputChannel, outputXfer))
-				goodXfers++;
+			{	if (++goodXfers == startFrm)
+					mDevice.AutoCirculateStart(mConfig.fOutputChannel);
+			}
 			else
 				badXfers++;
-
-			if (goodXfers == 3)
-				mDevice.AutoCirculateStart(mConfig.fOutputChannel);
 
 			//	Signal that the frame has been "consumed"...
 			mFrameDataRing.EndConsumeNextBuffer();

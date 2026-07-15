@@ -628,7 +628,7 @@ void NTV2Player8K::ConsumeFrames (void)
 	AUTOCIRCULATE_TRANSFER	outputXfer;
 	AUTOCIRCULATE_STATUS	outputStatus;
 	AJAAncillaryData *		pPkt (AJA_NULL);
-	ULWord					goodXfers(0), badXfers(0), prodWaits(0), noRoomWaits(0);
+	ULWord					goodXfers(0), badXfers(0), prodWaits(0), noRoomWaits(0), startFrm(3);
 	const UWord				numACFramesPerChannel(7);
 
 	//	Stop AutoCirculate, just in case someone else left it running...
@@ -672,6 +672,12 @@ void NTV2Player8K::ConsumeFrames (void)
 													1 /*numChannels*/,  startNum,  endNum));
 	if (!initOK)
 		{PLFAIL("AutoCirculateInitForOutput failed");  mGlobalQuit = true;}
+	else
+	{	mDevice.AutoCirculateGetStatus (mConfig.fOutputChannel, outputStatus);
+		startFrm = outputStatus.GetFrameCount() - 1;
+		if (startFrm > 3)
+			startFrm = 3;
+	}
 
 	while (!mGlobalQuit)
 	{
@@ -706,12 +712,11 @@ void NTV2Player8K::ConsumeFrames (void)
 
 			//	Perform the DMA transfer to the device...
 			if (mDevice.AutoCirculateTransfer (mConfig.fOutputChannel, outputXfer))
-				goodXfers++;
+			{	if (++goodXfers == startFrm)
+					mDevice.AutoCirculateStart(mConfig.fOutputChannel);
+			}
 			else
 				badXfers++;
-
-			if (goodXfers == 3)
-				mDevice.AutoCirculateStart(mConfig.fOutputChannel);
 
 			//	Signal that the frame has been "consumed"...
 			mFrameDataRing.EndConsumeNextBuffer();

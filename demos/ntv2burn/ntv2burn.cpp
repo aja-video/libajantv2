@@ -575,7 +575,7 @@ void NTV2Burn::PlayFrames (void)
 {
 	const ULWord			acOptions (AUTOCIRCULATE_WITH_RP188
 										| (mConfig.WithAnc() && !mConfig.WithTallVANC() ? AUTOCIRCULATE_WITH_ANC : 0));
-	ULWord					goodXfers(0), badXfers(0), starves(0), noRoomWaits(0);
+	ULWord					goodXfers(0), badXfers(0), starves(0), noRoomWaits(0), startFrm(3);
 	AUTOCIRCULATE_TRANSFER	outputXferInfo;
 	AUTOCIRCULATE_STATUS	outputStatus;
 
@@ -597,6 +597,11 @@ void NTV2Burn::PlayFrames (void)
 		for (uint16_t frmNum(outputStatus.GetStartFrame());  frmNum <= outputStatus.GetEndFrame();  frmNum++)
 			mDevice.DMAWriteFrame(ULWord(frmNum), tmpFrame, mFormatDesc.GetTotalBytes(), mConfig.fOutputChannel);
 	}	//	else if --novideo
+	if (!mGlobalQuit  &&  mDevice.AutoCirculateGetStatus (mConfig.fOutputChannel, outputStatus))
+	{	startFrm = outputStatus.GetFrameCount() - 1;
+		if (startFrm > 3)
+			startFrm = 3;
+	}
 
 	while (!mGlobalQuit)
 	{
@@ -626,12 +631,11 @@ void NTV2Burn::PlayFrames (void)
 
 			//	Transfer the frame to the device for eventual playout...
 			if (mDevice.AutoCirculateTransfer (mConfig.fOutputChannel, outputXferInfo))
-				goodXfers++;
+			{	if (++goodXfers == startFrm)
+					mDevice.AutoCirculateStart(mConfig.fOutputChannel);
+			}
 			else
 				badXfers++;
-
-			if (goodXfers == 3)	//	Start AutoCirculate playout once 3 frames are buffered on the device...
-				mDevice.AutoCirculateStart(mConfig.fOutputChannel);
 
 			//	Signal that the frame has been "consumed"...
 			mFrameDataRing.EndConsumeNextBuffer ();
