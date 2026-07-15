@@ -4896,7 +4896,7 @@ public:
 									Defaults to the first HDMI output.
 		@return						True if successful;	 otherwise false.
 	**/
-	AJA_VIRTUAL bool		SetHDMIOutForceYUV (const bool inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		SetHDMIOutForceYUV (const bool inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 18.1
 	/**
 		@brief						Answers if the given HDMI output is currently forced to YUV colorspace or not.
 		@param[out]	outValue		Receives true if the HDMI output is forced to YUV mode;  otherwise false (unforced).
@@ -4904,7 +4904,7 @@ public:
 									Defaults to the first HDMI output.
 		@return						True if successful;	 otherwise false.
 	**/
-	AJA_VIRTUAL bool		GetHDMIOutForceYUV (bool & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		GetHDMIOutForceYUV (bool & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);			//	New in SDK 18.1
 
 	/**
 		@brief						Sets the given HDMI output to forced RGB colorspace or not.
@@ -4913,7 +4913,7 @@ public:
 									Defaults to the first HDMI output.
 		@return						True if successful;	 otherwise false.
 	**/
-	AJA_VIRTUAL bool		SetHDMIOutForceRGB (const bool inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		SetHDMIOutForceRGB (const bool inNewValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);	//	New in SDK 18.1
 	/**
 		@brief						Answers if the given HDMI output is currently forced to RGB colorspace or not.
 		@param[out]	outValue		Receives true if the HDMI output is forced to RGB mode;  otherwise false (unforced).
@@ -4921,7 +4921,7 @@ public:
 									Defaults to the first HDMI output.
 		@return						True if successful;	 otherwise false.
 	**/
-	AJA_VIRTUAL bool		GetHDMIOutForceRGB (bool & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		GetHDMIOutForceRGB (bool & outValue, const NTV2Channel inWhichHDMIOut = NTV2_CHANNEL1);			//	New in SDK 18.1
 
 	/**
 		@brief						Answers with the bit depth of the downstream device connected to the given HDMI output.

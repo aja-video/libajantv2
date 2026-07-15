@@ -21,6 +21,7 @@ This is the open-source SDK for discovering, interrogating and controlling NTV2 
 1. [Building the NTV2 Device Driver](#building-driver)
 1. [Verifying the NTV2 Device Driver](#verifying-driver)
 1. [SDK Forward & Backward Compatibility](#fwdbackcompatibility)
+   - [Deprecation History](#deprecationhistory)
 1. [SDK & Driver Compatibility](#drivercompat)
 1. [Firmware and Device Features](#fwdevicefeatures)
 1. [‘libajantv2’ Dynamic (Shared) Libary](#dynamiclib)
@@ -389,7 +390,7 @@ Starting with the 11.3 SDK, AJA introduced the first `NTV2_DEPRECATE` macro, and
 ```
 This means that if the `NTV2_DEPRECATE` macro is undefined, then existing code that relies on the old APIs will continue to compile, link and run. If the `NTV2_DEPRECATE` macro is defined, then the obsolete APIs disappear from the compilation, and build errors will result if they’re used.
 
-### Deprecation History
+### Deprecation History <a name="deprecationhistory"></a>
 
 <details><summary>Click to expand</summary>
 
@@ -763,11 +764,10 @@ This means that if the `NTV2_DEPRECATE` macro is undefined, then existing code t
         - New **GetTaskMode** and **SetTaskMode** member functions to replace their deprecated “EveryFrameServices” equivalents.
       - In `ntv2utils.h`, new **NTV2GetPluginsFolderPath** and **NTV2GetVDevFolderPath** utility functions.
 - **SDK 18.1:** Defined macro `NTV2_DEPRECATE_18_1` in `ntv2deprecate.h`.
-  - This release finally purges (removes) everything associated with the obsolete Corvid HEVC, the IoIP, and original 10gbps KonaIP board.
+  - This release finally purges everything associated with the obsolete Corvid HEVC, IoIP, and original 10gbps Kona IP board.
   - **ajabase**
     - **AJAPersistence** (and in fact everything in `ajabase/persistence`) is now deprecated, and will be removed in a future SDK.
-    - Until such removal, finally updated **SQLite** from version 3.24.0 (2018) to version 3.53.2 (2026).
-    - New `is_legal_hex_number` function.
+    - Updated **SQLite** from version 3.24.0 (2018) to version 3.53.2 (2026).
     - `is_legal_hex_number` now returns `bool` (success or fail) and now accepts an optional maximum length (default is 16).
     - New AJADebug message groups `AJA_DebugUnit_AcquireRelease`, `AJA_DebugUnit_CP2`, `AJA_DebugUnit_VDev`, `AJA_DebugUnit_SWDevice`
       `AJA_DebugUnit_VKONACDI`, `AJA_DebugUnit_AWS`
@@ -819,7 +819,7 @@ This means that if the `NTV2_DEPRECATE` macro is undefined, then existing code t
   - **Changes to NTV2 demos**
     - Removed call to `CNTV2DemoCommon::IsValidDevice` from all demos.
     - In all demos, demo class instance now destroyed before returning from `main`.
-    - Removed NTV2DeviceID member variable from demo classes.
+    - Removed **NTV2DeviceID** member variable from demo classes.
 
 </details>
 
@@ -840,7 +840,11 @@ It’s best to undefine macros from oldest-to-newest SDKs in contiguous blocks o
     //#define NTV2_DEPRECATE_15_6
     #define NTV2_DEPRECATE_15_7
 ```
-AJA may jettison all deprecated symbols and APIs in a future SDK. Please prepare for this by porting your code to the latest SDK. AJA developer partners are encouraged to use the **NTV2 SDK Porting Guide**, available at **sdksupport.aja.com**.
+AJA may jettison all deprecated symbols and APIs in a future SDK. Please prepare for this by porting your code to the latest SDK.
+If starting with a very old SDK (pre-13.0),
+follow the [**NTV2 SDK Porting Guide**](https://sdkdocs.aja.com/public/ntv2/knowledgebase/ntv2-porting-guide.html),
+available at [**sdkdocs.aja.com**](https://sdkdocs.aja.com/).
+
 
 ### Conditional Compilation Based on NTV2 SDK Version
 
