@@ -170,6 +170,39 @@ public:
 	**/
 	virtual AJAStatus GetTimecode (AJATimeCode & outTimecode, const AJATimeBase & inTimeBase) const;
 
+	/**
+		@brief		Sets my timecode/binary-group state from the two 32-bit words used to carry
+					SMPTE 12M timecode over NTV2 ancillary/register APIs (e.g. NTV2_RP188::fLo/fHi,
+					and the ANC timecode barcode used elsewhere in this SDK).
+		@param[in]	inLoWord		Specifies the low-order 32 bits.
+		@param[in]	inHiWord		Specifies the high-order 32 bits.
+		@param[in]	inTimeBase		Specifies the time base (frame rate), used to resolve the
+									format-dependent bit positions of the Field ID and Binary
+									Group Flag values (see SetFieldIdFlag/SetBinaryGroupFlag).
+		@note		The 2-word format has room for only 2 of the Binary Group Flag's 3 bits
+					(bits 26-27 of the high word); the most-significant BGF bit cannot be
+					represented and is silently dropped on both Get and Set.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus SetRP188Words (const uint32_t inLoWord, const uint32_t inHiWord, const AJATimeBase & inTimeBase);
+
+	/**
+		@brief		Answers with my current timecode/binary-group state packed into the two
+					32-bit words used to carry SMPTE 12M timecode over NTV2 ancillary/register
+					APIs (e.g. NTV2_RP188::fLo/fHi, and the ANC timecode barcode used elsewhere
+					in this SDK).
+		@param[out]	outLoWord		Receives the low-order 32 bits.
+		@param[out]	outHiWord		Receives the high-order 32 bits.
+		@param[in]	inTimeBase		Specifies the time base (frame rate), used to resolve the
+									format-dependent bit positions of the Field ID and Binary
+									Group Flag values (see GetFieldIdFlag/GetBinaryGroupFlag).
+		@note		The 2-word format has room for only 2 of the Binary Group Flag's 3 bits
+					(bits 26-27 of the high word); the most-significant BGF bit cannot be
+					represented and is silently dropped on both Get and Set.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus GetRP188Words (uint32_t & outLoWord, uint32_t & outHiWord, const AJATimeBase & inTimeBase) const;
+
 
 	/**
 		@brief		Sets my raw "Binary Group" hex values.
