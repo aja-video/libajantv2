@@ -1827,6 +1827,98 @@ TEST_SUITE("timebase/timecode" * doctest::description("functions in ajabase/comm
 		CHECK(tmp == "01:02:03:04");
 	}
 
+	TEST_CASE("AJATimeCode RP188")
+	{
+		// QueryRP188/SetRP188 round-trip, non-HFR rates: build a timecode from h/m/s/f,
+		// encode it to RP188 words (QueryRP188), decode those words into a fresh AJATimeCode
+		// (SetRP188), and confirm the frame count survives.
+		{
+			static const AJA_FrameRate kRates[] = {
+				AJA_FrameRate_2398, AJA_FrameRate_2400, AJA_FrameRate_2500,
+				AJA_FrameRate_2997, AJA_FrameRate_3000
+			};
+			for (unsigned n = 0; n < sizeof(kRates)/sizeof(kRates[0]); n++)
+			{
+				const AJATimeBase tb(kRates[n]);
+				const bool dropFrame = (kRates[n] == AJA_FrameRate_2997);
+
+				AJATimeCode srcTc;
+				srcTc.SetHmsf(1, 23, 45, 6, tb, dropFrame, true, 0);
+
+				uint32_t dbb = 0, lo = 0, hi = 0;
+				srcTc.QueryRP188(dbb, lo, hi, tb, dropFrame);
+
+				AJATimeCode dstTc;
+				dstTc.SetRP188(dbb, lo, hi, tb);
+
+				CHECK_EQ(dstTc.QueryFrame(), srcTc.QueryFrame());
+			}
+		}
+
+		// QueryRP188/SetRP188 round-trip, HFR-family rates: both the standard (divided)
+		// presentation and the full (non-divided) presentation that exercises the Field ID
+		// bit as an extra low-order frame bit, at both bit parities.
+		{
+			static const AJA_FrameRate kRates[] = {
+				AJA_FrameRate_4795, AJA_FrameRate_4800, AJA_FrameRate_5000,
+				AJA_FrameRate_5994, AJA_FrameRate_6000
+			};
+			for (unsigned n = 0; n < sizeof(kRates)/sizeof(kRates[0]); n++)
+			{
+				const AJATimeBase tb(kRates[n]);
+
+				// Standard (divided) presentation.
+				{
+					AJATimeCode srcTc(0, true);
+					srcTc.SetStdTimecodeForHfr(true);
+					srcTc.SetHmsf(1, 23, 45, 6, tb, false, true, 0);
+
+					uint32_t dbb = 0, lo = 0, hi = 0;
+					srcTc.QueryRP188(dbb, lo, hi, tb, false);
+
+					AJATimeCode dstTc(0, true);
+					dstTc.SetStdTimecodeForHfr(true);
+					dstTc.SetRP188(dbb, lo, hi, tb);
+
+					CHECK_EQ(dstTc.QueryFrame(), srcTc.QueryFrame());
+				}
+
+				// Full (non-divided) presentation -- exercises the Field ID extended path.
+				// CalcFrame's frame-doubling requires bStdTcForHfr=false throughout.
+				for (uint32_t f = 0; f <= 1; f++)	// exercise both Field ID parities
+				{
+					AJATimeCode srcTc(0, false);
+					srcTc.SetStdTimecodeForHfr(false);
+					srcTc.SetHmsf(1, 23, 45, f, tb, false, false, 0);
+
+					uint32_t dbb = 0, lo = 0, hi = 0;
+					srcTc.QueryRP188(dbb, lo, hi, tb, false);
+
+					AJATimeCode dstTc(0, false);
+					dstTc.SetStdTimecodeForHfr(false);
+					dstTc.SetRP188(dbb, lo, hi, tb);
+
+					CHECK_EQ(dstTc.QueryFrame(), srcTc.QueryFrame());
+				}
+			}
+		}
+
+		// Drop-frame bit survives the round trip independent of h/m/s/f (QueryIsRP188DropFrame
+		// reads it back directly from the words, bypassing SetRP188's h/m/s/f reconstruction).
+		{
+			const AJATimeBase tb(AJA_FrameRate_2997);
+			AJATimeCode srcTc;
+			srcTc.SetHmsf(1, 10, 0, 2, tb, true, true, 0);
+
+			uint32_t dbb = 0, lo = 0, hi = 0;
+			srcTc.QueryRP188(dbb, lo, hi, tb, true);
+			CHECK(AJATimeCode::QueryIsRP188DropFrame(dbb, lo, hi));
+
+			srcTc.QueryRP188(dbb, lo, hi, tb, false);
+			CHECK_FALSE(AJATimeCode::QueryIsRP188DropFrame(dbb, lo, hi));
+		}
+	}
+
 } //timecode
 
 

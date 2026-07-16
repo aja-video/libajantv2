@@ -624,14 +624,52 @@ void AJATimeCode::SetRP188 (const uint32_t inDBB, const uint32_t inLo, const uin
 
 void AJATimeCode::QueryRP188(uint32_t & outDBB, uint32_t & outLo, uint32_t & outHi, const AJATimeBase & timeBase, const bool bDrop)
 {
-	AJA_UNUSED(timeBase);
-	AJA_UNUSED(bDrop);
-	
-	uint32_t dbb  = 0;
-	uint32_t low  = 0;
-	uint32_t high = 0;
-	//	UNIMPLEMENTED -- FINISH
-	outDBB = dbb;
+	// Mirrors SetRP188's bit layout exactly (see above) -- kept in sync with it by hand,
+	// since AJATimeCode has no BCD/binary-group storage of its own to drive this from.
+	uint32_t h = 0, m = 0, s = 0, f = 0;
+	CalcHmsf(h, m, s, f, m_frame, timeBase, bDrop, m_stdTcForHfr);
+
+	uint32_t low(0), high(0);
+
+	//	SECS
+	low  |= (s % 10)		  << 16;
+	low  |= ((s / 10) & 0x7)  << 24;
+	//	MINS
+	high |= (m % 10)		  ;
+	high |= ((m / 10) & 0x7)  << 8;
+	//	HRS
+	high |= (h % 10)		  << 16;
+	high |= ((h / 10) & 0x3)  << 24;
+	//	DROP FRAME (see QueryIsRP188DropFrame)
+	low  |= (bDrop ? 1u : 0u) << 10;
+
+	//	FRAMES
+	const AJA_FrameRate frameRate = timeBase.GetAJAFrameRate();
+	if (m_stdTcForHfr == false && frameRate >= AJA_FrameRate_4795)
+	{
+		// for frame rates > 39 fps, we need an extra bit for the frame "10s". By convention,
+		// we use the field ID bit to be the LS bit of the three bit number (see SetRP188).
+		// CalcHmsf (called with bStdTcForHfr=false above) returned the full, undivided frame
+		// count in 'f' -- split it back into a halved regular frame digit-pair plus the
+		// Field ID bit as its LS bit.
+		const bool fieldID = (f & 0x1) != 0;
+		const uint32_t halfFrame = f / 2;
+		low |= (halfFrame % 10);
+		low |= ((halfFrame / 10) & 0x3) << 8;
+
+		// Note: FID is in different words for PAL & NTSC!
+		if (frameRate == AJA_FrameRate_5000 || frameRate == AJA_FrameRate_10000)
+			high |= (fieldID ? 1u : 0u) << 27;
+		else
+			low  |= (fieldID ? 1u : 0u) << 27;
+	}
+	else
+	{
+		low |= (f % 10);
+		low |= ((f / 10) & 0x3) << 8;
+	}
+
+	outDBB = 0;	//	AJATimeCode has no DBB (line-address/CRC) state of its own to encode here.
 	outLo = low;
 	outHi = high;
 }

@@ -1470,6 +1470,307 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 		}	//	TEST_CASE("BFT_SMPTEAncData")
 #endif // AJANTV2_PROPRIETARY
 
+		TEST_CASE("BFT_AncillaryDataTimecodeRP188")
+		{
+			//	GetRP188Words/SetRP188Words round-trip: encode an AJAAncillaryData_Timecode into
+			//	the two 32-bit RP188 words, decode those words into a fresh instance, and confirm
+			//	every field survives -- across a spread of non-HFR and HFR-family frame rates.
+
+			//	Non-HFR rates: round-trip via the AJATimeCode/SetTimecode/GetTimecode convenience
+			//	API (simple case -- no Field ID / frame-doubling complexity to account for).
+			{
+				static const AJA_FrameRate kRates[] = {
+					AJA_FrameRate_2398, AJA_FrameRate_2400, AJA_FrameRate_2500,
+					AJA_FrameRate_2997, AJA_FrameRate_3000
+				};
+				for (unsigned n(0);  n < sizeof(kRates)/sizeof(kRates[0]);  n++)
+				{
+					const AJATimeBase tb (kRates[n]);
+					const bool dropFrame (kRates[n] == AJA_FrameRate_2997);
+
+					AJATimeCode srcTc;
+					srcTc.SetHmsf(1, 23, 45, 6, tb, dropFrame);
+
+					AJAAncillaryData_Timecode encTc;
+					CHECK(AJA_SUCCESS(encTc.SetTimecode(srcTc, tb, dropFrame)));
+
+					uint32_t loWord(0), hiWord(0);
+					CHECK(AJA_SUCCESS(encTc.GetRP188Words(loWord, hiWord, tb)));
+
+					AJAAncillaryData_Timecode decTc;
+					CHECK(AJA_SUCCESS(decTc.SetRP188Words(loWord, hiWord, tb)));
+
+					AJATimeCode dstTc;
+					CHECK(AJA_SUCCESS(decTc.GetTimecode(dstTc, tb)));
+					CHECK_EQ(dstTc.QueryFrame(), srcTc.QueryFrame());
+				}
+			}
+
+			//	HFR-family rates (48/50/60fps and their variants): drive AJAAncillaryData_Timecode
+			//	directly via SetTime/GetTime with a full (undivided) frame value, exercising the
+			//	Field-ID-as-extra-bit path at both bit parities. (Deliberately bypasses AJATimeCode's
+			//	own "std TC for HFR" convenience layer, which QueryHmsf's own comments note is not
+			//	frame-accurate for this combination -- irrelevant to what's being tested here.)
+			{
+				struct HfrCase { AJA_FrameRate rate; AJAAncillaryData_Timecode_Format fmt; uint32_t framesPerSec; };
+				static const HfrCase kCases[] = {
+					{AJA_FrameRate_4795, AJAAncillaryData_Timecode_Format_48fps, 48},
+					{AJA_FrameRate_4800, AJAAncillaryData_Timecode_Format_48fps, 48},
+					{AJA_FrameRate_5000, AJAAncillaryData_Timecode_Format_50fps, 50},
+					{AJA_FrameRate_5994, AJAAncillaryData_Timecode_Format_60fps, 60},
+					{AJA_FrameRate_6000, AJAAncillaryData_Timecode_Format_60fps, 60},
+				};
+				for (unsigned n(0);  n < sizeof(kCases)/sizeof(kCases[0]);  n++)
+				{
+					const AJATimeBase tb (kCases[n].rate);
+					const AJAAncillaryData_Timecode_Format fmt (kCases[n].fmt);
+					//	Exercise both parities of the Field ID bit (even & odd full-frame values).
+					for (uint32_t frames(kCases[n].framesPerSec - 2);  frames <= kCases[n].framesPerSec - 1;  frames++)
+					{
+						AJAAncillaryData_Timecode encTc;
+						CHECK(AJA_SUCCESS(encTc.SetTime(fmt, 1, 23, 45, frames)));
+
+						uint32_t loWord(0), hiWord(0);
+						CHECK(AJA_SUCCESS(encTc.GetRP188Words(loWord, hiWord, tb)));
+
+						AJAAncillaryData_Timecode decTc;
+						CHECK(AJA_SUCCESS(decTc.SetRP188Words(loWord, hiWord, tb)));
+
+						uint32_t h(0), m(0), s(0), f(0);
+						CHECK(AJA_SUCCESS(decTc.GetTime(fmt, h, m, s, f)));
+						CHECK_EQ(h, 1u);	CHECK_EQ(m, 23u);	CHECK_EQ(s, 45u);	CHECK_EQ(f, frames);
+					}
+				}
+			}
+
+			//	Field ID and Binary Group Flag round-trip independently at 50fps. Both live in
+			//	format-dependent bit positions within the time digits (see SetFieldIdFlag/
+			//	SetBinaryGroupFlag): at 50fps, Field ID lives in the Hour-Tens digit, while Binary-
+			//	Group-Flag bit 0 lives in Second-Tens -- resolving either with the wrong format
+			//	would read one as if it were the other, so confirm both survive a GetRP188Words/
+			//	SetRP188Words round trip independently.
+			{
+				const AJATimeBase tb50 (AJA_FrameRate_5000);
+				const AJAAncillaryData_Timecode_Format fmt50 (AJAAncillaryData_Timecode_Format_50fps);
+
+				AJAAncillaryData_Timecode encTc;
+				CHECK(AJA_SUCCESS(encTc.SetTime(fmt50, 2, 34, 56, 49)));		//	odd full-frame -> Field ID = true
+				CHECK(AJA_SUCCESS(encTc.SetBinaryGroupFlag(0x3, fmt50)));		//	both representable BGF bits set
+
+				bool fieldIdBefore(false);
+				CHECK(AJA_SUCCESS(encTc.GetFieldIdFlag(fieldIdBefore, fmt50)));
+				CHECK(fieldIdBefore);
+
+				uint32_t loWord(0), hiWord(0);
+				CHECK(AJA_SUCCESS(encTc.GetRP188Words(loWord, hiWord, tb50)));
+
+				AJAAncillaryData_Timecode decTc;
+				CHECK(AJA_SUCCESS(decTc.SetRP188Words(loWord, hiWord, tb50)));
+
+				uint32_t h(0), m(0), s(0), f(0);
+				CHECK(AJA_SUCCESS(decTc.GetTime(fmt50, h, m, s, f)));
+				CHECK_EQ(h, 2u);	CHECK_EQ(m, 34u);	CHECK_EQ(s, 56u);	CHECK_EQ(f, 49u);
+
+				bool fieldIdAfter(false);
+				CHECK(AJA_SUCCESS(decTc.GetFieldIdFlag(fieldIdAfter, fmt50)));
+				CHECK(fieldIdAfter);
+
+				uint8_t bgFlagAfter(0);
+				CHECK(AJA_SUCCESS(decTc.GetBinaryGroupFlag(bgFlagAfter, fmt50)));
+				CHECK_EQ(bgFlagAfter, 0x3);	//	the 3rd BGF bit has no room in the 2-word format (see doc comments)
+			}
+
+			//	Field ID lands in the correct wire bit for 25fps specifically. Per SMPTE ST 12-1:2014
+			//	Table 11 ("Summation of VITC and LTC codeword bit definitions"), the Field ID bit is
+			//	LTC bit 59 for the 25-frame/50-field family -- NOT LTC bit 27 like every other family
+			//	(bit 27 there is Binary Group Flag 0 instead). LTC bit 59 is hi-word bit 27 in this
+			//	2-word split. Confirm it lands there, not in the lo-word.
+			{
+				const AJATimeBase tb25 (AJA_FrameRate_2500);
+				const AJAAncillaryData_Timecode_Format fmt25 (AJAAncillaryData_Timecode_Format_25fps);
+
+				AJAAncillaryData_Timecode encTc;
+				CHECK(AJA_SUCCESS(encTc.SetFieldIdFlag(true, fmt25)));
+
+				uint32_t loWord(0), hiWord(0);
+				CHECK(AJA_SUCCESS(encTc.GetRP188Words(loWord, hiWord, tb25)));
+				CHECK_EQ((hiWord >> 27) & 0x1, 1u);	//	LTC bit 59 == hi-word bit 27
+				CHECK_EQ((loWord >> 27) & 0x1, 0u);	//	NOT lo-word bit 27 (that's BGF0 at 25fps)
+
+				AJAAncillaryData_Timecode decTc;
+				CHECK(AJA_SUCCESS(decTc.SetRP188Words(loWord, hiWord, tb25)));
+				bool fieldId(false);
+				CHECK(AJA_SUCCESS(decTc.GetFieldIdFlag(fieldId, fmt25)));
+				CHECK(fieldId);
+			}
+
+			//	Format-invariant sanity check: raw time digits, binary groups, drop-frame and
+			//	color-frame flags round-trip independent of any AJATimeCode/frame-rate involvement.
+			{
+				const AJATimeBase tb30 (AJA_FrameRate_3000);
+				AJAAncillaryData_Timecode encTc;
+				CHECK(AJA_SUCCESS(encTc.SetTimeDigits(3, 9, 7, 9, 7, 9, 3, 9)));	//	tens digits at max field width, units at max BCD digit
+				CHECK(AJA_SUCCESS(encTc.SetBinaryGroups(0x8, 0x7, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1)));
+				CHECK(AJA_SUCCESS(encTc.SetDropFrameFlag(true)));
+				CHECK(AJA_SUCCESS(encTc.SetColorFrameFlag(true)));
+
+				uint32_t loWord(0), hiWord(0);
+				CHECK(AJA_SUCCESS(encTc.GetRP188Words(loWord, hiWord, tb30)));
+
+				AJAAncillaryData_Timecode decTc;
+				CHECK(AJA_SUCCESS(decTc.SetRP188Words(loWord, hiWord, tb30)));
+
+				uint8_t hourTens(0), hourUnits(0), minTens(0), minUnits(0), secTens(0), secUnits(0), frameTens(0), frameUnits(0);
+				CHECK(AJA_SUCCESS(decTc.GetTimeDigits(hourTens, hourUnits, minTens, minUnits, secTens, secUnits, frameTens, frameUnits)));
+				CHECK_EQ(hourTens, 3);	CHECK_EQ(hourUnits, 9);
+				CHECK_EQ(minTens, 7);	CHECK_EQ(minUnits, 9);
+				CHECK_EQ(secTens, 7);	CHECK_EQ(secUnits, 9);
+				CHECK_EQ(frameTens, 3);	CHECK_EQ(frameUnits, 9);
+
+				uint8_t bg8(0), bg7(0), bg6(0), bg5(0), bg4(0), bg3(0), bg2(0), bg1(0);
+				CHECK(AJA_SUCCESS(decTc.GetBinaryGroups(bg8, bg7, bg6, bg5, bg4, bg3, bg2, bg1)));
+				CHECK_EQ(bg1, 0x1);	CHECK_EQ(bg2, 0x2);	CHECK_EQ(bg3, 0x3);	CHECK_EQ(bg4, 0x4);
+				CHECK_EQ(bg5, 0x5);	CHECK_EQ(bg6, 0x6);	CHECK_EQ(bg7, 0x7);	CHECK_EQ(bg8, 0x8);
+
+				bool dropFrame(false), colorFrame(false);
+				CHECK(AJA_SUCCESS(decTc.GetDropFrameFlag(dropFrame)));
+				CHECK(AJA_SUCCESS(decTc.GetColorFrameFlag(colorFrame)));
+				CHECK(dropFrame);
+				CHECK(colorFrame);
+			}
+		}	//	TEST_CASE("BFT_AncillaryDataTimecodeRP188")
+
+		TEST_CASE("BFT_AncillaryDataTimecodeRP188_AjabaseInterop")
+		{
+			//	Cross-library interop: confirm the two 32-bit RP188 words produced by
+			//	AJAAncillaryData_Timecode::GetRP188Words (ajaanc) are byte-for-byte consumable by
+			//	AJATimeCode::SetRP188 (ajabase), and vice versa -- i.e. these two independently
+			//	implemented encoders/decoders of the same wire format actually agree.
+
+			//	Non-HFR rates: no Field-ID/doubling complexity, so the two classes' ordinary
+			//	convenience APIs (SetTimecode/GetTimecode, SetHmsf/QueryFrame) compose cleanly.
+			{
+				static const AJA_FrameRate kRates[] = {
+					AJA_FrameRate_2398, AJA_FrameRate_2400, AJA_FrameRate_2500,
+					AJA_FrameRate_2997, AJA_FrameRate_3000
+				};
+				for (unsigned n(0);  n < sizeof(kRates)/sizeof(kRates[0]);  n++)
+				{
+					const AJATimeBase tb(kRates[n]);
+					const bool dropFrame(kRates[n] == AJA_FrameRate_2997);
+
+					//	Direction 1: ajabase (AJATimeCode) encodes, ajaanc (AJAAncillaryData_Timecode) decodes.
+					AJATimeCode srcTc;
+					srcTc.SetHmsf(1, 23, 45, 6, tb, dropFrame);
+
+					uint32_t dbb(0), lo(0), hi(0);
+					srcTc.QueryRP188(dbb, lo, hi, tb, dropFrame);
+
+					AJAAncillaryData_Timecode decTc;
+					CHECK(AJA_SUCCESS(decTc.SetRP188Words(lo, hi, tb)));
+
+					AJATimeCode roundTc;
+					CHECK(AJA_SUCCESS(decTc.GetTimecode(roundTc, tb)));
+					CHECK_EQ(roundTc.QueryFrame(), srcTc.QueryFrame());
+
+					//	Direction 2: ajaanc (AJAAncillaryData_Timecode) encodes, ajabase (AJATimeCode) decodes.
+					AJAAncillaryData_Timecode encTc;
+					CHECK(AJA_SUCCESS(encTc.SetTimecode(srcTc, tb, dropFrame)));
+
+					uint32_t loWord(0), hiWord(0);
+					CHECK(AJA_SUCCESS(encTc.GetRP188Words(loWord, hiWord, tb)));
+
+					AJATimeCode dstTc;
+					dstTc.SetRP188(0, loWord, hiWord, tb);
+					CHECK_EQ(dstTc.QueryFrame(), srcTc.QueryFrame());
+				}
+			}
+
+			//	HFR rates, full/undivided representation on both sides -- the representation the
+			//	two classes agree on bit-for-bit. (The "standard/divided" bridge between the two
+			//	classes' higher-level convenience methods has a separate, pre-existing wrinkle at
+			//	HFR rates unrelated to the RP188 word format itself -- see the note below.)
+			{
+				struct HfrCase { AJA_FrameRate rate; AJAAncillaryData_Timecode_Format fmt; uint32_t framesPerSec; };
+				static const HfrCase kCases[] = {
+					{AJA_FrameRate_4795, AJAAncillaryData_Timecode_Format_48fps, 48},
+					{AJA_FrameRate_4800, AJAAncillaryData_Timecode_Format_48fps, 48},
+					{AJA_FrameRate_5000, AJAAncillaryData_Timecode_Format_50fps, 50},
+					{AJA_FrameRate_5994, AJAAncillaryData_Timecode_Format_60fps, 60},
+					{AJA_FrameRate_6000, AJAAncillaryData_Timecode_Format_60fps, 60},
+				};
+				for (unsigned n(0);  n < sizeof(kCases)/sizeof(kCases[0]);  n++)
+				{
+					const AJATimeBase tb(kCases[n].rate);
+					const AJAAncillaryData_Timecode_Format fmt(kCases[n].fmt);
+					//	Exercise both parities of the Field ID bit (even & odd full-frame values).
+					for (uint32_t frames(kCases[n].framesPerSec - 2);  frames <= kCases[n].framesPerSec - 1;  frames++)
+					{
+						//	Direction 1: ajabase encodes (full/undivided), ajaanc decodes.
+						AJATimeCode srcTc(0, false);
+						srcTc.SetStdTimecodeForHfr(false);
+						srcTc.SetHmsf(1, 23, 45, frames, tb, false, false, 0);
+
+						uint32_t dbb(0), lo(0), hi(0);
+						srcTc.QueryRP188(dbb, lo, hi, tb, false);
+
+						AJAAncillaryData_Timecode decTc;
+						CHECK(AJA_SUCCESS(decTc.SetRP188Words(lo, hi, tb)));
+
+						uint32_t h2(0), m2(0), s2(0), f2(0);
+						CHECK(AJA_SUCCESS(decTc.GetTime(fmt, h2, m2, s2, f2)));
+						CHECK_EQ(h2, 1u);	CHECK_EQ(m2, 23u);	CHECK_EQ(s2, 45u);	CHECK_EQ(f2, frames);
+
+						//	Direction 2: ajaanc encodes (full/undivided), ajabase decodes.
+						AJAAncillaryData_Timecode encTc;
+						CHECK(AJA_SUCCESS(encTc.SetTime(fmt, 1, 23, 45, frames)));
+
+						uint32_t loWord(0), hiWord(0);
+						CHECK(AJA_SUCCESS(encTc.GetRP188Words(loWord, hiWord, tb)));
+
+						AJATimeCode dstTc(0, false);
+						dstTc.SetStdTimecodeForHfr(false);
+						dstTc.SetRP188(0, loWord, hiWord, tb);
+
+						uint32_t h(0), m(0), s(0), f(0);
+						dstTc.QueryHmsf(h, m, s, f, tb, false);
+						CHECK_EQ(h, 1u);	CHECK_EQ(m, 23u);	CHECK_EQ(s, 45u);	CHECK_EQ(f, frames);
+					}
+				}
+			}
+
+			//	Documented gotcha -- NOT a defect in GetRP188Words/SetRP188Words/QueryRP188/SetRP188
+			//	(the methods under test here), but a pre-existing wrinkle in the separate, higher-level
+			//	AJAAncillaryData_Timecode::GetTimecode() bridge worth knowing about: GetTimecode()
+			//	always retrieves the FULL/undivided frame value from GetTime() and hands it to
+			//	AJATimeCode::SetHmsf(), which interprets that value using the DESTINATION object's
+			//	OWN m_stdTcForHfr flag. A default-constructed AJATimeCode defaults that flag to
+			//	true (the "standard/divided" convention), so at HFR rates it will misinterpret an
+			//	already-full value as needing to be halved again. Demonstrates both the correct
+			//	usage (matching flag) and the footgun (default flag), so this isn't mistaken for a
+			//	bug in the interop of the new RP188 methods themselves.
+			{
+				const AJATimeBase tb5994(AJA_FrameRate_5994);
+				AJAAncillaryData_Timecode encTc;
+				CHECK(AJA_SUCCESS(encTc.SetTime(AJAAncillaryData_Timecode_Format_60fps, 1, 2, 3, 59)));
+
+				//	Correct usage: destination's bStdTcForHfr matches GetTime()'s full/undivided output.
+				AJATimeCode correctDst(0, false);
+				correctDst.SetStdTimecodeForHfr(false);
+				CHECK(AJA_SUCCESS(encTc.GetTimecode(correctDst, tb5994)));
+				uint32_t h(0), m(0), s(0), f(0);
+				correctDst.QueryHmsf(h, m, s, f, tb5994, false);
+				CHECK_EQ(f, 59u);
+
+				//	Footgun: a default-constructed AJATimeCode (bStdTcForHfr=true) re-halves an
+				//	already-full value -- shown here for documentation, not as correct usage.
+				AJATimeCode defaultDst;	//	bStdTcForHfr=true by default
+				CHECK(AJA_SUCCESS(encTc.GetTimecode(defaultDst, tb5994)));
+				defaultDst.QueryHmsf(h, m, s, f, tb5994, false);
+				CHECK(f != 59u);
+			}
+		}	//	TEST_CASE("BFT_AncillaryDataTimecodeRP188_AjabaseInterop")
+
 #if 0	//	** MrBill **	NOT READY FOR PRIME-TIME
 		TEST_CASE("BFT_SDSetFromVANCData")
 		{

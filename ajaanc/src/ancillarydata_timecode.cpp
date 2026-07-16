@@ -618,6 +618,158 @@ AJAStatus AJAAncillaryData_Timecode::GetBinaryGroupFlag (uint8_t & outBGFlag, co
 }
 
 
+//----------------------
+
+// Bit layout of the two 32-bit "RP188 words" used to carry SMPTE 12M timecode over NTV2
+// ancillary/register APIs. Scoped to this file only -- not part of the public API.
+namespace
+{
+	enum
+	{
+		kFrameUnitsMask		= 0xf,	kFrameUnitsShift		= 0,
+		kBinaryGroup1Mask	= 0xf,	kBinaryGroup1Shift		= 4,
+		kFrameTensMask		= 0x3,	kFrameTensShift			= 8,
+		kDropFrameMask		= 0x1,	kDropFrameShift			= 10,
+		kColorFrameMask		= 0x1,	kColorFrameShift		= 11,
+		kBinaryGroup2Mask	= 0xf,	kBinaryGroup2Shift		= 12,
+		kSecondUnitsMask	= 0xf,	kSecondUnitsShift		= 16,
+		kBinaryGroup3Mask	= 0xf,	kBinaryGroup3Shift		= 20,
+		kSecondTensMask		= 0x7,	kSecondTensShift		= 24,
+		kFieldIdLoMask		= 0x1,	kFieldIdLoShift			= 27,
+		kBinaryGroup4Mask	= 0xf,	kBinaryGroup4Shift		= 28,
+
+		kMinuteUnitsMask	= 0xf,	kMinuteUnitsShift		= 0,
+		kBinaryGroup5Mask	= 0xf,	kBinaryGroup5Shift		= 4,
+		kMinuteTensMask		= 0x7,	kMinuteTensShift		= 8,
+		kBinaryGroup6Mask	= 0xf,	kBinaryGroup6Shift		= 12,
+		kHourUnitsMask		= 0xf,	kHourUnitsShift			= 16,
+		kBinaryGroup7Mask	= 0xf,	kBinaryGroup7Shift		= 20,
+		kHourTensMask		= 0x3,	kHourTensShift			= 24,
+		kBinaryGroupFlagMask= 0x3,	kBinaryGroupFlagShift	= 26,	// only 2 of 3 BGF bits fit here
+		kBinaryGroup8Mask	= 0xf,	kBinaryGroup8Shift		= 28
+	};
+}
+
+AJAStatus AJAAncillaryData_Timecode::SetRP188Words (const uint32_t inLoWord, const uint32_t inHiWord, const AJATimeBase & inTimeBase)
+{
+	const AJAAncillaryData_Timecode_Format tcFmt (GetTimecodeFormatFromTimeBase(inTimeBase));
+
+	const uint8_t frameUnits = (inLoWord >> kFrameUnitsShift)   & kFrameUnitsMask;
+	const uint8_t bg1        = (inLoWord >> kBinaryGroup1Shift) & kBinaryGroup1Mask;
+	const uint8_t frameTens  = (inLoWord >> kFrameTensShift)    & kFrameTensMask;
+	const bool    dropFrame  = (inLoWord >> kDropFrameShift)    & kDropFrameMask;
+	const bool    colorFrame = (inLoWord >> kColorFrameShift)   & kColorFrameMask;
+	const uint8_t bg2        = (inLoWord >> kBinaryGroup2Shift) & kBinaryGroup2Mask;
+	const uint8_t secUnits   = (inLoWord >> kSecondUnitsShift)  & kSecondUnitsMask;
+	const uint8_t bg3        = (inLoWord >> kBinaryGroup3Shift) & kBinaryGroup3Mask;
+	const uint8_t secTens    = (inLoWord >> kSecondTensShift)   & kSecondTensMask;
+	const uint8_t bg4        = (inLoWord >> kBinaryGroup4Shift) & kBinaryGroup4Mask;
+
+	const uint8_t minUnits   = (inHiWord >> kMinuteUnitsShift)     & kMinuteUnitsMask;
+	const uint8_t bg5        = (inHiWord >> kBinaryGroup5Shift)    & kBinaryGroup5Mask;
+	const uint8_t minTens    = (inHiWord >> kMinuteTensShift)      & kMinuteTensMask;
+	const uint8_t hourUnits  = (inHiWord >> kHourUnitsShift)       & kHourUnitsMask;
+	const uint8_t bg7        = (inHiWord >> kBinaryGroup7Shift)    & kBinaryGroup7Mask;
+	const uint8_t hourTens   = (inHiWord >> kHourTensShift)        & kHourTensMask;
+	const uint8_t bgFlag     = (inHiWord >> kBinaryGroupFlagShift) & kBinaryGroupFlagMask;
+	const uint8_t bg6        = (inHiWord >> kBinaryGroup6Shift)    & kBinaryGroup6Mask;
+	const uint8_t bg8        = (inHiWord >> kBinaryGroup8Shift)    & kBinaryGroup8Mask;
+
+	// Field ID's bit position (27) is the same in both words -- but which WORD carries it
+	// depends on rate. Per SMPTE ST 12-1:2014 Table 11 ("Summation of VITC and LTC codeword
+	// bit definitions"), the field/flag bit that's LTC bit 27 for the 30-frame/60-field and
+	// 24-frame families moves to LTC bit 59 for the 25-frame/50-field family (bit 27 there is
+	// Binary Group Flag 0 instead). LTC bit 59 is hi-word bit 27 in this 2-word split, which
+	// happens to be the same slot already used for 50/100fps -- matches
+	// AJATimeCode::QueryRP188/SetRP188's rate check exactly (see its "Note: FID is in
+	// different words for PAL & NTSC!"), extended here to also cover 25fps.
+	const AJA_FrameRate rate (inTimeBase.GetAJAFrameRate());
+	const bool fieldIdInHiWord = (rate == AJA_FrameRate_2500 || rate == AJA_FrameRate_5000 || rate == AJA_FrameRate_10000);
+	const bool fieldId = fieldIdInHiWord
+		? (bool)((inHiWord >> kFieldIdLoShift) & kFieldIdLoMask)
+		: (bool)((inLoWord >> kFieldIdLoShift) & kFieldIdLoMask);
+
+	AJAStatus status = SetTimeDigits(hourTens, hourUnits, minTens, minUnits, secTens, secUnits, frameTens, frameUnits);
+	if (AJA_FAILURE(status)) return status;
+	status = SetBinaryGroups(bg8, bg7, bg6, bg5, bg4, bg3, bg2, bg1);
+	if (AJA_FAILURE(status)) return status;
+	status = SetDropFrameFlag(dropFrame, tcFmt);
+	if (AJA_FAILURE(status)) return status;
+	status = SetColorFrameFlag(colorFrame, tcFmt);
+	if (AJA_FAILURE(status)) return status;
+	status = SetFieldIdFlag(fieldId, tcFmt);
+	if (AJA_FAILURE(status)) return status;
+	return SetBinaryGroupFlag(bgFlag, tcFmt);
+}
+
+AJAStatus AJAAncillaryData_Timecode::GetRP188Words (uint32_t & outLoWord, uint32_t & outHiWord, const AJATimeBase & inTimeBase) const
+{
+	const AJAAncillaryData_Timecode_Format tcFmt (GetTimecodeFormatFromTimeBase(inTimeBase));
+
+	uint8_t hourTens, hourUnits, minTens, minUnits, secTens, secUnits, frameTens, frameUnits;
+	AJAStatus status = GetTimeDigits(hourTens, hourUnits, minTens, minUnits, secTens, secUnits, frameTens, frameUnits);
+	if (AJA_FAILURE(status)) return status;
+
+	uint8_t bg1, bg2, bg3, bg4, bg5, bg6, bg7, bg8;
+	status = GetBinaryGroups(bg8, bg7, bg6, bg5, bg4, bg3, bg2, bg1);
+	if (AJA_FAILURE(status)) return status;
+
+	bool dropFrame = false;
+	status = GetDropFrameFlag(dropFrame, tcFmt);
+	if (AJA_FAILURE(status)) return status;
+
+	bool colorFrame = false;
+	status = GetColorFrameFlag(colorFrame, tcFmt);
+	if (AJA_FAILURE(status)) return status;
+
+	bool fieldID = false;
+	status = GetFieldIdFlag(fieldID, tcFmt);
+	if (AJA_FAILURE(status)) return status;
+
+	uint8_t bgFlag = 0;
+	status = GetBinaryGroupFlag(bgFlag, tcFmt);
+	if (AJA_FAILURE(status)) return status;
+
+	outLoWord = 0;
+	outLoWord |= (frameUnits & kFrameUnitsMask)		<< kFrameUnitsShift;
+	outLoWord |= (bg1 & kBinaryGroup1Mask)				<< kBinaryGroup1Shift;
+	outLoWord |= (frameTens & kFrameTensMask)			<< kFrameTensShift;
+	outLoWord |= ((uint8_t)dropFrame & kDropFrameMask)	<< kDropFrameShift;
+	outLoWord |= ((uint8_t)colorFrame & kColorFrameMask) << kColorFrameShift;
+	outLoWord |= (bg2 & kBinaryGroup2Mask)				<< kBinaryGroup2Shift;
+	outLoWord |= (secUnits & kSecondUnitsMask)			<< kSecondUnitsShift;
+	outLoWord |= (bg3 & kBinaryGroup3Mask)				<< kBinaryGroup3Shift;
+	outLoWord |= (secTens & kSecondTensMask)			<< kSecondTensShift;
+	outLoWord |= (bg4 & kBinaryGroup4Mask)				<< kBinaryGroup4Shift;
+
+	outHiWord = 0;
+	outHiWord |= (minUnits & kMinuteUnitsMask)			<< kMinuteUnitsShift;
+	outHiWord |= (bg5 & kBinaryGroup5Mask)				<< kBinaryGroup5Shift;
+	outHiWord |= (minTens & kMinuteTensMask)			<< kMinuteTensShift;
+	outHiWord |= (bg6 & kBinaryGroup6Mask)				<< kBinaryGroup6Shift;
+	outHiWord |= (hourUnits & kHourUnitsMask)			<< kHourUnitsShift;
+	outHiWord |= (bg7 & kBinaryGroup7Mask)				<< kBinaryGroup7Shift;
+	outHiWord |= (hourTens & kHourTensMask)				<< kHourTensShift;
+	outHiWord |= (bgFlag & kBinaryGroupFlagMask)		<< kBinaryGroupFlagShift;	// only 2 of 3 bits fit
+	outHiWord |= (bg8 & kBinaryGroup8Mask)				<< kBinaryGroup8Shift;
+
+	// Field ID's bit position (27) is the same in both words -- but which WORD carries it
+	// depends on rate. Per SMPTE ST 12-1:2014 Table 11 ("Summation of VITC and LTC codeword
+	// bit definitions"), the field/flag bit that's LTC bit 27 for the 30-frame/60-field and
+	// 24-frame families moves to LTC bit 59 for the 25-frame/50-field family (bit 27 there is
+	// Binary Group Flag 0 instead). LTC bit 59 is hi-word bit 27 in this 2-word split, which
+	// happens to be the same slot already used for 50/100fps -- matches
+	// AJATimeCode::QueryRP188/SetRP188's rate check exactly (see its "Note: FID is in
+	// different words for PAL & NTSC!"), extended here to also cover 25fps.
+	const AJA_FrameRate rate (inTimeBase.GetAJAFrameRate());
+	if (rate == AJA_FrameRate_2500 || rate == AJA_FrameRate_5000 || rate == AJA_FrameRate_10000)
+		outHiWord |= ((uint8_t)fieldID & kFieldIdLoMask) << kFieldIdLoShift;
+	else
+		outLoWord |= ((uint8_t)fieldID & kFieldIdLoMask) << kFieldIdLoShift;
+
+	return AJA_STATUS_SUCCESS;
+}
+
 AJAAncillaryData_Timecode_Format AJAAncillaryData_Timecode::GetTimecodeFormatFromTimeBase (const AJATimeBase & timeBase)
 {
 	AJAAncillaryData_Timecode_Format tcFmt = AJAAncillaryData_Timecode_Format_Unknown;
