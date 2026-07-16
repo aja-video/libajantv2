@@ -88,10 +88,9 @@ public:
 	 */
 	void GetFrameRate(int64_t& frameTimeScale, int64_t& frameDuration) const;
 
-	// NOTE: ajabase has no method of deprecation. This uint32_t version of GetFrameRate
-	// previously had no impl. Added an impl and making it static assert to let the user
-	// know to use the int64_t version.
+#if !defined(NTV2_DEPRECATE_18_1)
 	void GetFrameRate(uint32_t& frameTimeScale, uint32_t& frameDuration) const;
+#endif
 
 	/**
 	 *	Get the video frame time scale used in conversions.
