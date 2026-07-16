@@ -136,6 +136,11 @@ void AJATimeBase::GetFrameRate(int64_t& frameTimeScale, int64_t& frameDuration) 
 	frameDuration = mFrameDuration;
 }
 
+void AJATimeBase::GetFrameRate(uint32_t& frameTimeScale, uint32_t& frameDuration) const
+{
+	static_assert("GetFrameRate(uint32_t& frameTimeScale, uint32_t& frameDuration) is deprecated! Use the int64_t version.");
+}
+
 int64_t AJATimeBase::GetFrameTimeScale(void) const
 {
 	return mFrameTimeScale;

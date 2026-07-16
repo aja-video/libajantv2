@@ -87,6 +87,10 @@ public:
 	 *	@param[out] frameDuration	Time units per frame (units/frame)
 	 */
 	void GetFrameRate(int64_t& frameTimeScale, int64_t& frameDuration) const;
+
+	// NOTE: ajabase has no method of deprecation. This uint32_t version of GetFrameRate
+	// previously had no impl. Added an impl and making it static assert to let the user
+	// know to use the int64_t version.
 	void GetFrameRate(uint32_t& frameTimeScale, uint32_t& frameDuration) const;
 
 	/**
