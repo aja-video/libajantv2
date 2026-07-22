@@ -232,38 +232,38 @@ The `libajantv2` repository can be opened as a directory in **Qt Creator** and b
 ### Compile-Time Customization <a name="customizing-ntv2"></a>
 There are a number of compile-time macros that control certain capabilities and/or aspects of NTV2.
 These are found in `ajantv2/includes/ajatypes.h` (unless otherwise specified).
-- `NTV2_USE_CPLUSPLUS11` — This macro is defined by default.
+- `NTV2_USE_CPLUSPLUS11` — Introduced in SDK 16.0. This macro is defined by default.
   - If defined, assumes a C++11 compiler (or later) is being used, and C++11 language features will be used in `libajantv2/ajantv2`.
   - If undefined, the use of C++11 language features are excluded from `libajantv2/ajantv2`.
   - **NOTE:** This macro is automatically defined or undefined as necessary by CMake depending on the `CMAKE_CXX_STANDARD` that’s in use at build-time.
   - Also note that if this macro is defined, so must `AJA_USE_CPLUSPLUS11` (see below) … and vice-versa.
-- `AJA_USE_CPLUSPLUS11` (in `ajabase/common/types.h`) — This macro is defined by default.
+- `AJA_USE_CPLUSPLUS11` (in `ajabase/common/types.h`) — Introduced in SDK 16.0. This macro is defined by default.
   - If defined, assumes a C++11 compiler (or later) is being used, and C++11 language features will be used in `libajantv2/ajabase`.
   - If undefined, the use of C++11 language features are excluded from `libajantv2/ajabase`.
   - **NOTE:** This macro is automatically defined or undefined as necessary by CMake depending on the `CMAKE_CXX_STANDARD` that’s in use at build-time.
   - Also note that if this macro is defined, so must `NTV2_USE_CPLUSPLUS11` (see above) … and vice-versa.
-- `NTV2_PREVENT_PLUGIN_LOAD` — This macro is undefined by default.
+- `NTV2_PREVENT_PLUGIN_LOAD` — Introduced in SDK 17.1. This macro is undefined by default.
   - If defined, the SDK cannot authenticate or load NTV2 plugins, because…
     - NTV2’s [**mbedtls**](https://github.com/Mbed-TLS/mbedtls) dependency is removed;
     - the **NTV2Plugin**, **PluginRegistry** and **NTV2PluginLoader** private classes are excluded from compilation;
     - `CreateClient()` in the **NTV2RPCClientAPI** and **NTV2RPCServerAPI** classes will always return `nullptr`.
   - If undefined, the SDK can authenticate and load NTV2 plugins.
   - **NOTE:** CMake automatically defines this macro if the CMake variable `AJANTV2_DISABLE_PLUGIN_LOAD` is `ON`.
-- `NTV2_WRITEREG_PROFILING` — This macro is defined by default.
+- `NTV2_WRITEREG_PROFILING` — Introduced in SDK 15.1. This macro is defined by default.
   - If defined, the `WriteRegister` profiling API in `CNTV2Card` is available.
   - If undefined, `WriteRegister` profiling is unavailable, which may yield a very small performance benefit.
-- `NTV2_NULL_DEVICE` — This macro is undefined by default.
+- `NTV2_NULL_DEVICE` — Introduced in SDK 17.0. This macro is undefined by default.
   - If defined, removes all linkage to the NTV2 kernel driver, causing all calls to `CNTV2DriverInterface::OpenLocalPhysical` to fail,
     thus allowing only remote/virtual devices to be operated.
   - If undefined, retains all linkage to the NTV2 kernel driver, allowing normal operation.
-- `NTV2_ALLOW_OPEN_UNSUPPORTED` — This macro is undefined by default.
+- `NTV2_ALLOW_OPEN_UNSUPPORTED` — Introduced in SDK 17.0.  This macro is undefined by default.
   - If defined, the SDK won’t check if the host-attached device being opened is supported.
   - If undefined, the SDK will fail the `Open` call if the host-attached device being opened is “unsupported”
     (per the `NTV2GetSupportedDevices` utility function declared in `ntv2utils.h`).
-- `NTV2_NUB_CLIENT_SUPPORT` — *Deprecated in SDK 17.1* — This macro is defined by default.
+- `NTV2_NUB_CLIENT_SUPPORT` — Introduced in SDK 12.4. *Deprecated in SDK 17.1* — This macro is defined by default.
   - If defined, the SDK shunts kernel driver calls to the **NTV2RPCClientAPI** if `IsRemote()` returns true.
   - If undefined, the SDK is prevented from calling into the **NTV2RPCClientAPI**.
-- `NTV2_CHECK_SDRAM_COLLISIONS` — *New in SDK 18.1* — This macro is defined by default.
+- `NTV2_CHECK_SDRAM_COLLISIONS` — Introduced in SDK 18.1. This macro is defined by default.
   - If defined, calls to **CNTV2Card** functions `AutoCirculateInitForInput()`, `AutoCirculateInitForOutput()`,
     `StartAudioInput()` and `StartAudioOutput()` will log any SDRAM collisions involving the AutoCirculate channel
     just initialized or the Audio System just started.
