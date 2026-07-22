@@ -1478,7 +1478,7 @@ bool CNTV2DriverInterface::IsDeviceReady (const bool checkValid)
 	if (IsRemote())
 	{
 		ULWord reg(0), val(0);
-		if (!ReadRegister(kVRegVDevReadyRegNum, reg))
+		if (!ReadRegister(kVRegSWDevReadyRegNum, reg))
 			return true;	//	failed to read VReg -- assume ready
 		if (!reg)
 			return true;	//	reg number is zero -- assume ready

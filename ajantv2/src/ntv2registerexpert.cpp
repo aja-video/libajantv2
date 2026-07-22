@@ -1290,7 +1290,7 @@ private:
 	void SetupVRegs(void)
 	{
 		AJAAutoLock lock(&mGuardMutex);
-		DEF_REG	(kVRegDriverVersion, mDriverVersionDecoder,	READWRITE,	kRegClass_Virtual,	kRegClass_NULL, kRegClass_NULL);
+		DEF_REG		(kVRegDriverVersion, mDriverVersionDecoder,	READWRITE,	kRegClass_Virtual,	kRegClass_NULL, kRegClass_NULL);
 		DEF_REGNAME	(kVRegAudioRecordPinDelay);
 		DEF_REGNAME	(kVRegRelativeVideoPlaybackDelay);
 		DEF_REGNAME	(kVRegGlobalAudioPlaybackMode);
@@ -1298,8 +1298,7 @@ private:
 		DEF_REGNAME	(kVRegStrictTiming);
 		DEF_REGNAME (kVRegCCPlayerBufSizeKB);
 		DEF_REGNAME (kVRegCCPlayerCustomPkt);
-		DEF_REG	(kVRegDriverType,	mDecodeDriverType, READWRITE, kRegClass_Virtual, kRegClass_NULL, kRegClass_NULL);
-		DEF_REG	(kVRegVDevReadyRegNum,	mDecodeVDevReady, READWRITE, kRegClass_Virtual, kRegClass_NULL, kRegClass_NULL);
+		DEF_REG		(kVRegDriverType,	mDecodeDriverType, READWRITE, kRegClass_Virtual, kRegClass_NULL, kRegClass_NULL);
 		DEF_REGNAME	(kVRegInputSelect);
 		DEF_REGNAME	(kVRegSecondaryFormatSelect);
 		DEF_REGNAME	(kVRegDigitalOutput1Select);
@@ -1315,6 +1314,8 @@ private:
 		DEF_REGNAME (kVRegSWDevMasterRecordAudio);
 		DEF_REGNAME (kVRegSWDevMasterRecordAnc);
 		DEF_REGNAME (kVRegSWDevMasterRecordTM);
+		DEF_REGNAME (kVRegSWDevMasterAudChPairChgInterval);
+		DEF_REG		(kVRegSWDevReadyRegNum,	mDecodeVDevReady, READWRITE, kRegClass_Virtual, kRegClass_NULL, kRegClass_NULL);
 		DEF_REGNAME	(kVRegVideoOutPauseMode);
 		DEF_REGNAME	(kVRegPulldownPattern);
 		DEF_REGNAME	(kVRegColorSpaceMode);
@@ -1433,7 +1434,7 @@ private:
 		DEF_REGNAME	(kVRegOutputTimecodeType);
 		DEF_REGNAME	(kVRegQuicktimeUsingBoard);
 		DEF_REGNAME	(kVRegApplicationPID);
-		DEF_REG	(kVRegApplicationCode,					mDecodeFourCC, READWRITE, kRegClass_Virtual, kRegClass_NULL, kRegClass_NULL);
+		DEF_REG		(kVRegApplicationCode,					mDecodeFourCC, READWRITE, kRegClass_Virtual, kRegClass_NULL, kRegClass_NULL);
 		DEF_REGNAME	(kVRegReleaseApplication);
 		DEF_REGNAME	(kVRegForceApplicationPID);
 		DEF_REGNAME	(kVRegForceApplicationCode);
@@ -1545,11 +1546,11 @@ private:
 		DEF_REGNAME	(kVRegMonAncField1Offset);
 		DEF_REGNAME	(kVRegMonAncField2Offset);
 		DEF_REGNAME	(kVRegFollowInputFormat);
-		DEF_REG	(kVRegAncField1Offset,					mDefaultRegDecoder, READWRITE, kRegClass_Anc,	kRegClass_NULL, kRegClass_NULL);
-		DEF_REG	(kVRegAncField2Offset,					mDefaultRegDecoder, READWRITE, kRegClass_Anc,	kRegClass_NULL, kRegClass_NULL);
+		DEF_REG		(kVRegAncField1Offset,					mDefaultRegDecoder, READWRITE, kRegClass_Anc,	kRegClass_NULL, kRegClass_NULL);
+		DEF_REG		(kVRegAncField2Offset,					mDefaultRegDecoder, READWRITE, kRegClass_Anc,	kRegClass_NULL, kRegClass_NULL);
 		DEF_REGNAME	(kVRegAgentCheck);
 		DEF_REGNAME	(kVReg4kOutputTransportSelection);
-		DEF_REG	(kVRegCustomAncInputSelect,				mDefaultRegDecoder, READWRITE, kRegClass_Anc,	kRegClass_NULL, kRegClass_NULL);
+		DEF_REG		(kVRegCustomAncInputSelect,				mDefaultRegDecoder, READWRITE, kRegClass_Anc,	kRegClass_NULL, kRegClass_NULL);
 		DEF_REGNAME	(kVRegUseThermostat);
 		DEF_REGNAME	(kVRegThermalSamplingRate);
 		DEF_REGNAME	(kVRegFanSpeed);

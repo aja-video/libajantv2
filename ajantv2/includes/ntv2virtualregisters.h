@@ -37,7 +37,6 @@ typedef enum
 	kVRegCCPlayerBufSizeKB					= VIRTUALREG_START+6,		// NTV2CCPlayer: custom Anc buffer size (KiloBytes)
 	kVRegCCPlayerCustomPkt					= VIRTUALREG_START+7,		// NTV2CCPlayer: if nonzero, insert custom Anc pkt: DID|SID|lineNum
 	kVRegDriverType							= VIRTUALREG_START+10,		// Driver type (MacOS only:  0 == KEXT, 'DEXT' == DEXT)
-	kVRegVDevReadyRegNum					= VIRTUALREG_START+11,		// Register number to check if virtual device "is ready"
 
 	// COMMON_VIRTUAL_REGS_KONA2
 	kVRegInputSelect						= VIRTUALREG_START+20,		// Input 1, Input 2, DualLink
@@ -48,14 +47,6 @@ typedef enum
 	kVRegAnalogOutputType					= VIRTUALREG_START+25,		// Analog output type
 	kVRegAnalogOutBlackLevel				= VIRTUALREG_START+26,		// Analog output black level
 	kVRegInputSelectUser					= VIRTUALREG_START+27,		// Input 1, Input 2, DualLink, set by user
-
-	kVRegSWDevMasterRunning					= VIRTUALREG_START+30,		//	SWDevice master running if incrementing over time
-	kVRegSWDevMasterPIDLo					= VIRTUALREG_START+31,		//	SWDevice master PID (LS 32 bits)
-	kVRegSWDevMasterPIDHi					= VIRTUALREG_START+32,		//	SWDevice master PID (MS 32 bits)
-	kVRegSWDevMasterRecordVideo				= VIRTUALREG_START+33,		//	SWDevice master: bits 0-7 (record output chl 1-8), 8-15 (record input chl 1-8)
-	kVRegSWDevMasterRecordAudio				= VIRTUALREG_START+34,		//	SWDevice master: bits 0-7 (record AudSys 1-8 output), 8-15 (record AudSys 1-8 input)
-	kVRegSWDevMasterRecordAnc				= VIRTUALREG_START+35,		//	SWDevice master: bits 0-7 (record AncIns 1-8), 8-15 (record AncExt 1-8)
-	kVRegSWDevMasterRecordTM				= VIRTUALREG_START+36,		//	SWDevice master: telemetry
 
 	// COMMON_VIRTUAL_REGS_MISC
 	kVRegVideoOutPauseMode					= VIRTUALREG_START+40,		// whether we pause on a frame or a field
@@ -359,6 +350,17 @@ typedef enum
 	kVRegVideoFormatCh6						= VIRTUALREG_START+406,
 	kVRegVideoFormatCh7						= VIRTUALREG_START+407,
 	kVRegVideoFormatCh8						= VIRTUALREG_START+408,
+
+	//	SWDevice
+	kVRegSWDevMasterRunning					= VIRTUALREG_START+410,		//	SWDevice master running if incrementing over time
+	kVRegSWDevMasterPIDLo					= VIRTUALREG_START+411,		//	SWDevice master PID (LS 32 bits)
+	kVRegSWDevMasterPIDHi					= VIRTUALREG_START+412,		//	SWDevice master PID (MS 32 bits)
+	kVRegSWDevMasterRecordVideo				= VIRTUALREG_START+413,		//	SWDevice master: bits 0-7 (record output chl 1-8), 8-15 (record input chl 1-8)
+	kVRegSWDevMasterRecordAudio				= VIRTUALREG_START+414,		//	SWDevice master: bits 0-7 (record AudSys 1-8 output), 8-15 (record AudSys 1-8 input)
+	kVRegSWDevMasterRecordAnc				= VIRTUALREG_START+415,		//	SWDevice master: bits 0-7 (record AncIns 1-8), 8-15 (record AncExt 1-8)
+	kVRegSWDevMasterRecordTM				= VIRTUALREG_START+416,		//	SWDevice master: telemetry recording bits
+	kVRegSWDevMasterAudChPairChgInterval	= VIRTUALREG_START+417,		//	SWDevice master: if non-zero, input VBI interval for changing audio chl pair detect pattern
+	kVRegSWDevReadyRegNum					= VIRTUALREG_START+418,		//	SWDevice: register number to check if software/virtual device "is ready"
 #if 0	//	IoIP/KonaIP10g purge
 	// Sarek VOIP section
 	kVRegIPAddrEth0							= VIRTUALREG_START+409,
