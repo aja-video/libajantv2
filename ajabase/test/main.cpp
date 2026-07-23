@@ -898,13 +898,19 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 		args.push_back("-pix-fmt");
 		args.push_back("yuv10");
 		CHECK_EQ(parser.Parse(args), true);
-#if defined(AJA_MAC)
-	CHECK_EQ(parser.UsageText().length(), 228);
-#elif defined(AJA_LINUX)
-	CHECK_EQ(parser.UsageText().length(), 227);
-#elif defined(AJA_WINDOWS)
-	CHECK_EQ(parser.UsageText().length(), 218);
-#endif
+		const std::string usage = parser.UsageText();
+		// Short-name abbreviation cluster: one char per option in order added,
+		// plus '?' for the auto-added help option.
+		CHECK(usage.find("[-dpvi?]") != std::string::npos);
+		// Per-option usage lines: short name first, then long names, '|'-separated.
+		CHECK(usage.find("[-d|--device]") != std::string::npos);
+		CHECK(usage.find("[-p|--pf|--pix-fmt|--pixel-format]") != std::string::npos);
+		CHECK(usage.find("[-v|--vf|--vid-fmt|--video-format]") != std::string::npos);
+		CHECK(usage.find("[-i|--inp|--input]") != std::string::npos);
+		// Auto-added help/usage options appear at the end.
+		CHECK(usage.find("[-?|--help]") != std::string::npos);
+		CHECK(usage.find("[--usage]") != std::string::npos);
+
 	}
 	TEST_CASE("AJACommandLineParser C++98 compliant")
 	{
