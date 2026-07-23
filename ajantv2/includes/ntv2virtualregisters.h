@@ -356,7 +356,7 @@ typedef enum
 	kVRegSWDevMasterPIDLo					= VIRTUALREG_START+411,		//	SWDevice master PID (LS 32 bits)
 	kVRegSWDevMasterPIDHi					= VIRTUALREG_START+412,		//	SWDevice master PID (MS 32 bits)
 	kVRegSWDevMasterRecordVideo				= VIRTUALREG_START+413,		//	SWDevice master: bits 0-7 (record output chl 1-8), 8-15 (record input chl 1-8)
-	kVRegSWDevMasterRecordAudio				= VIRTUALREG_START+414,		//	SWDevice master: bits 0-7 (record AudSys 1-8 output), 8-15 (record AudSys 1-8 input)
+	kVRegSWDevMasterRecordAudio				= VIRTUALREG_START+414,		//	SWDevice master: bits 0-7 (record AudSys 1-8 output), 8-15 (record AudSys 1-8 input), bit 31 (record .wav file)
 	kVRegSWDevMasterRecordAnc				= VIRTUALREG_START+415,		//	SWDevice master: bits 0-7 (record AncIns 1-8), 8-15 (record AncExt 1-8)
 	kVRegSWDevMasterRecordTM				= VIRTUALREG_START+416,		//	SWDevice master: telemetry recording bits
 	kVRegSWDevMasterAudChPairChgInterval	= VIRTUALREG_START+417,		//	SWDevice master: if non-zero, input VBI interval for changing audio chl pair detect pattern
