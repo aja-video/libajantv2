@@ -444,20 +444,26 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 	if (mDevice.IsOpen())
 	{
 		AJASystemInfo::append(infoTable, "Driver Version",		mDevice.GetDriverVersionString());
+
+		//	Driver Type
+		ULWord drvrType(0), dextType(0x44455854), vdevType(0x56444556);	//	'DEXT', 'VDEV'
+		mDevice.ReadRegister(kVRegDriverType, drvrType);
+		if (!drvrType)
 		#if defined(AJAMac)
-			ULWord drvrType(0), dextType(0x44455854);	//	'DEXT'
-			mDevice.ReadRegister(kVRegDriverType, drvrType);
-			if (!drvrType)
-				str = "Kernel Extension ('KEXT')";
-			else if (drvrType == dextType)
-				str = "DriverKit ('DEXT')";
-			else
-			{	ostringstream oss;
-				oss << "(Unknown/Invalid " << xHEX0N(drvrType,8) << ")";
-				str = oss.str();
-			}
-			AJASystemInfo::append(infoTable, "Driver Type",		str);
-		#endif	//	defined(AJAMac)
+			str = "AJA Kernel Extension ('KEXT')";
+		#else
+			str = "AJA Kernel Driver";
+		#endif
+		else if (drvrType == dextType)
+			str = "AJA DriverKit Extension ('DEXT')";
+		else if (drvrType == vdevType)
+			str = "No Driver (AJA Virtual Device)";
+		else
+		{	ostringstream oss;
+			oss << "(Unknown/Invalid " << NTV2_HEADER::FourCCToString(drvrType) << ")";
+			str = oss.str();
+		}
+		AJASystemInfo::append(infoTable, "Driver Type",		str);
 	}
 	AJASystemInfo::append(infoTable, "Watcher Nub Protocol Version",	"Built-in RPC support");
 
