@@ -147,8 +147,7 @@ typedef enum
 	kRegReserved16,					// 16
 	kRegFlashProgramReg,			// 17
 	kRegLineCount,					// 18
-	kRegOutputTimingFinePhase,		// 19  (was kRegReserved3)
-	kRegAud1Delay = kRegOutputTimingFinePhase, //19
+	kRegAud1Delay,					// 19
 	kRegVidIntControl,				// 20
 	kRegStatus,						// 21
 	kRegInputStatus,				// 22
@@ -217,8 +216,7 @@ typedef enum
 	kRegFS1ProcAmpC1Y_C1CB,			// 84
 	kRegFS1ProcAmpC1CR_C2CB,		// 85
 	kRegFS1ProcAmpC2CROffsetY,		// 86
-	kRegFS1AudioDelay,				// 87
-	kRegAud2Delay = kRegFS1AudioDelay, //87
+	kRegAud2Delay,					// 87
 	kRegBitfileDate,				// 88
 	kRegBitfileTime,				// 89
 	
@@ -248,11 +246,6 @@ typedef enum
 	kRegLTCEmbeddedBits32_63,		// 111
 	kRegLTCAnalogBits0_31,			// 112
 	kRegLTCAnalogBits32_63,			// 113
-
-	kRegLTCOutBits0_31	= kRegLTCEmbeddedBits0_31,	// 110
-	kRegLTCOutBits32_63 = kRegLTCEmbeddedBits32_63, // 111
-	kRegLTCInBits0_31	= kRegLTCAnalogBits0_31,	// 112
-	kRegLTCInBits32_63	= kRegLTCAnalogBits32_63,	// 113
 
 	kRegReserved114,				// 114
 	kRegAudioControl2,				// 115
@@ -335,10 +328,8 @@ typedef enum
 	kRegReserved185,				// 185
 	kRegReserved186,				// 186
 	kRegReserved187,				// 187
-	kRegVideoPayloadIDLinkA,		// 188
-	kRegVideoPayloadIDLinkB,		// 189
-	kRegSDIIn1VPIDA = kRegVideoPayloadIDLinkA,
-	kRegSDIIn1VPIDB = kRegVideoPayloadIDLinkB,
+	kRegSDIIn1VPIDA,				// 188
+	kRegSDIIn1VPIDB,				// 189
 	kRegAudioOutputSourceMap,		// 190
 	kRegXptSelectGroup11,			// 191
 	kRegStereoCompressor,			// 192
@@ -532,23 +523,23 @@ typedef enum
 	kRegRasterizerControl,			// 358
 
 	//HDMI V2 In Registers
-	kRegHDMIV2I2C1Control,			// 359
-	kRegHDMIV2I2C1Data,				// 360
-	kRegHDMIV2VideoSetup,			// 361
-	kRegHDMIV2HSyncDurationAndBackPorch,	// 362
-	kRegHDMIV2HActive,				// 363
+	kRegHDMIV2I2C1Control,						// 359
+	kRegHDMIV2I2C1Data,							// 360
+	kRegHDMIV2VideoSetup,						// 361
+	kRegHDMIV2HSyncDurationAndBackPorch,		// 362
+	kRegHDMIV2HActive,							// 363
 	kRegHDMIV2VSyncDurationAndBackPorchField1,	// 364
 	kRegHDMIV2VSyncDurationAndBackPorchField2,	// 365
-	kRegHDMIV2VActiveField1,		// 366
-	kRegHDMIV2VActiveField2,		// 367
-	kRegHDMIV2VideoStatus,			// 368
-	kRegHDMIV2HorizontalMeasurements,		// 369
-	kRegHDMIV2HBlankingMeasurements,		// 370
-	kRegHDMIV2HBlankingMeasurements1,		// 371
-	kRegHDMIV2VerticalMeasurementsField0,	// 372
-	kRegHDMIV2VerticalMeasurementsField1,	// 373
-	kRegHDMIV2i2c2Control,			// 374
-	kRegHDMIV2i2c2Data,				// 375
+	kRegHDMIV2VActiveField1,					// 366
+	kRegHDMIV2VActiveField2,					// 367
+	kRegHDMIV2VideoStatus,						// 368
+	kRegHDMIV2HorizontalMeasurements,			// 369
+	kRegHDMIV2HBlankingMeasurements,			// 370
+	kRegHDMIV2HBlankingMeasurements1,			// 371
+	kRegHDMIV2VerticalMeasurementsField0,		// 372
+	kRegHDMIV2VerticalMeasurementsField1,		// 373
+	kRegHDMIV2i2c2Control,						// 374
+	kRegHDMIV2i2c2Data,							// 375
 
 	kRegLUTV2Control,				// 376
 
@@ -710,14 +701,26 @@ typedef enum
 	kRegCh6Control2MFrame,			// 503
 	kRegCh7Control2MFrame,			// 504
 	kRegCh8Control2MFrame,			// 505
+
 	kRegXptSelectGroup32,			// 506
 	kRegXptSelectGroup33,			// 507
 	kRegXptSelectGroup34,			// 508
 	kRegXptSelectGroup35,			// 509
+
 	kRegReserved510,				// 510
 	kRegReserved511,				// 511
 
-	kRegNumRegisters
+	kRegNumRegisters				// 512						// MUST REMAIN LAST DEFINED ENUM
+#if 1	//	LEGACY ENUMs
+	,kRegOutputTimingFinePhase		= kRegAud1Delay				// 19 (was kRegReserved3)
+	,kRegFS1AudioDelay				= kRegAud2Delay				// 87
+	,kRegLTCOutBits0_31				= kRegLTCEmbeddedBits0_31	// 110
+	,kRegLTCOutBits32_63			= kRegLTCEmbeddedBits32_63	// 111
+	,kRegLTCInBits0_31				= kRegLTCAnalogBits0_31		// 112
+	,kRegLTCInBits32_63				= kRegLTCAnalogBits32_63	// 113
+	,kRegVideoPayloadIDLinkA		= kRegSDIIn1VPIDA			// 188
+	,kRegVideoPayloadIDLinkB		= kRegSDIIn1VPIDB			// 189
+#endif
 } NTV2RegisterNumber;
 
 typedef NTV2RegisterNumber	RegisterNum;

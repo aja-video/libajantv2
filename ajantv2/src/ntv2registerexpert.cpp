@@ -517,6 +517,7 @@ private:
 		DefineRegister (kRegAud6Control,		"", mDecodeAudControlReg,		READWRITE,	kRegClass_Audio,	kRegClass_Channel6, kRegClass_NULL);
 		DefineRegister (kRegAud7Control,		"", mDecodeAudControlReg,		READWRITE,	kRegClass_Audio,	kRegClass_Channel7, kRegClass_NULL);
 		DefineRegister (kRegAud8Control,		"", mDecodeAudControlReg,		READWRITE,	kRegClass_Audio,	kRegClass_Channel8, kRegClass_NULL);
+		DefineRegister (kRegAudioControl2,		"", mDecodeAudControl2Reg,		READWRITE,	kRegClass_Audio,	kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister (kRegAud1Detect,			"", mDecodeAudDetectReg,		READONLY,	kRegClass_Audio,	kRegClass_Channel1, kRegClass_Channel2);
 		DefineRegister (kRegAudDetect2,			"", mDecodeAudDetectReg,		READONLY,	kRegClass_Audio,	kRegClass_Channel3, kRegClass_Channel4);
 		DefineRegister (kRegAudioDetect5678,	"", mDecodeAudDetectReg,		READONLY,	kRegClass_Audio,	kRegClass_Channel8, kRegClass_Channel7);
@@ -3193,6 +3194,29 @@ private:
 			return oss.str();
 		}
 	}	mDecodeAudControlReg;
+	
+	struct DecodeAudControl2Reg : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{	AJA_UNUSED(inRegNum);  AJA_UNUSED(inDeviceID);
+			ostringstream	oss;
+			ULWord val (inRegValue & 0x000000FF);
+			NTV2StringList names;
+			if (val)
+				for (ULWord audSys(0);  audSys < 8;  audSys++)
+					if (val & (1UL << audSys))
+					{	ostringstream nm;
+						nm << "AudSys" << DEC(audSys+1);
+						names.push_back(nm.str());
+					}
+			oss << "192kHz enabled Audio Systems: ";
+			if (names.empty())
+				oss << "none";
+			else
+				oss << aja::join(names, ", ");
+			return oss.str();
+		}
+	}	mDecodeAudControl2Reg;
 	
 	struct DecodeAudSourceSelectReg : public Decoder
 	{
