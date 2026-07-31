@@ -1855,14 +1855,13 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanDoVITC2:						outValue = ::NTV2DeviceCanDoVITC2(devID);							break;
 		case kDeviceCanDoHDMIHDROut:				outValue = ::NTV2DeviceCanDoHDMIHDROut(devID);						break;
 		case kDeviceCanDoJ2K:						outValue = ::NTV2DeviceCanDoJ2K(devID);								break;
-
 		case kDeviceCanDo12gRouting:				outValue = ::NTV2DeviceCanDo12gRouting(devID);						break;
 		case kDeviceCanDo12GSDI:					outValue = ::NTV2DeviceCanDo12GSDI(devID);							break;
 		case kDeviceCanDo2110:						outValue = ::NTV2DeviceCanDo2110(devID);							break;
 		case kDeviceCanDo8KVideo:					outValue = ::NTV2DeviceCanDo8KVideo(devID);							break;
 		case kDeviceCanDoAudio192K:					outValue = ::NTV2DeviceCanDoAudio192K(devID);						break;
-		case kDeviceCanDoHDMIAuxCapture:			outValue = ::NTV2DeviceCanDoCustomAux(devID);						break;
-		case kDeviceCanDoHDMIAuxPlayback:			outValue = false && ::NTV2DeviceCanDoCustomAux(devID);				break;	//	SDK 17.1 HDMI AUX is Capture-Only
+		case kDeviceCanDoHDMIAuxCapture:			outValue = ::NTV2DeviceCanDoCustomAux(devID);						break;	//	CanDoCustomAux == CanDoHDMIAuxCapture
+		case kDeviceCanDoHDMIAuxPlayback:			outValue = false;													break;	//	No devices yet support aux playback
 		case kDeviceCanDoFramePulseSelect:			outValue = ::NTV2DeviceCanDoFramePulseSelect(devID);				break;
 		case kDeviceCanDoHDMIMultiView:				outValue = ::NTV2DeviceCanDoHDMIMultiView(devID);					break;
 		case kDeviceCanDoHFRRGB:					outValue = ::NTV2DeviceCanDoHFRRGB(devID);							break;
@@ -1882,7 +1881,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceHasRotaryEncoder:				outValue = ::NTV2DeviceHasRotaryEncoder(devID);						break;
 		case kDeviceHasSPIv5:						outValue = ::NTV2DeviceGetSPIFlashVersion(devID) == 5;				break;
 		case kDeviceHasXilinxDMA:					outValue = ::NTV2DeviceHasXilinxDMA(devID);							break;
-		case kDeviceCanDoStreamingDMA:				outValue = devID == DEVICE_ID_KONAXM;						break;
+		case kDeviceCanDoStreamingDMA:				outValue = devID == DEVICE_ID_KONAXM;								break;
 		case kDeviceHasPWMFanControl:				outValue = ::NTV2DeviceHasPWMFanControl(devID);						break;
 		case kDeviceCanDoHDMIQuadRasterConversion:	outValue = (GetNumSupported(kDeviceGetNumHDMIVideoInputs)
 																	||  GetNumSupported(kDeviceGetNumHDMIVideoOutputs))	//	At least 1 HDMI in/out

@@ -4429,6 +4429,126 @@ TEST_SUITE("NTV2RegInfo" * doctest::description("NTV2RegInfo tests"))
 	}	//	TEST_CASE("Import")
 }	//	TEST_SUITE("NTV2RegInfo")
 
+
+TEST_SUITE("DeviceCapabilities" * doctest::description("DeviceCapabilities tests"))
+{
+	TEST_CASE("NTV2BoolParamID")
+	{
+		CHECK_EQ(kDeviceCanDoCustomAux, kDeviceCanDoHDMIAuxCapture);
+		CHECK_EQ(kDeviceCanDoIDSwitch, kDeviceHasIDSwitch);
+
+		CNTV2Card c;
+		DeviceCapabilities dc(c);	//	Use this for convenience (these are all STATIC functions):
+		//	Spot-check BoolParamIDToString
+		CHECK_EQ("CanChangeEmbeddedAudioClock",	dc.BoolParamIDToString(kNTV2BoolParam_FIRST));
+		CHECK_EQ("CanChangeFrameBufferSize",	dc.BoolParamIDToString(kDeviceCanChangeFrameBufferSize));
+		CHECK_EQ("CanDoAudio96K",				dc.BoolParamIDToString(kDeviceCanDoAudio96K));
+		CHECK_EQ("CanDoCustomAnc",				dc.BoolParamIDToString(kDeviceCanDoCustomAnc));
+		CHECK_EQ("CanDoMultiFormat",			dc.BoolParamIDToString(kDeviceCanDoMultiFormat));
+		CHECK_EQ("CanDoSDIErrorChecks",			dc.BoolParamIDToString(kDeviceCanDoSDIErrorChecks));
+		CHECK_EQ("HasBiDirectionalSDI",			dc.BoolParamIDToString(kDeviceHasBiDirectionalSDI));
+		CHECK_EQ("CanDoAudioMixer",				dc.BoolParamIDToString(kDeviceCanDoAudioMixer));
+		CHECK_EQ("HasIDSwitch",					dc.BoolParamIDToString(kDeviceHasIDSwitch));
+		CHECK_EQ("CanDoClockMonitor",			dc.BoolParamIDToString(kDeviceCanDoClockMonitor));
+		//	Validate case-insensitivity, leading/trailing whitespace, with/without leading "k", with/without leading "Device"...
+		CHECK_EQ(dc.StringToBoolParamID(""),				kDeviceCanDo_INVALID);
+		CHECK_EQ(dc.StringToBoolParamID("    \t  \n  "),	kDeviceCanDo_INVALID);
+		//	Spot-chck StringToBoolParamID
+		CHECK_EQ(dc.StringToBoolParamID("kDeviceCanChangeEmbeddedAudioClock"),	kDeviceCanChangeEmbeddedAudioClock);
+		CHECK_EQ(dc.StringToBoolParamID("kDeviceCanThermostat"),				kDeviceCanThermostat);
+		CHECK_EQ(dc.StringToBoolParamID("DeviceCanThermostat"),					kDeviceCanThermostat);
+		CHECK_EQ(dc.StringToBoolParamID("CanThermostat"),						kDeviceCanThermostat);
+		CHECK_EQ(dc.StringToBoolParamID("CaNtHeRmOsTaT"),						kDeviceCanThermostat);
+		CHECK_EQ(dc.StringToBoolParamID("\t\t    kDeviceCanThermostat  \n\n"),	kDeviceCanThermostat);
+		CHECK_EQ(dc.StringToBoolParamID("kDeviceCanDoClockMonitor"),			kDeviceCanDoClockMonitor);
+		CHECK_EQ(dc.StringToBoolParamID("eviceCanDoClockMonitor"),				kDeviceCanDo_INVALID);
+	}	//	TEST_CASE("NTV2BoolParamID")
+
+	TEST_CASE("NTV2NumericParamID")
+	{
+		CNTV2Card c;
+		DeviceCapabilities dc(c);	//	Use this for convenience (these are all STATIC functions):
+		//	Spot-check NumParamIDToString
+		CHECK_EQ("", dc.NumParamIDToString(NTV2NumericParamID(0)));
+		CHECK_EQ("", dc.NumParamIDToString(NTV2NumericParamID(1999)));
+		CHECK_EQ("GetActiveMemorySize", dc.NumParamIDToString(kDeviceGetActiveMemorySize));
+		CHECK_EQ("GetNumFrameStores", dc.NumParamIDToString(kDeviceGetNumFrameStores));
+		CHECK_EQ("GetNumLUTs", dc.NumParamIDToString(kDeviceGetNumLUTs));
+		CHECK_EQ("GetNum25GSFPs", dc.NumParamIDToString(kDeviceGetNum25GSFPs));
+		CHECK_EQ("", dc.NumParamIDToString(kNTV2NumericParam_LAST));
+		CHECK_EQ("", dc.NumParamIDToString(NTV2NumericParamID(3000)));
+		//	Validate case-insensitivity, leading/trailing whitespace, with/without leading "k", with/without leading "Device"...
+		CHECK_EQ(dc.StringToNumParamID(""), kDeviceGetNum_INVALID);
+		CHECK_EQ(dc.StringToNumParamID("    \t  \n  "), kDeviceGetNum_INVALID);
+		CHECK_EQ(dc.StringToNumParamID("kDeviceGetActiveMemorySize"), kDeviceGetActiveMemorySize);
+		CHECK_EQ(dc.StringToNumParamID("kdevicegetactivememorysize"), kDeviceGetActiveMemorySize);
+		CHECK_EQ(dc.StringToNumParamID("KDEVICEGETACTIVEMEMORYSIZE"), kDeviceGetActiveMemorySize);
+		CHECK_EQ(dc.StringToNumParamID("KdEvIcEgEtAcTiVeMeMoRySiZe"), kDeviceGetActiveMemorySize);
+		CHECK_EQ(dc.StringToNumParamID("\tdEvIcEgEtAcTiVeMeMoRySiZe\n"), kDeviceGetActiveMemorySize);
+		CHECK_EQ(dc.StringToNumParamID("DeviceGetActiveMemorySize"), kDeviceGetActiveMemorySize);
+		CHECK_EQ(dc.StringToNumParamID("GetActiveMemorySize"), kDeviceGetActiveMemorySize);
+		CHECK_EQ(dc.StringToNumParamID("\t    GetActiveMemorySize    \n"), kDeviceGetActiveMemorySize);
+		CHECK_EQ(dc.StringToNumParamID("\t    GeTaCtIvEmEmOrYsIzE    \n"), kDeviceGetActiveMemorySize);
+		CHECK_NE(dc.StringToNumParamID("GetActiveMemorySiz"), kDeviceGetActiveMemorySize);
+		CHECK_EQ(dc.StringToNumParamID("GetActiveMemorySiz"), kDeviceGetNum_INVALID);
+		//	Spot-chck StringToNumParamID
+		CHECK_EQ(dc.StringToNumParamID("kDeviceGetNumFrameStores"), kDeviceGetNumFrameStores);
+		CHECK_EQ(dc.StringToNumParamID("DeviceGetNumFrameStores"), kDeviceGetNumFrameStores);
+		CHECK_EQ(dc.StringToNumParamID("GetNumFrameStores"), kDeviceGetNumFrameStores);
+		CHECK_EQ(dc.StringToNumParamID("kDeviceGetNumLUTs"), kDeviceGetNumLUTs);
+		CHECK_EQ(dc.StringToNumParamID("DeviceGetNumLUTs"), kDeviceGetNumLUTs);
+		CHECK_EQ(dc.StringToNumParamID("GetNumLUTs"), kDeviceGetNumLUTs);
+		CHECK_EQ(dc.StringToNumParamID("kDeviceGetNum25GSFPs"), kDeviceGetNum25GSFPs);
+		CHECK_EQ(dc.StringToNumParamID("DeviceGetNum25GSFPs"), kDeviceGetNum25GSFPs);
+		CHECK_EQ(dc.StringToNumParamID("GetNum25GSFPs"), kDeviceGetNum25GSFPs);
+	}	//	TEST_CASE("NTV2NumericParamID")
+
+	TEST_CASE("NTV2EnumsID")
+	{
+		CNTV2Card c;
+		DeviceCapabilities dc(c);	//	Use this for convenience (these are all STATIC functions):
+		//	Spot-check EnumsIDToString
+		CHECK_EQ("DeviceID",		dc.EnumsIDToString(kNTV2EnumsID_DeviceID));
+		CHECK_EQ("Standard",		dc.EnumsIDToString(kNTV2EnumsID_Standard));
+		CHECK_EQ("PixelFormat",		dc.EnumsIDToString(kNTV2EnumsID_PixelFormat));
+		CHECK_EQ("FrameGeometry",	dc.EnumsIDToString(kNTV2EnumsID_FrameGeometry));
+		CHECK_EQ("FrameRate",		dc.EnumsIDToString(kNTV2EnumsID_FrameRate));
+		CHECK_EQ("ScanGeometry",	dc.EnumsIDToString(kNTV2EnumsID_ScanGeometry));
+		CHECK_EQ("VideoFormat",		dc.EnumsIDToString(kNTV2EnumsID_VideoFormat));
+		CHECK_EQ("Mode",			dc.EnumsIDToString(kNTV2EnumsID_Mode));
+		CHECK_EQ("InputSource",		dc.EnumsIDToString(kNTV2EnumsID_InputSource));
+		CHECK_EQ("OutputDest",		dc.EnumsIDToString(kNTV2EnumsID_OutputDest));
+		CHECK_EQ("Channel",			dc.EnumsIDToString(kNTV2EnumsID_Channel));
+		CHECK_EQ("RefSource",		dc.EnumsIDToString(kNTV2EnumsID_RefSource));
+		CHECK_EQ("AudioRate",		dc.EnumsIDToString(kNTV2EnumsID_AudioRate));
+		CHECK_EQ("AudioSource",		dc.EnumsIDToString(kNTV2EnumsID_AudioSource));
+		CHECK_EQ("WidgetID",		dc.EnumsIDToString(kNTV2EnumsID_WidgetID));
+		CHECK_EQ("ConversionMode",	dc.EnumsIDToString(kNTV2EnumsID_ConversionMode));
+		CHECK_EQ("DSKMode",			dc.EnumsIDToString(kNTV2EnumsID_DSKMode));
+		CHECK_EQ("InputTCIndex",	dc.EnumsIDToString(kNTV2EnumsID_InputTCIndex));
+		CHECK_EQ("OutputTCIndex",	dc.EnumsIDToString(kNTV2EnumsID_OutputTCIndex));
+		CHECK_EQ("",		dc.EnumsIDToString(kNTV2EnumsID_LAST));
+		CHECK_EQ("",		dc.EnumsIDToString(NTV2EnumsID(3000)));
+		//	Validate case-insensitivity, leading/trailing whitespace, with/without leading "k", with/without leading "Device"...
+		CHECK_EQ(dc.StringToEnumsParamID(""), kNTV2EnumsID_INVALID);
+		CHECK_EQ(dc.StringToEnumsParamID("    \t  \n  "), kNTV2EnumsID_INVALID);
+		CHECK_EQ(dc.StringToEnumsParamID("kNTV2EnumsID_Standard"), kNTV2EnumsID_Standard);
+		CHECK_EQ(dc.StringToEnumsParamID("NTV2EnumsID_Standard"), kNTV2EnumsID_Standard);
+		CHECK_EQ(dc.StringToEnumsParamID("kNTV2EnumsID_Standard"), kNTV2EnumsID_Standard);
+		CHECK_EQ(dc.StringToEnumsParamID("Standard"), kNTV2EnumsID_Standard);
+		CHECK_EQ(dc.StringToEnumsParamID("\t    sTaNdArD    \n"), kNTV2EnumsID_Standard);
+		CHECK_EQ(dc.StringToEnumsParamID("\t    StAnDaRd    \n"), kNTV2EnumsID_Standard);
+		CHECK_NE(dc.StringToEnumsParamID("Standar"), kNTV2EnumsID_Standard);
+		CHECK_EQ(dc.StringToEnumsParamID("Standar"), kNTV2EnumsID_INVALID);
+		//	Spot-chck StringToEnumsParamID
+		CHECK_EQ(dc.StringToEnumsParamID("kNTV2EnumsID_VideoFormat"), kNTV2EnumsID_VideoFormat);
+		CHECK_EQ(dc.StringToEnumsParamID("kNTV2EnumsID_RefSource"), kNTV2EnumsID_RefSource);
+		CHECK_EQ(dc.StringToEnumsParamID("kNTV2EnumsID_WidgetID"), kNTV2EnumsID_WidgetID);
+		CHECK_EQ(dc.StringToEnumsParamID("kNTV2EnumsID_OutputTCIndex"), kNTV2EnumsID_OutputTCIndex);
+		CHECK_EQ(dc.StringToEnumsParamID("last"), kNTV2EnumsID_INVALID);
+	}	//	TEST_CASE("NTV2EnumsID")
+}	//	TEST_SUITE("DeviceCapabilities")
+
 #if 0
 TEST_SUITE("NTV2SWDevice" * doctest::description("NTV2SWDevice tests"))
 {

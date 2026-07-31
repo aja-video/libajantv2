@@ -595,10 +595,431 @@ int CNTV2Card::GetSFPConfigurationURLStrings(std::vector<std::string> & OutSFPUR
 NTV2Buffer CNTV2Card::NULL_POINTER (AJA_NULL, 0);
 
 
+///////////////////////////////////////////////////////////////////////////////////////////////	DeviceCapabilities
+
+
 bool DeviceCapabilities::CanDoWidget (const NTV2WidgetType inWgtType, const UWord index0)
 {
 	return CanDoWidget(CNTV2SignalRouter::WidgetIDFromTypeAndChannel(inWgtType, NTV2Channel(index0)));
 }
+
+
+#define _TO_STR(_x_)		#_x_
+
+AJALock DeviceCapabilities::sInitLock;
+NTV2StringList DeviceCapabilities::sBoolParamIDStrs, DeviceCapabilities::sNumParamIDStrs, DeviceCapabilities::sEnumsIDStrs;	//	STATIC
+
+string DeviceCapabilities::BoolParamIDToString (const NTV2BoolParamID p)	//	STATIC
+{
+	AJAAutoLock tmp(&sInitLock);
+	if (sBoolParamIDStrs.empty())
+	{
+		sBoolParamIDStrs.reserve(size_t(kNTV2BoolParam_COUNT));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanChangeEmbeddedAudioClock));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanChangeFrameBufferSize));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDisableUFC));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDo2KVideo));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDo3GLevelConversion));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoRGBLevelAConversion));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDo425Mux));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDo4KVideo));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoAESAudioIn));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoAnalogAudio));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoAnalogVideoIn));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoAnalogVideoOut));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoAudio2Channels));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoAudio6Channels));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoAudio8Channels));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoAudio96K));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoAudioDelay));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoBreakoutBox));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoCapture));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoColorCorrection));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoCustomAnc));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoDSKOpacity));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoDualLink));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoDVCProHD));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoEnhancedCSC));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoFrameStore1Display));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoFreezeOutput));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoHDMIOutStereo));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoHDV));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoHDVideo));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoIsoConvert));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoLTC));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoLTCInOnRefPort));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoMSI));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoMultiFormat));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoPCMControl));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoPCMDetection));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoPIO));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoPlayback));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoProgrammableCSC));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoProgrammableRS422));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoProRes));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoQREZ));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoQuarterExpand));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoRateConvert));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoRGBPlusAlphaOut));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoRP188));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoSDVideo));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoSDIErrorChecks));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoStackedAudio));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoStereoIn));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoStereoOut));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoThunderbolt));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoVideoProcessing));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanMeasureTemperature));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanReportFrameSize));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasBiDirectionalSDI));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasColorSpaceConverterOnChannel2));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasNWL));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasPCIeGen2));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasRetailSupport));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasSDIRelays));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasSPIFlash));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasSPIFlashSerial));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasSPIv2));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasSPIv3));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasSPIv4));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceIs64Bit));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceIsDirectAddressable));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceIsExternalToHost));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceIsLocalPhysical));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceIsSupported));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceNeedsRoutingSetup));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceSoftwareCanChangeFrameBufferSize));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanThermostat));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasHEVCM31));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasHEVCM30));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoVITC2));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoHDMIHDROut));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoJ2K));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDo12gRouting));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDo12GSDI));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDo2110));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDo8KVideo));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoAudio192K));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoAudioMixer));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoHDMIAuxCapture));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoHDMIAuxPlayback));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoFramePulseSelect));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoHDMIMultiView));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasMultiRasterWidget));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoHFRRGB));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoIP));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoMultiLinkAudio));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoWarmBootFPGA));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanReportFailSafeLoaded));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanReportRunningFirmwareDate));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasAudioMonitorRCAJacks));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasBiDirectionalAnalogAudio));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasGenlockv2));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasGenlockv3));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasHeadphoneJack));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasLEDAudioMeters));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasRotaryEncoder));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasSPIv5));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasXilinxDMA));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasMicrophoneInput));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoBreakoutBoard));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasBreakoutBoard));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceAudioCanWaitForVBI));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasNTV4FrameStores));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasXptConnectROM));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoAudioInput));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoAudioOutput));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoAESAudioOut));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasIDSwitch));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoHDMIQuadRasterConversion));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoCustomHancInsertion));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoStreamingDMA));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasPWMFanControl));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceROMHasBankSelect));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoVersalSysMon));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoGPIO));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasBracketLED));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDo25GIP));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanReportMixerDelay));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceHasLPProductCode));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoP2PTransmit));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoP2PReceive));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoFastBitfileSwitching));
+		sBoolParamIDStrs.push_back(_TO_STR(kDeviceCanDoClockMonitor));
+		NTV2_ASSERT(sBoolParamIDStrs.size() == size_t(kNTV2BoolParam_COUNT));
+		for (size_t ndx(0);  ndx < sBoolParamIDStrs.size();  ndx++)
+			sBoolParamIDStrs.at(ndx).erase(0, 7);	//	Lop off leading "kDevice"
+	}	//	if never initialized
+	return size_t(p) < sBoolParamIDStrs.size() ? sBoolParamIDStrs.at(size_t(p)) : "";
+}	//	BoolParamIDToString
+
+string DeviceCapabilities::NumParamIDToString (const NTV2NumericParamID p)	//	STATIC
+{
+	AJAAutoLock tmp(&sInitLock);
+	if (sNumParamIDStrs.empty())
+	{
+		sNumParamIDStrs.reserve(size_t(kNTV2NumericParam_COUNT));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetActiveMemorySize));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetDACVersion));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetDownConverterDelay));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetHDMIVersion));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetLUTVersion));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetMaxAudioChannels));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetMaxRegisterNumber));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetMaxTransferCount));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumDMAEngines));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumVideoChannels));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetPingLED));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetUFCVersion));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNum4kQuarterSizeConverters));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumAESAudioInputChannels));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumAESAudioOutputChannels));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumAnalogAudioInputChannels));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumAnalogAudioOutputChannels));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumAnalogVideoInputs));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumAnalogVideoOutputs));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumAudioSystems));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumCrossConverters));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumCSCs));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumDownConverters));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumEmbeddedAudioInputChannels));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumEmbeddedAudioOutputChannels));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumFrameStores));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumFrameSyncs));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumHDMIAudioInputChannels));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumHDMIAudioOutputChannels));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumHDMIVideoInputs));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumHDMIVideoOutputs));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumInputConverters));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumLUTs));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumMixers));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumOutputConverters));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumReferenceVideoInputs));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumSerialPorts));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumUpConverters));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumVideoInputs));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumVideoOutputs));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNum2022ChannelsSFP1));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNum2022ChannelsSFP2));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumLTCInputs));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumLTCOutputs));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumMicInputs));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumLUTBanks));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetTotalNumAudioSystems));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumBufferedAudioSystems));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNumTSIMuxers));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetSPIFlashVersion));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetGenlockVersion));
+		sNumParamIDStrs.push_back(_TO_STR(kDeviceGetNum25GSFPs));
+		NTV2_ASSERT(sNumParamIDStrs.size() == size_t(kNTV2NumericParam_COUNT));
+		for (size_t ndx(0);  ndx < sNumParamIDStrs.size();  ndx++)
+			sNumParamIDStrs.at(ndx).erase(0, 7);	//	Lop off leading "kDevice"
+	}	//	if never initialized
+	const size_t ndx (p >= kNTV2NumericParam_FIRST  &&  p < kNTV2NumericParam_LAST  ?  p - kNTV2NumericParam_FIRST  :  kDeviceGetNum_INVALID);
+	return ndx < sNumParamIDStrs.size() ? sNumParamIDStrs.at(ndx) : "";
+}	//	NumParamIDToString
+
+string DeviceCapabilities::EnumsIDToString (const NTV2EnumsID p)	//	STATIC
+{
+	AJAAutoLock tmp(&sInitLock);
+	if (sEnumsIDStrs.empty())
+	{
+		sEnumsIDStrs.reserve(kNTV2EnumsID_COUNT);
+		sEnumsIDStrs.push_back(_TO_STR(kNTV2EnumsID_DeviceID));
+		sEnumsIDStrs.push_back(_TO_STR(kNTV2EnumsID_Standard));
+		sEnumsIDStrs.push_back(_TO_STR(kNTV2EnumsID_PixelFormat));
+		sEnumsIDStrs.push_back(_TO_STR(kNTV2EnumsID_FrameGeometry));
+		sEnumsIDStrs.push_back(_TO_STR(kNTV2EnumsID_FrameRate));
+		sEnumsIDStrs.push_back(_TO_STR(kNTV2EnumsID_ScanGeometry));
+		sEnumsIDStrs.push_back(_TO_STR(kNTV2EnumsID_VideoFormat));
+		sEnumsIDStrs.push_back(_TO_STR(kNTV2EnumsID_Mode));
+		sEnumsIDStrs.push_back(_TO_STR(kNTV2EnumsID_InputSource));
+		sEnumsIDStrs.push_back(_TO_STR(kNTV2EnumsID_OutputDest));
+		sEnumsIDStrs.push_back(_TO_STR(kNTV2EnumsID_Channel));
+		sEnumsIDStrs.push_back(_TO_STR(kNTV2EnumsID_RefSource));
+		sEnumsIDStrs.push_back(_TO_STR(kNTV2EnumsID_AudioRate));
+		sEnumsIDStrs.push_back(_TO_STR(kNTV2EnumsID_AudioSource));
+		sEnumsIDStrs.push_back(_TO_STR(kNTV2EnumsID_WidgetID));
+		sEnumsIDStrs.push_back(_TO_STR(kNTV2EnumsID_ConversionMode));
+		sEnumsIDStrs.push_back(_TO_STR(kNTV2EnumsID_DSKMode));
+		sEnumsIDStrs.push_back(_TO_STR(kNTV2EnumsID_InputTCIndex));
+		sEnumsIDStrs.push_back(_TO_STR(kNTV2EnumsID_OutputTCIndex));
+		NTV2_ASSERT(sEnumsIDStrs.size() == size_t(kNTV2EnumsID_COUNT));
+		for (size_t ndx(0);  ndx < sEnumsIDStrs.size();  ndx++)
+			sEnumsIDStrs.at(ndx).erase(0, 13);	//	Lop off leading "kNTV2EnumsID_"
+	}	//	if never initialized
+	return size_t(p) < sEnumsIDStrs.size() ? sEnumsIDStrs.at(size_t(p)) : "";
+}
+
+#define InitStrToIDMap(_eid_,_t_,_max_,_fn_)	m.clear();												\
+												for (n = 0;  n < _max_;  n++)							\
+												{														\
+													if (!aja::lower(st = _fn_(_t_(n), false)).empty())	\
+														m[st] = n;										\
+													if (!aja::lower(st = _fn_(_t_(n), true)).empty())	\
+														m[st] = n;										\
+												}														\
+												sStrToIDMaps.at(_eid_) = m;
+
+DeviceCapabilities::GenericStrToIDMap	DeviceCapabilities::sStrBoolParamIDMap, DeviceCapabilities::sStrNumParamIDMap, DeviceCapabilities::sStrEnumsIDMap;	//	STATIC
+DeviceCapabilities::GenericStrToIDMaps	DeviceCapabilities::sStrToIDMaps;	//	STATIC
+
+void DeviceCapabilities::Init (void)	//	STATIC
+{	//	One stop shop for initialization
+	AJAAutoLock tmp(&sInitLock);
+	GenericStrToIDMapCI it;
+	if (sStrBoolParamIDMap.empty())
+	{
+		BoolParamIDToString(kDeviceCanChangeEmbeddedAudioClock);	//	Ensure sBoolParamIDStrs initialized
+		for (size_t ndx(0);  ndx < sBoolParamIDStrs.size();  ndx++)
+		{
+			string st(sBoolParamIDStrs.at(ndx));
+			aja::lower(st);
+			const NTV2BoolParamID id (NTV2BoolParamID(kNTV2BoolParam_FIRST + ndx));
+			it = sStrBoolParamIDMap.find(st);
+			if (it == sStrBoolParamIDMap.end())
+				sStrBoolParamIDMap[st] = id;
+			st = "device" + st;
+			it = sStrBoolParamIDMap.find(st);
+			if (it == sStrBoolParamIDMap.end())
+				sStrBoolParamIDMap[st] = id;
+			st = "k" + st;
+			it = sStrBoolParamIDMap.find(st);
+			if (it == sStrBoolParamIDMap.end())
+				sStrBoolParamIDMap[st] = id;
+		}
+		sStrBoolParamIDMap["kdevicecandocustomaux"]	= kDeviceCanDoHDMIAuxCapture;
+		sStrBoolParamIDMap["devicecandocustomaux"]	= kDeviceCanDoHDMIAuxCapture;
+		sStrBoolParamIDMap["candocustomaux"]		= kDeviceCanDoHDMIAuxCapture;
+		sStrBoolParamIDMap["kdevicecandoidswitch"]	= kDeviceHasIDSwitch;
+		sStrBoolParamIDMap["devicecandoidswitch"]	= kDeviceHasIDSwitch;
+		sStrBoolParamIDMap["candoidswitch"]			= kDeviceHasIDSwitch;
+	}
+	if (sStrNumParamIDMap.empty())
+	{
+		NumParamIDToString(kDeviceGetActiveMemorySize);	//	Ensure sNumParamIDStrs initialized
+		for (size_t ndx(0);  ndx < sNumParamIDStrs.size();  ndx++)
+		{
+			string st(sNumParamIDStrs.at(ndx));
+			aja::lower(st);
+			const NTV2NumericParamID id (NTV2NumericParamID(kNTV2NumericParam_FIRST + ndx));
+			it = sStrNumParamIDMap.find(st);
+			if (it == sStrNumParamIDMap.end())
+				sStrNumParamIDMap[st] = id;
+			st = "device" + st;
+			it = sStrNumParamIDMap.find(st);
+			if (it == sStrNumParamIDMap.end())
+				sStrNumParamIDMap[st] = id;
+			st = "k" + st;
+			it = sStrNumParamIDMap.find(st);
+			if (it == sStrNumParamIDMap.end())
+				sStrNumParamIDMap[st] = id;
+		}
+	}
+	if (sStrEnumsIDMap.empty())
+	{
+		EnumsIDToString(kNTV2EnumsID_Standard);	//	Ensure sEnumsIDStrs initialized
+		for (size_t ndx(0);  ndx < sEnumsIDStrs.size();  ndx++)
+		{
+			string st(sEnumsIDStrs.at(ndx));
+			aja::lower(st);
+			const NTV2EnumsID id (NTV2EnumsID(kNTV2EnumsID_FIRST + ndx));
+			it = sStrEnumsIDMap.find(st);
+			if (it == sStrEnumsIDMap.end())
+				sStrEnumsIDMap[st] = id;
+			st = "enumsid_" + st;
+			it = sStrEnumsIDMap.find(st);
+			if (it == sStrEnumsIDMap.end())
+				sStrEnumsIDMap[st] = id;
+			st = "ntv2" + st;
+			it = sStrEnumsIDMap.find(st);
+			if (it == sStrEnumsIDMap.end())
+				sStrEnumsIDMap[st] = id;
+			st = "k" + st;
+			it = sStrEnumsIDMap.find(st);
+			if (it == sStrEnumsIDMap.end())
+				sStrEnumsIDMap[st] = id;
+		}
+	}
+	if (sStrToIDMaps.empty())
+	{
+		string st;
+		ULWord n(0);
+		while (sStrToIDMaps.size() < kNTV2EnumsID_LAST)
+			sStrToIDMaps.push_back(GenericStrToIDMap());
+		GenericStrToIDMap m;
+//		InitStrToIDMap(kNTV2EnumsID_Device, NTV2DeviceID, ---n/a---, NTV2DeviceIDToString);
+		InitStrToIDMap(kNTV2EnumsID_Standard, NTV2Standard, NTV2_NUM_STANDARDS, NTV2StandardToString);
+		m["standards"] = kNTV2EnumsID_Standard;
+		InitStrToIDMap(kNTV2EnumsID_PixelFormat, NTV2PixelFormat, NTV2_FBF_LAST, NTV2FrameBufferFormatToString);
+		m["pixelformats"] = kNTV2EnumsID_PixelFormat;
+		InitStrToIDMap(kNTV2EnumsID_FrameGeometry, NTV2FrameGeometry, NTV2_FG_LAST, NTV2FrameGeometryToString);
+		InitStrToIDMap(kNTV2EnumsID_FrameRate, NTV2FrameRate, NTV2_FRAMERATE_LAST, NTV2FrameRateToString);
+		InitStrToIDMap(kNTV2EnumsID_VideoFormat, NTV2VideoFormat, NTV2_MAX_NUM_VIDEO_FORMATS, NTV2VideoFormatToString);
+		InitStrToIDMap(kNTV2EnumsID_Mode, NTV2Mode, NTV2_MODE_INVALID, NTV2ModeToString);
+		InitStrToIDMap(kNTV2EnumsID_InputSource, NTV2InputSource, NTV2_NUM_INPUTSOURCES, NTV2InputSourceToString);
+		InitStrToIDMap(kNTV2EnumsID_OutputDest, NTV2OutputDest, NTV2_NUM_OUTPUTDESTINATIONS, NTV2OutputDestinationToString);
+		m["outputdestination"] = kNTV2EnumsID_OutputDest;
+		m["outputdestinations"] = kNTV2EnumsID_OutputDest;
+		InitStrToIDMap(kNTV2EnumsID_Channel, NTV2Channel, NTV2_MAX_NUM_CHANNELS, NTV2ChannelToString);
+		InitStrToIDMap(kNTV2EnumsID_RefSource, NTV2RefSource, NTV2_NUM_REFERENCE_INPUTS, NTV2ReferenceSourceToString);
+		InitStrToIDMap(kNTV2EnumsID_AudioRate, NTV2AudioRate, NTV2_MAX_NUM_AudioRates, NTV2AudioRateToString);
+		InitStrToIDMap(kNTV2EnumsID_AudioSource, NTV2AudioSource, NTV2_MAX_NUM_AudioSources, NTV2AudioSourceToString);
+		InitStrToIDMap(kNTV2EnumsID_WidgetID, NTV2WidgetID, NTV2_WgtModuleTypeCount, NTV2WidgetIDToString);
+		m["widgetids"] = kNTV2EnumsID_WidgetID;
+//		InitStrToIDMap(kNTV2EnumsID_ConversionMode, NTV2ConversionMode, NTV2_NUM_CONVERSIONMODES, NTV2ConversionModeToString);
+//		InitStrToIDMap(kNTV2EnumsID_DSKMode, NTV2DSKMode, NTV2_DSKModeMax, NTV2DSKModeToString);
+		InitStrToIDMap(kNTV2EnumsID_InputTCIndex, NTV2TCIndex, NTV2_MAX_NUM_TIMECODE_INDEXES, NTV2TCIndexToString);
+		InitStrToIDMap(kNTV2EnumsID_OutputTCIndex, NTV2TCIndex, NTV2_MAX_NUM_TIMECODE_INDEXES, NTV2TCIndexToString);
+	}	//	if uninitialized
+}	//	Init
+
+NTV2BoolParamID DeviceCapabilities::StringToBoolParamID (string s)	//	STATIC
+{
+	AJAAutoLock tmp(&sInitLock);
+	if (sStrBoolParamIDMap.empty())
+		Init();
+	aja::lower(aja::strip(s));
+	GenericStrToIDMapCI it (sStrBoolParamIDMap.find(s));
+	return it != sStrBoolParamIDMap.end()  ?  NTV2BoolParamID(it->second)  :  kDeviceCanDo_INVALID;
+}
+
+NTV2NumericParamID DeviceCapabilities::StringToNumParamID (string s)	//	STATIC
+{
+	AJAAutoLock tmp(&sInitLock);
+	if (sStrNumParamIDMap.empty())
+		Init();
+	aja::lower(aja::strip(s));
+	GenericStrToIDMapCI it (sStrNumParamIDMap.find(s));
+	return it != sStrNumParamIDMap.end()  ?  NTV2NumericParamID(it->second)  :  kDeviceGetNum_INVALID;
+}
+
+NTV2EnumsID DeviceCapabilities::StringToEnumsParamID (string s)	//	STATIC
+{
+	AJAAutoLock tmp(&sInitLock);
+	if (sStrEnumsIDMap.empty())
+		Init();
+	aja::lower(aja::strip(s));
+	GenericStrToIDMapCI it (sStrEnumsIDMap.find(s));
+	return it != sStrEnumsIDMap.end()  ?  NTV2EnumsID(it->second)  :  kNTV2EnumsID_INVALID;
+}
+
+bool DeviceCapabilities::StringToSupportedEnumsIDValue (ULWord & outVal, const NTV2EnumsID id, string s)	//	STATIC
+{
+	AJAAutoLock tmp(&sInitLock);
+	if (sStrToIDMaps.empty())
+		Init();
+	if (id >= sStrToIDMaps.size())
+		return false;	//	No such map or bad EnumsID
+	GenericStrToIDMap & m (sStrToIDMaps.at(id));
+	if (m.empty())
+		return false;	//	NTV2EnumsID unsupported  (e.g. Device, ConversionMode, DSKMode, etc.)
+	GenericStrToIDMapCI iter(m.find(aja::strip(aja::lower(s))));
+	if (iter == m.end())
+		return false;
+	outVal = iter->second;
+	return true;
+}	//	StringToSupportedEnumsIDValue
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////	SDRAMAuditor

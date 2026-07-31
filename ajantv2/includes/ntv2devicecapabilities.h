@@ -367,8 +367,27 @@ class AJAExport DeviceCapabilities
 		inline NTV2_DEPRECATED_18_1(bool HasSPIv5(void))	{return dev.IsSupported(kDeviceHasSPIv5);}	///< @deprecated	Use DeviceCapabilities::GetSPIFlashVersion instead
 		inline NTV2_DEPRECATED_18_1(bool IsDNxIV(void))		{return dev.IsSupported(kDeviceHasMicrophoneInput);}	///< @deprecated	Use DeviceCapabilities::HasMicInput instead
 		inline NTV2_DEPRECATED_18_1(ULWord GetNumVideoChannels(void))	{return dev.GetNumSupported(kDeviceGetNumVideoChannels);}	///< @deprecated	Use DeviceCapabilities::GetNumFrameStores instead
+
 	private:
 		CNTV2DriverInterface &	dev;	///< @brief	My reference to the NTV2 device
+
+	public:		//	Class Methods
+		static std::string			BoolParamIDToString (const NTV2BoolParamID p);
+		static std::string			NumParamIDToString (const NTV2NumericParamID p);
+		static std::string			EnumsIDToString (const NTV2EnumsID p);
+		static NTV2BoolParamID		StringToBoolParamID (std::string s);
+		static NTV2NumericParamID	StringToNumParamID (std::string s);
+		static NTV2EnumsID			StringToEnumsParamID (std::string s);
+		static bool					StringToSupportedEnumsIDValue (ULWord & outVal, const NTV2EnumsID id, std::string s);
+	private:	//	Class Data
+		typedef std::map<std::string, ULWord>				GenericStrToIDMap;
+		typedef GenericStrToIDMap::const_iterator			GenericStrToIDMapCI;
+		typedef std::vector<GenericStrToIDMap>				GenericStrToIDMaps;
+		static AJALock sInitLock;
+		static NTV2StringList sBoolParamIDStrs, sNumParamIDStrs, sEnumsIDStrs;
+		static GenericStrToIDMap sStrBoolParamIDMap, sStrNumParamIDMap, sStrEnumsIDMap;
+		static GenericStrToIDMaps sStrToIDMaps;
+		static void Init (void);
 };	//	DeviceCapabilities
 
 #endif	//	NTV2_DEVICECAPABILITIES_H
