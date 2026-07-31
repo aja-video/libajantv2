@@ -73,7 +73,7 @@ static uint32_t gCloseCount(0);		//	Number of Close calls made
 #if defined(_DEBUGSTATS_)
 	#define DIDBGX(__x__)	AJA_sDEBUG	(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 #else
-	#define DIDBGX(__x__)	
+	#define DIDBGX(__x__)
 #endif
 
 /////////////// CLASS METHODS
@@ -1234,7 +1234,8 @@ bool CNTV2DriverInterface::AcquireStreamForApplication (const ULWord inAppCode, 
 	if (count > 19)	//	if timed out
 	{	// Get data about current owner
 		ULWord currentCode(0), curAppPID(0);
-		ReadRegister(kVRegApplicationCode, currentCode) || ReadRegister(kVRegApplicationPID, curAppPID);
+		ReadRegister(kVRegApplicationCode, currentCode);
+		ReadRegister(kVRegApplicationPID, curAppPID);
 
 		//	Check if owner is deceased
 		if (curAppPID  &&  !AJAProcess::IsValid(curAppPID))
@@ -1297,7 +1298,7 @@ bool CNTV2DriverInterface::SetStreamingApplication (const ULWord inAppCode, cons
 	//	This code restore Kona every-frame task
 	if (oldAppType == 'auto'  &&  oldPID == 0  &&  inNewAppType != 'auto')
 		WriteRegister(kVRegEveryFrameTaskFilter, NTV2_STANDARD_TASKS);
-	
+
 	//	reset override state
 	WriteRegister(kVRegAudioMixerOverrideState, 0);
 
