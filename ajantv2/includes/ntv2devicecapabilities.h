@@ -9,12 +9,16 @@
 #define NTV2_DEVICECAPABILITIES_H
 
 #include "ntv2driverinterface.h"
+#include "ntv2publicinterface.h"	//	for NTV2StringList, vector, map, string
+#include "ajabase/system/lock.h"	//	for AJALock
 
 /**
 	@brief	Convenience class/API for inquiring about device capabilities of physical and virtual devices.
-			Instead of calling the old global ::NTV2DeviceCanDoXXX(mDeviceID) functions,
-			call mCard.features().CanDoXXX().
-			Instead of calling ::NTV2DeviceGetNumYYY(mDeviceID), call mCard.features().GetNumYYY().
+			-	Instead of calling the old global ::NTV2DeviceCanDoXXX(deviceID) functions,
+				call card.features().CanDoXXX().
+			-	Instead of calling ::NTV2DeviceGetNumYYY(deviceID), call card.features().GetNumYYY().
+			-	Call CNTV2DriverInterface::GetSupportedItems to obtain a list of supported video or pixel
+				formats, frame rates, etc.
 	@see	\ref vidop-features
 **/
 class AJAExport DeviceCapabilities
