@@ -16,9 +16,15 @@ static INTERRUPT_ENUMS	gChannelToInputVerticalInterrupt[]	= {eInput1,  eInput2, 
 
 //	Subscribe to events
 
-bool CNTV2Card::SubscribeEvent (const INTERRUPT_ENUMS inEventCode)
+bool CNTV2Card::SubscribeEvent (const INTERRUPT_ENUMS id)
 {
-	return NTV2_IS_VALID_INTERRUPT_ENUM(inEventCode)  &&  ConfigureSubscription (true, inEventCode, mInterruptEventHandles[inEventCode]);
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+	{	NTV2ConfigureInterrupt msg;
+		return _pRPCAPI->NTV2MessageRemote(msg.doSubscribe(id));
+	}
+#endif// defined(NTV2_NUB_CLIENT_SUPPORT)
+	return NTV2_IS_VALID_INTERRUPT_ENUM(id)  &&  ConfigureSubscription (true, id, mInterruptEventHandles.at(id));
 }
 
 
@@ -52,9 +58,15 @@ bool CNTV2Card::SubscribeInputVerticalEvent (const NTV2ChannelSet & inChannels)
 
 //	Unsubscribe from events
 
-bool CNTV2Card::UnsubscribeEvent (const INTERRUPT_ENUMS inEventCode)
+bool CNTV2Card::UnsubscribeEvent (const INTERRUPT_ENUMS id)
 {
-	return NTV2_IS_VALID_INTERRUPT_ENUM(inEventCode)  &&  ConfigureSubscription (false, inEventCode, mInterruptEventHandles[inEventCode]);
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+	{	NTV2ConfigureInterrupt msg;
+		return _pRPCAPI->NTV2MessageRemote(msg.doUnsubscribe(id));
+	}
+#endif// defined(NTV2_NUB_CLIENT_SUPPORT)
+	return NTV2_IS_VALID_INTERRUPT_ENUM(id)  &&  ConfigureSubscription (false, id, mInterruptEventHandles.at(id));
 }
 
 

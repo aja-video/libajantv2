@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2interrupts.cpp
-	@brief		Implementation of CNTV2Card's interrupt functions.
+	@brief		Implementation of CNTV2Card's interrupt enable/disable functions.
 	@copyright	(C) 2004-2022 AJA Video Systems, Inc.
 **/
 
@@ -18,31 +18,64 @@ bool CNTV2Card::GetCurrentInterruptMasks (NTV2InterruptMask & outIntMask1, NTV2I
 }
 
 
-bool CNTV2Card::EnableInterrupt			(const INTERRUPT_ENUMS inInterruptCode)	{return ConfigureInterrupt (true, inInterruptCode);}
-bool CNTV2Card::EnableOutputInterrupt	(const NTV2Channel channel)				{return EnableInterrupt (gChannelToOutputInterrupt [channel]);}
-bool CNTV2Card::EnableInputInterrupt	(const NTV2Channel channel)				{return EnableInterrupt (gChannelToInputInterrupt [channel]);}
-bool CNTV2Card::EnableInputInterrupt	(const NTV2ChannelSet & inFrameStores)
+bool CNTV2Card::EnableInterrupt (const INTERRUPT_ENUMS id)
+{
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+	{	NTV2ConfigureInterrupt msg;
+		return _pRPCAPI->NTV2MessageRemote(msg.doEnable(id));
+	}
+#endif// defined(NTV2_NUB_CLIENT_SUPPORT)
+	return ConfigureInterrupt (true, id);
+}
+
+bool CNTV2Card::EnableOutputInterrupt (const NTV2Channel inChannel)
+{
+	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  EnableInterrupt (gChannelToOutputInterrupt [inChannel]);
+}
+
+bool CNTV2Card::EnableInputInterrupt (const NTV2Channel inChannel)
+{
+	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  EnableInterrupt (gChannelToInputInterrupt [inChannel]);
+}
+
+bool CNTV2Card::EnableInputInterrupt (const NTV2ChannelSet & inFrameStores)
 {
 	UWord failures(0);
 	for (NTV2ChannelSetConstIter it(inFrameStores.begin());  it != inFrameStores.end();  ++it)
-		if (!EnableInputInterrupt (*it))
+		if (!EnableInputInterrupt(*it))
 			failures++;
 	return failures == 0;
 }
 
-bool CNTV2Card::DisableInterrupt		(const INTERRUPT_ENUMS inInterruptCode)
+bool CNTV2Card::DisableInterrupt (const INTERRUPT_ENUMS id)
 {
-	if(NTV2_IS_INPUT_INTERRUPT(inInterruptCode) || NTV2_IS_OUTPUT_INTERRUPT(inInterruptCode))
-		return true;
-	return ConfigureInterrupt (false, inInterruptCode);
+	if (NTV2_IS_INPUT_INTERRUPT(id)  ||  NTV2_IS_OUTPUT_INTERRUPT(id))
+		return true;	//	Can't disable input/output interrupts
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+	{	NTV2ConfigureInterrupt msg;
+		return _pRPCAPI->NTV2MessageRemote(msg.doDisable(id));
+	}
+#endif// defined(NTV2_NUB_CLIENT_SUPPORT)
+	return ConfigureInterrupt (false, id);
 }
-bool CNTV2Card::DisableOutputInterrupt	(const NTV2Channel channel)				{return DisableInterrupt (gChannelToOutputInterrupt [channel]);}
-bool CNTV2Card::DisableInputInterrupt	(const NTV2Channel channel)				{return DisableInterrupt (gChannelToInputInterrupt [channel]);}
+
+bool CNTV2Card::DisableOutputInterrupt (const NTV2Channel inChannel)
+{
+	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  DisableInterrupt (gChannelToOutputInterrupt [inChannel]);
+}
+
+bool CNTV2Card::DisableInputInterrupt (const NTV2Channel inChannel)
+{
+	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  DisableInterrupt (gChannelToInputInterrupt [inChannel]);
+}
+
 bool CNTV2Card::DisableInputInterrupt	(const NTV2ChannelSet & inFrameStores)
 {
 	UWord failures(0);
 	for (NTV2ChannelSetConstIter it(inFrameStores.begin());  it != inFrameStores.end();  ++it)
-		if (!DisableInputInterrupt (*it))
+		if (!DisableInputInterrupt(*it))
 			failures++;
 	return failures == 0;
 }

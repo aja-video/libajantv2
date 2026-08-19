@@ -5692,6 +5692,7 @@ typedef enum
 		#define NTV2_TYPE_AJASTREAMCHANNEL		NTV2_FOURCC ('s', 't', 'c', 'h')	///< @brief Identifies NTV2StreamChannel struct
 		#define NTV2_TYPE_AJASTREAMBUFFER		NTV2_FOURCC ('s', 't', 'b', 'u')	///< @brief Identifies NTV2StreamBuffer struct
 		#define NTV2_TYPE_AJAMAILBUFFER    		NTV2_FOURCC ('m', 'a', 'i', 'l')	///< @brief Identifies NTV2MailBuffer struct
+		#define NTV2_TYPE_CONFIGINTERRUPT		NTV2_FOURCC ('c', 'i', 'n', 't')	///< @brief Identifies NTV2ConfigInterrupt struct
 		#if defined(NTV2_DEPRECATE_16_3)
 			#define AUTOCIRCULATE_TYPE_STATUS		NTV2_TYPE_ACSTATUS
 			#define AUTOCIRCULATE_TYPE_XFER			NTV2_TYPE_ACXFER
@@ -5719,7 +5720,8 @@ typedef enum
 													(_x_) == NTV2_TYPE_AJABITSTREAM		||	\
 													(_x_) == NTV2_TYPE_AJASTREAMCHANNEL	||	\
 													(_x_) == NTV2_TYPE_AJASTREAMBUFFER  ||  \
-                                                    (_x_) == NTV2_TYPE_AJAMAILBUFFER)
+													(_x_) == NTV2_TYPE_AJAMAILBUFFER	||	\
+													(_x_) == NTV2_TYPE_CONFIGINTERRUPT)
 
 		//	NTV2Buffer FLAGS
 		#define NTV2Buffer_ALLOCATED				BIT(0)		///< @brief Allocated using Allocate function?
@@ -7962,6 +7964,95 @@ typedef enum
 				NTV2_END_PRIVATE
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
 		NTV2_STRUCT_END (NTV2BankSelGetSetRegs)
+		/**
+			@brief	Configure interrupt (subscribe/unsubscribe, enable/disable, query subscribed interrupts, query enabled interrupts, etc.).
+			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
+		**/
+		NTV2_STRUCT_BEGIN (NTV2ConfigureInterrupt)
+				NTV2_HEADER			mHeader;				///< @brief The common structure header -- ALWAYS FIRST!
+					ULWord				mOperation;				///< @brief In: requested operation
+					ULWord				mFlags;					///< @brief In: option flags
+					ULWord				mInterruptID;			///< @brief In: INTERRUPT_ENUMS (interruptID) of interest
+					ULWord				mResult;				///< @brief Out: 0=success, otherwise failed
+					ULWord64			mInterruptIDs;			///< @brief Out: bitmap of enabled interrupt IDs
+					ULWord64			mEventHandle;			///< @brief In: handle to subscribe if kFlagMaskCreateHandle bit is clear
+					ULWord				mNumHandles;			///< @brief In: max num handles capacity;  Out: num handles returned
+					NTV2Buffer			mOutHandles;			///< @brief Buffer to contain resulting list of subscribed HANDLEs
+					ULWord				mSpares[32];			///< @brief Reserved for future use
+				NTV2_TRAILER		mTrailer;				///< @brief The common structure trailer -- ALWAYS LAST!
+
+			#if !defined (NTV2_BUILDING_DRIVER)
+				explicit	NTV2ConfigureInterrupt();		///< @brief Default constructor
+				inline		~NTV2ConfigureInterrupt()	{}	///< @brief Destructor
+
+				//	SUPPORTED OPERATIONS
+				static const ULWord	kOpINVALID				= 0x00000000;
+				static const ULWord	kOpFIRST				= 0x00000001;
+				static const ULWord	kOpSubscribe			= kOpFIRST;		///< @brief	For given mInterruptID, subscribe it
+				static const ULWord	kOpUnsubscribe			= 0x00000002;	///< @brief	For given mInterruptID, unsubscribe it
+				static const ULWord	kOpEnable				= 0x00000003;	///< @brief	For given mInterruptID, enable it
+				static const ULWord	kOpDisable				= 0x00000004;	///< @brief	For given mInterruptID, disable it
+				static const ULWord	kOpGetEventHandles		= 0x00000005;	///< @brief	For given mInterruptID, get subscribed event handles (fills mInOutNumHandles, mOutHandles, respects kFlagMaskIncludeGlobals)
+				static const ULWord	kOpGetSubscribedIDs		= 0x00000006;	///< @brief	Get subscribed interrupt IDs (mInterruptID ignored, fills mResultMask, respects kFlagMaskIncludeGlobals)
+				static const ULWord	kOpGetEnabledIDs		= 0x00000007;	///< @brief	Get enabled interrupt IDs (mInterruptID ignored, fills mResultMask)
+				static const ULWord	kOpLAST					= kOpGetEnabledIDs;
+
+				//	OPTION FLAGS
+				static const ULWord	kFlagMaskCreateHandle	= 0x00000001;	///< @brief	If set, create local event handle; otherwise handle is supplied for subscribe operation
+				static const ULWord	kFlagMaskIncludeGlobals	= 0x00000002;	///< @brief	If set, also include global event handles
+
+				//	Inquiry
+				inline ULWord				operation (void) const		{return mOperation;}		///< @return	my desired/intended operation
+				inline ULWord				flags (void) const			{return mFlags;}			///< @return	my option flags
+				inline INTERRUPT_ENUMS		interruptID (void) const	{return INTERRUPT_ENUMS(mInterruptID);}		///< @returns	my interrupt ID of interest
+				inline uint64_t				interruptIDs (void) const	{return mInterruptIDs;}		///< @returns	my interrupt IDs bitmap (a set of unique interrupt IDs)
+				inline bool					isValid (void) const		{return NTV2_IS_VALID_INTERRUPT_ENUM(interruptID()) && (operation() >= kOpFIRST && operation() <= kOpLAST);}		///< @return	True if I'm valid
+				inline operator				bool() const				{return isValid();}		///< @return	True if I'm valid (cast to bool)
+				inline ULWord				resultCode (void) const		{return mResult;}			///< @returns	my mResult value
+				inline bool					isSuccess (void) const		{return resultCode() ? true : false;}		///< @return	True if my mResult is zero
+				inline	operator			NTV2_HEADER*()				{return reinterpret_cast<NTV2_HEADER*>(this);}	///< @returns	my starting address casted to an NTV2_HEADER pointer
+				std::ostream &				Print (std::ostream & oss) const;	///< @brief	prints a human-readable representation of me to the given output stream
+				inline ULWord				numHandles (void) const		{return mNumHandles;}		///< @return	number of event HANDLEs
+				inline size_t				maxNumHandlesInBuffer (void) const	{return mOutHandles.GetByteCount() / sizeof(uint64_t);}		///< @return	number of event HANDLEs in mOutHandles NTV2Buffer
+				inline HANDLE				eventHandle (const size_t ndx) const	{return isValid() && mOutHandles && ndx < maxNumHandlesInBuffer() ? HANDLE(mOutHandles.U64(int(ndx))) : HANDLE(0);}	///< @return	event handle at given index number
+
+				inline bool					hasCreateHandleFlag (void) const	{return flags() & kFlagMaskCreateHandle;}	///< @returns	True if my "create handle" option is set
+				inline bool					hasIncludeGlobalsFlag (void) const	{return flags() & kFlagMaskIncludeGlobals;}	///< @returns	True if my "include globals" option is set
+
+				//	Changing/Configuring
+				inline NTV2ConfigureInterrupt &	doSubscribe (const INTERRUPT_ENUMS id)		{return doSubscribeEvent(id,HANDLE(0)).setCreateEvent();}	///< @brief	Create event handle and subscribe it to given interruptID
+				inline NTV2ConfigureInterrupt &	doSubscribeEvent (const INTERRUPT_ENUMS id, const HANDLE & hdl)	{return setOperation(kOpSubscribe).setInterruptID(id).setEventHandle(hdl);}	///< @brief	Subscribe given HANDLE for interruptID
+				inline NTV2ConfigureInterrupt &	doUnsubscribe (const INTERRUPT_ENUMS id)	{return setOperation(kOpUnsubscribe).setInterruptID(id);}	///< @brief	Unsubscribe local HANDLE from given interruptID
+				inline NTV2ConfigureInterrupt &	doEnable (const INTERRUPT_ENUMS id)			{return setOperation(kOpEnable).setInterruptID(id);}		///< @brief	Enable given interruptID
+				inline NTV2ConfigureInterrupt &	doDisable (const INTERRUPT_ENUMS id)		{return setOperation(kOpDisable).setInterruptID(id);}		///< @brief	Disable given interruptID
+
+				inline NTV2ConfigureInterrupt &	setResult		(const ULWord val)			{mResult = val;  return *this;}					///< @brief	Sets my result
+				inline NTV2ConfigureInterrupt &	setOperation	(const ULWord op)			{mOperation = op;  return *this;}				///< @brief	Sets my operation
+				inline NTV2ConfigureInterrupt &	setInterruptID	(const INTERRUPT_ENUMS id)	{mInterruptID = ULWord(id);  return *this;}		///< @brief	Sets my interruptID
+				inline NTV2ConfigureInterrupt &	setEventHandle	(const HANDLE & h)			{mEventHandle = ULWord64(h);  mNumHandles = 0; mOutHandles.Set(nullptr,0);  return *this;}	///< @brief	Sets my event handle
+				inline NTV2ConfigureInterrupt &	setCreateEvent	(void)						{mFlags |= kFlagMaskCreateHandle;  return *this;}	///< @brief	Sets the kFlagMaskCreateHandle option
+
+				static std::string			OpName (const ULWord op);			///< @return	Converts operation code to human-readable string
+				static NTV2StringList		IntNames (const uint64_t mask);		///< @returns	list of interrupt enum ID names from corresponding bits set in 'mask'
+				static std::string			IntName (const INTERRUPT_ENUMS id);	///< @returns	human-readable name of interrupt ID
+
+				NTV2_RPC_CODEC_DECLS
+				NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)
+
+				NTV2_BEGIN_PRIVATE
+					inline explicit	NTV2ConfigureInterrupt (const NTV2ConfigureInterrupt & inObj) : mHeader(0xFEFEFEFE, 0) {(void)inObj;}	///< @brief You can't construct an NTV2ConfigureInterrupt from another.
+					inline NTV2ConfigureInterrupt &	operator = (const NTV2ConfigureInterrupt & inRHS) {(void)inRHS; return *this;}	///< @brief You can't assign NTV2ConfigureInterrupt instances.
+				NTV2_END_PRIVATE
+			#endif	//	user-space clients only
+		NTV2_STRUCT_END (NTV2ConfigureInterrupt)
+
+		typedef NTV2ConfigureInterrupt	NTV2ConfigInterrupt, NTV2CfgInterrupt;
+
+		#define	AsNTV2ConfigInterrupt(_p_)	(reinterpret_cast<NTV2ConfigureInterrupt*>(_p_))
+		#define	AsNTV2CfgInterrupt(_p_)		(reinterpret_cast<NTV2ConfigureInterrupt*>(_p_))
+		#if !defined (NTV2_BUILDING_DRIVER)
+			AJAExport std::ostream & operator << (std::ostream & oss, const NTV2ConfigureInterrupt & msg);
+		#endif// !defined (NTV2_BUILDING_DRIVER)
 
 
 		/**
@@ -7970,7 +8061,7 @@ typedef enum
 		**/
 		NTV2_STRUCT_BEGIN (NTV2VirtualData) //	NTV2_TYPE_VIRTUAL_DATA_RW
 			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
-				ULWord			mTag;				///< @brief Tag for virtual data.  This value is used to recal saved data by tag.
+				ULWord			mTag;				///< @brief Tag for virtual data.  This value is used to recall saved data by tag.
 				ULWord			mIsWriting;			///< @brief If non-zero, virtual data will be written;	otherwise, virtual data will be read.
 				NTV2Buffer		mVirtualData;		///< @brief Pointer object to virtual data. The SDK owns this memory.
 			NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!

@@ -2263,7 +2263,7 @@ public:
 		@param[in]	inChannelPair	Specifies the new ::NTV2AudioChannelPair that is to drive the audio mixer's input.
 		@return		True if successful;	 otherwise false.
 		@note		Audio mixer inputs ::NTV2_AudioMixerInputAux1 and ::NTV2_AudioMixerInputAux2 are currently fixed to ::NTV2_AudioChannel1_2 and cannot be changed.
-		@see		CNTV2Card::SetAudioMixerInputChannelSelect, \ref audop-mixer
+		@see		CNTV2Card::GetAudioMixerInputChannelSelect, \ref audop-mixer
 	**/
 	AJA_VIRTUAL bool		SetAudioMixerInputChannelSelect (const NTV2AudioMixerInput inMixerInput, const NTV2AudioChannelPair inChannelPair); //	New in SDK 15.5
 

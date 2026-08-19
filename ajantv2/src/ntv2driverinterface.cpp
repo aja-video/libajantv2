@@ -453,12 +453,17 @@ bool CNTV2DriverInterface::ConfigureSubscription (const bool bSubscribe, const I
 	if (bSubscribe)
 	{										//	If subscribing,
 		mEventCounts [eInterruptType] = 0;	//		clear this interrupt's event counter
-		DIDBG("Subscribing '" << ::NTV2InterruptEnumString(eInterruptType) << "' (" << UWord(eInterruptType)
+		DIDBG("Subscribing '" << NTV2CfgInterrupt::IntName(eInterruptType) << "' (" << UWord(eInterruptType)
 				<< "), event counter reset");
+	}
+	else if (!outSubscriptionHdl)
+	{
+		DIDBGX("Unsubscribing '" << NTV2CfgInterrupt::IntName(eInterruptType) << "' (" << UWord(eInterruptType)
+				<< ") that was never subscribed");
 	}
 	else
 	{
-		DIDBGX("Unsubscribing '" << ::NTV2InterruptEnumString(eInterruptType) << "' (" << UWord(eInterruptType) << "), "
+		DIDBGX("Unsubscribing '" << NTV2CfgInterrupt::IntName(eInterruptType) << "' (" << UWord(eInterruptType) << "), "
 				<< mEventCounts[eInterruptType] << " event(s) received");
 	}
 	return true;
