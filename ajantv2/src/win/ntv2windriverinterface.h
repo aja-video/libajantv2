@@ -103,6 +103,8 @@ class AJAExport CNTV2WinDriverInterface : public CNTV2DriverInterface
 #if !defined(NTV2_DEPRECATE_17_6)
 		AJA_VIRTUAL inline bool	NTV2_DEPRECATED_17_6(HevcSendMessage(HevcMessageHeader* pMsg))	{(void)pMsg; return false;}	///< @deprecated	Corvid HEVC support dropped in SDK 17.6
 #endif//!defined(NTV2_DEPRECATE_17_6)
+		AJA_VIRTUAL HANDLE	GetEventHandleForInterrupt (const INTERRUPT_ENUMS eInterruptType);
+		#define GetInterruptEvent(__x__)	GetEventHandleForInterrupt(__x__)
 
 	//	PRIVATE INSTANCE METHODS
 	protected:
@@ -111,8 +113,6 @@ class AJAExport CNTV2WinDriverInterface : public CNTV2DriverInterface
 		AJA_VIRTUAL bool	CloseLocalPhysical (void);
 #endif	//	!defined(NTV2_NULL_DEVICE)
 		AJA_VIRTUAL bool	WinConfigureSubscription (const bool bSubscribe, const INTERRUPT_ENUMS eInterruptType);
-		AJA_VIRTUAL HANDLE	GetEventHandleForInterrupt (const INTERRUPT_ENUMS eInterruptType);
-		#define GetInterruptEvent(__x__)	GetEventHandleForInterrupt(__x__)
 		typedef std::vector<PULWord>	_EventHandles;
 
 	//	MEMBER DATA

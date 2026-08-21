@@ -412,7 +412,8 @@ bool CNTV2DriverInterface::SetInterruptEventCount (const INTERRUPT_ENUMS inInter
 {
 	if (!NTV2_IS_VALID_INTERRUPT_ENUM(inInterrupt))
 		{DIFAIL("Cannot set event count to " << inCount << " for interrupt '" << NTV2CfgInterrupt::IntName(inInterrupt) << "' -- bad interrupt ID");  return false;}
-	DIINFO("Interrupt '" << NTV2CfgInterrupt::IntName(inInterrupt) << "' event count changed from " << mEventCounts.at(inInterrupt) << " to " << inCount);
+	if (mEventCounts.at(inInterrupt) != inCount)
+		DIINFO("Interrupt '" << NTV2CfgInterrupt::IntName(inInterrupt) << "' event count changed from " << mEventCounts.at(inInterrupt) << " to " << inCount);
 	mEventCounts.at(inInterrupt) = inCount;
 	return true;
 }

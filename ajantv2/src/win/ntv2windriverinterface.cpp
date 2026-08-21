@@ -434,7 +434,7 @@ bool CNTV2WinDriverInterface::ConfigureInterrupt (const bool bEnable, const INTE
 bool CNTV2WinDriverInterface::WinConfigureSubscription (const bool bSubscribe, const INTERRUPT_ENUMS eInterruptType)
 {
 	NTV2_ASSERT(IsOpen()  &&  "Device not open");
-	NTV2_ASSERT(IsRemote()  && "Not local/physical device");
+	NTV2_ASSERT(!IsRemote()  &&  "Not local/physical device");
 	NTV2_ASSERT(NTV2_IS_VALID_INTERRUPT_ENUM(eInterruptType)  &&  "Invalid interruptType");
 
 	HANDLE hSubscription = HANDLE(mInterruptEventHandles.at(eInterruptType));
@@ -546,7 +546,7 @@ bool CNTV2WinDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS type, cons
 {
 	if (!IsOpen())
 		{WDIWARN("Cannot wait for '" << NTV2CfgInterrupt::IntName(type) << "' -- device not open");  return false;}
-	if (!NTV2_IS_VALID_INTERRUPT_ENUM(eInterruptType))
+	if (!NTV2_IS_VALID_INTERRUPT_ENUM(type))
 		{WDIWARN("Cannot wait for '" << NTV2CfgInterrupt::IntName(type) << "' -- bad interrupt id");  return false;}
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
