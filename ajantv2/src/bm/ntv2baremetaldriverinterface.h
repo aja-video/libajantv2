@@ -63,8 +63,6 @@ class CNTV2BareMetalDriverInterface : public CNTV2DriverInterface
 										const ULWord				inSegmentCardPitch,
 										const PCHANNEL_P2P_STRUCT & inP2PData);
 
-	AJA_VIRTUAL bool ConfigureSubscription (const bool bSubscribe, const INTERRUPT_ENUMS eInterruptType, PULWord & hSubcription)
-											{(void)bSubscribe; (void)eInterruptType; (void)hSubcription; return true;}
 	AJA_VIRTUAL bool ConfigureInterrupt (const bool bEnable, const INTERRUPT_ENUMS eInterruptType);
 	AJA_VIRTUAL bool GetInterruptCount (const INTERRUPT_ENUMS eInterrupt, ULWord & outCount);
 	AJA_VIRTUAL bool WaitForInterrupt (INTERRUPT_ENUMS eInterrupt, ULWord timeOutMs = 68);	// default of 68 ms timeout is enough time for 2K at 14.98 HZ

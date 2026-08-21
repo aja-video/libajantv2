@@ -319,8 +319,8 @@ class AJAExport CNTV2DriverInterface
 		@name	Interrupts
 	**/
 	///@{
-		AJA_VIRTUAL bool	ConfigureSubscription (const bool bSubscribe, const INTERRUPT_ENUMS inInterruptType, PULWord & outSubcriptionHdl);
 		AJA_VIRTUAL bool	ConfigureInterrupt (const bool bEnable,  const INTERRUPT_ENUMS eInterruptType);
+
 		/**
 			@brief	Answers with the number of interrupts of the given type processed by the driver.
 			@param[in]	eInterrupt	The interrupt type of interest.
@@ -329,9 +329,15 @@ class AJAExport CNTV2DriverInterface
 		**/
 		AJA_VIRTUAL bool	GetInterruptCount (const INTERRUPT_ENUMS eInterrupt,  ULWord & outCount);
 
+		/**
+			@brief	Efficiently waits for the next given interrupt to be signaled on the device.
+			@param[in]	eInterrupt	The interrupt of interest.
+			@param[in]	timeOutMs	Optionally specifies the maximum time to wait for the interrupt. Defaults to 68 milliseconds.
+			@return	True if successful;  otherwise false.
+			@note	Superclass implementations must call this function for remote devices (when built with NTV2_NUB_CLIENT_SUPPORT).
+		**/
 		AJA_VIRTUAL bool	WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt, const ULWord timeOutMs = 68);
 
-		AJA_VIRTUAL HANDLE	GetInterruptEvent (const INTERRUPT_ENUMS eInterruptType);
 		/**
 			@brief		Answers with the number of interrupt events that I successfully waited for.
 			@param[in]	inEventCode		Specifies the interrupt of interest.
@@ -349,6 +355,46 @@ class AJAExport CNTV2DriverInterface
 			@see		CNTV2DriverInterface::GetInterruptEventCount, \ref vidop-fldfrmint
 		**/
 		AJA_VIRTUAL bool	SetInterruptEventCount (const INTERRUPT_ENUMS inEventCode, const ULWord inCount);
+
+		/**
+			@brief		Answers with the number of output interrupt events that this device instance successfully waited for on the given channel.
+			@param[out] outCount		Receives the number of output interrupt events that were successfully waited for.
+			@param[in]	inChannel		Specifies the NTV2Channel of interest.
+			@return		True if successful;	 otherwise false.
+			@see		CNTV2Card::SetOutputVerticalEventCount, CNTV2DriverInterface::GetInterruptEventCount, \ref vidop-fldfrmint
+		**/
+		AJA_VIRTUAL inline bool	GetOutputVerticalEventCount (ULWord & outCount, const NTV2Channel inChannel = NTV2_CHANNEL1)
+									{return GetInterruptEventCount(::NTV2ChannelToOutputInterrupt(inChannel), outCount);}
+
+		/**
+			@brief		Answers with the number of input interrupt events that this device instance successfully waited for on the given channel.
+			@param[out] outCount		Receives the number of input interrupt events that were successfully waited for.
+			@param[in]	inChannel		Specifies the NTV2Channel of interest.
+			@return		True if successful;	 otherwise false.
+			@see		CNTV2Card::SetInputVerticalEventCount, CNTV2Card::GetInterruptEventCount, \ref vidop-fldfrmint
+		**/
+		AJA_VIRTUAL inline bool	GetInputVerticalEventCount (ULWord & outCount, const NTV2Channel inChannel = NTV2_CHANNEL1)
+									{return GetInterruptEventCount(::NTV2ChannelToInputInterrupt(inChannel), outCount);}
+
+		/**
+			@brief		Resets the output interrupt event tally for this device instance for the given channel.
+			@param[in]	inCount			Specifies the new count value. Use zero to reset the tally.
+			@param[in]	inChannel		Specifies the output FrameStore/channel.
+			@return		True if successful;	 otherwise false.
+			@see		CNTV2Card::GetOutputVerticalEventCount, CNTV2Card::SetInterruptEventCount, \ref vidop-fldfrmint
+		**/
+		AJA_VIRTUAL inline bool	SetOutputVerticalEventCount (const ULWord inCount, const NTV2Channel inChannel = NTV2_CHANNEL1)
+									{return SetInterruptEventCount(::NTV2ChannelToOutputInterrupt(inChannel), inCount);}
+
+		/**
+			@brief		Resets the input interrupt event tally for this device instance for the given channel.
+			@param[in]	inCount			Specifies the new count value. Use zero to reset the tally.
+			@param[in]	inChannel		Specifies the input FrameStore/channel.
+			@return		True if successful;	 otherwise false.
+			@see		CNTV2Card::GetInputVerticalEventCount, CNTV2Card::SetInterruptEventCount, \ref vidop-fldfrmint
+		**/
+		AJA_VIRTUAL inline bool	SetInputVerticalEventCount (const ULWord inCount, const NTV2Channel inChannel = NTV2_CHANNEL1)
+									{return SetInterruptEventCount(::NTV2ChannelToInputInterrupt(inChannel), inCount);}
 	///@}
 
 	/**
@@ -706,7 +752,6 @@ class AJAExport CNTV2DriverInterface
 	//	PRIVATE TYPES
 	protected:
 		typedef std::vector<ULWord>		_EventCounts;
-		typedef std::vector<PULWord>	_EventHandles;
 
 
 	//	MEMBER DATA
@@ -721,7 +766,6 @@ class AJAExport CNTV2DriverInterface
 #endif	//	NTV2_WRITEREG_PROFILING
 		ULWord				_programStatus;
 		NTV2RPCAPI *		_pRPCAPI;				///< @brief	Points to remote or software device interface; otherwise NULL for local physical device.
-		_EventHandles		mInterruptEventHandles;	///< @brief	For subscribing to each possible event, one for each interrupt type
 		_EventCounts		mEventCounts;			///< @brief	My event tallies, one for each interrupt type. Note that these
 #if defined(NTV2_WRITEREG_PROFILING)
 		NTV2RegisterWrites	mRegWrites;				///< @brief	Stores WriteRegister data

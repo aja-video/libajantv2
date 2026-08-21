@@ -68,7 +68,6 @@ class AJAExport CNTV2WinDriverInterface : public CNTV2DriverInterface
 										const PCHANNEL_P2P_STRUCT &	inP2PData);
 
 		AJA_VIRTUAL bool	ConfigureInterrupt (const bool bEnable, const INTERRUPT_ENUMS eInterruptType);
-		AJA_VIRTUAL bool	ConfigureSubscription (const bool bSubscribe, const INTERRUPT_ENUMS eInterruptType, PULWord & hSubcription);
 		AJA_VIRTUAL bool	GetInterruptCount (const INTERRUPT_ENUMS eInterrupt, ULWord & outCount);
 		AJA_VIRTUAL bool	WaitForInterrupt (const INTERRUPT_ENUMS eInterruptType, const ULWord timeOutMs = 50);
 
@@ -105,12 +104,16 @@ class AJAExport CNTV2WinDriverInterface : public CNTV2DriverInterface
 		AJA_VIRTUAL inline bool	NTV2_DEPRECATED_17_6(HevcSendMessage(HevcMessageHeader* pMsg))	{(void)pMsg; return false;}	///< @deprecated	Corvid HEVC support dropped in SDK 17.6
 #endif//!defined(NTV2_DEPRECATE_17_6)
 
-#if !defined(NTV2_NULL_DEVICE)
 	//	PRIVATE INSTANCE METHODS
 	protected:
+#if !defined(NTV2_NULL_DEVICE)
 		AJA_VIRTUAL bool	OpenLocalPhysical (const UWord inDeviceIndex);
 		AJA_VIRTUAL bool	CloseLocalPhysical (void);
 #endif	//	!defined(NTV2_NULL_DEVICE)
+		AJA_VIRTUAL bool	WinConfigureSubscription (const bool bSubscribe, const INTERRUPT_ENUMS eInterruptType);
+		AJA_VIRTUAL HANDLE	GetEventHandleForInterrupt (const INTERRUPT_ENUMS eInterruptType);
+		#define GetInterruptEvent(__x__)	GetEventHandleForInterrupt(__x__)
+		typedef std::vector<PULWord>	_EventHandles;
 
 	//	MEMBER DATA
 	protected:
@@ -121,6 +124,7 @@ class AJAExport CNTV2WinDriverInterface : public CNTV2DriverInterface
 		GUID			_GUID_PROPSET;
 		ULWord			_previousAudioState;
 		ULWord			_previousAudioSelection;
+		_EventHandles	mInterruptEventHandles;		//	Per-interrupt subscribed event handles
 #if !defined(NTV2_DEPRECATE_16_0)
 		typedef std::vector<ULWord *>	DMA_LOCKED_VEC;
 		DMA_LOCKED_VEC	_vecDmaLocked;	// OEM save locked memory addresses in vector

@@ -14,16 +14,15 @@ static const INTERRUPT_ENUMS	gChannelToOutputInterrupt [] =	{eOutput1,	eOutput2,
 
 bool CNTV2Card::GetCurrentInterruptMasks (NTV2InterruptMask & outIntMask1, NTV2Interrupt2Mask & outIntMask2)
 {
-	return CNTV2DriverInterface::ReadRegister(kRegVidIntControl, outIntMask1)  &&  CNTV2DriverInterface::ReadRegister(kRegVidIntControl2, outIntMask2);
+	return driverInterface().ReadRegister(kRegVidIntControl, outIntMask1)  &&  driverInterface().ReadRegister(kRegVidIntControl2, outIntMask2);
 }
-
 
 bool CNTV2Card::EnableInterrupt (const INTERRUPT_ENUMS id)
 {
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
 	{	NTV2ConfigureInterrupt msg;
-		return _pRPCAPI->NTV2MessageRemote(msg.doEnable(id));
+		return _pRPCAPI->NTV2MessageRemote(msg.doEnable(id))  &&  msg.isSuccess();
 	}
 #endif// defined(NTV2_NUB_CLIENT_SUPPORT)
 	return ConfigureInterrupt (true, id);
@@ -55,7 +54,7 @@ bool CNTV2Card::DisableInterrupt (const INTERRUPT_ENUMS id)
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
 	{	NTV2ConfigureInterrupt msg;
-		return _pRPCAPI->NTV2MessageRemote(msg.doDisable(id));
+		return _pRPCAPI->NTV2MessageRemote(msg.doDisable(id))  &&  msg.isSuccess();
 	}
 #endif// defined(NTV2_NUB_CLIENT_SUPPORT)
 	return ConfigureInterrupt (false, id);

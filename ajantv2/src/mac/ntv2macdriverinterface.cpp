@@ -749,8 +749,14 @@ static const uint32_t sIntEnumToStatKeys[] = {	AJA_DebugStat_WaitForInterruptOut
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS type, const ULWord timeout)
 {
+	if (!IsOpen())
+		{DIWARN("Cannot wait for '" << NTV2CfgInterrupt::IntName(type) << "' -- device not open");  return false;}
+	if (!NTV2_IS_VALID_INTERRUPT_ENUM(type))
+		{DIWARN("Cannot wait for '" << NTV2CfgInterrupt::IntName(type) << "' -- bad interrupt id");  return false;}
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
 		return CNTV2DriverInterface::WaitForInterrupt(type, timeout);
+#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (type == eChangeEvent)
 		return WaitForChangeEvent(timeout);
 
@@ -774,9 +780,11 @@ bool CNTV2MacDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS type, cons
 	}
 	UInt32 interruptOccurred = uint32_t(scalarO_64);
 	if (kernResult != KERN_SUCCESS)
-		{DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));  return false;}
+		{DIFAIL(KR(kernResult) << ": con=" << HEX8(GetIOConnect()) << " for '" << NTV2CfgInterrupt::IntName(type) << "'");  return false;}
 	if (interruptOccurred)
-		BumpEventCount(type);
+	{	BumpEventCount(type);
+		DIDBG("Interrupt '" << NTV2CfgInterrupt::IntName(type) << "' triggered, count=" << mEventCounts.at(type));
+	}
 	return interruptOccurred;
 }
 
@@ -787,6 +795,15 @@ bool CNTV2MacDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS type, cons
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterrupt, ULWord & outCount)
 {
+	if (!IsOpen())
+		{DIFAIL("Failed for '" << NTV2CfgInterrupt::IntName(eInterrupt) << "': device not open");  return false;}
+	if (!NTV2_IS_VALID_INTERRUPT_ENUM(eInterrupt))
+		{DIFAIL("Failed for '" << NTV2CfgInterrupt::IntName(eInterrupt) << "': bad interrupt ID");  return false;}
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+		return CNTV2DriverInterface::GetInterruptCount(eInterrupt, outCount);
+#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
+
 	kern_return_t	kernResult	= KERN_FAILURE;
 	uint64_t	scalarI_64[1]	= {eInterrupt};
 	uint64_t	scalarO_64		= 0;

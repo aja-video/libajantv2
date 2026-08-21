@@ -2709,9 +2709,8 @@ public:
 	AJA_VIRTUAL bool	EnableInputInterrupt (const NTV2ChannelSet & inFrameStores);
 
 
-	//
 	//	Disable Interrupt/Event
-	//
+
 	AJA_VIRTUAL bool	DisableInterrupt (const INTERRUPT_ENUMS inEventCode);						//	GENERIC!
 
 	/**
@@ -2738,12 +2737,11 @@ public:
 	**/
 	AJA_VIRTUAL bool	DisableInputInterrupt (const NTV2ChannelSet & inFrameStores);
 
-	AJA_VIRTUAL bool	GetCurrentInterruptMasks (NTV2InterruptMask & outIntMask1, NTV2Interrupt2Mask & outIntMask2);
+	AJA_VIRTUAL bool	GetCurrentInterruptMasks (NTV2InterruptMask & mask1, NTV2Interrupt2Mask & mask2);
 
 
-	//
 	//	Subscribe to events
-	//
+
 	/**
 		@brief		Causes me to be notified when the given event/interrupt is triggered for the AJA device.
 		@param[in]	inEventCode		Specifies the INTERRUPT_ENUMS of interest.
@@ -2755,14 +2753,15 @@ public:
 
 	/**
 		@brief		Causes me to be notified when an output vertical blanking interrupt is generated for the given output channel.
-		@param[in]	inChannel	Specifies the output channel of interest.
+		@param[in]	inChannel	Specifies the output channel of interest.  Defaults to ::NTV2_CHANNEL1.
 		@return		True if successful; otherwise false, which can indicate communication with the device has been lost,
 					or on the Windows platform, there are no more event subscription handles available.
 		@note		<b>Windows Users:</b> AJA recommends calling this function on the same thread that will call
 					CNTV2Card::WaitForOutputVerticalInterrupt or CNTV2Card::WaitForOutputFieldID.
 		@see		CNTV2Card::UnsubscribeOutputVerticalEvent, CNTV2Card::SubscribeEvent, \ref vidop-fldfrmint
 	**/
-	AJA_VIRTUAL bool	SubscribeOutputVerticalEvent (const NTV2Channel inChannel);
+	AJA_VIRTUAL inline bool	SubscribeOutputVerticalEvent (const NTV2Channel inChannel = NTV2_CHANNEL1)	{return SubscribeEvent(::NTV2ChannelToOutputInterrupt(inChannel));}
+
 
 	/**
 		@brief		Causes me to be notified when an output vertical blanking interrupt is generated for the given output channel(s).
@@ -2785,7 +2784,8 @@ public:
 					CNTV2Card::WaitForInputVerticalInterrupt or CNTV2Card::WaitForInputFieldID.
 		@see		CNTV2Card::UnsubscribeInputVerticalEvent, CNTV2Card::SubscribeEvent, \ref vidop-fldfrmint
 	**/
-	AJA_VIRTUAL bool	SubscribeInputVerticalEvent (const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL inline bool	SubscribeInputVerticalEvent (const NTV2Channel inChannel = NTV2_CHANNEL1)	{return SubscribeEvent(::NTV2ChannelToInputInterrupt(inChannel));}
+
 
 	/**
 		@brief		Causes me to be notified when an input vertical blanking interrupt occurs on the given input channel(s).
@@ -2799,9 +2799,8 @@ public:
 	AJA_VIRTUAL bool	SubscribeInputVerticalEvent (const NTV2ChannelSet & inChannels);
 
 
-	//
 	//	Unsubscribe from events
-	//
+
 	/**
 		@brief		Unregisters me so I'm no longer notified when the given event/interrupt is triggered on the AJA device.
 		@param[in]	inEventCode		Specifies the INTERRUPT_ENUMS of interest.
@@ -2817,7 +2816,7 @@ public:
 		@details	This function undoes the effect of a prior call to SubscribeOutputVerticalEvent.
 		@see		CNTV2Card::SubscribeOutputVerticalEvent, CNTV2Card::UnsubscribeEvent, \ref vidop-fldfrmint
 	**/
-	AJA_VIRTUAL bool	UnsubscribeOutputVerticalEvent (const NTV2Channel inChannel);
+	AJA_VIRTUAL inline bool	UnsubscribeOutputVerticalEvent (const NTV2Channel inChannel)	{return UnsubscribeEvent(::NTV2ChannelToOutputInterrupt(inChannel));}
 
 	/**
 		@brief		Unregisters me so I'm no longer notified when an output VBI is signaled on the given output channel(s).
@@ -2835,7 +2834,7 @@ public:
 		@details	This function undoes the effects of a prior call to SubscribeInputVerticalEvent.
 		@see		CNTV2Card::SubscribeInputVerticalEvent, CNTV2Card::UnsubscribeEvent, \ref vidop-fldfrmint
 	**/
-	AJA_VIRTUAL bool	UnsubscribeInputVerticalEvent (const NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL inline bool	UnsubscribeInputVerticalEvent (const NTV2Channel inChannel = NTV2_CHANNEL1)	{return UnsubscribeEvent(::NTV2ChannelToInputInterrupt(inChannel));}
 
 	/**
 		@brief		Unregisters me so I'm no longer notified when an input VBI is signaled on the given input channel(s).
@@ -2847,9 +2846,8 @@ public:
 	AJA_VIRTUAL bool	UnsubscribeInputVerticalEvent (const NTV2ChannelSet & inChannels);
 
 
-	//
 	//	Get interrupt counts
-	//
+
 	/**
 		@brief		Answers with the number of output vertical interrupts handled by the driver for the given output channel.
 		@param[out] outCount	Receives the number of output VBIs handled by the driver since it was loaded.
@@ -2868,45 +2866,8 @@ public:
 	**/
 	AJA_VIRTUAL bool	GetInputVerticalInterruptCount (ULWord & outCount, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
-	/**
-		@brief		Answers with the number of output interrupt events that I successfully waited for on the given channel.
-		@param[out] outCount		Receives the number of output interrupt events that were successfully waited for.
-		@param[in]	inChannel		Specifies the NTV2Channel of interest.
-		@return		True if successful;	 otherwise false.
-		@see		CNTV2Card::SetOutputVerticalEventCount, CNTV2DriverInterface::GetInterruptEventCount, \ref vidop-fldfrmint
-	**/
-	AJA_VIRTUAL bool	GetOutputVerticalEventCount (ULWord & outCount, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
-	/**
-		@brief		Answers with the number of input interrupt events that I successfully waited for on the given channel.
-		@param[out] outCount		Receives the number of input interrupt events that were successfully waited for.
-		@param[in]	inChannel		Specifies the NTV2Channel of interest.
-		@return		True if successful;	 otherwise false.
-		@see		CNTV2Card::SetInputVerticalEventCount, CNTV2Card::GetInterruptEventCount, \ref vidop-fldfrmint
-	**/
-	AJA_VIRTUAL bool	GetInputVerticalEventCount (ULWord & outCount, const NTV2Channel inChannel = NTV2_CHANNEL1);
-
-	/**
-		@brief		Resets my output interrupt event tally for the given channel.
-		@param[in]	inCount			Specifies the new count value. Use zero to reset the tally.
-		@param[in]	inChannel		Specifies the [output] channel.
-		@return		True if successful;	 otherwise false.
-		@see		CNTV2Card::GetOutputVerticalEventCount, CNTV2Card::SetInterruptEventCount, \ref vidop-fldfrmint
-	**/
-	AJA_VIRTUAL bool	SetOutputVerticalEventCount (const ULWord inCount, const NTV2Channel inChannel = NTV2_CHANNEL1);
-
-	/**
-		@brief		Resets my input interrupt event tally for the given channel.
-		@param[in]	inCount			Specifies the new count value. Use zero to reset the tally.
-		@param[in]	inChannel		Specifies the [input] channel.
-		@return		True if successful;	 otherwise false.
-		@see		CNTV2Card::GetInputVerticalEventCount, CNTV2Card::SetInterruptEventCount, \ref vidop-fldfrmint
-	**/
-	AJA_VIRTUAL bool	SetInputVerticalEventCount (const ULWord inCount, const NTV2Channel inChannel = NTV2_CHANNEL1);
-
-	//
 	//	Current field ID
-	//
 
 	/**
 		@brief		Returns the current field ID of the specified output channel.
@@ -2924,9 +2885,9 @@ public:
 	**/
 	AJA_VIRTUAL bool	GetInputFieldID (const NTV2Channel inChannel, NTV2FieldID & outFieldID);
 
-	//
+
 	//	Wait for event
-	//
+
 	/**
 		@brief		Efficiently sleeps the calling thread/process until the next one or more field (interlaced video)
 					or frame (progressive or interlaced video) VBIs occur for the specified output channel.
@@ -3015,9 +2976,9 @@ public:
 	**/
 	AJA_VIRTUAL bool	WaitForInputFieldID (const NTV2FieldID inFieldID, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
-	//
+
 	//	RegisterAccess Control
-	//
+
 	/**
 		@brief		Sets the FrameStore's ::NTV2RegisterWriteMode, which determines when CNTV2Card::SetInputFrame or
 					CNTV2Card::SetOutputFrame calls (and others) actually take effect.

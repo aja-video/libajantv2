@@ -3823,7 +3823,8 @@ ostream & NTV2BankSelGetSetRegs::Print (ostream & oss) const
 
 string NTV2ConfigInterrupt::OpName (const ULWord op)
 {
-	static NTV2StringList sOpStrs = {"(invalid)", "Subscribe", "Unsubscribe", "Enable", "Disable", "GetLocalHandles", "GetAllHandles", "GetLocalSubscribed", "GetEnabled"};
+	static NTV2StringList sOpStrs = {"(invalid)", /*1*/"Subscribe", /*2*/"Unsubscribe", /*3*/"Enable", /*4*/"Disable",
+									/*5*/"GetSubscribed", /*6*/"GetEnabledIDs", /*7*/"GetIntCount", /*8*/"SetIntCount"};
 	return op < sOpStrs.size() ? sOpStrs.at(op) : aja::to_string(op);
 }
 
@@ -3854,8 +3855,8 @@ NTV2ConfigInterrupt::NTV2ConfigureInterrupt ()
 		mResult			(0),
 		mInterruptIDs	(0),
 		mEventHandle	(0),
-		mNumHandles		(0),
-		mOutHandles		(nullptr,0)
+		mCount			(0),
+		mHandles		(nullptr,0)
 {
 	::memset(mSpares, 0, sizeof(mSpares));
 	NTV2_ASSERT_STRUCT_VALID;
@@ -3873,10 +3874,10 @@ ostream & NTV2ConfigureInterrupt::Print (ostream & oss) const
 		oss << " res=" << DEC(mResult);
 		if (interruptIDs())
 			oss	<< " ids=" << aja::join(IntNames(interruptIDs()),",");
-		if (numHandles())
-			oss << " num=" << DEC(numHandles());
-		if (mOutHandles)
-			oss << mOutHandles;
+		if (count())
+			oss << " num=" << DEC(count());
+		if (mHandles)
+			oss << " +" << maxHandleCapacity() << " hdls (max)";
 	}
 	oss << mTrailer;
 	return oss;
@@ -3926,13 +3927,32 @@ using namespace ntv2nub;
 
 	/*********************************************************************************************************************
 		RPC ENCODE/DECODE FUNCTIONS
+		Each class/struct type that can be marshalled to go over-the-wire must have an RPCEncode and RPCDecode member function.
+		For convenience, these Encode/Decode implementations have been consolidated together in this section.
+
+		RPCEncode FUNCTION	--	Calls PUSHU8, PUSHU16, PUSHU32, or PUSHU64 to add 8/16/32/64-bit data members to the RPCBlob.
+
+			bool class::RPCEncode (RPCBlob & outBlob)
+				Pushes each data member of the class or struct byte-by-byte onto the end of the provided byte sequence.
+				outBlob     A non-const reference to the byte sequence to be appended onto.
+				Returns true if successful; otherwise false.
+
+		RPCDecode FUNCTION	--	Calls POPU8, POPU16, POPU32, or POPU64 to pull 8/16/32/64-bit data members out of the RPCBlob.
+
+			bool class::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
+				Pops each data member of the class or struct byte-by-byte from the provided byte sequence.
+				inBlob		The source byte sequence.
+				inOutIndex	A non-const reference to the zero-based byte index (offset) into the byte sequence.
+							At entry:  points to the first byte of the next field to be popped from the sequence.
+							At exit:  points to the byte that immediately follows the last field popped from the sequence.
+				Returns true if successful; otherwise false.
 	*********************************************************************************************************************/
 	#define AsU8Ref(_x_)	reinterpret_cast<uint8_t&>(_x_)
 	#define AsU16Ref(_x_)	reinterpret_cast<uint16_t&>(_x_)
 	#define AsU32Ref(_x_)	reinterpret_cast<uint32_t&>(_x_)
 	#define AsU64Ref(_x_)	reinterpret_cast<uint64_t&>(_x_)
 
-	bool NTV2_HEADER::RPCEncode (UByteSequence & outBlob)
+	bool NTV2_HEADER::RPCEncode (RPCBlob & outBlob)
 	{
 		PUSHU32(fHeaderTag, outBlob);							//	ULWord		fHeaderTag
 		PUSHU32(fType, outBlob);								//	ULWord		fType
@@ -3945,7 +3965,7 @@ using namespace ntv2nub;
 		return true;
 	}
 
-	bool NTV2_HEADER::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool NTV2_HEADER::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{	uint32_t v32(0);
 		POPU32(fHeaderTag, inBlob, inOutIndex);					//	ULWord		fHeaderTag
 		POPU32(fType, inBlob, inOutIndex);						//	ULWord		fType
@@ -3959,14 +3979,14 @@ using namespace ntv2nub;
 		return true;
 	}
 
-	bool NTV2_TRAILER::RPCEncode (UByteSequence & outBlob)
+	bool NTV2_TRAILER::RPCEncode (RPCBlob & outBlob)
 	{
 		PUSHU32(fTrailerVersion, outBlob);						//	ULWord		fTrailerVersion
 		PUSHU32(fTrailerTag, outBlob);							//	ULWord		fTrailerTag
 		return true;
 	}
 
-	bool NTV2_TRAILER::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool NTV2_TRAILER::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{
 		POPU32(fTrailerVersion, inBlob, inOutIndex);			//	ULWord		fTrailerVersion
 		POPU32(fTrailerTag, inBlob, inOutIndex);				//	ULWord		fTrailerTag
@@ -3974,7 +3994,7 @@ using namespace ntv2nub;
 	}
 
 
-	bool NTV2Buffer::RPCEncode (UByteSequence & outBlob, bool fillBuffer)
+	bool NTV2Buffer::RPCEncode (RPCBlob & outBlob, bool fillBuffer)
 	{
 		PUSHU32(fByteCount, outBlob);							//	ULWord		fByteCount
 		PUSHU32(fFlags, outBlob);								//	ULWord		fFlags
@@ -3983,7 +4003,7 @@ using namespace ntv2nub;
 		return true;
 	}
 
-	bool NTV2Buffer::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex, bool fillBuffer)
+	bool NTV2Buffer::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex, bool fillBuffer)
 	{
 		ULWord byteCount(0), flags(0);
 		POPU32(byteCount, inBlob, inOutIndex);					//	ULWord		fByteCount
@@ -4001,7 +4021,7 @@ using namespace ntv2nub;
 	}
 
 	// Created for DMATransfer, removed Allocate().
-	bool NTV2Buffer::RPCDecodeNoAllocate (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool NTV2Buffer::RPCDecodeNoAllocate (const RPCBlob & inBlob, size_t & inOutIndex)
 	{
 		ULWord byteCount(0), flags(0);
 		POPU32(byteCount, inBlob, inOutIndex);					//	ULWord		fByteCount
@@ -4014,7 +4034,7 @@ using namespace ntv2nub;
 		return true;
 	}
 
-	bool NTV2GetRegisters::RPCEncodeClient (UByteSequence & outBlob)
+	bool NTV2GetRegisters::RPCEncodeClient (RPCBlob & outBlob)
 	{
 		const size_t totBytes	(mHeader.GetSizeInBytes()	//	Header + natural size of all structs/fields inbetween + Trailer
 								+ mInRegisters.GetByteCount() + mOutGoodRegisters.GetByteCount() + mOutValues.GetByteCount());	//	NTV2Buffer fields
@@ -4038,7 +4058,7 @@ using namespace ntv2nub;
 		return ok;
 	}
 
-	bool NTV2GetRegisters::RPCDecodeServer (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool NTV2GetRegisters::RPCDecodeServer (const RPCBlob & inBlob, size_t & inOutIndex)
 	{
 		bool ok = mHeader.RPCDecode(inBlob, inOutIndex);								//	NTV2_HEADER		mHeader
 		if (!ok) return false;
@@ -4055,7 +4075,7 @@ using namespace ntv2nub;
 		return ok;
 	}
 
-	bool NTV2GetRegisters::RPCEncodeServer (UByteSequence & outBlob)
+	bool NTV2GetRegisters::RPCEncodeServer (RPCBlob & outBlob)
 	{
 		const size_t totBytes	(mHeader.GetSizeInBytes()	//	Header + natural size of all structs/fields inbetween + Trailer
 								+ mInRegisters.GetByteCount() + mOutGoodRegisters.GetByteCount() + mOutValues.GetByteCount());	//	NTV2Buffer fields
@@ -4081,7 +4101,7 @@ using namespace ntv2nub;
 		return ok;
 	}
 
-	bool NTV2GetRegisters::RPCDecodeClient (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool NTV2GetRegisters::RPCDecodeClient (const RPCBlob & inBlob, size_t & inOutIndex)
 	{
 		bool ok = mHeader.RPCDecode(inBlob, inOutIndex);							//	NTV2_HEADER		mHeader
 		if (!ok) return false;
@@ -4099,7 +4119,7 @@ using namespace ntv2nub;
 		return ok;
 	}
 
-	bool NTV2SetRegisters::RPCEncode (UByteSequence & outBlob)
+	bool NTV2SetRegisters::RPCEncode (RPCBlob & outBlob)
 	{
 		const size_t totBytes	(mHeader.GetSizeInBytes()	//	Header + natural size of all structs/fields inbetween + Trailer
 								+ mInRegInfos.GetByteCount() + mOutBadRegIndexes.GetByteCount());	//	NTV2Buffer fields
@@ -4124,7 +4144,7 @@ using namespace ntv2nub;
 		return ok;
 	}
 
-	bool NTV2SetRegisters::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool NTV2SetRegisters::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{
 		bool ok = mHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER		mHeader
 		POPU32(mInNumRegisters, inBlob, inOutIndex);			//		ULWord			mInNumRegisters
@@ -4140,7 +4160,7 @@ using namespace ntv2nub;
 		return ok;
 	}
 
-	bool NTV2BankSelGetSetRegs::RPCEncode (UByteSequence & outBlob)
+	bool NTV2BankSelGetSetRegs::RPCEncode (RPCBlob & outBlob)
 	{
 		const size_t totBytes	(mHeader.GetSizeInBytes()	//	Header + natural size of all structs/fields inbetween + Trailer
 								+ mInBankInfos.GetByteCount() + mInRegInfos.GetByteCount());	//	NTV2Buffer fields
@@ -4164,7 +4184,7 @@ using namespace ntv2nub;
 		return ok;
 	}
 
-	bool NTV2BankSelGetSetRegs::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool NTV2BankSelGetSetRegs::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{
 		bool ok = mHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER		mHeader
 		POPU32(mIsWriting, inBlob, inOutIndex);					//		ULWord			mIsWriting
@@ -4179,15 +4199,15 @@ using namespace ntv2nub;
 		return ok;
 	}
 
-	bool NTV2ConfigureInterrupt::RPCEncode (UByteSequence & outBlob)
+	bool NTV2ConfigureInterrupt::RPCEncode (RPCBlob & outBlob)
 	{
 		const size_t totBytes	(mHeader.GetSizeInBytes()	//	Header + natural size of all structs/fields inbetween + Trailer
-								+ mOutHandles.GetByteCount());	//	NTV2Buffer field
+								+ mHandles.GetByteCount());	//	NTV2Buffer field
 		if (outBlob.capacity() < totBytes)
 			outBlob.reserve(totBytes);
 		if (!NTV2HostIsBigEndian)
 		{	//	All of my NTV2Buffers store arrays of ULWord64s that must be BigEndian BEFORE encoding into outBlob...
-			mOutHandles.ByteSwap64();
+			mHandles.ByteSwap64();
 		}
 		bool ok = mHeader.RPCEncode(outBlob);					//	NTV2_HEADER		mHeader
 		PUSHU32(mOperation, outBlob);							//		ULWord			mOperation
@@ -4196,17 +4216,17 @@ using namespace ntv2nub;
 		PUSHU32(mResult, outBlob);								//		ULWord			mResult
 		PUSHU64(mInterruptIDs, outBlob);						//		ULWord64		mInterruptIDs
 		PUSHU64(mEventHandle, outBlob);							//		ULWord64		mEventHandle
-		PUSHU32(mNumHandles, outBlob);							//		ULWord			mNumHandles
-		ok &= mOutHandles.RPCEncode(outBlob);					//		NTV2Buffer		mOutHandles
+		PUSHU32(mCount, outBlob);								//		ULWord			mCount
+		ok &= mHandles.RPCEncode(outBlob);						//		NTV2Buffer		mHandles
 		ok &= mTrailer.RPCEncode(outBlob);						//	NTV2_TRAILER	mTrailer
 		if (!NTV2HostIsBigEndian  &&  !ok)
 		{	//	FAILED:  Un-byteswap NTV2Buffer data...
-			mOutHandles.ByteSwap64();
+			mHandles.ByteSwap64();
 		}
 		return ok;
 	}
 
-	bool NTV2ConfigureInterrupt::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool NTV2ConfigureInterrupt::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{
 		bool ok = mHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER		mHeader
 		POPU32(mOperation, inBlob, inOutIndex);					//		ULWord			mOperation
@@ -4215,17 +4235,17 @@ using namespace ntv2nub;
 		POPU32(mResult, inBlob, inOutIndex);					//		ULWord			mResult
 		POPU64(mInterruptIDs, inBlob, inOutIndex);				//		ULWord64		mInterruptIDs
 		POPU64(mEventHandle, inBlob, inOutIndex);				//		ULWord64		mEventHandle
-		POPU32(mNumHandles, inBlob, inOutIndex);				//		ULWord			mNumHandles
-		ok &= mOutHandles.RPCDecode(inBlob, inOutIndex);		//		NTV2Buffer		mOutHandles
+		POPU32(mCount, inBlob, inOutIndex);						//		ULWord			mCount
+		ok &= mHandles.RPCDecode(inBlob, inOutIndex);			//		NTV2Buffer		mHandles
 		ok &= mTrailer.RPCDecode(inBlob, inOutIndex);			//	NTV2_TRAILER	mTrailer
 		if (!NTV2HostIsBigEndian)
 		{	//	Re-byteswap NTV2Buffer data after decoding...
-			mOutHandles.ByteSwap64();
+			mHandles.ByteSwap64();
 		}
 		return ok;
 	}
 
-	bool AUTOCIRCULATE_STATUS::RPCEncode (UByteSequence & outBlob)
+	bool AUTOCIRCULATE_STATUS::RPCEncode (RPCBlob & outBlob)
 	{
 		const size_t totBytes	(acHeader.GetSizeInBytes());	//	Header + natural size of all structs/fields inbetween + Trailer
 		if (outBlob.capacity() < totBytes)
@@ -4249,7 +4269,7 @@ using namespace ntv2nub;
 		return ok;
 	}
 
-	bool AUTOCIRCULATE_STATUS::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool AUTOCIRCULATE_STATUS::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{	uint16_t v16(0);  uint32_t v32(0);
 		bool ok = acHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER				acHeader
 		POPU16(v16, inBlob, inOutIndex);						//		NTV2Crosspoint			acCrosspoint
@@ -4276,7 +4296,7 @@ using namespace ntv2nub;
 		return ok;
 	}
 
-	bool FRAME_STAMP::RPCEncode (UByteSequence & outBlob)
+	bool FRAME_STAMP::RPCEncode (RPCBlob & outBlob)
 	{
 		const size_t totBytes	(acHeader.GetSizeInBytes());	//	Header + natural size of all structs/fields inbetween + Trailer
 		if (outBlob.capacity() < totBytes)
@@ -4312,7 +4332,7 @@ using namespace ntv2nub;
 		return ok;
 	}
 
-	bool FRAME_STAMP::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool FRAME_STAMP::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{	uint64_t v64(0);
 		bool ok = acHeader.RPCDecode(inBlob, inOutIndex);			//	NTV2_HEADER				acHeader
 		POPU64(v64, inBlob, inOutIndex);							//		LWord64					acFrameTime
@@ -4348,7 +4368,7 @@ using namespace ntv2nub;
 		return ok;
 	}
 
-	bool AUTOCIRCULATE_TRANSFER_STATUS::RPCEncode (UByteSequence & outBlob)
+	bool AUTOCIRCULATE_TRANSFER_STATUS::RPCEncode (RPCBlob & outBlob)
 	{
 		const size_t totBytes (acHeader.GetSizeInBytes());		//	Header + natural size of all structs/fields inbetween + Trailer
 		if (outBlob.capacity() < totBytes)
@@ -4368,7 +4388,7 @@ using namespace ntv2nub;
 		return ok;
 	}
 
-	bool AUTOCIRCULATE_TRANSFER_STATUS::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool AUTOCIRCULATE_TRANSFER_STATUS::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{	uint16_t v16(0);  uint32_t v32(0);
 		bool ok = acHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER				acHeader
 		POPU16(v16, inBlob, inOutIndex);						//		NTV2AutoCirculateState	acState
@@ -4387,7 +4407,7 @@ using namespace ntv2nub;
 		return ok;
 	}
 
-	bool NTV2SegmentedDMAInfo::RPCEncode (UByteSequence & outBlob)
+	bool NTV2SegmentedDMAInfo::RPCEncode (RPCBlob & outBlob)
 	{
 		PUSHU32(acNumSegments, outBlob);						//	ULWord					acNumSegments
 		PUSHU32(acNumActiveBytesPerRow, outBlob);				//	ULWord					acNumActiveBytesPerRow
@@ -4396,7 +4416,7 @@ using namespace ntv2nub;
 		return true;
 	}
 
-	bool NTV2SegmentedDMAInfo::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool NTV2SegmentedDMAInfo::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{
 		POPU32(acNumSegments, inBlob, inOutIndex);				//	ULWord					acNumSegments
 		POPU32(acNumActiveBytesPerRow, inBlob, inOutIndex);		//	ULWord					acNumActiveBytesPerRow
@@ -4405,14 +4425,14 @@ using namespace ntv2nub;
 		return true;
 	}
 
-	bool NTV2ColorCorrectionData::RPCEncode (UByteSequence & outBlob)
+	bool NTV2ColorCorrectionData::RPCEncode (RPCBlob & outBlob)
 	{
 		PUSHU16(ccMode, outBlob);								//	NTV2ColorCorrectionMode	ccMode
 		PUSHU32(ccSaturationValue, outBlob);					//	ULWord					ccSaturationValue
 		return ccLookupTables.RPCEncode(outBlob);				//	NTV2Buffer				ccLookupTables
 	}
 
-	bool NTV2ColorCorrectionData::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool NTV2ColorCorrectionData::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{	uint16_t u16(0);
 		POPU16(u16, inBlob, inOutIndex);						//	NTV2ColorCorrectionMode	ccMode
 		ccMode = NTV2ColorCorrectionMode(u16);
@@ -4420,7 +4440,7 @@ using namespace ntv2nub;
 		return ccLookupTables.RPCDecode(inBlob, inOutIndex);	//	NTV2Buffer				ccLookupTables
 	}
 
-	bool AutoCircVidProcInfo::RPCEncode (UByteSequence & outBlob)
+	bool AutoCircVidProcInfo::RPCEncode (RPCBlob & outBlob)
 	{
 		PUSHU16(mode, outBlob);									//	AutoCircVidProcMode		mode
 		PUSHU16(foregroundVideoCrosspoint, outBlob);			//	NTV2Crosspoint			foregroundVideoCrosspoint
@@ -4432,7 +4452,7 @@ using namespace ntv2nub;
 		return true;
 	}
 
-	bool AutoCircVidProcInfo::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool AutoCircVidProcInfo::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{	uint16_t v16(0);	uint32_t v32(0);
 		POPU16(v16, inBlob, inOutIndex);						//	AutoCircVidProcMode		mode
 		mode = AutoCircVidProcMode(v16);
@@ -4451,7 +4471,7 @@ using namespace ntv2nub;
 		return true;
 	}
 
-	bool NTV2_RP188::RPCEncode (UByteSequence & outBlob)
+	bool NTV2_RP188::RPCEncode (RPCBlob & outBlob)
 	{
 		PUSHU32(fDBB, outBlob);									//	ULWord					fDBB
 		PUSHU32(fLo, outBlob);									//	ULWord					fLo
@@ -4459,7 +4479,7 @@ using namespace ntv2nub;
 		return true;
 	}
 
-	bool NTV2_RP188::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool NTV2_RP188::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{
 		POPU32(fDBB, inBlob, inOutIndex);						//	ULWord					fDBB
 		POPU32(fLo, inBlob, inOutIndex);						//	ULWord					fLo
@@ -4467,7 +4487,7 @@ using namespace ntv2nub;
 		return true;
 	}
 
-	bool AUTOCIRCULATE_TRANSFER::RPCEncode (UByteSequence & outBlob)
+	bool AUTOCIRCULATE_TRANSFER::RPCEncode (RPCBlob & outBlob)
 	{
 		AJADebug::StatTimerStart(AJA_DebugStat_ACXferRPCEncode);
 		const size_t totBytes (acHeader.GetSizeInBytes() + acVideoBuffer.GetByteCount() + acAudioBuffer.GetByteCount()
@@ -4501,7 +4521,7 @@ using namespace ntv2nub;
 		return ok;
 	}
 
-	bool AUTOCIRCULATE_TRANSFER::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool AUTOCIRCULATE_TRANSFER::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{	uint16_t v16(0);  uint32_t v32(0);
 		AJADebug::StatTimerStart(AJA_DebugStat_ACXferRPCDecode);
 		bool ok = acHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER						acHeader
@@ -4535,7 +4555,7 @@ using namespace ntv2nub;
 		return ok;
 	}
 
-	bool AUTOCIRCULATE_TRANSFER_STRUCT::RPCEncode (UByteSequence & outBlob)
+	bool AUTOCIRCULATE_TRANSFER_STRUCT::RPCEncode (RPCBlob & outBlob)
 	{
 		NTV2Buffer buff;
 		PUSHU16(UWord(channelSpec), outBlob);					//	NTV2Crosspoint			channelSpec
@@ -4575,7 +4595,7 @@ using namespace ntv2nub;
 		return true;
 	}
 
-	bool AUTOCIRCULATE_TRANSFER_STRUCT::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool AUTOCIRCULATE_TRANSFER_STRUCT::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{	UWord v16(0);  ULWord v32(0);
 		POPU16(v16, inBlob, inOutIndex);						//	NTV2Crosspoint			channelSpec
 		channelSpec = NTV2Crosspoint(v16);
@@ -4635,7 +4655,7 @@ using namespace ntv2nub;
 		return true;
 	}
 
-	bool NTV2Bitstream::RPCEncode (UByteSequence & outBlob)
+	bool NTV2Bitstream::RPCEncode (RPCBlob & outBlob)
 	{
 		const size_t totBytes (mHeader.GetSizeInBytes());		//	Header + natural size of all structs/fields inbetween + Trailer
 		if (outBlob.capacity() < totBytes)
@@ -4652,7 +4672,7 @@ using namespace ntv2nub;
 		return ok;
 	}
 
-	bool NTV2Bitstream::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool NTV2Bitstream::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{
 		bool ok = mHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER				acHeader
 		ok &= mBuffer.RPCDecode(inBlob, inOutIndex);			//		NTV2Buffer				mBuffer
@@ -4666,7 +4686,7 @@ using namespace ntv2nub;
 		return ok;
 	}
 
-	bool AUTOCIRCULATE_STATUS_STRUCT::RPCEncode (UByteSequence & outBlob)
+	bool AUTOCIRCULATE_STATUS_STRUCT::RPCEncode (RPCBlob & outBlob)
 	{
 		PUSHU16(UWord(channelSpec), outBlob);					//	NTV2Crosspoint			channelSpec
 		PUSHU16(UWord(state), outBlob);							//	NTV2AutoCirculateState	state
@@ -4690,7 +4710,7 @@ using namespace ntv2nub;
 		return true;
 	}
 
-	bool AUTOCIRCULATE_STATUS_STRUCT::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool AUTOCIRCULATE_STATUS_STRUCT::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{	uint16_t v16(0);  uint32_t v32(0);
 		POPU16(v16, inBlob, inOutIndex);						//	NTV2Crosspoint			channelSpec
 		channelSpec = NTV2Crosspoint(v16);
@@ -4719,7 +4739,7 @@ using namespace ntv2nub;
 		return true;
 	}
 
-	bool RP188_STRUCT::RPCEncode (UByteSequence & outBlob)
+	bool RP188_STRUCT::RPCEncode (RPCBlob & outBlob)
 	{
 		PUSHU32(DBB, outBlob);				//	ULWord	DBB
 		PUSHU32(Low, outBlob);				//	ULWord	Low
@@ -4727,7 +4747,7 @@ using namespace ntv2nub;
 		return true;
 	}
 
-	bool RP188_STRUCT::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool RP188_STRUCT::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{
 		POPU32(DBB, inBlob, inOutIndex);	//	ULWord	DBB
 		POPU32(Low, inBlob, inOutIndex);	//	ULWord	Low
@@ -4736,7 +4756,7 @@ using namespace ntv2nub;
 	}
 
 
-	bool AUTOCIRCULATE_TASK_STRUCT::RPCEncode (UByteSequence & outBlob)
+	bool AUTOCIRCULATE_TASK_STRUCT::RPCEncode (RPCBlob & outBlob)
 	{
 		PUSHU32(taskVersion, outBlob);				//	ULWord	taskVersion
 		PUSHU32(taskSize, outBlob);					//	ULWord	taskSize
@@ -4760,7 +4780,7 @@ using namespace ntv2nub;
 		return true;
 	}
 
-	bool AUTOCIRCULATE_TASK_STRUCT::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool AUTOCIRCULATE_TASK_STRUCT::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{	ULWord u32(0);  ULWord64 u64(0);
 		POPU32(taskVersion, inBlob, inOutIndex);	//	ULWord	taskVersion
 		POPU32(taskSize, inBlob, inOutIndex);		//	ULWord	taskSize
@@ -4786,7 +4806,7 @@ using namespace ntv2nub;
 		return true;
 	}
 
-	bool FRAME_STAMP_STRUCT::RPCEncode (UByteSequence & outBlob)
+	bool FRAME_STAMP_STRUCT::RPCEncode (RPCBlob & outBlob)
 	{
 		PUSHU16(UWord(channelSpec), outBlob);					//	NTV2Crosspoint		channelSpec
 		PUSHU64(ULWord64(frameTime), outBlob);					//	LWord64				frameTime
@@ -4813,7 +4833,7 @@ using namespace ntv2nub;
 		return true;
 	}
 
-	bool FRAME_STAMP_STRUCT::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool FRAME_STAMP_STRUCT::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{	uint16_t v16(0);  uint64_t v64(0);
 		POPU16(v16, inBlob, inOutIndex);						//	NTV2Crosspoint		channelSpec
 		channelSpec = NTV2Crosspoint(v16);
@@ -4844,7 +4864,7 @@ using namespace ntv2nub;
 		return true;
 	}
 
-	bool AUTOCIRCULATE_DATA::RPCEncode (UByteSequence & outBlob)
+	bool AUTOCIRCULATE_DATA::RPCEncode (RPCBlob & outBlob)
 	{
 		PUSHU16(UWord(eCommand), outBlob);						//	AUTO_CIRC_COMMAND		eCommand
 		PUSHU16(UWord(channelSpec), outBlob);					//	NTV2Crosspoint			channelSpec
@@ -4877,7 +4897,7 @@ using namespace ntv2nub;
 		return true;
 	}
 
-	bool AUTOCIRCULATE_DATA::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	bool AUTOCIRCULATE_DATA::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{
 #if defined(AJA_LINUX)
 		#pragma GCC diagnostic push

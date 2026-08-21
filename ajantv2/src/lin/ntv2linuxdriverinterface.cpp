@@ -239,8 +239,14 @@ bool CNTV2LinuxDriverInterface::ConfigureInterrupt (const bool bEnable, const IN
 // Output: ULWord or equivalent(i.e. ULWord).
 bool CNTV2LinuxDriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterruptType, ULWord & outCount)
 {
+	if (!IsOpen())
+		{LDIFAIL("Failed for '" << NTV2CfgInterrupt::IntName(eInterruptType) << "': device not open");  return false;}
+	if (!NTV2_IS_VALID_INTERRUPT_ENUM(eInterruptType))
+		{LDIFAIL("Failed for '" << NTV2CfgInterrupt::IntName(eInterruptType) << "': bad interrupt ID");  return false;}
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
-		return false;
+		return CNTV2DriverInterface::GetInterruptCount(eInterruptType, outCount);
+#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
 	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 	if (   eInterruptType != eVerticalInterrupt
 		&& eInterruptType != eInput1
@@ -301,24 +307,29 @@ static const uint32_t sIntEnumToStatKeys[] = {	AJA_DebugStat_WaitForInterruptOut
 
 // Method: WaitForInterrupt
 // Output: True on successs, false on failure (ioctl failed or interrupt didn't happen)
-bool CNTV2LinuxDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt, const ULWord timeOutMs)
+bool CNTV2LinuxDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS type, const ULWord timeOutMs)
 {
+	if (!IsOpen())
+		{LDIWARN("Cannot wait for '" << NTV2CfgInterrupt::IntName(type) << "' -- device not open");  return false;}
+	if (!NTV2_IS_VALID_INTERRUPT_ENUM(type))
+		{LDIWARN("Cannot wait for '" << NTV2CfgInterrupt::IntName(type) << "' -- bad interrupt id");  return false;}
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
-		return CNTV2DriverInterface::WaitForInterrupt(eInterrupt, timeOutMs);
-
+		return CNTV2DriverInterface::WaitForInterrupt(type, timeOutMs);
+#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
 	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
 	NTV2_WAITFOR_INTERRUPT_STRUCT waitIntrStruct;
-	waitIntrStruct.eInterruptType = eInterrupt;
+	waitIntrStruct.eInterruptType = type;
 	waitIntrStruct.timeOutMs = timeOutMs;
 	waitIntrStruct.success = 0; // Assume failure
-
-	AJADebug::StatTimerStart(sIntEnumToStatKeys[eInterrupt]);
+	AJADebug::StatTimerStart(sIntEnumToStatKeys[type]);
 	const int result (ioctl(int(_hDevice), IOCTL_NTV2_WAITFOR_INTERRUPT, &waitIntrStruct));
-	AJADebug::StatTimerStop(sIntEnumToStatKeys[eInterrupt]);
+	AJADebug::StatTimerStop(sIntEnumToStatKeys[type]);
 	if (result)
-		{LDIFAIL("IOCTL_NTV2_WAITFOR_INTERRUPT failed");	return false;}
-	BumpEventCount (eInterrupt);
+		{LDIFAIL("Interrupt '" << NTV2CfgInterrupt::IntName(type) << "' failed: 'IOCTL_NTV2_WAITFOR_INTERRUPT' returned " << xHEX0N(result,8));	return false;}
+	BumpEventCount(type);
+	LDIDBG("Interrupt '" << NTV2CfgInterrupt::IntName(type) << "' triggered, count=" << mEventCounts.at(type));
 	return waitIntrStruct.success != 0;
 }
 

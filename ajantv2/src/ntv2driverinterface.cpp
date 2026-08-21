@@ -107,7 +107,6 @@ CNTV2DriverInterface::CNTV2DriverInterface ()
 #endif
 		,_programStatus					(0)
 		,_pRPCAPI						(AJA_NULL)
-		,mInterruptEventHandles			()
 		,mEventCounts					()
 #if defined(NTV2_WRITEREG_PROFILING)
 		,mRegWrites						()
@@ -129,10 +128,6 @@ CNTV2DriverInterface::CNTV2DriverInterface ()
 		,_pciSlot						(0)			//	DEPRECATE!
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 {
-	mInterruptEventHandles.reserve(eNumInterruptTypes);
-	while (mInterruptEventHandles.size() < eNumInterruptTypes)
-		mInterruptEventHandles.push_back(AJA_NULL);
-
 	mEventCounts.reserve(eNumInterruptTypes);
 	while (mEventCounts.size() < eNumInterruptTypes)
 		mEventCounts.push_back(0);
@@ -277,10 +272,6 @@ bool CNTV2DriverInterface::Close (void)
 {
 	if (IsOpen())
 	{
-		//	Unsubscribe all...
-		for (INTERRUPT_ENUMS eInt(eVerticalInterrupt);  eInt < eNumInterruptTypes;  eInt = INTERRUPT_ENUMS(eInt+1))
-			ConfigureSubscription (false, eInt, mInterruptEventHandles[eInt]);
-
 		const bool closeOK(IsRemote() ? CloseRemote() : CloseLocalPhysical());
 		if (closeOK)
 			AJAAtomic::Increment(&gCloseCount);
@@ -412,7 +403,7 @@ bool CNTV2DriverInterface::GetInterruptEventCount (const INTERRUPT_ENUMS inInter
 {
 	outCount = 0;
 	if (!NTV2_IS_VALID_INTERRUPT_ENUM(inInterrupt))
-		return false;
+		{DIFAIL("Cannot get event count for '" << NTV2CfgInterrupt::IntName(inInterrupt) << "' -- bad interrupt ID");  return false;}
 	outCount = mEventCounts.at(inInterrupt);
 	return true;
 }
@@ -420,23 +411,27 @@ bool CNTV2DriverInterface::GetInterruptEventCount (const INTERRUPT_ENUMS inInter
 bool CNTV2DriverInterface::SetInterruptEventCount (const INTERRUPT_ENUMS inInterrupt, const ULWord inCount)
 {
 	if (!NTV2_IS_VALID_INTERRUPT_ENUM(inInterrupt))
-		return false;
+		{DIFAIL("Cannot set event count to " << inCount << " for interrupt '" << NTV2CfgInterrupt::IntName(inInterrupt) << "' -- bad interrupt ID");  return false;}
+	DIINFO("Interrupt '" << NTV2CfgInterrupt::IntName(inInterrupt) << "' event count changed from " << mEventCounts.at(inInterrupt) << " to " << inCount);
 	mEventCounts.at(inInterrupt) = inCount;
 	return true;
 }
 
 bool CNTV2DriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterrupt,	 ULWord & outCount)
-{	(void) eInterrupt;
-	outCount = 0;
-	NTV2_ASSERT(false && "Needs subclass implementation");
-	return false;
-}
-
-HANDLE CNTV2DriverInterface::GetInterruptEvent (const INTERRUPT_ENUMS eInterruptType)
 {
-	if (!NTV2_IS_VALID_INTERRUPT_ENUM(eInterruptType))
-		return HANDLE(0);
-	return HANDLE(uint64_t(mInterruptEventHandles.at(eInterruptType)));
+	outCount = 0;
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+	{
+		NTV2ConfigureInterrupt msg;
+		if (!_pRPCAPI->NTV2MessageRemote(msg.doGetCount(eInterrupt)))
+			return false;
+		outCount = msg.count();
+		return true;
+	}
+#endif
+	DIFAIL("Not implemented, interruptID='" << NTV2CfgInterrupt::IntName(eInterrupt) << "'");
+	return false;
 }
 
 bool CNTV2DriverInterface::ConfigureInterrupt (const bool bEnable, const INTERRUPT_ENUMS eInterruptType)
@@ -444,32 +439,6 @@ bool CNTV2DriverInterface::ConfigureInterrupt (const bool bEnable, const INTERRU
 	NTV2_ASSERT(false && "Needs subclass implementation");
 	return false;
 }
-
-bool CNTV2DriverInterface::ConfigureSubscription (const bool bSubscribe, const INTERRUPT_ENUMS eInterruptType, PULWord & outSubscriptionHdl)
-{
-	if (!NTV2_IS_VALID_INTERRUPT_ENUM(eInterruptType))
-		return false;
-	outSubscriptionHdl = mInterruptEventHandles.at(eInterruptType);
-	if (bSubscribe)
-	{										//	If subscribing,
-		mEventCounts [eInterruptType] = 0;	//		clear this interrupt's event counter
-		DIDBG("Subscribing '" << NTV2CfgInterrupt::IntName(eInterruptType) << "' (" << UWord(eInterruptType)
-				<< "), event counter reset");
-	}
-	else if (!outSubscriptionHdl)
-	{
-		DIDBGX("Unsubscribing '" << NTV2CfgInterrupt::IntName(eInterruptType) << "' (" << UWord(eInterruptType)
-				<< ") that was never subscribed");
-	}
-	else
-	{
-		DIDBGX("Unsubscribing '" << NTV2CfgInterrupt::IntName(eInterruptType) << "' (" << UWord(eInterruptType) << "), "
-				<< mEventCounts[eInterruptType] << " event(s) received");
-	}
-	return true;
-
-}	//	ConfigureSubscription
-
 
 NTV2DeviceID CNTV2DriverInterface::GetDeviceID (void)
 {
@@ -635,7 +604,9 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine inDMAEngine,
 bool CNTV2DriverInterface::WaitForInterrupt (INTERRUPT_ENUMS eInterrupt, ULWord timeOutMs)
 {
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
-	return _pRPCAPI ? _pRPCAPI->NTV2WaitForInterruptRemote(eInterrupt, timeOutMs) : false;
+	if (_pRPCAPI  &&  _pRPCAPI->NTV2WaitForInterruptRemote(eInterrupt, timeOutMs))
+		{BumpEventCount(eInterrupt);  return true;}
+	return false;
 #else
 	(void) eInterrupt;
 	(void) timeOutMs;

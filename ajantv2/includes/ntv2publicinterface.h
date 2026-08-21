@@ -7973,11 +7973,11 @@ typedef enum
 					ULWord				mOperation;				///< @brief In: requested operation
 					ULWord				mFlags;					///< @brief In: option flags
 					ULWord				mInterruptID;			///< @brief In: INTERRUPT_ENUMS (interruptID) of interest
-					ULWord				mResult;				///< @brief Out: 0=success, otherwise failed
+					ULWord				mResult;				///< @brief Out: 0=false (fail), 1 or non-zero == true (success)
 					ULWord64			mInterruptIDs;			///< @brief Out: bitmap of enabled interrupt IDs
 					ULWord64			mEventHandle;			///< @brief In: handle to subscribe if kFlagMaskCreateHandle bit is clear
-					ULWord				mNumHandles;			///< @brief In: max num handles capacity;  Out: num handles returned
-					NTV2Buffer			mOutHandles;			///< @brief Buffer to contain resulting list of subscribed HANDLEs
+					ULWord				mCount;					///< @brief In: set interrupt count;  Out: requested count
+					NTV2Buffer			mHandles;				///< @brief Optional buffer to store subscribed HANDLEs
 					ULWord				mSpares[32];			///< @brief Reserved for future use
 				NTV2_TRAILER		mTrailer;				///< @brief The common structure trailer -- ALWAYS LAST!
 
@@ -7992,32 +7992,33 @@ typedef enum
 				static const ULWord	kOpUnsubscribe			= 0x00000002;	///< @brief	For given mInterruptID, unsubscribe it
 				static const ULWord	kOpEnable				= 0x00000003;	///< @brief	For given mInterruptID, enable it
 				static const ULWord	kOpDisable				= 0x00000004;	///< @brief	For given mInterruptID, disable it
-				static const ULWord	kOpGetEventHandles		= 0x00000005;	///< @brief	For given mInterruptID, get subscribed event handles (fills mInOutNumHandles, mOutHandles, respects kFlagMaskIncludeGlobals)
-				static const ULWord	kOpGetSubscribedIDs		= 0x00000006;	///< @brief	Get subscribed interrupt IDs (mInterruptID ignored, fills mResultMask, respects kFlagMaskIncludeGlobals)
-				static const ULWord	kOpGetEnabledIDs		= 0x00000007;	///< @brief	Get enabled interrupt IDs (mInterruptID ignored, fills mResultMask)
-				static const ULWord	kOpLAST					= kOpGetEnabledIDs;
+				static const ULWord	kOpGetSubscribed		= 0x00000005;	///< @brief	Get subscribed interrupt IDs (mInterruptID ignored, fills mResultMask, respects kFlagMaskIncludeGlobals)
+				static const ULWord	kOpGetEnabledIDs		= 0x00000006;	///< @brief	Get enabled interrupt IDs (mInterruptID ignored, fills mInterruptIDs)
+				static const ULWord	kOpGetIntCount			= 0x00000007;	///< @brief	For given mInterruptID, fetch driver interrupt count into mCount
+				static const ULWord	kOpSetIntCount			= 0x00000008;	///< @brief	For given mInterruptID, reset driver interrupt count from mCount
+				static const ULWord	kOpLAST					= kOpSetIntCount;
 
 				//	OPTION FLAGS
 				static const ULWord	kFlagMaskCreateHandle	= 0x00000001;	///< @brief	If set, create local event handle; otherwise handle is supplied for subscribe operation
 				static const ULWord	kFlagMaskIncludeGlobals	= 0x00000002;	///< @brief	If set, also include global event handles
 
 				//	Inquiry
-				inline ULWord				operation (void) const		{return mOperation;}		///< @return	my desired/intended operation
-				inline ULWord				flags (void) const			{return mFlags;}			///< @return	my option flags
-				inline INTERRUPT_ENUMS		interruptID (void) const	{return INTERRUPT_ENUMS(mInterruptID);}		///< @returns	my interrupt ID of interest
-				inline uint64_t				interruptIDs (void) const	{return mInterruptIDs;}		///< @returns	my interrupt IDs bitmap (a set of unique interrupt IDs)
-				inline bool					isValid (void) const		{return NTV2_IS_VALID_INTERRUPT_ENUM(interruptID()) && (operation() >= kOpFIRST && operation() <= kOpLAST);}		///< @return	True if I'm valid
-				inline operator				bool() const				{return isValid();}		///< @return	True if I'm valid (cast to bool)
-				inline ULWord				resultCode (void) const		{return mResult;}			///< @returns	my mResult value
-				inline bool					isSuccess (void) const		{return resultCode() ? true : false;}		///< @return	True if my mResult is zero
-				inline	operator			NTV2_HEADER*()				{return reinterpret_cast<NTV2_HEADER*>(this);}	///< @returns	my starting address casted to an NTV2_HEADER pointer
-				std::ostream &				Print (std::ostream & oss) const;	///< @brief	prints a human-readable representation of me to the given output stream
-				inline ULWord				numHandles (void) const		{return mNumHandles;}		///< @return	number of event HANDLEs
-				inline size_t				maxNumHandlesInBuffer (void) const	{return mOutHandles.GetByteCount() / sizeof(uint64_t);}		///< @return	number of event HANDLEs in mOutHandles NTV2Buffer
-				inline HANDLE				eventHandle (const size_t ndx) const	{return isValid() && mOutHandles && ndx < maxNumHandlesInBuffer() ? HANDLE(mOutHandles.U64(int(ndx))) : HANDLE(0);}	///< @return	event handle at given index number
+				inline ULWord			operation (void) const		{return mOperation;}		///< @return	my desired/intended operation
+				inline ULWord			flags (void) const			{return mFlags;}			///< @return	my option flags
+				inline INTERRUPT_ENUMS	interruptID (void) const	{return INTERRUPT_ENUMS(mInterruptID);}		///< @returns	my interrupt ID of interest
+				inline uint64_t			interruptIDs (void) const	{return mInterruptIDs;}		///< @returns	my interrupt IDs bitmap (a set of unique interrupt IDs)
+				inline bool				isValid (void) const		{return NTV2_IS_VALID_INTERRUPT_ENUM(interruptID()) && (operation() >= kOpFIRST && operation() <= kOpLAST);}		///< @return	True if I'm valid
+				inline operator			bool() const				{return isValid();}			///< @return	True if I'm valid (cast to bool)
+				inline bool				isSuccess (void) const		{return mResult ? true : false;}	///< @returns	true if my mResult is non-zero; otherwise false (if zero)
+				inline	operator		NTV2_HEADER*()				{return reinterpret_cast<NTV2_HEADER*>(this);}	///< @returns	my starting address casted to an NTV2_HEADER pointer
+				std::ostream &			Print (std::ostream & oss) const;	///< @brief	prints a human-readable representation of me to the given output stream
+				inline ULWord			count (void) const			{return mCount;}			///< @returns	count value
+				inline size_t			maxHandleCapacity (void) const	{return mHandles.GetByteCount() / sizeof(uint64_t);}	///< @return	number of event HANDLEs in mOutHandles NTV2Buffer
+				inline HANDLE			eventHandle (const INTERRUPT_ENUMS id) const	{return isValid() && mHandles && size_t(id) < maxHandleCapacity() ? HANDLE(mHandles.U64(int(id))) : HANDLE(0);}	///< @returns	interrupt event handle
+				inline bool				setEventHandle (const INTERRUPT_ENUMS id, HANDLE h)	{if (!isValid() || !mHandles || size_t(id) >= maxHandleCapacity()) return false; mHandles.U64(int(id)) = uint64_t(h); return true;}	///< @return	store interrupt event handle
 
-				inline bool					hasCreateHandleFlag (void) const	{return flags() & kFlagMaskCreateHandle;}	///< @returns	True if my "create handle" option is set
-				inline bool					hasIncludeGlobalsFlag (void) const	{return flags() & kFlagMaskIncludeGlobals;}	///< @returns	True if my "include globals" option is set
+				inline bool				hasCreateHandleFlag (void) const	{return flags() & kFlagMaskCreateHandle;}	///< @returns	True if my "create handle" option is set
+				inline bool				hasIncludeGlobalsFlag (void) const	{return flags() & kFlagMaskIncludeGlobals;}	///< @returns	True if my "include globals" option is set
 
 				//	Changing/Configuring
 				inline NTV2ConfigureInterrupt &	doSubscribe (const INTERRUPT_ENUMS id)		{return doSubscribeEvent(id,HANDLE(0)).setCreateEvent();}	///< @brief	Create event handle and subscribe it to given interruptID
@@ -8025,16 +8026,28 @@ typedef enum
 				inline NTV2ConfigureInterrupt &	doUnsubscribe (const INTERRUPT_ENUMS id)	{return setOperation(kOpUnsubscribe).setInterruptID(id);}	///< @brief	Unsubscribe local HANDLE from given interruptID
 				inline NTV2ConfigureInterrupt &	doEnable (const INTERRUPT_ENUMS id)			{return setOperation(kOpEnable).setInterruptID(id);}		///< @brief	Enable given interruptID
 				inline NTV2ConfigureInterrupt &	doDisable (const INTERRUPT_ENUMS id)		{return setOperation(kOpDisable).setInterruptID(id);}		///< @brief	Disable given interruptID
+				inline NTV2ConfigureInterrupt &	doGetCount (const INTERRUPT_ENUMS id)		{return setOperation(kOpGetIntCount).setInterruptID(id);}	///< @brief	Get interruptID count
+				inline NTV2ConfigureInterrupt &	doSetCount (const INTERRUPT_ENUMS id, const ULWord cnt=0)	{return setOperation(kOpSetIntCount).setInterruptID(id).setCount(cnt);}	///< @brief	Set interruptID count
+				inline NTV2ConfigureInterrupt &	doGetSubscribed (const bool includeHdls = false)
+					{	if (includeHdls)
+							mHandles.Allocate(size_t(eNumInterruptTypes));
+						else
+							mHandles.Set(nullptr, 0);
+						return setOperation(kOpGetSubscribed);
+					}	///< @brief	Retrieve subscribed interrupt IDs + count of them (+ optional event HANDLEs)
 
-				inline NTV2ConfigureInterrupt &	setResult		(const ULWord val)			{mResult = val;  return *this;}					///< @brief	Sets my result
+				inline NTV2ConfigureInterrupt &	setResult		(const ULWord val)			{mResult = val;  return *this;}					///< @brief	Sets my mResult
+				inline NTV2ConfigureInterrupt &	setFail			(void)						{return setResult(0);}							///< @brief	Zeroes my mResult (indicating failure)
+				inline NTV2ConfigureInterrupt &	setSuccess		(void)						{return setResult(1);}							///< @brief	Sets my mResult to 1 (non-zero indicates success)
+				inline NTV2ConfigureInterrupt &	setCount		(const ULWord val)			{mCount = val;  return *this;}					///< @brief	Sets my mCount
 				inline NTV2ConfigureInterrupt &	setOperation	(const ULWord op)			{mOperation = op;  return *this;}				///< @brief	Sets my operation
 				inline NTV2ConfigureInterrupt &	setInterruptID	(const INTERRUPT_ENUMS id)	{mInterruptID = ULWord(id);  return *this;}		///< @brief	Sets my interruptID
-				inline NTV2ConfigureInterrupt &	setEventHandle	(const HANDLE & h)			{mEventHandle = ULWord64(h);  mNumHandles = 0; mOutHandles.Set(nullptr,0);  return *this;}	///< @brief	Sets my event handle
+				inline NTV2ConfigureInterrupt &	setEventHandle	(const HANDLE & h)			{mEventHandle = ULWord64(h);  mCount = 0; mHandles.Set(nullptr,0);  return *this;}	///< @brief	Sets my event handle
 				inline NTV2ConfigureInterrupt &	setCreateEvent	(void)						{mFlags |= kFlagMaskCreateHandle;  return *this;}	///< @brief	Sets the kFlagMaskCreateHandle option
 
-				static std::string			OpName (const ULWord op);			///< @return	Converts operation code to human-readable string
-				static NTV2StringList		IntNames (const uint64_t mask);		///< @returns	list of interrupt enum ID names from corresponding bits set in 'mask'
-				static std::string			IntName (const INTERRUPT_ENUMS id);	///< @returns	human-readable name of interrupt ID
+				static std::string		OpName (const ULWord op);			///< @return	Converts operation code to human-readable string
+				static NTV2StringList	IntNames (const uint64_t mask);		///< @returns	list of interrupt enum ID names from corresponding bits set in 'mask'
+				static std::string		IntName (const INTERRUPT_ENUMS id);	///< @returns	human-readable name of interrupt ID
 
 				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)

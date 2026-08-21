@@ -150,10 +150,14 @@ CNTV2WinDriverInterface::CNTV2WinDriverInterface()
 		,_hDevice					(INVALID_HANDLE_VALUE)
 		,_previousAudioState		(0)
 		,_previousAudioSelection	(0)
+		,mInterruptEventHandles		()
 #if !defined(NTV2_DEPRECATE_16_0)
 		,_vecDmaLocked				()
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 {
+	mInterruptEventHandles.reserve(eNumInterruptTypes);
+	while (mInterruptEventHandles.size() < eNumInterruptTypes)
+		mInterruptEventHandles.push_back(AJA_NULL);
 	::memset(&_spDevInfoData, 0, sizeof(_spDevInfoData));
 	::memset(&_GUID_PROPSET, 0, sizeof(_GUID_PROPSET));
 }
@@ -264,6 +268,10 @@ bool CNTV2WinDriverInterface::CloseLocalPhysical (void)
 	NTV2_ASSERT(!IsRemote());
 	NTV2_ASSERT(IsOpen());
 	NTV2_ASSERT(_hDevice != INVALID_HANDLE_VALUE);
+
+	//	Unsubscribe all interrupts...
+	for (INTERRUPT_ENUMS eInt(eVerticalInterrupt);  eInt < eNumInterruptTypes;  eInt = INTERRUPT_ENUMS(eInt+1))
+		WinConfigureSubscription (/*bSubscribe*/false, eInt);
 	if (_pspDevIFaceDetailData)
 	{
 		delete [] _pspDevIFaceDetailData;
@@ -423,26 +431,27 @@ bool CNTV2WinDriverInterface::ConfigureInterrupt (const bool bEnable, const INTE
 //		HANDLE & hSubcription
 // Output: HANDLE & hSubcription (if subscribing)
 // Notes:  collects all driver calls for subscriptions in one place
-bool CNTV2WinDriverInterface::ConfigureSubscription (const bool bSubscribe, const INTERRUPT_ENUMS eInterruptType, PULWord & outSubscriptionHdl)
+bool CNTV2WinDriverInterface::WinConfigureSubscription (const bool bSubscribe, const INTERRUPT_ENUMS eInterruptType)
 {
-	if (!IsOpen() && !IsRemote())
-		return false;
-	bool res(CNTV2DriverInterface::ConfigureSubscription (bSubscribe, eInterruptType, outSubscriptionHdl));
-	if (IsRemote())
-		return res;
+	NTV2_ASSERT(IsOpen()  &&  "Device not open");
+	NTV2_ASSERT(IsRemote()  && "Not local/physical device");
+	NTV2_ASSERT(NTV2_IS_VALID_INTERRUPT_ENUM(eInterruptType)  &&  "Invalid interruptType");
+
+	HANDLE hSubscription = HANDLE(mInterruptEventHandles.at(eInterruptType));
+
 	// Check for previouse call to subscribe
-	if (bSubscribe	&&	outSubscriptionHdl)
+	if (bSubscribe	&&	hSubscription)
 		return true;	//	Already subscribed
 
 	// Check for valid handle to unsubscribe
-	if (!bSubscribe	 &&	 !outSubscriptionHdl)
+	if (!bSubscribe	 &&	 !hSubscription)
 		return true;	//	Already unsubscribed
 
 	// Assure that the avCard has been properly opened
-	HANDLE hSubscription = bSubscribe ? CreateEvent (NULL, FALSE, FALSE, NULL) : HANDLE(outSubscriptionHdl);
+	if (bSubscribe)
+		hSubscription = CreateEvent (NULL, FALSE, FALSE, NULL);
 	KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S propStruct;
 	DWORD dwBytesReturned = 0;
-
 	ZeroMemory (&propStruct,sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S));
 	propStruct.Property.Set		= _GUID_PROPSET;
 	propStruct.Property.Id		= KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS;
@@ -455,17 +464,28 @@ bool CNTV2WinDriverInterface::ConfigureSubscription (const bool bSubscribe, cons
 	if ((!bSubscribe && bRet)  ||  (bSubscribe && !bRet))
 	{
 		CloseHandle(hSubscription);
-		outSubscriptionHdl = 0;
+		WDINOTE("Closed event handle " << xHEX0N(hSubscription,16) << " for '" << NTV2CfgInterrupt::IntName(eInterruptType) << "'");
+		mInterruptEventHandles.at(eInterruptType) = PULWord(0);
 	}
 
 	if (!bRet)
 	{
-		WDIFAIL("interruptType=" << DEC(eInterruptType) << " subscribe=" << (bSubscribe?"Y":"N") << " failed: " << ::GetKernErrStr(GetLastError()));
+		WDIFAIL("'IOCTL_AJAPROPS_NEWSUBSCRIPTIONS|" << (bSubscribe ? "KSPROPERTY_TYPE_GET" : "KSPROPERTY_TYPE_SET") << "' failed for '" << NTV2CfgInterrupt::IntName(eInterruptType) << "' subscribe=" << (bSubscribe?"Y":"N") << " failed");
 		return false;
 	}
 	if (bSubscribe)
-		outSubscriptionHdl = PULWord(hSubscription);
+	{
+		mEventCounts.at(eInterruptType) = 0;	//	clear this interrupt's event counter
+		mInterruptEventHandles.at(eInterruptType) = PULWord(hSubscription);	//	Store handle in this interrupt's "slot"
+	}
 	return true;
+}
+
+HANDLE CNTV2WinDriverInterface::GetEventHandleForInterrupt (const INTERRUPT_ENUMS eInterruptType)
+{
+	if (!NTV2_IS_VALID_INTERRUPT_ENUM(eInterruptType))
+		return HANDLE(0);
+	return HANDLE(mInterruptEventHandles.at(eInterruptType));
 }
 
 // Method: getInterruptCount
@@ -473,12 +493,15 @@ bool CNTV2WinDriverInterface::ConfigureSubscription (const bool bSubscribe, cons
 // Output: ULONG or equivalent(i.e. ULWord).
 bool CNTV2WinDriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterruptType, ULWord & outCount)
 {
+	if (!IsOpen())
+		{WDIFAIL("Failed for '" << NTV2CfgInterrupt::IntName(eInterruptType) << "': device not open");  return false;}
+	if (!NTV2_IS_VALID_INTERRUPT_ENUM(eInterruptType))
+		{WDIFAIL("Failed for '" << NTV2CfgInterrupt::IntName(eInterruptType) << "': bad interrupt ID");  return false;}
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
-		return false;
+		return CNTV2DriverInterface::GetInterruptCount(eInterruptType, outCount);
 #endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
-	if (!IsOpen())
-		return false;
+
 	KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S propStruct;
 	DWORD dwBytesReturned = 0;
 	ZeroMemory (&propStruct,sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S));
@@ -519,41 +542,43 @@ static const uint32_t sIntEnumToStatKeys[] = {	AJA_DebugStat_WaitForInterruptOut
 												AJA_DebugStat_WaitForInterruptIn8,		//	eInput8		//	32
 												AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers};	//	33 thru 41
 
-bool CNTV2WinDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterruptType, const ULWord timeOutMs)
+bool CNTV2WinDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS type, const ULWord timeOutMs)
 {
+	if (!IsOpen())
+		{WDIWARN("Cannot wait for '" << NTV2CfgInterrupt::IntName(type) << "' -- device not open");  return false;}
+	if (!NTV2_IS_VALID_INTERRUPT_ENUM(eInterruptType))
+		{WDIWARN("Cannot wait for '" << NTV2CfgInterrupt::IntName(type) << "' -- bad interrupt id");  return false;}
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
-		return CNTV2DriverInterface::WaitForInterrupt(eInterruptType,timeOutMs);
+		return CNTV2DriverInterface::WaitForInterrupt(type, timeOutMs);
 #endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
-	if (!IsOpen())
-		return false;
-	if (!NTV2_IS_VALID_INTERRUPT_ENUM(eInterruptType))
-		return false;
-	bool bInterruptHappened = false;	// return value
 
-	HANDLE hEvent (GetInterruptEvent(eInterruptType));
+	HANDLE hEvent (GetInterruptEvent(type));
 	if (NULL == hEvent)
 	{
-		// no interrupt hooked up so just use Sleep function
+		//	No interrupt subscribed, so just Sleep for the timeout value
 		Sleep (timeOutMs);
+		WDIWARN("No event handle for '" << NTV2CfgInterrupt::IntName(type) << "' -- instead slept for " << timeOutMs << " msec");
+		return false;
 	}
-	else
+
+	//	Interrupt subscribed -- wait on it
+	AJADebug::StatTimerStart(sIntEnumToStatKeys[type]);
+	DWORD status = WaitForSingleObject(hEvent, timeOutMs);
+	AJADebug::StatTimerStop(sIntEnumToStatKeys[type]);
+	if (status == WAIT_OBJECT_0)
 	{
-		// interrupt hooked up. Wait
-		AJADebug::StatTimerStart(sIntEnumToStatKeys[eInterruptType]);
-		DWORD status = WaitForSingleObject(hEvent, timeOutMs);
-		AJADebug::StatTimerStop(sIntEnumToStatKeys[eInterruptType]);
-		if ( status == WAIT_OBJECT_0 )
-		{
-			bInterruptHappened = true;
-			BumpEventCount (eInterruptType);
-		}
-		else
-		{
-			;//MessageBox (0, "WaitForInterrupt timed out", "CNTV2WinDriverInterface", MB_ICONERROR | MB_OK);
-		}
+		BumpEventCount (type);
+		WDIDBG("Subscribed interrupt '" << NTV2CfgInterrupt::IntName(type) << "' triggered, count=" << mEventCounts.at(type));
+		return true;	//	All good!!
 	}
-	return bInterruptHappened;
+	if (status == WAIT_ABANDONED)
+		WDIFAIL("Subscribed interrupt '" << NTV2CfgInterrupt::IntName(type) << "' failed: WAIT_ABANDONED, count=" << mEventCounts.at(type));
+	else if (status == WAIT_TIMEOUT)
+		WDIFAIL("Subscribed interrupt '" << NTV2CfgInterrupt::IntName(type) << "' timed out after " << timeOutMs << " msec, count=" << mEventCounts.at(type));
+	else
+		WDIFAIL("Subscribed interrupt '" << NTV2CfgInterrupt::IntName(type) << "' failed: " << ::GetKernErrStr(GetLastError()));
+	return false;
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -6,31 +6,42 @@
 **/
 
 #include "ntv2card.h"
+#include "ajabase/system/debug.h"
 
 using namespace std; 
+
+#define INSTP(_p_)			HEX0N(uint64_t(_p_),16)
+#define DIFAIL(__x__)		AJA_sERROR	(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define DIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define DINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define DIINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define DIDBG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 
 
 static INTERRUPT_ENUMS	gChannelToOutputVerticalInterrupt[]	= {eOutput1, eOutput2, eOutput3, eOutput4, eOutput5, eOutput6, eOutput7, eOutput8, eNumInterruptTypes};
 static INTERRUPT_ENUMS	gChannelToInputVerticalInterrupt[]	= {eInput1,  eInput2,  eInput3,  eInput4,  eInput5,  eInput6,  eInput7,  eInput8,  eNumInterruptTypes};
 
 
-//	Subscribe to events
+//	Subscribe/Unsubscribe to/from events
 
 bool CNTV2Card::SubscribeEvent (const INTERRUPT_ENUMS id)
 {
+	if (!IsOpen())
+		{DIFAIL("Cannot subscribe to '" << NTV2CfgInterrupt::IntName(id) << "' -- device not open");  return false;}
+	if (!NTV2_IS_VALID_INTERRUPT_ENUM(id))
+		{DIFAIL("Cannot subscribe to '" << NTV2CfgInterrupt::IntName(id) << "' -- bad interrupt ID");  return false;}
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
 	{	NTV2ConfigureInterrupt msg;
-		return _pRPCAPI->NTV2MessageRemote(msg.doSubscribe(id));
+		return _pRPCAPI->NTV2MessageRemote(msg.doSubscribe(id))  &&  msg.isSuccess();
 	}
 #endif// defined(NTV2_NUB_CLIENT_SUPPORT)
-	return NTV2_IS_VALID_INTERRUPT_ENUM(id)  &&  ConfigureSubscription (true, id, mInterruptEventHandles.at(id));
-}
-
-
-bool CNTV2Card::SubscribeOutputVerticalEvent (const NTV2Channel inChannel)
-{
-	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  SubscribeEvent(gChannelToOutputVerticalInterrupt[inChannel]);
+#if defined(MSWindows)
+	return WinConfigureSubscription (true, id);
+#else
+	DIDBG("Subscribe to '" << NTV2CfgInterrupt::IntName(id) << "' is a no-op on this platform");
+	return true;	//	Non-Windows platforms reply "good to go"
+#endif
 }
 
 bool CNTV2Card::SubscribeOutputVerticalEvent (const NTV2ChannelSet & inChannels)
@@ -41,12 +52,6 @@ bool CNTV2Card::SubscribeOutputVerticalEvent (const NTV2ChannelSet & inChannels)
 	return !failures;
 }
 
-
-bool CNTV2Card::SubscribeInputVerticalEvent (const NTV2Channel inChannel)
-{
-	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  SubscribeEvent(gChannelToInputVerticalInterrupt[inChannel]);
-}
-
 bool CNTV2Card::SubscribeInputVerticalEvent (const NTV2ChannelSet & inChannels)
 {	UWord failures(0);
 	for (NTV2ChannelSetConstIter it(inChannels.begin());  it != inChannels.end();  ++it)
@@ -55,24 +60,24 @@ bool CNTV2Card::SubscribeInputVerticalEvent (const NTV2ChannelSet & inChannels)
 	return !failures;
 }
 
-
-//	Unsubscribe from events
-
 bool CNTV2Card::UnsubscribeEvent (const INTERRUPT_ENUMS id)
 {
+	if (!IsOpen())
+		{DIFAIL("Cannot unsubscribe from '" << NTV2CfgInterrupt::IntName(id) << "' -- device not open");  return false;}
+	if (!NTV2_IS_VALID_INTERRUPT_ENUM(id))
+		{DIFAIL("Cannot unsubscribe from '" << NTV2CfgInterrupt::IntName(id) << "' -- bad interrupt ID");  return false;}
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
 	{	NTV2ConfigureInterrupt msg;
-		return _pRPCAPI->NTV2MessageRemote(msg.doUnsubscribe(id));
+		return _pRPCAPI->NTV2MessageRemote(msg.doUnsubscribe(id))  &&  msg.isSuccess();
 	}
 #endif// defined(NTV2_NUB_CLIENT_SUPPORT)
-	return NTV2_IS_VALID_INTERRUPT_ENUM(id)  &&  ConfigureSubscription (false, id, mInterruptEventHandles.at(id));
-}
-
-
-bool CNTV2Card::UnsubscribeOutputVerticalEvent (const NTV2Channel inChannel)
-{
-	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  UnsubscribeEvent(gChannelToOutputVerticalInterrupt[inChannel]);
+#if defined(MSWindows)
+	return WinConfigureSubscription (false, id);
+#else
+	DIDBG("Unsubscribe from '" << NTV2CfgInterrupt::IntName(id) << "' is a no-op on this platform");
+	return true;	//	Non-Windows platforms reply "good to go"
+#endif
 }
 
 bool CNTV2Card::UnsubscribeOutputVerticalEvent (const NTV2ChannelSet & inChannels)
@@ -83,12 +88,6 @@ bool CNTV2Card::UnsubscribeOutputVerticalEvent (const NTV2ChannelSet & inChannel
 	return !failures;
 }
 
-
-bool CNTV2Card::UnsubscribeInputVerticalEvent (const NTV2Channel inChannel)
-{
-	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  UnsubscribeEvent(gChannelToInputVerticalInterrupt[inChannel]);
-}
-
 bool CNTV2Card::UnsubscribeInputVerticalEvent (const NTV2ChannelSet & inChannels)
 {	UWord failures(0);
 	for (NTV2ChannelSetConstIter it(inChannels.begin());  it != inChannels.end();  ++it)
@@ -97,50 +96,25 @@ bool CNTV2Card::UnsubscribeInputVerticalEvent (const NTV2ChannelSet & inChannels
 	return !failures;
 }
 
+//	NOTE: There's currently no API call to inquire which interrupts are subscribed or not
 
-//	Get interrupt count
+
+//	Get interrupt count from driver
 
 bool CNTV2Card::GetOutputVerticalInterruptCount (ULWord & outCount, const NTV2Channel inChannel)
 {
 	outCount = 0;
-	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  GetInterruptCount (gChannelToOutputVerticalInterrupt[inChannel], outCount);
+	return GetInterruptCount(::NTV2ChannelToOutputInterrupt(inChannel), outCount);
 }
 
 
 bool CNTV2Card::GetInputVerticalInterruptCount (ULWord & outCount, const NTV2Channel inChannel)
 {
 	outCount = 0;
-	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  GetInterruptCount (gChannelToInputVerticalInterrupt[inChannel], outCount);
+	return GetInterruptCount (::NTV2ChannelToInputInterrupt(inChannel), outCount);
 }
 
-
-//	Get event count
-
-bool CNTV2Card::GetOutputVerticalEventCount (ULWord & outCount, const NTV2Channel inChannel)
-{
-	outCount = NTV2_IS_VALID_CHANNEL(inChannel)  ?  mEventCounts.at(gChannelToOutputVerticalInterrupt[inChannel])  :  0;
-	return NTV2_IS_VALID_CHANNEL(inChannel);
-}
-
-
-bool CNTV2Card::GetInputVerticalEventCount (ULWord & outCount, const NTV2Channel inChannel)
-{
-	outCount = NTV2_IS_VALID_CHANNEL(inChannel)  ?  mEventCounts.at(gChannelToInputVerticalInterrupt[inChannel])  :  0;
-	return NTV2_IS_VALID_CHANNEL(inChannel);
-}
-
-
-//	Set event count
-
-bool CNTV2Card::SetOutputVerticalEventCount (const ULWord inCount, const NTV2Channel inChannel)
-{
-	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  SetInterruptEventCount(gChannelToOutputVerticalInterrupt[inChannel], inCount);
-}
-
-bool CNTV2Card::SetInputVerticalEventCount (const ULWord inCount, const NTV2Channel inChannel)
-{
-	return NTV2_IS_VALID_CHANNEL(inChannel)  &&  SetInterruptEventCount(gChannelToInputVerticalInterrupt[inChannel], inCount);
-}
+//	NOTE: There's currently no driver API call to reset the driver's interrupt counters
 
 
 bool CNTV2Card::WaitForOutputVerticalInterrupt (const NTV2Channel inChannel, UWord inRepeatCount)
@@ -152,7 +126,7 @@ bool CNTV2Card::WaitForOutputVerticalInterrupt (const NTV2Channel inChannel, UWo
 		return false;
 	do
 	{
-		result = WaitForInterrupt (gChannelToOutputVerticalInterrupt [inChannel]);
+		result = WaitForInterrupt (::NTV2ChannelToOutputInterrupt(inChannel));
 	} while (--inRepeatCount && result);
 	return result;
 }
@@ -167,7 +141,7 @@ bool CNTV2Card::WaitForInputVerticalInterrupt (const NTV2Channel inChannel, UWor
 		return false;
 	do
 	{
-		result = WaitForInterrupt (gChannelToInputVerticalInterrupt [inChannel]);
+		result = WaitForInterrupt (::NTV2ChannelToInputInterrupt(inChannel));
 	} while (--inRepeatCount && result);
 	return result;
 }
