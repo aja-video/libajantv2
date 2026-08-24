@@ -5770,6 +5770,7 @@ typedef enum
 		#define DMABUFFERLOCK_MANUAL				BIT(5)		///< @brief Used in ::NTV2BufferLock to manual page lock buffers.
 		#define DMABUFFERLOCK_MAX_SIZE				BIT(6)		///< @brief Used in ::NTV2BufferLock to set max locked size.
 		#define DMABUFFERLOCK_RDMA					BIT(7)		///< @brief Used in ::NTV2BufferLock to page lock a rdma buffer
+		#define DMABUFFERLOCK_DMABUF				BIT(8)		///< @brief Used in ::NTV2BufferLock to page lock an imported DMA-BUF buffer
 
 		// Bitstream flags
 		#define BITSTREAM_WRITE						BIT(0)		///< @brief Used in ::NTV2Bitstream to write a bitstream
@@ -8981,6 +8982,9 @@ typedef enum
 					This will reduce transfer time and CPU overhead at the cost of locking physical memory.
 			@note	This struct uses a constructor to properly initialize itself.
 					Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
+			@note	When ::DMABUFFERLOCK_DMABUF is set in mFlags, mBuffer specifies the mapped
+					address and length of an imported DMA-BUF, and mDmaBufFD specifies its
+					file descriptor. mDmaBufFD is only read when that flag is set.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2BufferLock)
 			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
@@ -8988,7 +8992,8 @@ typedef enum
 													//			A NULL buffer (or zero length) releases all locked buffers.
 				ULWord			mFlags;				///< @brief Action flags (lock, unlock, etc)
 				ULWord64		mMaxLockSize;		///< @brief Max locked bytes.
-				ULWord			mReserved[30];		///< @brief Reserved for future expansion.
+				ULWord			mDmaBufFD;			///< @brief DMA-BUF file descriptor, valid only with ::DMABUFFERLOCK_DMABUF
+				ULWord			mReserved[29];		///< @brief Reserved for future expansion.
 			NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
 
 			#if !defined (NTV2_BUILDING_DRIVER)
