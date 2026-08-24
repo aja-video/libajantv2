@@ -441,6 +441,26 @@ bool CNTV2Card::DMABufferLock (const NTV2Buffer & inBuffer, bool inMap, bool inR
 }
 
 
+bool CNTV2Card::DMABufferLockDmaBuf (const NTV2Buffer & inBuffer, const int inDmaBufFD, const bool inMap)
+{
+	if (!_boardOpened)
+		return false;		//	Device not open!
+
+	if (!inBuffer)
+		return false;
+
+	if (inDmaBufFD < 0)
+		return false;
+
+	NTV2BufferLock lockMsg (inBuffer, (DMABUFFERLOCK_LOCK |
+									   DMABUFFERLOCK_DMABUF |
+									   (inMap? DMABUFFERLOCK_MAP : 0)));
+	//	mDmaBufFD is not initialized by the constructors, so it is written explicitly
+	lockMsg.mDmaBufFD = ULWord(inDmaBufFD);
+	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&lockMsg));
+}
+
+
 bool CNTV2Card::DMABufferUnlock (const NTV2Buffer & inBuffer)
 {
 	if (!_boardOpened)
