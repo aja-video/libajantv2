@@ -6847,6 +6847,26 @@ protected:
 	AJA_VIRTUAL bool			S2110DeviceAncFromBuffers (const NTV2Channel inChannel, NTV2Buffer & ancF1, NTV2Buffer & ancF2);
 	AJA_VIRTUAL bool			WriteSDIInVPID (const NTV2Channel inChannel, const ULWord inValA, const ULWord inValB);
 
+	//	Global control register accumulator -- lets SetVideoFormat coalesce SetStandard/SetFrameGeometry/
+	//	SetFrameRate/SetSmpte372 into a single hardware write instead of one independent read-modify-write
+	//	per field (avoids parking the register in an illegal intermediate state while switching video
+	//	formats). The accumulator lives on the caller's stack (see SetVideoFormat) rather than as CNTV2Card
+	//	member state, so concurrent SetVideoFormat calls on the same card instance don't race on shared state.
+	struct GlobalControlRegWrite
+	{
+		bool	isValid;
+		ULWord	regNum;
+		ULWord	regValue;
+		GlobalControlRegWrite (void) : isValid(false), regNum(0), regValue(0) {}
+	};
+	AJA_VIRTUAL bool	WriteGlobalControlBits (const ULWord regNum, const ULWord value, const ULWord mask, const ULWord shift, GlobalControlRegWrite * pGlobalControl);
+	AJA_VIRTUAL bool	FlushGlobalControlWrite (GlobalControlRegWrite * pGlobalControl);
+
+	AJA_VIRTUAL bool	SetStandard (NTV2Standard inValue, NTV2Channel inChannel, GlobalControlRegWrite * pGlobalControl);
+	AJA_VIRTUAL bool	SetFrameGeometry (NTV2FrameGeometry inGeometry, bool inIsRetail, NTV2Channel inChannel, GlobalControlRegWrite * pGlobalControl);
+	AJA_VIRTUAL bool	SetFrameRate (NTV2FrameRate inNewValue, NTV2Channel inChannel, GlobalControlRegWrite * pGlobalControl);
+	AJA_VIRTUAL bool	SetSmpte372 (ULWord inValue, NTV2Channel inChannel, GlobalControlRegWrite * pGlobalControl);
+
 private:
 	// frame buffer sizing helpers
 	AJA_VIRTUAL bool	GetLargestFrameBufferFormatInUse(NTV2FrameBufferFormat & outFBF);
@@ -6861,6 +6881,7 @@ private:
 
 	AJA_VIRTUAL bool	IsMultiFormatActive (void); ///< @return	True if the device supports the multi format feature and it's enabled; otherwise false.
 	AJA_VIRTUAL bool	CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFirst, const NTV2Channel inLast);
+
 	class DeviceCapabilities	mDevCap;
 	friend class CNTV2DeviceScanner;	//	Device scanner needs access to my private methods & vars
 };	//	CNTV2Card
