@@ -196,6 +196,43 @@ bool CNTV2Card::GetTaskMode (NTV2TaskMode & outMode)
 	}
 #endif	//	!defined(NTV2_DEPRECATE_16_3)
 
+//	Method: WriteGlobalControlBits
+//	When pGlobalControl is NULL, this behaves exactly like a normal masked WriteRegister call. When
+//	non-NULL, the write is accumulated into *pGlobalControl instead of hitting hardware, so a run of
+//	calls that target the same global control register collapse into a single deferred value; a call
+//	that targets a *different* register first flushes whatever was pending. Callers must invoke
+//	FlushGlobalControlWrite() once they're done batching to commit the final accumulated value.
+//	The accumulator is owned by the caller (see SetVideoFormat), not CNTV2Card member state, so
+//	concurrent callers batching on the same card instance don't race with each other.
+bool CNTV2Card::WriteGlobalControlBits (const ULWord regNum, const ULWord value, const ULWord mask, const ULWord shift, GlobalControlRegWrite * pGlobalControl)
+{
+	if (!pGlobalControl)
+		return WriteRegister (regNum, value, mask, shift);
+
+	if (pGlobalControl->isValid  &&  pGlobalControl->regNum != regNum)
+		FlushGlobalControlWrite (pGlobalControl);		//	switching registers -- commit whatever was pending first
+
+	if (!pGlobalControl->isValid)
+	{
+		if (!ReadRegister (regNum, pGlobalControl->regValue))
+			return false;
+		pGlobalControl->regNum = regNum;
+		pGlobalControl->isValid = true;
+	}
+	pGlobalControl->regValue = (pGlobalControl->regValue & ~mask) | ((value << shift) & mask);
+	return true;
+}
+
+//	Method: FlushGlobalControlWrite
+bool CNTV2Card::FlushGlobalControlWrite (GlobalControlRegWrite * pGlobalControl)
+{
+	if (!pGlobalControl  ||  !pGlobalControl->isValid)
+		return true;
+	const bool ok (WriteRegister (pGlobalControl->regNum, pGlobalControl->regValue));
+	pGlobalControl->isValid = false;
+	return ok;
+}
+
 // Method: SetVideoFormat
 // Input:  NTV2VideoFormat
 // Output: NONE
@@ -240,17 +277,17 @@ bool CNTV2Card::SetVideoFormat (const NTV2VideoFormat value, const bool inIsReta
 	NTV2FrameGeometry inFrameGeometry = GetNTV2FrameGeometryFromVideoFormat(value);
 	bool squares;
 	
-	// Set the standard for this video format
-	SetStandard(inStandard, channel);
-
-	// Set the framegeometry for this video format
-	SetFrameGeometry(inFrameGeometry, ajaRetail, channel);
-
-	// Set the framerate for this video format
-	SetFrameRate(inFrameRate, channel);
-
-	// Set SMPTE 372 1080p60 Dual Link option
-	SetSmpte372(NTV2_IS_3Gb_FORMAT(value), channel);
+	// Set the standard, frame geometry, frame rate and SMPTE 372 dual-link option for this video format
+	// all at once -- these fields share the global control register(s), and committing them one at a
+	// time (as SetStandard/SetFrameGeometry/SetFrameRate/SetSmpte372 normally do) can transiently park
+	// the register in a combination that doesn't correspond to any valid format. globalControl is a
+	// stack-local accumulator (not CNTV2Card member state), so this is safe under concurrent calls.
+	GlobalControlRegWrite globalControl;
+	SetStandard(inStandard, channel, &globalControl);
+	SetFrameGeometry(inFrameGeometry, ajaRetail, channel, &globalControl);
+	SetFrameRate(inFrameRate, channel, &globalControl);
+	SetSmpte372(NTV2_IS_3Gb_FORMAT(value), channel, &globalControl);
+	FlushGlobalControlWrite(&globalControl);
 
 	// set virtual video format
 	WriteRegister (kVRegVideoFormatCh1 + channel, value);
@@ -790,6 +827,11 @@ bool CNTV2Card::GetVideoVOffset (int & outVOffset, const UWord inOutputSpigot)
 // Output: NONE
 bool CNTV2Card::SetStandard (NTV2Standard value, NTV2Channel inChannel)
 {
+	return SetStandard (value, inChannel, NULL);
+}
+
+bool CNTV2Card::SetStandard (NTV2Standard value, NTV2Channel inChannel, GlobalControlRegWrite * pGlobalControl)
+{
 	if (IsMultiRasterWidgetChannel(inChannel))
 		return WriteRegister (kRegMROutControl, value, kRegMaskStandard, kRegShiftStandard);
 	if (!IsMultiFormatActive())
@@ -803,7 +845,7 @@ bool CNTV2Card::SetStandard (NTV2Standard value, NTV2Channel inChannel)
 	if (NTV2_IS_2K1080_STANDARD(newStandard))
 		newStandard = NTV2_IS_PROGRESSIVE_STANDARD(newStandard) ? NTV2_STANDARD_1080p : NTV2_STANDARD_1080;
 
-	return WriteRegister (gChannelToGlobalControlRegNum[inChannel], newStandard, kRegMaskStandard, kRegShiftStandard);
+	return WriteGlobalControlBits (gChannelToGlobalControlRegNum[inChannel], newStandard, kRegMaskStandard, kRegShiftStandard, pGlobalControl);
 }
 
 // Method: GetStandard	  
@@ -880,6 +922,11 @@ bool CNTV2Card::IsSDStandard (bool & outIsStandardDef, NTV2Channel inChannel)
 // Output: NONE
 bool CNTV2Card::SetFrameGeometry (NTV2FrameGeometry value, bool ajaRetail, NTV2Channel channel)
 {
+	return SetFrameGeometry (value, ajaRetail, channel, NULL);
+}
+
+bool CNTV2Card::SetFrameGeometry (NTV2FrameGeometry value, bool ajaRetail, NTV2Channel channel, GlobalControlRegWrite * pGlobalControl)
+{
 #ifdef	MSWindows
 	NTV2TaskMode mode;
 	GetTaskMode(mode);
@@ -928,7 +975,7 @@ bool CNTV2Card::SetFrameGeometry (NTV2FrameGeometry value, bool ajaRetail, NTV2C
 	ULWord newFrameBufferSize = ::NTV2DeviceGetFrameBufferSize(_boardID, newGeometry, format);
 	bool changeBufferSize = IsSupported(kDeviceCanChangeFrameBufferSize) && (oldFrameBufferSize != newFrameBufferSize);
 
-	status = WriteRegister (regNum, newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
+	status = WriteGlobalControlBits (regNum, newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry, pGlobalControl);
 #if !defined(NTV2_DEPRECATE_17_2)
 	// If software set the frame buffer size, read the values from hardware
 	if ( GetFBSizeAndCountFromHW(_ulFrameBufferSize, _ulNumFrameBuffers) )
@@ -988,6 +1035,13 @@ bool CNTV2Card::GetFrameGeometry (NTV2FrameGeometry & outValue, NTV2Channel inCh
 // Output: NONE
 bool CNTV2Card::SetFrameRate (NTV2FrameRate value, NTV2Channel inChannel)
 {
+	GlobalControlRegWrite globalControl;
+	SetFrameRate (value, inChannel, &globalControl);
+	return FlushGlobalControlWrite(&globalControl);
+}
+
+bool CNTV2Card::SetFrameRate (NTV2FrameRate value, NTV2Channel inChannel, GlobalControlRegWrite * pGlobalControl)
+{
 	const ULWord loValue (value & 0x7);
 	const ULWord hiValue ((value & 0x8) >> 3);
 
@@ -996,8 +1050,8 @@ bool CNTV2Card::SetFrameRate (NTV2FrameRate value, NTV2Channel inChannel)
 	if (!IsMultiFormatActive ())
 		inChannel = NTV2_CHANNEL1;
 
-	return WriteRegister (gChannelToGlobalControlRegNum[inChannel], loValue, kRegMaskFrameRate, kRegShiftFrameRate) &&
-			WriteRegister (gChannelToGlobalControlRegNum[inChannel], hiValue, kRegMaskFrameRateHiBit, kRegShiftFrameRateHiBit);
+	return WriteGlobalControlBits (gChannelToGlobalControlRegNum[inChannel], loValue, kRegMaskFrameRate, kRegShiftFrameRate, pGlobalControl) &&
+			WriteGlobalControlBits (gChannelToGlobalControlRegNum[inChannel], hiValue, kRegMaskFrameRateHiBit, kRegShiftFrameRateHiBit, pGlobalControl);
 }
 
 // Method: GetFrameRate
@@ -1026,6 +1080,11 @@ bool CNTV2Card::GetFrameRate (NTV2FrameRate & outValue, NTV2Channel inChannel)
 // Method: SetSmpte372
 bool CNTV2Card::SetSmpte372 (ULWord inValue, NTV2Channel inChannel)
 {
+	return SetSmpte372 (inValue, inChannel, NULL);
+}
+
+bool CNTV2Card::SetSmpte372 (ULWord inValue, NTV2Channel inChannel, GlobalControlRegWrite * pGlobalControl)
+{
 	// Set true (1) to put card in SMPTE 372 dual-link mode (used for 1080p60, 1080p5994, 1080p50)
 	// Set false (0) to disable this mode
 	if (IsMultiRasterWidgetChannel(inChannel))
@@ -1033,7 +1092,7 @@ bool CNTV2Card::SetSmpte372 (ULWord inValue, NTV2Channel inChannel)
 	if (!IsMultiFormatActive())
 		inChannel = NTV2_CHANNEL1;
 
-	return WriteRegister (gChannelToSmpte372RegisterNum [inChannel], inValue, gChannelToSmpte372Masks [inChannel], gChannelToSmpte372Shifts [inChannel]);
+	return WriteGlobalControlBits (gChannelToSmpte372RegisterNum [inChannel], inValue, gChannelToSmpte372Masks [inChannel], gChannelToSmpte372Shifts [inChannel], pGlobalControl);
 }
 
 // Method: GetSmpte372
