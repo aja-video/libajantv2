@@ -86,6 +86,13 @@ namespace ntv2nub
 	}
 	///@}
 
+#if defined(_DEBUG)
+	#define NTV2_NUB_RGCHK(_cnt_)		if (inOutNdx + (_cnt_) > blob.size())	\
+											return false;
+#else
+	#define NTV2_NUB_RGCHK(_cnt_)	
+#endif
+
 	/**
 		@name	POP Functions
 		@brief	These functions are used to decode NTV2 objects/structs from a received byte sequence.
@@ -100,67 +107,78 @@ namespace ntv2nub
 								which the one byte comprising the value will be popped. On exit, contains the
 								index position immediately past the popped byte value.
 	**/
-	inline void POPU8 (uint8_t & outVal, const RPCBlob & blob, std::size_t & inOutNdx)
+	inline bool POPU8 (uint8_t & outVal, const RPCBlob & blob, std::size_t & inOutNdx)
 	{
+		NTV2_NUB_RGCHK(1)
 		outVal = blob.at(inOutNdx++);
+		return true;
 	}
 
 	/**
 		@brief		Pops a 16-bit value off the given byte sequence at the given zero-based index position.
-		@param[out]	outVal		Receives the 16-bit value popped from the byte sequence.
+		@param[out]	outVal		Receives the 16-bit value popped from the byte sequence. Unchanged if failed.
 		@param[in]	blob		The source byte sequence.
 		@param[out]	inOutNdx	On entry, contains the zero-based index position in the byte sequence from
 								which the 2 bytes comprising the value will be popped. On exit, contains the
 								index position immediately past the popped 2-byte value.
 		@param[in]	dontSwap	If false, the default, the value is byte-swapped after popping;
 								otherwise the value remains in native byte order.
+		@returns	True if successful; otherwise false.
 	**/
-	inline void POPU16 (uint16_t & outVal, const RPCBlob & blob, std::size_t & inOutNdx, const bool dontSwap = false)
+	inline bool POPU16 (uint16_t & outVal, const RPCBlob & blob, std::size_t & inOutNdx, const bool dontSwap = false)
 	{
 		uint16_t _u16(0);
 		UByte * _pU8(reinterpret_cast<UByte*>(&_u16));
+		NTV2_NUB_RGCHK(2)
 		_pU8[0] = blob.at(inOutNdx++); _pU8[1] = blob.at(inOutNdx++);
 		outVal = (NTV2HostIsBigEndian || dontSwap) ? _u16 : NTV2EndianSwap16BtoH(_u16);
+		return true;
 	}
 
 	/**
 		@brief		Pops a 32-bit value off the given byte sequence at the given zero-based index position.
-		@param[out]	outVal		Receives the 32-bit value popped from the byte sequence.
+		@param[out]	outVal		Receives the 32-bit value popped from the byte sequence. Unchanged if failed.
 		@param[in]	blob		The source byte sequence.
 		@param[out]	inOutNdx	On entry, contains the zero-based index position in the byte sequence from
 								which the 4 bytes comprising the value will be popped. On exit, contains the
 								index position immediately past the popped 4-byte value.
 		@param[in]	dontSwap	If false, the default, the value is byte-swapped after popping;
 								otherwise the value remains in native byte order.
+		@returns	True if successful; otherwise false.
 	**/
-	inline void POPU32 (uint32_t & outVal, const RPCBlob & blob, std::size_t & inOutNdx, const bool dontSwap = false)
+	inline bool POPU32 (uint32_t & outVal, const RPCBlob & blob, std::size_t & inOutNdx, const bool dontSwap = false)
 	{
 		uint32_t _u32(0);
 		UByte * _pU8(reinterpret_cast<UByte*>(&_u32));
+		NTV2_NUB_RGCHK(4)
 		_pU8[0] = blob.at(inOutNdx++); _pU8[1] = blob.at(inOutNdx++);
 		_pU8[2] = blob.at(inOutNdx++); _pU8[3] = blob.at(inOutNdx++);
 		outVal = (NTV2HostIsBigEndian || dontSwap) ? _u32 : NTV2EndianSwap32BtoH(_u32);
+		return true;
 	}
 
 	/**
 		@brief		Pops a 64-bit value off the given byte sequence at the given zero-based index position.
-		@param[out]	outVal		Receives the 64-bit value popped from the byte sequence.
+		@param[out]	outVal		Receives the 64-bit value popped from the byte sequence. Unchanged if failed.
 		@param[in]	blob		The source byte sequence.
 		@param[out]	inOutNdx	On entry, contains the zero-based index position in the byte sequence from
 								which the 8 bytes comprising the value will be popped. On exit, contains the
 								index position immediately past the popped 8-byte value.
 		@param[in]	dontSwap	If false, the default, the value is byte-swapped after popping;
 								otherwise the value remains in native byte order.
+		@returns	True if successful; otherwise false.
 	**/
-	inline void POPU64 (uint64_t & outVal, const RPCBlob & blob, std::size_t & inOutNdx, const bool dontSwap = false)
+	inline bool POPU64 (uint64_t & outVal, const RPCBlob & blob, std::size_t & inOutNdx, const bool dontSwap = false)
 	{
 		uint64_t _u64(0);
 		UByte * _pU8(reinterpret_cast<UByte*>(&_u64));
+		NTV2_NUB_RGCHK(8)
 		_pU8[0] = blob.at(inOutNdx++); _pU8[1] = blob.at(inOutNdx++);
 		_pU8[2] = blob.at(inOutNdx++); _pU8[3] = blob.at(inOutNdx++);
 		_pU8[4] = blob.at(inOutNdx++); _pU8[5] = blob.at(inOutNdx++);
 		_pU8[6] = blob.at(inOutNdx++); _pU8[7] = blob.at(inOutNdx++);
 		outVal = (NTV2HostIsBigEndian || dontSwap) ? _u64 : NTV2EndianSwap64BtoH(_u64);
+		return true;
 	}
 	///@}
 

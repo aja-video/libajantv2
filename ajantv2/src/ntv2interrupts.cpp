@@ -21,7 +21,7 @@ bool CNTV2Card::EnableInterrupt (const INTERRUPT_ENUMS id)
 {
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
-	{	NTV2ConfigureInterrupt msg;
+	{	NTV2ConfigureInterrupt msg(this);
 		return _pRPCAPI->NTV2MessageRemote(msg.doEnable(id))  &&  msg.isSuccess();
 	}
 #endif// defined(NTV2_NUB_CLIENT_SUPPORT)
@@ -53,7 +53,7 @@ bool CNTV2Card::DisableInterrupt (const INTERRUPT_ENUMS id)
 		return true;	//	Can't disable input/output interrupts
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
-	{	NTV2ConfigureInterrupt msg;
+	{	NTV2ConfigureInterrupt msg(this);
 		return _pRPCAPI->NTV2MessageRemote(msg.doDisable(id))  &&  msg.isSuccess();
 	}
 #endif// defined(NTV2_NUB_CLIENT_SUPPORT)

@@ -424,7 +424,7 @@ bool CNTV2DriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterrupt,	
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
 	{
-		NTV2ConfigureInterrupt msg;
+		NTV2ConfigureInterrupt msg(this);
 		if (!_pRPCAPI->NTV2MessageRemote(msg.doGetCount(eInterrupt)))
 			return false;
 		outCount = msg.count();

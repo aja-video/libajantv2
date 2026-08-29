@@ -32,7 +32,7 @@ bool CNTV2Card::SubscribeEvent (const INTERRUPT_ENUMS id)
 		{DIFAIL("Cannot subscribe to '" << NTV2CfgInterrupt::IntName(id) << "' -- bad interrupt ID");  return false;}
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
-	{	NTV2ConfigureInterrupt msg;
+	{	NTV2ConfigureInterrupt msg(this);
 		return _pRPCAPI->NTV2MessageRemote(msg.doSubscribe(id))  &&  msg.isSuccess();
 	}
 #endif// defined(NTV2_NUB_CLIENT_SUPPORT)
@@ -68,7 +68,7 @@ bool CNTV2Card::UnsubscribeEvent (const INTERRUPT_ENUMS id)
 		{DIFAIL("Cannot unsubscribe from '" << NTV2CfgInterrupt::IntName(id) << "' -- bad interrupt ID");  return false;}
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
-	{	NTV2ConfigureInterrupt msg;
+	{	NTV2ConfigureInterrupt msg(this);
 		return _pRPCAPI->NTV2MessageRemote(msg.doUnsubscribe(id))  &&  msg.isSuccess();
 	}
 #endif// defined(NTV2_NUB_CLIENT_SUPPORT)

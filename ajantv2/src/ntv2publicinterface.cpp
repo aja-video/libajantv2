@@ -3847,7 +3847,7 @@ NTV2StringList NTV2ConfigInterrupt::IntNames (const uint64_t mask)
 	return strs;
 }
 
-NTV2ConfigInterrupt::NTV2ConfigureInterrupt ()
+NTV2ConfigInterrupt::NTV2ConfigureInterrupt (const void * pClient)
 	:	mHeader	(NTV2_TYPE_CONFIGINTERRUPT, sizeof(NTV2ConfigureInterrupt)),
 		mOperation		(kOpINVALID),
 		mFlags			(0),
@@ -3855,6 +3855,7 @@ NTV2ConfigInterrupt::NTV2ConfigureInterrupt ()
 		mResult			(0),
 		mInterruptIDs	(0),
 		mEventHandle	(0),
+		mClientID		(uint64_t(pClient)),
 		mCount			(0),
 		mHandles		(nullptr,0)
 {
@@ -3862,7 +3863,7 @@ NTV2ConfigInterrupt::NTV2ConfigureInterrupt ()
 	NTV2_ASSERT_STRUCT_VALID;
 }
 
-ostream & NTV2ConfigureInterrupt::Print (ostream & oss) const
+ostream & NTV2ConfigureInterrupt::print (ostream & oss) const
 {
 	oss << mHeader;
 	if (isValid())
@@ -3871,6 +3872,8 @@ ostream & NTV2ConfigureInterrupt::Print (ostream & oss) const
 		oss << " id=" << IntName(interruptID());
 		if (flags())
 			oss << " flgs=" << xHEX0N(mFlags,8);
+		if (clientID())
+			oss << " " << HEX(clientID());
 		oss << " res=" << DEC(mResult);
 		if (interruptIDs())
 			oss	<< " ids=" << aja::join(IntNames(interruptIDs()),",");
@@ -3885,7 +3888,7 @@ ostream & NTV2ConfigureInterrupt::Print (ostream & oss) const
 
 ostream & operator << (ostream & oss, const NTV2ConfigureInterrupt & msg)
 {
-	return msg.Print(oss);
+	return msg.print(oss);
 }
 
 
@@ -4205,43 +4208,40 @@ using namespace ntv2nub;
 								+ mHandles.GetByteCount());	//	NTV2Buffer field
 		if (outBlob.capacity() < totBytes)
 			outBlob.reserve(totBytes);
-		if (!NTV2HostIsBigEndian)
-		{	//	All of my NTV2Buffers store arrays of ULWord64s that must be BigEndian BEFORE encoding into outBlob...
-			mHandles.ByteSwap64();
-		}
-		bool ok = mHeader.RPCEncode(outBlob);					//	NTV2_HEADER		mHeader
+		bool ok = true;
+		if (!NTV2HostIsBigEndian && mHandles)
+			ok &= mHandles.ByteSwap64();	//	mHandles is array of ULWord64s that must be BigEndian BEFORE encoding into outBlob
+		ok &= mHeader.RPCEncode(outBlob);						//	NTV2_HEADER		mHeader
 		PUSHU32(mOperation, outBlob);							//		ULWord			mOperation
 		PUSHU32(mFlags, outBlob);								//		ULWord			mFlags
 		PUSHU32(mInterruptID, outBlob);							//		ULWord			mInterruptID
 		PUSHU32(mResult, outBlob);								//		ULWord			mResult
 		PUSHU64(mInterruptIDs, outBlob);						//		ULWord64		mInterruptIDs
 		PUSHU64(mEventHandle, outBlob);							//		ULWord64		mEventHandle
+		PUSHU64(mClientID, outBlob);							//		ULWord64		mClientID
 		PUSHU32(mCount, outBlob);								//		ULWord			mCount
 		ok &= mHandles.RPCEncode(outBlob);						//		NTV2Buffer		mHandles
 		ok &= mTrailer.RPCEncode(outBlob);						//	NTV2_TRAILER	mTrailer
-		if (!NTV2HostIsBigEndian  &&  !ok)
-		{	//	FAILED:  Un-byteswap NTV2Buffer data...
-			mHandles.ByteSwap64();
-		}
+		if (!NTV2HostIsBigEndian  &&  !ok  &&  mHandles)
+			ok &= mHandles.ByteSwap64();	//	FAILED:  Un-byteswap NTV2Buffer data
 		return ok;
 	}
 
 	bool NTV2ConfigureInterrupt::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{
 		bool ok = mHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER		mHeader
-		POPU32(mOperation, inBlob, inOutIndex);					//		ULWord			mOperation
-		POPU32(mFlags, inBlob, inOutIndex);						//		ULWord			mFlags
-		POPU32(mInterruptID, inBlob, inOutIndex);				//		ULWord			mInterruptID
-		POPU32(mResult, inBlob, inOutIndex);					//		ULWord			mResult
-		POPU64(mInterruptIDs, inBlob, inOutIndex);				//		ULWord64		mInterruptIDs
-		POPU64(mEventHandle, inBlob, inOutIndex);				//		ULWord64		mEventHandle
-		POPU32(mCount, inBlob, inOutIndex);						//		ULWord			mCount
+		ok &= POPU32(mOperation, inBlob, inOutIndex);			//		ULWord			mOperation
+		ok &= POPU32(mFlags, inBlob, inOutIndex);				//		ULWord			mFlags
+		ok &= POPU32(mInterruptID, inBlob, inOutIndex);			//		ULWord			mInterruptID
+		ok &= POPU32(mResult, inBlob, inOutIndex);				//		ULWord			mResult
+		ok &= POPU64(mInterruptIDs, inBlob, inOutIndex);		//		ULWord64		mInterruptIDs
+		ok &= POPU64(mEventHandle, inBlob, inOutIndex);			//		ULWord64		mEventHandle
+		ok &= POPU64(mClientID, inBlob, inOutIndex);			//		ULWord64		mClientID
+		ok &= POPU32(mCount, inBlob, inOutIndex);				//		ULWord			mCount
 		ok &= mHandles.RPCDecode(inBlob, inOutIndex);			//		NTV2Buffer		mHandles
 		ok &= mTrailer.RPCDecode(inBlob, inOutIndex);			//	NTV2_TRAILER	mTrailer
 		if (!NTV2HostIsBigEndian)
-		{	//	Re-byteswap NTV2Buffer data after decoding...
-			mHandles.ByteSwap64();
-		}
+			mHandles.ByteSwap64();	//	Re-byteswap NTV2Buffer data after decoding
 		return ok;
 	}
 

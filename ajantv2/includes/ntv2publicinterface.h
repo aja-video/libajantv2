@@ -7976,13 +7976,14 @@ typedef enum
 					ULWord				mResult;				///< @brief Out: 0=false (fail), 1 or non-zero == true (success)
 					ULWord64			mInterruptIDs;			///< @brief Out: bitmap of enabled interrupt IDs
 					ULWord64			mEventHandle;			///< @brief In: handle to subscribe if kFlagMaskCreateHandle bit is clear
+					ULWord64			mClientID;				///< @brief In: client identifier
 					ULWord				mCount;					///< @brief In: set interrupt count;  Out: requested count
 					NTV2Buffer			mHandles;				///< @brief Optional buffer to store subscribed HANDLEs
 					ULWord				mSpares[32];			///< @brief Reserved for future use
 				NTV2_TRAILER		mTrailer;				///< @brief The common structure trailer -- ALWAYS LAST!
 
 			#if !defined (NTV2_BUILDING_DRIVER)
-				explicit	NTV2ConfigureInterrupt();		///< @brief Default constructor
+				explicit	NTV2ConfigureInterrupt(const void * pClient = nullptr);	///< @brief Default ctor, optionally set clientID if needed
 				inline		~NTV2ConfigureInterrupt()	{}	///< @brief Destructor
 
 				//	SUPPORTED OPERATIONS
@@ -8007,11 +8008,12 @@ typedef enum
 				inline ULWord			flags (void) const			{return mFlags;}			///< @return	my option flags
 				inline INTERRUPT_ENUMS	interruptID (void) const	{return INTERRUPT_ENUMS(mInterruptID);}		///< @returns	my interrupt ID of interest
 				inline uint64_t			interruptIDs (void) const	{return mInterruptIDs;}		///< @returns	my interrupt IDs bitmap (a set of unique interrupt IDs)
-				inline bool				isValid (void) const		{return NTV2_IS_VALID_INTERRUPT_ENUM(interruptID()) && (operation() >= kOpFIRST && operation() <= kOpLAST);}		///< @return	True if I'm valid
+				inline bool				isValid (void) const		{return mHeader.IsValid() && mTrailer.IsValid() && mHeader.GetType() == NTV2_TYPE_CONFIGINTERRUPT  &&  NTV2_IS_VALID_INTERRUPT_ENUM(interruptID()) && (operation() >= kOpFIRST && operation() <= kOpLAST);}		///< @return	True if I'm valid
 				inline operator			bool() const				{return isValid();}			///< @return	True if I'm valid (cast to bool)
 				inline bool				isSuccess (void) const		{return mResult ? true : false;}	///< @returns	true if my mResult is non-zero; otherwise false (if zero)
 				inline	operator		NTV2_HEADER*()				{return reinterpret_cast<NTV2_HEADER*>(this);}	///< @returns	my starting address casted to an NTV2_HEADER pointer
-				std::ostream &			Print (std::ostream & oss) const;	///< @brief	prints a human-readable representation of me to the given output stream
+				std::ostream &			print (std::ostream & oss) const;	///< @brief	prints a human-readable representation of me to the given output stream
+				inline uint64_t			clientID (void) const		{return mClientID;}			///< @returns	my client ID
 				inline ULWord			count (void) const			{return mCount;}			///< @returns	count value
 				inline size_t			maxHandleCapacity (void) const	{return mHandles.GetByteCount() / sizeof(uint64_t);}	///< @return	number of event HANDLEs in mOutHandles NTV2Buffer
 				inline HANDLE			eventHandle (const INTERRUPT_ENUMS id) const	{return isValid() && mHandles && size_t(id) < maxHandleCapacity() ? HANDLE(mHandles.U64(int(id))) : HANDLE(0);}	///< @returns	interrupt event handle
@@ -8039,6 +8041,7 @@ typedef enum
 				inline NTV2ConfigureInterrupt &	setResult		(const ULWord val)			{mResult = val;  return *this;}					///< @brief	Sets my mResult
 				inline NTV2ConfigureInterrupt &	setFail			(void)						{return setResult(0);}							///< @brief	Zeroes my mResult (indicating failure)
 				inline NTV2ConfigureInterrupt &	setSuccess		(void)						{return setResult(1);}							///< @brief	Sets my mResult to 1 (non-zero indicates success)
+				inline NTV2ConfigureInterrupt &	setClientID		(const uint64_t id)			{mClientID = id;  return *this;}				///< @brief	Sets my mClientID
 				inline NTV2ConfigureInterrupt &	setCount		(const ULWord val)			{mCount = val;  return *this;}					///< @brief	Sets my mCount
 				inline NTV2ConfigureInterrupt &	setOperation	(const ULWord op)			{mOperation = op;  return *this;}				///< @brief	Sets my operation
 				inline NTV2ConfigureInterrupt &	setInterruptID	(const INTERRUPT_ENUMS id)	{mInterruptID = ULWord(id);  return *this;}		///< @brief	Sets my interruptID
