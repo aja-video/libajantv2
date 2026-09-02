@@ -1395,7 +1395,7 @@ bool CNTV2WinDriverInterface::NTV2Message (NTV2_HEADER * pInMessage)
 	const bool ok = DeviceIoControl(_hDevice, IOCTL_AJANTV2_MESSAGE, pInMessage, pInMessage->GetSizeInBytes (), pInMessage, pInMessage->GetSizeInBytes(), &dwBytesReturned, NULL);
 	AJADebug::StatTimerStop(AJA_DebugStat_NTV2Message);
 	if (!ok)
-		{WDIFAIL("Failed: " << ::GetKernErrStr(GetLastError()));  return false;}
+		{WDIFAIL("Failed: " << ::GetKernErrStr(GetLastError()) << ": " << *pInMessage);  return false;}
 	return true;
 }
 
