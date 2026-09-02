@@ -41,10 +41,8 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     add_subdirectory(ntv2vcam)
 endif()
 
-if(NOT AJANTV2_BUILD_OPENSOURCE)
-    add_subdirectory(ntv2ccgrabber)  
-    add_subdirectory(ntv2ccplayer)
-endif()
+add_subdirectory(ntv2ccgrabber)  
+add_subdirectory(ntv2ccplayer)
 
 if (NOT AJA_DISABLE_AMD)
     add_subdirectory(AMD)
