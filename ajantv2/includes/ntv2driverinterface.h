@@ -322,7 +322,8 @@ class AJAExport CNTV2DriverInterface
 		AJA_VIRTUAL bool	ConfigureInterrupt (const bool bEnable,  const INTERRUPT_ENUMS eInterruptType);
 
 		/**
-			@brief	Answers with the number of interrupts of the given type processed by the driver.
+			@brief	Answers with the current total number of interrupts of the given type processed by the driver's interrupt
+					service routine (ISR).
 			@param[in]	eInterrupt	The interrupt type of interest.
 			@param[out]	outCount	Receives the count value.
 			@return	True if successful;  otherwise false.
@@ -339,7 +340,8 @@ class AJAExport CNTV2DriverInterface
 		AJA_VIRTUAL bool	WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt, const ULWord timeOutMs = 68);
 
 		/**
-			@brief		Answers with the number of interrupt events that I successfully waited for.
+			@brief		Answers with the current number of interrupt events that this CNTV2Card/CNTV2DriverInterface instance
+						successfully waited for.
 			@param[in]	inEventCode		Specifies the interrupt of interest.
 			@param[out]	outCount		Receives the number of interrupt events that I successfully waited for.
 			@return		True if successful;  otherwise false.
@@ -348,7 +350,8 @@ class AJAExport CNTV2DriverInterface
 		AJA_VIRTUAL bool	GetInterruptEventCount (const INTERRUPT_ENUMS inEventCode, ULWord & outCount);
 
 		/**
-			@brief		Resets my interrupt event tally for the given interrupt type. (This is my count of the number of successful event waits.)
+			@brief		Sets the interrupt event tally for the given interrupt type for this CNTV2Card/CNTV2DriverInterface
+						instance to the given value.
 			@param[in]	inEventCode		Specifies the interrupt type.
 			@param[in]	inCount			Specifies the new count value. Use zero to reset the tally.
 			@return		True if successful;  otherwise false.
