@@ -252,7 +252,7 @@ bool SetAncExtWriteParams(Ntv2SystemContext* context, NTV2Channel channel, ULWor
 {
 	//Calculate where ANC Extractor will put the data
 	ULWord nextFrame = frameNumber+1;//This is so the next calculation will point to the beginning of the next frame - subtract offset for memory start
-	ULWord endOfFrameLocation = GetFrameBufferSize(context, (channel < NTV2_CHANNEL5) ? NTV2_CHANNEL1 : NTV2_CHANNEL5)* nextFrame;
+	ULWord endOfFrameLocation = GetFrameBufferSize(context, channel) * nextFrame;
 	ULWord ANCStartMemory = endOfFrameLocation - ntv2ReadVirtualRegister(context, kVRegAncField1Offset);
 	ULWord ANCStopMemory = endOfFrameLocation - ntv2ReadVirtualRegister(context, kVRegAncField2Offset);
 	ANCStopMemory -= 1;
@@ -265,7 +265,7 @@ bool SetAncExtField2WriteParams(Ntv2SystemContext* context, NTV2Channel channel,
 {
 	//Calculate where ANC Extractor will put the data
 	ULWord nextFrame = frameNumber+1;//This is so the next calculation will point to the beginning of the next frame - subtract offset for memory start
-	ULWord endOfFrameLocation = GetFrameBufferSize(context, (channel < NTV2_CHANNEL5) ? NTV2_CHANNEL1 : NTV2_CHANNEL5)* nextFrame;
+	ULWord endOfFrameLocation = GetFrameBufferSize(context, channel) * nextFrame;
 	ULWord ANCStartMemory = endOfFrameLocation - ntv2ReadVirtualRegister(context, kVRegAncField2Offset);
 	ULWord ANCStopMemory = endOfFrameLocation - 1;
 	SetAncExtField2StartAddr(context, channel, ANCStartMemory);
@@ -629,7 +629,7 @@ bool SetAncInsReadParams(Ntv2SystemContext* context, NTV2Channel channel, ULWord
 {
 	//Calculate where ANC Extractor will put the data
 	ULWord nextFrame = frameNumber+1; //Start at the beginning of next frame and subtract offset
-	ULWord frameLocation = GetFrameBufferSize(context, channel < NTV2_CHANNEL5 ? NTV2_CHANNEL1 : NTV2_CHANNEL5)* (nextFrame);
+	ULWord frameLocation = GetFrameBufferSize(context, channel) * nextFrame;
 	ULWord ANCStartMemory = frameLocation - ntv2ReadVirtualRegister(context, kVRegAncField1Offset);
 	ULWord ancField1Size = field1Size;
 	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(context, kRegBoardID);
@@ -664,7 +664,7 @@ bool SetAncInsReadParams(Ntv2SystemContext* context, NTV2Channel channel, ULWord
 bool SetAncInsReadField2Params(Ntv2SystemContext* context, NTV2Channel channel, ULWord frameNumber, ULWord field2Size)
 {
 	ULWord nextFrame = frameNumber+1; //Start at the beginning of next frame and subtract offset
-	ULWord frameLocation = GetFrameBufferSize(context, channel < NTV2_CHANNEL5 ? NTV2_CHANNEL1 : NTV2_CHANNEL5)* (nextFrame);
+	ULWord frameLocation = GetFrameBufferSize(context, channel) * nextFrame;
 	ULWord ANCStartMemory = frameLocation - ntv2ReadVirtualRegister(context, kVRegAncField2Offset);
 	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(context, kRegBoardID);
 

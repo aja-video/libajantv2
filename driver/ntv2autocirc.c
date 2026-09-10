@@ -1910,7 +1910,7 @@ void BeginAutoCircTransfer(uint32_t frameNumber,
 	if (pAuto->circulateWithCustomAncData)
 	{
 		NTV2Channel channel = GetNTV2ChannelForNTV2Crosspoint(pAuto->channelSpec);
-		uint32_t frameSize = GetFrameBufferSize(pSysCon, (channel < NTV2_CHANNEL5) ? NTV2_CHANNEL1 : NTV2_CHANNEL5);
+		uint32_t frameSize = GetFrameBufferSize(pSysCon, channel);
 		pAuto->ancTransferOffset = frameSize - ntv2ReadVirtualRegister(pSysCon, kVRegAncField1Offset);
 		pAuto->ancField2TransferOffset = frameSize - ntv2ReadVirtualRegister(pSysCon, kVRegAncField2Offset);
 	}
