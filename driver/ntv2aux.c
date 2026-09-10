@@ -164,7 +164,7 @@ bool SetAuxExtWriteParams(Ntv2SystemContext* context, NTV2Channel channel, ULWor
 {
 	//Calculate where AUX Extractor will put the data
 	ULWord nextFrame = frameNumber+1;//This is so the next calculation will point to the beginning of the next frame - subtract offset for memory start
-	ULWord endOfFrameLocation = GetFrameBufferSize(context, (channel < NTV2_CHANNEL5) ? NTV2_CHANNEL1 : NTV2_CHANNEL5)* nextFrame;
+	ULWord endOfFrameLocation = GetFrameBufferSize(context, channel) * nextFrame;
 	ULWord AUXStartMemory = endOfFrameLocation - ntv2ReadVirtualRegister(context, kVRegAncField1Offset);
 	ULWord AUXStopMemory = endOfFrameLocation - ntv2ReadVirtualRegister(context, kVRegAncField2Offset);
 	AUXStopMemory -= 1;
@@ -177,7 +177,7 @@ bool SetAuxExtField2WriteParams(Ntv2SystemContext* context, NTV2Channel channel,
 {
 	//Calculate where AUX Extractor will put the data
 	ULWord nextFrame = frameNumber+1;//This is so the next calculation will point to the beginning of the next frame - subtract offset for memory start
-	ULWord endOfFrameLocation = GetFrameBufferSize(context, (channel < NTV2_CHANNEL5) ? NTV2_CHANNEL1 : NTV2_CHANNEL5)* nextFrame;
+	ULWord endOfFrameLocation = GetFrameBufferSize(context, channel) * nextFrame;
 	ULWord AUXStartMemory = endOfFrameLocation - ntv2ReadVirtualRegister(context, kVRegAncField2Offset);
 	ULWord AUXStopMemory = endOfFrameLocation - 1;
 	SetAuxExtField2StartAddr(context, channel, AUXStartMemory);

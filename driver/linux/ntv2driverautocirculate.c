@@ -4191,7 +4191,7 @@ OemBeginAutoCirculateTransfer_Ex (ULWord deviceNumber,
 	if (pAuto->circulateWithCustomAncData)
 	{
 		NTV2Channel channel = GetNTV2ChannelForNTV2Crosspoint(pAuto->channelSpec);
-		ULWord frameSize = GetFrameBufferSize(&systemContext, (channel < NTV2_CHANNEL5) ? NTV2_CHANNEL1 : NTV2_CHANNEL5);
+		ULWord frameSize = GetFrameBufferSize(&systemContext, channel);
 		pAuto->ancTransferOffset = frameSize - ReadRegister(deviceNumber, kVRegAncField1Offset, NO_MASK, NO_SHIFT);
 		pAuto->ancField2TransferOffset = frameSize - ReadRegister(deviceNumber, kVRegAncField2Offset, NO_MASK, NO_SHIFT);
 	}
