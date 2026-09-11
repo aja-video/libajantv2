@@ -63,6 +63,11 @@ else()
     if(NOT DEFINED AJANTV2_MBEDTLS_URL)
         set(AJANTV2_MBEDTLS_URL https://github.com/aja-video/mbedtls.git)
     endif()
+    # GIT_TAG is pinned to a commit hash (head of branch fix-win-dll-cmake) rather than the branch name.
+    # A branch name makes the update step "git fetch" on every build, which fails when offline.
+    if (NOT DEFINED AJANTV2_MBEDTLS_TAG)
+        set(AJANTV2_MBEDTLS_TAG a2bab1f17d1254f9a0ca35acf06f051239cfac53)
+    endif()
     message(STATUS "NTV2 SDK will load signed 3rd-party plugins")
 
     set(MBEDTLS_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/mbedtls-install)
@@ -87,7 +92,7 @@ else()
     ExternalProject_Add(
         mbedtls
         GIT_REPOSITORY ${AJANTV2_MBEDTLS_URL}
-        GIT_TAG fix-win-dll-cmake
+        GIT_TAG ${AJANTV2_MBEDTLS_TAG}
         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${MBEDTLS_INSTALL_DIR}
                     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
                     -DENABLE_TESTING=OFF 
