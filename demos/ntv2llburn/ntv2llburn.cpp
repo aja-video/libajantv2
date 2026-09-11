@@ -298,12 +298,8 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 	mDevice.SetFrameBufferFormat (mConfig.fInputChannel, mConfig.fPixelFormat);
 	mDevice.SetFrameBufferFormat (mConfig.fOutputChannel, mConfig.fPixelFormat);
 
-	//	Enable and subscribe to the interrupts for the channel to be used...
-	mDevice.EnableInputInterrupt (mConfig.fInputChannel);
+	//	Subscribe to the interrupt events to be used...
 	mDevice.SubscribeInputVerticalEvent (mConfig.fInputChannel);
-
-	//	Enable and subscribe to the output interrupts (though it's enabled by default)...
-	mDevice.EnableOutputInterrupt (mConfig.fOutputChannel);
 	mDevice.SubscribeOutputVerticalEvent (mConfig.fOutputChannel);
 
 	//	Set the Frame Store modes

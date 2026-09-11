@@ -167,10 +167,8 @@ AJAStatus NTV2FieldBurn::SetupVideo (void)
 	}
 	mDevice.EnableChannel(mConfig.fOutputChannel);	//	Enable the output frame buffer
 
-	//	Enable/subscribe interrupts...
-	mDevice.EnableInputInterrupt(mConfig.fInputChannel);
+	//	Subscribe interrupts...
 	mDevice.SubscribeInputVerticalEvent(mConfig.fInputChannel);
-	mDevice.EnableOutputInterrupt(mConfig.fOutputChannel);
 	mDevice.SubscribeOutputVerticalEvent(mConfig.fOutputChannel);
 
 	//	Pick an appropriate output spigot based on the output channel...

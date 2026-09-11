@@ -171,10 +171,8 @@ AJAStatus NTV2Burn::SetupVideo (void)
 	if (mConfig.IsVerbose())
 		cout << "## NOTE:  Input FrameStore chosen to be " << mConfig.IChStr() << endl;
 
-	//	Enable/subscribe interrupts...
-	mDevice.EnableInputInterrupt(mConfig.fInputChannel);
+	//	Subscribe interrupts...
 	mDevice.SubscribeInputVerticalEvent(mConfig.fInputChannel);
-	mDevice.EnableOutputInterrupt(NTV2_CHANNEL1);
 	mDevice.SubscribeOutputVerticalEvent(NTV2_CHANNEL1);
 
 	//	Flip the input spigot to "receive" if necessary...

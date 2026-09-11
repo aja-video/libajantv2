@@ -321,15 +321,9 @@ AJAStatus NTV2Burn4KQuadrant::SetupOutputVideo (void)
 	//	If using a single-device, then subscribe the output channel to
 	//	channel 5's interrupts, otherwise channel 1's...
 	if (mSingleDevice)
-	{
-		mOutputDevice.EnableOutputInterrupt (NTV2_CHANNEL5);
 		mOutputDevice.SubscribeOutputVerticalEvent (NTV2_CHANNEL5);
-	}
 	else
-	{
-		mOutputDevice.EnableOutputInterrupt(NTV2_CHANNEL1);
 		mOutputDevice.SubscribeOutputVerticalEvent (NTV2_CHANNEL1);
-	}
 
 	mOutputDevice.SetEnableVANCData (false, false);
 
