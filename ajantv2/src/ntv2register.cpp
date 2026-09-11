@@ -4699,7 +4699,7 @@ bool CNTV2Card::ReadSDIStatistics (NTV2SDIInStatistics & outStats)
 		return false;	//	Device not open!
 	if (!IsSupported(kDeviceCanDoSDIErrorChecks))
 		return false;	//	Device doesn't support it!
-	if (!NTV2Message(reinterpret_cast<NTV2_HEADER*>(&outStats)))
+	if (!NTV2Message(outStats))
 	{
 		const ULWord numSDIInputs(GetNumSupported(kDeviceGetNumVideoInputs));
 		NTV2RegisterReads sdiStatRegInfos;

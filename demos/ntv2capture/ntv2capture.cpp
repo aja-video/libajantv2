@@ -478,11 +478,11 @@ void NTV2Capture::CaptureFrames (void)
 		if (mDevice.features().CanDoSDIErrorChecks() && NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource))
 		{
 			NTV2SDIInStatistics	sdiStats;
-			NTV2SDIInputStatus	inputStatus;
 			if (mDevice.ReadSDIStatistics(sdiStats))
 			{
+				NTV2SDIInputStatus inputStatus;
 				sdiStats.GetSDIInputStatus(inputStatus, UWord(::GetIndexForNTV2InputSource(mConfig.fInputSource)));
-				if (!inputStatus.mLocked)
+				if (!inputStatus.isLocked())
 					CAPWARN(inputStatus);
 			}
 		}

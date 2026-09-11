@@ -2554,19 +2554,20 @@ void NTV2SDIInStatistics::Clear(void)
 	NTV2_ASSERT_STRUCT_VALID;
 	if (mInStatistics.IsNULL())
 		return;
-	NTV2SDIInputStatus * pArray(reinterpret_cast <NTV2SDIInputStatus *> (mInStatistics.GetHostPointer()));
-	for (int i = 0; i < NTV2_MAX_NUM_CHANNELS; i++)
+	NTV2SDIInputStatus * pArray(mInStatistics);
+	const ULWord numElements(mInStatistics.GetByteCount() / sizeof(NTV2SDIInputStatus));
+	for (ULWord i = 0; i < numElements; i++)
 		pArray[i].Clear();
 }
 
 bool NTV2SDIInStatistics::GetSDIInputStatus(NTV2SDIInputStatus & outStatus, const UWord inSDIInputIndex0)
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	const ULWord		numElements(mInStatistics.GetByteCount() / sizeof(NTV2SDIInputStatus));
-	const NTV2SDIInputStatus *	pArray(reinterpret_cast <const NTV2SDIInputStatus *> (mInStatistics.GetHostPointer()));
-	outStatus.Clear();
-	if (!pArray)
+	if (!mInStatistics)
 		return false;
+	const ULWord numElements(mInStatistics.GetByteCount() / sizeof(NTV2SDIInputStatus));
+	const NTV2SDIInputStatus * pArray(mInStatistics);
+	outStatus.Clear();
 	if (numElements != 8)
 		return false;
 	if (inSDIInputIndex0 >= numElements)
@@ -2579,10 +2580,10 @@ NTV2SDIInputStatus &	NTV2SDIInStatistics::operator [] (const size_t inSDIInputIn
 {
 	NTV2_ASSERT_STRUCT_VALID;
 	static NTV2SDIInputStatus dummy;
-	const ULWord	numElements(mInStatistics.GetByteCount() / sizeof(NTV2SDIInputStatus));
-	NTV2SDIInputStatus * pArray(reinterpret_cast<NTV2SDIInputStatus*>(mInStatistics.GetHostPointer()));
-	if (!pArray)
+	if (!mInStatistics)
 		return dummy;
+	NTV2SDIInputStatus * pArray(mInStatistics);
+	const ULWord numElements(mInStatistics.GetByteCount() / sizeof(NTV2SDIInputStatus));
 	if (numElements != 8)
 		return dummy;
 	if (inSDIInputIndex0 >= numElements)

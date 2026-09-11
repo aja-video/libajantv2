@@ -7158,32 +7158,38 @@ typedef enum
 			UWord			mCRCTallyB;				///< @brief The number of lines having a CRC error was detected in the "A" stream of the SDI link
 													///			since this tally was last reset.
 			ULWord			mUnlockTally;			///< @brief The number of times "RX Locked" went inactive since this tally was last reset.
-			//ULWord64		mFrameTally;			///< @brief The number of frames that have been detected on the SDI input since this tally was last reset.
 			ULWord64		mFrameRefClockCount;	///< @brief This count is incremented on each 148.xx reference clock, and latched at EAV for each frame.
 			ULWord64		mGlobalClockCount;		///< @brief This count is incremented on each 148.xx reference clock.
 			bool			mFrameTRSError;			///< @brief If true, SAV/EAV was missing, or the SDI framer had to realign, or "RX Locked" went
 													///			inactive. This is updated once per frame (unless vertical timing is absent on the input).
 			bool			mLocked;				///< @brief If true, a valid SDI transport was detected in the received data stream.
 													///			If false, at least 15 consecutive lines in the received stream had TRS errors.
-			bool			mVPIDValidA;			///< @brief If true, at least one valid SMPTE 352 packet was received over the last four VBI periods.
-			bool			mVPIDValidB;			///< @brief If true, at least one valid SMPTE 352 packet was received over the last four VBI periods.
+			bool			mVPIDValidA;			///< @brief If true, at least one valid SMPTE 352 packet was received on Link A over the last 4 VBI periods.
+			bool			mVPIDValidB;			///< @brief If true, at least one valid SMPTE 352 packet was received on Link B over the last 4 VBI periods.
 			#if !defined (NTV2_BUILDING_DRIVER)
+				explicit			NTV2SDIInputStatus ();								///< @brief Constructs a default NTV2SDIInputStatus.
+				void				Clear (void);										///< @brief Clears (zeroes) all of my member variables.
+				inline bool			isLocked (void) const		{return mLocked;}		///< @returns	true if a valid SDI transport was detected in the received data stream;
+																						///				otherwise at least 15 consecutive lines in the received stream had TRS errors
+				inline ULWord		unlockTally (void) const	{return mUnlockTally;}	///< @returns	the number of times "RX Locked" went inactive since last reset.
 				/**
-					@brief	Constructs a default NTV2SDIInputStatus.
+					@returns	the number of lines having a CRC error detected in the given stream since last reset.
+					@param[in]	ndx		Specifies the link index (0=="A", 1=="B"). Defaults to Link "A".
 				**/
-				explicit			NTV2SDIInputStatus ();
-
+				inline UWord		CRCLines (const UWord ndx = 0) const	{return ndx ? mCRCTallyB : mCRCTallyA;}
+				inline bool			hasFrameTRSError (void) const	{return mFrameTRSError;}	///< @returns	true if SAV/EAV missing or SDI framer had to realign, or "RX Locked" went inactive;
+																								///< 			(Updated once per frame unless timing is absent on input.)
 				/**
-					@brief	Constructs a default NTV2SDIInputStatus.
+					@returns	true if at least one valid SMPTE 352 packet was received on the given link over the last 4 VBI periods.
+					@param[in]	ndx		Specifies the link index (0=="A", 1=="B"). Defaults to Link "A".
 				**/
-				void				Clear (void);
-
+				inline bool			hasValidVPID (const UWord ndx = 0) const	{return ndx ? mVPIDValidB : mVPIDValidA;}
 				/**
 					@brief	Prints a human-readable representation of me into the given output stream.
-					@param	inOutStream		The output stream to receive my human-readable representation.
+					@param	oStream		The output stream to receive the information.
 					@return A reference to the given output stream.
 				**/
-				std::ostream &		Print (std::ostream & inOutStream) const;
+				std::ostream &		Print (std::ostream & oStream) const;
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
 		NTV2_STRUCT_END (NTV2SDIInputStatus)
 
@@ -8201,6 +8207,11 @@ typedef enum
 					@return A reference to the output stream.
 				**/
 				std::ostream &	Print (std::ostream & inOutStream) const;
+
+				/**
+					@return		My address casted to an NTV2_HEADER pointer.
+				**/
+				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 18.1
 
 				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)
