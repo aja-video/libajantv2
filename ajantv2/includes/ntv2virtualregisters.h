@@ -13,15 +13,12 @@
 #define MAX_NUM_VIRTUAL_REGISTERS	1024	//	Starting in SDK 12.6, there's room for 1024 virtual registers
 
 /**
-	@brief	Virtual registers are used to pass 32-bit values to/from the device driver, and aren't always
-			associated with hardware registers.
+	@brief	Virtual registers are used to pass 32-bit values to/from the device driver, independent of hardware registers.
 
 	@note	Drivers after SDK 12.5.x all allocate a 4K page for storing an array of 1024 x 4-byte integers.
-			OEM applications can store values in slots kVRegFirstOEM thru kVRegLast, inclusive.
-			AJA recommends storing at kVRegLast, kVRegLast-1, kVRegLast-2, etc., being careful
-			to never store anything below kVRegFirstOEM.
+			OEM applications can store values in slots kVRegFirstOEM thru kVRegLast (inclusive).
 
-	@note	AJA does not reserve virtual registers for OEMs, and thus, collisions may occur with other OEM applications.
+	@note	AJA does not reserve virtual registers for OEMs, and thus, collisions could occur with other OEM applications.
 **/
 typedef enum
 {
@@ -62,7 +59,7 @@ typedef enum
 	kVRegBitFileDownload					= VIRTUALREG_START+50,		// NTV2BitfileType
 	kVRegSaveRegistersToRegistry			= VIRTUALREG_START+51,		// no argument				
 	kVRegRecallRegistersFromRegistry		= VIRTUALREG_START+52,		// same address as above, on purpose
-	kVRegClearAllSubscriptions				= VIRTUALREG_START+53,		// NTV2BitfileType
+	kVRegClearAllSubscriptions				= VIRTUALREG_START+53,		// Forcibly clear all subscribed event handles
 	kVRegRestoreHardwareProcampRegisters	= VIRTUALREG_START+54,
 	kVRegAcquireReferenceCount				= VIRTUALREG_START+55,		// Acquire the board with a reference count on acquire
 	kVRegReleaseReferenceCount				= VIRTUALREG_START+56,
