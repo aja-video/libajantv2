@@ -6,14 +6,18 @@
 #
 # This file controls the SDK versioning
 #
-# Check in this file to update the major, minor, and point version numbers
+# Major, minor and point come from libajantv2/VERSION.txt. Bump that, not this.
 #
 # The build number will be set by the TeamCity automated builder
 #
 
-SDKVER_MAJ ?= 18
-SDKVER_MIN ?=  0
-SDKVER_PNT ?=  0
+# Resolves to libajantv2/VERSION.txt, relative to this file rather than the cwd.
+NTV2_VERSION_FILE := $(strip $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST)))))/../VERSION.txt
+NTV2_VERSION := $(strip $(shell cat $(NTV2_VERSION_FILE)))
+
+SDKVER_MAJ ?= $(word 1,$(subst ., ,$(NTV2_VERSION)))
+SDKVER_MIN ?= $(word 2,$(subst ., ,$(NTV2_VERSION)))
+SDKVER_PNT ?= $(word 3,$(subst ., ,$(NTV2_VERSION)))
 
 ifeq ($(TC_BUILD_COUNTER),)
   SDKVER_BLD = 0

@@ -352,6 +352,7 @@ dkms-pkg:
 	@mkdir -p tmp/$(DKMSDIR)/libajantv2/driver/linux
 	@mkdir -p tmp/$(DKMSDIR)/libajantv2/ajantv2/includes
 	@mkdir -p tmp/$(DKMSDIR)/libajantv2/ajantv2/src/lin
+	@cp $(A_ROOT)/VERSION.txt tmp/$(DKMSDIR)/libajantv2/
 	@for i in "$(AJANTV2INCS)" ; do \
 		cp $$i tmp/$(DKMSDIR)/libajantv2/ajantv2/includes/ ; \
 	done
