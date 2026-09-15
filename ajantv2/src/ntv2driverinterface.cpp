@@ -60,8 +60,10 @@ using namespace std;
 
 #if defined(AJA_LINUX)
 	#define KVRegAcquireRefCount	kVRegAcquireLinuxReferenceCount
+	#define KVRegReleaseRefCount	kVRegReleaseLinuxReferenceCount
 #else
 	#define KVRegAcquireRefCount	kVRegAcquireReferenceCount
+	#define KVRegReleaseRefCount	kVRegReleaseReferenceCount
 #endif
 
 //	Stats
@@ -1152,7 +1154,7 @@ bool CNTV2DriverInterface::AcquireStreamForApplicationWithReference (const ULWor
 		}
 		else if (curAppCode == inAppCode  &&  curAppPID == ULWord(inAppPID))
 		{	// Process already acquired, so bump the count
-			result = WriteRegister(KVRegAcquireRefCount, 1);
+			result = WriteRegister(KVRegAcquireRefCount, 1);	// Increment
 			break;
 		}
 		// Someone else has the board, so wait and try again
@@ -1173,7 +1175,7 @@ bool CNTV2DriverInterface::ReleaseStreamForApplicationWithReference (const ULWor
 	if (currentCode == inAppCode  &&  currentPID == ULWord(inAppPID))
 	{
 		if (currentCount > 1)
-			result = WriteRegister(kVRegReleaseLinuxReferenceCount, 1);
+			result = WriteRegister(KVRegReleaseRefCount, 1);	//	Decrement register KVRegAcquireRefCount (the "1" value is ignored)
 		else if (currentCount == 1)
 			result = ReleaseStreamForApplication(inAppCode, inAppPID);
 		else
@@ -1249,7 +1251,7 @@ bool CNTV2DriverInterface::ReleaseStreamForApplication (const ULWord inAppCode, 
 		return false;	//	Fail
 	}
 
-	WriteRegister(KVRegAcquireRefCount, 0);	//	OK to ignore result
+	WriteRegister(KVRegAcquireRefCount, 0);	//	Force to zero, OK to ignore result
 	ARINFO("Streaming app " << NTV2_HEADER::FourCCToString(inAppCode) << ", PID " << DEC(inAppPID)
 			<< " released, taskMode=" << ::NTV2TaskModeToString(NTV2TaskMode(curTaskMode),true));
 	return true;
@@ -1286,7 +1288,7 @@ bool CNTV2DriverInterface::SetStreamingApplication (const ULWord inAppCode, cons
 
 	// support for reference counting
 	if (inNewPID == 0)
-		WriteRegister(KVRegAcquireRefCount, 0);
+		WriteRegister(KVRegAcquireRefCount, 0);	// Force to zero, ignore any error result
 #endif	//	end		macOS driver implementation (adapted to use VRegs)
 }	//	SetStreamingApplication
 
