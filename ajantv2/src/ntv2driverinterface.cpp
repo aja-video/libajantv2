@@ -1097,7 +1097,8 @@ void CNTV2DriverInterface::setDeviceIndexNumber (const UWord num)
 {
 	if (_boardNumber != num)
 	{
-		VDNOTE(GetDescription() << ": patched device index from " << DEC(_boardNumber) << " to " << DEC(num));
+		if (IsRemote())		//	Log this only for remote/virtual devices
+			VDNOTE(GetDescription() << ": patched device index from " << DEC(_boardNumber) << " to " << DEC(num));
 		_boardNumber = num;
 	}
 	if (IsRemote())		//	Remote/virtual device?
@@ -1117,185 +1118,224 @@ const uint32_t	kAgentAppFcc (NTV2_FOURCC('A','j','a','A'));
 
 bool CNTV2DriverInterface::AcquireStreamForApplicationWithReference (const ULWord inAppCode, const int32_t inAppPID)
 {
-	ULWord svcInitialized(0);
+	ostringstream dev, appid, curid;
+	uint32_t curCode(0), curPID(0), refCnt(0), curTaskMode(0), svcInitialized(0);
+	ReadRegister(kVRegApplicationCode, curCode), ReadRegister(kVRegApplicationPID, curPID), ReadRegister(KVRegAcquireRefCount, refCnt), ReadRegister(kVRegEveryFrameTaskFilter, curTaskMode);
+	dev << ::NTV2DeviceIDToString(GetDeviceID()) << "-" << DEC(GetIndexNumber());
+	appid << "app " << NTV2_HEADER::FourCCToString(inAppCode) << " PID " << DEC(inAppPID);
+	curid << "current app " << NTV2_HEADER::FourCCToString(curCode) << " PID " << DEC(curPID) << " tm=" << ::NTV2TaskModeToString(NTV2TaskMode(curTaskMode),true) << " refCnt=" << DEC(refCnt);
 	if (ReadRegister(kVRegServicesInitialized, svcInitialized))
 		if (!svcInitialized)	//	if services have never initialized the device
 			if (inAppCode != kAgentAppFcc)	//	if not AJA Agent
-				ARWARN(::NTV2DeviceIDToString(GetDeviceID()) << "-" << DEC(GetIndexNumber())
-					<< " never initialized by AJAAgent, acquiring app " << NTV2_HEADER::FourCCToString(inAppCode) << ", PID " << DEC(inAppPID));
+				ARWARN(dev.str() << " never initialized by AJAAgent, acquiring " << appid.str());
 
-	uint32_t curAppCode(0), curAppPID(0), curTaskMode(0);
-	ReadRegister(kVRegApplicationCode, curAppCode) || ReadRegister(kVRegApplicationPID, curAppPID) || ReadRegister(kVRegEveryFrameTaskFilter, curTaskMode);
 
 	//	Check if owner is deceased
-	if (curAppPID  &&  !AJAProcess::IsValid(curAppPID))
+	if (/*curPID  &&*/  !AJAProcess::IsValid(curPID))
 	{
 		//	Process doesn't exist, so release it
-		ARINFO("Streaming app PID " << DEC(curAppPID) << " deceased, will release");
-		ReleaseStreamForApplication (curAppCode, int32_t(curAppPID));	//	ignore result, AJAAgent may have already done this
+		ARINFO(dev.str() << ": will release deceased " << curid.str());
+		ReleaseStreamForApplication (curCode, int32_t(curPID));	//	ignore result, AJAAgent may have already done this
 		//	Re-sample current appCode, appPID, taskMode...
-		ReadRegister(kVRegApplicationCode, curAppCode) || ReadRegister(kVRegApplicationPID, curAppPID) || ReadRegister(kVRegEveryFrameTaskFilter, curTaskMode);
+		ReadRegister(kVRegApplicationCode, curCode), ReadRegister(kVRegApplicationPID, curPID), ReadRegister(KVRegAcquireRefCount, refCnt), ReadRegister(kVRegEveryFrameTaskFilter, curTaskMode);
+		curid.str(""); curid << "current app " << NTV2_HEADER::FourCCToString(curCode) << " PID " << DEC(curPID) << " tm=" << ::NTV2TaskModeToString(NTV2TaskMode(curTaskMode),true) << " refCnt=" << DEC(refCnt);
 	}
+
 	bool result(false);
 	int count(0);
-
 	for (count = 0;  count < 20;  count++)
 	{
-		if (!curAppPID)
+		if (!curPID)
 		{
 			// Nothing has the board
+			ARDBG(dev.str() << ": try " << DEC(count) << ": no current app, will set app code for " << appid.str());
 			if (!WriteRegister(kVRegApplicationCode, inAppCode))	// Set app code
 				break;  //  fail
 			// Just in case this is not zero
-			WriteRegister(KVRegAcquireRefCount, 0);	// Force to zero
-			WriteRegister(KVRegAcquireRefCount, 1);	// Increment to 1
+			result = WriteRegister(KVRegAcquireRefCount, 0);	// Force to zero
+			ARDBG(dev.str() << ": try " << DEC(count) << ": force refCnt to zero for " << appid.str() << (result ? " GOOD" : " FAILED"));
+			result = WriteRegister(KVRegAcquireRefCount, 1);	// Increment to 1
+			ARDBG(dev.str() << ": try " << DEC(count) << ": increment refCnt for " << appid.str() << (result ? " GOOD" : " FAILED"));
 			result = WriteRegister(kVRegApplicationPID, ULWord(inAppPID));	// Set PID
+//			ARDBG(dev.str() << ": try " << DEC(count) << ": set PID for " << appid.str() << (result ? " GOOD" : " FAILED"));
 			break;
 		}
-		else if (curAppCode == inAppCode  &&  curAppPID == ULWord(inAppPID))
+		else if (curCode == inAppCode  &&  curPID == ULWord(inAppPID))
 		{	// Process already acquired, so bump the count
+			ARDBG(dev.str() << ": try " << DEC(count) << ": " << appid.str() << " already acquired, will increment refCnt, " << curid.str());
 			result = WriteRegister(KVRegAcquireRefCount, 1);	// Increment
 			break;
 		}
 		// Someone else has the board, so wait and try again
 		AJATime::Sleep(50);
+		ReadRegister(kVRegApplicationCode, curCode), ReadRegister(kVRegApplicationPID, curPID), ReadRegister(KVRegAcquireRefCount, refCnt), ReadRegister(kVRegEveryFrameTaskFilter, curTaskMode);
+		curid.str(""); curid << "current app " << NTV2_HEADER::FourCCToString(curCode) << " PID " << DEC(curPID) << " tm=" << ::NTV2TaskModeToString(NTV2TaskMode(curTaskMode),true) << " refCnt=" << DEC(refCnt);
 	}	// try up to 20 times
 	if (result)
-		ARINFO("Streaming app " << NTV2_HEADER::FourCCToString(inAppCode) << ", PID " << DEC(inAppPID) << " acquired successfully");
+		ARINFO(dev.str() << ": " << appid.str() << " acquired successfully");
 	else
-		ARFAIL("Failed to acquire streaming app " << NTV2_HEADER::FourCCToString(inAppCode) << ", PID " << DEC(inAppPID) << (count > 19 ? " (timed out)" : ""));
+		ARFAIL(dev.str() << ": failed to acquire " << appid.str() << (count > 19 ? " (timed out)" : ""));
 	return result;
 }	//	AcquireStreamForApplicationWithReference
 
 bool CNTV2DriverInterface::ReleaseStreamForApplicationWithReference (const ULWord inAppCode, const int32_t inAppPID)
 {
-	ULWord currentCode(0), currentPID(0), currentCount(0);
-	ReadRegister(kVRegApplicationCode, currentCode) || ReadRegister(kVRegApplicationPID, currentPID) || ReadRegister(KVRegAcquireRefCount, currentCount);
+	ULWord curCode(0), curPID(0), refCnt(0), curTaskMode(0);
+	ReadRegister(kVRegApplicationCode, curCode), ReadRegister(kVRegApplicationPID, curPID), ReadRegister(KVRegAcquireRefCount, refCnt), ReadRegister(kVRegEveryFrameTaskFilter, curTaskMode);
 	bool result(false);
-	if (currentCode == inAppCode  &&  currentPID == ULWord(inAppPID))
+	ostringstream dev;    dev << ::NTV2DeviceIDToString(GetDeviceID()) << "-" << DEC(GetIndexNumber());
+	ostringstream appid;  appid << "app " << NTV2_HEADER::FourCCToString(inAppCode) << " PID " << DEC(inAppPID);
+	ostringstream tm;     tm << "tm=" << ::NTV2TaskModeToString(NTV2TaskMode(curTaskMode),true);
+	if (curCode == inAppCode  &&  curPID == ULWord(inAppPID))
 	{
-		if (currentCount > 1)
-			result = WriteRegister(KVRegReleaseRefCount, 1);	//	Decrement register KVRegAcquireRefCount (the "1" value is ignored)
-		else if (currentCount == 1)
+		if (refCnt > 1)
+		{	ARDBG(dev.str() << ": will decrement refCnt " << DEC(refCnt) << " for " << appid.str() << ", " << tm.str());
+			result = WriteRegister(KVRegReleaseRefCount, 1);	//	Driver will decrement register value ("1" is ignored)
+		}
+		else if (refCnt == 1)
+		{	ARDBG(dev.str() << ": will release " << appid.str() << " refCnt=" << DEC(refCnt) << ", " << tm.str());
 			result = ReleaseStreamForApplication(inAppCode, inAppPID);
+		}
 		else
+		{	ARDBG(dev.str() << ": refCnt already 0 for " << appid.str() << ", " << tm.str());
 			result = true;
+		}
+		if (result)
+			ARINFO(dev.str() << ": " << appid.str() << " released successfully");
+		else
+			ARFAIL(dev.str() << ": failed to release " << appid.str() << " refCnt=" << DEC(refCnt) << ", " << tm.str());
 	}
-	if (result)
-		ARINFO("Streaming app " << NTV2_HEADER::FourCCToString(inAppCode) << ", PID " << DEC(inAppPID) << " released successfully");
 	else
-		ARFAIL("Failed to release streaming app " << NTV2_HEADER::FourCCToString(inAppCode) << ", PID " << DEC(inAppPID));
+		ARFAIL(dev.str() << ": " << appid.str() << " not current app " << NTV2_HEADER::FourCCToString(curCode) << " PID "
+				<< DEC(curPID) << ", refCnt=" << DEC(refCnt) << ", " << tm.str());
 	return result;
 }	//	ReleaseStreamForApplicationWithReference
 
 bool CNTV2DriverInterface::AcquireStreamForApplication (const ULWord inAppCode, const int32_t inAppPID)
 {
+	ostringstream dev;    dev << ::NTV2DeviceIDToString(GetDeviceID()) << "-" << DEC(GetIndexNumber());
+	ostringstream appid;  appid << "app " << NTV2_HEADER::FourCCToString(inAppCode) << " PID " << DEC(inAppPID);
 	ULWord svcInitialized(0);
 	if (ReadRegister(kVRegServicesInitialized, svcInitialized))
 		if (!svcInitialized)	//	if services have never initialized the device
 			if (inAppCode != kAgentAppFcc)	//	if not AJA Agent
-				ARWARN(::NTV2DeviceIDToString(GetDeviceID()) << "-" << DEC(GetIndexNumber())
-					<< " uninitialized by AJAAgent, requesting app " << xHEX0N(inAppCode,8) << ", PID " << DEC(inAppPID));
+				ARWARN(dev.str() << " uninitialized by AJAAgent, requesting " << appid.str());
 
 	//	Loop for a while trying to acquire the board
 	bool result(false);
-	int count(0);
+	ULWord count(0), curCode(0), curPID(0), refCnt(0), curTaskMode(0);
+	ostringstream curid;
 	for (count = 0;  count < 20;  count++)
 	{
+		ARDBG(dev.str() << ": try " << DEC(count) << ": will set app code for " << appid.str());
 		if (WriteRegister(kVRegApplicationCode, inAppCode))
 		{
 			result = WriteRegister(kVRegApplicationPID, ULWord(inAppPID));
 			break;
 		}
 		AJATime::Sleep(50);
-	}
+	}	//	try 20 times (about 1 sec)
 
 	if (count > 19)	//	if timed out
 	{	// Get data about current owner
-		ULWord currentCode(0), curAppPID(0);
-		ReadRegister(kVRegApplicationCode, currentCode);
-		ReadRegister(kVRegApplicationPID, curAppPID);
+		ReadRegister(kVRegApplicationCode, curCode), ReadRegister(kVRegApplicationPID, curPID), ReadRegister(KVRegAcquireRefCount, refCnt), ReadRegister(kVRegEveryFrameTaskFilter, curTaskMode);
+		curid << "current app " << NTV2_HEADER::FourCCToString(curCode) << " PID " << DEC(curPID) << " tm="
+				<< ::NTV2TaskModeToString(NTV2TaskMode(curTaskMode),true) << " refCnt=" << DEC(refCnt);
 
 		//	Check if owner is deceased
-		if (curAppPID  &&  !AJAProcess::IsValid(curAppPID))
+		if (/*curPID  &&*/  !AJAProcess::IsValid(curPID))
 		{	// Process doesn't exist, so make the board our own
-			ARINFO("Streaming app PID " << DEC(curAppPID) << " deceased, will release");
-			ReleaseStreamForApplication (currentCode, int32_t(curAppPID));	//	ignore result, AJAAgent may have already done this
+			ARINFO(dev.str() << ": will release deceased " << curid.str());
+			ReleaseStreamForApplication (curCode, int32_t(curPID));	//	ignore result, AJAAgent may have already done this
 			for (count = 0;  count < 20;  count++)
 			{
+				ARDBG(dev.str() << ": try " << DEC(count) << ": will set app code for " << appid.str());
 				if (WriteRegister(kVRegApplicationCode, inAppCode))
 				{
 					result = WriteRegister(kVRegApplicationPID, ULWord(inAppPID));
 					break;
 				}
 				AJATime::Sleep(50);
-			}
+			}	//	try 20 times (about 1 sec)
 		}
 		// Current owner is alive, so don't interfere
-	}
+	}	//	if timed out
+	ReadRegister(kVRegApplicationCode, curCode), ReadRegister(kVRegApplicationPID, curPID), ReadRegister(KVRegAcquireRefCount, refCnt), ReadRegister(kVRegEveryFrameTaskFilter, curTaskMode);
+	curid.str("");
+	curid << ", current app " << NTV2_HEADER::FourCCToString(curCode) << " PID " << DEC(curPID) << " tm="
+				<< ::NTV2TaskModeToString(NTV2TaskMode(curTaskMode),true) << " refCnt=" << DEC(refCnt);
 	if (result)
-		ARINFO("Streaming app " << NTV2_HEADER::FourCCToString(inAppCode) << ", PID " << DEC(inAppPID) << " acquired successfully");
+		ARINFO(dev.str() << ": successfully acquired" << (count > 19 ? " after timeout" : "") << curid.str());
 	else
-		ARFAIL("Failed to acquire streaming app " << NTV2_HEADER::FourCCToString(inAppCode) << ", PID " << DEC(inAppPID) << (count > 19 ? " (timed out)" : ""));
+		ARFAIL(dev.str() << ": failed to acquire " << appid.str() << (count > 19 ? " (timed out)" : "") << curid.str());
 	return result;
 }	//	AcquireStreamForApplication
 
 bool CNTV2DriverInterface::ReleaseStreamForApplication (const ULWord inAppCode, const int32_t inAppPID)
-{	(void)inAppCode;	//	Don't care which appCode
-	uint32_t curAppCode(0), curAppPID(0), curTaskMode(0);
-	ReadRegister(kVRegApplicationCode, curAppCode) || ReadRegister(kVRegApplicationPID, curAppPID) || ReadRegister(kVRegEveryFrameTaskFilter, curTaskMode);
+{	//	Don't care which appCode
+	ULWord curCode(0), curPID(0), refCnt(0), curTaskMode(0);
+	ReadRegister(kVRegApplicationCode, curCode), ReadRegister(kVRegApplicationPID, curPID), ReadRegister(KVRegAcquireRefCount, refCnt), ReadRegister(kVRegEveryFrameTaskFilter, curTaskMode);
+	ostringstream dev;    dev << ::NTV2DeviceIDToString(GetDeviceID()) << "-" << DEC(GetIndexNumber());
+	ostringstream appid;  appid << "app " << NTV2_HEADER::FourCCToString(inAppCode) << " PID " << DEC(inAppPID);
+	ostringstream curid;  curid << "current app " << NTV2_HEADER::FourCCToString(curCode) << " PID " << DEC(curPID) << " tm="
+								<< ::NTV2TaskModeToString(NTV2TaskMode(curTaskMode),true) << " refCnt=" << DEC(refCnt);
 
 	if (!WriteRegister(kVRegReleaseApplication, ULWord(inAppPID)))
-	{	ARFAIL("Setting kVRegReleaseApplication failed with app PID " << DEC(inAppPID) << ", curAppPID=" << DEC(curAppPID)
-				<< ", curAppCode=" << NTV2_HEADER::FourCCToString(curAppCode) << ", taskMode=" << ::NTV2TaskModeToString(NTV2TaskMode(curTaskMode),true));
+	{	ARFAIL(dev.str() << ": WriteRegister kVRegReleaseApplication failed for " << appid.str() << ", " << curid.str());
 		return false;	//	Fail
 	}
 
 	WriteRegister(KVRegAcquireRefCount, 0);	//	Force to zero, OK to ignore result
-	ARINFO("Streaming app " << NTV2_HEADER::FourCCToString(inAppCode) << ", PID " << DEC(inAppPID)
-			<< " released, taskMode=" << ::NTV2TaskModeToString(NTV2TaskMode(curTaskMode),true));
+	ReadRegister(kVRegApplicationCode, curCode), ReadRegister(kVRegApplicationPID, curPID), ReadRegister(KVRegAcquireRefCount, refCnt), ReadRegister(kVRegEveryFrameTaskFilter, curTaskMode);
+	curid.str("");  curid << "current app " << NTV2_HEADER::FourCCToString(curCode) << " PID " << DEC(curPID) << " tm="
+								<< ::NTV2TaskModeToString(NTV2TaskMode(curTaskMode),true) << " refCnt=" << DEC(refCnt);
+	ARINFO(dev.str() << ": " << appid.str() << " released, " << curid.str());
 	return true;
 }	//	ReleaseStreamForApplication
 
 bool CNTV2DriverInterface::SetStreamingApplication (const ULWord inAppCode, const int32_t inAppPID)
 {
+	ULWord curCode(0), curPID(0), refCnt(0), curTaskMode(0);  ostringstream dev, appid, curid, newid;
+	ReadRegister(kVRegApplicationCode, curCode), ReadRegister(kVRegApplicationPID, curPID), ReadRegister(KVRegAcquireRefCount, refCnt), ReadRegister(kVRegEveryFrameTaskFilter, curTaskMode);
+	dev << ::NTV2DeviceIDToString(GetDeviceID()) << "-" << DEC(GetIndexNumber());
+	appid << "app " << NTV2_HEADER::FourCCToString(inAppCode) << " PID " << DEC(inAppPID);
+	curid << "app " << NTV2_HEADER::FourCCToString(curCode) << " PID " << DEC(curPID) << " tm=" << ::NTV2TaskModeToString(NTV2TaskMode(curTaskMode),true) << " refCnt=" << DEC(refCnt);
 #if 1	//	original implementation
+	ARDBG(dev.str() << ": will WriteRegister kVRegForceApplicationCode & kVRegForceApplicationPID with " << appid.str() << ", current " << curid.str());
 	bool result (WriteRegister(kVRegForceApplicationCode, inAppCode)  &&  WriteRegister(kVRegForceApplicationPID, ULWord(inAppPID)));
+	ReadRegister(kVRegApplicationCode, curCode), ReadRegister(kVRegApplicationPID, curPID), ReadRegister(KVRegAcquireRefCount, refCnt), ReadRegister(kVRegEveryFrameTaskFilter, curTaskMode);
+	newid << "app " << NTV2_HEADER::FourCCToString(curCode) << " PID " << DEC(curPID) << " tm=" << ::NTV2TaskModeToString(NTV2TaskMode(curTaskMode),true) << " refCnt=" << DEC(refCnt);
 	if (result)
-		ARINFO("Streaming app forcibly set to " << NTV2_HEADER::FourCCToString(inAppCode) << ", PID to " << DEC(inAppPID));
+		ARINFO(dev.str() << ": successfully force-set to " << appid.str() << ", former " << curid.str() << ", new " << newid.str());
 	else
-		ARFAIL("Failed to forcibly set streaming app to " << NTV2_HEADER::FourCCToString(inAppCode) << ", PID to " << DEC(inAppPID));
+		ARFAIL(dev.str() << ": failed to force-set to " << appid.str() << ", former " << curid.str() << ", new " << newid.str());
 	return result;
 #else	//	begin	macOS driver implementation (adapted to use VRegs)
-	uint32_t oldAppType(0), oldPID(0), oldRefCount(0);
-	ReadRegister(kVRegApplicationCode, oldAppType) || ReadRegister(kVRegApplicationPID, oldPID) || ReadRegister(KVRegAcquireRefCount, oldRefCount);
-
 	//	SPECIAL CASE: Adobe Plugins
 	//	Adobe plug-in (X-Machina / Greg) are using the OEM driver every frame task
-	//	If they are in control of the board (eg mStreamingAppType == 'auto' && mStreamingAppPID == 0)
+	//	If they are in control of the board (eg curCode == 'auto' && curPID == 0)
 	//	Then we assume they have enabled the OEM every frame task.
 	//	This code restore Kona every-frame task
-	if (oldAppType == 'auto'  &&  oldPID == 0  &&  inNewAppType != 'auto')
+	if (curCode == 'auto'  &&  curPID == 0  &&  inAppCode != 'auto')
 		WriteRegister(kVRegEveryFrameTaskFilter, NTV2_STANDARD_TASKS);
 
 	//	reset override state
 	WriteRegister(kVRegAudioMixerOverrideState, 0);
 
-	if (inNewAppType)
-		WriteRegister(kVRegApplicationCode, inNewAppType); // always remember what our previous app was
+	if (inAppCode)
+		WriteRegister(kVRegApplicationCode, inAppCode); // always remember what our previous app was
 
-	WriteRegister(kVRegApplicationPID, inNewPID);
+	WriteRegister(kVRegApplicationPID, inAppPID);
 
 	// support for reference counting
-	if (inNewPID == 0)
+	if (inAppPID == 0)
 		WriteRegister(KVRegAcquireRefCount, 0);	// Force to zero, ignore any error result
 #endif	//	end		macOS driver implementation (adapted to use VRegs)
 }	//	SetStreamingApplication
 
 bool CNTV2DriverInterface::GetStreamingApplication (ULWord & outAppType, int32_t & outProcessID)
 {
-	outAppType = 0;
-	outProcessID = 0;
+	outAppType = 0;  outProcessID = 0;
 	return ReadRegister(kVRegApplicationCode, outAppType)  &&  CNTV2DriverInterface::ReadRegister(kVRegApplicationPID, outProcessID);
 }
 

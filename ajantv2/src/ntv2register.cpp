@@ -170,13 +170,33 @@ static const ULWord gChannelToSDIInputProgressiveMask []	= { kRegMaskInput1Progr
 static const ULWord gChannelToSDIInputProgressiveShift []	= { kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			kRegShiftInput1Progressive,			kRegShiftInput2Progressive,
 																kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			kRegShiftInput1Progressive,			kRegShiftInput2Progressive,			0};
 
+#define ARFAIL(__x__)		AJA_sERROR	(AJA_DebugUnit_AcquireRelease, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define ARWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_AcquireRelease, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define ARNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_AcquireRelease, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define ARINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_AcquireRelease, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define ARDBG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_AcquireRelease, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 
 // Method: SetEveryFrameServices
 // Input:  NTV2TaskMode
 // Output: NONE
 bool CNTV2Card::SetTaskMode (const NTV2TaskMode inMode)
 {
-	return NTV2_IS_VALID_TASK_MODE(inMode) && WriteRegister(kVRegEveryFrameTaskFilter, ULWord(inMode));
+	if (!NTV2_IS_VALID_TASK_MODE(inMode))
+		{ARFAIL(GetDescription() << ": invalid task mode " << DEC(inMode));  return false;}
+	NTV2TaskMode oldMode(NTV2_TASK_MODE_INVALID), newMode(oldMode);
+	GetTaskMode(oldMode);
+	if (inMode == oldMode)
+		{ARDBG(GetDescription() << ": task mode '" << ::NTV2TaskModeToString(oldMode,true) << "' unchanged");  return true;}
+	ARDBG(GetDescription() << ": about to change task mode from '" << ::NTV2TaskModeToString(oldMode,true) << "' to '" << ::NTV2TaskModeToString(inMode,true) << "'");
+	const bool result (WriteRegister(kVRegEveryFrameTaskFilter, ULWord(inMode)));
+	GetTaskMode(newMode);
+	if (result  &&  newMode != inMode)
+		ARWARN(GetDescription() << ": task mode now '" << ::NTV2TaskModeToString(newMode,true) << "' after being set to '" << ::NTV2TaskModeToString(inMode,true) << "'");
+	if (result  &&  newMode == inMode)
+		ARINFO(GetDescription() << ": task mode changed from '" << ::NTV2TaskModeToString(oldMode,true) << "' to '" << ::NTV2TaskModeToString(newMode,true) << "'");
+	if (!result)
+		ARFAIL(GetDescription() << ": failed to change task mode from '" << ::NTV2TaskModeToString(oldMode,true) << "' to '" << ::NTV2TaskModeToString(inMode,true) << "'");
+	return result;
 }
 
 bool CNTV2Card::GetTaskMode (NTV2TaskMode & outMode)
