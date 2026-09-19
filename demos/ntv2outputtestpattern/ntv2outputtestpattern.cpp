@@ -50,7 +50,8 @@ NTV2OutputTestPattern::~NTV2OutputTestPattern ()
 
 	//	Restore the prior service level, and release the device...
 	mDevice.SetTaskMode(mSavedTaskMode);
-	mDevice.ReleaseStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));
+	if (!mConfig.fDoMultiFormat)
+		mDevice.ReleaseStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid()));
 
 }	//	destructor
 
@@ -86,7 +87,7 @@ AJAStatus NTV2OutputTestPattern::Init (void)
 	if (!mConfig.fDoMultiFormat)
 	{
 		mDevice.GetConnections(mSavedConnections);		//	Save current routing, so it can be restored later
-		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid())))
+		if (!mDevice.AcquireStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid())))
 		{	cerr	<< "## ERROR:  '" << mDevice.GetDisplayName() << "' can't be acquired -- busy" << endl;
 			return AJA_STATUS_BUSY;		//	Device is in use by another app -- fail
 		}
