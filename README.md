@@ -32,6 +32,7 @@ This is the open-source SDK for discovering, interrogating and controlling NTV2 
 The **libajantv2** folder contains the following items:
 - **ajaanc** — Classes for encoding & decoding SDI ancillary data packets.
 - **ajabase** — Utility classes (e.g. threads, mutexes, files, etc.).
+- **ajacc** — Closed-captioning classes (e.g. EIA/CEA 608 & 708 codecs, renderers, etc.).
 - **ajantv2** — Principal classes, especially **CNTV2Card**.
   - **includes** — Header files.
   - **src** — Source files.
@@ -72,6 +73,9 @@ To prevent building certain targets, these CMake variables can be set to `ON` in
 Demo apps are normally built by default.
 - `AJANTV2_DISABLE_DRIVER` — If `ON`, prevents building the driver (Linux only).\
 Building the driver is enabled by default for Linux
+- `AJANTV2_DISABLE_AJACC` — If `ON`, excludes all ‘**ajacc**’ closed-captioning support from the build.\
+Closed-captioning support is normally excluded by default.\
+Set the parameter to `OFF` to include and build AJA’s captioning classes.
 - `AJANTV2_DISABLE_TOOLS` — If `ON`, prevents building the command-line tools (e.g. **ntv2thermo**, **regio**, **supportlog**, …).\
 Command-line tools are normally built by default.
 - `AJANTV2_DISABLE_TESTS` — If `ON`, prevents building the unit test(s).\
