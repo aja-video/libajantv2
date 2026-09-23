@@ -3042,21 +3042,23 @@ public:
 										This parameter always overrides \c inFrameCount if, when specified with \c inEndFrameNumber,
 										are both non-zero. If specified, must be larger than \c inStartFrameNumber -- see \ref vidop-indexing
 										for more information.
+		@details	If this function succeeds, the driver will have designated a contiguous set of device frame buffers that will be written
+					by the FrameStore, and placed the channel into the ::NTV2_AUTOCIRCULATE_INIT state. The channel will then be ready for
+					a subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
+					The driver will also set the FrameStore mode to input, but change little else in its configuration.
+					FrameStore pixel format and video format changes should be completed by the caller prior to calling this function.
 		@note		For Multi-Channel or 4K/8K applications (i.e. where more than one channel is used for streaming video), AJA
 					recommends specifying zero for \c inFrameCount, and explicitly specifying a frame range using \c inStartFrameNumber
 					and \c inEndFrameNumber parameters.
 		@note		Fewer frames reduces latency, but increases the likelihood of frame drops.
 					See \ref autocircfrmcnt.
 		@note		All \ref ntv2signalrouting should be completed prior to calling this function.
+		@note		The driver does not change the FrameStore's Input Frame register with this function. To prevent potentially interfering
+					with other in-progress streaming operations in other channels (FrameStores) on the device, after this function returns,
+					callers may need to call CNTV2Card::SetInputFrame to set the FrameStore's Input Frame to the first AutoCirculate frame
+					of its frame range, then call CNTV2Card::EnableChannel immediately before CNTV2Card::AutoCirculateStart.
 		@note		This function logs \ref autocirculatemsgs to \ref usingajalogger or the \ref usinglogreader.
 					Be sure the <tt>AutoCirculate_39</tt> message group is enabled, and the client application has called AJADebug::Open.
-		@details	If this function succeeds, the driver will have designated a contiguous set of device frame buffers to be written by
-					the FrameStore, and placed the channel into the ::NTV2_AUTOCIRCULATE_INIT state. The channel will then be ready for
-					a subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
-					If the device's ::NTV2TaskMode (see CNTV2Card::GetEveryFrameServices ) is ::NTV2_OEM_TASKS, the driver
-					will perform most of the device setup, including configuring the FrameStore, etc.;
-					otherwise (if ::NTV2_DISABLE_TASKS ), the caller must manage <i>all</i> aspects of the FrameStore ( ::NTV2Mode,
-					::NTV2VideoFormat, etc.) before calling this function.
 		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateInitForOutput, \ref autocirculatecapture
 	**/
 	AJA_VIRTUAL bool	AutoCirculateInitForInput ( const NTV2Channel		inChannel,
@@ -3081,18 +3083,15 @@ public:
 										::AUTOCIRCULATE_WITH_LTC, ::AUTOCIRCULATE_WITH_ANC, etc.). Defaults to zero (no options).
 		@param[in]	inNumChannels		Optionally specifies the number of channels to operate on when CNTV2Card::AutoCirculateStart or
 										CNTV2Card::AutoCirculateStop are called. Defaults to 1. Must be greater than zero. See \ref autocirculateganging.
+		@details	If this function succeeds, the driver will have designated a contiguous set of device frame buffers that will be written
+					by the FrameStore, and placed the channel into the ::NTV2_AUTOCIRCULATE_INIT state. The channel will then be ready for
+					a subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
+					The driver will also set the FrameStore mode to input, but change little else in its configuration.
+					FrameStore pixel format and video format changes should be completed by the caller prior to calling this function.
 		@note		Fewer frames reduces latency, but increases the likelihood of frame drops.
 					See \ref autocircfrmcnt.
-		@note		All \ref ntv2signalrouting should be completed prior to calling this function.
 		@note		This function logs \ref autocirculatemsgs to \ref usingajalogger or the \ref usinglogreader when <tt>AutoCirculate_39</tt>
 					message group is enabled, and the client application has called AJADebug::Open.
-		@details	If this function succeeds, the driver will have designated a contiguous set of device frame buffers to be written by
-					the FrameStore, and placed the channel into the ::NTV2_AUTOCIRCULATE_INIT state. The channel will then be ready for
-					a subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
-					If the device's ::NTV2TaskMode (see CNTV2Card::GetEveryFrameServices ) is ::NTV2_OEM_TASKS, the driver
-					will perform most of the device setup, including configuring the FrameStore, etc.;
-					otherwise (if ::NTV2_DISABLE_TASKS ), the caller must manage <i>all</i> aspects of the FrameStore ( ::NTV2Mode,
-					::NTV2VideoFormat, etc.) before calling this function.
 		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateInitForOutput, \ref autocirculatecapture
 	**/
 	AJA_VIRTUAL bool	AutoCirculateInitForInput ( const NTV2Channel			inChannel,
@@ -3130,7 +3129,6 @@ public:
 					recommends specifying zero for \c inFrameCount, and explicitly specifying a frame range using \c inStartFrameNumber
 					and \c inEndFrameNumber parameters.
 		@note		Fewer frames reduces latency, but increases the likelihood of frame drops. See \ref autocirculatelowlatency.
-		@note		All \ref ntv2signalrouting should be completed prior to calling this function.
 		@note		This function logs \ref autocirculatemsgs to \ref usingajalogger or the \ref usinglogreader.
 					Be sure the <tt>AutoCirculate_39</tt> message group is enabled, and the client application has called AJADebug::Open.
 		@details	If this function succeeds, the driver will have designated a contiguous set of device frame buffers to be read by
@@ -3165,7 +3163,6 @@ public:
 		@param[in]	inNumChannels		Optionally specifies the number of channels to operate on when CNTV2Card::AutoCirculateStart or
 										CNTV2Card::AutoCirculateStop are called. Defaults to 1. Must be greater than zero. See \ref autocirculateganging.
 		@note		Fewer frames reduces latency, but increases the likelihood of frame drops. See \ref autocirculatelowlatency.
-		@note		All \ref ntv2signalrouting should be completed prior to calling this function.
 		@note		This function logs \ref autocirculatemsgs to \ref usingajalogger or the \ref usinglogreader.
 					Be sure the <tt>AutoCirculate_39</tt> message group is enabled, and the client application has called AJADebug::Open.
 		@details	If this function succeeds, the driver will have designated a contiguous set of device frame buffers to be read by
@@ -3195,22 +3192,27 @@ public:
 									the next VBI received by the given channel. If non-zero, AutoCirculate will remain in the
 									::NTV2_AUTOCIRCULATE_STARTING_AT_TIME state until the system tick clock exceeds this value, at
 									which point it will switch to the ::NTV2_AUTOCIRCULATE_RUNNING state. This value is denominated
-									in the same time units as the finest-grained time counter available on the host's operating system.
+									in the same time units as the finest-grained time counter available on the host operating system.
 		@details	This function performs the following tasks:
 					-	It sets the state of the channel in the driver from ::NTV2_AUTOCIRCULATE_INIT to ::NTV2_AUTOCIRCULATE_STARTING.
 					-	At the next VBI, the driver's interrupt service routine (ISR) will check the OS tick clock, and if it exceeds
 						\c inStartTime value, it will continue starting AutoCirculate -- otherwise the channel will remain in the
 						::NTV2_AUTOCIRCULATE_STARTING phase, with the driver re-checking the clock at every subsequent VBI.
 					-	The driver will change the channel's state to ::NTV2_AUTOCIRCULATE_RUNNING.
-					-	The driver will start tracking which memory frames are available and which are empty.
-					<b>Capture/Input Mode</b> -- The next frame to be recorded is determined, and the current last input audio sample is
-					written into the next frame's FRAME_STAMP's acAudioInStartAddress field. Finally, the channel's active frame
-					is set to the next frame number.
-					<b>Playout/Output Mode</b> -- The next frame to go out the jack is determined, and the current last output audio
-					sample is written into the next frame's FRAME_STAMP::acAudioOutStartAddress field. Finally, the channel's active
-					frame is set to the next frame number.
-					-	Finally, the driver will AutoCirculate frames at every VBI on a per-channel basis.
+					-	The driver will start tracking which device memory frames are available and which are empty.
+						-	<b>Capture/Input Mode</b> -- The next frame to be recorded is determined, and the current last input
+							audio sample is written into the next frame's FRAME_STAMP's acAudioInStartAddress field.
+							Then the channel's active frame is set to the next frame number.
+						-	<b>Playout/Output Mode</b> -- The next frame to go out the jack is determined, and the current last
+							output audio sample is written into the next frame's FRAME_STAMP::acAudioOutStartAddress field.
+							Then the channel's active frame is set to the next frame number.
+					-	The driver will continue to AutoCirculate frames at every VBI on a per-channel basis.
 		@note		This method will fail if the specified channel's AutoCirculate state is not ::NTV2_AUTOCIRCULATE_INIT.
+		@note		All \ref ntv2signalrouting must be completed prior to calling this function. This is especially important when
+					ingesting video, because without a signal routing connection between an input and FrameStore widgets, the
+					FrameStore won't trigger input VBIs, and AutoCirculate will remain stuck in the ::NTV2_AUTOCIRCULATE_STARTING
+					state. (Also, for input VBIs to fire, the FrameStore must be enabled, and a valid signal must be present at
+					the input connector.)
 		@note		Calling CNTV2Card::AutoCirculateStart while in the ::NTV2_AUTOCIRCULATE_PAUSED state won't un-pause AutoCirculate.
 					(Instead, it will restart it.)
 		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculatePause, \ref aboutautocirculate
