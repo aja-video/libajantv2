@@ -3018,48 +3018,63 @@ public:
 
 
 	/**
-		@brief		Prepares for subsequent AutoCirculate ingest, designating a contiguous block of frame buffers on the device for use
-					by the FrameStore/channel, and specifies other optional behaviors.
+		@brief		Prepares for subsequent AutoCirculate ingest streaming, designating a contiguous block of frame buffers on the
+					device for use by the FrameStore/channel, and specifies other optional behaviors.
 					Upon successful return, the channel's ::NTV2AutoCirculateState is set to ::NTV2_AUTOCIRCULATE_INIT where
 					it will remain until a subsequent call is made to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateStop.
 		@return		\c true if successful; otherwise \c false.
-		@param[in]	inChannel			Specifies the ::NTV2Channel to use. Call ::NTV2DeviceGetNumFrameStores to discover how many
-										FrameStores (and therefore channels) are available on the device.
-		@param[in]	inFrameCount		Optionally specifies the number of contiguous device frame buffers to be continuously cycled
-										through if zero is specified for both \c inStartFrameNumber and \c inEndFrameNumber.
-										Defaults to 7. This value is ignored if a legitimate frame range is specified in the
-										\c inStartFrameNumber and \c inEndFrameNumber parameters (see below).
+		@param[in]	inChannel			Specifies the ::NTV2Channel and thereby which \ref vidop-fswidget to use.
+		@param[in]	inFrameCount		Specifies the number of contiguous device frame buffers to be continuously cycled through.
+										-	This value is ignored if a legitimate frame range is specified by \c inStartFrameNumber
+											and a non-zero \c inEndFrameNumber value (see below).
+										-	Defaults to 7.
+										-	CNTV2Card::FindUnallocatedFrames is called with this frame count value to determine the
+											actual frame range to be used. That function is not thread-safe, making it easy for two
+											or more threads or processes calling <b>AutoCirculateInit…</b> to end up using the same
+											frame buffer memory. See \ref fbconflict for more information.
+										-	<b>NOTE:</b> Fewer frames reduces latency, but increases the likelihood of frame drops.
+											See \ref autocircfrmcnt.
 		@param[in]	inAudioSystem		Specifies the Audio System to use, if any. Defaults to ::NTV2_AUDIOSYSTEM_INVALID (no audio).
 		@param[in]	inOptionFlags		A bit mask that specifies additional AutoCirculate options (e.g., ::AUTOCIRCULATE_WITH_RP188,
 										::AUTOCIRCULATE_WITH_LTC, ::AUTOCIRCULATE_WITH_ANC, etc.). Defaults to zero (no options).
-		@param[in]	inNumChannels		Optionally specifies the number of channels to operate on when CNTV2Card::AutoCirculateStart or
-										CNTV2Card::AutoCirculateStop are called. Defaults to 1. Must be greater than zero. See \ref autocirculateganging.
-		@param[in]	inStartFrameNumber	Specifies the starting frame index number as a zero-based unsigned decimal integer. Defaults to zero.
-										This parameter always overrides \c inFrameCount if, when specified with \c inEndFrameNumber,
-										are both non-zero. If specified, must be less than \c inEndFrameNumber -- see \ref vidop-indexing
-										for more information.
-		@param[in]	inEndFrameNumber	Specifies the ending frame number as a zero-based unsigned decimal integer. Defaults to zero.
-										This parameter always overrides \c inFrameCount if, when specified with \c inEndFrameNumber,
-										are both non-zero. If specified, must be larger than \c inStartFrameNumber -- see \ref vidop-indexing
-										for more information.
-		@details	If this function succeeds, the driver will have designated a contiguous set of device frame buffers that will be written
-					by the FrameStore, and placed the channel into the ::NTV2_AUTOCIRCULATE_INIT state. The channel will then be ready for
-					a subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
-					The driver will also set the FrameStore mode to input, but change little else in its configuration.
-					FrameStore pixel format and video format changes should be completed by the caller prior to calling this function.
-		@note		For Multi-Channel or 4K/8K applications (i.e. where more than one channel is used for streaming video), AJA
-					recommends specifying zero for \c inFrameCount, and explicitly specifying a frame range using \c inStartFrameNumber
-					and \c inEndFrameNumber parameters.
-		@note		Fewer frames reduces latency, but increases the likelihood of frame drops.
-					See \ref autocircfrmcnt.
-		@note		All \ref ntv2signalrouting should be completed prior to calling this function.
-		@note		The driver does not change the FrameStore's Input Frame register with this function. To prevent potentially interfering
-					with other in-progress streaming operations in other channels (FrameStores) on the device, after this function returns,
-					callers may need to call CNTV2Card::SetInputFrame to set the FrameStore's Input Frame to the first AutoCirculate frame
-					of its frame range, then call CNTV2Card::EnableChannel immediately before CNTV2Card::AutoCirculateStart.
-		@note		This function logs \ref autocirculatemsgs to \ref usingajalogger or the \ref usinglogreader.
-					Be sure the <tt>AutoCirculate_39</tt> message group is enabled, and the client application has called AJADebug::Open.
-		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateInitForOutput, \ref autocirculatecapture
+		@param[in]	inNumChannels		This unsigned integer parameter value is used to gang together multiple, contiguous ranges of
+										FrameStores/channels by optionally specifying the number of channels/FrameStores to operate.
+										-	Defaults to 1 (i.e. only operate one FrameStore/channel).
+										-	If specified, the parameter value must be at least one (1).
+										-	See \ref autocirculateganging for more information.
+		@param[in]	inStartFrameNumber	Specifies the first frame buffer index number of the AutoCirculate frame range as a zero-based
+										unsigned decimal integer.
+										-	Defaults to zero.
+										-	This parameter, along with a non-zero \c inEndFrameNumber, overrides \c inFrameCount.
+										-	If specified, must be less than \c inEndFrameNumber when \c inEndFrameNumber is non-zero.
+										-	See \ref vidop-indexing for more information.
+		@param[in]	inEndFrameNumber	Specifies the last frame buffer index number of the AutoCirculate frame range as a zero-based
+										unsigned decimal integer.
+										-	Defaults to zero.
+										-	If non-zero, this parameter, along with \c inStartFrameNumber, overrides \c inFrameCount.
+										-	If specified, must be larger than \c inStartFrameNumber.
+										-	See \ref vidop-indexing for more information.
+		@details	Once the starting and ending device frame buffer range is ascertained and validated, this function causes the NTV2
+					kernel driver to:
+					-	Remember/assign the given/resulting device frame buffer range to the channel. (These are the frame buffer slots
+						that will be written by the FrameStore into device SDRAM when AutoCirculate starts and runs.)
+					-	Switches the channel's AutoCirculate state to ::NTV2_AUTOCIRCULATE_INIT.  The channel will then be ready for a
+						subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
+					-	Sets the FrameStore's ::NTV2Mode to ::NTV2_MODE_INPUT.
+						-	<b>NOTE:</b> The driver leaves intact the FrameStore's Input Frame register and its enabled/disabled state.
+							This mode change, however, could suddenly interfere with in-progress streaming in another channel, depending
+							on the FrameStore's Input Frame register's value. See \ref vidop-fbconflict.
+					-	If the ::AUTOCIRCULATE_WITH_ANC bit in \c inOptionFlags is set, initializes the ancillary/auxiliary data extractor
+						(for the SDI/HDMI input that corresponds to \c inChannel) without yet enabling it to write into memory.
+		@note		For Multi-Channel or 4K/8K applications, AJA recommends specifying zero for \c inFrameCount, and explicitly specifying
+					a frame range using \c inStartFrameNumber and \c inEndFrameNumber.
+		@note		Most configuration should be completed prior to calling this function, especially:
+					-	FrameStore video format (see CNTV2Card::SetVideoFormat);
+					-	FrameStore pixel format (see CNTV2Card::SetFrameBufferFormat);
+					-	All \ref ntv2signalrouting to the FrameStore.
+		@note		This function logs diagnostic messages into the \ref debuglogging in the \c AutoCirculate_39 message group.
+					See \ref autocirculatemsgs for a list of these messages.
+		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateStart, CNTV2Card::AutoCirculateInitForOutput, \ref autocirculatecapture
 	**/
 	AJA_VIRTUAL bool	AutoCirculateInitForInput ( const NTV2Channel		inChannel,
 													const UWord				inFrameCount		= 7,
@@ -3070,29 +3085,50 @@ public:
 													const UWord				inEndFrameNumber	= 0);
 
 	/**
-		@brief		Prepares for subsequent AutoCirculate ingest, designating a contiguous block of frame buffers on the device for use
-					by the FrameStore/channel, and specifies other optional behaviors.
+		@brief		Prepares for subsequent AutoCirculate ingest streaming, designating a contiguous block of frame buffers on the
+					device for use by the FrameStore/channel, and specifies other optional behaviors.
 					Upon successful return, the channel's ::NTV2AutoCirculateState is set to ::NTV2_AUTOCIRCULATE_INIT where
 					it will remain until a subsequent call is made to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateStop.
 		@return		\c true if successful; otherwise \c false.
-		@param[in]	inChannel			Specifies the ::NTV2Channel to use. Call ::NTV2DeviceGetNumFrameStores to discover how many
-										FrameStores (and therefore channels) are available on the device.
-		@param[in]	inFrameRange		Specifies the device SDRAM frame range to use.
+		@param[in]	inChannel			Specifies the ::NTV2Channel and thereby which \ref vidop-fswidget to use.
+		@param[in]	inFrameRange		Specifies the device SDRAM frame range to be used using an NTV2ACFrameRange.
+										Note that fewer frames reduces latency, but increases the likelihood of frame drops.
+										See \ref autocirculatelowlatency.
 		@param[in]	inAudioSystem		Specifies the Audio System to use, if any. Defaults to ::NTV2_AUDIOSYSTEM_INVALID (no audio).
 		@param[in]	inOptionFlags		A bit mask that specifies additional AutoCirculate options (e.g., ::AUTOCIRCULATE_WITH_RP188,
 										::AUTOCIRCULATE_WITH_LTC, ::AUTOCIRCULATE_WITH_ANC, etc.). Defaults to zero (no options).
-		@param[in]	inNumChannels		Optionally specifies the number of channels to operate on when CNTV2Card::AutoCirculateStart or
-										CNTV2Card::AutoCirculateStop are called. Defaults to 1. Must be greater than zero. See \ref autocirculateganging.
-		@details	If this function succeeds, the driver will have designated a contiguous set of device frame buffers that will be written
-					by the FrameStore, and placed the channel into the ::NTV2_AUTOCIRCULATE_INIT state. The channel will then be ready for
-					a subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
-					The driver will also set the FrameStore mode to input, but change little else in its configuration.
-					FrameStore pixel format and video format changes should be completed by the caller prior to calling this function.
-		@note		Fewer frames reduces latency, but increases the likelihood of frame drops.
-					See \ref autocircfrmcnt.
-		@note		This function logs \ref autocirculatemsgs to \ref usingajalogger or the \ref usinglogreader when <tt>AutoCirculate_39</tt>
-					message group is enabled, and the client application has called AJADebug::Open.
-		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateInitForOutput, \ref autocirculatecapture
+		@param[in]	inNumChannels		This unsigned integer parameter value is used to gang together multiple, contiguous ranges of
+										FrameStores/channels by optionally specifying the number of channels/FrameStores to operate.
+										-	Defaults to 1 (i.e. only operate one FrameStore/channel).
+										-	If specified, the parameter value must be at least one (1).
+										-	See \ref autocirculateganging for more information.
+		@details	The given device frame buffer range given in \c inFrameRange is ascertained and validated.
+					-	If it's invalid (see NTV2ACFrameRange::valid) the function fails (returns \c false).
+					-	If it's a simple frame count (see NTV2ACFrameRange::isCountOnly), then CNTV2Card::FindUnallocatedFrames is
+						called with NTV2ACFrameRange::count to determine the actual frame range to be used. That function is not
+						thread-safe, making it easy for two or more threads/processes calling <b>AutoCirculateInit…</b> to end up
+						using the same frame buffer memory. See \ref fbconflict for more information.
+					-	Otherwise the explicit frame range in \c inFrameRange is used, which is what AJA recommends for Multi-Channel
+						or 4K/8K applications.
+
+					Then the NTV2 kernel driver will:
+					-	Remember/assign the given/resulting device frame buffer range to the channel. (These are the frame buffer slots
+						that will be written by the FrameStore into device SDRAM when AutoCirculate starts and runs.)
+					-	Switches the channel's AutoCirculate state to ::NTV2_AUTOCIRCULATE_INIT.  The channel will then be ready for a
+						subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
+					-	Sets the FrameStore's ::NTV2Mode to ::NTV2_MODE_INPUT.
+						-	<b>NOTE:</b> The driver leaves intact the FrameStore's Input Frame register and its enabled/disabled state.
+							This mode change, however, could suddenly interfere with in-progress streaming in another channel, depending
+							on the FrameStore's Input Frame register's value. See \ref vidop-fbconflict.
+					-	If the ::AUTOCIRCULATE_WITH_ANC bit in \c inOptionFlags is set, initializes the ancillary/auxiliary data extractor
+						(for the SDI/HDMI input that corresponds to \c inChannel) without yet enabling it to write into memory.
+		@note		Most configuration should be completed prior to calling this function, especially:
+					-	FrameStore video format (see CNTV2Card::SetVideoFormat);
+					-	FrameStore pixel format (see CNTV2Card::SetFrameBufferFormat);
+					-	All \ref ntv2signalrouting to the FrameStore.
+		@note		This function logs diagnostic messages into the \ref debuglogging in the \c AutoCirculate_39 message group.
+					See \ref autocirculatemsgs for a list of these messages.
+		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateStart, CNTV2Card::AutoCirculateInitForOutput, \ref autocirculatecapture
 	**/
 	AJA_VIRTUAL bool	AutoCirculateInitForInput ( const NTV2Channel			inChannel,
 													const NTV2ACFrameRange &	inFrameRange,
@@ -3101,44 +3137,59 @@ public:
 													const UByte					inNumChannels		= 1);
 
 	/**
-		@brief		Prepares for subsequent AutoCirculate playout, designating a contiguous block of frame buffers on the device for use
-					by the FrameStore/channel, and specifies other optional behaviors.
+		@brief		Prepares for subsequent AutoCirculate playback streaming, designating a contiguous block of frame buffers on the
+					device for use by the FrameStore/channel, and specifies other optional behaviors.
 					Upon successful return, the channel's ::NTV2AutoCirculateState is set to ::NTV2_AUTOCIRCULATE_INIT where
 					it will remain until a subsequent call is made to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateStop.
 		@return		\c true if successful; otherwise \c false.
-		@param[in]	inChannel			Specifies the ::NTV2Channel to use. Call ::NTV2DeviceGetNumFrameStores to discover how many
-										FrameStores (and therefore channels) are available on the device.
-		@param[in]	inFrameCount		Optionally specifies the number of contiguous device frame buffers to be continuously cycled
-										through if zero is specified for both \c inStartFrameNumber and \c inEndFrameNumber.
-										Defaults to 7. This value is ignored if a legitimate frame range is specified in the
-										\c inStartFrameNumber and \c inEndFrameNumber parameters (see below).
+		@param[in]	inChannel			Specifies the ::NTV2Channel and thereby which \ref vidop-fswidget to use.
+		@param[in]	inFrameCount		Specifies the number of contiguous device frame buffers to be continuously cycled through.
+										-	This value is ignored if a legitimate frame range is specified by \c inStartFrameNumber
+											and a non-zero \c inEndFrameNumber value (see below).
+										-	Defaults to 7.
+										-	CNTV2Card::FindUnallocatedFrames is called with this frame count value to determine the
+											actual frame range to be used. That function is not thread-safe, making it easy for two
+											or more threads or processes calling <b>AutoCirculateInit…</b> to end up using the same
+											frame buffer memory. See \ref fbconflict for more information.
+										-	<b>NOTE:</b> Fewer frames reduces latency, but increases the likelihood of frame drops.
+											See \ref autocircfrmcnt.
 		@param[in]	inAudioSystem		Specifies the Audio System to use, if any. Defaults to ::NTV2_AUDIOSYSTEM_INVALID (no audio).
 		@param[in]	inOptionFlags		A bit mask that specifies additional AutoCirculate options (e.g., ::AUTOCIRCULATE_WITH_RP188,
 										::AUTOCIRCULATE_WITH_LTC, ::AUTOCIRCULATE_WITH_ANC, etc.). Defaults to zero (no options).
-		@param[in]	inNumChannels		Optionally specifies the number of channels to operate on when CNTV2Card::AutoCirculateStart or
-										CNTV2Card::AutoCirculateStop are called. Defaults to 1. Must be greater than zero. See \ref autocirculateganging.
-		@param[in]	inStartFrameNumber	Specifies the starting frame index number as a zero-based unsigned decimal integer. Defaults to zero.
-										This parameter always overrides \c inFrameCount if, when specified with \c inEndFrameNumber,
-										are both non-zero. If specified, must be less than \c inEndFrameNumber -- see \ref vidop-indexing
-										for more information.
-		@param[in]	inEndFrameNumber	Specifies the ending frame index number as a zero-based unsigned decimal integer. Defaults to zero.
-										This parameter always overrides \c inFrameCount if, when specified with \c inEndFrameNumber,
-										are both non-zero. If specified, must be larger than \c inStartFrameNumber -- see \ref vidop-indexing
-										for more information.
-		@note		For Multi-Channel or 4K/8K applications (i.e. where more than one channel is used for streaming video), AJA
-					recommends specifying zero for \c inFrameCount, and explicitly specifying a frame range using \c inStartFrameNumber
-					and \c inEndFrameNumber parameters.
-		@note		Fewer frames reduces latency, but increases the likelihood of frame drops. See \ref autocirculatelowlatency.
-		@note		This function logs \ref autocirculatemsgs to \ref usingajalogger or the \ref usinglogreader.
-					Be sure the <tt>AutoCirculate_39</tt> message group is enabled, and the client application has called AJADebug::Open.
-		@details	If this function succeeds, the driver will have designated a contiguous set of device frame buffers to be read by
-					the FrameStore, and placed the channel into the ::NTV2_AUTOCIRCULATE_INIT state. The channel will then be ready for
-					a subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
-					If the device's ::NTV2TaskMode (see CNTV2Card::GetEveryFrameServices ) is ::NTV2_OEM_TASKS, the driver
-					will perform most of the device setup, including configuring the FrameStore, setting the output standard, etc.;
-					otherwise (if ::NTV2_DISABLE_TASKS ), the caller must manage <i>all</i> aspects of the FrameStore ( ::NTV2Mode,
-					::NTV2VideoFormat, etc.) before calling this function.
-		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateInitForInput, \ref autocirculateplayout
+		@param[in]	inNumChannels		This unsigned integer parameter value is used to gang together multiple, contiguous ranges of
+										FrameStores/channels by optionally specifying the number of channels/FrameStores to operate.
+										-	Defaults to 1 (i.e. only operate one FrameStore/channel).
+										-	If specified, the parameter value must be at least one (1).
+										-	See \ref autocirculateganging for more information.
+		@param[in]	inStartFrameNumber	Specifies the first frame buffer index number of the AutoCirculate frame range as a zero-based
+										unsigned decimal integer.
+										-	Defaults to zero.
+										-	This parameter, along with a non-zero \c inEndFrameNumber, overrides \c inFrameCount.
+										-	If specified, must be less than \c inEndFrameNumber when \c inEndFrameNumber is non-zero.
+										-	See \ref vidop-indexing for more information.
+		@param[in]	inEndFrameNumber	Specifies the last frame buffer index number of the AutoCirculate frame range as a zero-based
+										unsigned decimal integer.
+										-	Defaults to zero.
+										-	If non-zero, this parameter, along with \c inStartFrameNumber, overrides \c inFrameCount.
+										-	If specified, must be larger than \c inStartFrameNumber.
+										-	See \ref vidop-indexing for more information.
+		@details	Once the starting and ending device frame buffer range is ascertained and validated, this function causes the NTV2
+					kernel driver to:
+					-	Remember/assign the given/resulting device frame buffer range to the channel. (These are the frame buffer slots
+						that will be read by the FrameStore from device SDRAM when AutoCirculate starts and runs.)
+					-	Switches the channel's AutoCirculate state to ::NTV2_AUTOCIRCULATE_INIT.  The channel will then be ready for a
+						subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
+					-	Sets the FrameStore's ::NTV2Mode to ::NTV2_MODE_OUTPUT.
+					-	If the ::AUTOCIRCULATE_WITH_ANC bit in \c inOptionFlags is set, initializes the ancillary/auxiliary data inserter
+						(for the SDI/HDMI output that corresponds to \c inChannel) without yet enabling it to read from memory.
+		@note		For Multi-Channel or 4K/8K applications, AJA recommends specifying zero for \c inFrameCount, and explicitly specifying
+					a frame range using \c inStartFrameNumber and \c inEndFrameNumber.
+		@note		Most configuration should be completed prior to calling this function, especially:
+					-	FrameStore video format (see CNTV2Card::SetVideoFormat);
+					-	FrameStore pixel format (see CNTV2Card::SetFrameBufferFormat);
+		@note		This function logs diagnostic messages into the \ref debuglogging in the \c AutoCirculate_39 message group.
+					See \ref autocirculatemsgs for a list of these messages.
+		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateStart, CNTV2Card::AutoCirculateInitForInput, \ref autocirculateplayout
 	**/
 	AJA_VIRTUAL bool	AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 													const UWord				inFrameCount		= 7,
@@ -3149,30 +3200,46 @@ public:
 													const UWord				inEndFrameNumber	= 0);
 
 	/**
-		@brief		Prepares for subsequent AutoCirculate playout, designating a contiguous block of frame buffers on the device for use
-					by the FrameStore/channel, and specifies other optional behaviors.
+		@brief		Prepares for subsequent AutoCirculate playback streaming, designating a contiguous block of frame buffers on the
+					device for use by the FrameStore/channel, and specifies other optional behaviors.
 					Upon successful return, the channel's ::NTV2AutoCirculateState is set to ::NTV2_AUTOCIRCULATE_INIT where
 					it will remain until a subsequent call is made to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateStop.
 		@return		\c true if successful; otherwise \c false.
-		@param[in]	inChannel			Specifies the ::NTV2Channel to use. Call ::NTV2DeviceGetNumFrameStores to discover how many
-										FrameStores (and therefore channels) are available on the device.
-		@param[in]	inFrameRange		Specifies the device SDRAM frame range to use.
+		@param[in]	inChannel			Specifies the ::NTV2Channel and thereby which \ref vidop-fswidget to use.
+		@param[in]	inFrameRange		Specifies the device SDRAM frame range to be used using an NTV2ACFrameRange.
+										Note that fewer frames reduces latency, but increases the likelihood of frame drops.
+										See \ref autocirculatelowlatency.
 		@param[in]	inAudioSystem		Specifies the Audio System to use, if any. Defaults to ::NTV2_AUDIOSYSTEM_INVALID (no audio).
 		@param[in]	inOptionFlags		A bit mask that specifies additional AutoCirculate options (e.g., ::AUTOCIRCULATE_WITH_RP188,
 										::AUTOCIRCULATE_WITH_LTC, ::AUTOCIRCULATE_WITH_ANC, etc.). Defaults to zero (no options).
-		@param[in]	inNumChannels		Optionally specifies the number of channels to operate on when CNTV2Card::AutoCirculateStart or
-										CNTV2Card::AutoCirculateStop are called. Defaults to 1. Must be greater than zero. See \ref autocirculateganging.
-		@note		Fewer frames reduces latency, but increases the likelihood of frame drops. See \ref autocirculatelowlatency.
-		@note		This function logs \ref autocirculatemsgs to \ref usingajalogger or the \ref usinglogreader.
-					Be sure the <tt>AutoCirculate_39</tt> message group is enabled, and the client application has called AJADebug::Open.
-		@details	If this function succeeds, the driver will have designated a contiguous set of device frame buffers to be read by
-					the FrameStore, and placed the channel into the ::NTV2_AUTOCIRCULATE_INIT state. The channel will then be ready for
-					a subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
-					If the device's ::NTV2TaskMode (see CNTV2Card::GetEveryFrameServices ) is ::NTV2_OEM_TASKS, the driver
-					will perform most of the device setup, including configuring the FrameStore, setting the output standard, etc.;
-					otherwise (if ::NTV2_DISABLE_TASKS ), the caller must manage <i>all</i> aspects of the FrameStore ( ::NTV2Mode,
-					::NTV2VideoFormat, etc.) before calling this function.
-		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateInitForInput, \ref autocirculateplayout
+		@param[in]	inNumChannels		This unsigned integer parameter value is used to gang together multiple, contiguous ranges of
+										FrameStores/channels by optionally specifying the number of channels/FrameStores to operate.
+										-	Defaults to 1 (i.e. only operate one FrameStore/channel).
+										-	If specified, the parameter value must be at least one (1).
+										-	See \ref autocirculateganging for more information.
+		@details	The given device frame buffer range given in \c inFrameRange is ascertained and validated.
+					-	If it's invalid (see NTV2ACFrameRange::valid) the function fails (returns \c false).
+					-	If it's a simple frame count (see NTV2ACFrameRange::isCountOnly), then CNTV2Card::FindUnallocatedFrames is
+						called with NTV2ACFrameRange::count to determine the actual frame range to be used. That function is not
+						thread-safe, making it easy for two or more threads/processes calling <b>AutoCirculateInit…</b> to end up
+						using the same frame buffer memory. See \ref fbconflict for more information.
+					-	Otherwise the explicit frame range in \c inFrameRange is used, which is what AJA recommends for Multi-Channel
+						and/or 4K/8K applications.
+
+					Then the NTV2 kernel driver will:
+					-	Remember/assign the given/resulting device frame buffer range to the channel. (These are the frame buffer slots
+						that will be read by the FrameStore from device SDRAM when AutoCirculate starts and runs.)
+					-	Switches the channel's AutoCirculate state to ::NTV2_AUTOCIRCULATE_INIT.  The channel will then be ready for a
+						subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
+					-	Sets the FrameStore's ::NTV2Mode to ::NTV2_MODE_OUTPUT.
+					-	If the ::AUTOCIRCULATE_WITH_ANC bit in \c inOptionFlags is set, initializes the ancillary/auxiliary data inserter
+						(for the SDI/HDMI output that corresponds to \c inChannel) without yet enabling it to read from memory.
+		@note		Most configuration should be completed prior to calling this function, especially:
+					-	FrameStore video format (see CNTV2Card::SetVideoFormat);
+					-	FrameStore pixel format (see CNTV2Card::SetFrameBufferFormat);
+		@note		This function logs diagnostic messages into the \ref debuglogging in the \c AutoCirculate_39 message group.
+					See \ref autocirculatemsgs for a list of these messages.
+		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateStart, CNTV2Card::AutoCirculateInitForInput, \ref autocirculateplayout
 	**/
 
 	AJA_VIRTUAL bool	AutoCirculateInitForOutput (const NTV2Channel			inChannel,
@@ -3182,24 +3249,27 @@ public:
 													const UByte					inNumChannels		= 1);
 
 	/**
-		@brief		Starts AutoCirculating the specified channel that was previously initialized by CNTV2Card::AutoCirculateInitForInput or
-					CNTV2Card::AutoCirculateInitForOutput.
+		@brief		Starts AutoCirculate streaming for the specified channel that was previously initialized by
+					CNTV2Card::AutoCirculateInitForInput or CNTV2Card::AutoCirculateInitForOutput.
 		@return		True if successful; otherwise false.
-		@param[in]	inChannel		Specifies the ::NTV2Channel to use. Call ::NTV2DeviceGetNumFrameStores to discover how many
-									FrameStores (and therefore channels) are available on the device.
-		@param[in]	inStartTime		Optionally specifies a future start time as an unsigned 64-bit host-OS-dependent time value.
-									If zero, the default, AutoCirculate will switch to the ::NTV2_AUTOCIRCULATE_RUNNING state at
-									the next VBI received by the given channel. If non-zero, AutoCirculate will remain in the
-									::NTV2_AUTOCIRCULATE_STARTING_AT_TIME state until the system tick clock exceeds this value, at
-									which point it will switch to the ::NTV2_AUTOCIRCULATE_RUNNING state. This value is denominated
-									in the same time units as the finest-grained time counter available on the host operating system.
-		@details	This function performs the following tasks:
-					-	It sets the state of the channel in the driver from ::NTV2_AUTOCIRCULATE_INIT to ::NTV2_AUTOCIRCULATE_STARTING.
-					-	At the next VBI, the driver's interrupt service routine (ISR) will check the OS tick clock, and if it exceeds
-						\c inStartTime value, it will continue starting AutoCirculate -- otherwise the channel will remain in the
-						::NTV2_AUTOCIRCULATE_STARTING phase, with the driver re-checking the clock at every subsequent VBI.
-					-	The driver will change the channel's state to ::NTV2_AUTOCIRCULATE_RUNNING.
-					-	The driver will start tracking which device memory frames are available and which are empty.
+		@param[in]	inChannel		Specifies the ::NTV2Channel to use (and thereby which \ref vidop-fswidget to operate).
+		@param[in]	inStartTime		Optionally specifies a future start time. Defaults to zero, which starts streaming at the next VBI.
+									This value is denominated in the same time units as the FRAME_STAMP::acFrameTime timestamp captured
+									by the driver's interrupt service routine (ISR), the finest-grained time counter available on the
+									host operating system.
+		@details	This function immediately switches the channel's AutoCirculate state from ::NTV2_AUTOCIRCULATE_INIT to
+					::NTV2_AUTOCIRCULATE_STARTING, which then causes the NTV2 kernel driver's interrupt service routine (ISR) to perform
+					the following tasks:
+					-	Checks the host OS tick clock, and if it does not exceed the \c inStartTime value, it does nothing further, and
+					as such, remains in the ::NTV2_AUTOCIRCULATE_STARTING phase.
+					-	When the host OS tick clock exceeds the \c inStartTime value, the channel's state is switched from
+						::NTV2_AUTOCIRCULATE_STARTING to ::NTV2_AUTOCIRCULATE_RUNNING.
+						-	If the channel was initialized with a valid audio system, the audio system is started
+							(i.e. audio capture for input, audio playback for output).
+						-	If the channel was initialized with ::AUTOCIRCULATE_WITH_ANC, the ancillary inserter (output) or extractor
+							(input) is initialized.
+					-	Once in the ::NTV2_AUTOCIRCULATE_RUNNING state, the driver ISR begins tracking which device memory frames
+						are available and which are empty.
 						-	<b>Capture/Input Mode</b> -- The next frame to be recorded is determined, and the current last input
 							audio sample is written into the next frame's FRAME_STAMP's acAudioInStartAddress field.
 							Then the channel's active frame is set to the next frame number.
@@ -3222,8 +3292,7 @@ public:
 	/**
 		@brief		Stops AutoCirculate for the given channel, and releases the on-device frame buffers that were allocated to it.
 		@return		True if successful; otherwise false.
-		@param[in]	inChannel		Specifies the ::NTV2Channel to stop. Call ::NTV2DeviceGetNumFrameStores to discover how many
-									FrameStores (and therefore channels) are available on the device.
+		@param[in]	inChannel		Specifies the ::NTV2Channel to stop (and thereby which \ref vidop-fswidget to affect).
 		@param[in]	inAbort			Specifies if AutoCirculate is to be immediately stopped, not gracefully.
 									Defaults to false (graceful stop).
 		@details	If asked to stop gracefully (the default), the channel's AutoCirculate state is set to ::NTV2_AUTOCIRCULATE_STOPPING,
@@ -4092,9 +4161,9 @@ public:
 	AJA_VIRTUAL bool	GetColorSpaceMakeAlphaFromKey (ULWord & outMakeAlphaFromKey, const NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
-		@brief		Answers whether or not the video signal present at the CSC’s Key Input is in sync with the video signal present
+		@brief		Answers whether or not the video signal present at the CSC's Key Input is in sync with the video signal present
 					at its Video Input.
-		@param[out] outVideoKeySyncFail		Receives true if the video signal present at the CSC’s Key Input is NOT sync'd to the
+		@param[out] outVideoKeySyncFail		Receives true if the video signal present at the CSC's Key Input is NOT sync'd to the
 											video signal present at its Video Input;  otherwise receives false.
 		@param[in]	inChannel	Optionally specifies the CSC of interest, a zero-based index value expressed as an ::NTV2Channel.
 								Call ::NTV2DeviceGetNumCSCs to determine the number of available CSCs on the device.

@@ -965,37 +965,66 @@ inline NTV2SmpteLineNumber GetSmpteLineNumber (const NTV2Standard inStandard)	{r
 
 
 /**
-	@brief	AutoCirculate Frame Range
+	@brief	A helper class used in CNTV2Card::AutoCirculateInitForInput and CNTV2Card::AutoCirculateInitForOutput that makes it easier
+			to specify an AutoCirculate Frame Range, either as a simple frame count (to lazily allow CNTV2Card::FindUnallocatedFrames
+			to determine the actual frame range to use), or an explicit frame range.
 **/
 class AJAExport NTV2ACFrameRange
 {
 	public:
+		/**
+			@brief		Constructs me from a simple frame count.
+			@param[in]	inFrameCount	Specifies a frame count. This value should be at least 1.
+			@warning	AJA generally does not recommended using "lazy" AutoCirculate buffer allocation/specification in production code.
+		**/
 		explicit inline	NTV2ACFrameRange (const UWord inFrameCount = 0)
 						{
 							setCountOnly(inFrameCount);
 						}
+
+		/**
+			@brief		Constructs me from an explicit frame range.
+			@param[in]	inFirstFrame	Specifies the starting frame index number. This value should be less than \c inLastFrame.
+			@param[in]	inLastFrame		Specifies the ending frame index number. This value should be greater than \c inFirstFrame.
+		**/
 		explicit inline	NTV2ACFrameRange (const UWord inFirstFrame, const UWord inLastFrame)
 						{
 							setExactRange (inFirstFrame, inLastFrame);
 						}
-		inline bool		isCountOnly (void) const	{return mIsCountOnly;}		///< @returns	true if I'm a simple frame count
-		inline bool		isFrameRange (void) const	{return !isCountOnly();}	///< @returns	true if I'm a specific frame range
-		inline UWord	count (void) const			{return isCountOnly() ? mFrameCount : 0;}	///< @returns	my frame count (if a simple frame count); otherwise zero
-		inline UWord	firstFrame (void) const		{return mFirstFrame;}		///< @returns	my first frame (if explicit frame range); otherwise zero
-		inline UWord	lastFrame (void) const		{return mLastFrame;}		///< @returns	my last frame (if explicit frame range); otherwise zero
+
+		inline bool		isCountOnly (void) const	{return mIsCountOnly;}		///< @returns	\c true if I'm a simple frame count;  otherwise I'm an explicit frame range.
+		inline bool		isFrameRange (void) const	{return !isCountOnly();}	///< @returns	\c true if I'm a specific frame range;  otherwise I'm a simple frame count.
+		inline UWord	count (void) const			{return isCountOnly() ? mFrameCount : 0;}	///< @returns	my frame count (valid only if I'm a simple frame count); otherwise zero
+		inline UWord	firstFrame (void) const		{return mFirstFrame;}		///< @returns	my first frame index number (if explicit frame range); otherwise zero
+		inline UWord	lastFrame (void) const		{return mLastFrame;}		///< @returns	my last frame index number (if explicit frame range); otherwise zero
 		inline			operator bool() const		{return valid();}			///< @returns	true if valid; otherwise false
+
+		/**
+			@returns	\c true if I'm valid;  otherwise \c false
+		**/
 		inline bool		valid (void) const
 						{
 							if (isCountOnly())
 								return count() > 0;
 							return lastFrame() >= firstFrame();
 						}
+
+		/**
+			@brief		Invalidates me.
+		**/
 		inline NTV2ACFrameRange &	makeInvalid (void)
 						{
 							mIsCountOnly = true;
 							mFrameCount = mFirstFrame = mLastFrame = 0;
 							return *this;
 						}
+
+		/**
+			@brief		Sets me to the given explicit frame range values.
+			@param[in]	inFirstFrame	Specifies my starting frame index number. This value should be less than \c inLastFrame.
+			@param[in]	inLastFrame		Specifies my ending frame index number. This value should be greater than \c inFirstFrame.
+			@returns	\c true if I'm valid;  otherwise \c false
+		**/
 		inline bool		setExactRange (const UWord inFirstFrame, const UWord inLastFrame)
 						{
 							mIsCountOnly = false;
@@ -1004,6 +1033,13 @@ class AJAExport NTV2ACFrameRange
 							mLastFrame = inLastFrame;
 							return valid();
 						}
+
+		/**
+			@brief		Sets me to an explicit frame range specified by a frame count and a starting frame index.
+			@param[in]	inCount			Specifies my frame count. This value should be at least 1.
+			@param[in]	inFirstFrame	Specifies my starting frame index number.
+			@returns	\c true if I'm valid;  otherwise \c false
+		**/
 		inline bool		setRangeWithCount (const UWord inCount, const UWord inFirstFrame)
 						{
 							mIsCountOnly = false;
@@ -1012,6 +1048,12 @@ class AJAExport NTV2ACFrameRange
 							mLastFrame = mFirstFrame + inCount - 1;
 							return valid();
 						}
+
+		/**
+			@brief		Sets me to a simple frame count.
+			@param[in]	inCount			Specifies my frame count. This value should be at least 1.
+			@returns	\c true if I'm valid;  otherwise \c false
+		**/
 		inline bool		setCountOnly (const UWord inCount)
 						{
 							mIsCountOnly	= true;
@@ -1019,7 +1061,20 @@ class AJAExport NTV2ACFrameRange
 							mFirstFrame = mLastFrame = 0;
 							return valid();
 						}
+		/**
+			@brief		Resets me from the given character string that should contain a human-readable frame range.
+			@param[in]	inStr		Specifies the character string to be interpreted as a frame range.
+			@returns	an empty string if successful;  otherwise a non-empty string containing a human-readable error message.
+		**/
 		std::string		setFromString (const std::string & inStr);
+
+		/**
+			@brief		Converts me into a character string.
+			@param[in]	inNormalized	If true, the returned string will contain something like "X-Y" or "N@M",
+										suitable for use in NTV2ACFrameRange::setFromString;
+										otherwise, it will contain a more human-readable description of my frame range.
+			@returns	a character string that contains a readable representation of my frame range.
+		**/
 		std::string		toString (const bool inNormalized = false) const;
 
 	private:
