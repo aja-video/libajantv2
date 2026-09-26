@@ -7970,11 +7970,12 @@ typedef enum
 				NTV2_END_PRIVATE
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
 		NTV2_STRUCT_END (NTV2BankSelGetSetRegs)
+
 		/**
 			@brief	Configure interrupt (subscribe/unsubscribe, enable/disable, query subscribed interrupts, query enabled interrupts, etc.).
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
-		NTV2_STRUCT_BEGIN (NTV2ConfigureInterrupt)
+		NTV2_STRUCT_BEGIN (NTV2ConfigInterrupt)
 				NTV2_HEADER			mHeader;				///< @brief The common structure header -- ALWAYS FIRST!
 					ULWord				mOperation;				///< @brief In: requested operation
 					ULWord				mFlags;					///< @brief In: option flags
@@ -7983,14 +7984,16 @@ typedef enum
 					ULWord64			mInterruptIDs;			///< @brief Out: bitmap of enabled interrupt IDs
 					ULWord64			mEventHandle;			///< @brief In: handle to subscribe if kFlagMaskCreateHandle bit is clear
 					ULWord64			mClientID;				///< @brief In: client identifier
+					ULWord64			mClientPID;				///< @brief In: client process identifier
+					ULWord64			mClientTID;				///< @brief In: client thread identifier
 					ULWord				mCount;					///< @brief In: set interrupt count;  Out: requested count
 					NTV2Buffer			mHandles;				///< @brief Optional buffer to store subscribed HANDLEs
 					ULWord				mSpares[32];			///< @brief Reserved for future use
 				NTV2_TRAILER		mTrailer;				///< @brief The common structure trailer -- ALWAYS LAST!
 
 			#if !defined (NTV2_BUILDING_DRIVER)
-				explicit	NTV2ConfigureInterrupt(const void * pClient = nullptr);	///< @brief Default ctor, optionally set clientID if needed
-				inline		~NTV2ConfigureInterrupt()	{}	///< @brief Destructor
+				explicit	NTV2ConfigInterrupt(const void * pClient = nullptr);	///< @brief Default ctor, optionally set clientID if needed
+				inline		~NTV2ConfigInterrupt()	{}	///< @brief Destructor
 
 				//	SUPPORTED OPERATIONS
 				static const ULWord	kOpINVALID				= 0x00000000;
@@ -8020,6 +8023,8 @@ typedef enum
 				inline	operator		NTV2_HEADER*()				{return reinterpret_cast<NTV2_HEADER*>(this);}	///< @returns	my starting address casted to an NTV2_HEADER pointer
 				std::ostream &			print (std::ostream & oss) const;	///< @brief	prints a human-readable representation of me to the given output stream
 				inline uint64_t			clientID (void) const		{return mClientID;}			///< @returns	my client ID
+				inline uint64_t			clientPID (void) const		{return mClientPID;}		///< @returns	my client process ID
+				inline uint64_t			clientTID (void) const		{return mClientTID;}		///< @returns	my client thread ID
 				inline ULWord			count (void) const			{return mCount;}			///< @returns	count value
 				inline size_t			maxHandleCapacity (void) const	{return mHandles.GetByteCount() / sizeof(uint64_t);}	///< @return	number of event HANDLEs in mOutHandles NTV2Buffer
 				inline HANDLE			eventHandle (const INTERRUPT_ENUMS id) const	{return isValid() && mHandles && size_t(id) < maxHandleCapacity() ? HANDLE(mHandles.U64(int(id))) : HANDLE(0);}	///< @returns	interrupt event handle
@@ -8029,14 +8034,14 @@ typedef enum
 				inline bool				hasIncludeGlobalsFlag (void) const	{return flags() & kFlagMaskIncludeGlobals;}	///< @returns	True if my "include globals" option is set
 
 				//	Changing/Configuring
-				inline NTV2ConfigureInterrupt &	doSubscribe (const INTERRUPT_ENUMS id)		{return doSubscribeEvent(id,HANDLE(0)).setCreateEvent();}	///< @brief	Create event handle and subscribe it to given interruptID
-				inline NTV2ConfigureInterrupt &	doSubscribeEvent (const INTERRUPT_ENUMS id, const HANDLE & hdl)	{return setOperation(kOpSubscribe).setInterruptID(id).setEventHandle(hdl);}	///< @brief	Subscribe given HANDLE for interruptID
-				inline NTV2ConfigureInterrupt &	doUnsubscribe (const INTERRUPT_ENUMS id)	{return setOperation(kOpUnsubscribe).setInterruptID(id);}	///< @brief	Unsubscribe local HANDLE from given interruptID
-				inline NTV2ConfigureInterrupt &	doEnable (const INTERRUPT_ENUMS id)			{return setOperation(kOpEnable).setInterruptID(id);}		///< @brief	Enable given interruptID
-				inline NTV2ConfigureInterrupt &	doDisable (const INTERRUPT_ENUMS id)		{return setOperation(kOpDisable).setInterruptID(id);}		///< @brief	Disable given interruptID
-				inline NTV2ConfigureInterrupt &	doGetCount (const INTERRUPT_ENUMS id)		{return setOperation(kOpGetIntCount).setInterruptID(id);}	///< @brief	Get interruptID count
-				inline NTV2ConfigureInterrupt &	doSetCount (const INTERRUPT_ENUMS id, const ULWord cnt=0)	{return setOperation(kOpSetIntCount).setInterruptID(id).setCount(cnt);}	///< @brief	Set interruptID count
-				inline NTV2ConfigureInterrupt &	doGetSubscribed (const bool includeHdls = false)
+				inline NTV2ConfigInterrupt &	doSubscribe (const INTERRUPT_ENUMS id)		{return doSubscribeEvent(id,HANDLE(0)).setCreateEvent();}	///< @brief	Create event handle and subscribe it to given interruptID
+				inline NTV2ConfigInterrupt &	doSubscribeEvent (const INTERRUPT_ENUMS id, const HANDLE & hdl)	{return setOperation(kOpSubscribe).setInterruptID(id).setEventHandle(hdl);}	///< @brief	Subscribe given HANDLE for interruptID
+				inline NTV2ConfigInterrupt &	doUnsubscribe (const INTERRUPT_ENUMS id)	{return setOperation(kOpUnsubscribe).setInterruptID(id);}	///< @brief	Unsubscribe local HANDLE from given interruptID
+				inline NTV2ConfigInterrupt &	doEnable (const INTERRUPT_ENUMS id)			{return setOperation(kOpEnable).setInterruptID(id);}		///< @brief	Enable given interruptID
+				inline NTV2ConfigInterrupt &	doDisable (const INTERRUPT_ENUMS id)		{return setOperation(kOpDisable).setInterruptID(id);}		///< @brief	Disable given interruptID
+				inline NTV2ConfigInterrupt &	doGetCount (const INTERRUPT_ENUMS id)		{return setOperation(kOpGetIntCount).setInterruptID(id);}	///< @brief	Get interruptID count
+				inline NTV2ConfigInterrupt &	doSetCount (const INTERRUPT_ENUMS id, const ULWord cnt=0)	{return setOperation(kOpSetIntCount).setInterruptID(id).setCount(cnt);}	///< @brief	Set interruptID count
+				inline NTV2ConfigInterrupt &	doGetSubscribed (const bool includeHdls = false)
 					{	if (includeHdls)
 							mHandles.Allocate(size_t(eNumInterruptTypes));
 						else
@@ -8044,15 +8049,15 @@ typedef enum
 						return setOperation(kOpGetSubscribed);
 					}	///< @brief	Retrieve subscribed interrupt IDs + count of them (+ optional event HANDLEs)
 
-				inline NTV2ConfigureInterrupt &	setResult		(const ULWord val)			{mResult = val;  return *this;}					///< @brief	Sets my mResult
-				inline NTV2ConfigureInterrupt &	setFail			(void)						{return setResult(0);}							///< @brief	Zeroes my mResult (indicating failure)
-				inline NTV2ConfigureInterrupt &	setSuccess		(void)						{return setResult(1);}							///< @brief	Sets my mResult to 1 (non-zero indicates success)
-				inline NTV2ConfigureInterrupt &	setClientID		(const uint64_t id)			{mClientID = id;  return *this;}				///< @brief	Sets my mClientID
-				inline NTV2ConfigureInterrupt &	setCount		(const ULWord val)			{mCount = val;  return *this;}					///< @brief	Sets my mCount
-				inline NTV2ConfigureInterrupt &	setOperation	(const ULWord op)			{mOperation = op;  return *this;}				///< @brief	Sets my operation
-				inline NTV2ConfigureInterrupt &	setInterruptID	(const INTERRUPT_ENUMS id)	{mInterruptID = ULWord(id);  return *this;}		///< @brief	Sets my interruptID
-				inline NTV2ConfigureInterrupt &	setEventHandle	(const HANDLE & h)			{mEventHandle = ULWord64(h);  mCount = 0; mHandles.Set(nullptr,0);  return *this;}	///< @brief	Sets my event handle
-				inline NTV2ConfigureInterrupt &	setCreateEvent	(void)						{mFlags |= kFlagMaskCreateHandle;  return *this;}	///< @brief	Sets the kFlagMaskCreateHandle option
+				inline NTV2ConfigInterrupt &	setResult		(const ULWord val)			{mResult = val;  return *this;}		///< @brief	Sets my mResult
+				inline NTV2ConfigInterrupt &	setFail			(void)						{return setResult(0);}				///< @brief	Zeroes my mResult (indicating failure)
+				inline NTV2ConfigInterrupt &	setSuccess		(void)						{return setResult(1);}				///< @brief	Sets my mResult to 1 (non-zero indicates success)
+				inline NTV2ConfigInterrupt &	setClientID		(const uint64_t id)			{mClientID = id;  return *this;}	///< @brief	Sets my mClientID
+				inline NTV2ConfigInterrupt &	setCount		(const ULWord val)			{mCount = val;  return *this;}		///< @brief	Sets my mCount
+				NTV2ConfigInterrupt &			setOperation	(const ULWord op);			///< @brief	Sets my operation; also stores caller's PID & TID
+				inline NTV2ConfigInterrupt &	setInterruptID	(const INTERRUPT_ENUMS id)	{mInterruptID = ULWord(id);  return *this;}	///< @brief	Sets my interruptID
+				inline NTV2ConfigInterrupt &	setEventHandle	(const HANDLE & h)			{mEventHandle = ULWord64(h);  mCount = 0; mHandles.Set(nullptr,0);  return *this;}	///< @brief	Sets my event handle
+				inline NTV2ConfigInterrupt &	setCreateEvent	(void)						{mFlags |= kFlagMaskCreateHandle;  return *this;}	///< @brief	Sets the kFlagMaskCreateHandle option
 
 				static std::string		OpName (const ULWord op);			///< @return	Converts operation code to human-readable string
 				static NTV2StringList	IntNames (const uint64_t mask);		///< @returns	list of interrupt enum ID names from corresponding bits set in 'mask'
@@ -8062,18 +8067,18 @@ typedef enum
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)
 
 				NTV2_BEGIN_PRIVATE
-					inline explicit	NTV2ConfigureInterrupt (const NTV2ConfigureInterrupt & inObj) : mHeader(0xFEFEFEFE, 0) {(void)inObj;}	///< @brief You can't construct an NTV2ConfigureInterrupt from another.
-					inline NTV2ConfigureInterrupt &	operator = (const NTV2ConfigureInterrupt & inRHS) {(void)inRHS; return *this;}	///< @brief You can't assign NTV2ConfigureInterrupt instances.
+					inline explicit	NTV2ConfigInterrupt (const NTV2ConfigInterrupt & inObj) : mHeader(0xFEFEFEFE, 0) {(void)inObj;}	///< @brief You can't construct an NTV2ConfigInterrupt from another.
+					inline NTV2ConfigInterrupt &	operator = (const NTV2ConfigInterrupt & inRHS) {(void)inRHS; return *this;}	///< @brief You can't assign NTV2ConfigInterrupt instances.
 				NTV2_END_PRIVATE
 			#endif	//	user-space clients only
-		NTV2_STRUCT_END (NTV2ConfigureInterrupt)
+		NTV2_STRUCT_END (NTV2ConfigInterrupt)
 
-		typedef NTV2ConfigureInterrupt	NTV2ConfigInterrupt, NTV2CfgInterrupt;
+		typedef NTV2ConfigInterrupt	NTV2ConfigureInterrupt, NTV2CfgInterrupt;
 
-		#define	AsNTV2ConfigInterrupt(_p_)	(reinterpret_cast<NTV2ConfigureInterrupt*>(_p_))
-		#define	AsNTV2CfgInterrupt(_p_)		(reinterpret_cast<NTV2ConfigureInterrupt*>(_p_))
+		#define	AsNTV2ConfigInterrupt(_p_)	(reinterpret_cast<NTV2ConfigInterrupt*>(_p_))
+		#define	AsNTV2CfgInterrupt(_p_)		(reinterpret_cast<NTV2ConfigInterrupt*>(_p_))
 		#if !defined (NTV2_BUILDING_DRIVER)
-			AJAExport std::ostream & operator << (std::ostream & oss, const NTV2ConfigureInterrupt & msg);
+			AJAExport std::ostream & operator << (std::ostream & oss, const NTV2ConfigInterrupt & msg);
 		#endif// !defined (NTV2_BUILDING_DRIVER)
 
 
