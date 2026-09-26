@@ -3034,7 +3034,8 @@ public:
 											frame buffer memory. See \ref fbconflict for more information.
 										-	<b>NOTE:</b> Fewer frames reduces latency, but increases the likelihood of frame drops.
 											See \ref autocircfrmcnt.
-		@param[in]	inAudioSystem		Specifies the Audio System to use, if any. Defaults to ::NTV2_AUDIOSYSTEM_INVALID (no audio).
+		@param[in]	inAudioSystem		Specifies the \ref audop-fwimpl-audsys to use, if any.
+										Defaults to ::NTV2_AUDIOSYSTEM_INVALID (no audio).
 		@param[in]	inOptionFlags		A bit mask that specifies additional AutoCirculate options (e.g., ::AUTOCIRCULATE_WITH_RP188,
 										::AUTOCIRCULATE_WITH_LTC, ::AUTOCIRCULATE_WITH_ANC, etc.). Defaults to zero (no options).
 		@param[in]	inNumChannels		This unsigned integer parameter value is used to gang together multiple, contiguous ranges of
@@ -3054,9 +3055,12 @@ public:
 										-	If non-zero, this parameter, along with \c inStartFrameNumber, overrides \c inFrameCount.
 										-	If specified, must be larger than \c inStartFrameNumber.
 										-	See \ref vidop-indexing for more information.
-		@details	Once the starting and ending device frame buffer range is ascertained and validated, this function causes the NTV2
+		@details	<b>NOTE:</b> For Multi-Channel or 4K/8K applications, AJA recommends specifying zero for \c inFrameCount, and
+					explicitly specifying a frame range using \c inStartFrameNumber and \c inEndFrameNumber.
+
+					Once the starting and ending device frame buffer range is ascertained and validated, this function causes the NTV2
 					kernel driver to:
-					-	Remember/assign the given/resulting device frame buffer range to the channel. (These are the frame buffer slots
+					-	Assigns the device frame buffer range to the channel. (These are the frame buffer slots
 						that will be written by the FrameStore into device SDRAM when AutoCirculate starts and runs.)
 					-	Switches the channel's AutoCirculate state to ::NTV2_AUTOCIRCULATE_INIT.  The channel will then be ready for a
 						subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
@@ -3066,12 +3070,12 @@ public:
 							on the FrameStore's Input Frame register's value. See \ref vidop-fbconflict.
 					-	If the ::AUTOCIRCULATE_WITH_ANC bit in \c inOptionFlags is set, initializes the ancillary/auxiliary data extractor
 						(for the SDI/HDMI input that corresponds to \c inChannel) without yet enabling it to write into memory.
-		@note		For Multi-Channel or 4K/8K applications, AJA recommends specifying zero for \c inFrameCount, and explicitly specifying
-					a frame range using \c inStartFrameNumber and \c inEndFrameNumber.
-		@note		Most configuration should be completed prior to calling this function, especially:
+
+		@note		Most \ref vidop-fswidget configuration should be completed prior to calling this function, especially:
 					-	FrameStore video format (see CNTV2Card::SetVideoFormat);
 					-	FrameStore pixel format (see CNTV2Card::SetFrameBufferFormat);
 					-	All \ref ntv2signalrouting to the FrameStore.
+
 		@note		This function logs diagnostic messages into the \ref debuglogging in the \c AutoCirculate_39 message group.
 					See \ref autocirculatemsgs for a list of these messages.
 		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateStart, CNTV2Card::AutoCirculateInitForOutput, \ref autocirculatecapture
@@ -3094,7 +3098,8 @@ public:
 		@param[in]	inFrameRange		Specifies the device SDRAM frame range to be used using an NTV2ACFrameRange.
 										Note that fewer frames reduces latency, but increases the likelihood of frame drops.
 										See \ref autocirculatelowlatency.
-		@param[in]	inAudioSystem		Specifies the Audio System to use, if any. Defaults to ::NTV2_AUDIOSYSTEM_INVALID (no audio).
+		@param[in]	inAudioSystem		Specifies the \ref audop-fwimpl-audsys to use, if any.
+										Defaults to ::NTV2_AUDIOSYSTEM_INVALID (no audio).
 		@param[in]	inOptionFlags		A bit mask that specifies additional AutoCirculate options (e.g., ::AUTOCIRCULATE_WITH_RP188,
 										::AUTOCIRCULATE_WITH_LTC, ::AUTOCIRCULATE_WITH_ANC, etc.). Defaults to zero (no options).
 		@param[in]	inNumChannels		This unsigned integer parameter value is used to gang together multiple, contiguous ranges of
@@ -3112,7 +3117,7 @@ public:
 						or 4K/8K applications.
 
 					Then the NTV2 kernel driver will:
-					-	Remember/assign the given/resulting device frame buffer range to the channel. (These are the frame buffer slots
+					-	Assigns the device frame buffer range to the channel. (These are the frame buffer slots
 						that will be written by the FrameStore into device SDRAM when AutoCirculate starts and runs.)
 					-	Switches the channel's AutoCirculate state to ::NTV2_AUTOCIRCULATE_INIT.  The channel will then be ready for a
 						subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
@@ -3122,10 +3127,12 @@ public:
 							on the FrameStore's Input Frame register's value. See \ref vidop-fbconflict.
 					-	If the ::AUTOCIRCULATE_WITH_ANC bit in \c inOptionFlags is set, initializes the ancillary/auxiliary data extractor
 						(for the SDI/HDMI input that corresponds to \c inChannel) without yet enabling it to write into memory.
-		@note		Most configuration should be completed prior to calling this function, especially:
+
+		@note		Most \ref vidop-fswidget configuration should be completed prior to calling this function, especially:
 					-	FrameStore video format (see CNTV2Card::SetVideoFormat);
 					-	FrameStore pixel format (see CNTV2Card::SetFrameBufferFormat);
 					-	All \ref ntv2signalrouting to the FrameStore.
+
 		@note		This function logs diagnostic messages into the \ref debuglogging in the \c AutoCirculate_39 message group.
 					See \ref autocirculatemsgs for a list of these messages.
 		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateStart, CNTV2Card::AutoCirculateInitForOutput, \ref autocirculatecapture
@@ -3153,7 +3160,8 @@ public:
 											frame buffer memory. See \ref fbconflict for more information.
 										-	<b>NOTE:</b> Fewer frames reduces latency, but increases the likelihood of frame drops.
 											See \ref autocircfrmcnt.
-		@param[in]	inAudioSystem		Specifies the Audio System to use, if any. Defaults to ::NTV2_AUDIOSYSTEM_INVALID (no audio).
+		@param[in]	inAudioSystem		Specifies the \ref audop-fwimpl-audsys to use, if any.
+										Defaults to ::NTV2_AUDIOSYSTEM_INVALID (no audio).
 		@param[in]	inOptionFlags		A bit mask that specifies additional AutoCirculate options (e.g., ::AUTOCIRCULATE_WITH_RP188,
 										::AUTOCIRCULATE_WITH_LTC, ::AUTOCIRCULATE_WITH_ANC, etc.). Defaults to zero (no options).
 		@param[in]	inNumChannels		This unsigned integer parameter value is used to gang together multiple, contiguous ranges of
@@ -3173,20 +3181,24 @@ public:
 										-	If non-zero, this parameter, along with \c inStartFrameNumber, overrides \c inFrameCount.
 										-	If specified, must be larger than \c inStartFrameNumber.
 										-	See \ref vidop-indexing for more information.
-		@details	Once the starting and ending device frame buffer range is ascertained and validated, this function causes the NTV2
+
+		@details	<b>NOTE:</b> For Multi-Channel or 4K/8K applications, AJA recommends specifying zero for \c inFrameCount, and
+					explicitly specifying a frame range using \c inStartFrameNumber and \c inEndFrameNumber.
+
+					Once the starting and ending device frame buffer range is ascertained and validated, this function causes the NTV2
 					kernel driver to:
-					-	Remember/assign the given/resulting device frame buffer range to the channel. (These are the frame buffer slots
+					-	Assigns the device frame buffer range to the channel. (These are the frame buffer slots
 						that will be read by the FrameStore from device SDRAM when AutoCirculate starts and runs.)
 					-	Switches the channel's AutoCirculate state to ::NTV2_AUTOCIRCULATE_INIT.  The channel will then be ready for a
 						subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
 					-	Sets the FrameStore's ::NTV2Mode to ::NTV2_MODE_OUTPUT.
 					-	If the ::AUTOCIRCULATE_WITH_ANC bit in \c inOptionFlags is set, initializes the ancillary/auxiliary data inserter
 						(for the SDI/HDMI output that corresponds to \c inChannel) without yet enabling it to read from memory.
-		@note		For Multi-Channel or 4K/8K applications, AJA recommends specifying zero for \c inFrameCount, and explicitly specifying
-					a frame range using \c inStartFrameNumber and \c inEndFrameNumber.
-		@note		Most configuration should be completed prior to calling this function, especially:
+
+		@note		Most \ref vidop-fswidget configuration should be completed prior to calling this function, especially:
 					-	FrameStore video format (see CNTV2Card::SetVideoFormat);
 					-	FrameStore pixel format (see CNTV2Card::SetFrameBufferFormat);
+
 		@note		This function logs diagnostic messages into the \ref debuglogging in the \c AutoCirculate_39 message group.
 					See \ref autocirculatemsgs for a list of these messages.
 		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateStart, CNTV2Card::AutoCirculateInitForInput, \ref autocirculateplayout
@@ -3209,7 +3221,8 @@ public:
 		@param[in]	inFrameRange		Specifies the device SDRAM frame range to be used using an NTV2ACFrameRange.
 										Note that fewer frames reduces latency, but increases the likelihood of frame drops.
 										See \ref autocirculatelowlatency.
-		@param[in]	inAudioSystem		Specifies the Audio System to use, if any. Defaults to ::NTV2_AUDIOSYSTEM_INVALID (no audio).
+		@param[in]	inAudioSystem		Specifies the \ref audop-fwimpl-audsys to use, if any.
+										Defaults to ::NTV2_AUDIOSYSTEM_INVALID (no audio).
 		@param[in]	inOptionFlags		A bit mask that specifies additional AutoCirculate options (e.g., ::AUTOCIRCULATE_WITH_RP188,
 										::AUTOCIRCULATE_WITH_LTC, ::AUTOCIRCULATE_WITH_ANC, etc.). Defaults to zero (no options).
 		@param[in]	inNumChannels		This unsigned integer parameter value is used to gang together multiple, contiguous ranges of
@@ -3234,9 +3247,11 @@ public:
 					-	Sets the FrameStore's ::NTV2Mode to ::NTV2_MODE_OUTPUT.
 					-	If the ::AUTOCIRCULATE_WITH_ANC bit in \c inOptionFlags is set, initializes the ancillary/auxiliary data inserter
 						(for the SDI/HDMI output that corresponds to \c inChannel) without yet enabling it to read from memory.
-		@note		Most configuration should be completed prior to calling this function, especially:
+
+		@note		Most \ref vidop-fswidget configuration should be completed prior to calling this function, especially:
 					-	FrameStore video format (see CNTV2Card::SetVideoFormat);
 					-	FrameStore pixel format (see CNTV2Card::SetFrameBufferFormat);
+
 		@note		This function logs diagnostic messages into the \ref debuglogging in the \c AutoCirculate_39 message group.
 					See \ref autocirculatemsgs for a list of these messages.
 		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateStart, CNTV2Card::AutoCirculateInitForInput, \ref autocirculateplayout
@@ -3475,6 +3490,7 @@ public:
 										regions of device SDRAM, and also its ::NTV2VideoFormat will determine if the frames are
 										quad-sized or quad-quad-sized. Defaults to ::NTV2_CHANNEL_INVALID for backward compatibility.
 		@return		True if successful; otherwise false.
+		@warning	This function is not thread-safe!
 		@note		Prior to SDK 16.1, this function returned invalid frame numbers if any AutoCirculate channels were actively
 					processing UHD/4K or UHD2/8K. In SDK 16.2, this function failed (returned false) if any AutoCirculate channels
 					were actively processing UHD/4K or UHD2/8K. In SDK 16.3, the function was corrected to work with UHD/4K and UHD2/8K,
