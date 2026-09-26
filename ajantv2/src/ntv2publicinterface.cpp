@@ -10,6 +10,8 @@
 #include "ntv2endian.h"
 #include "ajabase/system/memory.h"
 #include "ajabase/system/debug.h"
+#include "ajabase/system/process.h"
+#include "ajabase/system/thread.h"
 #include "ajabase/common/common.h"
 #include "ntv2registerexpert.h"
 #include "ntv2nubtypes.h"
@@ -3848,8 +3850,8 @@ NTV2StringList NTV2ConfigInterrupt::IntNames (const uint64_t mask)
 	return strs;
 }
 
-NTV2ConfigInterrupt::NTV2ConfigureInterrupt (const void * pClient)
-	:	mHeader	(NTV2_TYPE_CONFIGINTERRUPT, sizeof(NTV2ConfigureInterrupt)),
+NTV2ConfigInterrupt::NTV2ConfigInterrupt (const void * pClient)
+	:	mHeader	(NTV2_TYPE_CONFIGINTERRUPT, sizeof(NTV2ConfigInterrupt)),
 		mOperation		(kOpINVALID),
 		mFlags			(0),
 		mInterruptID	(eNumInterruptTypes),
@@ -3857,6 +3859,8 @@ NTV2ConfigInterrupt::NTV2ConfigureInterrupt (const void * pClient)
 		mInterruptIDs	(0),
 		mEventHandle	(0),
 		mClientID		(uint64_t(pClient)),
+		mClientPID		(0),
+		mClientTID		(0),
 		mCount			(0),
 		mHandles		(nullptr,0)
 {
@@ -3864,7 +3868,7 @@ NTV2ConfigInterrupt::NTV2ConfigureInterrupt (const void * pClient)
 	NTV2_ASSERT_STRUCT_VALID;
 }
 
-ostream & NTV2ConfigureInterrupt::print (ostream & oss) const
+ostream & NTV2ConfigInterrupt::print (ostream & oss) const
 {
 	oss << mHeader;
 	if (isValid())
@@ -3875,6 +3879,10 @@ ostream & NTV2ConfigureInterrupt::print (ostream & oss) const
 			oss << " flgs=" << xHEX0N(mFlags,8);
 		if (clientID())
 			oss << " " << HEX(clientID());
+		if (clientPID())
+			oss << " pid=" << HEX(clientPID());
+		if (clientTID())
+			oss << " tid=" << HEX(clientTID());
 		oss << " res=" << DEC(mResult);
 		if (interruptIDs())
 			oss	<< " ids=" << aja::join(IntNames(interruptIDs()),",");
@@ -3887,7 +3895,15 @@ ostream & NTV2ConfigureInterrupt::print (ostream & oss) const
 	return oss;
 }
 
-ostream & operator << (ostream & oss, const NTV2ConfigureInterrupt & msg)
+NTV2ConfigInterrupt & NTV2ConfigInterrupt::setOperation (const ULWord op)
+{
+	mOperation = op;
+	mClientPID = AJAProcess::GetPid();
+	mClientTID = AJAThread::GetThreadId();
+	return *this;
+}
+
+ostream & operator << (ostream & oss, const NTV2ConfigInterrupt & msg)
 {
 	return msg.print(oss);
 }
@@ -4203,7 +4219,7 @@ using namespace ntv2nub;
 		return ok;
 	}
 
-	bool NTV2ConfigureInterrupt::RPCEncode (RPCBlob & outBlob)
+	bool NTV2ConfigInterrupt::RPCEncode (RPCBlob & outBlob)
 	{
 		const size_t totBytes	(mHeader.GetSizeInBytes()	//	Header + natural size of all structs/fields inbetween + Trailer
 								+ mHandles.GetByteCount());	//	NTV2Buffer field
@@ -4220,6 +4236,8 @@ using namespace ntv2nub;
 		PUSHU64(mInterruptIDs, outBlob);						//		ULWord64		mInterruptIDs
 		PUSHU64(mEventHandle, outBlob);							//		ULWord64		mEventHandle
 		PUSHU64(mClientID, outBlob);							//		ULWord64		mClientID
+		PUSHU64(mClientPID, outBlob);							//		ULWord64		mClientPID
+		PUSHU64(mClientTID, outBlob);							//		ULWord64		mClientTID
 		PUSHU32(mCount, outBlob);								//		ULWord			mCount
 		ok &= mHandles.RPCEncode(outBlob);						//		NTV2Buffer		mHandles
 		ok &= mTrailer.RPCEncode(outBlob);						//	NTV2_TRAILER	mTrailer
@@ -4228,7 +4246,7 @@ using namespace ntv2nub;
 		return ok;
 	}
 
-	bool NTV2ConfigureInterrupt::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
+	bool NTV2ConfigInterrupt::RPCDecode (const RPCBlob & inBlob, size_t & inOutIndex)
 	{
 		bool ok = mHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER		mHeader
 		ok &= POPU32(mOperation, inBlob, inOutIndex);			//		ULWord			mOperation
@@ -4238,6 +4256,8 @@ using namespace ntv2nub;
 		ok &= POPU64(mInterruptIDs, inBlob, inOutIndex);		//		ULWord64		mInterruptIDs
 		ok &= POPU64(mEventHandle, inBlob, inOutIndex);			//		ULWord64		mEventHandle
 		ok &= POPU64(mClientID, inBlob, inOutIndex);			//		ULWord64		mClientID
+		ok &= POPU64(mClientPID, inBlob, inOutIndex);			//		ULWord64		mClientPID
+		ok &= POPU64(mClientTID, inBlob, inOutIndex);			//		ULWord64		mClientTID
 		ok &= POPU32(mCount, inBlob, inOutIndex);				//		ULWord			mCount
 		ok &= mHandles.RPCDecode(inBlob, inOutIndex);			//		NTV2Buffer		mHandles
 		ok &= mTrailer.RPCDecode(inBlob, inOutIndex);			//	NTV2_TRAILER	mTrailer
