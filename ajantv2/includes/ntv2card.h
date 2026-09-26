@@ -3031,7 +3031,7 @@ public:
 										-	CNTV2Card::FindUnallocatedFrames is called with this frame count value to determine the
 											actual frame range to be used. That function is not thread-safe, making it easy for two
 											or more threads or processes calling <b>AutoCirculateInit…</b> to end up using the same
-											frame buffer memory. See \ref fbconflict for more information.
+											frame buffer memory. See \ref vidop-fbconflict for more information.
 										-	<b>NOTE:</b> Fewer frames reduces latency, but increases the likelihood of frame drops.
 											See \ref autocircfrmcnt.
 		@param[in]	inAudioSystem		Specifies the \ref audop-fwimpl-audsys to use, if any.
@@ -3112,7 +3112,7 @@ public:
 					-	If it's a simple frame count (see NTV2ACFrameRange::isCountOnly), then CNTV2Card::FindUnallocatedFrames is
 						called with NTV2ACFrameRange::count to determine the actual frame range to be used. That function is not
 						thread-safe, making it easy for two or more threads/processes calling <b>AutoCirculateInit…</b> to end up
-						using the same frame buffer memory. See \ref fbconflict for more information.
+						using the same frame buffer memory. See \ref vidop-fbconflict for more information.
 					-	Otherwise the explicit frame range in \c inFrameRange is used, which is what AJA recommends for Multi-Channel
 						or 4K/8K applications.
 
@@ -3157,7 +3157,7 @@ public:
 										-	CNTV2Card::FindUnallocatedFrames is called with this frame count value to determine the
 											actual frame range to be used. That function is not thread-safe, making it easy for two
 											or more threads or processes calling <b>AutoCirculateInit…</b> to end up using the same
-											frame buffer memory. See \ref fbconflict for more information.
+											frame buffer memory. See \ref vidop-fbconflict for more information.
 										-	<b>NOTE:</b> Fewer frames reduces latency, but increases the likelihood of frame drops.
 											See \ref autocircfrmcnt.
 		@param[in]	inAudioSystem		Specifies the \ref audop-fwimpl-audsys to use, if any.
@@ -3235,7 +3235,7 @@ public:
 					-	If it's a simple frame count (see NTV2ACFrameRange::isCountOnly), then CNTV2Card::FindUnallocatedFrames is
 						called with NTV2ACFrameRange::count to determine the actual frame range to be used. That function is not
 						thread-safe, making it easy for two or more threads/processes calling <b>AutoCirculateInit…</b> to end up
-						using the same frame buffer memory. See \ref fbconflict for more information.
+						using the same frame buffer memory. See \ref vidop-fbconflict for more information.
 					-	Otherwise the explicit frame range in \c inFrameRange is used, which is what AJA recommends for Multi-Channel
 						and/or 4K/8K applications.
 
