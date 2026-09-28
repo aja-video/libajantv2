@@ -847,7 +847,8 @@ bool CNTV2Card::AncExtractSetWriteParams (const UWord inSDIInput, const ULWord i
 	if (ok) ok = GetAncOffsets (*this, F1Offset, F2Offset);
 
 	const ULWord	ANCStartMemory	(frameLocation - F1Offset);
-	const ULWord	ANCStopMemory	(frameLocation - F2Offset - 1);
+//	const ULWord	ANCStopMemory	(frameLocation - F2Offset - 1);
+	const ULWord	ANCStopMemory	(frameLocation - 1);
 	if (ok) ok = SetAncExtField1StartAddr (*this, inSDIInput, ANCStartMemory);
 	if (ok) ok = SetAncExtField1EndAddr (*this, inSDIInput, ANCStopMemory);
 	return ok;
