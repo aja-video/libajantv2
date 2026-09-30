@@ -64,12 +64,29 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         )
         set(CMAKE_OSX_SYSROOT "${_aja_macos_sdk_path}" CACHE STRING "macOS SDK" FORCE)
     endif()
-    get_filename_component(MACOS_SDK_NAME ${CMAKE_OSX_SYSROOT} NAME_WLE)
+    get_filename_component(MACOS_SDK_NAME "${CMAKE_OSX_SYSROOT}" NAME_WLE)
 
-    string(REPLACE "MacOSX" "" MACOS_SDK_VERSION ${MACOS_SDK_NAME})
-    string(REPLACE "." ";" MACOS_SDK_VERSION_LIST ${MACOS_SDK_VERSION})
-    list(GET MACOS_SDK_VERSION_LIST 0 MACOS_SDK_VERSION_MAJOR)
-    list(GET MACOS_SDK_VERSION_LIST 1 MACOS_SDK_VERSION_MINOR)
+    # The SDK path is usually the unversioned "MacOSX.sdk" (from xcrun, or as the
+    # real directory inside Xcode), so ask xcrun for the version instead of
+    # relying on the directory name. Fall back to the name, e.g. "MacOSX15.2.sdk".
+    execute_process(
+        COMMAND xcrun --sdk "${CMAKE_OSX_SYSROOT}" --show-sdk-version
+        OUTPUT_VARIABLE MACOS_SDK_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+    if(NOT MACOS_SDK_VERSION)
+        string(REPLACE "MacOSX" "" MACOS_SDK_VERSION "${MACOS_SDK_NAME}")
+    endif()
+    if(MACOS_SDK_VERSION MATCHES "^([0-9]+)(\\.([0-9]+))?")
+        set(MACOS_SDK_VERSION_MAJOR ${CMAKE_MATCH_1})
+        set(MACOS_SDK_VERSION_MINOR 0)
+        if(NOT "${CMAKE_MATCH_3}" STREQUAL "")
+            set(MACOS_SDK_VERSION_MINOR ${CMAKE_MATCH_3})
+        endif()
+    else()
+        message(WARNING "Unable to determine macOS SDK version from CMAKE_OSX_SYSROOT: ${CMAKE_OSX_SYSROOT}")
+    endif()
     message(STATUS "CMAKE_OSX_SYSROOT: ${CMAKE_OSX_SYSROOT}")
     message(STATUS "MACOS_SDK_NAME: ${MACOS_SDK_NAME}")
     message(STATUS "MACOS_SDK_VERSION: ${MACOS_SDK_VERSION}")
