@@ -45,6 +45,15 @@ static const uint32_t	gAudMaxSizeBytes (256 * 1024);	//	Max per-frame audio buff
 
 static const bool		BUFFER_PAGE_ALIGNED	(true);
 
+static NTV2Channel GetRealVideoOutputChannel (CNTV2Card & inDevice, NTV2Channel inRequestedChannel)
+{
+	if (!NTV2_IS_VALID_CHANNEL(inRequestedChannel))
+		return NTV2_CHANNEL1;
+	if (inDevice.features().GetNumVideoOutputs() <= 1)
+		return NTV2_CHANNEL1;
+	return inRequestedChannel;
+}
+
 //	Audio tone generator data
 static const double		gFrequencies []	=	{250.0, 500.0, 1000.0, 2000.0};
 static const ULWord		gNumFrequencies		(sizeof(gFrequencies) / sizeof(double));
@@ -413,6 +422,8 @@ bool NTV2Player::RouteOutputSignal (void)
 	const NTV2OutputXptID	cscVidOutXpt(::GetCSCOutputXptFromChannel(mConfig.fOutputChannel,  false/*isKey*/,  !isRGB/*isRGB*/));
 	const NTV2OutputXptID	fsVidOutXpt (::GetFrameStoreOutputXptFromChannel(mConfig.fOutputChannel,  isRGB/*isRGB*/,  false/*is425*/));
 	const NTV2InputXptID	cscInputXpt (isRGB ? ::GetCSCInputXptFromChannel(mConfig.fOutputChannel, false/*isKeyInput*/) : NTV2_INPUT_CROSSPOINT_INVALID);
+	// This fixed the case with Kona1 two framestores but only one video out
+	const NTV2Channel		sdiOutputChannel (GetRealVideoOutputChannel(mDevice, mConfig.fOutputChannel));
 
 	if (!mConfig.fDoMultiFormat)  //	Not multiformat:  We own the whole device...
 		mDevice.ClearRouting();		//	Start with clean slate
@@ -422,12 +433,12 @@ bool NTV2Player::RouteOutputSignal (void)
 			connectFailures++;
 
 	if (mDevice.features().HasBiDirectionalSDI())
-		mDevice.SetSDITransmitEnable(mConfig.fOutputChannel, true);
+		mDevice.SetSDITransmitEnable(sdiOutputChannel, true);
 
-	if (!mDevice.Connect (::GetSDIOutputInputXpt (mConfig.fOutputChannel, false/*isDS2*/),  isRGB ? cscVidOutXpt : fsVidOutXpt,  canVerify))
+	if (!mDevice.Connect (::GetSDIOutputInputXpt (sdiOutputChannel, false/*isDS2*/),  isRGB ? cscVidOutXpt : fsVidOutXpt,  canVerify))
 		connectFailures++;
 
-	mDevice.SetSDIOutputStandard (mConfig.fOutputChannel, outputStandard);
+	mDevice.SetSDIOutputStandard (sdiOutputChannel, outputStandard);
 
 	mTCIndexes.insert (::NTV2ChannelToTimecodeIndex(mConfig.fOutputChannel, /*inEmbeddedLTC=*/mConfig.fTransmitLTC));
 	//	NOTE: No need to send VITC2 with VITC1 (for "i" formats) -- firmware does this automatically
@@ -633,6 +644,7 @@ void NTV2Player::ConsumeFrames (void)
 
 	//	Stop AutoCirculate...
 	mDevice.AutoCirculateStop(mConfig.fOutputChannel);
+	mDevice.AutoCirculateFlush(mConfig.fOutputChannel);
 	PLNOTE("Thread completed: " << DEC(goodXfers) << " xfers, " << DEC(badXfers) << " failed, "
 			<< DEC(starves) << " starves, " << DEC(noRoomWaits) << " VBI waits");
 	if (pAncStrm)

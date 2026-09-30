@@ -254,8 +254,9 @@ bool SetAncExtWriteParams(Ntv2SystemContext* context, NTV2Channel channel, ULWor
 	ULWord nextFrame = frameNumber+1;//This is so the next calculation will point to the beginning of the next frame - subtract offset for memory start
 	ULWord endOfFrameLocation = GetFrameBufferSize(context, channel) * nextFrame;
 	ULWord ANCStartMemory = endOfFrameLocation - ntv2ReadVirtualRegister(context, kVRegAncField1Offset);
-	ULWord ANCStopMemory = endOfFrameLocation - ntv2ReadVirtualRegister(context, kVRegAncField2Offset);
-	ANCStopMemory -= 1;
+//	ULWord ANCStopMemory = endOfFrameLocation - ntv2ReadVirtualRegister(context, kVRegAncField2Offset);
+    ULWord ANCStopMemory = endOfFrameLocation - 1;
+//	ANCStopMemory -= 1;
 	SetAncExtField1StartAddr(context, channel, ANCStartMemory);
 	SetAncExtField1EndAddr(context, channel, ANCStopMemory);
 	return true;
