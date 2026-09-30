@@ -543,7 +543,7 @@ void EnableNtv2Interrupts(Ntv2SystemContext* pSystemContext)
 		enableMask += kIntUartTXEnable + kIntUartRXEnable;
 	if(NTV2DeviceCanDoRS422N(deviceID, NTV2_CHANNEL2))
 		enableMask += kIntUart2TXEnable;
-	switch(NTV2DeviceGetNumVideoChannels(deviceID))
+	switch(NTV2DeviceGetNumFrameStores(deviceID))
 	{
 		case 8:
 			enableMask2 += kIntIn8Enable;
@@ -571,6 +571,9 @@ void EnableNtv2Interrupts(Ntv2SystemContext* pSystemContext)
 				enableMask += kIntOut3Enable;
 		case 2:
 			enableMask += kIntIn2Enable;
+            if (deviceID == DEVICE_ID_KONA1) {
+                enableMask += kIntOut2Enable;
+            } else
 			if(NTV2DeviceCanDoMultiFormat(deviceID))
 				enableMask += kIntOut2Enable;
 		default:
@@ -619,7 +622,7 @@ void DisableNtv2Interrupts(Ntv2SystemContext* pSystemContext)
 		disableMask += kIntUartTXEnable + kIntUartRXEnable;
 	if(NTV2DeviceCanDoRS422N(deviceID, NTV2_CHANNEL2))
 		disableMask += kIntUart2TXEnable;
-	switch(NTV2DeviceGetNumVideoChannels(deviceID))
+	switch(NTV2DeviceGetNumFrameStores(deviceID))
 	{
 		case 8:
 			disableMask2 += kIntIn8Enable;
@@ -647,8 +650,11 @@ void DisableNtv2Interrupts(Ntv2SystemContext* pSystemContext)
 				disableMask += kIntOut3Enable;
 		case 2:
 			disableMask += kIntIn2Enable;
-			if(NTV2DeviceCanDoMultiFormat(deviceID))
+            if (deviceID == DEVICE_ID_KONA1) {
+                disableMask += kIntOut2Enable;
+            } else if(NTV2DeviceCanDoMultiFormat(deviceID)) {
 				disableMask += kIntOut2Enable;
+            }
 		default:
 		case 1:
 			disableMask += kIntIn1Enable;
