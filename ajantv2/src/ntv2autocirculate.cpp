@@ -764,52 +764,14 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 			else
 				F1SizeInBytes = size_t(F2OffsetFromBottom - F1OffsetFromBottom);
 		}
-		if ((_boardID == DEVICE_ID_IOIP_2110) || (_boardID == DEVICE_ID_IOIP_2110_RGB12))
-		{	//	IoIP 2110 Playout requires room for RTP+GUMP per anc buffer, to also operate SDI5 Mon output
-			ULWord	F1MonOffsetFromBottom(0),  F2MonOffsetFromBottom(0);
-			const bool good (GetAncRegionOffsetFromBottom(F1MonOffsetFromBottom, NTV2_AncRgn_MonField1)
-							 &&	 GetAncRegionOffsetFromBottom(F2MonOffsetFromBottom, NTV2_AncRgn_MonField2));
-			if (good	//	Driver expects anc regions in this order (from bottom): F2Mon, F2, F1Mon, F1
-				&&	F2MonOffsetFromBottom < F2OffsetFromBottom
-				&&	F2OffsetFromBottom < F1MonOffsetFromBottom
-				&&	F1MonOffsetFromBottom < F1OffsetFromBottom)
-			{
-				F1SizeInBytes = size_t(F1OffsetFromBottom - F2OffsetFromBottom);
-				F2SizeInBytes = size_t(F2OffsetFromBottom);
-			}
-			else
-			{	//	Anc regions out of order!
-				XMTWARN(GetDescription() << ": IoIP 2110 playout anc rgns disordered (offsets from bottom): F2Mon=" << HEX0N(F2MonOffsetFromBottom,8)
-						<< " F2=" << HEX0N(F2OffsetFromBottom,8) << " F1Mon=" << HEX0N(F1MonOffsetFromBottom,8)
-						<< " F1=" << HEX0N(F1OffsetFromBottom,8));
-				F1SizeInBytes = F2SizeInBytes = 0;	//	Out of order, don't do Anc
-			}
-			savedAncF1 = inOutXferInfo.acANCBuffer;			//	copy
-			savedAncF2 = inOutXferInfo.acANCField2Buffer;	//	copy
-			if (inOutXferInfo.acANCBuffer.GetByteCount() < F1SizeInBytes)
-			{	//	Enlarge acANCBuffer, and copy everything from savedAncF1 into it...
-				inOutXferInfo.acANCBuffer.Allocate(F1SizeInBytes);
-				inOutXferInfo.acANCBuffer.Fill(uint64_t(0));
-				inOutXferInfo.acANCBuffer.CopyFrom(savedAncF1, 0, 0, savedAncF1.GetByteCount());
-			}
-			if (inOutXferInfo.acANCField2Buffer.GetByteCount() < F2SizeInBytes)
-			{	//	Enlarge acANCField2Buffer, and copy everything from savedAncF2 into it...
-				inOutXferInfo.acANCField2Buffer.Allocate(F2SizeInBytes);
-				inOutXferInfo.acANCField2Buffer.Fill(uint64_t(0));
-				inOutXferInfo.acANCField2Buffer.CopyFrom(savedAncF2, 0, 0, savedAncF2.GetByteCount());
-			}
-		}	//	if IoIP 2110 playout
+		if (inOutXferInfo.acANCBuffer.IsNULL())
+			tmpLocalF1AncBuffer = inOutXferInfo.acANCBuffer.Allocate(F1SizeInBytes);
 		else
-		{	//	else KonaIP 2110 playout
-			if (inOutXferInfo.acANCBuffer.IsNULL())
-				tmpLocalF1AncBuffer = inOutXferInfo.acANCBuffer.Allocate(F1SizeInBytes);
-			else
-				savedAncF1 = inOutXferInfo.acANCBuffer; //	copy
-			if (inOutXferInfo.acANCField2Buffer.IsNULL())
-				tmpLocalF2AncBuffer = inOutXferInfo.acANCField2Buffer.Allocate(F2SizeInBytes);
-			else
-				savedAncF2 = inOutXferInfo.acANCField2Buffer;	//	copy
-		}	//	else KonaIP 2110 playout
+			savedAncF1 = inOutXferInfo.acANCBuffer; //	copy
+		if (inOutXferInfo.acANCField2Buffer.IsNULL())
+			tmpLocalF2AncBuffer = inOutXferInfo.acANCField2Buffer.Allocate(F2SizeInBytes);
+		else
+			savedAncF2 = inOutXferInfo.acANCField2Buffer;	//	copy
 		S2110DeviceAncToXferBuffers(inChannel, inOutXferInfo);
 	}	//	if SMPTE 2110 playout
 	else if (IsSupported(kDeviceCanDo2110)  &&  NTV2_IS_INPUT_CROSSPOINT(crosspoint))
@@ -998,9 +960,9 @@ static const TimecodeFormat sNTV2Rate2TCFormat[] = {kTCFormatUnknown	//	NTV2_FRA
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 													};
 
-//	VPID Packet Insertion						1080	720		525		625		1080p	2K		2K1080p		2K1080i		UHD		4K		UHDHFR		4KHFR
-static const uint16_t	sVPIDLineNumsF1[] = {	10,		10,		13,		9,		10,		10,		10,			10,			10,		10,		10,			10	};
-static const uint16_t	sVPIDLineNumsF2[] = {	572,	0,		276,	322,	0,		0,		0,			572,		0,		0,		0,			0	};
+//	VPID Packet Insertion						1080	720		525		625		1080p	2K		2K1080p		2K1080i		UHD		4K		UHDHFR		4KHFR	UHD2	8K	UHDpsf	4Kpsf
+static const uint16_t	sVPIDLineNumsF1[] = {	10,		10,		13,		9,		10,		10,		10,			10,			10,		10,		10,			10,		10,		10,	10,		10,		0};
+static const uint16_t	sVPIDLineNumsF2[] = {	572,	0,		276,	322,	0,		0,		0,			572,		0,		0,		0,			0,		0,		0,	0,		0,		0};
 
 //	SDI RX Status Registers (for setting/clearing "VPID Present" bits)
 static const uint32_t	gSDIInRxStatusRegs[] = {kRegRXSDI1Status, kRegRXSDI2Status, kRegRXSDI3Status, kRegRXSDI4Status, kRegRXSDI5Status, kRegRXSDI6Status, kRegRXSDI7Status, kRegRXSDI8Status, 0};
@@ -1171,7 +1133,6 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 	bool				isProgressive	(false);
 	bool				generateRTP		(false);
 	const bool			isMonitoring	(AJADebug::IsActive(AJA_DebugUnit_Anc2110Xmit));
-	const bool			isIoIP2110		((_boardID == DEVICE_ID_IOIP_2110) || (_boardID == DEVICE_ID_IOIP_2110_RGB12));
 	NTV2Standard		standard		(NTV2_STANDARD_INVALID);
 	NTV2Buffer &		ancF1			(inOutXferInfo.acANCBuffer);
 	NTV2Buffer &		ancF2			(inOutXferInfo.acANCField2Buffer);
@@ -1192,17 +1153,6 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 	const NTV2SmpteLineNumber	smpteLineNumInfo	(::GetSmpteLineNumber(standard));
 	const uint32_t				F2StartLine			(smpteLineNumInfo.GetLastLine());	//	F2 VANC starts past last line of F1
 
-	//	IoIP 2110 Playout requires RTP+GUMP per anc buffer to operate SDI5 Mon output...
-	GetAncRegionOffsetFromBottom(F1OffsetFromBottom,	NTV2_AncRgn_Field1);
-	GetAncRegionOffsetFromBottom(F2OffsetFromBottom,	NTV2_AncRgn_Field2);
-	GetAncRegionOffsetFromBottom(F1MonOffsetFromBottom, NTV2_AncRgn_MonField1);
-	GetAncRegionOffsetFromBottom(F2MonOffsetFromBottom, NTV2_AncRgn_MonField2);
-	//	Define F1 & F2 GUMP sub-buffers from ancF1 & ancF2 (only used for IoIP 2110)...
-	NTV2Buffer gumpF1(ancF1.GetHostAddress(F1OffsetFromBottom - F1MonOffsetFromBottom), // addr
-						F1MonOffsetFromBottom - F2OffsetFromBottom);	// byteCount
-	NTV2Buffer gumpF2(ancF2.GetHostAddress(F2OffsetFromBottom - F2MonOffsetFromBottom), // addr
-						F2MonOffsetFromBottom); // byteCount
-
 	if (ancF1 || ancF2)
 	{
 		//	Import anc packet list that AutoCirculateTransfer's caller put into Xfer struct's Anc buffers (GUMP or RTP).
@@ -1212,59 +1162,17 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 
 		if (!packetList.IsEmpty())
 		{
-			const bool	isF1RTP (ancF1 ? AJARTPAncPayloadHeader::BufferStartsWithRTPHeader(ancF1) : false);
-			const bool	isF2RTP (ancF2 ? AJARTPAncPayloadHeader::BufferStartsWithRTPHeader(ancF2) : false);
-			if (isIoIP2110 && isF1RTP && isF2RTP)
-			{	//	Generate F1 & F2 GUMP from F1 & F2 RTP...
-				packetList.GetSDITransmitData(gumpF1, gumpF2, isProgressive, F2StartLine);
-			}
-			else
-			{
-				if (ancF1)
-				{
-					if (isF1RTP)
-					{	//	Caller F1 buffer contains RTP
-						if (isIoIP2110)
-						{	//	Generate GUMP from packetList...
-							NTV2Buffer skipF2Data;
-							packetList.GetSDITransmitData(gumpF1, skipF2Data, isProgressive, F2StartLine);
-						}
-					}
-					else
-					{	//	Caller F1 buffer contains GUMP
-						generateRTP = true; //	Force conversion to RTP
-						if (isIoIP2110)
-						{	//	Copy GUMP to where the driver expects it...
-							const ULWord	gumpLength (std::min(F1MonOffsetFromBottom - F2OffsetFromBottom, ULWord(gumpF1.GetByteCount())));
-							gumpF1.CopyFrom(/*src=*/ancF1,	/*srcOffset=*/0,  /*dstOffset=*/0,	/*byteCount=*/gumpLength);
-						}	//	if IoIP
-					}	//	if F1 is GUMP
-				}	//	if ancF1 non-NULL
-				if (ancF2)
-				{
-					if (isF2RTP)
-					{	//	Caller F2 buffer contains RTP
-						if (isIoIP2110)
-						{	//	Generate GUMP from packetList...
-							NTV2Buffer skipF1Data;
-							packetList.GetSDITransmitData(skipF1Data, gumpF2, isProgressive, F2StartLine);
-						}
-					}
-					else
-					{	//	Caller F2 buffer contains GUMP
-						generateRTP = true; //	Force conversion to RTP
-						if (isIoIP2110)
-						{	//	Copy GUMP to where the driver expects it...
-							const ULWord	gumpLength (std::min(F2MonOffsetFromBottom, ULWord(gumpF2.GetByteCount())));
-							gumpF2.CopyFrom(/*src=*/ancF2,	/*srcOffset=*/0,  /*dstOffset=*/0,	/*byteCount=*/gumpLength);
-						}	//	if IoIP
-					}	//	if F2 is GUMP
-				}	//	if ancF2 non-NULL
-			}	//	else not IoIP or not F1RTP or not F2RTP
+			const bool isF1RTP (ancF1 ? AJARTPAncPayloadHeader::BufferStartsWithRTPHeader(ancF1) : false);
+			const bool isF2RTP (ancF2 ? AJARTPAncPayloadHeader::BufferStartsWithRTPHeader(ancF2) : false);
+			if (ancF1  &&  !isF1RTP)
+				generateRTP = true; //	Force conversion to RTP
+			if (ancF2  &&  !isF2RTP)
+				generateRTP = true; //	Force conversion to RTP
 		}	//	if caller supplied any anc
 	}	//	if either buffer non-empty/NULL
 
-	if (isMonitoring)	XMTDBG("ORIG: " << packetList); //	Original packet list from caller
+	if (isMonitoring)
+		XMTDBG("ORIG: " << packetList); //	Original packet list from caller
 
 	//	Callers can override our register-based VPID values...
 	if (!packetList.CountAncillaryDataWithID(0x41,0x01))			//	If no VPID packets in buffer...
@@ -1369,37 +1277,9 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 		//XMTDBG("CHGD: " << packetList);	//	DEBUG:	Changed packet list (to be converted to RTP)
 		const bool		multiRTPPkt = inOutXferInfo.acTransferStatus.acState == NTV2_AUTOCIRCULATE_INVALID	?  true	 :	false;
 		packetList.SetAllowMultiRTPTransmit(multiRTPPkt);
-		NTV2Buffer rtpF1 (ancF1.GetHostAddress(0),  isIoIP2110  ?	 F1OffsetFromBottom - F1MonOffsetFromBottom	 :	ancF1.GetByteCount());
-		NTV2Buffer rtpF2 (ancF2.GetHostAddress(0),  isIoIP2110  ?	 F2OffsetFromBottom - F2MonOffsetFromBottom	 :	ancF2.GetByteCount());
+		NTV2Buffer rtpF1 (ancF1.GetHostAddress(0),  ancF1.GetByteCount());
+		NTV2Buffer rtpF2 (ancF2.GetHostAddress(0),  ancF2.GetByteCount());
 		result = AJA_SUCCESS(packetList.GetIPTransmitData (rtpF1, rtpF2, isProgressive, F2StartLine));
-		//if (isIoIP2110)	XMTDBG("F1RTP: " << rtpF1 << " F2RTP: " << rtpF2 << " Xfer: " << inOutXferInfo);
-#if 0	/// Development
-		DMAWriteAnc(31, rtpF1, rtpF2, NTV2_CHANNEL_INVALID);	//	DEBUG: DMA RTP into frame 31
-		if (result)
-		{
-			AJAAncillaryList	compareRTP; //	RTP into compareRTP
-			NTV2_ASSERT(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers(rtpF1, rtpF2, compareRTP)));
-			//if (packetList.GetAncillaryDataWithID(0x61,0x02)->GetChecksum() != compareRTP.GetAncillaryDataWithID(0x61,0x02)->GetChecksum())
-			//XMTDBG("COMPRTP608: " << packetList.GetAncillaryDataWithID(0x61,0x02)->AsString(8) << compareRTP.GetAncillaryDataWithID(0x61,0x02)->AsString(8));
-			string compRTP (compareRTP.CompareWithInfo(packetList, /*ignoreLocation*/false, /*ignoreChecksum*/false));
-			if (!compRTP.empty())
-				XMTWARN("MISCOMPARE: " << compRTP);
-		}
-		if (isIoIP2110)
-		{
-			DMAWriteAnc(32, gumpF1, gumpF2, NTV2_CHANNEL_INVALID);	//	DEBUG: DMA GUMP into frame 32
-			if (result)
-			{
-				AJAAncillaryList	compareGUMP;	//	GUMP into compareGUMP
-				NTV2_ASSERT(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers(gumpF1, gumpF2, compareGUMP)));
-				//if (packetList.GetAncillaryDataWithID(0x61,0x02)->GetChecksum() != compareGUMP.GetAncillaryDataWithID(0x61,0x02)->GetChecksum())
-				//XMTDBG("COMPGUMP608: " << packetList.GetAncillaryDataWithID(0x61,0x02)->AsString(8) << compareGUMP.GetAncillaryDataWithID(0x61,0x02)->AsString(8));
-				string compGUMP (compareGUMP.CompareWithInfo(packetList, /*ignoreLocation*/false, /*ignoreChecksum*/false));
-				if (!compGUMP.empty())
-					XMTWARN("MISCOMPARE: " << compGUMP);
-			}
-		}	//	IoIP2110
-#endif	///	Development
 	}	//	if generateRTP
 	return result;
 
@@ -1478,7 +1358,8 @@ bool CNTV2Card::S2110DeviceAncToBuffers (const NTV2Channel inChannel, NTV2Buffer
 			}
 		}	//	if client didn't insert their own VPID
 	}	//	if no VPID pkts in buffer
-	else if (isMonitoring)	{XMTDBG(DEC(pkts.CountAncillaryDataWithID(0x41,0x01)) << " VPID packet(s) already provided, won't insert any here");}
+	else if (isMonitoring)
+		{XMTDBG(DEC(pkts.CountAncillaryDataWithID(0x41,0x01)) << " VPID packet(s) already provided, won't insert any here");}
 
 	//	Non-autocirculate users can transmit timecode two ways:
 	//	1)	Insert ATC or VITC packets into the Anc buffers themselves, or
@@ -1543,17 +1424,6 @@ bool CNTV2Card::S2110DeviceAncToBuffers (const NTV2Channel inChannel, NTV2Buffer
 		ancF1.Fill(ULWord(0));	ancF2.Fill(ULWord(0));	//	Clear/reset anc RTP buffers
 		//XMTDBG(pkts);
 		result = AJA_SUCCESS(pkts.GetIPTransmitData (ancF1, ancF2, isProgressive, F2StartLine));
-#if 0	///	Development
-		if (result)
-		{
-			AJAAncillaryList	comparePkts;
-			NTV2_ASSERT(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers(ancF1, ancF2, comparePkts)));
-			//XMTDBG(comparePkts);
-			string compareResult (comparePkts.CompareWithInfo(pkts,false,false));
-			if (!compareResult.empty())
-				XMTWARN("MISCOMPARE: " << compareResult);
-		}
-#endif	///	Development
 	}
 	return result;
 
