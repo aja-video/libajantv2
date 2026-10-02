@@ -126,7 +126,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoHDMIMultiView,					///< @brief True if device can rasterize 4 HD signals into a single HDMI output.
 	kDeviceHasMultiRasterWidget,				///< @brief True if device can rasterize 4 HD signals into a single HDMI output.
 	kDeviceCanDoHFRRGB,							///< @brief True if device supports 1080p RGB at more than 50Hz frame rates.
-	kDeviceCanDoIP,								///< @brief True if device has SFP connectors.
+	kDeviceCanDoIP,								///< @brief True if device supports 10Gbps IP (mutually exclusive with kDeviceCanDo25GIP).
 	kDeviceCanDoMultiLinkAudio,					///< @brief True if device supports grouped audio system control.
 	kDeviceCanDoWarmBootFPGA,					///< @brief True if device can warm-boot to load updated firmware.
 	kDeviceCanReportFailSafeLoaded,				///< @brief True if device can report if its "fail-safe" firmware is loaded/running.
@@ -158,7 +158,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoVersalSysMon,					///< @brief	True if device supports Versal Adaptive SoC System Monitor.
 	kDeviceCanDoGPIO,							///< @brief	True if device has GPIO interface.	(New in SDK 18.0)
 	kDeviceHasBracketLED,						///< @brief True if device has LED(s) on the card bracket. (New in SDK 18.0)
-	kDeviceCanDo25GIP,							///< @brief True if device has 25Gbps SFPs. (New in SDK 18.0)
+	kDeviceCanDo25GIP,							///< @brief True if device supports 25Gbps IP. (New in SDK 18.0)
 	kDeviceCanReportMixerDelay,					///< @brief	True if device can report Mixer delay. (New in SDK 18.1)
 	kDeviceHasLPProductCode,					///< @brief	True if device has a local processor handling the product code. (New in SDK 18.1)
 	kDeviceCanDoP2PTransmit,					///< @brief	True if device can directly transmit data to another PCIe device via peer-to-peer DMA. (New in SDK 18.1)
