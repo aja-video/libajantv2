@@ -345,7 +345,7 @@ bool CNTV2Card::SetVideoFormat (const NTV2VideoFormat value, const bool inIsReta
 		SetQuadQuadFrameEnable(false, channel);
 		if (!IsMultiFormatActive())
 		{
-			CopyVideoFormat(channel, NTV2_CHANNEL1, NTV2_CHANNEL8);
+			CopyVideoFormat(channel, NTV2_CHANNEL1, NTV2Channel(GetNumSupported(kDeviceGetNumFrameStores) - 1));//NTV2_CHANNEL8);
 		}
 	}
 	
@@ -1517,6 +1517,12 @@ bool CNTV2Card::GetTsiMuxSyncFail (bool & outSyncFailed, const NTV2Channel inWhi
 bool CNTV2Card::CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFirst, const NTV2Channel inLast)
 {
 	ULWord standard(0), rate1(0), rate2(0), s372(0), geometry(0), format(0);
+	if (inFirst > inLast)
+		return false;	//	first must be <= last
+	if (inSrc >= NTV2_MAX_NUM_CHANNELS)
+		return false;	//	past channel 8, prevent bad access from [inSrc]
+	if (inLast >= NTV2_MAX_NUM_CHANNELS)
+		return false;	//	past channel 8, prevent bad access from [channel]
 	bool status(false);
 
 	status = ReadRegister (gChannelToGlobalControlRegNum[inSrc], standard,	kRegMaskStandard,  kRegShiftStandard);
