@@ -347,19 +347,10 @@ ostream & operator << (ostream & inOutStream, const NTV2_HEADER & inObj)
 }
 
 
-ostream & NTV2_HEADER::Print (ostream & inOutStream) const
+ostream & NTV2_HEADER::Print (ostream & oss) const
 {
-	inOutStream << "[";
-	if (NTV2_IS_VALID_HEADER_TAG (fHeaderTag))
-		inOutStream << NTV2_4CC_AS_STRING (fHeaderTag);
-	else
-		inOutStream << "BAD-" << HEX0N(fHeaderTag,8);
-	if (NTV2_IS_VALID_STRUCT_TYPE (fType))
-		inOutStream << NTV2_4CC_AS_STRING (fType);
-	else
-		inOutStream << "|BAD-" << HEX0N(fType,8);
-	inOutStream << " v" << fHeaderVersion << " vers=" << fVersion << " sz=" << fSizeInBytes;
-	return inOutStream << "]";
+	return oss << "[" << FourCCToString(fHeaderTag) << "|" << FourCCToString(fType) << " v" << fHeaderVersion
+			<< " vers=" << fVersion << " sz=" << fSizeInBytes << "]";
 }
 
 string NTV2_HEADER::FourCCToString (const ULWord in4CC, char nonPrintable)
@@ -395,18 +386,49 @@ string NTV2_HEADER::FourCCToString (const ULWord in4CC, char nonPrintable)
 }
 
 
-ostream & operator << (ostream & inOutStream, const NTV2_TRAILER & inObj)
+
+NTV2_TRAILER::NTV2_TRAILER ()
+	:	fTrailerVersion		(NTV2SDKVersionEncode(AJA_NTV2_SDK_VERSION_MAJOR, AJA_NTV2_SDK_VERSION_MINOR, AJA_NTV2_SDK_VERSION_POINT, AJA_NTV2_SDK_BUILD_NUMBER)),
+		fTrailerTag			(NTV2_TRAILER_TAG)
 {
-	inOutStream << "[";
-	if (NTV2_IS_VALID_TRAILER_TAG(inObj.fTrailerTag))
-		inOutStream << NTV2_4CC_AS_STRING(inObj.fTrailerTag);
+}
+
+ostream & NTV2_TRAILER::Print (ostream & oss) const
+{
+	oss << "[" << NTV2_HEADER::FourCCToString(fTrailerTag);
+	if (IsValidVersion())
+		oss << " clientSDK=" << DEC(NTV2SDKVersionDecode_Major(fTrailerVersion)) << "." << DEC(NTV2SDKVersionDecode_Minor(fTrailerVersion))
+				<< "." << DEC(NTV2SDKVersionDecode_Point(fTrailerVersion)) << "." << DEC(NTV2SDKVersionDecode_Build(fTrailerVersion));
 	else
-		inOutStream << "BAD-" << HEX0N(inObj.fTrailerTag,8);
-	return inOutStream << " rawVers=" << xHEX0N(inObj.fTrailerVersion,8) << " clientSDK="
-				<< DEC(NTV2SDKVersionDecode_Major(inObj.fTrailerVersion))
-				<< "." << DEC(NTV2SDKVersionDecode_Minor(inObj.fTrailerVersion))
-				<< "." << DEC(NTV2SDKVersionDecode_Point(inObj.fTrailerVersion))
-				<< "." << DEC(NTV2SDKVersionDecode_Build(inObj.fTrailerVersion)) << "]";
+		oss << " rawVers=" << xHEX0N(fTrailerVersion,8);
+	return oss << "]";
+}
+
+bool NTV2_TRAILER::MatchesThisSDK (void) const
+{
+	const uint32_t vers (NTV2SDKVersionEncode(AJA_NTV2_SDK_VERSION_MAJOR, AJA_NTV2_SDK_VERSION_MINOR, AJA_NTV2_SDK_VERSION_POINT, AJA_NTV2_SDK_BUILD_NUMBER));
+	return vers == fTrailerVersion;
+}
+
+bool NTV2_TRAILER::IsValidVersion (void) const
+{
+	const ULWord vers(fTrailerVersion), major(NTV2SDKVersionDecode_Major(vers)), minor(NTV2SDKVersionDecode_Minor(vers)),
+					point(NTV2SDKVersionDecode_Point(fTrailerVersion)), build(NTV2SDKVersionDecode_Build(fTrailerVersion));
+	if (!vers)
+		return false;	//	entire field is zero
+	if (major < 15)
+		return false;	//	major version less than 15
+	if (minor > 15)
+		return false;	//	minor version exceeds 15
+	if (point > 15)
+		return false;	//	point version exceeds 15
+	return true;
+}
+
+
+ostream & operator << (ostream & oss, const NTV2_TRAILER & inObj)
+{
+	return inObj.Print(oss);
 }
 
 
@@ -416,10 +438,14 @@ ostream & operator << (ostream & inOutStream, const NTV2Buffer & inObj)
 }
 
 
-ostream & NTV2Buffer::Print (ostream & inOutStream) const
+ostream & NTV2Buffer::Print (ostream & oss) const
 {
-	inOutStream << (IsAllocatedBySDK() ? "0X" : "0x") << HEX0N(GetRawHostPointer(),16) << "/" << DECN(GetByteCount(),10);
-	return inOutStream;
+	oss << DECN(GetByteCount(),10) << " @ x";
+	if (IsAllocatedBySDK())
+		oss << Hex(GetRawHostPointer());
+	else
+		oss << HEX(GetRawHostPointer());
+	return oss;
 }
 
 
@@ -1516,14 +1542,6 @@ string NTV2AutoCirculateStateToString (const NTV2AutoCirculateState inState)
 		return string (sStateStrings [inState]);
 	else
 		return "<invalid>";
-}
-
-
-
-NTV2_TRAILER::NTV2_TRAILER ()
-	:	fTrailerVersion		(NTV2SDKVersionEncode(AJA_NTV2_SDK_VERSION_MAJOR, AJA_NTV2_SDK_VERSION_MINOR, AJA_NTV2_SDK_VERSION_POINT, AJA_NTV2_SDK_BUILD_NUMBER)),
-		fTrailerTag			(NTV2_TRAILER_TAG)
-{
 }
 
 

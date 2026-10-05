@@ -7006,7 +7006,7 @@ typedef enum
 				bool						PutU8s (const UByteSequence & inU8s, const size_t inU8Offset = 0);
 				///@}
 
-				inline NTV2_DEPRECATED_18_1(ULWordSet & FindAll (ULWordSet & outOffsets, const NTV2Buffer & inValue) const) {return Find(outOffsets,inValue);}	//	New in SDK 16.3, renamed in SDK 18.1
+				inline NTV2_DEPRECATED_18_1(ULWordSet & FindAll (ULWordSet & outOffsets, const NTV2Buffer & inValue) const) {return Find(outOffsets,inValue);}	///< @deprecated	New in SDK 16.3, renamed "Find" in SDK 18.1
 
 			private:
 				inline uint8_t				flags (void) const	{return uint8_t(fFlags);}
@@ -7243,7 +7243,7 @@ typedef enum
 
 
 		/**
-			@brief	All new NTV2 structs start with this common header.
+			@brief	All NTV2 messages start with this common header.
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2_HEADER)
@@ -7262,7 +7262,7 @@ typedef enum
 					/**
 						@brief		Constructs a default NTV2_HEADER having the proper tag, version, and the given type and size.
 						@param[in]	inStructureType		Specifies the structure type.
-						@param[in]	inSizeInBytes		Specifies the total size of the structure.
+						@param[in]	inSizeInBytes		Specifies the total size of the structure, including the NTV2_TRAILER and all inbetween bytes.
 					**/
 					explicit		NTV2_HEADER (const ULWord inStructureType, const ULWord inSizeInBytes);
 
@@ -7286,8 +7286,11 @@ typedef enum
 					/**
 						@return		True if my tag and type fields are valid;  otherwise false.
 					**/
-					inline bool		IsValid (void) const	{return NTV2_IS_VALID_HEADER_TAG(fHeaderTag) && NTV2_IS_VALID_STRUCT_TYPE(fType);}
+					inline bool		IsValid (void) const	{return NTV2_IS_VALID_HEADER_TAG(fHeaderTag)  &&  fType;}
 
+					/**
+						@return		Zeroes my result status field.
+					**/
 					inline void		ClearResultStatus (void)		{fResultStatus = 0;}	//	New in SDK 17.5
 
 					static std::string FourCCToString (const ULWord in4CC, const char nonPrintable = '?');
@@ -7298,7 +7301,7 @@ typedef enum
 
 
 		/**
-			@brief	All new NTV2 structs end with this common trailer.
+			@brief	All NTV2 messages end with this common trailer.
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (NTV2_TRAILER)
@@ -7309,9 +7312,31 @@ typedef enum
 					explicit	NTV2_TRAILER ();	///< @brief Constructs a default NTV2_TRAILER having the proper version and tag.
 
 					/**
-						@return		True if my tag is valid;  otherwise false.
+						@return		True if my tag and version fields are valid;  otherwise false.
 					**/
-					inline bool		IsValid (void) const	{return NTV2_IS_VALID_TRAILER_TAG (fTrailerTag);}
+					inline bool		IsValid (void) const		{return NTV2_IS_VALID_TRAILER_TAG (fTrailerTag)  &&  IsValidVersion();}//  &&  MatchesThisSDK();}
+
+					/**
+						@brief	Prints a human-readable representation of me into the given output stream.
+						@param	oss		The output stream to receive my human-readable representation.
+						@return A reference to the given output stream.
+					**/
+					std::ostream &	Print (std::ostream & oss) const;
+
+					/**
+						@returns	my raw version.
+					**/
+					inline ULWord	SDKVersion (void) const		{return fTrailerVersion;}
+
+					/**
+						@returns	true if the SDK version packed into fTrailerVersion matches the SDK I was compiled from;  otherwise false.
+					**/
+					bool			MatchesThisSDK (void) const;
+
+					/**
+						@returns	true if the SDK version packed into fTrailerVersion appears to be valid;  otherwise false.
+					**/
+					bool			IsValidVersion (void) const;
 
 					NTV2_RPC_CODEC_DECLS
 				#endif	//	user-space clients only
@@ -8020,6 +8045,7 @@ typedef enum
 				inline bool				isValid (void) const		{return mHeader.IsValid() && mTrailer.IsValid() && mHeader.GetType() == NTV2_TYPE_CONFIGINTERRUPT  &&  NTV2_IS_VALID_INTERRUPT_ENUM(interruptID()) && (operation() >= kOpFIRST && operation() <= kOpLAST);}		///< @return	True if I'm valid
 				inline operator			bool() const				{return isValid();}			///< @return	True if I'm valid (cast to bool)
 				inline bool				isSuccess (void) const		{return mResult ? true : false;}	///< @returns	true if my mResult is non-zero; otherwise false (if zero)
+				inline bool				isFail (void) const			{return !isSuccess();}		///< @returns	true if my mResult is zero; otherwise false (if non-zero)
 				inline	operator		NTV2_HEADER*()				{return reinterpret_cast<NTV2_HEADER*>(this);}	///< @returns	my starting address casted to an NTV2_HEADER pointer
 				std::ostream &			print (std::ostream & oss) const;	///< @brief	prints a human-readable representation of me to the given output stream
 				inline uint64_t			clientID (void) const		{return mClientID;}			///< @returns	my client ID
@@ -8051,7 +8077,7 @@ typedef enum
 
 				inline NTV2ConfigInterrupt &	setResult		(const ULWord val)			{mResult = val;  return *this;}		///< @brief	Sets my mResult
 				inline NTV2ConfigInterrupt &	setFail			(void)						{return setResult(0);}				///< @brief	Zeroes my mResult (indicating failure)
-				inline NTV2ConfigInterrupt &	setSuccess		(void)						{return setResult(1);}				///< @brief	Sets my mResult to 1 (non-zero indicates success)
+				inline NTV2ConfigInterrupt &	setSuccess		(const bool b = true)		{return setResult(b ? 1 : 0);}		///< @brief	Sets my mResult to 1 (non-zero indicates success)
 				inline NTV2ConfigInterrupt &	setClientID		(const uint64_t id)			{mClientID = id;  return *this;}	///< @brief	Sets my mClientID
 				inline NTV2ConfigInterrupt &	setCount		(const ULWord val)			{mCount = val;  return *this;}		///< @brief	Sets my mCount
 				NTV2ConfigInterrupt &			setOperation	(const ULWord op);			///< @brief	Sets my operation; also stores caller's PID & TID
