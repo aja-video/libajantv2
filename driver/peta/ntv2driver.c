@@ -4110,6 +4110,7 @@ static int platform_resources_config(ULWord deviceNumber)
     // Walk through the children nodes and setup the device
     for_each_child_of_node(pd->dev.of_node, node)
 	{
+//        MSG("%s: node\n", ntv2pp->name);
         if(!strcmp("reg", node->name))
 		{
 			MSG("%s: found registers\n", ntv2pp->name);
@@ -4124,23 +4125,13 @@ static int platform_resources_config(ULWord deviceNumber)
             if(ret)
 				goto fail;
         }
-#if 0        
-        if(!strcmp("fs", node->name))
-		{
-			MSG("%s: found fs memory\n", ntv2pp->name);
-			ret = platform_add_fs_memory(deviceNumber, node);
-            if(ret)
-				goto fail;
-        }
-#endif        
         if(!strcmp("fs1", node->name))
 		{
 			MSG("%s: found fs memory\n", ntv2pp->name);
-			ret = platform_add_fs_memory(deviceNumber, node);
+			ret = platform_add_fb_memory(deviceNumber, node);
             if(ret)
 				goto fail;
         }
-#if 0
         if(!strcmp("fs2", node->name))
 		{
 			MSG("%s: found fs memory\n", ntv2pp->name);
@@ -4148,7 +4139,6 @@ static int platform_resources_config(ULWord deviceNumber)
             if(ret)
 				goto fail;
         }
-#endif
 		if(!strcmp("irq", node->name))
 		{
 			MSG("%s: found interrupt\n", ntv2pp->name);
