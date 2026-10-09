@@ -3704,9 +3704,9 @@ string NTV2ChannelSetToStr (const NTV2ChannelSet & inObj, const bool inCompact)
 NTV2ChannelSet NTV2MakeChannelSet (const NTV2Channel inFirstChannel, const UWord inNumChannels)
 {
 	NTV2ChannelSet result;
-	for (NTV2Channel ch(inFirstChannel);  ch < NTV2Channel(inFirstChannel+inNumChannels);  ch = NTV2Channel(ch+1))
+	for (UWord ch(inFirstChannel);  ch < UWord(inFirstChannel+inNumChannels)  &&  ch < NTV2_MAX_NUM_CHANNELS;  ch++)
 		if (NTV2_IS_VALID_CHANNEL(ch))
-			result.insert(ch);
+			result.insert(NTV2Channel(ch));
 	return result;
 }
 
@@ -3721,9 +3721,9 @@ NTV2ChannelSet NTV2MakeChannelSet (const NTV2ChannelList inChannels)
 NTV2ChannelList NTV2MakeChannelList (const NTV2Channel inFirstChannel, const UWord inNumChannels)
 {
 	NTV2ChannelList result;
-	for (NTV2Channel ch(inFirstChannel);  ch < NTV2Channel(inFirstChannel+inNumChannels);  ch = NTV2Channel(ch+1))
+	for (UWord ch(inFirstChannel);  ch < (inFirstChannel+inNumChannels)  &&  ch < NTV2_MAX_NUM_CHANNELS;  ch++)
 		if (NTV2_IS_VALID_CHANNEL(ch))
-			result.push_back(ch);
+			result.push_back(NTV2Channel(ch));
 	return result;
 }
 
