@@ -147,7 +147,7 @@ bool				RoutingExpert::GetWidgetsForOutput (const NTV2OutputXptID inOutputXpt, N
 	AJAAutoLock	lock(&gLock);
 	NTV2_ASSERT(!gOutputXpt2WidgetIDs.empty());
 	outWidgetIDs.clear();
-	for (OutputXpt2WidgetIDsConstIter iter(gOutputXpt2WidgetIDs.find(inOutputXpt));
+	for (OutputXpt2WidgetIDsConstIter iter(gOutputXpt2WidgetIDs.lower_bound(inOutputXpt));
 		iter != gOutputXpt2WidgetIDs.end()  &&  iter->first == inOutputXpt;
 		++iter)
 			outWidgetIDs.insert(iter->second);
@@ -159,7 +159,7 @@ bool				RoutingExpert::GetWidgetsForInput (const NTV2InputXptID inInputXpt, NTV2
 	AJAAutoLock	lock(&gLock);
 	NTV2_ASSERT(!gInputXpt2WidgetIDs.empty());
 	outWidgetIDs.clear();
-	InputXpt2WidgetIDsConstIter iter(gInputXpt2WidgetIDs.find(inInputXpt));
+	InputXpt2WidgetIDsConstIter iter(gInputXpt2WidgetIDs.lower_bound(inInputXpt));
 	while (iter != gInputXpt2WidgetIDs.end()  &&  iter->first == inInputXpt)
 	{
 		outWidgetIDs.insert(iter->second);
@@ -173,7 +173,7 @@ bool				RoutingExpert::GetWidgetInputs (const NTV2WidgetID inWidgetID, NTV2Input
 	AJAAutoLock	lock(&gLock);
 	NTV2_ASSERT(!gWidget2InputXpts.empty());
 	outInputs.clear();
-	Widget2InputXptsConstIter	iter(gWidget2InputXpts.find(inWidgetID));
+	Widget2InputXptsConstIter	iter(gWidget2InputXpts.lower_bound(inWidgetID));
 	while (iter != gWidget2InputXpts.end() && iter->first == inWidgetID)
 	{
 		outInputs.insert(iter->second);
@@ -187,7 +187,7 @@ bool				RoutingExpert::GetWidgetOutputs (const NTV2WidgetID inWidgetID, NTV2Outp
 	AJAAutoLock	lock(&gLock);
 	NTV2_ASSERT(!gWidget2OutputXpts.empty());
 	outOutputs.clear();
-	Widget2OutputXptsConstIter	iter(gWidget2OutputXpts.find(inWidgetID));
+	Widget2OutputXptsConstIter	iter(gWidget2OutputXpts.lower_bound(inWidgetID));
 	while (iter != gWidget2OutputXpts.end()  &&  iter->first == inWidgetID)
 	{
 		outOutputs.insert(iter->second);
