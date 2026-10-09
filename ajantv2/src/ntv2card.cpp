@@ -864,6 +864,12 @@ string DeviceCapabilities::EnumsIDToString (const NTV2EnumsID p)	//	STATIC
 DeviceCapabilities::GenericStrToIDMap	DeviceCapabilities::sStrBoolParamIDMap, DeviceCapabilities::sStrNumParamIDMap, DeviceCapabilities::sStrEnumsIDMap;	//	STATIC
 DeviceCapabilities::GenericStrToIDMaps	DeviceCapabilities::sStrToIDMaps;	//	STATIC
 
+static string vidfmtstr (const NTV2VideoFormat vf, const bool b)	//	for NTV2VideoFormat enum strings
+{
+	const char * pStr(::NTV2VideoFormatString(vf));
+	return b && pStr ? string(pStr) : "";
+}
+
 void DeviceCapabilities::Init (void)	//	STATIC
 {	//	One stop shop for initialization
 	AJAAutoLock tmp(&sInitLock);
@@ -956,6 +962,7 @@ void DeviceCapabilities::Init (void)	//	STATIC
 		InitStrToIDMap(kNTV2EnumsID_FrameGeometry, NTV2FrameGeometry, NTV2_FG_LAST, NTV2FrameGeometryToString);
 		InitStrToIDMap(kNTV2EnumsID_FrameRate, NTV2FrameRate, NTV2_FRAMERATE_LAST, NTV2FrameRateToString);
 		InitStrToIDMap(kNTV2EnumsID_VideoFormat, NTV2VideoFormat, NTV2_MAX_NUM_VIDEO_FORMATS, NTV2VideoFormatToString);
+		InitStrToIDMap(kNTV2EnumsID_VideoFormat, NTV2VideoFormat, NTV2_MAX_NUM_VIDEO_FORMATS, vidfmtstr);
 		InitStrToIDMap(kNTV2EnumsID_Mode, NTV2Mode, NTV2_MODE_INVALID, NTV2ModeToString);
 		InitStrToIDMap(kNTV2EnumsID_InputSource, NTV2InputSource, NTV2_NUM_INPUTSOURCES, NTV2InputSourceToString);
 		InitStrToIDMap(kNTV2EnumsID_OutputDest, NTV2OutputDest, NTV2_NUM_OUTPUTDESTINATIONS, NTV2OutputDestinationToString);
