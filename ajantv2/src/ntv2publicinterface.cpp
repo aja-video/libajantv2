@@ -395,13 +395,7 @@ NTV2_TRAILER::NTV2_TRAILER ()
 
 ostream & NTV2_TRAILER::Print (ostream & oss) const
 {
-	oss << "[" << NTV2_HEADER::FourCCToString(fTrailerTag);
-	if (IsValidVersion())
-		oss << " clientSDK=" << DEC(NTV2SDKVersionDecode_Major(fTrailerVersion)) << "." << DEC(NTV2SDKVersionDecode_Minor(fTrailerVersion))
-				<< "." << DEC(NTV2SDKVersionDecode_Point(fTrailerVersion)) << "." << DEC(NTV2SDKVersionDecode_Build(fTrailerVersion));
-	else
-		oss << " rawVers=" << xHEX0N(fTrailerVersion,8);
-	return oss << "]";
+	return oss << "[" << NTV2_HEADER::FourCCToString(fTrailerTag) << " vers=" << VersionString() << "]";
 }
 
 bool NTV2_TRAILER::MatchesThisSDK (void) const
@@ -413,7 +407,7 @@ bool NTV2_TRAILER::MatchesThisSDK (void) const
 bool NTV2_TRAILER::IsValidVersion (void) const
 {
 	const ULWord vers(fTrailerVersion), major(NTV2SDKVersionDecode_Major(vers)), minor(NTV2SDKVersionDecode_Minor(vers)),
-					point(NTV2SDKVersionDecode_Point(fTrailerVersion)), build(NTV2SDKVersionDecode_Build(fTrailerVersion));
+					point(NTV2SDKVersionDecode_Point(vers));// build(NTV2SDKVersionDecode_Build(vers));
 	if (!vers)
 		return false;	//	entire field is zero
 	if (major < 15)
@@ -423,6 +417,31 @@ bool NTV2_TRAILER::IsValidVersion (void) const
 	if (point > 15)
 		return false;	//	point version exceeds 15
 	return true;
+}
+
+string NTV2_TRAILER::VersionString (void) const
+{
+	ostringstream oss;
+	if (IsValidVersion())
+		oss << DEC(NTV2SDKVersionDecode_Major(fTrailerVersion)) << "." << DEC(NTV2SDKVersionDecode_Minor(fTrailerVersion))
+			<< "." << DEC(NTV2SDKVersionDecode_Point(fTrailerVersion)) << "." << DEC(NTV2SDKVersionDecode_Build(fTrailerVersion));
+	else
+		oss << xHEX0N(fTrailerVersion,8);
+	return oss.str();
+}
+
+bool NTV2_TRAILER::VersionComponents (ULWord & outMajor, ULWord & outMinor, ULWord & outPoint, ULWord & outBuild) const
+{
+	if (IsValidVersion())
+	{
+		outMajor = NTV2SDKVersionDecode_Major(fTrailerVersion);
+		outMinor = NTV2SDKVersionDecode_Minor(fTrailerVersion);
+		outPoint = NTV2SDKVersionDecode_Point(fTrailerVersion);
+		outBuild = NTV2SDKVersionDecode_Build(fTrailerVersion);
+		return true;
+	}
+	outMajor = outMinor = outPoint = outBuild = 0;
+	return false;
 }
 
 

@@ -7338,6 +7338,19 @@ typedef enum
 					**/
 					bool			IsValidVersion (void) const;
 
+					/**
+						@returns	a string containing my human-readable SDK version (or its hexadecimal value if invalid).
+					**/
+					std::string		VersionString (void) const;
+
+					/**
+						@param[out]	outMajor	Receives my SDK major version number (or zero if invalid).
+						@param[out]	outMinor	Receives my SDK minor version number (or zero if invalid).
+						@param[out]	outPoint	Receives my SDK point number (or zero if invalid).
+						@param[out]	outBuild	Receives my SDK build number (or zero if invalid).
+					**/
+					bool			VersionComponents (ULWord & outMajor, ULWord & outMinor, ULWord & outPoint, ULWord & outBuild) const;
+
 					NTV2_RPC_CODEC_DECLS
 				#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2_TRAILER)
