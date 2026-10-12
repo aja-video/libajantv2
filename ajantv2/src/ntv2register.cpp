@@ -310,7 +310,7 @@ bool CNTV2Card::SetVideoFormat (const NTV2VideoFormat value, const bool inIsReta
 	FlushGlobalControlWrite(&globalControl);
 
 	// set virtual video format
-	WriteRegister (kVRegVideoFormatCh1 + channel, value);
+	WriteRegister (kVRegVideoFormatCh1 + ULWord(channel), value);
 
 	//This will handle 4k formats
 	if (NTV2_IS_QUAD_FRAME_FORMAT(value))
@@ -1530,7 +1530,7 @@ bool CNTV2Card::CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFir
 	status &= ReadRegister (gChannelToGlobalControlRegNum[inSrc], rate2, kRegMaskFrameRateHiBit, kRegShiftFrameRateHiBit);
 	status &= ReadRegister (gChannelToSmpte372RegisterNum[inSrc], s372, gChannelToSmpte372Masks[inSrc], gChannelToSmpte372Shifts[inSrc]);
 	status &= ReadRegister (gChannelToGlobalControlRegNum[inSrc], geometry, kRegMaskGeometry, kRegShiftGeometry);
-	status &= ReadRegister (kVRegVideoFormatCh1 + inSrc, format);
+	status &= ReadRegister (kVRegVideoFormatCh1 + ULWord(inSrc), format);
 	if (!status) return false;
 
 	for (int channel = inFirst; channel <= inLast; channel++)
