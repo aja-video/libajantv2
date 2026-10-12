@@ -818,7 +818,11 @@ std::string AJACommandLineParser::CommandName()
 
 bool AJACommandLineParser::hasOptionPrefix(const std::string &name)
 {
-    return aja::starts_with(name, kSingleDash);
+    // An option is a dash followed by at least one character (the getopt
+    // definition). A lone "-" is an operand -- conventionally stdin/stdout --
+    // so it can be given as an option's value ("-p -") and is never itself
+    // treated as an option.
+    return name.length() > 1 && aja::starts_with(name, kSingleDash);
 }
 
 bool AJACommandLineParser::hasAssignmentOperator(const std::string &arg)

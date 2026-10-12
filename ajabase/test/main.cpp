@@ -716,6 +716,44 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 		CHECK_EQ(parser.IsSet("dev"), false); // expect the full exact argname
 		CHECK_EQ(parser.IsSet("-fmt"), false);
 	}
+	TEST_CASE("AJACommandLineParser::Parse Bare-Dash Value")
+	{
+		// POSIX guideline 13 / getopt: a lone "-" is an operand, conventionally
+		// meaning stdin or stdout, never an option -- an option is a dash plus
+		// at least one character. "-p -" must therefore deliver "-" as p's
+		// value, the same as "--path=-" always has.
+		AJACommandLineParser parser;
+		parser.AddOption(AJACommandLineOption(AJAStringList{"p", "path"}, "File path"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"w", "write"}, "Write mode"));
+		AJAStringList args;
+		args.push_back("ut_ajabase"); // skipped by the parser
+		args.push_back("-p");
+		args.push_back("-");
+		args.push_back("-w");
+		CHECK_EQ(parser.Parse(args), true);
+		CHECK_EQ(parser.IsSet("path"), true);
+		CHECK_EQ(parser.Value("path").AsString(), "-");
+		CHECK_EQ(parser.IsSet("write"), true);
+
+		// The assignment form keeps working.
+		AJACommandLineParser parser2;
+		parser2.AddOption(AJACommandLineOption(AJAStringList{"p", "path"}, "File path"));
+		AJAStringList args2;
+		args2.push_back("ut_ajabase"); // skipped by the parser
+		args2.push_back("--path=-");
+		CHECK_EQ(parser2.Parse(args2), true);
+		CHECK_EQ(parser2.Value("path").AsString(), "-");
+
+		// A lone "-" is an operand, so it must not trip the unknown-arg error.
+		AJACommandLineParser strict(kErrorOnUnknownArgs);
+		strict.AddOption(AJACommandLineOption(AJAStringList{"p", "path"}, "File path"));
+		AJAStringList args3;
+		args3.push_back("ut_ajabase"); // skipped by the parser
+		args3.push_back("-p");
+		args3.push_back("-");
+		CHECK_EQ(strict.Parse(args3), true);
+		CHECK_EQ(strict.Value("path").AsString(), "-");
+	}
 	TEST_CASE("AJACommandLineParser Parse kShortOptionsDefault")
 	{
 		AJACommandLineParser parser;
