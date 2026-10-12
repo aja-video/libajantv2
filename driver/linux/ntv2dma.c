@@ -28,6 +28,7 @@
 #include "registerio.h"
 #include "ntv2stream.h"
 #include "ntv2dma.h"
+#include "ntv2dmabuf.h"
 
 static struct ntv2_page_fops rdma_fops = { NULL, NULL, NULL, NULL};
 
@@ -200,7 +201,7 @@ static inline bool dmaPageRootAutoLock(PDMA_PAGE_ROOT pRoot);
 static inline bool dmaPageRootAutoMap(PDMA_PAGE_ROOT pRoot);
 
 static int dmaPageBufferInit(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer,
-							 ULWord numPages, bool rdma);
+							 ULWord numPages, bool rdma, int dmabufFd);
 static void dmaPageBufferRelease(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer);
 static int dmaPageLock(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer,
 					   PVOID pAddress, ULWord size, ULWord direction);
@@ -451,28 +452,28 @@ int dmaInit(ULWord deviceNumber)
                               DMA_MSG_CONTEXT);
 
                 // allocate the default page and scatter list buffers
-                if (dmaPageBufferInit(deviceNumber, &pDmaContext->videoPageBuffer, pDmaEngine->maxVideoPages, false) != 0)
+                if (dmaPageBufferInit(deviceNumber, &pDmaContext->videoPageBuffer, pDmaEngine->maxVideoPages, false, -1) != 0)
                 {
                     NTV2_MSG_ERROR("%s%d:%s%d:%s%d: dmaInit allocate video page buffer failed\n",
                                    DMA_MSG_CONTEXT);
                     pDmaEngine->state = DmaStateDead;
                 }
 
-                if (dmaPageBufferInit(deviceNumber, &pDmaContext->audioPageBuffer, pDmaEngine->maxAudioPages, false) != 0)
+                if (dmaPageBufferInit(deviceNumber, &pDmaContext->audioPageBuffer, pDmaEngine->maxAudioPages, false, -1) != 0)
                 {
                     NTV2_MSG_ERROR("%s%d:%s%d:%s%d: dmaInit allocate audio page buffer failed\n",
                                    DMA_MSG_CONTEXT);
                     pDmaEngine->state = DmaStateDead;
                 }
 
-                if (dmaPageBufferInit(deviceNumber, &pDmaContext->ancF1PageBuffer, pDmaEngine->maxAncPages, false) != 0)
+                if (dmaPageBufferInit(deviceNumber, &pDmaContext->ancF1PageBuffer, pDmaEngine->maxAncPages, false, -1) != 0)
                 {
                     NTV2_MSG_ERROR("%s%d:%s%d:%s%d: dmaInit allocate anc field 1 page buffer failed\n",
                                    DMA_MSG_CONTEXT);
                     pDmaEngine->state = DmaStateDead;
                 }
 
-                if (dmaPageBufferInit(deviceNumber, &pDmaContext->ancF2PageBuffer, pDmaEngine->maxAncPages, false) != 0)
+                if (dmaPageBufferInit(deviceNumber, &pDmaContext->ancF2PageBuffer, pDmaEngine->maxAncPages, false, -1) != 0)
                 {
                     NTV2_MSG_ERROR("%s%d:%s%d:%s%d: dmaInit allocate anc field 2 page buffer failed\n",
                                    DMA_MSG_CONTEXT);
@@ -1076,6 +1077,7 @@ int dmaTransfer(PDMA_PARAMS pDmaParams)
 									   pDmaParams->pVidUserVa,
 									   videoCardBytes,
 									   false,
+									   -1,
 									   dmaPageRootAutoMap(pDmaParams->pPageRoot));
 						pVideoPageBuffer = dmaPageRootFind(deviceNumber,
 														   pDmaParams->pPageRoot,
@@ -1268,6 +1270,7 @@ int dmaTransfer(PDMA_PARAMS pDmaParams)
 								   pDmaParams->pAudUserVa,
 								   audioCardBytes,
 								   false,
+								   -1,
 								   dmaPageRootAutoMap(pDmaParams->pPageRoot));
 					pAudioPageBuffer = dmaPageRootFind(deviceNumber,
 													   pDmaParams->pPageRoot,
@@ -1385,6 +1388,7 @@ int dmaTransfer(PDMA_PARAMS pDmaParams)
 								   pDmaParams->pAncF1UserVa,
 								   ancF1CardBytes,
 								   false,
+								   -1,
 								   dmaPageRootAutoMap(pDmaParams->pPageRoot));
 					pAncF1PageBuffer = dmaPageRootFind(deviceNumber,
 													   pDmaParams->pPageRoot,
@@ -1490,6 +1494,7 @@ int dmaTransfer(PDMA_PARAMS pDmaParams)
 								   pDmaParams->pAncF2UserVa,
 								   ancF2CardBytes,
 								   false,
+								   -1,
 								   dmaPageRootAutoMap(pDmaParams->pPageRoot));
 					pAncF2PageBuffer = dmaPageRootFind(deviceNumber,
 													   pDmaParams->pPageRoot,
@@ -2404,7 +2409,7 @@ void dmaPageRootRelease(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot)
 }
 
 int dmaPageRootAdd(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot,
-				   PVOID pAddress, ULWord size, bool rdma, bool map)
+				   PVOID pAddress, ULWord size, bool rdma, int dmabufFd, bool map)
 {
 	PDMA_PAGE_BUFFER pBuffer;
 	unsigned long flags;
@@ -2413,8 +2418,8 @@ int dmaPageRootAdd(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot,
 	if ((pRoot == NULL) || (pAddress == NULL) || (size == 0))
 		return -EINVAL;
 
-	NTV2_MSG_PAGE_MAP("%s%d: dmaPageRootAdd  addr %016llx  size %d  rdma %d  map %d\n",
-					  DMA_MSG_DEVICE, (ULWord64)pAddress, size, rdma, map);
+	NTV2_MSG_PAGE_MAP("%s%d: dmaPageRootAdd  addr %016llx  size %d  rdma %d  dmabuf %d  map %d\n",
+					  DMA_MSG_DEVICE, (ULWord64)pAddress, size, rdma, dmabufFd, map);
 
 	// use current buffer if found
 	pBuffer = dmaPageRootFind(deviceNumber, pRoot, pAddress, size);
@@ -2433,7 +2438,7 @@ int dmaPageRootAdd(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot,
 		return -ENOMEM;
 	}
 
-	ret = dmaPageBufferInit(deviceNumber, pBuffer, (size / PAGE_SIZE + 2), rdma);
+	ret = dmaPageBufferInit(deviceNumber, pBuffer, (size / PAGE_SIZE + 2), rdma, dmabufFd);
 	if (ret < 0)
 	{
 		kfree(pBuffer);
@@ -2661,17 +2666,25 @@ void dmaPageRootFree(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
 }
 
 static int dmaPageBufferInit(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer,
-							 ULWord numPages, bool rdma)
+							 ULWord numPages, bool rdma, int dmabufFd)
 {
 	if ((pBuffer == NULL) || (numPages == 0))
 		return -EINVAL;
 	
 	memset(pBuffer, 0, sizeof(DMA_PAGE_BUFFER));
 	INIT_LIST_HEAD(&pBuffer->bufferEntry);
+	pBuffer->dmabufFd = -1;
 
 	if (rdma)
 	{
 		pBuffer->rdma = true;
+		return 0;
+	}
+
+	if (dmabufFd >= 0)
+	{
+		pBuffer->dmabuf = true;
+		pBuffer->dmabufFd = dmabufFd;
 		return 0;
 	}
 	
@@ -2761,6 +2774,19 @@ static int dmaPageLock(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer,
             return -EPERM;
         }
     }
+
+	if (pBuffer->dmabuf)
+	{
+		ret = ntv2_dmabuf_get_pages(pBuffer, pAddress, size, direction);
+		if (ret < 0)
+		{
+			NTV2_MSG_ERROR("%s%d: dmaPageLock dmabuf lock failed %d  addr %016llx  len %08llx\n",
+						   DMA_MSG_DEVICE, ret, (ULWord64)pAddress, (ULWord64)size);
+			return ret;
+		}
+
+		return 0;
+	}
 
 	if (pBuffer->rdma || (pBuffer->pPageList == NULL) || (pBuffer->pSgList == NULL))
 		return -EINVAL;
@@ -2912,6 +2938,13 @@ static void dmaPageUnlock(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
             }
         }
 
+		if (pBuffer->dmabuf)
+		{
+			NTV2_MSG_PAGE_MAP("%s%d: dmaPageUnlock dmabuf release\n", DMA_MSG_DEVICE);
+			ntv2_dmabuf_put_pages(pBuffer);
+			goto clear;
+		}
+
 		if (pBuffer->rdma || (pBuffer->pPageList == NULL))
 			return;
 
@@ -2934,6 +2967,7 @@ static void dmaPageUnlock(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
 		}
 	}
 		
+clear:
 	// clear parameters
 	pBuffer->pUserAddress = NULL;
 	pBuffer->userSize = 0;
@@ -2964,6 +2998,12 @@ static int dmaBusMap(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer,
         NTV2_MSG_ERROR("%s%d: dmaBusMap rdma not supported", DMA_MSG_DEVICE);
         return -EPERM;
     }
+
+	if (pBuffer->dmabuf)
+	{
+		NTV2_MSG_ERROR("%s%d: dmaBusMap dmabuf not supported", DMA_MSG_DEVICE);
+		return -EPERM;
+	}
 
 	// clear segment list
 	NTV2_LINUX_SG_INIT_TABLE_FUNC(pBuffer->pSgList, pBuffer->sgListSize);
@@ -3019,6 +3059,21 @@ static int dmaSgMap(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
             }
         }
 
+		if (pBuffer->dmabuf)
+		{
+			ret = ntv2_dmabuf_map_pages(pNTV2Params->pci_dev, pBuffer);
+			if (ret < 0)
+			{
+				NTV2_MSG_ERROR("%s%d: dmaSgMap dmabuf map failed %d\n",
+							   DMA_MSG_DEVICE, ret);
+				return ret;
+			}
+
+			NTV2_MSG_PAGE_MAP("%s%d: dmaSgMap dmabuf mapped %d segment(s)\n",
+							  DMA_MSG_DEVICE, pBuffer->numSgs);
+			return 0;
+		}
+
 		if (pBuffer->pSgList == NULL)
 			return -EINVAL;
 			
@@ -3069,6 +3124,14 @@ static void dmaSgUnmap(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
             }
         }
 
+		if (pBuffer->dmabuf)
+		{
+			NTV2_MSG_PAGE_MAP("%s%d: dmaSgUnmap dmabuf unmap %d segments\n",
+							  DMA_MSG_DEVICE, pBuffer->numSgs);
+			ntv2_dmabuf_unmap_pages(pNTV2Params->pci_dev, pBuffer);
+			return;
+		}
+
 		NTV2_MSG_PAGE_MAP("%s%d: dmaSgUnmap unmap %d segments\n", 
 						  DMA_MSG_DEVICE, pBuffer->numSgs); 
 
@@ -3090,7 +3153,8 @@ static void dmaSgDevice(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
 
 	if ((pBuffer == NULL) ||
         (pBuffer->pSgList == NULL) ||
-        (pBuffer->rdma))
+        (pBuffer->rdma) ||
+        (pBuffer->dmabuf))
 		return;
 
 	if (pBuffer->sgMap)
@@ -3116,7 +3180,8 @@ static void dmaSgHost(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
 
 	if ((pBuffer == NULL) ||
         (pBuffer->pSgList == NULL) ||
-        (pBuffer->rdma))
+        (pBuffer->rdma) ||
+        (pBuffer->dmabuf))
 		return;
 
 	if (pBuffer->sgMap)

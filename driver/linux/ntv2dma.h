@@ -119,6 +119,9 @@ typedef struct _dmaPageBuffer
 	LWord64					lockSize;			// locked bytes
 	bool					rdma;				// use nvidia rdma
     void*                   rdmaContext;        // rdma context
+	bool					dmabuf;				// use imported dma-buf
+	int						dmabufFd;			// dma-buf file descriptor
+    void*                   dmabufContext;      // dma-buf context
 } DMA_PAGE_BUFFER, *PDMA_PAGE_BUFFER;
 
 // dma transfer parameters
@@ -324,7 +327,7 @@ void dmaRelease(ULWord deviceNumber);
 int dmaPageRootInit(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot);
 void dmaPageRootRelease(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot);
 int dmaPageRootAdd(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot,
-				   PVOID pAddress, ULWord size, bool rdma, bool map);
+				   PVOID pAddress, ULWord size, bool rdma, int dmabufFd, bool map);
 int dmaPageRootRemove(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot,
 					  PVOID pAddress, ULWord size);
 int dmaPageRootPrune(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot, ULWord size);
