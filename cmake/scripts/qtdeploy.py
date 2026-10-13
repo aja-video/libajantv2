@@ -15,6 +15,42 @@ import os
 import shutil
 import subprocess
 import sys
+import time
+
+def is_up_to_date(src_path, tgt_path):
+    """True if tgt_path already holds a copy of src_path made by copy2."""
+    try:
+        src = os.stat(src_path)
+        tgt = os.stat(tgt_path)
+    except OSError:
+        return False
+    return src.st_size == tgt.st_size and int(src.st_mtime) == int(tgt.st_mtime)
+
+def deploy_file(src_path, tgt_path, retries=10, delay=0.5):
+    """
+    Copy src_path to tgt_path. Several targets can deploy the same Qt DLLs into the
+    same install dir in parallel, so copy to a unique temp file and atomically replace
+    the target, retrying while another process has the target open.
+    """
+    if is_up_to_date(src_path, tgt_path):
+        return
+    tmp_path = f"{tgt_path}.{os.getpid()}.tmp"
+    shutil.copy2(src_path, tmp_path)
+    try:
+        for attempt in range(retries):
+            try:
+                os.replace(tmp_path, tgt_path)
+                return
+            except PermissionError:
+                if is_up_to_date(src_path, tgt_path):
+                    return
+                if attempt == retries - 1:
+                    raise
+                time.sleep(delay)
+    finally:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+
 if __name__ == "__main__":
     if len(sys.argv) < 4:
         print("Usage: python3 qtdeploy.py <deployqt path> <target exe path> <cmake install path>")
@@ -35,8 +71,7 @@ if __name__ == "__main__":
         sys.exit(1)
     exe_dirname = os.path.dirname(exe_path)
     install_path = os.path.abspath(os.path.normpath(sys.argv[3]))
-    if not os.path.exists(install_path):
-        os.makedirs(install_path)
+    os.makedirs(install_path, exist_ok=True)
 
     qtdeploy_args = [deployqt_path, "--no-compiler-runtime", "--json", exe_path]
     if is_debug:
@@ -77,9 +112,8 @@ if __name__ == "__main__":
             src_file = os.path.basename(elem["source"])
             install_tgt_path = os.path.join(install_tgt_dir, src_file)
             print(f"src: {src_path}\ntgt: {install_tgt_path}\n")
-            if not os.path.exists(install_tgt_dir):
-                os.makedirs(install_tgt_dir)
-            shutil.copyfile(src_path, install_tgt_path)
+            os.makedirs(install_tgt_dir, exist_ok=True)
+            deploy_file(src_path, install_tgt_path)
             if not os.path.exists(install_tgt_path):
                 print(f"Error copying {src_path} to {install_tgt_path}")
                 sys.exit(1)
