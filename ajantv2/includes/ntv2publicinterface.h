@@ -7243,64 +7243,6 @@ typedef enum
 
 
 		/**
-			@brief	All NTV2 messages start with this common header.
-			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
-		**/
-		NTV2_STRUCT_BEGIN (NTV2_HEADER)
-			NTV2_BEGIN_PRIVATE
-				ULWord		fHeaderTag;			///< @brief A special FourCC to identify a structure header & detect endianness, set when created
-				ULWord		fType;				///< @brief A special FourCC to identify a structure type ('stat', 'xfer', 'task', etc.), set when created
-				ULWord		fHeaderVersion;		///< @brief The version of this header structure, set when created, originally zero
-				ULWord		fVersion;			///< @brief The version of the structure that follows this header, set when created, originally zero
-				ULWord		fSizeInBytes;		///< @brief The total size of the struct, in bytes, including header, body and trailer, set when created
-				ULWord		fPointerSize;		///< @brief The size, in bytes, of a pointer on the host, set when created
-				ULWord		fOperation;			///< @brief Starting in SDK 16.3, stores an RPC connection ID
-				ULWord		fResultStatus;		///< @brief The result status of the operation (zero if success or non-zero failure code), cleared when created, set by driver
-			NTV2_END_PRIVATE
-
-				#if !defined (NTV2_BUILDING_DRIVER)
-					/**
-						@brief		Constructs a default NTV2_HEADER having the proper tag, version, and the given type and size.
-						@param[in]	inStructureType		Specifies the structure type.
-						@param[in]	inSizeInBytes		Specifies the total size of the structure, including the NTV2_TRAILER and all inbetween bytes.
-					**/
-					explicit		NTV2_HEADER (const ULWord inStructureType, const ULWord inSizeInBytes);
-
-					inline ULWord	GetSizeInBytes (void) const			{return fSizeInBytes;}	///< @brief My total size, in bytes, including header, body and trailer (but excluding embedded NTV2Buffer data)
-					inline ULWord	GetTag (void) const					{return fHeaderTag;}	//	New in SDK 16.3
-					inline ULWord	GetType (void) const				{return fType;}			//	New in SDK 16.3
-					inline ULWord	GetHeaderVersion (void) const		{return fHeaderVersion;}	//	New in SDK 16.3
-					inline ULWord	GetVersion (void) const				{return fVersion;}		//	New in SDK 16.3
-					inline ULWord	GetPointerSize (void) const			{return fPointerSize;}	//	New in SDK 16.3
-					inline ULWord	GetConnectionID (void) const			{return fOperation;}	//	New in SDK 16.3
-					inline void		SetConnectionID (const ULWord inValue)	{fOperation = inValue;}	//	New in SDK 16.3
-					inline ULWord	GetResultStatus (void) const			{return fResultStatus;}	//	New in SDK 17.5
-
-					/**
-						@brief	Prints a human-readable representation of me into the given output stream.
-						@param	inOutStream		The output stream to receive my human-readable representation.
-						@return A reference to the given output stream.
-					**/
-					std::ostream &	Print (std::ostream & inOutStream) const;
-
-					/**
-						@return		True if my tag and type fields are valid;  otherwise false.
-					**/
-					inline bool		IsValid (void) const	{return NTV2_IS_VALID_HEADER_TAG(fHeaderTag)  &&  fType;}
-
-					/**
-						@return		Zeroes my result status field.
-					**/
-					inline void		ClearResultStatus (void)		{fResultStatus = 0;}	//	New in SDK 17.5
-
-					static std::string FourCCToString (const ULWord in4CC, const char nonPrintable = '?');
-
-					NTV2_RPC_CODEC_DECLS
-				#endif	//	user-space clients only
-		NTV2_STRUCT_END (NTV2_HEADER)
-
-
-		/**
 			@brief	All NTV2 messages end with this common trailer.
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
@@ -7314,7 +7256,7 @@ typedef enum
 					/**
 						@return		True if my tag and version fields are valid;  otherwise false.
 					**/
-					inline bool		IsValid (void) const		{return NTV2_IS_VALID_TRAILER_TAG (fTrailerTag)  &&  IsValidVersion();}//  &&  MatchesThisSDK();}
+					inline bool		IsValid (void) const		{return NTV2_IS_VALID_TRAILER_TAG(fTrailerTag)  &&  IsValidVersion();}
 
 					/**
 						@brief	Prints a human-readable representation of me into the given output stream.
@@ -7354,6 +7296,72 @@ typedef enum
 					NTV2_RPC_CODEC_DECLS
 				#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2_TRAILER)
+
+
+		/**
+			@brief	All NTV2 messages start with this common header.
+			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
+		**/
+		NTV2_STRUCT_BEGIN (NTV2_HEADER)
+			NTV2_BEGIN_PRIVATE
+				ULWord		fHeaderTag;			///< @brief A special FourCC to identify a structure header & detect endianness, set when created
+				ULWord		fType;				///< @brief A special FourCC to identify a structure type ('stat', 'xfer', 'task', etc.), set when created
+				ULWord		fHeaderVersion;		///< @brief The version of this header structure, set when created, originally zero
+				ULWord		fVersion;			///< @brief The version of the structure that follows this header, set when created, originally zero
+				ULWord		fSizeInBytes;		///< @brief The total size of the struct, in bytes, including header, body and trailer, set when created
+				ULWord		fPointerSize;		///< @brief The size, in bytes, of a pointer on the host, set when created
+				ULWord		fOperation;			///< @brief Starting in SDK 16.3, stores an RPC connection ID
+				ULWord		fResultStatus;		///< @brief The result status of the operation (zero if success or non-zero failure code), cleared when created, set by driver
+			NTV2_END_PRIVATE
+
+				#if !defined (NTV2_BUILDING_DRIVER)
+					/**
+						@brief		Constructs a default NTV2_HEADER having the proper tag, version, and the given type and size.
+						@param[in]	inStructureType		Specifies the structure type.
+						@param[in]	inSizeInBytes		Specifies the total size of the structure, including the NTV2_TRAILER and all inbetween bytes.
+					**/
+					explicit		NTV2_HEADER (const ULWord inStructureType, const ULWord inSizeInBytes);
+
+					inline ULWord	GetSizeInBytes (void) const			{return fSizeInBytes;}	///< @brief My total size, in bytes, including header, body and trailer (but excluding embedded NTV2Buffer data)
+					inline ULWord	GetTag (void) const					{return fHeaderTag;}		//	New in SDK 16.3
+					inline ULWord	GetType (void) const				{return fType;}				//	New in SDK 16.3
+					inline ULWord	GetHeaderVersion (void) const		{return fHeaderVersion;}	//	New in SDK 16.3
+					inline ULWord	GetVersion (void) const				{return fVersion;}			//	New in SDK 16.3
+					inline ULWord	GetPointerSize (void) const			{return fPointerSize;}		//	New in SDK 16.3
+					inline ULWord	GetConnectionID (void) const			{return fOperation;}	//	New in SDK 16.3
+					inline void		SetConnectionID (const ULWord inValue)	{fOperation = inValue;}	//	New in SDK 16.3
+					inline ULWord	GetResultStatus (void) const			{return fResultStatus;}	//	New in SDK 17.5
+					const NTV2_TRAILER * GetTrailer (void) const;									//	New in SDK 18.1
+					/**
+						@brief	Prints a human-readable representation of me into the given output stream.
+						@param	inOutStream		The output stream to receive my human-readable representation.
+						@return A reference to the given output stream.
+					**/
+					std::ostream &	Print (std::ostream & inOutStream) const;
+
+					/**
+						@param[in]	chkTrailer		Specifies if the NTV2_TRAILER (if present in memory past this header)
+													should also be checked. Defaults to false (only check this header).
+						@return		True if my tag and type fields are valid;  otherwise false.
+					**/
+					inline bool		IsValid (const bool chkTrailer = false) const
+									{	const size_t bytes (sizeof(NTV2_HEADER) + (chkTrailer ? sizeof(NTV2_TRAILER) : 0));
+										bool ok = NTV2_IS_VALID_HEADER_TAG(fHeaderTag)	//	tag must match NTV2_HEADER_TAG
+													&&  fType							//	non-zero fType
+													&&  GetSizeInBytes() > bytes;		//	size exceeds header size (& possibly trailer size)
+										const NTV2_TRAILER * pTrlr = chkTrailer ? GetTrailer() : nullptr;
+										return pTrlr  ?  ok && pTrlr->IsValid()  :  ok;
+									}
+					/**
+						@return		Zeroes my result status field.
+					**/
+					inline void		ClearResultStatus (void)		{fResultStatus = 0;}	//	New in SDK 17.5
+
+					static std::string FourCCToString (const ULWord in4CC, const char nonPrintable = '?');
+
+					NTV2_RPC_CODEC_DECLS
+				#endif	//	user-space clients only
+		NTV2_STRUCT_END (NTV2_HEADER)
 
 
 		/**

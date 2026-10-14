@@ -340,6 +340,11 @@ NTV2_HEADER::NTV2_HEADER (const ULWord inStructureType, const ULWord inStructSiz
 {
 }
 
+const NTV2_TRAILER * NTV2_HEADER::GetTrailer (void) const
+{
+	return IsValid()	? reinterpret_cast<const NTV2_TRAILER*>(uint64_t(&fHeaderTag) + GetSizeInBytes() - sizeof(NTV2_TRAILER))
+						: nullptr;
+}
 
 ostream & operator << (ostream & inOutStream, const NTV2_HEADER & inObj)
 {
@@ -395,7 +400,7 @@ NTV2_TRAILER::NTV2_TRAILER ()
 
 ostream & NTV2_TRAILER::Print (ostream & oss) const
 {
-	return oss << "[" << NTV2_HEADER::FourCCToString(fTrailerTag) << " vers=" << VersionString() << "]";
+	return oss << "[" << VersionString() << " " << NTV2_HEADER::FourCCToString(fTrailerTag) << "]";
 }
 
 bool NTV2_TRAILER::MatchesThisSDK (void) const
@@ -407,7 +412,7 @@ bool NTV2_TRAILER::MatchesThisSDK (void) const
 bool NTV2_TRAILER::IsValidVersion (void) const
 {
 	const ULWord vers(fTrailerVersion), major(NTV2SDKVersionDecode_Major(vers)), minor(NTV2SDKVersionDecode_Minor(vers)),
-					point(NTV2SDKVersionDecode_Point(vers));// build(NTV2SDKVersionDecode_Build(vers));
+					point(NTV2SDKVersionDecode_Point(vers));
 	if (!vers)
 		return false;	//	entire field is zero
 	if (major < 15)
