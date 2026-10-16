@@ -342,8 +342,10 @@ NTV2_HEADER::NTV2_HEADER (const ULWord inStructureType, const ULWord inStructSiz
 
 const NTV2_TRAILER * NTV2_HEADER::GetTrailer (void) const
 {
-	return IsValid()	? reinterpret_cast<const NTV2_TRAILER*>(uint64_t(&fHeaderTag) + GetSizeInBytes() - sizeof(NTV2_TRAILER))
-						: nullptr;
+	if (!IsValid())
+		return nullptr;
+	const NTV2_TRAILER * pTrailer = reinterpret_cast<const NTV2_TRAILER*>(uint64_t(&fHeaderTag) + GetSizeInBytes() - sizeof(NTV2_TRAILER));
+	return pTrailer->IsValid() ? pTrailer : nullptr;
 }
 
 ostream & operator << (ostream & inOutStream, const NTV2_HEADER & inObj)
@@ -363,7 +365,7 @@ string NTV2_HEADER::FourCCToString (const ULWord in4CC, char nonPrintable)
 	const char * pU32 (reinterpret_cast<const char *>(&in4CC));
 	ostringstream result, fourCC;
 	size_t badTally(0);
-	if (nonPrintable && !::isprint(nonPrintable))
+	if (nonPrintable  &&  (nonPrintable < 32  ||  nonPrintable > 126))	//	!::isprint(nonPrintable)
 		nonPrintable = 0;	//	specified non-printable character to use is itself non-printable:  don't use it
 	for (size_t charPos(0);  charPos < 4;  charPos++)
 	{
@@ -372,7 +374,7 @@ string NTV2_HEADER::FourCCToString (const ULWord in4CC, char nonPrintable)
 		#else	//	little-endian:
 			const char ch (pU32[3 - charPos]);
 		#endif
-		if (::isprint(ch))
+		if (ch > 31  &&  ch < 127)	//	::isprint(ch)
 			fourCC << ch;
 		else
 		{
@@ -388,6 +390,16 @@ string NTV2_HEADER::FourCCToString (const ULWord in4CC, char nonPrintable)
 	else
 		result << "'" << fourCC.str() << "'";	//	all printable, show 4CC exclusively (no hex value)
 	return result.str();
+}
+
+bool NTV2_HEADER::IsFourCC (const ULWord in4CC)
+{
+	if (!in4CC)
+		return false;	//	Zero -- not a valid 4CC
+	const uint8_t * pU32 (reinterpret_cast<const uint8_t *>(&in4CC));
+	const uint8_t ch0(pU32[0] >> 5), ch1(pU32[1] >> 5), ch2(pU32[2] >> 5), ch3(pU32[3] >> 5);
+	//	BUG:	FIX THIS:	This algorithm allows unprintable character 0x7F!!
+	return ch0 && ch0 < 4  &&  ch1 && ch1 < 4  &&  ch2 && ch2 < 4  &&  ch3 && ch3 < 4;
 }
 
 

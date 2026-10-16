@@ -4345,12 +4345,57 @@ TEST_SUITE("NTV2ScanMethod" * doctest::description("NTV2ScanMethod tests"))
 }	//	TEST_SUITE("NTV2ScanMethod")
 
 
+TEST_SUITE("NTV2Message" * doctest::description("NTV2Message tests"))
+{
+	TEST_CASE("Basic")
+	{
+//		ostringstream oss;
+		uint32_t fourCC(0);
+		for (UWord chVal(0);  chVal < 256;  chVal += 4)
+		{
+			const uint32_t c0(chVal+0), c1(chVal+1), c2(chVal+2), c3(chVal+3);
+			fourCC = (c0 << 24) | (c1 << 16) | (c2 << 8) | c3;
+			if (chVal > 31 && chVal < 128)	//	legal
+			{
+//				oss << " " << NTV2_HEADER::FourCCToString(fourCC);  if (!(chVal % 16)) oss << endl;
+//				if (!NTV2_HEADER::IsFourCC(fourCC)) cout << "Should be legal:\t" << xHEX0N(fourCC,8) << "\t" << NTV2_HEADER::FourCCToString(fourCC) << endl;
+				CHECK(NTV2_HEADER::IsFourCC(fourCC));
+			}
+			else	//	illegal
+			{
+//				oss << endl << NTV2_HEADER::FourCCToString(fourCC);
+//				if (NTV2_HEADER::IsFourCC(fourCC)) cout << "Should be illegal:\t" << xHEX0N(fourCC,8) << "\t" << NTV2_HEADER::FourCCToString(fourCC) << endl;
+				CHECK_FALSE(NTV2_HEADER::IsFourCC(fourCC));
+			}
+		}
+//		cout << oss.str() << endl;
+/*		THESE ALL FAIL BECAUSE IsFourCC doesn't correctly handle unprintable character 0x7F
+		CHECK_FALSE(NTV2_HEADER::IsFourCC(0x7F7F7F7F));
+		CHECK_FALSE(NTV2_HEADER::IsFourCC(0x3030307F));
+		CHECK_FALSE(NTV2_HEADER::IsFourCC(0x30307F30));
+		CHECK_FALSE(NTV2_HEADER::IsFourCC(0x307F3030));
+		CHECK_FALSE(NTV2_HEADER::IsFourCC(0x7F303030));
+*/
+		NTV2GetRegisters a;
+		NTV2_HEADER * pMsg = a;
+		CHECK(pMsg->IsValid());
+		CHECK_EQ(pMsg->GetTag(), NTV2_HEADER_TAG);
+		CHECK_EQ(pMsg->GetType(), NTV2_TYPE_GETREGS);
+		CHECK_EQ(NTV2_HEADER::FourCCToString(pMsg->GetTag()), string("'NTV2'"));
+		CHECK_EQ(NTV2_HEADER::FourCCToString(pMsg->GetType()), string("'regR'"));
+//		NTV2RegNumSet regNums;
+//		CHECK(a.NTV2_IS_STRUCT_VALID());
+//		CHECK_FALSE(a.GetGoodRegisters(regNums));
+	}	//	TEST_CASE("Basic")
+}	//	TEST_SUITE("NTV2GetRegisters")
+
+
 TEST_SUITE("NTV2GetRegisters" * doctest::description("NTV2GetRegisters tests"))
 {
 	TEST_CASE("Basic")
 	{
 		NTV2GetRegisters a;
-		NTV2_HEADER * pMsg = reinterpret_cast<NTV2_HEADER*>(&a);
+		NTV2_HEADER * pMsg = a;
 		CHECK(pMsg->IsValid());
 		CHECK_EQ(pMsg->GetTag(), NTV2_HEADER_TAG);
 		CHECK_EQ(pMsg->GetType(), NTV2_TYPE_GETREGS);

@@ -7331,7 +7331,18 @@ typedef enum
 					inline ULWord	GetConnectionID (void) const			{return fOperation;}	//	New in SDK 16.3
 					inline void		SetConnectionID (const ULWord inValue)	{fOperation = inValue;}	//	New in SDK 16.3
 					inline ULWord	GetResultStatus (void) const			{return fResultStatus;}	//	New in SDK 17.5
+
+					/**
+						@returns	a pointer to the NTV2_TRAILER struct at the end of the message I'm heading;  otherwise nullptr if invalid.
+						@details	In theory, the message trailer should start at &fHeaderTag + fSizeInBytes - sizeof(NTV2_TRAILER),
+									but in practice, this is very often not the case. It depends on the declared data types of any/all
+									fields inside the message struct (and any sub-structs), and critically, the compiler's packing
+									alignment used at compile time not only for this struct, but all intervening structs.
+									At some point in a future SDK, AJA may standardize on a particular packing alignment
+									for all platforms (e.g. 4-bytes).
+					**/
 					const NTV2_TRAILER * GetTrailer (void) const;									//	New in SDK 18.1
+
 					/**
 						@brief	Prints a human-readable representation of me into the given output stream.
 						@param	inOutStream		The output stream to receive my human-readable representation.
@@ -7340,24 +7351,31 @@ typedef enum
 					std::ostream &	Print (std::ostream & inOutStream) const;
 
 					/**
+						@return		True if my tag, type and total size appear to be valid;  otherwise false.
 						@param[in]	chkTrailer		Specifies if the NTV2_TRAILER (if present in memory past this header)
-													should also be checked. Defaults to false (only check this header).
-						@return		True if my tag and type fields are valid;  otherwise false.
+													should also be checked. Defaults to false (only check my header fields).
+													If the message trailer is to be checked but GetTrailer returns null
+													(very common on many platforms/compilers), the trailer will not be
+													checked.
 					**/
 					inline bool		IsValid (const bool chkTrailer = false) const
 									{	const size_t bytes (sizeof(NTV2_HEADER) + (chkTrailer ? sizeof(NTV2_TRAILER) : 0));
-										bool ok = NTV2_IS_VALID_HEADER_TAG(fHeaderTag)	//	tag must match NTV2_HEADER_TAG
-													&&  fType							//	non-zero fType
-													&&  GetSizeInBytes() > bytes;		//	size exceeds header size (& possibly trailer size)
-										const NTV2_TRAILER * pTrlr = chkTrailer ? GetTrailer() : nullptr;
-										return pTrlr  ?  ok && pTrlr->IsValid()  :  ok;
+										bool ok = NTV2_IS_VALID_HEADER_TAG(fHeaderTag)	//	tag matches NTV2_HEADER_TAG
+													&&  IsFourCC(fType)					//	fType is 4CC
+													&&  GetSizeInBytes() > bytes;		//	total message size seems reasonable
+										if (chkTrailer  &&  ok)
+										{	const NTV2_TRAILER * pTrlr = GetTrailer();
+											return pTrlr  ?  pTrlr->IsValid()  :  true;
+										}
+										return ok;
 									}
 					/**
 						@return		Zeroes my result status field.
 					**/
 					inline void		ClearResultStatus (void)		{fResultStatus = 0;}	//	New in SDK 17.5
 
-					static std::string FourCCToString (const ULWord in4CC, const char nonPrintable = '?');
+					static std::string	FourCCToString (const ULWord in4CC, const char nonPrintable = '?');
+					static bool			IsFourCC (const ULWord in4CC);
 
 					NTV2_RPC_CODEC_DECLS
 				#endif	//	user-space clients only
