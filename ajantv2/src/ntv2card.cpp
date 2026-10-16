@@ -146,8 +146,15 @@ string CNTV2Card::GetDescription (void) const
 	CNTV2Card * pCard = (CNTV2Card*)(this);	//	Ugly: *sigh* If only most CNTV2Card member functions were 'const'
 	ostringstream oss;
 	string hostName("localhost"), snStr;
+#if defined(AJALinux)
+	//	On Linux, AJASystemInfo popen()s 'uname -m' and 'date' (5 processes), and AutoCirculateTransfer calls this for every frame
+	char host[256] = {0};
+	if (::gethostname(host, sizeof(host) - 1) == 0)
+		hostName = host;
+#else
 	AJASystemInfo sysInfo (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_System);
 	sysInfo.GetValue(AJA_SystemInfoTag_System_Name, hostName);
+#endif
 	oss << pCard->GetModelName();
 	if (!pCard->GetSerialNumberString(snStr))
 		snStr.clear();
