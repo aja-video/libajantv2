@@ -906,7 +906,10 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 	#endif	//	AJA_NTV2_CLEAR_HOST_ANC_BUFFER_TAIL_AFTER_CAPTURE_XFER
 
 	if (result)
-		ACDBG(GetDescription() << ": Transfer successful for Ch" << DEC(inChannel+1));
+	{	//	This runs for every frame:  don't build the message unless actively monitoring AC debug output
+		if (AJADebug::IsActive(AJA_DebugUnit_AutoCirculate))
+			ACDBG(GetDescription() << ": Transfer successful for Ch" << DEC(inChannel+1));
+	}
 	else
 		ACFAIL(GetDescription() << ": Transfer failed on Ch" << DEC(inChannel+1));
 	return result;

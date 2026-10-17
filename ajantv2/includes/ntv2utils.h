@@ -1156,6 +1156,7 @@ AJAExport NTV2DeviceID NTV2GetDeviceIDFromBitfileName	(const std::string & inBit
 AJAExport std::string NTV2GetFirmwareFolderPath			(const bool inAddTrailingPathDelim = false);
 AJAExport std::string NTV2GetPluginsFolderPath			(const bool inAddTrailingPathDelim = false);	//	New in SDK 18.0
 AJAExport std::string NTV2GetVDevFolderPath				(const bool inAddTrailingPathDelim = false);	//	New in SDK 18.0
+AJAExport std::string NTV2GetHostName					(void);											//	New in SDK 18.1
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const RP188_STRUCT & inObj);
 AJAExport std::string NTV2GetVersionString				(const bool inDetailed = false);
 AJAExport std::string NTV2RegisterNumberToString		(const NTV2RegisterNumber		inValue);	//	New in SDK 12.0

@@ -18,10 +18,10 @@
 #include "ajabase/system/lock.h"
 #include "ajabase/system/info.h"
 #include "ajabase/common/common.h"
-#if defined(AJALinux)
-	#include <string.h>	 // For memset
-	#include <stdint.h>
-
+#if defined(AJAMac)
+	#include <sys/sysctl.h>
+#elif defined(AJALinux)
+	#include <unistd.h>
 #endif
 #include <algorithm>
 #include <sstream>
@@ -7390,6 +7390,28 @@ string NTV2GetVDevFolderPath (const bool inAddTrailingPathDelim)
 		if (c == '/' || c == '\\')
 			fwPath.erase(fwPath.length()-1, 1);	//	lop off trailing '/'
 	return fwPath;
+}
+
+string NTV2GetHostName (void)
+{	//	This function can be called every frame, so avoid using AJASystemInfo (very slow on Linux)
+	string hostName("localhost");
+	#if defined(AJALinux)
+		char tmpBuf[256] = {0};
+		if (::gethostname(tmpBuf, sizeof(tmpBuf) - 1) == 0)
+			hostName = tmpBuf;
+	#elif defined(AJAMac)
+		char tmpBuf[256];
+		size_t sz = sizeof(tmpBuf);
+		if (::sysctlbyname("kern.hostname", tmpBuf, &sz, nullptr, 0) == 0)
+			hostName = tmpBuf;
+	#elif defined(MSWindows)
+		TCHAR tmpBuf[256] = TEXT("");
+		DWORD sz = MAX_COMPUTERNAME_LENGTH*2;
+		if (GetComputerNameEx(ComputerNameDnsHostname, tmpBuf, &sz))
+			hostName = tmpBuf;
+	#else
+	#endif
+	return hostName;
 }
 
 #define IsAJAInternalDevice(_d_)	(((_d_) == DEVICE_ID_IP25_R) || ((_d_) == DEVICE_ID_IP25_T) || ((_d_) == DEVICE_ID_FS8))

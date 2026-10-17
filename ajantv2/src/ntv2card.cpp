@@ -143,11 +143,9 @@ string CNTV2Card::GetDescription (void) const
 	if (IsRemote())
 		return CNTV2DriverInterface::GetDescription();
 
+	string hostName(::NTV2GetHostName()), snStr;
 	CNTV2Card * pCard = (CNTV2Card*)(this);	//	Ugly: *sigh* If only most CNTV2Card member functions were 'const'
 	ostringstream oss;
-	string hostName("localhost"), snStr;
-	AJASystemInfo sysInfo (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_System);
-	sysInfo.GetValue(AJA_SystemInfoTag_System_Name, hostName);
 	oss << pCard->GetModelName();
 	if (!pCard->GetSerialNumberString(snStr))
 		snStr.clear();
