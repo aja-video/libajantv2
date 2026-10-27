@@ -26,11 +26,11 @@ if(DEFINED AJA_DISABLE_TESTS)
 endif()
 
 set(TARGET_INCLUDE_DIRS
-    ../libajantv2
-    ../libajantv2/ajaanc/includes
-    ../libajantv2/ajabase
-    ../libajantv2/ajantv2
-    ../libajantv2/ajantv2/includes
+    ..
+    ../ajaanc/includes
+    ../ajabase
+    ../ajantv2
+    ../ajantv2/includes
     includes
 )
 

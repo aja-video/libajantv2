@@ -7,7 +7,6 @@ set(TARGET_INCLUDE_DIRS
 	${DOCTEST_INCLUDE_DIR}
 	../../ajantv2
 	../../ajantv2/includes
-	${LIBAJACC_DIR}/includes
 )
 
 set(TARGET_LINK_LIBS
