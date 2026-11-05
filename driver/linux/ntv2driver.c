@@ -62,10 +62,6 @@
 #include "ntv2publicinterface.h"
 #include "ntv2linuxpublicinterface.h"
 #include "ntv2devicefeatures.h"
-#if defined(AJA_HEVC)
-# include "hevcdriver.h"
-# include "hevcpublic.h"
-#endif
 #include "ntv2driver.h"
 #include "registerio.h"
 #include "ntv2driverprocamp.h"
@@ -274,12 +270,6 @@ static int pci_P2PAperture_map (struct pci_dev *pdev, NTV2PrivateParams * ntv2pp
 
 static void initializeRegisterNames(NTV2PrivateParams *ntv2pp, unsigned long mappedAddress);
 static void dma_registers_init (struct pci_dev *pdev, NTV2PrivateParams * ntv2pp);
-
-#if defined(AJA_HEVC)
-// locate connected hevc device
-static bool findHevcDevice(NTV2PrivateParams* ntv2pp, unsigned long* pDevNum);
-static bool testHevcControl(NTV2PrivateParams* ntv2pp, unsigned long devNum);
-#endif
 
 static int readVirtualData(ULWord tag, UByte *buf, ULWord size);
 static int writeVirtualData(ULWord tag, UByte *buf, ULWord size);
@@ -496,32 +486,6 @@ static struct pci_device_id pci_device_id_tab[] =
 	   0												// Opaque data
 	},
 
-#if defined(AJA_HEVC)
-    {  // CORVIDHEVC K7
-        NTV2_VENDOR_ID, NTV2_DEVICE_ID_CORVIDHEVC_K7,   // Vendor and device IDs
-        PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
-        0, 0,											// Class, class_mask
-        0												// Opaque data
-	},
-	{  // CORVIDHEVC MB31 Maintenance Mode
-	   HEVC_VENDOR_ID, HEVC_DEVICE_ID,					// Vendor and device IDs
-	   0, 0,											// Subvendor, Subdevice IDs
-	   0, 0,											// Class, class_mask
-	   0												// Opaque data
-	},
-	{  // CORVIDHEVC MB31 Codec Mode
-	   HEVC_VENDOR_ID, HEVC_DEVICE_ID,					// Vendor and device IDs
-	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_CORVIDHEVC_MB31,  // Subvendor, Subdevice IDs
-	   0, 0,											// Class, class_mask
-	   0												// Opaque data
-	},
-	{  // CORVIDHEVC MB31 Any - Should be removed
-	   HEVC_VENDOR_ID, HEVC_DEVICE_ID,					// Vendor and device IDs
-	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
-	   0, 0,											// Class, class_mask
-	   0												// Opaque data
-	},
-#endif
 	{ 0, 0, 0, 0, 0, 0, 0 }								// Array terminator
 };
 
@@ -2124,94 +2088,6 @@ messageError:
 		}
 		break;
 
-#if defined(AJA_HEVC)
-	case IOCTL_HEVC_MESSAGE:
-		{
-			int returnCode = -EFAULT;
-			HevcMessageHeader messageHeader;
-			HevcMessageHeader *pMessageBuffer;
-
-			if (pNTV2Params->_DeviceID != DEVICE_ID_CORVIDHEVC) return -EFAULT;
-
-			// get the hevc connected device
-			if (pNTV2Params->_hevcDevNum == 0xffffffff)
-			{
-				if(!findHevcDevice(pNTV2Params, &pNTV2Params->_hevcDevNum)) return -EFAULT;
-			}
-
-			// get the message header
-			if (copy_from_user((void*)&messageHeader, (const void*) arg, sizeof(HevcMessageHeader))) 
-			{
-				return -EFAULT;
-			}
-			if (messageHeader.size == 0)
-			{
-				return -EFAULT;
-			}
-
-			// get the entire message
-			pMessageBuffer = (HevcMessageHeader*)kmalloc(messageHeader.size, GFP_ATOMIC);
-			if (pMessageBuffer == NULL)
-			{
-				return -ENOMEM;
-			}
-			if (copy_from_user((void*)pMessageBuffer, (const void*) arg, messageHeader.size)) 
-			{
-				kfree(pMessageBuffer);
-				return -EFAULT;
-			}
-
-			// process the message
-			switch(messageHeader.type)
-			{
-			case Hevc_MessageId_Info:
-				if(messageHeader.size == sizeof(HevcMessageInfo))
-					returnCode = hevcGetDeviceInfo(pNTV2Params->_hevcDevNum, (HevcMessageInfo*)pMessageBuffer);
-				break;
-			case Hevc_MessageId_Register:
-				if(messageHeader.size == sizeof(HevcMessageRegister))
-					returnCode = hevcRegister(pNTV2Params->_hevcDevNum, (HevcMessageRegister*)pMessageBuffer);
-				break;
-			case Hevc_MessageId_Command:
-				if(messageHeader.size == sizeof(HevcMessageCommand))
-					returnCode = hevcSendCommand(pNTV2Params->_hevcDevNum, (HevcMessageCommand*)pMessageBuffer);
-				break;
-			case Hevc_MessageId_Transfer:
-				if(messageHeader.size == sizeof(HevcMessageTransfer))
-					returnCode = hevcVideoTransfer(pNTV2Params->_hevcDevNum, (HevcMessageTransfer*)pMessageBuffer);
-				break;
-			case Hevc_MessageId_Status:
-				if(messageHeader.size == sizeof(HevcMessageStatus))
-					returnCode = hevcGetStatus(pNTV2Params->_hevcDevNum, (HevcMessageStatus*)pMessageBuffer);
-				break;
-			case Hevc_MessageId_Debug:
-				if(messageHeader.size == sizeof(HevcMessageDebug))
-					returnCode = hevcDebugInfo(pNTV2Params->_hevcDevNum, (HevcMessageDebug*)pMessageBuffer);
-				break;
-			default:
-				returnCode = -EFAULT;
-				break;
-			}
-
-			if (returnCode != 0)
-			{
-				kfree(pMessageBuffer);
-				return returnCode;
-			}
-
-			// copy results to user
-			if (copy_to_user((void*)arg, (const void*)pMessageBuffer, messageHeader.size)) 
-			{
-				kfree(pMessageBuffer);
-				return -EFAULT;
-			}
-
-			kfree(pMessageBuffer);
-			return returnCode;
-		}
-		break;
-#endif
-
 #if defined(AJA_NTV42)
 	case IOCTL_NTV42_VERSION:
 		return ntv42_ioctl_version(pNTV2Params->ntv42_device, pFileData, arg);
@@ -3270,10 +3146,6 @@ static int reboot_handler(struct notifier_block *this, unsigned long code, void 
 {
 //	ULWord  i;
 
-#if defined(AJA_HEVC)
-	hevc_reboot_handler(this, code, x);
-#endif
-
 	// We don't want to generate interrupts if the system is rebooting
 	// This could confuse the BIOS and cause the system to hang
 	// Disable interrupts on all boards so we'll come up quietly
@@ -3319,10 +3191,6 @@ static int __init aja_ntv2_module_init(void)
 
 	getNTV2ModuleParams()->name = "ntv2mod";
 	getNTV2ModuleParams()->driverName = "ajantv2";
-
-#if defined(AJA_HEVC)
-	hevc_module_init("hevc");
-#endif
 
 	MSG("%s: module init begin\n", getNTV2ModuleParams()->name);
 	getDriverVersionString(versionString, STRMAX);
@@ -3501,13 +3369,6 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
 	struct device *device = NULL;
 #endif
 
-#if defined(AJA_HEVC)
-	if (id->vendor == HEVC_VENDOR_ID)
-	{
-		return hevc_probe(pdev, id);
-	}
-#endif
-
     res = allocNTV2DeviceNumber(&deviceNumber);
     if (res != 0)
 	{
@@ -3550,10 +3411,6 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
 
 	// enable register access
 	ntv2pp->registerEnable = true;
-
-#if defined(AJA_HEVC)
-	ntv2pp->_hevcDevNum = 0xffffffff;
-#endif
 
 	// configure system context
 	ntv2pp->systemContext.devNum = deviceNumber;
@@ -4196,14 +4053,6 @@ static void remove(struct pci_dev *pdev)
     unsigned long flags;
     bool ioDone;
 
-#if defined(AJA_HEVC)
-	if (pdev->vendor == HEVC_VENDOR_ID)
-	{
-        MSG("%s: ignore HEVC device remove\n", getNTV2ModuleParams()->name);
-		return;
-	}
-#endif
-
 	MSG("%s: device remove\n", ntv2pp->name);
 
 #if defined(AJA_NTV42)
@@ -4404,10 +4253,6 @@ static void __exit aja_ntv2_module_cleanup(void)
 {
 	MSG("%s: module exit begin - %d devices\n", getNTV2ModuleParams()->name, getNTV2ModuleParams()->numNTV2Devices);
 	
-#if defined(AJA_HEVC)
-	hevc_module_cleanup();
-#endif
-
 	unregister_reboot_notifier(&reboot_notifier);
 
 	remove_proc_entry("driver/aja", NULL /* parent dir */);
@@ -5691,104 +5536,6 @@ static void dma_registers_init (struct pci_dev *pdev, NTV2PrivateParams * ntv2pp
 			ntv2pp->name);
 	}
 }
-
-#if defined(AJA_HEVC)
-static bool	findHevcDevice(NTV2PrivateParams* ntv2pp, unsigned long* pDevNum)
-{
-	uint32_t maxDevices = hevcGetNumDevices();
-	uint32_t numDevices = 0;
-	uint32_t firstNum = 0;
-	uint32_t devNum = maxDevices;
-	uint32_t busNum = maxDevices;
-	uint32_t gpioNum = maxDevices;
-
-	if (pDevNum == NULL) return false;
-
-	// count number of hevc devices
-	for (devNum = 0; devNum < maxDevices; devNum++)
-	{
-		Ntv2SystemContext* pSysCon = hevcGetSystemContext(devNum);
-		if (pSysCon != NULL) 
-		{
-			numDevices++;
-			if (numDevices == 1) firstNum = devNum;
-		}
-	}
-	if (numDevices == 0) return false;
-	if (numDevices == 1)
-	{
-		MSG("%s: Found the hevc device\n", ntv2pp->name);
-		*pDevNum = firstNum;
-		return true;
-	}
-
-	// scan the hevc devices for a corresponding bus number
-	for (busNum = 0; busNum < maxDevices; busNum++)
-	{
-		Ntv2SystemContext* pSysCon = hevcGetSystemContext(busNum);
-		if (pSysCon == NULL) continue;
-		if (pSysCon->busNumber == (ntv2pp->busNumber + 1))
-		{
-			break;
-		}
-	}
-
-	// scan for connected codec
-	for(gpioNum = 0; gpioNum < maxDevices; gpioNum++)
-	{
-		if (hevcIsCodecMode(gpioNum))
-		{
-			if (testHevcControl(ntv2pp, gpioNum))
-			{
-				break;
-			}
-		}
-	}
-
-	if (gpioNum < maxDevices)
-	{
-		MSG("%s: Found hevc device %d using gpio\n",
-			ntv2pp->name, gpioNum);
-		*pDevNum = gpioNum;
-	}
-	else if (busNum < maxDevices)
-	{
-		MSG("%s: Found hevc device %d using bus number\n",
-			ntv2pp->name, busNum);
-		*pDevNum = busNum;
-	}
-	else
-	{
-		MSG("%s: Hevc device not found\n", ntv2pp->name);
-		return false;
-	}
-
-	return true;
-}
-
-static bool testHevcControl(NTV2PrivateParams* ntv2pp, unsigned long devNum)
-{
-	int status;
-	uint32_t value;
-
-	// test gpio low
-	status = hevcSetGpio((uint32_t)devNum, 63, true, false);
-	if (status != NTV2_STATUS_SUCCESS) return false;
-	value = ReadRegister(ntv2pp->deviceNumber, HEVC_NTV2_GPIO_REGISTER_HIGH, NO_MASK, NO_SHIFT);
-	if ((value & 0x80000000) != 0) return false;
-
-	// test gpio high
-	status = hevcSetGpio((uint32_t)devNum, 63, true, true);
-	if (status != NTV2_STATUS_SUCCESS) return false;
-	value = ReadRegister(ntv2pp->deviceNumber, HEVC_NTV2_GPIO_REGISTER_HIGH, NO_MASK, NO_SHIFT);
-	if ((value & 0x80000000) == 0) return false;
-
-	// deassert gpio
-	hevcSetGpio((uint32_t)devNum, 63, false, false);
-
-	return true;
-}
-#endif
 
 static VirtualDataNode *findVirtualDataNode(ULWord tag)
 {

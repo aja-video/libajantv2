@@ -8,13 +8,6 @@ DEFINES += AJA_LINUX
 INCLUDEPATH += ../../ajalibraries/ajantv2/includes/
 
 SOURCES += \
-    ./hevcapi.c \
-    ./hevccommand.c \
-    ./hevcdriver.c \
-    ./hevcinterrupt.c \
-    ./hevcparams.c \
-    ./hevcregister.c \
-    ./hevcstream.c \
     ./ntv2commonreg.c \
     ./ntv2displayid.c \
     ./ntv2dma.c \
@@ -70,15 +63,6 @@ DISTFILES += \
 HEADERS += \
     ./driverdbg.h \
     ./fs1wait.h \
-    ./hevccommand.h \
-    ./hevccommon.h \
-    ./hevcconstants.h \
-    ./hevcdriver.h \
-    ./hevcinterrupt.h \
-    ./hevcparams.h \
-    ./hevcpublic.h \
-    ./hevcregister.h \
-    ./hevcstream.h \
     ./ntv2commonreg.h \
     ./ntv2displayid.h \
     ./ntv2dma.h \

@@ -97,30 +97,6 @@ set(AJADRIVER_LINUX_SOURCES
 	linux/ntv2serial.c
 	linux/registerio.c)
 
-if (NOT AJANTV2_BUILD_OPENSOURCE)
-	# add HEVC sources
-	set(AJADRIVER_LINUX_HEADERS
-		${AJADRIVER_LINUX_HEADERS}
-		linux/hevccommand.h
-		linux/hevccommon.h
-		linux/hevcconstants.h
-		linux/hevcdriver.h
-		linux/hevcinterrupt.h
-		linux/hevcparams.h
-		linux/hevcpublic.h
-		linux/hevcregister.h
-		linux/hevcstream.h)
-	set(AJADRIVER_LINUX_SOURCES
-		${AJADRIVER_LINUX_SOURCES}
-		linux/hevcapi.c
-		linux/hevccommand.c
-		linux/hevcdriver.c
-		linux/hevcinterrupt.c
-		linux/hevcparams.c
-		linux/hevcregister.c
-		linux/hevcstream.c)
-endif()
-
 set(AJADRIVER_LINUX_BUILD_FILES
 	linux/dkms.conf
 	linux/Makefile

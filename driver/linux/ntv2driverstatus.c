@@ -76,7 +76,6 @@ void getDeviceVersionString(ULWord deviceNumber, char *deviceVersionString, ULWo
     case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K: deviceStr = "KONAIP_1RX_1TX_J2K"; break;
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K: deviceStr = "KONAIP_2TX_J2K"; break;
 	case DEVICE_ID_KONAIP_1RX_1TX_2110: deviceStr = "KONAIP_1RX_1TX_2110"; break;
-    case DEVICE_ID_CORVIDHEVC: deviceStr = "CORVIDHEVC"; break;
 	case DEVICE_ID_IO4KPLUS: deviceStr = "IO4KPLUS"; break;
 	case DEVICE_ID_IOIP_2022: deviceStr = "IOIP_2022"; break;
     case DEVICE_ID_IOIP_2110: deviceStr = "IOIP_2110"; break;

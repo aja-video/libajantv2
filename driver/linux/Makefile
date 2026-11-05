@@ -31,10 +31,6 @@ ifdef AJA_NTV42
 	ccflags-y += -DAJA_NTV42=$(AJA_NTV42)
 endif
 
-ifdef AJA_HEVC
-	ccflags-y += -DAJA_HEVC=$(AJA_HEVC)
-endif
-
 # if rdma is set
 ifdef AJA_RDMA
 # force rdma build
@@ -219,29 +215,6 @@ DRIVERLINSRCS = ntv2dma.c \
 				ntv2serial.c \
 				registerio.c
 
-ifdef AJA_HEVC
-HEVCSRCS = hevcdriver.c \
-			hevcparams.c \
-			hevcregister.c \
-			hevcapi.c \
-			hevcinterrupt.c \
-			hevccommand.c \
-			hevcstream.c
-
-HEVCINCS = $(A_LINUX_DRIVER_PATH)/hevcpublic.h \
-			$(A_LINUX_DRIVER_PATH)/hevccommon.h \
-			$(A_LINUX_DRIVER_PATH)/hevcdriver.h \
-			$(A_LINUX_DRIVER_PATH)/hevcparams.h \
-			$(A_LINUX_DRIVER_PATH)/hevcconstants.h \
-			$(A_LINUX_DRIVER_PATH)/hevcregister.h \
-			$(A_LINUX_DRIVER_PATH)/hevcinterrupt.h \
-			$(A_LINUX_DRIVER_PATH)/hevccommand.h \
-			$(A_LINUX_DRIVER_PATH)/hevcstream.h
-else
-HEVCSRCS =
-HEVCINCS =
-endif
-
 ifdef AJA_NTV42
 NTV42INCS = ../ntv42device.h ../ntv42ioctl.h
 NTV42SRCS = ../ntv42device.c ../ntv42ioctl.c ../ntv42ioctl_event.c ../ntv42ioctl_dma.c ../ntv42regbatch.c
@@ -258,8 +231,8 @@ RDMASRCS = ntv2rdma.c
 RDMAINCS =
 endif
 
-ALLDRIVERINCS =$(AJANTV2_INCS) $(AJANTV2SRCLIN) $(DRIVERINCS) $(DRIVERLININCS) $(HEVCSINCS) $(RDMAINCS) $(NTV42INCS)
-ALLDRIVERSRCS =$(DRIVERSRCS) $(DRIVERLINSRCS) $(HEVCSRCS) $(NTV42SRCS) ntv2devicefeatures.c ntv2driverprocamp.c ntv2vpidfromspec.c
+ALLDRIVERINCS =$(AJANTV2_INCS) $(AJANTV2SRCLIN) $(DRIVERINCS) $(DRIVERLININCS) $(RDMAINCS) $(NTV42INCS)
+ALLDRIVERSRCS =$(DRIVERSRCS) $(DRIVERLINSRCS) $(NTV42SRCS) ntv2devicefeatures.c ntv2driverprocamp.c ntv2vpidfromspec.c
 ALLDRIVEROBJS =$(patsubst %.c,%.o,$(ALLDRIVERSRCS))
 RDMADRIVEROBJS =$(patsubst %.c,%.o,$(RDMASRCS))
 

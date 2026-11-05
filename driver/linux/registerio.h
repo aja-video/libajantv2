@@ -459,10 +459,6 @@ typedef struct ntv2_private
 	bool registerEnable;
 	bool serialActive;
 	
-#if defined(AJA_HEVC)
-	unsigned long _hevcDevNum;
-#endif
-
 #if defined(AJA_NTV42)
     struct ntv42_device_t* ntv42_device;
 #endif    
