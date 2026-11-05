@@ -97,6 +97,7 @@ else()
                     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
                     -DENABLE_TESTING=OFF 
                     -DENABLE_PROGRAMS=OFF
+                    -DMBEDTLS_FATAL_WARNINGS=OFF
                     -DCMAKE_C_FLAGS=${MBEDTLS_C_FLAGS}
                     -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}
                     -DUSE_STATIC_MBEDTLS_LIBRARY=ON
