@@ -4968,10 +4968,19 @@ int DoMessageBufferLock(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot, NTV2BufferLoc
 	if ((pBufferLock->mFlags & DMABUFFERLOCK_LOCK) != 0)
 	{
 //		MSG("%s: lock flags %x\n", getNTV2ModuleParams()->name, pBufferLock->mFlags);
+		bool rdma = ((pBufferLock->mFlags & DMABUFFERLOCK_RDMA) != 0);
+		bool dmabuf = ((pBufferLock->mFlags & DMABUFFERLOCK_DMABUF) != 0);
+
+		// the two memory backends are mutually exclusive
+		if (rdma && dmabuf)
+			return -EINVAL;
+
+		// mDmaBufFD is only defined when DMABUFFERLOCK_DMABUF is set
 		return dmaPageRootAdd(deviceNumber, pRoot,
 							  (PVOID)pBufferLock->mBuffer.fUserSpacePtr,
 							  pBufferLock->mBuffer.fByteCount,
-							  ((pBufferLock->mFlags & DMABUFFERLOCK_RDMA) != 0),
+							  rdma,
+							  dmabuf? (int)pBufferLock->mDmaBufFD : -1,
 							  ((pBufferLock->mFlags & DMABUFFERLOCK_MAP) != 0));
 	}
 
