@@ -7529,7 +7529,9 @@ typedef enum
 					ULWord64				acRDTSCStartTime;			///< @brief Timestamp of the first VBI received after CNTV2Card::AutoCirculateStart called, using host OS system clock.
 					ULWord64				acAudioClockStartTime;		///< @brief Timestamp of the first VBI received after CNTV2Card::AutoCirculateStart called, using "64-bit clean" value of the device's 48kHz audio clock (::kRegAud1Counter register).
 					ULWord64				acRDTSCCurrentTime;			///< @brief Timestamp when CNTV2Card::AutoCirculateGetStatus called, using the host OS system clock.
-					ULWord64				acAudioClockCurrentTime;	///< @brief Timestamp when CNTV2Card::AutoCirculateGetStatus called, using "64-bit clean" value of the device's 48kHz audio clock (::kRegAud1Counter register).
+					ULWord64				acAudioClockCurrentTime;	///< @brief Timestamp at the moment CNTV2Card::AutoCirculateGetStatus was handled in the driver.
+																		///<		Uses the AJA device's audio clock, as expressed through register 28 (::kRegAud1Counter),
+																		///<		but translated into 10 MHz ticks.
 					ULWord					acFramesProcessed;			///< @brief Total number of frames successfully processed since CNTV2Card::AutoCirculateStart called.
 					ULWord					acFramesDropped;			///< @brief Total number of frames dropped since CNTV2Card::AutoCirculateStart called
 					ULWord					acBufferLevel;				///< @brief Number of buffered frames in driver ready to capture or play
@@ -8370,8 +8372,7 @@ typedef enum
 																		///<		CNTV2Card::AutoCirculateGetFrameStamp calls were handled
 																		///<		in the driver. Uses the AJA device's audio clock, as
 																		///<		expressed through register 28 (::kRegAud1Counter), but
-																		///<		extended to 64-bits. (This clock increments 48,000 times
-																		///<		per second, and starts at zero at FPGA load at power-up.)
+																		///<		translated into 10 MHz ticks.
 					ULWord				acCurrentAudioExpectedAddress;	//	FIXFIXFIX	Document		What is this?!
 					ULWord				acCurrentAudioStartAddress;		///< @brief As set by play
 					ULWord				acCurrentFieldCount;			///< @brief As found by ISR at Call Field0 or Field1 _currently_ being OUTPUT (when CNTV2Card::AutoCirculateGetFrameStamp was called)
