@@ -328,6 +328,6 @@ MODULE_LICENSE("Proprietary");
 #else
 MODULE_LICENSE("Dual MIT/GPL");
 #endif
-MODULE_AUTHOR("AJA");
+MODULE_AUTHOR("AJA Video Systems, Inc.");
 MODULE_DESCRIPTION("Interface between AJA NTV2 driver and NVidia RDMA");
 

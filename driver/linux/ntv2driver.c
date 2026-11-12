@@ -135,7 +135,7 @@
 /*******************************/
 /* Module macros, params, etc. */
 /*******************************/
-MODULE_AUTHOR("Bill Bowen and Shaun Case and Jeff Coffin");
+MODULE_AUTHOR("AJA Video Systems, Inc.");
 
 MODULE_LICENSE("Dual MIT/GPL");
 
