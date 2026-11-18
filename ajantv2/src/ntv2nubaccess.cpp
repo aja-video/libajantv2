@@ -2146,13 +2146,11 @@ ostream & NTV2RPCClientAPI::Print (ostream & oss) const
 string NTV2RPCClientAPI::Description (void) const
 {
 	NTV2StringList strs;
-	string fName(ConnectParam(kQParamVDevFileName)), hostName;
+	string fName(ConnectParam(kQParamVDevFileName)), hostName(::NTV2GetHostName());
 	if (!fName.empty())
 		strs.push_back(string("from '") + fName + "'");
-	AJASystemInfo sysInfo (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_System);
-	sysInfo.GetValue(AJA_SystemInfoTag_System_Name, hostName);
 	if (!hostName.empty())
-		{strs.push_back("on");  strs.push_back(string("'") + hostName + "'");}
+		strs.push_back(string("on '") + hostName + "'");
 	return aja::join(strs, " ");
 }
 
