@@ -247,7 +247,7 @@ bool CNTV2Card::GetKeySignal (bool & outValue, const NTV2Channel inChannel)
 // sdi output VPID parameter overrides
 bool CNTV2Card::SetSDIOutVPIDTransferCharacteristics(bool enable, NTV2VPIDTransferCharacteristics inValue, const NTV2Channel inChannel)
 {
-    ULWord regValue = (enable? kVRegMaskSDIOutVPIDOverride : 0) | (inValue & kVRegMaskSDIOutVPIDValue);
+    ULWord regValue = (enable? kVRegMaskSDIOutVPIDOverride : 0) | (ULWord(inValue) & kVRegMaskSDIOutVPIDValue);
 	return IS_CHANNEL_VALID(inChannel) && WriteRegister(gChannelToSDIOutVPIDTransferCharacteristics[inChannel], regValue);    
 }
 
@@ -265,7 +265,7 @@ bool CNTV2Card::GetSDIOutVPIDTransferCharacteristics(bool & enable, NTV2VPIDTran
 
 bool CNTV2Card::SetSDIOutVPIDColorimetry(bool enable, NTV2VPIDColorimetry inValue, const NTV2Channel inChannel)
 {
-    ULWord regValue = (enable? kVRegMaskSDIOutVPIDOverride : 0) | (inValue & kVRegMaskSDIOutVPIDValue);
+    ULWord regValue = (enable? kVRegMaskSDIOutVPIDOverride : 0) | (ULWord(inValue) & kVRegMaskSDIOutVPIDValue);
 	return IS_CHANNEL_VALID(inChannel) && WriteRegister(gChannelToSDIOutVPIDColorimetry[inChannel], regValue);    
 }
 
@@ -283,7 +283,7 @@ bool CNTV2Card::GetSDIOutVPIDColorimetry(bool & enable, NTV2VPIDColorimetry & ou
 
 bool CNTV2Card::SetSDIOutVPIDLuminance(bool enable, NTV2VPIDLuminance inValue, const NTV2Channel inChannel)
 {
-    ULWord regValue = (enable? kVRegMaskSDIOutVPIDOverride : 0) | (inValue & kVRegMaskSDIOutVPIDValue);
+    ULWord regValue = (enable? kVRegMaskSDIOutVPIDOverride : 0) | (ULWord(inValue) & kVRegMaskSDIOutVPIDValue);
 	return IS_CHANNEL_VALID(inChannel) && WriteRegister(gChannelToSDIOutVPIDLuminance[inChannel], regValue);    
 }
 
@@ -301,7 +301,7 @@ bool CNTV2Card::GetSDIOutVPIDLuminance(bool & enable, NTV2VPIDLuminance & outVal
 
 bool CNTV2Card::SetSDIOutVPIDRGBRange(bool enable, NTV2VPIDRGBRange inValue, const NTV2Channel inChannel)
 {
-    ULWord regValue = (enable? kVRegMaskSDIOutVPIDOverride : 0) | (inValue & kVRegMaskSDIOutVPIDValue);
+    ULWord regValue = (enable? kVRegMaskSDIOutVPIDOverride : 0) | (ULWord(inValue) & kVRegMaskSDIOutVPIDValue);
 	return IS_CHANNEL_VALID(inChannel) && WriteRegister(gChannelToSDIOutVPIDRGBRange[inChannel], regValue);    
 }
 
