@@ -473,6 +473,19 @@ public:
 		return DMABufferLock(NTV2Buffer(pInBuffer, inByteCount), inMap, inRDMA);
 	}
 
+	/**
+		@brief		Registers an imported DMA-BUF as the host memory of subsequent DMA transfers.
+		@param[in]	inBuffer		Specifies the mapped address and length of the DMA-BUF.
+		@param[in]	inDmaBufFD		Specifies the DMA-BUF file descriptor.
+		@param[in]	inMap			Also lock the segment map.
+		@return		True if successful; otherwise false.
+		@note		Linux only. The driver imports the descriptor and takes its own reference, so the
+					caller may close it once this call returns. The address is the key of the registration,
+					so the buffer is released with CNTV2Card::DMABufferUnlock as usual.
+		@see		CNTV2Card::DMABufferLock, CNTV2Card::DMABufferUnlock, \ref vidop-locking
+	**/
+	AJA_VIRTUAL bool	DMABufferLockDmaBuf (const NTV2Buffer & inBuffer, const int inDmaBufFD, const bool inMap = true);
+
 
 	/**
 		@brief		Unlocks the given host buffer that was previously locked using CNTV2Card::DMABufferLock.

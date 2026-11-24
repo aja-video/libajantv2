@@ -195,6 +195,7 @@ DRIVERLININCS = buildenv.h \
 				driverdbg.h \
 				fs1wait.h \
 				ntv2dma.h \
+				ntv2dmabuf.h \
 				ntv2driverautocirculate.h \
 				ntv2driverbigphysarea.h \
 				ntv2driverdbgmsgctl.h \
@@ -206,6 +207,7 @@ DRIVERLININCS = buildenv.h \
 				registerio.h
 
 DRIVERLINSRCS = ntv2dma.c \
+				ntv2dmabuf.c \
 				ntv2driverautocirculate.c \
 				ntv2driver.c \
 				ntv2driverdbgmsgctl.c \
